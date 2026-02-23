@@ -14,8 +14,8 @@
 #include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/mining_algorithms.h"
-#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
-#include "core/algorithms/fd/multi_attr_rhs_stripped_fd.h"
+#include "core/algorithms/fd/table_mask_pair.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
 #include "core/config/indices/type.h"
 #include "core/util/bitset_utils.h"
 #include "python_bindings/py_util/bind_primitive.h"
@@ -27,9 +27,11 @@ namespace {
 namespace py = pybind11;
 
 using FdList = py::typing::List<model::FunctionalDependency>;
+using PySelectionPairs = py::typing::Iterable<py::typing::Tuple<py::int_, py::int_>>;
 
 #define FD_CLASS_NAME "FunctionalDependency"
 #define ATTRIBUTE_CLASS_NAME "Attribute"
+#define TABLE_MASK_PAIR_FD_VIEW_CLASS_NAME "TableMaskPairFdView"
 
 py::tuple MakeFdNameTuple(FD const& fd) {
     auto [lhs, rhs] = fd.ToNameTuple();
@@ -111,6 +113,45 @@ ssize_t FdHash(model::FunctionalDependency const& fd) {
                                    python_bindings::VectorToTuple(fd.rhs)));
 }
 
+FdList FdsToList(algos::fd::TableMaskPairFdView const& storage) {
+    // The container would be allocated twice if we created it on
+    // core's side: once there, and the other time for the copy.
+    FdList fd_list{storage.GetTableMaskPairs().size()};
+    Py_ssize_t i = 0;
+    for (model::FunctionalDependency fd : storage) {
+        // If not released, the refcount of the new object will reach 0 after
+        // this line, triggering UB on access.
+        PyList_SET_ITEM(fd_list.ptr(), i, py::cast(std::move(fd)).release().ptr());
+        ++i;
+    }
+    return fd_list;
+}
+
+std::deque<algos::fd::TableMaskPair> TableMaskPairsFromIntPairs(PySelectionPairs int_pairs,
+                                                                std::size_t col_number) {
+    std::deque<algos::fd::TableMaskPair> table_mask_pairs;
+    for (py::handle pair : int_pairs) {
+        if (!py::isinstance<py::tuple>(pair)) {
+            throw std::runtime_error("FD in storage must be a tuple!");
+        }
+        auto tuple_pair = py::cast<py::tuple>(pair);
+        if (tuple_pair.size() != 2) {
+            throw std::runtime_error("FD in storage must be a pair!");
+        }
+        py::object lhs{tuple_pair[0]};
+        if (!py::isinstance<py::int_>(lhs)) {
+            throw std::runtime_error("LHS column selection must be an int!");
+        }
+        py::object rhs{tuple_pair[1]};
+        if (!py::isinstance<py::int_>(rhs)) {
+            throw std::runtime_error("RHS column selection must be an int!");
+        }
+        table_mask_pairs.emplace_back(python_bindings::IntToBitset(lhs, col_number),
+                                      python_bindings::IntToBitset(rhs, col_number));
+    }
+    return table_mask_pairs;
+}
+
 template <typename Algo>
 void BindFdAlgorithm(py::module const& fd_algos_module, char const* name) {
     python_bindings::detail::RegisterAlgorithm<Algo, algos::Algorithm>(fd_algos_module, name)
@@ -122,6 +163,7 @@ void BindFdAlgorithm(py::module const& fd_algos_module, char const* name) {
 namespace python_bindings {
 void BindFd(py::module_& main_module) {
     using namespace algos;
+    using namespace algos::fd;
     using namespace pybind11::literals;
 
     auto fd_module = main_module.def_submodule("fd");
@@ -229,6 +271,67 @@ void BindFd(py::module_& main_module) {
             .def(py::init<std::string, std::vector<model::Attribute>,
                           std::vector<model::Attribute>>(),
                  "table_name"_a, "lhs"_a, "rhs"_a);
+    py::class_<TableMaskPairFdView, TableMaskPairFdView::OwningPointer>(
+            fd_module, TABLE_MASK_PAIR_FD_VIEW_CLASS_NAME)
+            .def("to_fds", static_cast<FdList (*)(TableMaskPairFdView const&)>(FdsToList))
+            .def(
+                    "__iter__",
+                    [](TableMaskPairFdView const& storage) {
+                        return py::make_iterator(storage.begin(), storage.end());
+                    },
+                    py::keep_alive<0, 1>())
+            .def(py::pickle(
+                    // __getstate__
+                    [](TableMaskPairFdView const& storage) {
+                        auto const& table_mask_pairs = storage.GetTableMaskPairs();
+                        model::TableHeader const& header = storage.GetTableHeader();
+                        py::list py_table_mask_pairs{table_mask_pairs.size()};
+                        Py_ssize_t i = 0;
+                        for (fd::TableMaskPair const& table_mask_pair : table_mask_pairs) {
+                            // If not released, the refcount of the new object will reach 0 after
+                            // this line, triggering UB on access.
+                            PyList_SET_ITEM(py_table_mask_pairs.ptr(), i,
+                                            py::make_tuple(BitsetToInt(table_mask_pair.lhs),
+                                                           BitsetToInt(table_mask_pair.rhs))
+                                                    .release()
+                                                    .ptr());
+                            ++i;
+                        }
+                        return py::make_tuple(
+                                py::make_tuple(header.table_name, header.column_names),
+                                std::move(py_table_mask_pairs));
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 2) {
+                            throw std::runtime_error(TABLE_MASK_PAIR_FD_VIEW_CLASS_NAME
+                                                     " pickle state must have two elements!");
+                        }
+                        py::tuple header_tuple = t[0];
+                        if (!py::isinstance<py::tuple>(header_tuple)) {
+                            throw std::runtime_error(
+                                    "Expected tuple as first element "
+                                    "in " TABLE_MASK_PAIR_FD_VIEW_CLASS_NAME " pickle state");
+                        }
+                        if (header_tuple.size() != 2) {
+                            throw std::runtime_error("Header must be represented by two elements!");
+                        }
+                        auto table_name = header_tuple[0].cast<std::string>();
+                        auto column_names = header_tuple[1].cast<std::vector<std::string>>();
+                        std::size_t const col_number = column_names.size();
+                        py::object int_pairs_list = t[1];
+                        return TableMaskPairFdView{
+                                {std::move(table_name), std::move(column_names)},
+                                TableMaskPairsFromIntPairs(std::move(int_pairs_list), col_number)};
+                    }))
+            .def(py::init([](std::string table_name, std::vector<std::string> column_names,
+                             PySelectionPairs selection_pairs) {
+                     std::size_t const col_number = column_names.size();
+                     return TableMaskPairFdView{
+                             {std::move(table_name), std::move(column_names)},
+                             TableMaskPairsFromIntPairs(selection_pairs, col_number)};
+                 }),
+                 "table_name"_a, "column_names"_a, "selection_pairs"_a);
 
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";
