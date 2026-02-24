@@ -254,6 +254,7 @@ void BindFd(py::module_& main_module) {
             .def(py::self != py::self)
             .def("to_string_short", FdToStringShort)
             .def("to_string_full", FdToStringFull)
+            .def("to_input", &model::FunctionalDependency::ToInput)
             .def(py::pickle(
                     // __getstate__
                     [](model::FunctionalDependency const& fd) {
