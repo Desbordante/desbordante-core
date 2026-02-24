@@ -8,6 +8,7 @@
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
@@ -43,6 +44,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<config::ErrorType>,
         normal_conv_pair<config::IndicesType>,
         normal_conv_pair<model::DDString>,
+        normal_conv_pair<model::FdInput>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,

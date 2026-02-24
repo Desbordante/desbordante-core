@@ -20,7 +20,7 @@ std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
 }
 
 std::shared_ptr<model::PLI const> ColumnLayoutRelationData::CalculatePLI(
-        std::vector<unsigned int> const& indices) const {
+        std::vector<model::Index> const& indices) const {
     if (indices.size() <= 0) throw std::invalid_argument("received unpositive number of indices");
 
     std::shared_ptr<model::PLI const> pli = GetColumnData(indices[0]).GetPliOwnership();
