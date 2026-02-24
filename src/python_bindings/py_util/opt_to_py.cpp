@@ -10,6 +10,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
@@ -52,6 +53,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kNormalConvPair<config::IndicesType>,
         kNormalConvPair<model::DDString>,
         kNormalConvPair<model::Gdd>,
+        kNormalConvPair<model::FdInput>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<model::InputFormatType>,
