@@ -17,6 +17,7 @@
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
+#include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
@@ -207,6 +208,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::optional<int>>,
         kNormalConvPair<algos::md::ColumnSimilarityClassifier>,
         kNormalConvPair<std::vector<algos::md::ColumnSimilarityClassifier>>,
+        kNormalConvPair<model::FdInput>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,
