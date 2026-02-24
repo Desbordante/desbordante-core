@@ -6,10 +6,12 @@
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
+#include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/table_header.h"
 
 namespace algos::fd_verifier {
 
@@ -19,15 +21,16 @@ class FDVerifier : public Algorithm {
 private:
     config::InputTable input_table_;
 
-    config::IndicesType lhs_indices_;
-    config::IndicesType rhs_indices_;
+    model::FdInput fd_input_;
     config::EqNullsType is_null_equal_null_;
 
+    model::TableHeader table_header_;
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::unique_ptr<StatsCalculator> stats_calculator_;
 
-    void VerifyFD() const;
+    void VerifyFD(std::vector<model::Index> const& lhs_indices,
+                  std::vector<model::Index> const& rhs_indices) const;
     void RegisterOptions();
 
     void ResetState() final {
