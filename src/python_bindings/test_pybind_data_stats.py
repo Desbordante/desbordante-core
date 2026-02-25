@@ -46,6 +46,12 @@ class TestDataStats(unittest.TestCase):
         self.assertIsNone(self.data_stats.get_number_of_words(0))
         self.assertIsNone(self.data_stats.get_number_of_entirely_uppercase_words(0))
         self.assertIsNone(self.data_stats.get_number_of_entirely_lowercase_words(0))
+        self.assertIsNone(self.data_stats.get_whitespace_only_count(0))
+        self.assertIsNone(self.data_stats.get_leading_whitespace_count(0))
+        self.assertIsNone(self.data_stats.get_trailing_whitespace_count(0))
+        self.assertIsNone(self.data_stats.get_special_chars_count(0))
+        self.assertIsNone(self.data_stats.get_first_char_frequency(0))
+        self.assertIsNone(self.data_stats.get_last_char_frequency(0))
 
     def test_get_number_of_values(self) -> None:
         res = self.data_stats.get_number_of_values(0)
@@ -248,6 +254,52 @@ class TestDataStats(unittest.TestCase):
     def test_word_vocab(self) -> None:
         res = self.data_stats.get_words(6)
         expected = {"abc", "abd", "abe", "eeee", "ggg", "gre", "grg"}
+        self.assertEqual(expected, res)
+    
+    def test_whitespace_only_count(self) -> None:
+        res = self.data_stats.get_whitespace_only_count(11)
+        expected = 0
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_whitespace_only_count(10)
+        expected = 0
+        self.assertEqual(expected, res)
+    
+    def test_leading_whitespace_count(self) -> None:
+        res = self.data_stats.get_leading_whitespace_count(11)
+        expected = 3
+        self.assertEqual(expected, res)
+    
+    def test_trailing_whitespace_count(self) -> None:
+        res = self.data_stats.get_trailing_whitespace_count(11)
+        expected = 4
+        self.assertEqual(expected, res)
+    
+    def test_special_chars_count(self) -> None:
+        res = self.data_stats.get_special_chars_count(11)
+        expected = 3
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_special_chars_count(10)
+        expected = 1
+        self.assertEqual(expected, res)
+    
+    def test_first_char_frequency(self) -> None:
+        res = self.data_stats.get_first_char_frequency(11)
+        expected = " :3"
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_first_char_frequency(10)
+        expected = "a:3"
+        self.assertEqual(expected, res)
+    
+    def test_last_char_frequency(self) -> None:
+        res = self.data_stats.get_last_char_frequency(11)
+        expected = " :4"
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_last_char_frequency(10)
+        expected = "d:2"
         self.assertEqual(expected, res)
 
 if __name__ == "__main__":

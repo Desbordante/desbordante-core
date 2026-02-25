@@ -36,7 +36,9 @@ struct ColumnStats {
             num_zeros, num_negatives, sum_of_squares, geometric_mean, mean_ad, median, median_ad,
             vocab, num_non_letter_chars, num_digit_chars, num_lowercase_chars, num_uppercase_chars,
             num_chars, num_avg_chars, min_num_chars, max_num_chars, min_num_words, max_num_words,
-            num_words, num_entirely_uppercase, num_entirely_lowercase;
+            num_words, num_entirely_uppercase, num_entirely_lowercase, whitespace_only_count,
+            leading_whitespace_count, trailing_whitespace_count, special_chars_count,
+            first_char_freq, last_char_freq;
 
     std::string ToString() const;
     std::unordered_map<std::string, std::string> ToKeyValueMap() const;
