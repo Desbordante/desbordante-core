@@ -166,6 +166,24 @@ void BindStatistics(pybind11::module_& main_module) {
                  "Returns the amount of entirely lowercase words in a column.", py::arg("index"))
             .def("get_number_of_entirely_uppercase_words",
                  &DataStats::GetNumberOfEntirelyUppercaseWords,
-                 "Returns the amount of entirely uppercase words in a column.", py::arg("index"));
+                 "Returns the amount of entirely uppercase words in a column.", py::arg("index"))
+            .def("get_whitespace_only_count", &DataStats::GetWhitespaceOnlyCount,
+                 "Returns the number of rows that consist only of whitespace characters (spaces "
+                 "and tabs).",
+                 py::arg("index"))
+            .def("get_leading_whitespace_count", &DataStats::GetNumberOfRowsWithLeadingWhitespace,
+                 "Returns the number of rows that have leading whitespace characters.",
+                 py::arg("index"))
+            .def("get_trailing_whitespace_count", &DataStats::GetNumberOfRowsWithTrailingWhitespace,
+                 "Returns the number of rows that have trailing whitespace characters.",
+                 py::arg("index"))
+            .def("get_special_chars_count", &DataStats::GetNumberOfRowsWithSpecialChars,
+                 "Returns the number of rows that contain special characters.", py::arg("index"))
+            .def("get_first_char_frequency", &DataStats::GetFirstCharFrequency,
+                 "Returns the most frequent first character and its count as a string in format.",
+                 py::arg("index"))
+            .def("get_last_char_frequency", &DataStats::GetLastCharFrequency,
+                 "Returns the most frequent last character and its count as a string in format.",
+                 py::arg("index"));
 }
 }  // namespace python_bindings

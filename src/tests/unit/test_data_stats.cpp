@@ -61,6 +61,12 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetNumberOfWords(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfEntirelyUppercaseWords(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfEntirelyLowercaseWords(0).HasValue());
+    EXPECT_FALSE(stats.GetWhitespaceOnlyCount(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfRowsWithLeadingWhitespace(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfRowsWithTrailingWhitespace(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfRowsWithSpecialChars(0).HasValue());
+    EXPECT_FALSE(stats.GetFirstCharFrequency(0).HasValue());
+    EXPECT_FALSE(stats.GetLastCharFrequency(0).HasValue());
 }
 
 TEST(TestDataStats, TestGetWords) {
@@ -466,6 +472,68 @@ TEST(TestDataStats, MultipleExecutionConsistentResults) {
         stats_ptr->Execute();
         ASSERT_EQ(first_res, stats_ptr->ToString()) << "fail on run " << i;
     }
+}
+
+TEST(TestDataStats, TestWhitespaceOnlyCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+
+    algos::Statistic whitespace_stat = stats.GetWhitespaceOnlyCount(11);
+    size_t count = mo::Type::GetValue<mo::Int>(whitespace_stat.GetData());
+    EXPECT_EQ(count, 0);
+
+    whitespace_stat = stats.GetWhitespaceOnlyCount(10);
+    count = mo::Type::GetValue<mo::Int>(whitespace_stat.GetData());
+    EXPECT_EQ(count, 0);
+}
+
+TEST(TestDataStats, TestLeadingWhitespaceCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+
+    algos::Statistic leading_stat = stats.GetNumberOfRowsWithLeadingWhitespace(11);
+    size_t count = mo::Type::GetValue<mo::Int>(leading_stat.GetData());
+    EXPECT_EQ(count, 3);
+}
+
+TEST(TestDataStats, TestTrailingWhitespaceCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+
+    algos::Statistic trailing_stat = stats.GetNumberOfRowsWithTrailingWhitespace(11);
+    size_t count = mo::Type::GetValue<mo::Int>(trailing_stat.GetData());
+    EXPECT_EQ(count, 4);
+}
+
+TEST(TestDataStats, TestSpecialCharsCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+
+    algos::Statistic special_stat = stats.GetNumberOfRowsWithSpecialChars(11);
+    size_t count = mo::Type::GetValue<mo::Int>(special_stat.GetData());
+    EXPECT_EQ(count, 3);
+
+    special_stat = stats.GetNumberOfRowsWithSpecialChars(10);
+    count = mo::Type::GetValue<mo::Int>(special_stat.GetData());
+    EXPECT_EQ(count, 1);
+}
+
+TEST(TestDataStats, TestFirstCharFrequency) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+
+    algos::Statistic first_char_stat = stats.GetFirstCharFrequency(11);
+    std::string result = mo::Type::GetValue<mo::String>(first_char_stat.GetData());
+    EXPECT_EQ(result, " :3");
+}
+
+TEST(TestDataStats, TestLastCharFrequency) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+
+    algos::Statistic last_char_stat = stats.GetLastCharFrequency(11);
+    std::string result = mo::Type::GetValue<mo::String>(last_char_stat.GetData());
+    EXPECT_EQ(result, " :4");
 }
 
 };  // namespace tests

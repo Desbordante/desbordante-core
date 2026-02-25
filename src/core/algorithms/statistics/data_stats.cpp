@@ -863,6 +863,148 @@ Statistic DataStats::CountIfInColumnForWords(Pred pred, size_t index) const {
     return Statistic(res, &int_type, false);
 }
 
+Statistic DataStats::GetWhitespaceOnlyCount(size_t index) const {
+    if (all_stats_[index].whitespace_only_count.HasValue())
+        return all_stats_[index].whitespace_only_count;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    size_t count = 0;
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        auto const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
+
+        if (!str.empty() && std::all_of(str.begin(), str.end(), [](char c) {
+                return std::isspace(static_cast<unsigned char>(c));
+            })) {
+            count++;
+        }
+    }
+
+    mo::IntType int_type;
+    std::byte const* res = int_type.MakeValue(count);
+    return Statistic(res, &int_type, false);
+}
+
+Statistic DataStats::GetWhitespaceCount(size_t index, CharPosition pos) const {
+    auto& stat_cache = (pos == CharPosition::kFirst) ? all_stats_[index].leading_whitespace_count
+                                                     : all_stats_[index].trailing_whitespace_count;
+
+    if (stat_cache.HasValue()) return stat_cache;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    size_t count = 0;
+    auto check_whitespace = [pos](std::string const& str) {
+        if (str.empty()) return false;
+
+        char char_to_check = (pos == CharPosition::kFirst) ? str[0] : str.back();
+        return static_cast<bool>(std::isspace(static_cast<unsigned char>(char_to_check)));
+    };
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        auto const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
+        if (check_whitespace(str)) {
+            count++;
+        }
+    }
+
+    mo::IntType int_type;
+    std::byte const* res = int_type.MakeValue(count);
+    return Statistic(res, &int_type, false);
+}
+
+Statistic DataStats::GetNumberOfRowsWithLeadingWhitespace(size_t index) const {
+    return GetWhitespaceCount(index, CharPosition::kFirst);
+}
+
+Statistic DataStats::GetNumberOfRowsWithTrailingWhitespace(size_t index) const {
+    return GetWhitespaceCount(index, CharPosition::kLast);
+}
+
+Statistic DataStats::GetNumberOfRowsWithSpecialChars(size_t index) const {
+    if (all_stats_[index].special_chars_count.HasValue())
+        return all_stats_[index].special_chars_count;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    static constexpr std::string_view const kSpecialChars = "@#$%^&!?*_+=~'-\"";
+    size_t count = 0;
+
+    static constexpr std::array<bool, 256> kMap = []() constexpr {
+        std::array<bool, 256> map = {0};
+        for (char c : kSpecialChars) {
+            map[static_cast<unsigned char>(c)] = true;
+        }
+        return map;
+    }();
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        auto const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
+
+        if (std::any_of(str.begin(), str.end(),
+                        [](char c) { return kMap[static_cast<unsigned char>(c)]; })) {
+            count++;
+        }
+    }
+
+    mo::IntType int_type;
+    std::byte const* res = int_type.MakeValue(count);
+    return Statistic(res, &int_type, false);
+}
+
+Statistic DataStats::GetCharFrequency(size_t index, CharPosition pos) const {
+    if ((pos == CharPosition::kFirst && all_stats_[index].first_char_freq.HasValue()) ||
+        (pos == CharPosition::kLast && all_stats_[index].last_char_freq.HasValue())) {
+        return pos == CharPosition::kFirst ? all_stats_[index].first_char_freq
+                                           : all_stats_[index].last_char_freq;
+    }
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    std::unordered_map<char, size_t> freq_map;
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        auto const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
+        if (str.empty()) continue;
+
+        char c = (pos == CharPosition::kFirst) ? str.front() : str.back();
+        freq_map[c]++;
+    }
+    assert(freq_map.size() != 0);
+
+    auto const& [most_frequent, max_freq] = *std::max_element(
+            freq_map.begin(), freq_map.end(), [](auto const& lhs, auto const& rhs) {
+                return std::tie(lhs.second, lhs.first) < std::tie(rhs.second, rhs.first);
+            });
+
+    if (max_freq == 0) return {};
+
+    std::string result = std::string(1, most_frequent) + ":" + std::to_string(max_freq);
+    mo::StringType string_type;
+    std::byte const* res = string_type.MakeValue(result);
+    return Statistic(res, &string_type, false);
+}
+
+Statistic DataStats::GetFirstCharFrequency(size_t index) const {
+    return GetCharFrequency(index, CharPosition::kFirst);
+}
+
+Statistic DataStats::GetLastCharFrequency(size_t index) const {
+    return GetCharFrequency(index, CharPosition::kLast);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
@@ -906,6 +1048,14 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].num_words = GetNumberOfWords(index);
             all_stats_[index].num_entirely_uppercase = GetNumberOfEntirelyUppercaseWords(index);
             all_stats_[index].num_entirely_lowercase = GetNumberOfEntirelyLowercaseWords(index);
+            all_stats_[index].whitespace_only_count = GetWhitespaceOnlyCount(index);
+            all_stats_[index].leading_whitespace_count =
+                    GetNumberOfRowsWithLeadingWhitespace(index);
+            all_stats_[index].trailing_whitespace_count =
+                    GetNumberOfRowsWithTrailingWhitespace(index);
+            all_stats_[index].special_chars_count = GetNumberOfRowsWithSpecialChars(index);
+            all_stats_[index].first_char_freq = GetFirstCharFrequency(index);
+            all_stats_[index].last_char_freq = GetLastCharFrequency(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(

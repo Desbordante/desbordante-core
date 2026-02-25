@@ -23,6 +23,8 @@ class DataStats : public Algorithm {
 
     void ResetState() final;
 
+    enum class CharPosition { kFirst, kLast };
+
     // Returns number of elements satisfying the predicate
     template <class Pred, class Data>
     size_t CountIf(Pred pred, Data const& data) const;
@@ -61,6 +63,10 @@ class DataStats : public Algorithm {
     // Returns median value for numeric vector
     static std::byte* MedianOfNumericVector(std::vector<std::byte const*> const& data,
                                             model::INumericType const& type);
+    // Returns number of rows with whitespace on first or last position
+    Statistic GetWhitespaceCount(size_t index, CharPosition pos) const;
+    // Returns the most frequent character in a column on first or last position
+    Statistic GetCharFrequency(size_t index, CharPosition pos) const;
 
 protected:
     config::InputTable input_table_;
@@ -166,7 +172,18 @@ public:
     Statistic GetNumberOfEntirelyUppercaseWords(size_t index) const;
     // Returns the amount of entirely lowercase words in a string column.
     Statistic GetNumberOfEntirelyLowercaseWords(size_t index) const;
-
+    // Returns the number of rows that consist only of whitespace characters (spaces and tabs).
+    Statistic GetWhitespaceOnlyCount(size_t index) const;
+    // Returns the number of rows that have leading whitespace characters.
+    Statistic GetNumberOfRowsWithLeadingWhitespace(size_t index) const;
+    // Returns the number of rows that have trailing whitespace characters.
+    Statistic GetNumberOfRowsWithTrailingWhitespace(size_t index) const;
+    // Returns the number of rows that contain special characters.
+    Statistic GetNumberOfRowsWithSpecialChars(size_t index) const;
+    // Returns the most frequent first character.
+    Statistic GetFirstCharFrequency(size_t index) const;
+    // Returns the most frequent last character.
+    Statistic GetLastCharFrequency(size_t index) const;
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;
     std::string ToString() const;
