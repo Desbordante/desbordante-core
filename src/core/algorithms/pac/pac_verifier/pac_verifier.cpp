@@ -133,7 +133,7 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         // NOTE: This should be checked before min_epsilon, because (??, min_epsilon) will always
         // have its first <= max_epsilon
         if (begin->first > max_epsilon_) {
-            LOG_TRACE(
+            LOG_DEBUG(
                     "Max eps and min delta cannot be both satisfied. Taking pair with min delta.");
             return *begin;
         }
@@ -176,9 +176,9 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         return stripped_emp_prob.front();
     }
 
-    LOG_TRACE("Stripped empirical probabilities:");
+    LOG_DEBUG("Stripped empirical probabilities:");
     for ([[maybe_unused]] auto const& [eps, delta] : stripped_emp_prob) {
-        LOG_TRACE("\t{}, {}", eps, delta);
+        LOG_DEBUG("\t{}, {}", eps, delta);
     }
 
     double max_eps_diff = -1;
