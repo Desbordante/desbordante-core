@@ -43,7 +43,7 @@ Based on the previous examples, the most suitable domain here is the Ball domain
 measuring distance from a single center value.
 ''')
 
-ball = desbordante.pac.domains.Ball(["Desbordante"], 1)
+ball = desbordante.pac.domains.Ball(["Desbordante"], 0)
 
 print(
     f'We run the Domain PAC verifier with the following parameter: domain={BLUE}{ball}{ENDC}.'
@@ -59,9 +59,12 @@ print(f'Result: {GREEN}{pac}{ENDC}.')
 print(
     f'''This means that {GREEN}{pac.delta * 100}%{ENDC} of our users make no more than {GREEN}{pac.epsilon}{ENDC} typos in the word
 "Desbordante", which satisfies our requirement.
+
+If you would like to see which specific words contain a given number of typos, you can inspect the
+outliers (see previous examples).
 ''')
 
 print(
-    f'''Now that you have completed all basic examples, you continue with the advanced example:
+    f'''Now that you have completed all basic examples, you can continue with the advanced example:
 {CYAN}examples/advanced/verifying_pac/verifying_domain_pac_custom_domain.py{ENDC}.
 This example demonstrates how to define and use a Custom domain.''')
