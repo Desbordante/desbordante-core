@@ -116,8 +116,11 @@ Interpretation:
     * With a larger ε ({BLUE}{pac_1.epsilon:.3f}{ENDC}), nearly all users show some level of interest
     * With a very small ε ({BLUE}{pac_2.epsilon:.3f}{ENDC}), only {BLUE}{pac_2.delta * 100.0:.0f}%{ENDC} of users closely match the ideal reader.
 
-You can user highlights to identify which users are closer to or farther from the ideal profile.
-For an introduction to highlights, see {CYAN}examples/basic/verifying_pac/verifying_domain_pac1.py{ENDC}.'''
+You can check outliers to identify which users are closer to or farther from the ideal profile.
+For an introduction to outliers, see {CYAN}examples/basic/verifying_pac/verifying_domain_pac1.py{ENDC}.
+
+You now know how to use Domain PACs with built-in domains as well as custom ones.
+Try applying them to your own data and see what insights you can uncover.'''
       )
 
 # C++ note: Custom domain is called "Untyped domain" in C++ code, because it erases type

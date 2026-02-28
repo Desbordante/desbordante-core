@@ -2,6 +2,7 @@
 
 from tabulate import tabulate
 from csv import reader
+from math import inf
 
 import desbordante
 
@@ -30,6 +31,7 @@ If you haven\'t read first and second parts yet, it is recommended to start ther
 
 In the first example we verified the following Domain PAC on temperature sensor readings:
     {BLUE}Domain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC}
+
 In the second example, we added tachometer readings and validated a Domain PAC on two columns using
 the Parallelepiped domain.
 
@@ -44,6 +46,7 @@ print(
             |        |
             +--------+
     (85, 1500)      (85, 3500)
+
 Our task from the second example was:
     The normal operating RPM for this engine is {BLUE}[1500, 3500]{ENDC}. Values outside this range are
     not harmful by themselves (as long as they are within {BLUE}[0, 5000]{ENDC}), but:
@@ -56,7 +59,7 @@ A rectangle does not perfectly describe these conditions. For example,
     * (80, 1600) is mostly acceptable.
 However, both points have the same distance from the rectangle boundary. This shows that a shape
 with sharp corners does not model the risk accurately.
-What we rally want is a smooth shape without corners -- an ellipse.
+What we really want is a smooth shape without corners -- an ellipse.
 
 In this approach, ellipses (and their higher-dimensional equivalents) are represented by the Ball domain.
 You might wonder: a ball has the same radius in all dimensions, while an ellipse has different ones.
@@ -81,8 +84,11 @@ algo.load_data(table=(ENGINE_TEMPS, ',', True),
                domain=ellipse,
                column_indices=[0, 1])
 algo.execute()
+pac = algo.get_pac()
 print(f'''Algorithm result:
-    {GREEN}{algo.get_pac()}{ENDC}''')
+    {GREEN}{pac}{ENDC}
+Outliers between {BLUE}+{pac.epsilon:.1f}{ENDC} and {BLUE}+∞{ENDC}: {BOLD}{algo.get_highlights(pac.epsilon, inf)}{ENDC}.
+''')
 
 parallelepiped = desbordante.pac.domains.Parallelepiped(['85', '1500'],
                                                         ['95', '3500'],
@@ -92,9 +98,11 @@ algo.load_data(table=(ENGINE_TEMPS, ',', True),
                domain=parallelepiped,
                column_indices=[0, 1])
 algo.execute()
+pac = algo.get_pac()
 
 print(f'''For comparison, the Parallelepiped domain previously produced:
-    {RED}{algo.get_pac()}{ENDC}
+    {RED}{pac}{ENDC}
+Outliers between {BLUE}+{pac.epsilon:.1f}{ENDC} and {BLUE}+∞{ENDC}: {BOLD}{algo.get_highlights(pac.epsilon, inf)}{ENDC}.
 ''')
 print(
     f'''Although the numerical values differ slightly, the Ball domain better reflects the actual operating

@@ -61,6 +61,7 @@ print(
 The engine is made of high-strength metal, so short-term temperature deviations are acceptable and
 will not cause immediate damage. In other words, engine operates properly when Pr(t ∈ [85, 95]±ε) ≥ δ.
 Based on engineering analysis, the acceptable limits are: ε = {BLUE}5{ENDC}, δ = {BLUE}0.9{ENDC}.
+
 In terms of Domain PACs, the following constraint should hold: {BLUE}Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC}.
 ''')
 
@@ -76,15 +77,18 @@ print(
 )
 
 print(
-    'First, we need to define the domain. A segment is a special case of a parallelepiped, so we use it here.'
-)
+    f'''First, we need to define the domain. Available options are:
+  * {BLUE}Parallelepiped{ENDC} -- a closed n-ary parallelepiped
+  * {BLUE}Ball{ENDC} -- a closed n-ary ball
+  * {BLUE}CustomDomain{ENDC} -- a domain with user-defined metric
+A segment is simply a one-dimensional parallelepiped, so we use the {BLUE}Parallelepiped{ENDC} domain here.''')
 # Parallelepiped has a special constructor for segment.
 # Notice the usage of quotes: these strings will be converted to values once the table is loaded.
 segment = desbordante.pac.domains.Parallelepiped('85', '95')
 
 print(
-    f'''We run algorithm with the following options: domain={BLUE}{segment}{ENDC}.
-All other parameters use default values: min_epsilon={BLUE}0{ENDC}, max_epsilon={BLUE}∞{ENDC}, min_delta={BLUE}0.9{ENDC}, delta_steps={BLUE}100{ENDC}.
+    f'''We run algorithm with the following options: domain={BLUE}{segment}{ENDC}. All other parameters use default
+values: min_epsilon={BLUE}0{ENDC}, max_epsilon={BLUE}∞{ENDC}, min_delta={BLUE}0.9{ENDC}, delta_steps={BLUE}100{ENDC}.
 ''')
 
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
@@ -94,16 +98,19 @@ algo.load_data(table=(ENGINE_TEMPS_BAD, ',', True),
                domain=segment)
 algo.execute()
 
-print(f'Algorithm result: {YELLOW}{algo.get_pac()}{ENDC}.')
+print(f'Algorithm result: {YELLOW}{algo.get_pac()}{ENDC}.\n')
 print(
-    f'''This PAC is not very informative. Let\'s run algorithm with min_epsilon={BLUE}5{ENDC} and max_epsilon={BLUE}5{ENDC}.
-This will give us the exact δ, for which PAC with ε={BLUE}5{ENDC} holds.
+    f'''This result is not directly informative for our goal. Since both ε and δ exceed the required values,
+we cannot determine whether the constraint holds for ε={BLUE}5{ENDC} and δ={BLUE}0.9{ENDC}.
+
+Let\'s run algorithm with min_epsilon={BLUE}5{ENDC} and max_epsilon={BLUE}5{ENDC}. This will give us the exact δ,
+for which PAC with ε={BLUE}5{ENDC} holds.
 ''')
 
 # Note that, when min_epsilon or max_epsilon is specified, default min_delta becomes 0
 algo.execute(min_epsilon=5, max_epsilon=5)
 
-print(f'Algorithm result: {RED}{algo.get_pac()}{ENDC}.')
+print(f'Algorithm result: {RED}{algo.get_pac()}{ENDC}.\n')
 print(
     f'''Also, let\'s run algorithm with max_epsilon={BLUE}0{ENDC} and min_delta={BLUE}0.9{ENDC} to check which ε
 is needed to satisfy δ={BLUE}0.9{ENDC}. With these parameters algorithm enters special mode and returns
@@ -115,7 +122,7 @@ pair (ε, min_delta), so that we can validate PAC with the given δ.
 algo.execute(max_epsilon=0, min_delta=0.9)
 
 pac = algo.get_pac()
-print(f'Algorithm result: {RED}{pac}{ENDC}.')
+print(f'Algorithm result: {RED}{pac}{ENDC}.\n')
 print(
     f'''Here algorithm gives δ={BLUE}{pac.delta}{ENDC}, which is greater than {BLUE}0.9{ENDC}, because achieving δ={BLUE}0.9{ENDC} requires
 ε={BLUE}{pac.epsilon}{ENDC} and PAC ({BLUE}{pac.epsilon}{ENDC}, {BLUE}{pac.delta}{ENDC}) holds. So, this means that δ={BLUE}0.9{ENDC} would also require ε={BLUE}{pac.epsilon}{ENDC}.
@@ -126,14 +133,14 @@ print(
 
 print(
     f'''Let\'s look at values violating PAC. Domain PAC verifier can detect values between eps_1
-and eps_2, i. e. values that lie in D±eps_2 \\ D±eps_1. Such values are called highlights or outliers.
+and eps_2, i. e. values that lie in D±eps_2 \\ D±eps_1. Such values are called outliers (or highlights).
 Let\'s find outliers for different eps_1, eps_2 values:''')
 
 value_ranges = [(0, 1), (1, 2), (2, 3), (3, 5), (5, 7), (7, 10)]
 highlights_table = [(f'{BLUE}{v_range[0]}{ENDC}', f'{BLUE}{v_range[1]}{ENDC}',
                      str(algo.get_highlights(*v_range)))
                     for v_range in value_ranges]
-print(tabulate(highlights_table, headers=('eps_1', 'eps_2', 'highlights')))
+print(tabulate(highlights_table, headers=('eps_1', 'eps_2', 'outliers')))
 print()
 
 print('''We can see two problems:
@@ -155,6 +162,7 @@ algo.load_data(table=(ENGINE_TEMPS_GOOD, ',', True),
 algo.execute()
 
 print(f'''Algorithm result: {GREEN}{algo.get_pac()}{ENDC}.
+
 The desired PAC now holds, which means the improved engine operates within acceptable limits.
 
 It is recommended to continue with the second example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac2.py{ENDC}),
