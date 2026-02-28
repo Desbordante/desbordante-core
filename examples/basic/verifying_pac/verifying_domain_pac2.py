@@ -37,20 +37,20 @@ print()
 print(
     f'''The normal operating RPM for this engine is {BLUE}[1500, 3500]{ENDC}. Values outside this range are
 not harmful by themselves (as long as they are within {BLUE}[0, 5000]{ENDC}), but:
-    * A cold engine may stall at low RPM and can be damaged at high RPM.
-    * An overheated engine is especially vulnerable at RPM values outside {BLUE}[1500, 3500]{ENDC}, because
+  * A cold engine may stall at low RPM and can be damaged at high RPM.
+  * An overheated engine is especially vulnerable at RPM values outside {BLUE}[1500, 3500]{ENDC}, because
       cooling efficiency depends on RPM.
 As in the first example, we use the Domain PAC verifier to check whether the engine operates properly.
 ''')
 
 print(
     f'''Firstly, we need to create domain. We have a Cartesian product of two segments: {BLUE}[85, 95] x [1500, 3500]{ENDC},
-so it would be natural to use parallelepiped.''')
-print(
-    f'''We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
+so it would be natural to use parallelepiped.
+
+We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
 of two segments:
-    * temperature: [85, 95];
-    * RPM: [1500, 3500].
+  * temperature: [85, 95];
+  * RPM: [1500, 3500].
 This forms a parallelepiped domain: {BLUE}[85, 95] x [1500, 3500]{ENDC}.
 ''')
 # Arguments of generic version are A = (a1, a2, ..., an) and B = (b1, b2, ..., bn).
@@ -70,25 +70,26 @@ algo.execute(max_epsilon=10)
 pac = algo.get_pac()
 print(f'Algorithm result: {RED}{pac}{ENDC}.')
 print(
-    f'A result with δ = {BLUE}{pac.delta}{ENDC} is unexpected. To understand what is happening, we examine the highlights.'
+    f'A result with δ = {BLUE}{pac.delta}{ENDC} is unexpected. To understand what is happening, we examine the outliers.'
 )
 
 print(
-    f'''Highlights between {BLUE}0{ENDC} and {BLUE}{pac.epsilon}{ENDC} are: {BOLD}{algo.get_highlights(0, pac.epsilon)}{ENDC}.
+    f'''Outliers between {BLUE}+{0:.1f}{ENDC} and {BLUE}+{pac.epsilon:.1f}{ENDC} are: {BOLD}{algo.get_highlights(0, pac.epsilon)}{ENDC}.
 ''')
 print(
-    f'''There are very few highlights, which suggests that the parameters may not be chosen correctly.
+    f'''There are very few outliers, which suggests that the parameters may not be chosen correctly.
 
 The question is: what does ε = {BLUE}{pac.epsilon}{ENDC} mean in two-dimensional domain? Should ε correspond to:
-    * 10 degrees of temperature difference, or
-    * 1500 RPM difference?
+  * 10 degrees of temperature difference, or
+  * 1500 RPM difference?
 To answer this, we need to understand how distance is computed.
 
 The parallelepiped uses the Chebyshev metric to calculate distance between value tuples:
     {BOLD}d(x, y) = max{{|x[1] - y[1]|, ..., |x[n] - y[n]|}}{ENDC}
+
 In our case:
-    * temperature differences are on the order of tens;
-    * RPM differences are on the order of thousands.
+  * temperature differences are on the order of tens;
+  * RPM differences are on the order of thousands.
 As a result, RPM differences dominate the distance computation, making temperature differences
 almost irrelevant. This issue affects all coordinate-wise metric-based domains (currently
 Parallelepiped and Ball, though custom domains can be implemented in C++).
@@ -110,8 +111,13 @@ algo.load_data(table=(ENGINE_TEMPS, ',', True),
                domain=parallelepiped,
                column_indices=[0, 1])
 algo.execute(max_epsilon=10, min_delta=0.9)
-print(f'''Algorithm result: {GREEN}{algo.get_pac()}{ENDC}.
+pac = algo.get_pac()
+print(f'''Algorithm result: {GREEN}{pac}{ENDC}.
 This result is now meaningful and consistent with the findings from the first example.
+
+To better understand the effect of levelling coefficients, let's inspect the outliers.
+Outliers between {BLUE}+0{ENDC} and {BLUE}+5{ENDC}: {BOLD}{algo.get_highlights(0, 5)}{ENDC}.
+You can observe that the outliers reflect the normalized distance.
 
 It is recommended to continue with the third example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
 which introduces another basic domain type: Ball.''')
