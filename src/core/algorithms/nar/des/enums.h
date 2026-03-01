@@ -1,6 +1,6 @@
 #pragma once
 
-#include <enum.h>
+#include "core/util/better_enum_with_visibility.h"
 
 namespace algos::des {
 BETTER_ENUM(DifferentialStrategy, char, rand1Bin = 0, rand1Exp, randToBest1Exp, best2Exp, rand2Exp,

@@ -4,8 +4,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <enum.h>
-
 #include "core/algorithms/algebraic_constraints/ac.h"
 #include "core/algorithms/algebraic_constraints/ac_exception.h"
 #include "core/algorithms/algebraic_constraints/ac_exception_finder.h"
@@ -17,6 +15,7 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/types.h"
+#include "core/util/better_enum_with_visibility.h"
 
 namespace algos {
 

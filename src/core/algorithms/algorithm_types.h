@@ -1,8 +1,7 @@
 #pragma once
 
-#include <enum.h>
-
 #include "core/algorithms/algorithms.h"
+#include "core/util/better_enum_with_visibility.h"
 
 namespace algos {
 

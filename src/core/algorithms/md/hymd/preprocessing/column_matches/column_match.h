@@ -1,15 +1,15 @@
 #pragma once
-
 #include <string>
 
 #include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
 #include "core/algorithms/md/hymd/indexes/records_info.h"
 #include "core/model/table/relational_schema.h"
+#include "core/util/export.h"
 #include "core/util/worker_thread_pool.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 
-class ColumnMatch {
+class DESBORDANTE_EXPORT ColumnMatch {
 private:
     bool is_symmetrical_and_eq_is_max_;
     std::string name_;

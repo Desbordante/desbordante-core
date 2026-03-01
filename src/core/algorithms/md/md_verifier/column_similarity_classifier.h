@@ -1,10 +1,10 @@
 #pragma once
-
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
 #include "core/algorithms/md/md_verifier/cmptr.h"
+#include "core/util/export.h"
 
 namespace algos::md {
-class ColumnSimilarityClassifier {
+class DESBORDANTE_EXPORT ColumnSimilarityClassifier {
 private:
     CMPtr column_match_;
     model::md::DecisionBoundary decision_boundary_;
