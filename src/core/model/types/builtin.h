@@ -4,7 +4,8 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/serialization/strong_typedef.hpp>
-#include <enum.h>
+
+#include "core/util/better_enum_with_visibility.h"
 
 namespace model {
 
