@@ -1,8 +1,7 @@
 #pragma once
 
-#include <enum.h>
-
 #include "core/model/table/column.h"
+#include "core/util/better_enum_with_visibility.h"
 
 namespace algos::fastadc {
 
