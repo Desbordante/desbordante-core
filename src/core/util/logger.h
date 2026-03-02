@@ -43,6 +43,12 @@ inline std::shared_ptr<spdlog::logger>& GetCachedLogger() {
 }
 }  // namespace util::logging
 
+// Ignore arguments, but mark them as "used"
+#define DESBORDANTE_NOOP(...)                 \
+    do {                                      \
+        (void)sizeof((void)(__VA_ARGS__), 0); \
+    } while (false)
+
 #if !defined(SPDLOG_ACTIVE_LEVEL)
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
 #endif
@@ -50,35 +56,35 @@ inline std::shared_ptr<spdlog::logger>& GetCachedLogger() {
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_TRACE
 #define LOG_TRACE(...) SPDLOG_LOGGER_TRACE(::util::logging::GetCachedLogger(), __VA_ARGS__)
 #else
-#define LOG_TRACE(...) (void)0
+#define LOG_TRACE(...) DESBORDANTE_NOOP(__VA_ARGS__)
 #endif
 
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_DEBUG
 #define LOG_DEBUG(...) SPDLOG_LOGGER_DEBUG(::util::logging::GetCachedLogger(), __VA_ARGS__)
 #else
-#define LOG_DEBUG(...) (void)0
+#define LOG_DEBUG(...) DESBORDANTE_NOOP(__VA_ARGS__)
 #endif
 
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_INFO
 #define LOG_INFO(...) SPDLOG_LOGGER_INFO(::util::logging::GetCachedLogger(), __VA_ARGS__)
 #else
-#define LOG_INFO(...) (void)0
+#define LOG_INFO(...) DESBORDANTE_NOOP(__VA_ARGS__)
 #endif
 
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_WARN
 #define LOG_WARN(...) SPDLOG_LOGGER_WARN(::util::logging::GetCachedLogger(), __VA_ARGS__)
 #else
-#define LOG_WARN(...) (void)0
+#define LOG_WARN(...) DESBORDANTE_NOOP(__VA_ARGS__)
 #endif
 
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_ERROR
 #define LOG_ERROR(...) SPDLOG_LOGGER_ERROR(::util::logging::GetCachedLogger(), __VA_ARGS__)
 #else
-#define LOG_ERROR(...) (void)0
+#define LOG_ERROR(...) DESBORDANTE_NOOP(__VA_ARGS__)
 #endif
 
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_CRITICAL
 #define LOG_CRITICAL(...) SPDLOG_LOGGER_CRITICAL(::util::logging::GetCachedLogger(), __VA_ARGS__)
 #else
-#define LOG_CRITICAL(...) (void)0
+#define LOG_CRITICAL(...) DESBORDANTE_NOOP(__VA_ARGS__)
 #endif
