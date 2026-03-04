@@ -29,7 +29,7 @@ private:
     }
 
 public:
-    HyUCC() : UCCAlgorithm({}) {
+    HyUCC() : UCCAlgorithm() {
         RegisterOption(config::kThreadNumberOpt(&threads_num_));
     }
 };

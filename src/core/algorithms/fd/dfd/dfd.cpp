@@ -12,7 +12,7 @@
 
 namespace algos {
 
-DFD::DFD() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+DFD::DFD() : PliBasedFDAlgorithm() {
     RegisterOptions();
 }
 
@@ -46,12 +46,10 @@ unsigned long long DFD::ExecuteInternal() {
         }
     }
 
-    double progress_step = 100.0 / schema->GetNumColumns();
     boost::asio::thread_pool search_space_pool(number_of_threads_);
 
     for (auto& rhs : schema->GetColumns()) {
-        boost::asio::post(search_space_pool, [this, &rhs, schema, progress_step,
-                                              &partition_storage]() {
+        boost::asio::post(search_space_pool, [this, &rhs, schema, &partition_storage]() {
             ColumnData const& rhs_data = relation_->GetColumnData(rhs->GetIndex());
             model::PositionListIndex const* const rhs_pli = rhs_data.GetPositionListIndex();
 
@@ -61,7 +59,6 @@ unsigned long long DFD::ExecuteInternal() {
              * */
             if (rhs_pli->GetNepAsLong() == relation_->GetNumTuplePairs()) {
                 RegisterFd(schema->CreateEmptyVertical(), *rhs, relation_->GetSharedPtrSchema());
-                AddProgress(progress_step);
                 return;
             }
 
@@ -72,13 +69,10 @@ unsigned long long DFD::ExecuteInternal() {
             for (auto const& minimal_dependency_lhs : minimal_deps) {
                 RegisterFd(minimal_dependency_lhs, *rhs, relation_->GetSharedPtrSchema());
             }
-            AddProgress(progress_step);
-            LOG_INFO("{}", static_cast<int>(GetProgress().second));
         });
     }
 
     search_space_pool.join();
-    SetProgress(100);
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);

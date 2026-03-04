@@ -18,7 +18,7 @@
 
 namespace algos::cfd {
 
-FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
+FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery() {
     RegisterOptions();
 }
 

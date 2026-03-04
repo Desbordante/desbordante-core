@@ -23,9 +23,6 @@ private:
     void PrintInfo(hpiv::ResultCollector const& rc) const;
 
     void ResetUCCAlgorithmState() override {}
-
-public:
-    HPIValid() : UCCAlgorithm({}) {}
 };
 
 }  // namespace algos

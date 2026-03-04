@@ -16,7 +16,7 @@ namespace algos {
 
 std::mutex search_spaces_mutex;
 
-Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+Pyro::Pyro() : PliBasedFDAlgorithm() {
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
@@ -80,28 +80,26 @@ unsigned long long Pyro::ExecuteInternal() {
     unsigned int total_error_calc_count = 0;
     unsigned long long total_ascension = 0;
     unsigned long long total_trickle = 0;
-    double progress_step = 100.0 / search_spaces_.size();
 
-    auto const work_on_search_space =
-            [this, &progress_step](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
-                                   ProfilingContext* profiling_context, [[maybe_unused]] int id) {
-                while (true) {
-                    std::unique_ptr<SearchSpace> polled_space;
-                    {
-                        std::scoped_lock<std::mutex> lock(search_spaces_mutex);
-                        if (search_spaces.empty()) {
-                            break;
-                        }
-                        polled_space = std::move(search_spaces.front());
-                        search_spaces.pop_front();
-                    }
-                    LOG_TRACE("Thread {} got SearchSpace", id);
-                    polled_space->SetContext(profiling_context);
-                    polled_space->EnsureInitialized();
-                    polled_space->Discover();
-                    AddProgress(progress_step);
+    auto const work_on_search_space = [](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
+                                         ProfilingContext* profiling_context,
+                                         [[maybe_unused]] int id) {
+        while (true) {
+            std::unique_ptr<SearchSpace> polled_space;
+            {
+                std::scoped_lock<std::mutex> lock(search_spaces_mutex);
+                if (search_spaces.empty()) {
+                    break;
                 }
-            };
+                polled_space = std::move(search_spaces.front());
+                search_spaces.pop_front();
+            }
+            LOG_TRACE("Thread {} got SearchSpace", id);
+            polled_space->SetContext(profiling_context);
+            polled_space->EnsureInitialized();
+            polled_space->Discover();
+        }
+    };
 
     std::vector<std::thread> threads;
     for (int i = 0; i < parameters_.parallelism; i++) {
@@ -113,7 +111,6 @@ unsigned long long Pyro::ExecuteInternal() {
         threads[i].join();
     }
 
-    SetProgress(100);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 

@@ -5,8 +5,7 @@
 
 namespace algos {
 
-PliBasedFDAlgorithm::PliBasedFDAlgorithm(std::vector<std::string_view> phase_names)
-    : FDAlgorithm(std::move(phase_names)) {
+PliBasedFDAlgorithm::PliBasedFDAlgorithm() : FDAlgorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
