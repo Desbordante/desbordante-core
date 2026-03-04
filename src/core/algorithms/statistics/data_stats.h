@@ -196,6 +196,14 @@ public:
     Statistic GetFirstCharFrequency(size_t index) const;
     // Returns the most frequent last character.
     Statistic GetLastCharFrequency(size_t index) const;
+    // Returns minimal number of whitespaces in a string column.
+    Statistic GetMinWhiteSpaces(size_t index) const;
+    // Returns maximal number of whitespaces in a string column.
+    Statistic GetMaxWhiteSpaces(size_t index) const;
+    // Returns number of true values in a bool column.
+    Statistic GetTrueCount(size_t index) const;
+    // Returns number of false values in a bool column.
+    Statistic GetFalseCount(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;

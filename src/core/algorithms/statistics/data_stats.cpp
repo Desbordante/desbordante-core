@@ -323,6 +323,48 @@ Statistic DataStats::GetNumberOfNegatives(size_t index) const {
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kLess);
 }
 
+Statistic DataStats::GetTrueCount(size_t index) const {
+    if (all_stats_[index].true_count.HasValue())
+        return all_stats_[index].true_count;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kBool) return {};
+
+    size_t count = 0;
+    auto const& data = col.GetData();
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        bool value = *reinterpret_cast<bool const*>(data[i]);
+        if (value) count++;
+    }
+
+    mo::IntType int_type;
+    return Statistic(int_type.MakeValue(count), &int_type, false);
+}
+
+Statistic DataStats::GetFalseCount(size_t index) const {
+    if (all_stats_[index].false_count.HasValue())
+        return all_stats_[index].false_count;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kBool) return {};
+
+    size_t count = 0;
+    auto const& data = col.GetData();
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        bool value = *reinterpret_cast<bool const*>(data[i]);
+        if (!value) count++;
+    }
+
+    mo::IntType int_type;
+    return Statistic(int_type.MakeValue(count), &int_type, false);
+}
+
 Statistic DataStats::GetSumOfSquares(size_t index) const {
     if (all_stats_[index].sum_of_squares.HasValue()) return all_stats_[index].sum_of_squares;
     mo::TypedColumnData const& col = col_data_[index];
@@ -667,6 +709,24 @@ Statistic DataStats::GetMaxNumberOfChars(size_t index) const {
     if (col.GetTypeId() != +mo::TypeId::kString) return {};
 
     return GetStringMaxOf(index, [](std::string const& line) { return line.size(); });
+}
+
+Statistic DataStats::GetMinWhiteSpaces(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    return GetStringMinOf(index, [](std::string const& line) {
+        return std::count(line.begin(), line.end(), ' ');
+    });
+}
+
+Statistic DataStats::GetMaxWhiteSpaces(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    return GetStringMaxOf(index, [](std::string const& line) {
+        return std::count(line.begin(), line.end(), ' ');
+    });
 }
 
 std::vector<std::string> DataStats::GetWordsInString(std::string line) {
@@ -1062,6 +1122,14 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].special_chars_count = GetNumberOfRowsWithSpecialChars(index);
             all_stats_[index].first_char_freq = GetFirstCharFrequency(index);
             all_stats_[index].last_char_freq = GetLastCharFrequency(index);
+            all_stats_[index].min_white_spaces = GetMinWhiteSpaces(index);
+            all_stats_[index].max_white_spaces = GetMaxWhiteSpaces(index);
+
+            if (type_id == +mo::TypeId::kBool) {
+                // boolean counts
+                all_stats_[index].true_count = GetTrueCount(index);
+                all_stats_[index].false_count = GetFalseCount(index);
+            }
         }
 
         all_stats_[index].is_categorical = IsCategorical(
