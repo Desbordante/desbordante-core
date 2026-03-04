@@ -12,7 +12,7 @@
 
 namespace algos {
 
-Fastod::Fastod() : Algorithm({}) {
+Fastod::Fastod() : Algorithm() {
     PrepareOptions();
 }
 

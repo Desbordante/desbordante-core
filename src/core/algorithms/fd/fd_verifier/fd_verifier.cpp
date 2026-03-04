@@ -12,7 +12,7 @@
 
 namespace algos::fd_verifier {
 
-FDVerifier::FDVerifier() : Algorithm({}) {
+FDVerifier::FDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
