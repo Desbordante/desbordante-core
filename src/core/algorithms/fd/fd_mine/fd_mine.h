@@ -38,9 +38,6 @@ private:
 
     void ResetStateFd() final;
     unsigned long long ExecuteInternal() override;
-
-public:
-    FdMine();
 };
 
 }  // namespace algos

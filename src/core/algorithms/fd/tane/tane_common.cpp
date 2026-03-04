@@ -19,7 +19,7 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+TaneCommon::TaneCommon() : PliBasedFDAlgorithm() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
@@ -144,7 +144,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
                   avg_partners);
     }
     auto start_time = std::chrono::system_clock::now();
-    double progress_step = 100.0 / (schema->GetNumColumns() + 1);
 
     // Initialize level 0
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
@@ -153,7 +152,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
     level0->Add(std::make_unique<model::LatticeVertex>(schema->CreateEmptyVertical()));
     model::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
     levels.push_back(std::move(level0));
-    AddProgress(progress_step);
 
     // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
@@ -211,7 +209,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
         }
     }
     levels.push_back(std::move(level1));
-    AddProgress(progress_step);
 
     unsigned int max_arity =
             max_lhs_ == std::numeric_limits<unsigned int>::max() ? max_lhs_ : max_lhs_ + 1;
@@ -233,10 +230,8 @@ unsigned long long TaneCommon::ExecuteInternal() {
 
         Prune(level);
         // TODO: printProfilingData
-        AddProgress(progress_step);
     }
 
-    SetProgress(100);
     std::chrono::milliseconds elapsed_milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
                                                                   start_time);

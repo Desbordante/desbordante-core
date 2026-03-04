@@ -16,7 +16,7 @@
 #include "core/model/table/typed_column_data.h"
 
 namespace algos {
-Cords::Cords() : FDAlgorithm({kFirstPhaseName, kSecondPhaseName}) {
+Cords::Cords() : FDAlgorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
@@ -165,9 +165,6 @@ unsigned long long Cords::ExecuteInternal() {
 
     auto start_time = std::chrono::system_clock::now();
 
-    SetProgress(kTotalProgressPercent);
-    ToNextProgressPhase();
-
     std::vector<bool> is_soft_or_trivial(column_count);
     for (model::ColumnIndex col_ind = 0; col_ind != column_count; ++col_ind)
         is_soft_or_trivial[col_ind] = IsSoftOrTrivial(col_ind, row_count);
@@ -213,7 +210,6 @@ unsigned long long Cords::ExecuteInternal() {
         }
     }
 
-    SetProgress(kTotalProgressPercent);
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     return elapsed_time.count();

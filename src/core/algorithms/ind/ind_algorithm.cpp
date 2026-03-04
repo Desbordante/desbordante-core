@@ -5,8 +5,7 @@
 
 namespace algos {
 
-INDAlgorithm::INDAlgorithm(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+INDAlgorithm::INDAlgorithm() : Algorithm() {
     RegisterOption(config::kTablesOpt(&input_tables_));
     MakeOptionsAvailable({config::kTablesOpt.GetName()});
 }

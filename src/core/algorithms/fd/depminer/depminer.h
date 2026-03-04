@@ -16,15 +16,11 @@ private:
     void LhsForColumn(std::unique_ptr<Column> const& column, std::vector<CMAXSet> const& cmax_sets);
     std::vector<CMAXSet> GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets);
 
-    double progress_step_ = 0;
     RelationalSchema const* schema_ = nullptr;
 
     void ResetStateFd() final {}
 
     unsigned long long ExecuteInternal() final;
-
-public:
-    Depminer();
 };
 
 }  // namespace algos

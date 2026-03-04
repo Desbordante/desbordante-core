@@ -20,7 +20,7 @@
 
 namespace algos::hyfd {
 
-HyFD::HyFD() : PliBasedFDAlgorithm({}) {
+HyFD::HyFD() : PliBasedFDAlgorithm() {
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
@@ -62,8 +62,6 @@ unsigned long long HyFD::ExecuteInternal() {
 
     auto fds = positive_cover_tree->FillFDs();
     RegisterFDs(std::move(fds), og_mapping);
-
-    SetProgress(kTotalProgressPercent);
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);

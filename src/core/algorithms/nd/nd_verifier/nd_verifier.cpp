@@ -26,7 +26,7 @@
 
 namespace algos::nd_verifier {
 
-NDVerifier::NDVerifier() : Algorithm({}) {
+NDVerifier::NDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }

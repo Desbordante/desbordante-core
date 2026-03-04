@@ -40,8 +40,6 @@ private:
     void ResetStateAr() final;
 
 public:
-    Apriori();
-
     std::list<std::set<std::string>> GetFrequentList() const override;
 };
 
