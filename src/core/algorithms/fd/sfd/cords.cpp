@@ -92,14 +92,14 @@ void Cords::LoadDataInternal() {
             model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 }
 
-bool Cords::DetectSFD(Sample const &smp) {
+bool Cords::DetectSFD(Sample const& smp) {
     return smp.GetConcatCardinality() <= max_diff_vals_proportion_ * smp.GetRowIndices().size() &&
            (smp.GetLhsCardinality() >=
             (1 - min_sfd_strength_measure_) * smp.GetConcatCardinality());
 }
 
 void Cords::SkewHandling(model::ColumnIndex col_i, model::ColumnIndex col_k,
-                         std::vector<model::TypedColumnData> const &data, Sample &smp) {
+                         std::vector<model::TypedColumnData> const& data, Sample& smp) {
     for (model::ColumnIndex col_ind : {col_i, col_k}) {
         if (handler_.GetColumnFrequencySum(col_ind) >=
             (1 - min_skew_threshold_) * data[col_ind].GetNumRows()) {
@@ -113,7 +113,7 @@ void Cords::SkewHandling(model::ColumnIndex col_i, model::ColumnIndex col_k,
     }
 }
 
-void Cords::Init(model::ColumnIndex columns, std::vector<model::TypedColumnData> const &data) {
+void Cords::Init(model::ColumnIndex columns, std::vector<model::TypedColumnData> const& data) {
     is_skewed_.resize(columns, false);
     domains_.resize(columns, 0);
     handler_.InitFrequencyHandler(data, columns, max_amount_of_categories_);
@@ -129,7 +129,7 @@ void Cords::RegisterCorrelation(model::ColumnIndex lhs_ind, model::ColumnIndex r
 }
 
 bool Cords::CheckCorrelation(model::ColumnIndex col_i, model::ColumnIndex col_k,
-                             std::vector<model::TypedColumnData> const &data, Sample &smp) {
+                             std::vector<model::TypedColumnData> const& data, Sample& smp) {
     SkewHandling(col_i, col_k, data, smp);
 
     ContingencyTable cont_table(col_i, col_k, domains_);
@@ -156,7 +156,7 @@ bool Cords::IsSoftOrTrivial(model::ColumnIndex col_ind, size_t row_count) {
 }
 
 unsigned long long Cords::ExecuteInternal() {
-    std::vector<model::TypedColumnData> const &data = typed_relation_->GetColumnData();
+    std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
 
     size_t row_count = data.front().GetNumRows();
     model::ColumnIndex column_count = data.size();

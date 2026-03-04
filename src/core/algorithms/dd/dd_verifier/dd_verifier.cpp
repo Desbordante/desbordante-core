@@ -32,10 +32,10 @@ double DDVerifier::GetError() const {
 }
 
 void DDVerifier::VisualizeHighlights() const {
-    for (auto const &hl : highlights_) {
-        auto const &col_data = typed_relation_->GetColumnData(hl.GetAttributeIndex());
-        RelationalSchema const *col_schema = typed_relation_->GetSchema();
-        auto const &pair = hl.GetPairRows();
+    for (auto const& hl : highlights_) {
+        auto const& col_data = typed_relation_->GetColumnData(hl.GetAttributeIndex());
+        RelationalSchema const* col_schema = typed_relation_->GetSchema();
+        auto const& pair = hl.GetPairRows();
         LOG_DEBUG("DD does not hold in {} in {} and {} rows with values {}, {}\n",
                   col_schema->GetColumn(hl.GetAttributeIndex())->GetName(), pair.first, pair.second,
                   col_data.GetDataAsString(pair.first), col_data.GetDataAsString(pair.second));
@@ -47,7 +47,7 @@ std::size_t DDVerifier::GetNumErrorRhs() const {
 }
 
 bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const {
-    model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
+    model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
     model::TypeId const type_id = column.GetTypeId();
 
     if (type_id == +model::TypeId::kUndefined) {
@@ -62,11 +62,11 @@ bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const
 }
 
 double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
-                                     std::pair<std::size_t, std::size_t> const &tuple_pair) const {
-    model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
-    std::byte const *first_value = column.GetValue(tuple_pair.first);
-    std::byte const *second_value = column.GetValue(tuple_pair.second);
-    auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
+                                     std::pair<std::size_t, std::size_t> const& tuple_pair) const {
+    model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
+    std::byte const* first_value = column.GetValue(tuple_pair.first);
+    std::byte const* second_value = column.GetValue(tuple_pair.second);
+    auto const& type = static_cast<model::IMetrizableType const&>(column.GetType());
     return type.Dist(first_value, second_value);
 }
 
@@ -76,7 +76,7 @@ std::vector<std::pair<std::size_t, std::size_t>> DDVerifier::GetRowsWhereLhsHold
         for (std::size_t j = i + 1; j < num_rows_; ++j) {
             bool all_lhs_hold = true;
             auto curr_constraint = dd_.left.cbegin();
-            for (auto const &column_index : lhs_column_indices_) {
+            for (auto const& column_index : lhs_column_indices_) {
                 double const diff = CalculateDistance(column_index, {i, j});
                 if (!curr_constraint->constraint.Contains(diff)) {
                     all_lhs_hold = false;
@@ -103,7 +103,7 @@ void DDVerifier::MakeExecuteOptsAvailable() {
 }
 
 void DDVerifier::CheckCorrectnessDd() const {
-    auto check_constraint = [](auto const &constraint) {
+    auto check_constraint = [](auto const& constraint) {
         if (constraint.constraint.upper_bound < constraint.constraint.lower_bound) {
             throw std::invalid_argument("Invalid constraint bounds for column: " +
                                         constraint.column_name);
@@ -124,8 +124,8 @@ unsigned long long DDVerifier::ExecuteInternal() {
     return elapsed_milliseconds;
 }
 
-void DDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs) {
-    for (auto const &pair : lhs) {
+void DDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs) {
+    for (auto const& pair : lhs) {
         auto curr_constraint = dd_.right.cbegin();
         bool is_error = false;
         for (auto const column_index : rhs_column_indices_) {
@@ -143,7 +143,7 @@ void DDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> c
 }
 
 void DDVerifier::VerifyDD() {
-    auto get_column_index = [&](auto const &constraint) {
+    auto get_column_index = [&](auto const& constraint) {
         return typed_relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
     };
     std::ranges::transform(dd_.left, std::back_inserter(lhs_column_indices_), get_column_index);
@@ -173,7 +173,7 @@ void DDVerifier::VerifyDD() {
     error_ = lhs.empty() ? 0 : static_cast<double>(num_error_rhs_) / lhs.size();
 }
 
-std::vector<Highlight> const &DDVerifier::GetHighlights() const {
+std::vector<Highlight> const& DDVerifier::GetHighlights() const {
     return highlights_;
 }
 
