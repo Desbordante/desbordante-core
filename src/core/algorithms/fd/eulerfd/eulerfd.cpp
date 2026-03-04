@@ -28,7 +28,7 @@ void EulerFD::LoadDataInternal() {
     schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
 
     for (size_t i = 0; i < number_of_attributes_; ++i) {
-        std::string const &column_name = input_table_->GetColumnName(static_cast<int>(i));
+        std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
         schema_->AppendColumn(column_name);
     }
 
@@ -44,9 +44,9 @@ void EulerFD::LoadDataInternal() {
         }
 
         tuples_.emplace_back(std::vector<size_t>(number_of_attributes_));
-        auto &current_tuple = tuples_.back();
+        auto& current_tuple = tuples_.back();
         for (size_t i = 0; i < number_of_attributes_; i++) {
-            auto &values = columns[i];
+            auto& values = columns[i];
             auto it = values.find(line[i]);
             if (it != values.end()) {
                 current_tuple[i] = it->second;
@@ -100,9 +100,9 @@ void EulerFD::SaveAnswer() {
     for (size_t rhs_attr = 0; rhs_attr < number_of_attributes_; rhs_attr++) {
         // Then tree filling we use inverse indexes, so to get correct tree we inverse again
         size_t inv_rhs_attr = inv_indexes[rhs_attr];
-        auto &tree = positive_cover_[inv_rhs_attr];
+        auto& tree = positive_cover_[inv_rhs_attr];
         auto rhs = *schema_->GetColumn(rhs_attr);
-        tree.ForEach([&](Bitset const &lhs_attr) {
+        tree.ForEach([&](Bitset const& lhs_attr) {
             auto lhs = schema_->GetVertical(ChangeAttributesOrder(lhs_attr, attribute_indexes_));
             RegisterFd(lhs, rhs, schema_);
         });
@@ -141,7 +141,7 @@ void EulerFD::BuildPartition() {
         std::unordered_map<size_t, std::vector<size_t>> values;
         for (size_t tuple_num = 0; tuple_num < number_of_tuples_; tuple_num++) {
             auto value = tuples_[tuple_num][attr_num];
-            auto &similar_values = values[value];
+            auto& similar_values = values[value];
             similar_values.push_back(tuple_num);
         }
         if (values.size() == 1) {
@@ -152,7 +152,7 @@ void EulerFD::BuildPartition() {
             // This means that the sizes of all clusters are 1, so we can pass the cycle below
             continue;
         } else {
-            for (auto &&[_, cluster] : values) {
+            for (auto&& [_, cluster] : values) {
                 if (cluster.size() > 1) {
                     clusters_.emplace_back(std::move(cluster), rand_function_);
                 }
@@ -171,10 +171,10 @@ EulerFD::Bitset EulerFD::BuildAgreeSet(size_t t1, size_t t2) const {
     return equal_attr;
 }
 
-double EulerFD::SamplingInCluster(Cluster *cluster) {
+double EulerFD::SamplingInCluster(Cluster* cluster) {
     return cluster->Sample([this](size_t t1, size_t t2) -> size_t {
         Bitset agree_set = BuildAgreeSet(t1, t2);
-        auto &&[_, result] = invalids_.insert(agree_set);
+        auto&& [_, result] = invalids_.insert(agree_set);
 
         // Check that this is a new FD
         if (result) {
@@ -192,7 +192,7 @@ void EulerFD::Sampling() {
         // We put all clusters in mlfq, even if effective coefficient was 0
         is_first_sample_ = false;
 
-        for (auto &cluster : clusters_) {
+        for (auto& cluster : clusters_) {
             double eff = SamplingInCluster(&cluster);
             mlfq_.Add(&cluster, eff, true);
         }
@@ -207,7 +207,7 @@ void EulerFD::Sampling() {
     // Sampling in first queues of mlfq
     new_invalids_.clear();
     while (mlfq_.GetEffectiveSize() > 0) {
-        Cluster *cluster = mlfq_.Get();
+        Cluster* cluster = mlfq_.Get();
         SamplingInCluster(cluster);
         mlfq_.Add(cluster, cluster->GetAverage());
     }
@@ -218,7 +218,7 @@ void EulerFD::Sampling() {
 
     // Sampling in last queues (it is priority queues) of mlfq
     while (mlfq_.GetLastQueueSize() > 0 && mlfq_.MaxEffectInLastQueue() >= effective_threshold_) {
-        Cluster *cluster = mlfq_.Get();
+        Cluster* cluster = mlfq_.Get();
         SamplingInCluster(cluster);
         mlfq_.AddAtLast(cluster);
     }
@@ -237,8 +237,8 @@ bool EulerFD::IsPCoverGrowthSmall() const {
 }
 
 std::vector<size_t> EulerFD::GetAttributesSortedByFrequency(
-        std::vector<Bitset> const &neg_cover_vector) {
-    for (auto const &bitset : neg_cover_vector) {
+        std::vector<Bitset> const& neg_cover_vector) {
+    for (auto const& bitset : neg_cover_vector) {
         for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
             attribute_frequencies_[attr_num] += bitset[attr_num];
         }
@@ -255,8 +255,8 @@ std::vector<size_t> EulerFD::GetAttributesSortedByFrequency(
     return attr_indices;
 }
 
-EulerFD::Bitset EulerFD::ChangeAttributesOrder(Bitset const &initial_bitset,
-                                               std::vector<size_t> const &new_order) {
+EulerFD::Bitset EulerFD::ChangeAttributesOrder(Bitset const& initial_bitset,
+                                               std::vector<size_t> const& new_order) {
     size_t bitset_size = initial_bitset.size();
     Bitset modified_bitset(bitset_size);
     for (size_t bit = 0; bit < bitset_size; ++bit) {
@@ -267,7 +267,7 @@ EulerFD::Bitset EulerFD::ChangeAttributesOrder(Bitset const &initial_bitset,
     return modified_bitset;
 }
 
-void EulerFD::AddInvalidAtTree(SearchTreeEulerFD &tree, Bitset const &invalid) {
+void EulerFD::AddInvalidAtTree(SearchTreeEulerFD& tree, Bitset const& invalid) {
     if (tree.ContainsAnySupersetOf(invalid)) {
         return;
     }
@@ -275,36 +275,36 @@ void EulerFD::AddInvalidAtTree(SearchTreeEulerFD &tree, Bitset const &invalid) {
     tree.Add(invalid);
 }
 
-std::unordered_set<EulerFD::Bitset> EulerFD::RemoveGeneralizations(SearchTreeEulerFD &tree,
-                                                                   Bitset const &invalid) {
+std::unordered_set<EulerFD::Bitset> EulerFD::RemoveGeneralizations(SearchTreeEulerFD& tree,
+                                                                   Bitset const& invalid) {
     // Generalizations is subsets
     std::unordered_set<Bitset> remove;
-    tree.ForEachSubset(invalid, [&remove](Bitset const &sub) { remove.insert(sub); });
-    for (auto &sub : remove) {
+    tree.ForEachSubset(invalid, [&remove](Bitset const& sub) { remove.insert(sub); });
+    for (auto& sub : remove) {
         tree.Remove(sub);
     }
     return remove;
 }
 
 std::vector<EulerFD::Bitset> EulerFD::CreateNegativeCover(
-        size_t rhs, std::vector<Bitset> const &neg_cover_vector) {
-    auto &tree = negative_cover_[rhs];
-    for (auto &invalid : neg_cover_vector) {
+        size_t rhs, std::vector<Bitset> const& neg_cover_vector) {
+    auto& tree = negative_cover_[rhs];
+    for (auto& invalid : neg_cover_vector) {
         if (!invalid[rhs]) {
             AddInvalidAtTree(tree, invalid);
         }
     }
 
     std::vector<Bitset> neg_cover_rhs;
-    tree.ForEach([&neg_cover_rhs](Bitset const &invalid) { neg_cover_rhs.push_back(invalid); });
+    tree.ForEach([&neg_cover_rhs](Bitset const& invalid) { neg_cover_rhs.push_back(invalid); });
     return neg_cover_rhs;
 }
 
-size_t EulerFD::Invert(size_t rhs, std::vector<Bitset> const &neg) {
-    auto &tree = positive_cover_[rhs];
-    for (auto &invalid : neg) {
+size_t EulerFD::Invert(size_t rhs, std::vector<Bitset> const& neg) {
+    auto& tree = positive_cover_[rhs];
+    for (auto& invalid : neg) {
         auto removeds = RemoveGeneralizations(tree, invalid);
-        for (auto &removed : removeds) {
+        for (auto& removed : removeds) {
             for (size_t i = 0; i < number_of_attributes_; i++) {
                 if (i == rhs || invalid[i] || constant_columns_[attribute_indexes_[i]]) {
                     continue;
@@ -346,13 +346,13 @@ size_t EulerFD::GenerateResults() {
     }
 
     // Change attribute order, in first index set with the largest number of 1
-    for (auto &neg_cover_el : neg_cover_vector) {
+    for (auto& neg_cover_el : neg_cover_vector) {
         neg_cover_el = ChangeAttributesOrder(neg_cover_el, inv_indexes);
     }
 
     // Sorting all non fd by number of 1
     std::sort(neg_cover_vector.begin(), neg_cover_vector.end(),
-              [](Bitset const &left, Bitset const &right) { return left.count() > right.count(); });
+              [](Bitset const& left, Bitset const& right) { return left.count() > right.count(); });
 
     // Creating ncover and pcover trees for each rhs
     size_t fd_num = 0;
@@ -364,7 +364,7 @@ size_t EulerFD::GenerateResults() {
         size_t real_rhs = inv_indexes[rhs];
         auto neg = CreateNegativeCover(real_rhs, neg_cover_vector);
         // Sorting all non fd by number of 1
-        std::sort(neg.begin(), neg.end(), [](Bitset const &left, Bitset const &right) {
+        std::sort(neg.begin(), neg.end(), [](Bitset const& left, Bitset const& right) {
             return left.count() > right.count();
         });
         fd_num += Invert(real_rhs, neg);

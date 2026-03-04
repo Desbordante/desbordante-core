@@ -52,32 +52,32 @@ private:
 
     unsigned long long ExecuteInternal() override;
 
-    void Init(model::ColumnIndex columns, std::vector<model::TypedColumnData> const &data);
+    void Init(model::ColumnIndex columns, std::vector<model::TypedColumnData> const& data);
 
-    bool DetectSFD(Sample const &smp);
+    bool DetectSFD(Sample const& smp);
 
     // bool DetectAndRegisterSFD(Sample const &smp);
 
     void SkewHandling(model::ColumnIndex col_i, model::ColumnIndex col_k,
-                      std::vector<model::TypedColumnData> const &data, Sample &smp);
+                      std::vector<model::TypedColumnData> const& data, Sample& smp);
 
     bool IsSoftOrTrivial(model::ColumnIndex col_ind, size_t row_count);
 
     bool CheckCorrelation(model::ColumnIndex col_i, model::ColumnIndex col_k,
-                          std::vector<model::TypedColumnData> const &data, Sample &smp);
+                          std::vector<model::TypedColumnData> const& data, Sample& smp);
 
     void RegisterCorrelation(model::ColumnIndex lhs_ind, model::ColumnIndex rhs_ind);
 
 public:
-    std::vector<Column> const &GetSoftKeys() const noexcept {
+    std::vector<Column> const& GetSoftKeys() const noexcept {
         return soft_keys_;
     }
 
-    std::vector<Column> const &GetTrivialColumns() const noexcept {
+    std::vector<Column> const& GetTrivialColumns() const noexcept {
         return trivial_columns_;
     }
 
-    std::list<Correlation> const &GetCorrelations() const noexcept {
+    std::list<Correlation> const& GetCorrelations() const noexcept {
         return correlations_collection_.AsList();
     }
 

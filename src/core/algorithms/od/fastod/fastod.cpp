@@ -173,7 +173,7 @@ void Fastod::ComputeODs() {
                         AddToResult(std::move(od));
                         CCPut(context, fastod::DeleteAttribute(cc, attr));
 
-                        const AttributeSet diff = fastod::Difference(schema_, context);
+                        AttributeSet const diff = fastod::Difference(schema_, context);
 
                         if (diff.Any()) {
                             CCPut(context, cc & (~diff));
@@ -227,7 +227,7 @@ void Fastod::CalculateNextLevel() {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
 
-                const AttributeSet candidate = fastod::AddAttribute(
+                AttributeSet const candidate = fastod::AddAttribute(
                         fastod::AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
                 candidate.Iterate([this, &candidate, &create_context](model::ColumnIndex attr) {
