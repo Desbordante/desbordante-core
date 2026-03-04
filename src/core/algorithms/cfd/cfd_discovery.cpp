@@ -14,14 +14,11 @@
 
 namespace algos::cfd {
 
-CFDDiscovery::CFDDiscovery(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+CFDDiscovery::CFDDiscovery() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kTable, kCfdColumnsNumber, kCfdTuplesNumber});
 }
-
-CFDDiscovery::CFDDiscovery() : CFDDiscovery({kDefaultPhaseName}) {}
 
 void CFDDiscovery::LoadDataInternal() {
     relation_ = CFDRelationData::CreateFrom(*input_table_, columns_number_, tuples_number_);

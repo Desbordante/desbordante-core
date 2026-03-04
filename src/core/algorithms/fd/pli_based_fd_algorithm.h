@@ -27,7 +27,7 @@ protected:
     }
 
 public:
-    PliBasedFDAlgorithm(std::vector<std::string_view> phase_names);
+    PliBasedFDAlgorithm();
 };
 
 }  // namespace algos

@@ -16,7 +16,7 @@ namespace algos::afd_metric_calculator {
 
 using Cluster = model::PositionListIndex::Cluster;
 
-AFDMetricCalculator::AFDMetricCalculator() : Algorithm({}) {
+AFDMetricCalculator::AFDMetricCalculator() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }

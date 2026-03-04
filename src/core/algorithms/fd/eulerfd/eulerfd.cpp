@@ -2,7 +2,7 @@
 
 namespace algos {
 
-EulerFD::EulerFD() : FDAlgorithm({kDefaultPhaseName}), mlfq_(kQueuesNumber) {
+EulerFD::EulerFD() : FDAlgorithm(), mlfq_(kQueuesNumber) {
     last_ncover_ratios_.fill(1);
     last_pcover_ratios_.fill(1);
     RegisterOption(config::kCustomRandomFlagOpt(&custom_random_opt_));

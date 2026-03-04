@@ -31,14 +31,9 @@ protected:
     util::PrimitiveCollection<model::UCC> ucc_collection_;
     config::EqNullsType is_null_equal_null_{};
 
-    // Pass this value as phase_names to the constructor if your algorithm has only one progress bar
-    // phase.
-    // If your algorithm has no progress bar implemented, pass an empty vector.
-    constexpr static std::string_view kDefaultPhaseName = "UCC mining";
-
-    explicit UCCAlgorithm(std::vector<std::string_view> phase_names);
-
 public:
+    UCCAlgorithm();
+
     std::list<model::UCC> const& UCCList() const noexcept {
         return ucc_collection_.AsList();
     }

@@ -45,7 +45,7 @@ auto CreateSchema(config::InputTable const& table) {
 }  // namespace
 
 namespace algos::md {
-MDVerifier::MDVerifier() : Algorithm({}) {
+MDVerifier::MDVerifier() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kLeftTable, kRightTable});

@@ -16,7 +16,7 @@
 
 namespace algos::order {
 
-Order::Order() : Algorithm({}) {
+Order::Order() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }

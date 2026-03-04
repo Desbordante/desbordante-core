@@ -18,7 +18,7 @@
 
 namespace algos {
 
-GfdHandler::GfdHandler() : Algorithm({}) {
+GfdHandler::GfdHandler() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::names::kGfdData, config::names::kGraphData});
 };
