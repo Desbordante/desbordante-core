@@ -468,4 +468,46 @@ TEST(TestDataStats, MultipleExecutionConsistentResults) {
     }
 }
 
+TEST(TestDataStats, TestGetMinWhiteSpaces) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    auto stat = stats.GetMinWhiteSpaces(11);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 0);
+}
+
+TEST(TestDataStats, TestGetMaxWhiteSpaces) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    auto stat = stats.GetMaxWhiteSpaces(11);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 13);
+}
+
+TEST(TestDataStats, TestGetTrueCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestBool);
+    algos::DataStats &stats = *stats_ptr;
+
+    stats.Execute(); 
+
+    auto stat = stats.GetTrueCount(0); 
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 3);
+}
+
+TEST(TestDataStats, TestGetFalseCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestBool);
+    algos::DataStats &stats = *stats_ptr;
+
+    stats.Execute();
+
+    auto stat = stats.GetFalseCount(0);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 2);
+}
+
 };  // namespace tests

@@ -125,6 +125,10 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(num_words, "num_words");
     try_add_stat(num_entirely_uppercase, "num_entirely_uppercase");
     try_add_stat(num_entirely_lowercase, "num_entirely_lowercase");
+    try_add_stat(min_white_spaces, "min_white_spaces");
+    try_add_stat(max_white_spaces, "max_white_spaces");
+    try_add_stat(true_count, "true_count");
+    try_add_stat(false_count, "false_count");
 
     return res;
 }
