@@ -17,7 +17,7 @@
 
 namespace algos::dc {
 
-FastADC::FastADC() : Algorithm({}) {
+FastADC::FastADC() : Algorithm() {
     pred_index_provider_ = std::make_shared<PredicateIndexProvider>();
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});

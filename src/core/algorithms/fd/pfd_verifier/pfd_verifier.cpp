@@ -58,7 +58,7 @@ std::shared_ptr<model::PLI const> PFDVerifier::CalculatePLI(
     return pli;
 }
 
-PFDVerifier::PFDVerifier() : Algorithm({}) {
+PFDVerifier::PFDVerifier() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kTable, kEqualNulls});

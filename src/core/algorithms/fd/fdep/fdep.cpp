@@ -13,7 +13,7 @@
 
 namespace algos {
 
-FDep::FDep() : FDAlgorithm({kDefaultPhaseName}) {
+FDep::FDep() : FDAlgorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }

@@ -32,8 +32,6 @@ protected:
     std::shared_ptr<CFDRelationData> relation_;
 
 public:
-    constexpr static std::string_view kDefaultPhaseName = "CFD mining";
-    explicit CFDDiscovery(std::vector<std::string_view> phase_names);
     explicit CFDDiscovery();
     void LoadDataInternal() final;
     int NrCfds() const;

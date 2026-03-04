@@ -69,9 +69,6 @@ private:
     void RegisterCorrelation(model::ColumnIndex lhs_ind, model::ColumnIndex rhs_ind);
 
 public:
-    constexpr static std::string_view kFirstPhaseName = "Calculating values frequencies";
-    constexpr static std::string_view kSecondPhaseName = "SFD and correlations mining";
-
     std::vector<Column> const &GetSoftKeys() const noexcept {
         return soft_keys_;
     }

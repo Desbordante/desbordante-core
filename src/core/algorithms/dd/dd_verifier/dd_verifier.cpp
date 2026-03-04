@@ -15,7 +15,7 @@
 #include "core/util/timed_invoke.h"
 
 namespace algos::dd {
-DDVerifier::DDVerifier() : Algorithm({}) {
+DDVerifier::DDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
