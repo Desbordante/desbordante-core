@@ -21,8 +21,8 @@ namespace tane {
 
 // TaneCommon::TaneCommon() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 
-TaneCommon::TaneCommon(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : PliBasedAFDAlgorithm({kDefaultPhaseName}, relation_manager) {
+TaneCommon::TaneCommon()
+    : PliBasedAFDAlgorithm({kDefaultPhaseName}) {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
@@ -34,9 +34,8 @@ double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
 // void TaneCommon::RegisterAndCountFd(Vertical lhs, Column const* rhs) {
 //     RegisterFd(std::move(lhs), *rhs, relation_->GetSharedPtrSchema());
 
-void TaneCommon::RegisterAndCountFd(Vertical const& lhs, Column const* rhs) {
-    dynamic_bitset<> lhs_bitset = lhs.GetColumnIndices();
-    PliBasedAFDAlgorithm::RegisterAfd(lhs, *rhs, relation_->GetSharedPtrSchema());
+void TaneCommon::RegisterAndCountFd(Vertical lhs, Column const* rhs) {
+    RegisterAfd(std::move(lhs), *rhs, relation_->GetSharedPtrSchema());
 }
 
 void TaneCommon::RegisterAndCountAfd(Vertical const& lhs, Column const* rhs,
@@ -186,8 +185,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
         double fd_error = CalculateZeroAryFdError(&column_data);
         if (fd_error <= max_fd_error_) {  // TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
-            // RegisterAndCountFd(schema->CreateEmptyVertical(), column.get());
-            RegisterAndCountAfd(*schema->empty_vertical_, column.get(), fd_error);
+            RegisterAndCountAfd(schema->CreateEmptyVertical(), column.get(), fd_error);
 
             vertex->GetRhsCandidates().set(column->GetIndex(), false);
             if (fd_error == 0) {
@@ -260,7 +258,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
     LOG_DEBUG("Time: {} milliseconds", apriori_millis);
     LOG_DEBUG("Intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
-    LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
+    LOG_DEBUG("Total FD count: {}", afd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
 
     return apriori_millis;

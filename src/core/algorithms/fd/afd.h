@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "algorithms/fd/fd.h"
+#include "core/algorithms/fd/fd.h"
 
 class AFD : public FD {
 private:

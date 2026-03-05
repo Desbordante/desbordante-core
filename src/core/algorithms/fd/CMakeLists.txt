@@ -42,3 +42,26 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd Boost::headers)
+
+# --- AFD ---
+set(NAME afd)
+desbordante_add_lib(NAME OBJECT)
+target_sources(
+    ${NAME}
+    PRIVATE afd_algorithm.cpp  # Added afd_algorithm.cpp here
+    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
+)
+target_link_libraries(
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos Boost::headers
+)
+
+
+# --- PliBasedAFD ---
+set(NAME afd.pli)
+desbordante_add_lib(NAME OBJECT)
+target_sources(
+    ${NAME}
+    PRIVATE pli_based_afd_algorithm.cpp
+    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
+)
+target_link_libraries(${NAME} PRIVATE ${DESBORDANTE_PREFIX}::afd Boost::headers)

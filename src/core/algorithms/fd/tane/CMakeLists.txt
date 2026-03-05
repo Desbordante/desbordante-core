@@ -7,7 +7,7 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
-    ${NAME} PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::fd::pli Boost::headers
+    ${NAME} PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::afd::pli Boost::headers
 )
 
 # --- Tane ---
@@ -19,7 +19,7 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::tane::common ${DESBORDANTE_PREFIX}::fd::pli
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::tane::common ${DESBORDANTE_PREFIX}::afd::pli
                     better-enums Boost::headers
 )
 
@@ -32,6 +32,6 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::tane::common ${DESBORDANTE_PREFIX}::fd::pli
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::tane::common ${DESBORDANTE_PREFIX}::afd::pli
                     better-enums Boost::headers
 )

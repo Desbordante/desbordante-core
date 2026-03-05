@@ -2,43 +2,19 @@
 
 #include <optional>
 
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "afd_algorithm.h"
-#include "model/table/column_layout_relation_data.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/algorithms/fd/afd_algorithm.h"
+#include "core/model/table/column_layout_relation_data.h"
 
 namespace algos {
 
 class PliBasedAFDAlgorithm : public AFDAlgorithm {
-public:
-    class ColumnLayoutRelationDataManager {
-    private:
-        config::InputTable* input_table_;
-        config::EqNullsType* is_null_equal_null_;
-        std::shared_ptr<ColumnLayoutRelationData>* relation_;
-
-    public:
-        ColumnLayoutRelationDataManager(
-                config::InputTable* input_table, config::EqNullsType* is_null_equal_null,
-                std::shared_ptr<ColumnLayoutRelationData>* relation_ptr) noexcept
-            : input_table_(input_table),
-              is_null_equal_null_(is_null_equal_null),
-              relation_(relation_ptr) {}
-
-        std::shared_ptr<ColumnLayoutRelationData> GetRelation() const {
-            if (*relation_ == nullptr)
-                *relation_ =
-                        ColumnLayoutRelationData::CreateFrom(**input_table_, *is_null_equal_null_);
-            return *relation_;
-        }
-    };
-
 private:
     config::InputTable input_table_;
     config::EqNullsType is_null_equal_null_;
-    ColumnLayoutRelationDataManager const relation_manager_;
 
-    void RegisterRelationManagerOptions();
+    void RegisterOptions();
 
 protected:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
@@ -53,8 +29,7 @@ protected:
     }
 
 public:
-    PliBasedAFDAlgorithm(std::vector<std::string_view> phase_names,
-                        std::optional<ColumnLayoutRelationDataManager> relation_manager);
+    PliBasedAFDAlgorithm(std::vector<std::string_view> phase_names);
 };
 
 }  // namespace algos

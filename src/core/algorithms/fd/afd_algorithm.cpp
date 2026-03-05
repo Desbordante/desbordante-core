@@ -1,10 +1,10 @@
-#include "afd_algorithm.h"
+#include "core/algorithms/fd/afd_algorithm.h"
 
 #include <map>
 #include <thread>
 #include <vector>
 
-#include "config/max_lhs/option.h"
+#include "core/config/max_lhs/option.h"
 
 namespace algos {
 
