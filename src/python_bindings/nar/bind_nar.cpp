@@ -163,7 +163,7 @@ void BindNar(py::module_& main_module) {
                         return nar;
                     }));
 
-    BindPrimitive<DES>(nar_module, &NARAlgorithm::GetNARVector, "NarAlgorithm", "get_nars", {"DES"},
-                       pybind11::return_value_policy::copy);
+    BindPrimitive<DES>(nar_module, &NARAlgorithm::GetNARVector, "NarAlgorithm", "get_nars",
+                       {"DES"});
 }
 }  // namespace python_bindings

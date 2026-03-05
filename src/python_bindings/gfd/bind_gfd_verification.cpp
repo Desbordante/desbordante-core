@@ -20,6 +20,6 @@ void BindGfdVerification(pybind11::module_& main_module) {
 
     BindPrimitive<GfdValidator, EGfdValidator, NaiveGfdValidator>(
             gfd_module, &GfdHandler::GfdList, "GfdAlgorithm", "get_gfds",
-            {"GfdValid", "EGfdValid", "NaiveGfdValid"}, py::return_value_policy::copy);
+            {"GfdValid", "EGfdValid", "NaiveGfdValid"});
 }
 }  // namespace python_bindings
