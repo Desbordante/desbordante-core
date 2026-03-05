@@ -43,7 +43,7 @@ ClueSet BuildClueSet(std::vector<PliShard> const& pliShards, PredicatePacks cons
             }
 
             for (auto const& [clue, count] : partial_clue_set) {
-                auto [it, inserted] = clue_set.try_emplace(clue, count);
+                auto [it, inserted] = clue_set.emplace(clue, count);
                 if (!inserted) {
                     it->second += count;
                 }
@@ -130,7 +130,7 @@ ClueSet BuildClueSetParallel(std::vector<PliShard> const& pliShards, PredicatePa
                 }
 
                 for (auto const& [clue, count] : buffers.task_clue_set) {
-                    auto [it, inserted] = buffers.thread_clue_set.try_emplace(clue, count);
+                    auto [it, inserted] = buffers.thread_clue_set.emplace(clue, count);
                     if (!inserted) {
                         it->second += count;
                     }
@@ -141,7 +141,7 @@ ClueSet BuildClueSetParallel(std::vector<PliShard> const& pliShards, PredicatePa
             [&global_clue_set, &global_mutex](ThreadLocalBuffers&& buffers) {
                 std::lock_guard<std::mutex> lock(global_mutex);
                 for (auto const& [clue, count] : buffers.thread_clue_set) {
-                    auto [it, inserted] = global_clue_set.try_emplace(clue, count);
+                    auto [it, inserted] = global_clue_set.emplace(clue, count);
                     if (!inserted) {
                         it->second += count;
                     }
