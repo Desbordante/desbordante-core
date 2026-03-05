@@ -1,8 +1,17 @@
 #pragma once
 
 #include <bitset>
+#include <functional>
 #include <unordered_map>
 #include <vector>
+
+#include <boost/version.hpp>
+
+#define UNORDERED_FLAT_MAP_AVAILABLE (BOOST_VERSION >= 108100)
+
+#if UNORDERED_FLAT_MAP_AVAILABLE
+#include <boost/unordered/unordered_flat_map.hpp>
+#endif
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/model/types/bitset.h"
@@ -14,11 +23,15 @@ using Clue = model::Bitset<kPredicateBits>;
 
 struct ClueHash {
     std::size_t operator()(Clue const& clue) const noexcept {
-        return clue.to_ullong();
+        return std::hash<Clue>{}(clue);
     }
 };
 
+#if UNORDERED_FLAT_MAP_AVAILABLE
+using ClueSet = boost::unordered::unordered_flat_map<Clue, int64_t, ClueHash>;
+#else
 using ClueSet = std::unordered_map<Clue, int64_t, ClueHash>;
+#endif
 
 template <typename... Vectors>
 ClueSet AccumulateClues(ClueSet& clue_set, Vectors const&... vectors) {
@@ -30,7 +43,7 @@ ClueSet AccumulateClues(ClueSet& clue_set, Vectors const&... vectors) {
             if (clue.none()) {
                 ++clue_zero_count;
             } else {
-                auto [it, inserted] = clue_set.try_emplace(clue, 1);
+                auto [it, inserted] = clue_set.emplace(clue, 1);
                 if (!inserted) it->second++;
             }
         }
