@@ -36,21 +36,21 @@ void BindSFD(py::module_& main_module) {
             .def("GetRhsIndex", &Correlation::GetRhsIndex)
             .def("GetLhsName", &Correlation::GetLhsName)
             .def("GetRhsName", &Correlation::GetRhsName)
-            .def("__eq__", [](Correlation const& corr1, Correlation const& corr2) {
-                py::tuple corr1_state_tuple = SerializeCorrelation(corr1);
-                py::tuple corr2_state_tuple = SerializeCorrelation(corr2);
+            .def("__eq__",
+                 [](Correlation const& corr1, Correlation const& corr2) {
+                     py::tuple corr1_state_tuple = SerializeCorrelation(corr1);
+                     py::tuple corr2_state_tuple = SerializeCorrelation(corr2);
 
-                return corr1_state_tuple.equal(corr2_state_tuple);
-            })
-            .def("__hash__", [](Correlation const& corr) {
-                py::tuple corr_state_tuple = SerializeCorrelation(corr);
-                return py::hash(corr_state_tuple);
-            })
+                     return corr1_state_tuple.equal(corr2_state_tuple);
+                 })
+            .def("__hash__",
+                 [](Correlation const& corr) {
+                     py::tuple corr_state_tuple = SerializeCorrelation(corr);
+                     return py::hash(corr_state_tuple);
+                 })
             .def(py::pickle(
                     // __getstate__
-                    [](Correlation const& corr) {
-                        return SerializeCorrelation(corr);
-                    },
+                    [](Correlation const& corr) { return SerializeCorrelation(corr); },
                     // __setstate__
                     [](py::tuple t) {
                         if (t.size() != 2) {
