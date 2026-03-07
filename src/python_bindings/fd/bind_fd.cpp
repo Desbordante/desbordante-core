@@ -21,10 +21,12 @@ namespace py = pybind11;
 
 using FdList = py::typing::List<model::FunctionalDependency>;
 using PySelectionPairs = py::typing::Iterable<py::typing::Tuple<py::int_, py::int_>>;
+using PyLhsLists = py::typing::Iterable<py::typing::Iterable<py::int_>>;
 
 #define FD_CLASS_NAME "FunctionalDependency"
 #define ATTRIBUTE_CLASS_NAME "Attribute"
 #define MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME "MultiAttrRhsFdStorage"
+#define SINGLE_ATTR_RHS_FD_STORAGE_CLASS_NAME "SingleAttrRhsFdStorage"
 
 template <typename ElementType>
 py::tuple VectorToTuple(std::vector<ElementType> vec) {
@@ -129,6 +131,29 @@ FdList FdsToList(algos::MultiAttrRhsFdStorage const& storage) {
     return fd_list;
 }
 
+FdList FdsToList(algos::SingleAttrRhsFdStorage const& storage) {
+    // The container would be allocated twice if we created it on
+    // core's side: once there, and the other time for the copy.
+    std::size_t fds_total = 0;
+    for (std::deque<algos::SingleAttrRhsStrippedFd> attr_fds : storage.GetStripped()) {
+        fds_total += attr_fds.size();
+    }
+    FdList fd_list{fds_total};
+    Py_ssize_t fd_index = 0;
+    model::Index rhs_index = 0;
+    for (std::deque<algos::SingleAttrRhsStrippedFd> const& attr_fds : storage.GetStripped()) {
+        for (algos::SingleAttrRhsStrippedFd const& stripped_fd : attr_fds) {
+            py::object py_fd = py::cast(stripped_fd.ToFd(storage.GetTableHeader(), rhs_index));
+            // If not released, the refcount of the object will reach 0 after exiting the scope,
+            // triggering UB on access.
+            PyList_SET_ITEM(fd_list.ptr(), fd_index, py_fd.release().ptr());
+            ++fd_index;
+        }
+        ++rhs_index;
+    }
+    return fd_list;
+}
+
 std::deque<algos::MultiAttrRhsStrippedFd> StrippedFdsFromIntPairs(PySelectionPairs int_pairs,
                                                                   std::size_t col_number) {
     std::deque<algos::MultiAttrRhsStrippedFd> stripped_fds;
@@ -151,6 +176,27 @@ std::deque<algos::MultiAttrRhsStrippedFd> StrippedFdsFromIntPairs(PySelectionPai
         stripped_fds.emplace_back(python_bindings::IntToBitset(lhs, col_number),
                                   python_bindings::IntToBitset(rhs, col_number));
     }
+    return stripped_fds;
+}
+
+std::vector<std::deque<algos::SingleAttrRhsStrippedFd>> StrippedFdsFromLhsLists(
+        PyLhsLists lhs_lists, std::size_t col_number) {
+    std::vector<std::deque<algos::SingleAttrRhsStrippedFd>> stripped_fds(col_number);
+    // We can't really trust what is passed to us from Python, so better rely on C++ structures as
+    // much as possible and never call the same Python method twice.
+    // And if that's what we're doing, might as well relax the type requirement to just Iterable.
+    auto it = lhs_lists.begin();
+    for (std::deque<algos::SingleAttrRhsStrippedFd>& attr_stripped_fds : stripped_fds) {
+        if (it == lhs_lists.end()) throw std::runtime_error("FD List has too few elements!");
+        for (py::handle lhs : *it) {
+            if (!py::isinstance<py::int_>(lhs))
+                throw std::runtime_error("LHS column selection must be an int!");
+            attr_stripped_fds.emplace_back(
+                    python_bindings::IntToBitset(py::cast<py::int_>(lhs), col_number));
+        }
+        ++it;
+    }
+    if (it != lhs_lists.end()) throw std::runtime_error("FD List has too many elements!");
     return stripped_fds;
 }
 
@@ -335,6 +381,69 @@ void BindFd(py::module_& main_module) {
                              StrippedFdsFromIntPairs(selection_pairs, col_number)};
                  }),
                  "table_name"_a, "column_names"_a, "selection_pairs"_a);
+    py::class_<SingleAttrRhsFdStorage, SingleAttrRhsFdStorage::OwningPointer>(
+            fd_module, SINGLE_ATTR_RHS_FD_STORAGE_CLASS_NAME)
+            .def("to_fds", static_cast<FdList (*)(SingleAttrRhsFdStorage const&)>(FdsToList))
+            .def(
+                    "__iter__",
+                    [](SingleAttrRhsFdStorage const& storage) {
+                        return py::make_iterator(storage.begin(), storage.end());
+                    },
+                    py::keep_alive<0, 1>())
+            .def(py::pickle(
+                    // __getstate__
+                    [](SingleAttrRhsFdStorage const& storage) {
+                        auto const& stripped_fds = storage.GetStripped();
+                        model::TableHeader const& header = storage.GetTableHeader();
+                        py::list py_stripped_fds{stripped_fds.size()};
+                        Py_ssize_t rhs_index = 0;
+                        for (std::deque<SingleAttrRhsStrippedFd> const& stripped_fds_attr :
+                             stripped_fds) {
+                            py::list py_stripped_fds_attr{stripped_fds_attr.size()};
+                            Py_ssize_t i = 0;
+                            for (SingleAttrRhsStrippedFd const& stripped_fd : stripped_fds_attr) {
+                                PyList_SET_ITEM(py_stripped_fds_attr.ptr(), i,
+                                                BitsetToInt(stripped_fd.lhs).release().ptr());
+                                ++i;
+                            }
+                            PyList_SET_ITEM(py_stripped_fds.ptr(), rhs_index,
+                                            py_stripped_fds_attr.release().ptr());
+                            ++rhs_index;
+                        }
+                        return py::make_tuple(
+                                py::make_tuple(header.table_name, header.column_names),
+                                std::move(py_stripped_fds));
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 2) {
+                            throw std::runtime_error(SINGLE_ATTR_RHS_FD_STORAGE_CLASS_NAME
+                                                     " pickle state must have two elements!");
+                        }
+                        py::tuple header_tuple = t[0];
+                        if (!py::isinstance<py::tuple>(header_tuple)) {
+                            throw std::runtime_error(
+                                    "Expected tuple as first element "
+                                    "in " SINGLE_ATTR_RHS_FD_STORAGE_CLASS_NAME " pickle state");
+                        }
+                        if (header_tuple.size() != 2) {
+                            throw std::runtime_error("Header must be represented by two elements!");
+                        }
+                        auto table_name = header_tuple[0].cast<std::string>();
+                        auto column_names = header_tuple[1].cast<std::vector<std::string>>();
+                        py::object fds_list = t[1];
+                        std::size_t const col_number = column_names.size();
+                        return SingleAttrRhsFdStorage{
+                                {std::move(table_name), std::move(column_names)},
+                                StrippedFdsFromLhsLists(std::move(fds_list), col_number)};
+                    }))
+            .def(py::init([](std::string table_name, std::vector<std::string> column_names,
+                             PyLhsLists lhs_lists) {
+                     std::size_t const col_number = column_names.size();
+                     return SingleAttrRhsFdStorage{{std::move(table_name), std::move(column_names)},
+                                                   StrippedFdsFromLhsLists(lhs_lists, col_number)};
+                 }),
+                 "table_name"_a, "column_names"_a, "lhs_lists"_a);
 
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";
