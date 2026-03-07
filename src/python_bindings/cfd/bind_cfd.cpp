@@ -20,9 +20,9 @@ namespace py = pybind11;
 namespace {
 template <typename ElementType>
 py::tuple VectorToTuple(std::vector<ElementType> vec) {
-    std::size_t const size = vec.size();
+    size_t const size = vec.size();
     py::tuple tuple(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         tuple[i] = std::move(vec[i]);
     }
     return tuple;
@@ -30,9 +30,9 @@ py::tuple VectorToTuple(std::vector<ElementType> vec) {
 
 template <typename ElementType>
 py::tuple VectorVectorToTuple(std::vector<std::vector<ElementType>> vec) {
-    std::size_t const size = vec.size();
+    size_t const size = vec.size();
     py::tuple tuple(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         tuple[i] = VectorToTuple(std::move(vec[i]));
     }
     return tuple;
@@ -44,14 +44,12 @@ py::tuple MakeCfdTuple(algos::cfd::cfun::CCFD const& cfd) {
     return py::make_tuple(VectorToTuple(std::move(lhs)), std::move(rhs),
                           VectorVectorToTuple(std::move(tableau)), cfd.GetSupport());
 }
-}  // namespace
 
-namespace python_bindings {
 void BindFdFirst(py::module_& cfd_module) {
     using namespace algos::cfd;
 
-    auto fd_first_module = BindPrimitive<FDFirstAlgorithm>(cfd_module, &CFDDiscovery::GetCfds,
-                                                           "CfdAlgorithm", "get_cfds", {"FDFirst"});
+    auto fd_first_module = python_bindings::BindPrimitive<FDFirstAlgorithm>(
+            cfd_module, &CFDDiscovery::GetCfds, "CfdAlgorithm", "get_cfds", {"FDFirst"});
 
     py::class_<RawCFD::RawItem>(fd_first_module, "Item")
             .def_property_readonly("attribute", &RawCFD::RawItem::GetAttribute)
@@ -92,8 +90,8 @@ void BindFdFirst(py::module_& cfd_module) {
 
 void BindCfun(pybind11::module_& cfd_module) {
     using namespace algos::cfd::cfun;
-    auto cfdfinder_module =
-            BindPrimitiveNoBase<CFUN>(cfd_module, "CFUN").def("get_cfds", &CFUN::GetCFDList);
+    auto cfdfinder_module = python_bindings::BindPrimitiveNoBase<CFUN>(cfd_module, "CFUN")
+                                    .def("get_cfds", &CFUN::GetCFDList);
 
     py::class_<CCFD>(cfdfinder_module, "CCFD")
             .def("__str__", &CCFD::ToString)
@@ -153,6 +151,10 @@ void BindCfun(pybind11::module_& cfd_module) {
                         return CCFD(std::move(embedded_fd), std::move(tableau), support);
                     }));
 }
+
+}  // namespace
+
+namespace python_bindings {
 
 void BindCfd(py::module_& main_module) {
     auto cfd_module = main_module.def_submodule("cfd");

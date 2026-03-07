@@ -8,12 +8,6 @@ import pandas
 
 TABLE_PATH = 'examples/datasets/play_tennis.csv'
 MINIMUM_SUPPORT = 3
-GREEN_BG_CODE = '\033[1;42m'
-GREEN_FG_CODE = '\033[1;32m'
-RED_BG_CODE = '\033[1;41m'
-DEFAULT_BG_CODE = '\033[1;49m'
-DEFAULT_FG_CODE = '\033[1;37m/'
-
 
 if __name__ == '__main__':
     tableDF = pandas.read_csv(TABLE_PATH)

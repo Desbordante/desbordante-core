@@ -4,6 +4,4 @@
 
 namespace python_bindings {
 void BindCfd(pybind11::module_& main_module);
-void BindCfun(pybind11::module_& cfd_module);
-void BindFdFirst(pybind11::module_& main_module);
 }  // namespace python_bindings
