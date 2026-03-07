@@ -1,9 +1,10 @@
 #include "gdd.h"
 
+#include <charconv>
+
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
 #include "core/algorithms/gdd/gdd_graph_description.h"
-#include "spdlog/spdlog.h"
 
 namespace model {
 
@@ -45,12 +46,12 @@ size_t EditDistance(std::string_view a, std::string_view b) {
     if (a.empty()) return b.size();
     if (b.empty()) return a.size();
 
-    std::vector<size_t> prev(b.size() + 1);
+    std::vector<std::size_t> prev(b.size() + 1);
     for (size_t i = 0; i < prev.size(); ++i) {
         prev[i] = i;
     }
 
-    std::vector<size_t> cur(b.size() + 1);
+    std::vector<std::size_t> cur(b.size() + 1);
     for (std::size_t i = 1; i <= a.size(); ++i) {
         cur[0] = i;
         for (std::size_t j = 1; j <= b.size(); ++j) {
@@ -84,6 +85,7 @@ double TryParseNumber(gdd::detail::ConstValue const& val) {
     if (std::holds_alternative<double>(val)) {
         return std::get<double>(val);
     }
+
     std::string const& s = std::get<std::string>(val);
     double result;
     if (std::from_chars(s.data(), s.data() + s.size(), result).ec != std::errc()) {
@@ -97,8 +99,16 @@ double CalculateDistance(gdd::detail::ConstValue const& lhs, gdd::detail::ConstV
     switch (metric_kind) {
         case gdd::detail::DistanceMetric::kAbsDiff:
             return std::abs(TryParseNumber(lhs) - TryParseNumber(rhs));
+
         case gdd::detail::DistanceMetric::kEditDistance:
+            if (!std::holds_alternative<std::string>(lhs)) {
+                throw std::logic_error("Expected string in LHS for edit distance metric");
+            }
+            if (!std::holds_alternative<std::string>(rhs)) {
+                throw std::logic_error("Expected string in RHS for edit distance metric");
+            }
             return EditDistance(std::get<std::string>(lhs), std::get<std::string>(rhs));
+
         default:
             throw std::logic_error("Unimplemented distance metric type");
     }
@@ -110,6 +120,7 @@ std::optional<gdd::vertex_t> Gdd::FindPatternVertexById(size_t id) const {
     for (auto [v, vend] = boost::vertices(pattern_); v != vend; ++v) {
         if (pattern_[*v].id == id) return *v;
     }
+
     return std::nullopt;
 }
 
@@ -118,7 +129,7 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
                               gdd::detail::DistanceConstraint const& constraint) const {
     using namespace gdd::detail;
 
-    auto resolve_graph_vertex = [this, &map](size_t pv_id) -> std::optional<gdd::vertex_t> {
+    auto resolve_graph_vertex = [this, &map](std::size_t pv_id) -> std::optional<gdd::vertex_t> {
         auto const pv = FindPatternVertexById(pv_id);
         if (!pv) return std::nullopt;
 
@@ -130,8 +141,8 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
         return gv_it->second;
     };
 
-    auto token_as_relation =
-            [](DistanceOperand const& operand) -> std::optional<std::pair<size_t, std::string>> {
+    auto token_as_relation = [](DistanceOperand const& operand)
+            -> std::optional<std::pair<std::size_t, std::string>> {
         if (!std::holds_alternative<GddToken>(operand)) {
             return std::nullopt;
         }
@@ -158,6 +169,7 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
     if (auto const lhs_rel = token_as_relation(constraint.lhs)) {
         auto const& [lhs_pid, lhs_relname] = *lhs_rel;
         auto const gv_lhs_opt = resolve_graph_vertex(lhs_pid);
+
         if (!gv_lhs_opt) {
             return false;
         }
@@ -174,7 +186,7 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
                     return g[t].id == static_cast<size_t>(std::get<int64_t>(cv));
                 }
                 throw std::logic_error(
-                        "invalid node representation in gdd relation constraint (unsuitable type)");
+                        "Invalid node representation in gdd relation constraint (unsuitable type)");
             };
             return std::ranges::any_of(lhs_targets, matches_cr);
         }

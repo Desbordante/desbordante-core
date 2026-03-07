@@ -5,19 +5,34 @@
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/gdd/gdd_graph_description.h"
+#include "gdd_counterexample.h"
 
 namespace algos {
 
 class GddValidator : public Algorithm {
 private:
     std::filesystem::path graph_path_;
-    std::vector<std::filesystem::path> gdd_paths_;
     model::gdd::graph_t graph_;
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
+    std::vector<GddCounterexample> counterexamples_;
+
+    bool print_reason_ = false;
 
     void FilterValidGdds();
+    void RegisterOptions();
+
+    virtual unsigned long long ExecuteInternal() final;
+
+    virtual void ResetState() final;
+
+    virtual void LoadDataInternal() final;
+
 protected:
+    bool GetPrintReasonFlag() const noexcept {
+        return print_reason_;
+    }
+
     model::gdd::graph_t const& GetGraph() const noexcept {
         return graph_;
     }
@@ -26,13 +41,8 @@ protected:
         return gdds_;
     }
 
-    virtual unsigned long long ExecuteInternal() final;
-
-    virtual void ResetState() final {}
-
-    virtual void LoadDataInternal() final {}
-
-    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) = 0;
+    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
+                       GddCounterexample* out_counterexample = nullptr) = 0;
 
 public:
     GddValidator();
@@ -43,11 +53,15 @@ public:
         return result_;
     }
 
+    std::vector<GddCounterexample> const& GetCounterexamples() const noexcept {
+        return counterexamples_;
+    }
+
     GddValidator(GddValidator const&) = delete;
     GddValidator(GddValidator&&) = delete;
     GddValidator& operator=(GddValidator const&) = delete;
     GddValidator& operator=(GddValidator&&) = delete;
-    virtual ~GddValidator() = default;
+    virtual ~GddValidator() override = default;
 };
 
 }  // namespace algos
