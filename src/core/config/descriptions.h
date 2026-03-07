@@ -191,6 +191,9 @@ constexpr auto kDMaxNumberOfEdges =
 constexpr auto kDOutputGraphIds = "output the ids of graph containing each frequent subgraph";
 constexpr auto kDGSpanOutputPath =
         "path to output file for frequent subgraphs (if empty, no file is written)";
+// GDD
+constexpr auto kDGddData = "List of GDD objects";
+constexpr auto kDGddPrintNotHoldsReason = "Print the reason why dependency does not hold";
 // HyMD
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDLeftTable = "first table processed by the algorithm";

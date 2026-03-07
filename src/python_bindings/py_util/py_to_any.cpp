@@ -15,6 +15,7 @@
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -127,6 +128,7 @@ std::pair<std::type_index, ConvFunc> const kCharEnumConvPair{
                     error_message << '|';
                 }
             }
+            error_message.seekp(-1, std::stringstream::cur);
             error_message << ']';
 
             throw config::ConfigurationError(error_message.str());
@@ -198,6 +200,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::unordered_map<std::string, std::shared_ptr<Metric>>>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        kNormalConvPair<std::vector<model::Gdd>>,
         kNormalConvPair<std::pair<std::string, std::string>>,
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,

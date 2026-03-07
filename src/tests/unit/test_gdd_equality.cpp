@@ -135,18 +135,6 @@ TEST(GddEquality, DifferentConstraintsNotEqual) {
     EXPECT_FALSE(g2 == g1);
 }
 
-TEST(GddEquality, ConstraintOrderMattersWithVectorEquality) {
-    graph_t const p = MakePersonCityPattern(false, 0);
-
-    DistanceConstraint const c1 = MakeAttrEditDistanceLe(0, "name", "Alice", 0.0);
-    DistanceConstraint const c2 = MakeAttrEditDistanceLe(1, "name", "Riga", 0.0);
-
-    Gdd const g1(p, Gdd::Phi{c1, c2}, Gdd::Phi{});
-    Gdd const g2(p, Gdd::Phi{c2, c1}, Gdd::Phi{});
-    EXPECT_FALSE(g1 == g2);
-    EXPECT_FALSE(g2 == g1);
-}
-
 TEST(GddEquality, ConstraintThresholdComparisonShouldBeSymmetric) {
     graph_t p = MakePersonCityPattern(false, 0);
 

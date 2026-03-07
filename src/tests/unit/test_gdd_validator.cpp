@@ -1,3 +1,7 @@
+#include <filesystem>
+#include <fstream>
+#include <memory>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -10,6 +14,7 @@
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/gdd/gdd_validator/naive_gdd_validator.h"
 #include "core/algorithms/ucc/hyucc/validator.h"
+#include "core/config/names.h"
 #include "core/parser/graph_parser/graph_parser.h"
 
 namespace tests {
@@ -42,6 +47,18 @@ DistanceConstraint EqStrAttrToConst(std::size_t pattern_vid, std::string attr_na
             .threshold = 0.0,
             .metric = DistanceMetric::kEditDistance,
             .op = CmpOp::kEq,
+    };
+}
+
+DistanceConstraint EditLeAttrToAttr(std::size_t lhs_pattern_vid, std::string lhs_attr_name,
+                                    std::size_t rhs_pattern_vid, std::string rhs_attr_name,
+                                    double threshold) {
+    return DistanceConstraint{
+            .lhs = GddToken{lhs_pattern_vid, AttrTag{std::move(lhs_attr_name)}},
+            .rhs = GddToken{rhs_pattern_vid, AttrTag{std::move(rhs_attr_name)}},
+            .threshold = threshold,
+            .metric = DistanceMetric::kEditDistance,
+            .op = CmpOp::kLe,
     };
 }
 
@@ -130,7 +147,7 @@ Gdd MakeGdd_VacuousImplication_NonexistentPerson() {
 
 Gdd MakeGdd_CompanyHqInAmsterdam_NoCompanyInGraph() {
     auto pattern = PatternCompanyCity("hq_in");
-    Gdd::Phi lhs{};  // empty LHS
+    Gdd::Phi lhs{};
     Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Amsterdam")};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
@@ -145,163 +162,273 @@ Gdd MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint() {
 Gdd MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity() {
     auto pattern = PatternPersonCity("lives_in");
     Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Misha")};
-    Gdd::Phi rhs{
-            EditLeStrAttrToConst(1, "label", "Coty", 1.0)};  // "City" is distance 1 from "Coty"
+    Gdd::Phi rhs{EditLeStrAttrToConst(1, "label", "Coty", 1.0)};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-graph_t LargeGraph_AllGood() {
-    return ReadGraphFromDot(R"(digraph G {
-        // Persons
+std::string LargeGraph_AllGood_Dot() {
+    return R"(digraph G {
         1 [label="Person", name="Misha", age="25", email="m@x"];
         2 [label="Person", name="Bob",   age="31"];
         3 [label="Person", name="Alice", age="22"];
 
-        // Cities
         101 [label="City", name="Amsterdam", population="821752"];
         102 [label="City", name="Riga",      population="605273"];
         103 [label="City", name="Paris"];
 
-        // Countries
         201 [label="Country", name="Netherlands"];
         202 [label="Country", name="Latvia"];
         203 [label="Country", name="France"];
 
-        // lives_in
         1 -> 101 [label="lives_in"];
         2 -> 102 [label="lives_in"];
         3 -> 103 [label="lives_in"];
 
-        // in_country
         101 -> 201 [label="in_country"];
         102 -> 202 [label="in_country"];
         103 -> 203 [label="in_country"];
 
-        // noise / unrelated edges
         1 -> 2 [label="friend"];
         2 -> 3 [label="friend"];
         3 -> 1 [label="friend"];
         101 -> 102 [label="sister_city"];
         102 -> 103 [label="sister_city"];
-    })");
+    })";
 }
 
-graph_t LargeGraph_WithViolation_MishaAlsoLivesInRiga() {
-    return ReadGraphFromDot(R"(digraph G {
-        // Persons
+std::string LargeGraph_WithViolation_MishaAlsoLivesInRiga_Dot() {
+    return R"(digraph G {
         1 [label="Person", name="Misha", age="25", email="m@x"];
         2 [label="Person", name="Bob",   age="31"];
         3 [label="Person", name="Alice", age="22"];
 
-        // Cities
         101 [label="City", name="Amsterdam", population="821752"];
         102 [label="City", name="Riga",      population="605273"];
         103 [label="City", name="Paris"];
 
-        // Countries
         201 [label="Country", name="Netherlands"];
         202 [label="Country", name="Latvia"];
         203 [label="Country", name="France"];
 
-        // lives_in (Misha has TWO)
         1 -> 101 [label="lives_in"];
-        1 -> 102 [label="lives_in"]; // counterexample for "Misha -> Amsterdam"
+        1 -> 102 [label="lives_in"];
         2 -> 102 [label="lives_in"];
         3 -> 103 [label="lives_in"];
 
-        // in_country
         101 -> 201 [label="in_country"];
         102 -> 202 [label="in_country"];
         103 -> 203 [label="in_country"];
 
-        // noise
         1 -> 2 [label="friend"];
         2 -> 3 [label="friend"];
         3 -> 1 [label="friend"];
-    })");
+    })";
 }
 
-graph_t Graph_NoMatchesForCompanyCity() {
-    return ReadGraphFromDot(R"(digraph G {
+std::string Graph_NoMatchesForCompanyCity_Dot() {
+    return R"(digraph G {
         1 [label="Person", name="Misha"];
         2 [label="Person", name="Bob"];
         1 -> 2 [label="friend"];
+    })";
+}
+
+std::string DblpLikeGraph_Dot() {
+    return R"(digraph G {
+        1 [label="Author", name="Jiawei Han", canonical_author_id="author:han_jiawei"];
+        2 [label="Author", name="J. Han",     canonical_author_id="author:han_jiawei"];
+
+        3 [label="Author", name="Philip S. Yu", canonical_author_id="author:yu_philip"];
+
+        4 [label="Author", name="Yi Zhang", canonical_author_id="author:zhang_yi"];
+        5 [label="Author", name="Yu Zhang", canonical_author_id="author:zhang_yu"];
+
+        101 [label="Paper", title="Mining Frequent Patterns",     year="2000"];
+        102 [label="Paper", title="Mining Frequent Pattern Sets", year="2000"];
+        103 [label="Paper", title="Scalable Pattern Search",      year="2023"];
+        104 [label="Paper", title="Efficient Pattern Search",     year="2023"];
+
+        201 [label="Venue", name="SIGMOD"];
+        202 [label="Venue", name="KDD"];
+
+        1 -> 101 [label="authored"];
+        3 -> 101 [label="authored"];
+
+        2 -> 102 [label="authored"];
+        3 -> 102 [label="authored"];
+
+        4 -> 103 [label="authored"];
+        5 -> 104 [label="authored"];
+
+        101 -> 201 [label="published_in"];
+        102 -> 201 [label="published_in"];
+        103 -> 202 [label="published_in"];
+        104 -> 202 [label="published_in"];
+    })";
+}
+
+graph_t PatternDblpStrong() {
+    return ReadGraphFromDot(R"(digraph P {
+        0 [label="Author"];
+        1 [label="Author"];
+        2 [label="Paper"];
+        3 [label="Paper"];
+        4 [label="Author"];
+        5 [label="Venue"];
+
+        0 -> 2 [label="authored"];
+        1 -> 3 [label="authored"];
+        4 -> 2 [label="authored"];
+        4 -> 3 [label="authored"];
+        2 -> 5 [label="published_in"];
+        3 -> 5 [label="published_in"];
     })");
+}
+
+graph_t PatternDblpWeak() {
+    return ReadGraphFromDot(R"(digraph P {
+        0 [label="Author"];
+        1 [label="Author"];
+        2 [label="Paper"];
+        3 [label="Paper"];
+        4 [label="Venue"];
+
+        0 -> 2 [label="authored"];
+        1 -> 3 [label="authored"];
+        2 -> 4 [label="published_in"];
+        3 -> 4 [label="published_in"];
+    })");
+}
+
+Gdd MakeGdd_DblpStrongAuthorResolution() {
+    auto pattern = PatternDblpStrong();
+    Gdd::Phi lhs{
+            EditLeAttrToAttr(0, "name", 1, "name", 8.0),
+            EditLeAttrToAttr(2, "year", 3, "year", 0.0),
+    };
+    Gdd::Phi rhs{
+            EditLeAttrToAttr(0, "canonical_author_id", 1, "canonical_author_id", 0.0),
+    };
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+Gdd MakeGdd_DblpWeakAuthorResolution() {
+    auto pattern = PatternDblpWeak();
+    Gdd::Phi lhs{
+            EditLeAttrToAttr(0, "name", 1, "name", 2.0),
+            EditLeAttrToAttr(2, "year", 3, "year", 0.0),
+    };
+    Gdd::Phi rhs{
+            EditLeAttrToAttr(0, "canonical_author_id", 1, "canonical_author_id", 0.0),
+    };
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
 }  // namespace
 
-TEST(NaiveGddValidator_Interface, GenerateSatisfied_FiltersOnLargeGraph_AllSatisfied) {
-    graph_t const graph = LargeGraph_AllGood();
+class GddValidatorTest : public ::testing::Test {
+protected:
+    static std::filesystem::path WriteTempDotFile(std::string const& dot,
+                                                  std::string const& file_name) {
+        auto const path = std::filesystem::temp_directory_path() / file_name;
+        std::ofstream out(path);
+        out << dot;
+        out.close();
+        return path;
+    }
+
+    static std::unique_ptr<algos::GddValidator> CreateGddValidatorInstance(
+            std::filesystem::path const& graph_path, std::vector<model::Gdd> const& gdds) {
+        algos::StdParamsMap const option_map = {
+                {config::names::kGraphData, graph_path},
+                {config::names::kGddData, gdds},
+        };
+        return algos::CreateAndLoadAlgorithm<algos::NaiveGddValidator>(option_map);
+    }
+};
+
+TEST_F(GddValidatorTest, GenerateSatisfied_FiltersOnLargeGraph_AllSatisfied) {
+    auto const graph_path =
+            WriteTempDotFile(LargeGraph_AllGood_Dot(), "gdd_large_graph_all_good.dot");
 
     std::vector<Gdd> gdds;
-    gdds.emplace_back(MakeGdd_MishaLivesInAmsterdam());                 // satisfied
-    gdds.emplace_back(MakeGdd_RigaInLatvia());                          // satisfied
-    gdds.emplace_back(MakeGdd_VacuousImplication_NonexistentPerson());  // satisfied (LHS false)
-    gdds.emplace_back(
-            MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint());      // satisfied
-    gdds.emplace_back(MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity());  // satisfied
+    gdds.emplace_back(MakeGdd_MishaLivesInAmsterdam());
+    gdds.emplace_back(MakeGdd_RigaInLatvia());
+    gdds.emplace_back(MakeGdd_VacuousImplication_NonexistentPerson());
+    gdds.emplace_back(MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint());
+    gdds.emplace_back(MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity());
 
-    std::unique_ptr<algos::GddValidator> const validator =
-            std::make_unique<NaiveGddValidator>(graph, gdds);
-    validator->LoadData();
+    auto const validator = CreateGddValidatorInstance(graph_path, gdds);
     validator->Execute();
     auto const out = validator->GetResult();
 
-    EXPECT_TRUE(out.size() == 5);
+    EXPECT_EQ(out.size(), 5);
 }
 
-TEST(NaiveGddValidator_Interface, GenerateSatisfied_FiltersOnLargeGraph_DetectsViolation) {
-    graph_t const graph = LargeGraph_WithViolation_MishaAlsoLivesInRiga();
+TEST_F(GddValidatorTest, GenerateSatisfied_FiltersOnLargeGraph_DetectsViolation) {
+    auto const graph_path = WriteTempDotFile(LargeGraph_WithViolation_MishaAlsoLivesInRiga_Dot(),
+                                             "gdd_large_graph_with_violation.dot");
 
-    auto const gdd_bad = MakeGdd_MishaLivesInAmsterdam();  // should be UNSAT due to counterexample
-    auto const gdd_ok1 = MakeGdd_RigaInLatvia();           // still SAT
-    auto const gdd_ok2 = MakeGdd_VacuousImplication_NonexistentPerson();  // SAT (LHS false)
-    auto const gdd_ok3 = MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint();  // SAT
-    auto const gdd_ok4 = MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity();        // SAT
+    auto const gdd_bad = MakeGdd_MishaLivesInAmsterdam();
+    auto const gdd_ok1 = MakeGdd_RigaInLatvia();
+    auto const gdd_ok2 = MakeGdd_VacuousImplication_NonexistentPerson();
+    auto const gdd_ok3 = MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint();
+    auto const gdd_ok4 = MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity();
 
     std::vector const gdds = {gdd_bad, gdd_ok1, gdd_ok2, gdd_ok3, gdd_ok4};
 
-    std::unique_ptr<algos::GddValidator> const validator =
-            std::make_unique<NaiveGddValidator>(graph, gdds);
-    validator->LoadData();
+    auto validator = CreateGddValidatorInstance(graph_path, gdds);
     validator->Execute();
     auto const out = validator->GetResult();
 
-    EXPECT_TRUE(out.size() == 4);
+    EXPECT_EQ(out.size(), 4);
     EXPECT_TRUE(std::ranges::find(out, gdd_ok1) != out.end());
     EXPECT_TRUE(std::ranges::find(out, gdd_ok2) != out.end());
     EXPECT_TRUE(std::ranges::find(out, gdd_ok3) != out.end());
     EXPECT_TRUE(std::ranges::find(out, gdd_ok4) != out.end());
 }
 
-TEST(NaiveGddValidator_Interface, GenerateSatisfied_UsesCustomAttributesAndLabel) {
-    graph_t const graph = LargeGraph_AllGood();
+TEST_F(GddValidatorTest, GenerateSatisfied_UsesCustomAttributesAndLabel) {
+    auto const graph_path =
+            WriteTempDotFile(LargeGraph_AllGood_Dot(), "gdd_custom_attrs_graph.dot");
 
     auto const gdd = MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity();
 
-    std::unique_ptr<algos::GddValidator> const validator =
-            std::make_unique<NaiveGddValidator>(graph, std::vector{gdd});
-    validator->LoadData();
+    auto const validator = CreateGddValidatorInstance(graph_path, std::vector{gdd});
     validator->Execute();
     auto const out = validator->GetResult();
 
-    EXPECT_TRUE(out.size() == 1);
-    EXPECT_TRUE(out[0] == gdd);
+    EXPECT_EQ(out.size(), 1);
+    EXPECT_EQ(out[0], gdd);
 }
 
-TEST(NaiveGddValidator_Interface, GenerateSatisfied_EmptyMatchSet_ShouldBeSatisfied) {
-    // Semantics: if H(Q,G) is empty, then forall h in H: (LHS -> RHS) holds => satisfied.
-    graph_t const graph = Graph_NoMatchesForCompanyCity();
+TEST_F(GddValidatorTest, GenerateSatisfied_EmptyMatchSet_ShouldBeSatisfied) {
+    auto const graph_path = WriteTempDotFile(Graph_NoMatchesForCompanyCity_Dot(),
+                                             "gdd_no_matches_company_city.dot");
     auto const gdd = MakeGdd_CompanyHqInAmsterdam_NoCompanyInGraph();
 
-    std::unique_ptr<algos::GddValidator> const validator =
-            std::make_unique<NaiveGddValidator>(graph, std::vector{gdd});
-    validator->LoadData();
+    auto const validator = CreateGddValidatorInstance(graph_path, std::vector{gdd});
     validator->Execute();
     auto const out = validator->GetResult();
 
     EXPECT_EQ(out, std::vector{gdd});
+}
+
+TEST_F(GddValidatorTest, GenerateSatisfied_DblpLikeAuthorResolution_StrongHoldsWeakFails) {
+    auto const graph_path = WriteTempDotFile(DblpLikeGraph_Dot(), "gdd_dblp_like_graph.dot");
+
+    auto const weak_gdd = MakeGdd_DblpWeakAuthorResolution();
+    auto const strong_gdd = MakeGdd_DblpStrongAuthorResolution();
+
+    std::vector const gdds{weak_gdd, strong_gdd};
+
+    auto const validator = CreateGddValidatorInstance(graph_path, gdds);
+    validator->Execute();
+    auto const out = validator->GetResult();
+
+    EXPECT_EQ(out.size(), 1);
+    EXPECT_TRUE(std::ranges::find(out, strong_gdd) != out.end());
+    EXPECT_TRUE(std::ranges::find(out, weak_gdd) == out.end());
 }
 
 }  // namespace tests
