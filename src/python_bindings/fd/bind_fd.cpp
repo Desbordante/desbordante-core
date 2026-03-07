@@ -13,6 +13,7 @@
 
 #include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
 #include "core/algorithms/fd/mining_algorithms.h"
 #include "core/algorithms/fd/table_mask_pair.h"
 #include "core/algorithms/fd/table_mask_pair_fd_view.h"
@@ -28,10 +29,12 @@ namespace py = pybind11;
 
 using FdList = py::typing::List<model::FunctionalDependency>;
 using PySelectionPairs = py::typing::Iterable<py::typing::Tuple<py::int_, py::int_>>;
+using PyLhsMaskLists = py::typing::Iterable<py::typing::Iterable<py::int_>>;
 
 #define FD_CLASS_NAME "FunctionalDependency"
 #define ATTRIBUTE_CLASS_NAME "Attribute"
 #define TABLE_MASK_PAIR_FD_VIEW_CLASS_NAME "TableMaskPairFdView"
+#define LHS_MASK_FD_VIEW_CLASS_NAME "LhsMaskFdView"
 
 py::tuple MakeFdNameTuple(FD const& fd) {
     auto [lhs, rhs] = fd.ToNameTuple();
@@ -127,6 +130,29 @@ FdList FdsToList(algos::fd::TableMaskPairFdView const& storage) {
     return fd_list;
 }
 
+FdList FdsToList(algos::fd::LhsMaskFdView const& storage) {
+    // The container would be allocated twice if we created it on
+    // core's side: once there, and the other time for the copy.
+    std::size_t fds_total = 0;
+    for (std::deque<algos::fd::LhsTableMask> attr_fds : storage.GetLhsMasks()) {
+        fds_total += attr_fds.size();
+    }
+    FdList fd_list{fds_total};
+    Py_ssize_t fd_index = 0;
+    model::Index rhs_index = 0;
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& lhs_mask : attr_fds) {
+            py::object py_fd = py::cast(lhs_mask.ToFd(storage.GetTableHeader(), rhs_index));
+            // If not released, the refcount of the object will reach 0 after exiting the scope,
+            // triggering UB on access.
+            PyList_SET_ITEM(fd_list.ptr(), fd_index, py_fd.release().ptr());
+            ++fd_index;
+        }
+        ++rhs_index;
+    }
+    return fd_list;
+}
+
 std::deque<algos::fd::TableMaskPair> TableMaskPairsFromIntPairs(PySelectionPairs int_pairs,
                                                                 std::size_t col_number) {
     std::deque<algos::fd::TableMaskPair> table_mask_pairs;
@@ -150,6 +176,27 @@ std::deque<algos::fd::TableMaskPair> TableMaskPairsFromIntPairs(PySelectionPairs
                                       python_bindings::IntToBitset(rhs, col_number));
     }
     return table_mask_pairs;
+}
+
+std::vector<std::deque<algos::fd::LhsTableMask>> LhsTableMasksFromPyLhsMaskLists(
+        PyLhsMaskLists lhs_mask_lists, std::size_t col_number) {
+    std::vector<std::deque<algos::fd::LhsTableMask>> lhs_masks(col_number);
+    // We can't really trust what is passed to us from Python, so better rely on C++ structures as
+    // much as possible and never call the same Python method twice.
+    // And if that's what we're doing, might as well relax the type requirement to just Iterable.
+    auto it = lhs_mask_lists.begin();
+    for (std::deque<algos::fd::LhsTableMask>& attr_lhs_masks : lhs_masks) {
+        if (it == lhs_mask_lists.end()) throw std::runtime_error("FD List has too few elements!");
+        for (py::handle lhs : *it) {
+            if (!py::isinstance<py::int_>(lhs))
+                throw std::runtime_error("LHS column selection must be an int!");
+            attr_lhs_masks.emplace_back(
+                    python_bindings::IntToBitset(py::cast<py::int_>(lhs), col_number));
+        }
+        ++it;
+    }
+    if (it != lhs_mask_lists.end()) throw std::runtime_error("FD List has too many elements!");
+    return lhs_masks;
 }
 
 template <typename Algo>
@@ -333,6 +380,68 @@ void BindFd(py::module_& main_module) {
                              TableMaskPairsFromIntPairs(selection_pairs, col_number)};
                  }),
                  "table_name"_a, "column_names"_a, "selection_pairs"_a);
+    py::class_<LhsMaskFdView, LhsMaskFdView::OwningPointer>(fd_module, LHS_MASK_FD_VIEW_CLASS_NAME)
+            .def("to_fds", static_cast<FdList (*)(LhsMaskFdView const&)>(FdsToList))
+            .def(
+                    "__iter__",
+                    [](LhsMaskFdView const& storage) {
+                        return py::make_iterator(storage.begin(), storage.end());
+                    },
+                    py::keep_alive<0, 1>())
+            .def(py::pickle(
+                    // __getstate__
+                    [](LhsMaskFdView const& storage) {
+                        auto const& lhs_masks = storage.GetLhsMasks();
+                        model::TableHeader const& header = storage.GetTableHeader();
+                        py::list py_lhs_masks{lhs_masks.size()};
+                        Py_ssize_t rhs_index = 0;
+                        for (std::deque<LhsTableMask> const& lhs_masks_attr : lhs_masks) {
+                            py::list py_lhs_masks_attr{lhs_masks_attr.size()};
+                            Py_ssize_t i = 0;
+                            for (LhsTableMask const& lhs_mask : lhs_masks_attr) {
+                                PyList_SET_ITEM(py_lhs_masks_attr.ptr(), i,
+                                                BitsetToInt(lhs_mask.lhs).release().ptr());
+                                ++i;
+                            }
+                            PyList_SET_ITEM(py_lhs_masks.ptr(), rhs_index,
+                                            py_lhs_masks_attr.release().ptr());
+                            ++rhs_index;
+                        }
+                        return py::make_tuple(
+                                py::make_tuple(header.table_name, header.column_names),
+                                std::move(py_lhs_masks));
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 2) {
+                            throw std::runtime_error(LHS_MASK_FD_VIEW_CLASS_NAME
+                                                     " pickle state must have two elements!");
+                        }
+                        py::tuple header_tuple = t[0];
+                        if (!py::isinstance<py::tuple>(header_tuple)) {
+                            throw std::runtime_error(
+                                    "Expected tuple as first element "
+                                    "in " LHS_MASK_FD_VIEW_CLASS_NAME " pickle state");
+                        }
+                        if (header_tuple.size() != 2) {
+                            throw std::runtime_error("Header must be represented by two elements!");
+                        }
+                        auto table_name = header_tuple[0].cast<std::string>();
+                        auto column_names = header_tuple[1].cast<std::vector<std::string>>();
+                        py::object fds_list = t[1];
+                        std::size_t const col_number = column_names.size();
+                        return LhsMaskFdView{
+                                {std::move(table_name), std::move(column_names)},
+                                LhsTableMasksFromPyLhsMaskLists(std::move(fds_list), col_number)};
+                    }))
+            .def(py::init([](std::string table_name, std::vector<std::string> column_names,
+                             PyLhsMaskLists lhs_mask_lists) {
+                     std::size_t const col_number = column_names.size();
+                     return LhsMaskFdView{
+                             {std::move(table_name), std::move(column_names)},
+                             LhsTableMasksFromPyLhsMaskLists(lhs_mask_lists, col_number)};
+                 }),
+                 "table_name"_a, "column_names"_a, "lhs_mask_lists"_a);
 
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";

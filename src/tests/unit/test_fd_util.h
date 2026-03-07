@@ -1,10 +1,13 @@
 #pragma once
 
+#include <algorithm>
+
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
 #include "core/algorithms/fd/pyrocommon/core/parameters.h"
 #include "core/algorithms/fd/table_mask_pair_fd_view.h"
 #include "core/config/error/type.h"
@@ -16,6 +19,11 @@
 namespace tests {
 inline bool NoFDsFound(algos::fd::TableMaskPairFdView const& storage) {
     return storage.GetTableMaskPairs().empty();
+}
+
+inline bool NoFDsFound(algos::fd::LhsMaskFdView const& storage) {
+    return std::ranges::all_of(storage.GetLhsMasks(),
+                               [](auto& attr_fds) { return attr_fds.empty(); });
 }
 
 inline unsigned int Fletcher16(std::string str) {
@@ -57,6 +65,10 @@ inline std::vector<std::string> FDToJsonStrings(algos::fd::TableMaskPair const& 
     return strings;
 }
 
+inline std::string FDToJsonString(algos::fd::LhsTableMask const& fd, model::Index rhs_index) {
+    return "{\"lhs\": " + ToIndicesString(fd.lhs) + ", \"rhs\": " + std::to_string(rhs_index) + '}';
+}
+
 inline std::string FDsToJson(algos::fd::TableMaskPairFdView const& fd_storage) {
     std::string result = "{\"fds\": [";
     std::vector<std::string> discovered_fd_strings;
@@ -67,6 +79,27 @@ inline std::string FDsToJson(algos::fd::TableMaskPairFdView const& fd_storage) {
         }
     }
     std::sort(discovered_fd_strings.begin(), discovered_fd_strings.end());
+    for (std::string const& fd : discovered_fd_strings) {
+        result += fd + ",";
+    }
+    if (result.back() == ',') {
+        result.erase(result.size() - 1);
+    }
+    result += "]}";
+    return result;
+}
+
+inline std::string FDsToJson(algos::fd::LhsMaskFdView const& fd_storage) {
+    std::vector<std::string> discovered_fd_strings;
+    model::Index rhs_index = 0;
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : fd_storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
+            discovered_fd_strings.push_back(FDToJsonString(stripped_fd, rhs_index));
+        }
+        ++rhs_index;
+    }
+    std::sort(discovered_fd_strings.begin(), discovered_fd_strings.end());
+    std::string result = "{\"fds\": [";
     for (std::string const& fd : discovered_fd_strings) {
         result += fd + ",";
     }
@@ -97,6 +130,29 @@ testing::AssertionResult CheckFdCollectionEquality(
                             : testing::AssertionFailure() << "some FDs remain undiscovered";
 }
 
+inline testing::AssertionResult CheckFdCollectionEquality(
+        std::set<std::pair<std::vector<unsigned int>, unsigned int>> expected,
+        algos::fd::LhsMaskFdView const& actual) {
+    model::Index rhs_index = 0;
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : actual.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
+            std::vector<unsigned int> lhs_indices =
+                    util::BitsetToIndices<unsigned int>(stripped_fd.lhs);
+            if (auto it = expected.find(std::make_pair(lhs_indices, rhs_index));
+                it == expected.end()) {
+                return testing::AssertionFailure()
+                       << "discovered a false FD: " << ToIndicesString(stripped_fd.lhs) << "->"
+                       << rhs_index;
+            } else {
+                expected.erase(it);
+            }
+        }
+        ++rhs_index;
+    }
+    return expected.empty() ? testing::AssertionSuccess()
+                            : testing::AssertionFailure() << "some FDs remain undiscovered";
+}
+
 std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
         algos::fd::TableMaskPairFdView const& storage) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
@@ -104,6 +160,19 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
         util::ForEachIndex(fd.rhs, [&](model::Index i) {
             set.emplace(util::BitsetToIndices<unsigned int>(fd.lhs), i);
         });
+    }
+    return set;
+}
+
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
+        algos::fd::LhsMaskFdView const& storage) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    model::Index rhs_index = 0;
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
+            set.emplace(util::BitsetToIndices<unsigned int>(stripped_fd.lhs), rhs_index);
+        }
+        ++rhs_index;
     }
     return set;
 }
