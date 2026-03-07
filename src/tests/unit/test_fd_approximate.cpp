@@ -12,7 +12,7 @@ using ::testing::ContainerEq, ::testing::Eq;
 
 namespace tests {
 
-static testing::AssertionResult CheckFdListEquality(
+static testing::AssertionResult CheckFdCollectionEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
         std::list<FD> const& expected) {
     for (auto& fd : expected) {
@@ -61,7 +61,7 @@ TYPED_TEST_P(ApproximateFDTest, WorksOnLongDataset) {
 
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestLong);
     algorithm->Execute();
-    ASSERT_TRUE(CheckFdListEquality(true_fd_collection, algorithm->FdList()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, algorithm->FdList()));
 }
 
 TYPED_TEST_P(ApproximateFDTest, WorksOnWideDataset) {
@@ -89,7 +89,7 @@ TYPED_TEST_P(ApproximateFDTest, ConsistentRepeatedExecution) {
     for (int i = 0; i < 3; ++i) {
         algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kNeighbors10k));
         algorithm->Execute();
-        ASSERT_TRUE(CheckFdListEquality(first_res, algorithm->FdList()));
+        ASSERT_TRUE(CheckFdCollectionEquality(first_res, algorithm->FdList()));
     }
 }
 
