@@ -1,12 +1,21 @@
 #include "core/algorithms/fd/aidfd/aid.h"
 
+#include <numeric>
+
+#include "core/algorithms/fd/make_reordering_lhs_mask_adder.h"
+#include "core/config/max_lhs/option.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/util/bitset_utils.h"
 
-namespace algos {
+namespace algos::fd {
 
-Aid::Aid() : FDAlgorithm() {
+Aid::Aid() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
+}
+
+void Aid::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName()});
 }
 
 void Aid::RegisterOptions() {
@@ -19,7 +28,7 @@ void Aid::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = RelationalSchema::CreateFrom(*input_table_);
+    table_header_ = model::TableHeader::FromDatasetStream(*input_table_);
 
     while (input_table_->HasNextRow()) {
         std::vector<std::string> const& next_line = input_table_->GetNextRow();
@@ -36,7 +45,8 @@ void Aid::LoadDataInternal() {
     constant_columns_ = boost::dynamic_bitset<>(number_of_attributes_);
 }
 
-void Aid::ResetStateFd() {
+void Aid::ResetState() {
+    fd_view_ = nullptr;
     clusters_.assign(number_of_attributes_, std::unordered_map<size_t, Cluster>{});
     indices_in_clusters_.assign(number_of_attributes_, std::vector<size_t>(number_of_tuples_));
     constant_columns_.reset();
@@ -142,18 +152,6 @@ boost::dynamic_bitset<> Aid::BuildAgreeSet(size_t t1, size_t t2) {
     return equal_attr;
 }
 
-void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
-    boost::dynamic_bitset<> empty_set(number_of_attributes_);
-    Vertical lhs = schema_->CreateEmptyVertical();
-    for (size_t attr_num = constant_columns_.find_first();
-         attr_num != boost::dynamic_bitset<>::npos;
-         attr_num = constant_columns_.find_next(attr_num)) {
-        attributes[attr_num] = false;
-        Column rhs = *schema_->GetColumn(attr_num);
-        RegisterFd(lhs, rhs, schema_);
-    }
-}
-
 void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTree& pos_cover_tree,
                           size_t rhs) {
     std::vector<boost::dynamic_bitset<>> subsets;
@@ -184,29 +182,41 @@ void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTre
 }
 
 void Aid::InvertNegativeCover() {
-    boost::dynamic_bitset<> attributes(number_of_attributes_);
-    attributes.set();
-    HandleConstantColumns(attributes);
-
     std::vector<boost::dynamic_bitset<>> neg_cover_vector;
     neg_cover_vector.insert(neg_cover_vector.end(), neg_cover_.begin(), neg_cover_.end());
     auto comp_by_card = [](boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<> const& rhs) {
         return lhs.count() > rhs.count();
     };
     std::sort(neg_cover_vector.begin(), neg_cover_vector.end(), comp_by_card);
+
     auto attr_indices = GetAttributesSortedByFrequency(neg_cover_vector);
 
     std::vector<size_t> inv_attr_indices(number_of_attributes_);
     for (size_t i = 0; i < number_of_attributes_; ++i) {
         inv_attr_indices[attr_indices[i]] = i;
     }
-
-    this->constant_columns_ = ChangeAttributesOrder(this->constant_columns_, inv_attr_indices);
-    attributes = ChangeAttributesOrder(attributes, inv_attr_indices);
+    // These should be processed and removed from all internal structures waaay before this part so
+    // the algorithm can pretend as if they don't exist.
+    constant_columns_ = util::ReorderBitset(constant_columns_, inv_attr_indices);
     for (auto& neg_cover_el : neg_cover_vector) {
-        neg_cover_el = ChangeAttributesOrder(neg_cover_el, inv_attr_indices);
+        neg_cover_el = util::ReorderBitset(neg_cover_el, inv_attr_indices);
     }
 
+    LhsMaskFdView::Storage storage(number_of_attributes_);
+    // Why are we reordering in the reporting function? Because when splitting into separate
+    // structures/functions, the reordering will be done to the input: the inversion procedure
+    // itself can work with any arbitrary bunch of bitsets, it's just that we've noticed in our case
+    // it's faster to have it work on bitsets with this order. Then, logically, we pass a structure
+    // into the procedure, then reinterpret the bitsets into actual FDs by reordering them back.
+    auto report_fd = MakeReorderingLhsMaskAdder(storage, attr_indices);
+    util::ForEachIndex(constant_columns_, [&](model::Index i) {
+        report_fd(boost::dynamic_bitset(number_of_attributes_), i);
+    });
+
+    boost::dynamic_bitset<> attributes(number_of_attributes_);
+    attributes.set();
+    attributes -= constant_columns_;
+    // This can be parallelized.
     for (size_t rhs = 0; rhs < number_of_attributes_; ++rhs) {
         if (constant_columns_[rhs]) {
             continue;
@@ -214,68 +224,39 @@ void Aid::InvertNegativeCover() {
 
         attributes[rhs] = false;
         SearchTree pos_cover_tree(attributes);
+        attributes[rhs] = true;
+
         for (auto const& neg_cover_el : neg_cover_vector) {
             if (!neg_cover_el[rhs]) {
                 HandleInvalidFd(neg_cover_el, pos_cover_tree, rhs);
             }
         }
 
-        size_t real_rhs = attr_indices[rhs];
-        std::vector<boost::dynamic_bitset<>> pos_cover_vector;
-        pos_cover_tree.ForEach(
-                [&pos_cover_vector, &attr_indices](boost::dynamic_bitset<> const& pos_cover_el) {
-                    pos_cover_vector.push_back(ChangeAttributesOrder(pos_cover_el, attr_indices));
-                });
-
-        RegisterFDs(real_rhs, pos_cover_vector);
-        attributes[rhs] = true;
+        pos_cover_tree.ForEach([&report_fd, rhs](boost::dynamic_bitset<> const& pos_cover_el) {
+            report_fd(pos_cover_el, rhs);
+        });
     }
-}
 
-void Aid::RegisterFDs(size_t rhs_attribute,
-                      std::vector<boost::dynamic_bitset<>> const& list_of_lhs_attributes) {
-    Column rhs = *schema_->GetColumn(rhs_attribute);
-    for (auto const& lhs_attributes : list_of_lhs_attributes) {
-        Vertical lhs = schema_->GetVertical(lhs_attributes);
-        RegisterFd(lhs, rhs, schema_);
-    }
+    fd_view_ = std::make_shared<LhsMaskFdView>(table_header_, std::move(storage));
 }
 
 size_t Aid::GenerateSecondClusterIndex(size_t index_in_cluster, size_t iteration_num) const {
     return (iteration_num * kPrime) % index_in_cluster;
 }
 
-boost::dynamic_bitset<> Aid::ChangeAttributesOrder(boost::dynamic_bitset<> const& initial_bitset,
-                                                   std::vector<size_t> const& new_order) {
-    size_t bitset_size = initial_bitset.size();
-    boost::dynamic_bitset<> modified_bitset(bitset_size);
-    for (size_t bit = 0; bit < bitset_size; ++bit) {
-        if (initial_bitset[bit]) {
-            modified_bitset.set(new_order[bit]);
-        }
-    }
-
-    return modified_bitset;
-}
-
 std::vector<size_t> Aid::GetAttributesSortedByFrequency(
         std::vector<boost::dynamic_bitset<>> const& neg_cover_vector) const {
     std::vector<unsigned int> frequency(number_of_attributes_, 0);
     for (auto const& bitset : neg_cover_vector) {
-        for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
-            frequency[attr_num] += bitset[attr_num];
-        }
+        util::ForEachIndex(bitset, [&](model::Index i) { ++frequency[i]; });
     }
 
     std::vector<size_t> attr_indices(number_of_attributes_);
-    for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
-        attr_indices[attr_num] = attr_num;
-    }
-
+    std::iota(attr_indices.begin(), attr_indices.end(), 0);
     std::sort(attr_indices.begin(), attr_indices.end(),
               [&frequency](size_t lhs, size_t rhs) { return frequency[lhs] > frequency[rhs]; });
 
     return attr_indices;
 }
 
-}  // namespace algos
+}  // namespace algos::fd
