@@ -1,13 +1,14 @@
 #include "core/algorithms/dd/add_verifier/add_verifier.h"
-
+#include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace algos::dd {
 
-ADDVerifier::ADDVerifier() : DDVerifier() {
+ADDVerifier::ADDVerifier(): DDVerifier() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
@@ -57,7 +58,7 @@ void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> 
     if (!dd_.right.cbegin()->constraint.Contains(min_dist)) {
         error_ = 1.;
     } else {
-        error_ = 1. - num_pairs_with_min_dist / lhs.size();
+        error_ = 1. - double(num_pairs_with_min_dist) / lhs.size();
     }
 }
 
@@ -67,8 +68,8 @@ bool ADDVerifier::DDHolds() const {
 
 void ADDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kDDString});
     MakeOptionsAvailable({kDDString, kSatisfactionThreshold});
+
 }
 
 void ADDVerifier::CheckCorrectnessDd() const {
