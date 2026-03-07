@@ -1667,6 +1667,350 @@ support:  8 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
 confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
 
 
+'''
+
+snapshots['test_example[basic/mining_cfdfinder.py-None-mining_cfdfinder_output] mining_cfdfinder_output'] = '''
+CFDFinder Mining Example - Desbordante
+
+=== Note ===
+CFD is a unique pattern for which there are several search algorithms,
+each of which defines CFD in its own way.
+Therefore, we suggest that you review all the examples of the CFD pattern
+and choose your appropriate option depending on your task:
+
+1. verifying_cfd.py
+2. mining_cfd.py
+
+=== Explain Conditional Functional Dependencies ===
+
+Conditional Functional Dependencies (CFD) generalize traditional functional dependencies (FD)
+by adding conditions to attribute values via the pattern tableau.
+This allows you to find dependencies that are not performed for the entire table,
+but only for a subset of rows that meet certain conditions in the data.
+
+=== Formal Definition ===
+
+This example examines the CFDFinder algorithm, which uses the following definition of CFD:
+
+CFD is a pair of embedded FD and a pattern tableau:
+* Embedded FD (X -> A) is a common functional dependency,
+  where X (LHS) is a subset of table attributes and A (RHS) is a single attribute not contained in X.
+
+* The pattern tableau is a table with attributes LHS and RHS in which each tuple contains
+  one of the following types of conditions in each of its attributes:
+    - A fixed constant value. Example: 'London'
+    - A fixed negative value. Example: '¬Mark' or '¬30'
+    - A range of values. Example: '[30 - 65]'
+    - A wildcard symbol ('_') that allows any condition in this attribute.
+
+For example, consider medical data (a table) containing the attributes Diagnosis,
+Genetic_Marker, Blood_Type:
+   * FD [Diagnosis, Blood_Type] -> [Genetic_Marker] may mean that people with the same
+     diagnosis and blood type always have the same genetic marker.
+
+   * On the other hand, CFD [Diagnosis, Blood_Type] -> [Genetic_Marker] with pattern
+     tableau {(Cancer|_), (Diabetes|_)} clarifies that the previous rule applies only
+     when Cancer and Diabetes are diagnosed.
+
+=== Note ===
+CFDFinder searches for CFDs, where for RHS there is always a '_' in the condition,
+that is, the wildcard symbol will always be in the pattern tableau for attribute A
+(therefore, the pattern tableau does not contain attribute A).
+
+=== Key Quality Measures for CFD ===
+
+Support: The fraction of records satisfying the condition LHS
+Confidence: The fraction of records where RHS occurs given LHS
+
+=== Algorithm Basic Parameters ===
+
+The CFDFinder algorithm supports several use cases, and each of them has its own parameters.
+To begin with, we will describe the parameters common to all scenarios.
+
+* cfd_max_lhs: The maximum number of attributes in LHS
+  - Range: from 1 to number of columns
+
+* pli_cache_limit: The maximum number of cached plis that are used in the study
+  of candidates with similar LHS
+  - Range: from 1 to infinity (if memory permits)
+
+* expansion_strategy: Defines which types of conditions can be used in the pattern tuple.
+  - 'constant': Only constants and wildcard are used as conditions for attributes.
+
+  - 'negative_constant': Similar to the 'constant' strategy, but the negation
+    condition is added.
+
+  - 'range': The condition for each attribute is represented by a range of constant.
+    To do this, the attribute domain is arranged in lexicographic order.
+    Also in this strategy, the conditions may have the usual constants and wildcard symbol.
+
+* result_strategy: Defines the form in which the result of the algorithm will be obtained.
+  - 'direct': The result of the algorithm will be all the CFDs found according to
+    the specified parameters.
+
+  - 'lattice': Of all the discovered CFDs, only the most general of those rules
+    that have the same RHS will be included in the result.
+    For example, if the algorithm finds rules [X, Y, Z] -> A, [X, Y] -> A,
+    [Y, Z] -> A, [Y] -> A and [X] -> A, then only rule [X] -> A and [Y] -> A
+    will be included in the result.
+
+  - 'tree': It works similarly to the 'lattice' strategy, but it can also identify
+    additional specific CFDs with high support, which are sometimes lost in strict generalization.
+
+* pruning_strategy: Defines the various use cases of the algorithm that will be discussed further.
+   - Possible values: ['legacy', 'support_independent', 'rhs_filter', 'partial_fd']
+
+=== Bacteria Dataset Explanation ===
+
+Let's look at an example of a dataset containing the results of experiments on
+growing a strain of bacteria:
+
+   Oxygen_Level  Temperature_C   pH Nutrient_Level Growth_Rate  Population_Count
+0           Low             25  6.5            Low        Slow                15
+1           Low             25  6.5         Medium      Medium                95
+2           Low             25  6.5         Medium        Slow                30
+3           Low             25  7.5           High   Very_Fast               525
+4           Low             25  7.5           High   Very_Fast               530
+5           Low             25  6.5           High        Slow                10
+6        Medium             25  7.0         Medium      Medium                95
+7        Medium             25  7.0         Medium      Medium               100
+8        Medium             25  7.5         Medium        Slow                45
+9        Medium             35  7.0           High        Fast               290
+10       Medium             40  6.5            Low        Dead                 0
+11       Medium             40  6.5            Low        Dead                 0
+12         High             35  7.5           High   Very_Fast               500
+13         High             40  7.0           High        Dead                 0
+
+We take oxygen level, temperature, pH and nutrient level as study parameters,
+and measure the growth rate and number of populations as a result.
+
+For knowledge discovery and data quality assessment,it is
+interesting for us to study these results in order to draw some conclusions
+and determine the direction of the next experiments.
+
+For example, we may be interested in the following:
+
+* 1. Have we chosen the values of the study parameters correctly?
+     Are the parameters themselves independent?
+
+* 2. Which parameters introduce instability in growth rate predictions?
+
+* 3. Which parameter values are the boundary values for the stability of the results.
+
+Let's try to answer these questions using the CFD mining.
+
+=== Legacy Strategy ===
+
+One of the possible scenarios for using the algorithm is to search for CFDs with
+minimal support and confidence thresholds. To do this, you can use the 'legacy'
+pruning strategy, which takes the following parameters:
+
+* cfd_minconf (minimal confidence):
+  - Range: from 0.0 to 1.0
+
+* cfd_minsup (minimal support):
+  - Range: from 0.0 to 1.0
+
+Let's run the algorithm with the following parameters:
+
+  * Pruning Strategy (pruning_strategy): legacy
+  * Expansion Strategy (expansion_strategy): negative_constant
+  * Result Strategy (result_strategy): direct
+  * Minimum Support (cfd_minsup): 0.8
+  * Minimum Confidence (cfd_minconf): 1
+
+With our parameters, the algorithm detected 3 CFDs.
+
+Let's look at the results that express the dependence between the study parameters.
+
+  1. [Oxygen_Level Nutrient_Level] -> Temperature_C
+PatternTableau {
+	(¬High|_)
+}
+
+    Support: 0.8571428571428571
+    Confidence: 1.0
+
+  This CFD indicates that:
+  If the oxygen level is not 'High' and nutrient level has the same values
+  then according to our data we can predict the temperature under which
+  the experiment was conducted.
+
+This dependence may indicate an error in the design of the experiments,
+since temperature is not an independent variable.
+It may be worth conducting additional experiments with more random parameters.
+
+=== Support Independent and RHS Filter Strategies ===
+
+Sometimes it is still useful to look for low-support dependencies, as they can
+identify rare but interesting dependencies that are performed on a small group of records.
+To find them, you can use an interactive selection of minimum support values in
+the 'legacy' strategy, but this approach is not optimal.
+The 'support independent' strategy is better suited for such cases.
+
+This strategy has the following parameters:
+
+* cfd_minconf (minimal confidence):
+  - Range: from 0.0 to 1.0
+
+* min_support_gain: the minimum number of tuples that each pattern in the
+  pattern tableau must support.
+  - Range: from 1 to number of rows
+
+* max_support_drop: the maximum number of tuples by which CFD support can
+  decrease when one attribute from LHS is removed from the embedded FD.
+  - Range: from 1 to number of rows
+
+* max_patterns: maximum number of rows in the pattern tableau.
+  - Range: from 1 to number of rows
+
+If we are only interested in those rules that express dependence for certain
+attributes, then to reduce the running time of the algorithm, we can use the
+'rhs_filter' strategy, which is an extension of the previous strategy and
+adds another one to all previous parameters:
+
+* rhs_indices: the indexes of the attributes we are interested in for the RHS.
+  - Example: [1,3,5]
+
+Let's run the algorithm with the following parameters:
+
+  * Pruning Strategy (pruning_strategy): rhs_filter
+  * Expansion Strategy (expansion_strategy): range
+  * Result Strategy (result_strategy): lattice
+  * Minimum Confidence (cfd_minconf): 1
+  * Minimum support gain (min_support_gain): 4
+  * Maximum support drop (max_support_drop): 2
+  * Maximum patterns (max_patterns): 1
+  * RHS indices (rhs_indices): [4]
+
+Discovered 4 CFDs:
+
+Let's say we're interested in the effect of temperature on growth rate.
+Consider the following low-support dependencies:
+
+  1. [Oxygen_Level Temperature_C] -> Growth_Rate
+PatternTableau {
+	(_|[35 - 40])
+}
+
+    Support: 0.35714285714285715
+    Confidence: 1.0
+
+  This CFD indicates that:
+  At a temperature of 35-40 degrees, the combination of oxygen regime
+  and temperature uniquely determines the growth rate.
+
+  2. [Temperature_C pH] -> Growth_Rate
+PatternTableau {
+	([35 - 40]|_)
+}
+
+    Support: 0.35714285714285715
+    Confidence: 1.0
+
+  This CFD indicates that:
+  In the same temperature range of 35-40 degrees, the combination of
+  temperature and pH also uniquely determines growth.
+
+Both rules are useful, despite the low support, because they identify a
+temperature zone 35-40 degrees where the system becomes as predictable as possible
+and where you can focus on one key parameter oxygen level or pH instead of
+controlling all factors at the same time.
+
+=== Partial FD Strategy ===
+
+In addition to searching for common CFDs, the CFDFinder algorithm can be used
+to mine partial FDs.
+
+=== Formal Definition ===
+
+Partial FD is a CFD covering the entire relation instance, i.e. those that
+have a support of 1, but do have a confidence of less than 1.
+
+To search, you can use the 'partial_fd' pruning strategy, which has a single
+parameter 'max_g1'. g1 from the G family of metrics determines the fraction
+of pairs of records violating embedded FD.
+
+For example, let's run the algorithm on our bacteria dataset with the
+following parameters:
+
+  * pruning_strategy: partial_fd
+  * result_strategy: lattice
+  * max_g1: 0.02
+
+Discovered 5 partial FDs:
+
+Let's look at the rules that have the 'Growth_Rate' attribute in the dependency
+defining attribute.
+
+  1. [Oxygen_Level pH Nutrient_Level] -> Growth_Rate
+PatternTableau {
+	(_|_|_)
+}
+
+    Support: 1.0
+    Confidence: 0.9285714285714286
+
+  2. [Temperature_C pH Nutrient_Level] -> Growth_Rate
+PatternTableau {
+	(_|_|_)
+}
+
+    Support: 1.0
+    Confidence: 0.9285714285714286
+
+Let's see which entries violate the embedded FDs of these dependencies.
+For example, take the following pair of records:
+
+  Oxygen_Level  Temperature_C   pH Nutrient_Level Growth_Rate  Population_Count
+1          Low             25  6.5         Medium      Medium                95
+2          Low             25  6.5         Medium        Slow                30
+
+That is, with the same dependency parameters, the growth rate is rare,
+but it can be different. Perhaps this is an error in the data itself,
+or the values of the parameters at which the violation occurs, however,
+are near stability boundaries.
+Also, the dependencies differ only in the attributes Oxygen_Level and
+Temperature_C, which may indicate a strong correlation of these parameters
+or similar information regarding Growth_Rate.
+
+In any case, the analysis helped us to draw some conclusions about our data
+and direct it to further experiments.
+
+=== Note ===
+For more information about mining partial fd with the g1 metric, we recommend
+reading the example 'mining_afd.py'.
+
+=== Experimentation Workflow ===
+
+When searching for CFDs, it is usually necessary to experiment with the algorithm
+parameters, since it is quite difficult to immediately get the right set for you.
+
+If your goal is to simplely find high-support CFDs, the legacy strategy is well suited.
+Recommendations for selecting parameters:
+1. Start with middle support and high confidence
+2. If there are few CFDs, loosen the restrictions
+3. If there are a lot of CFDs, increase the LHS size limit or use lattice/tree result strategy.
+
+If your goal is to find rare but interesting CFDs, the support independent strategy is well suited.
+Recommendations for selecting parameters:
+1. The parameter max_support_drop and min_support_gain strongly influence the number of discovered CFDs.
+   Their values should be selected in the range from '1' value to 30 percent of the number of rows in the table.
+2. Maximum patterns strongly affects the running time of the algorithm, so start with small values (for example, 2 or 3).
+   This way, a tableau with a small number of patterns will be more concise.
+3. Use the rhs_filter strategy if you are only interested in certain attributes for the RHS.
+   This will significantly reduce the running time of the algorithm.
+
+If your goal is to look for errors and inaccuracies in the data, a partial FDs search may be
+well suited for you. You can start with small values of the max g1 parameter (for example 0.01)
+and increase if necessary.
+
+Such experiments on your data will help you discover:
+  * new hidden knowledge
+  * data quality issues
+  * patterns useful for decision making
+
+CFD mining example completed!
 
 '''
 
