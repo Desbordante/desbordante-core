@@ -1,10 +1,28 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "core/algorithms/fd/raw_fd.h"
+#include "core/model/table/attribute.h"
 #include "core/model/table/column.h"
 #include "core/model/table/vertical.h"
+
+namespace model {
+struct FunctionalDependency {
+    std::string table_name;
+    std::vector<Attribute> lhs;
+    std::vector<Attribute> rhs;
+
+    FunctionalDependency(std::string table_name, std::vector<Attribute> lhs,
+                         std::vector<Attribute> rhs)
+        : table_name(std::move(table_name)), lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+
+    bool operator==(FunctionalDependency const& other) const noexcept {
+        return table_name == other.table_name && lhs == other.lhs && rhs == other.rhs;
+    }
+};
+}  // namespace model
 
 class FD {
 private:
