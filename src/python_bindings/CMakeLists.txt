@@ -88,6 +88,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cfd
     ${DESBORDANTE_PREFIX}::cfd::verifier
+    ${DESBORDANTE_PREFIX}::cfd::cfun
     better-enums
     Boost::headers
 )

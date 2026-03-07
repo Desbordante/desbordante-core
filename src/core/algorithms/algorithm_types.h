@@ -11,7 +11,7 @@ using AlgorithmTypes =
                    fd_verifier::FDVerifier, HyUCC, PyroUCC, HPIValid, cfd::FDFirstAlgorithm,
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, Fastod, GfdValidator,
                    EGfdValidator, NaiveGfdValidator, order::Order, dd::Split, Cords, hymd::HyMD,
-                   PFDVerifier, cfd_verifier::CFDVerifier, GSpan>;
+                   PFDVerifier, cfd_verifier::CFDVerifier, cfd::cfun::CFUN, GSpan>;
 
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
  * algorithm please add its corresponding value to this enum and to the type
@@ -96,6 +96,7 @@ BETTER_ENUM(AlgorithmType, char,
 
 /* CFD verifier algorithm */
     cfd_verifier,
+    cfun,
     
 /* Frequent subgraph mining algorithms*/
     gspan
