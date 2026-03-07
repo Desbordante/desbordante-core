@@ -20,11 +20,10 @@ private:
     using Level = std::vector<Quadruple>;
 
     config::InputTable input_table_;
-    config::EqNullsType is_null_equal_null_;
     unsigned int min_support_ = 1;
 
     std::unique_ptr<CFDRelationData> cfd_relation_;
-    std::list<CCFD> cfd_list;
+    std::list<CCFD> cfd_list_;
 
     Level BuildZeroLevel() const;
     Level BuildFirstLevel() const;
@@ -44,7 +43,7 @@ public:
     CFUN();
 
     std::list<CCFD> const& GetCFDList() const noexcept {
-        return cfd_list;
+        return cfd_list_;
     }
 
     void MakeExecuteOptsAvailable() override;

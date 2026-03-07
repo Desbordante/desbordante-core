@@ -155,7 +155,7 @@ void CFUN::ComputeClosures(Level& current, Level& last,
                                               cfd_relation_->GetNumRows());
             }
 
-            cfd_list.push_back(DisplayCFD(candidate, num_col, valid_cluster_ids));
+            cfd_list_.push_back(DisplayCFD(candidate, num_col, valid_cluster_ids));
         };
 
         util::ForEachIndex(unset_attributes, compute_cfds_and_update_closure);

@@ -40,6 +40,7 @@ target_link_libraries(
     INTERFACE ${DESBORDANTE_PREFIX}::ac
               ${DESBORDANTE_PREFIX}::ar
               ${DESBORDANTE_PREFIX}::cfd
+              ${DESBORDANTE_PREFIX}::cfd::cfun
               ${DESBORDANTE_PREFIX}::cfd::verifier
               ${DESBORDANTE_PREFIX}::datastats
               ${DESBORDANTE_PREFIX}::dd::split
