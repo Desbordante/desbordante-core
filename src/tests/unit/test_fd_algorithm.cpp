@@ -220,6 +220,25 @@ void MaxLhsTestFun(CSVConfig config, algos::fd::TableMaskPairFdView const& fd_st
         ASSERT_TRUE(fd.lhs.count() <= max_lhs);
     }
 }
+
+void MaxLhsTestFun(CSVConfig config, algos::fd::LhsMaskFdView const& fd_storage,
+                   config::MaxLhsType max_lhs) {
+    using namespace config::names;
+    algos::StdParamsMap verify_params = {
+            {kCsvConfig, config},
+            {kError, config::ErrorType{0.0}},
+            {kMaximumLhs, max_lhs},
+    };
+    auto verify_algo = algos::CreateAndLoadAlgorithm<algos::Pyro>(verify_params);
+    verify_algo->Execute();
+    auto verify_list = FDsToSet(verify_algo->FdList());
+    ASSERT_TRUE(CheckFdCollectionEquality(verify_list, fd_storage));
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : fd_storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& lhs_table_mask : attr_fds) {
+            ASSERT_TRUE(lhs_table_mask.count() <= max_lhs);
+        }
+    }
+}
 }  // namespace
 
 TYPED_TEST_P(FdDiscoveryTest, MaxLHSOptionWork) {
