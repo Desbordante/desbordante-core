@@ -1,12 +1,17 @@
 #include "core/algorithms/fd/aidfd/aid.h"
 
+#include "core/config/max_lhs/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 
 namespace algos {
 
-Aid::Aid() : FDAlgorithm() {
+Aid::Aid() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
+}
+
+void Aid::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName()});
 }
 
 void Aid::RegisterOptions() {
@@ -19,12 +24,13 @@ void Aid::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-
-    for (size_t i = 0; i < number_of_attributes_; ++i) {
-        std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
-        schema_->AppendColumn(column_name);
+    std::size_t const attr_num = input_table_->GetNumberOfColumns();
+    std::vector<std::string> column_names;
+    column_names.reserve(attr_num);
+    for (size_t i = 0; i != attr_num; ++i) {
+        column_names.push_back(input_table_->GetColumnName(i));
     }
+    table_header_ = {input_table_->GetRelationName(), std::move(column_names)};
 
     while (input_table_->HasNextRow()) {
         std::vector<std::string> const& next_line = input_table_->GetNextRow();
@@ -41,7 +47,8 @@ void Aid::LoadDataInternal() {
     constant_columns_ = boost::dynamic_bitset<>(number_of_attributes_);
 }
 
-void Aid::ResetStateFd() {
+void Aid::ResetState() {
+    fd_storage_ = nullptr;
     clusters_.assign(number_of_attributes_, std::unordered_map<size_t, Cluster>{});
     indices_in_clusters_.assign(number_of_attributes_, std::vector<size_t>(number_of_tuples_));
     constant_columns_.reset();
@@ -153,18 +160,6 @@ boost::dynamic_bitset<> Aid::BuildAgreeSet(size_t t1, size_t t2) {
     return equal_attr;
 }
 
-void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
-    boost::dynamic_bitset<> empty_set(number_of_attributes_);
-    Vertical lhs = schema_->CreateEmptyVertical();
-    for (size_t attr_num = constant_columns_.find_first();
-         attr_num != boost::dynamic_bitset<>::npos;
-         attr_num = constant_columns_.find_next(attr_num)) {
-        attributes[attr_num] = false;
-        Column rhs = *schema_->GetColumn(attr_num);
-        RegisterFd(lhs, rhs, schema_);
-    }
-}
-
 void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTree& pos_cover_tree,
                           size_t rhs) {
     std::vector<boost::dynamic_bitset<>> subsets;
@@ -193,9 +188,14 @@ void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTre
 }
 
 void Aid::InvertNegativeCover() {
+    SingleAttrRhsFdStorage::LhsLimBuilder storage_builder{number_of_attributes_, max_lhs_};
+    util::ForEachIndex(constant_columns_, [&](model::Index i) {
+        storage_builder.AddFd(i, {boost::dynamic_bitset(number_of_attributes_)});
+    });
+
     boost::dynamic_bitset<> attributes(number_of_attributes_);
     attributes.set();
-    HandleConstantColumns(attributes);
+    attributes -= constant_columns_;
 
     std::vector<boost::dynamic_bitset<>> neg_cover_vector;
     neg_cover_vector.insert(neg_cover_vector.end(), neg_cover_.begin(), neg_cover_.end());
@@ -210,7 +210,7 @@ void Aid::InvertNegativeCover() {
         inv_attr_indices[attr_indices[i]] = i;
     }
 
-    this->constant_columns_ = ChangeAttributesOrder(this->constant_columns_, inv_attr_indices);
+    constant_columns_ = ChangeAttributesOrder(constant_columns_, inv_attr_indices);
     attributes = ChangeAttributesOrder(attributes, inv_attr_indices);
     for (auto& neg_cover_el : neg_cover_vector) {
         neg_cover_el = ChangeAttributesOrder(neg_cover_el, inv_attr_indices);
@@ -230,24 +230,15 @@ void Aid::InvertNegativeCover() {
         }
 
         size_t real_rhs = attr_indices[rhs];
-        std::vector<boost::dynamic_bitset<>> pos_cover_vector;
-        pos_cover_tree.ForEach(
-                [&pos_cover_vector, &attr_indices](boost::dynamic_bitset<> const& pos_cover_el) {
-                    pos_cover_vector.push_back(ChangeAttributesOrder(pos_cover_el, attr_indices));
-                });
+        pos_cover_tree.ForEach([&storage_builder, &attr_indices,
+                                real_rhs](boost::dynamic_bitset<> const& pos_cover_el) {
+            storage_builder.AddFd(real_rhs, {ChangeAttributesOrder(pos_cover_el, attr_indices)});
+        });
 
-        RegisterFDs(real_rhs, pos_cover_vector);
         attributes[rhs] = true;
     }
-}
 
-void Aid::RegisterFDs(size_t rhs_attribute,
-                      std::vector<boost::dynamic_bitset<>> const& list_of_lhs_attributes) {
-    Column rhs = *schema_->GetColumn(rhs_attribute);
-    for (auto const& lhs_attributes : list_of_lhs_attributes) {
-        Vertical lhs = schema_->GetVertical(lhs_attributes);
-        RegisterFd(lhs, rhs, schema_);
-    }
+    fd_storage_ = storage_builder.Build(table_header_);
 }
 
 size_t Aid::GenerateSecondClusterIndex(size_t index_in_cluster, size_t iteration_num) const {
