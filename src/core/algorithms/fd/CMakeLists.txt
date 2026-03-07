@@ -22,6 +22,30 @@ foreach(dir IN LISTS SUBDIRS)
     add_subdirectory(${dir})
 endforeach()
 
+# --- AFD ---
+set(NAME afd)
+desbordante_add_lib(NAME OBJECT)
+target_sources(
+    ${NAME}
+    PRIVATE afd_algorithm.cpp
+    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
+)
+target_link_libraries(
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos Boost::headers
+)
+
+
+# --- PliBasedAFD ---
+set(NAME afd.pli)
+desbordante_add_lib(NAME OBJECT)
+target_sources(
+    ${NAME}
+    PRIVATE pli_based_afd_algorithm.cpp
+    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
+)
+target_link_libraries(${NAME} PRIVATE ${DESBORDANTE_PREFIX}::afd Boost::headers)
+
+
 # --- FD ---
 set(NAME fd)
 desbordante_add_lib(NAME OBJECT)
@@ -31,7 +55,7 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos Boost::headers
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::afd ${DESBORDANTE_PREFIX}::algos Boost::headers
 )
 
 # --- PliBasedFD ---
@@ -43,3 +67,5 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd Boost::headers)
+
+
