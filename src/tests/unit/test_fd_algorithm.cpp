@@ -161,4 +161,93 @@ using Algorithms =
                          algos::FDep, algos::FUN, algos::hyfd::HyFD, algos::PFDTane>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
+TYPED_TEST_SUITE_P(FdDiscoveryTest);
+
+TYPED_TEST_P(FdDiscoveryTest, ThrowsOnEmpty) {
+    auto algorithm = TestFixture::CreateAndConfToLoad(kTestEmpty);
+    ASSERT_THROW(algorithm->LoadData(), std::runtime_error);
+}
+
+TYPED_TEST_P(FdDiscoveryTest, ReturnsEmptyOnSingleNonKey) {
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kTestSingleColumn);
+    algorithm->Execute();
+    ASSERT_TRUE(NoFDsFound(*algorithm->GetFdStorage()));
+}
+
+TYPED_TEST_P(FdDiscoveryTest, WorksOnLongDataset) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{{{2}, 1}};
+
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kTestLong);
+    algorithm->Execute();
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFdStorage()));
+}
+
+TYPED_TEST_P(FdDiscoveryTest, WorksOnWideDataset) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{
+            {{0}, 2}, {{0}, 4}, {{2}, 0}, {{2}, 4}, {{4}, 0}, {{4}, 2}, {{}, 1}, {{}, 3}};
+
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kTestWide);
+    algorithm->Execute();
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFdStorage()));
+}
+
+TYPED_TEST_P(FdDiscoveryTest, LightDatasetsConsistentHash) {
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightDatasets);
+}
+
+TYPED_TEST_P(FdDiscoveryTest, HeavyDatasetsConsistentHash) {
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
+}
+
+TYPED_TEST_P(FdDiscoveryTest, ConsistentRepeatedExecution) {
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kWdcAstronomical);
+    algorithm->Execute();
+    auto first_res = FDsToSet(algorithm->GetFdStorage()->GetStripped());
+    for (int i = 0; i < 3; ++i) {
+        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kWdcAstronomical));
+        algorithm->Execute();
+        ASSERT_TRUE(CheckFdCollectionEquality(first_res, *algorithm->GetFdStorage()));
+    }
+}
+
+namespace {
+void MaxLhsTestFun(CSVConfig config, std::deque<algos::MultiAttrRhsStrippedFd> const& fds_list,
+                   config::MaxLhsType max_lhs) {
+    using namespace config::names;
+    algos::StdParamsMap verify_params = {
+            {kCsvConfig, config},
+            {kError, config::ErrorType{0.0}},
+            {kMaximumLhs, max_lhs},
+    };
+    auto verify_algo = algos::CreateAndLoadAlgorithm<algos::Pyro>(verify_params);
+    verify_algo->Execute();
+    auto verify_list = FDsToSet(verify_algo->FdList());
+    ASSERT_TRUE(CheckFdListEquality(verify_list, fds_list));
+    for (auto& fd : fds_list) {
+        ASSERT_TRUE(fd.lhs.count() <= max_lhs);
+    }
+}
+}  // namespace
+
+TYPED_TEST_P(FdDiscoveryTest, MaxLHSOptionWork) {
+    config::MaxLhsType max_lhs = 2;
+
+    auto algo = TestFixture::CreateAlgorithmInstance(kTestFD, max_lhs);
+    algo->Execute();
+    MaxLhsTestFun(kTestFD, *algo->GetFdStorage(), max_lhs);
+
+    auto algo_large = TestFixture::CreateAlgorithmInstance(kCIPublicHighway700, max_lhs);
+    algo_large->Execute();
+    MaxLhsTestFun(kCIPublicHighway700, *algo_large->GetFdStorage(), max_lhs);
+}
+
+REGISTER_TYPED_TEST_SUITE_P(FdDiscoveryTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNonKey,
+                            WorksOnLongDataset, WorksOnWideDataset, LightDatasetsConsistentHash,
+                            HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
+                            MaxLHSOptionWork);
+
+using AlgorithmsNew = ::testing::Types<>;
+
+INSTANTIATE_TYPED_TEST_SUITE_P(FdDiscoveryTest, FdDiscoveryTest, AlgorithmsNew);
+
 }  // namespace tests
