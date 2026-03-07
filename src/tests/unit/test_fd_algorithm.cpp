@@ -35,7 +35,7 @@ namespace tests {
  * 2. in CreateAlgorithmInstance replace "Tane" with <your algorithm class name>
  * */
 
-testing::AssertionResult CheckFdListEquality(
+testing::AssertionResult CheckFdCollectionEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
         std::list<FD> const& expected) {
     for (auto& fd : expected) {
@@ -83,7 +83,7 @@ TYPED_TEST_P(AlgorithmTest, WorksOnLongDataset) {
 
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestLong);
     algorithm->Execute();
-    ASSERT_TRUE(CheckFdListEquality(true_fd_collection, algorithm->FdList()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, algorithm->FdList()));
 }
 
 TYPED_TEST_P(AlgorithmTest, WorksOnWideDataset) {
@@ -92,7 +92,7 @@ TYPED_TEST_P(AlgorithmTest, WorksOnWideDataset) {
 
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestWide);
     algorithm->Execute();
-    ASSERT_TRUE(CheckFdListEquality(true_fd_collection, algorithm->FdList()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, algorithm->FdList()));
 }
 
 TYPED_TEST_P(AlgorithmTest, LightDatasetsConsistentHash) {
@@ -110,7 +110,7 @@ TYPED_TEST_P(AlgorithmTest, ConsistentRepeatedExecution) {
     for (int i = 0; i < 3; ++i) {
         algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kWdcAstronomical));
         algorithm->Execute();
-        ASSERT_TRUE(CheckFdListEquality(first_res, algorithm->FdList()));
+        ASSERT_TRUE(CheckFdCollectionEquality(first_res, algorithm->FdList()));
     }
 }
 
@@ -125,7 +125,7 @@ void MaxLhsTestFun(CSVConfig config, std::list<FD> const& fds_list, config::MaxL
     auto verify_algo = algos::CreateAndLoadAlgorithm<algos::Pyro>(verify_params);
     verify_algo->Execute();
     auto verify_list = FDsToSet(verify_algo->FdList());
-    ASSERT_TRUE(CheckFdListEquality(verify_list, fds_list));
+    ASSERT_TRUE(CheckFdCollectionEquality(verify_list, fds_list));
     for (auto& fd : fds_list) {
         ASSERT_TRUE(fd.GetLhs().GetArity() <= max_lhs);
     }
