@@ -1,13 +1,14 @@
 #include "core/algorithms/dd/add_verifier/add_verifier.h"
-
+#include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace algos::dd {
 
-ADDVerifier::ADDVerifier() : DDVerifier() {
+ADDVerifier::ADDVerifier(): DDVerifier() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
@@ -23,6 +24,7 @@ void ADDVerifier::RegisterOptions() {
             Option{&satisfaction_threshold_, kSatisfactionThreshold, kDSatisfactionThreshold, 0.}
                     .SetValueCheck(check_threshold));
 }
+
 
 void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs) {
     double min_dist = -1.;
@@ -52,7 +54,7 @@ void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> 
     if (min_dist < dd_.right.cbegin()->constraint.lower_bound || min_dist > dd_.right.cbegin()->constraint.upper_bound) {
         error_ = 1.;
     } else {
-        error_ = 1. - num_pairs_with_min_dist / lhs.size();
+        error_ = 1. - double(num_pairs_with_min_dist) / lhs.size();
     }
 }
 
@@ -62,11 +64,11 @@ bool ADDVerifier::DDHolds() const {
 
 void ADDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kDDString});
     MakeOptionsAvailable({kDDString, kSatisfactionThreshold});
+
 }
 
-void DDVerifier::CheckCorrectnessDd() const {
+void ADDVerifier::CheckCorrectnessDd() const {
     auto check_constraint = [](auto const &constraint) {
         if (constraint.constraint.upper_bound < constraint.constraint.lower_bound) {
             throw std::invalid_argument("Invalid constraint bounds for column: " +
