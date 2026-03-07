@@ -56,6 +56,7 @@ constexpr auto kDenialConstraint = "denial_constraint";
 // DD verifier
 constexpr auto kDDString = "dd";
 constexpr auto kDDudm = "metrics_map";
+constexpr auto kSatisfactionThreshold = "satisfaction_threshold";
 // DES
 constexpr auto kCrossoverProbability = "crossover_probability";
 constexpr auto kDifferentialScale = "differential_scale";
