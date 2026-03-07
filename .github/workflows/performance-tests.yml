@@ -101,10 +101,10 @@ jobs:
         working-directory: ${{github.workspace}}/build/target
         run: |
           if [[ -a 'baseline.json' ]]; then
-            ./Desbordante_benchmark --baseline ${{ github.workspace }}/baseline.json \
+            ./Desbordante.benchmark --baseline ${{ github.workspace }}/baseline.json \
               --output ${{ github.workspace }}/curr-results.json
           else
-            ./Desbordante_benchmark --output ${{ github.workspace }}/curr-results.json
+            ./Desbordante.benchmark --output ${{ github.workspace }}/curr-results.json
           fi
 
       # All next steps should be ran even if this one has failed
