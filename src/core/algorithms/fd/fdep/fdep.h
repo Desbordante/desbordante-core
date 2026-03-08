@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/fdep/fd_tree_element.h"
@@ -25,12 +26,12 @@ private:
     std::shared_ptr<RelationalSchema> schema_{};
 
     std::vector<std::string> column_names_;
-    size_t number_attributes_{};
+    std::size_t number_attributes_{};
 
     std::unique_ptr<FDTreeElement> neg_cover_tree_{};
     std::unique_ptr<FDTreeElement> pos_cover_tree_{};
 
-    std::vector<std::vector<size_t>> tuples_;
+    std::vector<std::vector<std::size_t>> tuples_;
 
     void RegisterOptions();
 
@@ -44,7 +45,7 @@ private:
 
     // Iterating over all pairs t1 and t2 of the relation
     // Adding violated FDs to negative cover tree.
-    void AddViolatedFDs(std::vector<size_t> const& t1, std::vector<size_t> const& t2);
+    void AddViolatedFDs(std::vector<std::size_t> const& t1, std::vector<std::size_t> const& t2);
 
     // Converting negative cover tree into positive cover tree
     void CalculatePositiveCover(FDTreeElement const& neg_cover_subtree,
@@ -53,7 +54,7 @@ private:
     // Specializing general dependencies for not to be followed from violated dependencies of
     // negative cover tree.
     void SpecializePositiveCover(model::Bitset<FDTreeElement::kMaxAttrNum> const& lhs,
-                                 size_t const& a);
+                                 std::size_t const& a);
 };
 
 }  // namespace algos

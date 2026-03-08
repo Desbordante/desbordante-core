@@ -1,8 +1,8 @@
 #include "core/algorithms/dc/FastADC/misc/typed_column_data_value_differences.h"
 
 #include <algorithm>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 
@@ -14,6 +14,8 @@
 #include "core/util/logger.h"
 
 namespace algos::fastadc {
+
+using std::size_t, std::int64_t;
 
 template <typename T>
 static double GetSharedPercentageTyped(model::TypedColumnData const& c1,

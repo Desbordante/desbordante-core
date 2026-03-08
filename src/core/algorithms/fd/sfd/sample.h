@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <numbers>
 #include <vector>
 
@@ -20,12 +21,12 @@ private:
     std::vector<model::TupleIndex> row_indices_;
     Column lhs_col_;
     Column rhs_col_;
-    size_t lhs_cardinality_;
-    size_t rhs_cardinality_;
-    size_t concat_cardinality_;
+    std::size_t lhs_cardinality_;
+    std::size_t rhs_cardinality_;
+    std::size_t concat_cardinality_;
 
 public:
-    Sample(bool fixed_sample, unsigned long long sample_size, size_t rows, model::ColumnIndex lhs,
+    Sample(bool fixed_sample, unsigned long long sample_size, std::size_t rows, model::ColumnIndex lhs,
            model::ColumnIndex rhs, std::vector<model::TypedColumnData> const &data,
            RelationalSchema const *rel_schema_);
     void Filter(FrequencyHandler const &handler, std::vector<model::TypedColumnData> const &data,
@@ -33,11 +34,11 @@ public:
 
     /* Formulae (2) from "CORDS: Automatic Discovery of Correlations and Soft Functional
        Dependencies."*/
-    static unsigned long long CalculateSampleSize(size_t lhs_cardinality, size_t rhs_cardinality,
+    static unsigned long long CalculateSampleSize(std::size_t lhs_cardinality, std::size_t rhs_cardinality,
                                                   long double max_false_positive_probability,
                                                   long double delta);
 
-    [[nodiscard]] std::vector<size_t> const &GetRowIndices() const {
+    [[nodiscard]] std::vector<std::size_t> const &GetRowIndices() const {
         return row_indices_;
     }
 

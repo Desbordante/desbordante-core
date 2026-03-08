@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd_algorithm.h"
@@ -35,10 +36,10 @@ private:
     long double min_structural_zeroes_proportion_;
     long double max_false_positive_probability_;
     long double delta_;
-    size_t max_amount_of_categories_;
+    std::size_t max_amount_of_categories_;
 
     std::vector<bool> is_skewed_;
-    std::vector<size_t> domains_;
+    std::vector<std::size_t> domains_;
 
     CorrelationCollection correlations_collection_;
     FrequencyHandler handler_;
@@ -61,7 +62,7 @@ private:
     void SkewHandling(model::ColumnIndex col_i, model::ColumnIndex col_k,
                       std::vector<model::TypedColumnData> const& data, Sample& smp);
 
-    bool IsSoftOrTrivial(model::ColumnIndex col_ind, size_t row_count);
+    bool IsSoftOrTrivial(model::ColumnIndex col_ind, std::size_t row_count);
 
     bool CheckCorrelation(model::ColumnIndex col_i, model::ColumnIndex col_k,
                           std::vector<model::TypedColumnData> const& data, Sample& smp);

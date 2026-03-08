@@ -1,4 +1,5 @@
 #include <memory>
+#include <cstddef>
 #include <string>
 
 #include <gmock/gmock.h>
@@ -29,7 +30,7 @@ struct DCTestParams {
     bool do_collect_violations_;
     bool dc_holds_;
     CSVConfig csv_config;
-    std::vector<std::pair<size_t, size_t>> violations;
+    std::vector<std::pair<std::size_t, std::size_t>> violations;
 };
 
 class TestDCVerifier : public ::testing::TestWithParam<DCTestParams> {};

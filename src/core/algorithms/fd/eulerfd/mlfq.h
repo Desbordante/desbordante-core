@@ -4,6 +4,7 @@
 #include <memory>
 #include <queue>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/fd/eulerfd/cluster.h"
 
@@ -21,21 +22,21 @@ private:
     };
 
     std::vector<Queue> queues_;
-    size_t effective_size_ = 0;
+    std::size_t effective_size_ = 0;
     std::priority_queue<LastQueueElement> last_queue_{};
 
     // Index of not empty queue with the highest priority
     int actual_queue_ = -1;
 
 public:
-    explicit MLFQ(size_t queues_number);
+    explicit MLFQ(std::size_t queues_number);
 
     void Add(Cluster *cluster, double priority, bool add_if_zero = false);
     void AddAtLast(Cluster *cluster);
     [[nodiscard]] Cluster *Get();
 
-    [[nodiscard]] size_t GetEffectiveSize() const;
-    [[nodiscard]] size_t GetLastQueueSize() const;
+    [[nodiscard]] std::size_t GetEffectiveSize() const;
+    [[nodiscard]] std::size_t GetLastQueueSize() const;
     [[nodiscard]] double MaxEffectInLastQueue() const;
     void Clear();
 };

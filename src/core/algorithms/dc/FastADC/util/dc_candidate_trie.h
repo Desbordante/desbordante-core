@@ -2,7 +2,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
@@ -11,6 +11,9 @@
 #include "core/algorithms/dc/FastADC/util/dc_candidate.h"
 
 namespace algos::fastadc {
+
+using std::size_t;
+
 class DCCandidateTrie {
 public:
     explicit DCCandidateTrie(size_t max_subtrees);

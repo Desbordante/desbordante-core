@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
 
+#include <cstddef>
+
 PruningMap::PruningMap(RelationalSchema const* schema) {
     for (auto const& column : schema->GetColumns()) {
         this->insert(std::make_pair(Vertical(*column), std::unordered_set<Vertical>()));
@@ -29,7 +31,7 @@ void PruningMap::RebalanceGroup(Vertical const& key) {
     auto const& deps_of_group = this->at(key);
     auto inverted_columns = key.GetColumnIndices().operator~();
 
-    for (size_t column_index = inverted_columns.find_first();
+    for (std::size_t column_index = inverted_columns.find_first();
          column_index < inverted_columns.size();
          column_index = inverted_columns.find_next(column_index)) {
         Vertical new_key = key.Union(*key.GetSchema()->GetColumn(column_index));

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -14,6 +15,8 @@
 #include "core/model/table/vertical.h"
 
 namespace algos {
+
+using std::size_t;
 
 class Aid : public FDAlgorithm {
 private:

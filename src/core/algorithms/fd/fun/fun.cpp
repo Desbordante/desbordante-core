@@ -1,8 +1,12 @@
 #include "core/algorithms/fd/fun/fun.h"
 
+#include <cstddef>
+
 #include "core/util/logger.h"
 
 namespace algos {
+
+using std::size_t;
 
 FunQuadruple FunQuadruple::Union(Column const& that) const {
     return FunQuadruple(candidate_.Union(that));

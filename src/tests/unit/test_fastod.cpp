@@ -1,5 +1,6 @@
 #include <memory>
 #include <vector>
+#include <cstddef>
 
 #include <gtest/gtest.h>
 
@@ -14,7 +15,7 @@ namespace tests {
 
 namespace {
 
-size_t RunFastod(algos::StdParamsMap const& params) {
+std::size_t RunFastod(algos::StdParamsMap const& params) {
     std::unique_ptr<algos::Fastod> fastod = algos::CreateAndLoadAlgorithm<algos::Fastod>(params);
 
     fastod->Execute();
@@ -29,13 +30,13 @@ size_t RunFastod(algos::StdParamsMap const& params) {
     std::sort(ods_desc_sorted.begin(), ods_desc_sorted.end());
     std::sort(ods_simple_sorted.begin(), ods_simple_sorted.end());
 
-    size_t ods_asc_sorted_hash = algos::fastod::hashing::CombineHashes(ods_asc_sorted);
-    size_t ods_desc_sorted_hash = algos::fastod::hashing::CombineHashes(ods_desc_sorted);
-    size_t ods_simple_sorted_hash = algos::fastod::hashing::CombineHashes(ods_simple_sorted);
+    std::size_t ods_asc_sorted_hash = algos::fastod::hashing::CombineHashes(ods_asc_sorted);
+    std::size_t ods_desc_sorted_hash = algos::fastod::hashing::CombineHashes(ods_desc_sorted);
+    std::size_t ods_simple_sorted_hash = algos::fastod::hashing::CombineHashes(ods_simple_sorted);
 
-    std::vector<size_t> od_hashes = {ods_asc_sorted_hash, ods_desc_sorted_hash,
+    std::vector<std::size_t> od_hashes = {ods_asc_sorted_hash, ods_desc_sorted_hash,
                                      ods_simple_sorted_hash};
-    size_t result_hash = algos::fastod::hashing::CombineHashes(od_hashes);
+    std::size_t result_hash = algos::fastod::hashing::CombineHashes(od_hashes);
 
     return result_hash;
 }
@@ -50,7 +51,7 @@ TEST_P(ExactFastodResultHashTest, CorrectnessTest) {
     using namespace config::names;
     CSVConfigHash csv_config_hash = GetParam();
     algos::StdParamsMap params{{kCsvConfig, csv_config_hash.config}};
-    size_t actual_hash = RunFastod(params);
+    std::size_t actual_hash = RunFastod(params);
     EXPECT_EQ(actual_hash, csv_config_hash.hash);
 }
 
@@ -58,7 +59,7 @@ TEST_P(ApproximateFastodResultHashTest, CorrectnessTest) {
     using namespace config::names;
     CSVConfigHash csv_config_hash = GetParam();
     algos::StdParamsMap params{{kCsvConfig, csv_config_hash.config}, {kError, 0.1}};
-    size_t actual_hash = RunFastod(params);
+    std::size_t actual_hash = RunFastod(params);
     EXPECT_EQ(actual_hash, csv_config_hash.hash);
 }
 

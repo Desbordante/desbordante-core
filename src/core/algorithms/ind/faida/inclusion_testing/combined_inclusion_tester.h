@@ -1,6 +1,7 @@
 #pragma once
 
 #include <hash_table8.hpp>
+#include <cstddef>
 
 #include "core/algorithms/ind/faida/inclusion_testing/hll_data.h"
 #include "core/algorithms/ind/faida/inclusion_testing/iinclusion_tester.h"
@@ -11,7 +12,7 @@ namespace algos::faida {
 
 class CombinedInclusionTester : public IInclusionTester {
 private:
-    size_t const null_hash_;
+    std::size_t const null_hash_;
     SampledInvertedIndex sampled_inverted_index_;
     std::unordered_map<TableIndex, emhash8::HashMap<std::shared_ptr<SimpleCC>, HLLData>>
             hlls_by_table_;
@@ -24,7 +25,7 @@ private:
     unsigned num_threads_;
 
     static int CalcNumBits(double error) {
-        return int(log((1.106 / error) * (1.106 / error)) / log(2));
+        return int(std::log((1.106 / error) * (1.106 / error)) / std::log(2));
     }
 
     HLLData CreateApproxDataStructure() const {
@@ -33,7 +34,7 @@ private:
         return data;
     }
 
-    void InsertRowIntoHLL(size_t row_hash, HLLData& data) const {
+    void InsertRowIntoHLL(std::size_t row_hash, HLLData& data) const {
         std::optional<hll::HyperLogLog>& hll = data.GetHll();
         if (!hll.has_value()) {
             data.SetHll(hll::HyperLogLog(CalcNumBits(error_)));
@@ -51,7 +52,7 @@ private:
     }
 
 public:
-    CombinedInclusionTester(unsigned num_threads, double error, size_t null_hash)
+    CombinedInclusionTester(unsigned num_threads, double error, std::size_t null_hash)
         : null_hash_(null_hash),
           curr_table_idx_(-1),
           num_certain_checks_(0),
@@ -64,7 +65,7 @@ public:
     void Initialize(std::vector<HashedTableSample> const& table_samples) override;
 
     void StartInsertRow(TableIndex table_idx) override;
-    void InsertRows(IRowIterator::Block const& values, size_t block_size) override;
+    void InsertRows(IRowIterator::Block const& values, std::size_t block_size) override;
 
     bool IsIncludedIn(std::shared_ptr<SimpleCC> const& dep,
                       std::shared_ptr<SimpleCC> const& ref) override;

@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 #include "core/config/indices/type.h"
@@ -14,15 +16,15 @@ namespace {
 class UCCVerifierSimpleParams {
 private:
     algos::StdParamsMap params_map_;
-    size_t num_clusters_violating_ucc_ = 0;
-    size_t num_rows_violating_ucc_ = 0;
+    std::size_t num_clusters_violating_ucc_ = 0;
+    std::size_t num_rows_violating_ucc_ = 0;
     double expected_error_ = 0.0;
     std::vector<model::PLI::Cluster> clusters_violating_ucc_;
 
 public:
     UCCVerifierSimpleParams(CSVConfig const& csv_config, config::IndicesType column_indices,
-                            size_t const num_clusters_violating_ucc,
-                            size_t const num_rows_violating_ucc, double const expected_error,
+                            std::size_t const num_clusters_violating_ucc,
+                            std::size_t const num_rows_violating_ucc, double const expected_error,
                             std::vector<model::PLI::Cluster> clusters_violating_ucc)
         : params_map_({{onam::kCsvConfig, csv_config}, {onam::kEqualNulls, true}}),
           num_clusters_violating_ucc_(num_clusters_violating_ucc),
@@ -41,11 +43,11 @@ public:
         return params_map_;
     }
 
-    size_t GetExpectedNumClustersViolatingUCC() const {
+    std::size_t GetExpectedNumClustersViolatingUCC() const {
         return num_clusters_violating_ucc_;
     }
 
-    size_t GetExpectedNumRowsViolatingUCC() const {
+    std::size_t GetExpectedNumRowsViolatingUCC() const {
         return num_rows_violating_ucc_;
     }
 

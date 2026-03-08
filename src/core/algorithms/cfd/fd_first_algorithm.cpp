@@ -1,6 +1,7 @@
 #include "core/algorithms/cfd/fd_first_algorithm.h"
 
 #include <iterator>
+#include <cstddef>
 
 #include <boost/unordered_map.hpp>
 

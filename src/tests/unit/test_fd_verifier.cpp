@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <memory>
+#include <cstddef>
 
 #include <gtest/gtest.h>
 
@@ -53,11 +54,11 @@ namespace onam = config::names;
 struct FDVerifyingParams {
     algos::StdParamsMap params;
     long double const error = 0.;
-    size_t const num_error_clusters = 0;
-    size_t const num_error_rows = 0;
+    std::size_t const num_error_clusters = 0;
+    std::size_t const num_error_rows = 0;
 
     FDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                      size_t const num_error_clusters = 0, size_t const num_error_rows = 0,
+                      std::size_t const num_error_clusters = 0, std::size_t const num_error_rows = 0,
                       long double const error = 0., CSVConfig const& csv_config = kTestFD)
         : params({{onam::kCsvConfig, csv_config},
                   {onam::kLhsIndices, std::move(lhs_indices)},

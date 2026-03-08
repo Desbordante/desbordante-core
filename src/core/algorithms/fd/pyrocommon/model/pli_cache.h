@@ -3,6 +3,7 @@
 class ProfilingContext;
 
 #include <mutex>
+#include <cstddef>
 
 #include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
 #include "core/model/table/column_layout_relation_data.h"
@@ -67,7 +68,7 @@ public:
         maximum_entropy_ = e;
     }
 
-    size_t Size() const;
+    std::size_t Size() const;
 
     // returns ownership of single column PLIs back to ColumnLayoutRelationData
     virtual ~PLICache();

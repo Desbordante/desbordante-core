@@ -1,5 +1,6 @@
 #include "core/util/convex_hull.h"
 
+#include <cstddef>
 #include <algorithm>
 
 namespace util {
@@ -10,24 +11,24 @@ static long double CrossProduct(Point const& p0, Point const& p1, Point const& p
 }
 
 std::vector<std::pair<Point, Point>> GetAntipodalPairs(std::vector<Point> const& conv_hull) {
-    size_t n = conv_hull.size();
+    std::size_t n = conv_hull.size();
     std::vector<std::pair<Point, Point>> antipodal_pairs;
     if (n <= 1) return antipodal_pairs;
     if (n == 2) {
         antipodal_pairs.emplace_back(conv_hull[0], conv_hull[1]);
         return antipodal_pairs;
     }
-    auto next = [n](size_t p) { return (p + 1) % n; };
-    auto area = [&conv_hull](size_t a, size_t b, size_t c) {
+    auto next = [n](std::size_t p) { return (p + 1) % n; };
+    auto area = [&conv_hull](std::size_t a, std::size_t b, std::size_t c) {
         return CrossProduct(conv_hull[a], conv_hull[b], conv_hull[c]);
     };
-    size_t p = n - 1;
-    size_t next_p = 0;
-    size_t q = 0;
+    std::size_t p = n - 1;
+    std::size_t next_p = 0;
+    std::size_t q = 0;
     while (area(p, next_p, next(q)) > area(p, next_p, q)) {
         q = next(q);
     }
-    size_t q0 = q;
+    std::size_t q0 = q;
     while (q != 0) {
         p = next_p;
         next_p = next(p);

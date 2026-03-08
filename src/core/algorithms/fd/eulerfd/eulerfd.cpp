@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 
+#include <ctime>
+
 namespace algos {
 
 EulerFD::EulerFD() : FDAlgorithm(), mlfq_(kQueuesNumber) {
@@ -382,7 +384,7 @@ unsigned long long EulerFD::ExecuteInternal() {
         random_ = std::make_unique<CustomRandom>(custom_random_opt_.value());
         rand_function_ = [&]() { return random_->NextInt(kRandomUpperBound); };
     } else {
-        srand(time(NULL));
+        srand(std::time(NULL));
         rand_function_ = std::rand;
     }
 

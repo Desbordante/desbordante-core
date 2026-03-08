@@ -1,11 +1,13 @@
 #include "core/algorithms/dc/FastADC/util/single_clue_set_builder.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 
 namespace algos::fastadc {
+
+using std::size_t;
 
 SingleClueSetBuilder::SingleClueSetBuilder(PliShard const& shard)
     : plis_(shard.Plis()),

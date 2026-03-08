@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/pfd_verifier/pfd_stats_calculator.h"
@@ -39,12 +40,12 @@ private:
     std::shared_ptr<model::PLI const> CalculatePLI(config::IndicesType const& indices) const;
 
 public:
-    size_t GetNumViolatingClusters() const {
+    std::size_t GetNumViolatingClusters() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumViolatingClusters();
     }
 
-    size_t GetNumViolatingRows() const {
+    std::size_t GetNumViolatingRows() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumViolatingRows();
     }

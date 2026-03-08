@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <variant>
+#include <cstddef>
 
 #include "core/util/logger.h"
 
@@ -659,7 +660,7 @@ std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(std::vector<Vertic
 
         for (Vertical const& invalid_member : invalid_hitting_set_members) {
             boost::dynamic_bitset<> const& column_indices = vertical.GetColumnIndices();
-            for (size_t corrective_column_index = column_indices.find_first();
+            for (std::size_t corrective_column_index = column_indices.find_first();
                  corrective_column_index != boost::dynamic_bitset<>::npos;
                  corrective_column_index = column_indices.find_next(corrective_column_index)) {
                 Column const& corrective_column = *schema->GetColumn(corrective_column_index);

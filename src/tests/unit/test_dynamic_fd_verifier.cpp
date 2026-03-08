@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <memory>
+#include <cstddef>
 
 #include <gtest/gtest.h>
 
@@ -48,14 +49,14 @@ namespace onam = config::names;
 struct DynFDVerifyingParams {
     algos::StdParamsMap params;
     long double const error = 0.;
-    size_t const num_error_clusters = 0;
-    size_t const num_error_rows = 0;
+    std::size_t const num_error_clusters = 0;
+    std::size_t const num_error_rows = 0;
 
     DynFDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                         size_t const num_error_clusters = 0, size_t const num_error_rows = 0,
+                         std::size_t const num_error_clusters = 0, std::size_t const num_error_rows = 0,
                          long double const error = 0., CSVConfig const& insert_config = {},
                          CSVConfig const& update_config = {},
-                         std::unordered_set<size_t> delete_config = {},
+                         std::unordered_set<std::size_t> delete_config = {},
                          CSVConfig const& csv_config = kTestDynamicFDInit)
         : params({{onam::kCsvConfig, csv_config},
                   {onam::kLhsIndices, std::move(lhs_indices)},

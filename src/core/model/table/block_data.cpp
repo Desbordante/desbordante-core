@@ -7,9 +7,10 @@
 
 #include <algorithm>
 #include <cassert>
-#include <limits>
 
 namespace model {
+
+using std::size_t;
 
 namespace details {
 

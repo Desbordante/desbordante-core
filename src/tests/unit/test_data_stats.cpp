@@ -1,5 +1,7 @@
 #include <gmock/gmock.h>
 
+#include <cstddef>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/statistics/data_stats.h"
 #include "core/config/names.h"
@@ -98,7 +100,7 @@ TEST(TestDataStats, TestGetWordCount) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic word_count_stat = stats.GetNumberOfWords(11);
-    size_t count = mo::Type::GetValue<mo::Int>(word_count_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(word_count_stat.GetData());
     EXPECT_EQ(count, 21);
 }
 
@@ -106,7 +108,7 @@ TEST(TestDataStats, TestGetEntirelyUppercaseCount) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic entirely_uppercase_count_stat = stats.GetNumberOfEntirelyUppercaseWords(11);
-    size_t count = mo::Type::GetValue<mo::Int>(entirely_uppercase_count_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(entirely_uppercase_count_stat.GetData());
     EXPECT_EQ(count, 2);
 }
 
@@ -114,7 +116,7 @@ TEST(TestDataStats, TestGetEntirelyLowercaseCount) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic entirely_lowercase_count_stat = stats.GetNumberOfEntirelyLowercaseWords(11);
-    size_t count = mo::Type::GetValue<mo::Int>(entirely_lowercase_count_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(entirely_lowercase_count_stat.GetData());
     EXPECT_EQ(count, 16);
 }
 
@@ -122,7 +124,7 @@ TEST(TestDataStats, TestGetMaxWords) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic max_words_stat = stats.GetMaxNumberOfWords(11);
-    size_t count = mo::Type::GetValue<mo::Int>(max_words_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(max_words_stat.GetData());
     EXPECT_EQ(count, 9);
 }
 
@@ -130,7 +132,7 @@ TEST(TestDataStats, TestGetMinWords) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic min_words_stat = stats.GetMinNumberOfWords(11);
-    size_t count = mo::Type::GetValue<mo::Int>(min_words_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(min_words_stat.GetData());
     EXPECT_EQ(count, 1);
 }
 
@@ -138,7 +140,7 @@ TEST(TestDataStats, TestGetMaxChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic max_chars_stat = stats.GetMaxNumberOfChars(10);
-    size_t count = mo::Type::GetValue<mo::Int>(max_chars_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(max_chars_stat.GetData());
     EXPECT_EQ(count, 13);
 }
 
@@ -146,7 +148,7 @@ TEST(TestDataStats, TestGetMinChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic min_chars_stat = stats.GetMinNumberOfChars(10);
-    size_t count = mo::Type::GetValue<mo::Int>(min_chars_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(min_chars_stat.GetData());
     EXPECT_EQ(count, 3);
 }
 
@@ -162,7 +164,7 @@ TEST(TestDataStats, TestGetNumberOfChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic num_chars_stat = stats.GetNumberOfChars(10);
-    size_t count = mo::Type::GetValue<mo::Int>(num_chars_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(num_chars_stat.GetData());
     EXPECT_EQ(count, 47);
 }
 
@@ -170,7 +172,7 @@ TEST(TestDataStats, TestGetNumberOfUppercaseChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic num_uppercase_chars = stats.GetNumberOfUppercaseChars(10);
-    size_t count = mo::Type::GetValue<mo::Int>(num_uppercase_chars.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(num_uppercase_chars.GetData());
     EXPECT_EQ(count, 6);
 }
 
@@ -178,7 +180,7 @@ TEST(TestDataStats, TestGetNumberOfLowercaseChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic num_lowercase_chars = stats.GetNumberOfLowercaseChars(10);
-    size_t count = mo::Type::GetValue<mo::Int>(num_lowercase_chars.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(num_lowercase_chars.GetData());
     EXPECT_EQ(count, 33);
 }
 
@@ -186,7 +188,7 @@ TEST(TestDataStats, TestGetNumberOfDigitChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic non_letter_chars_stat = stats.GetNumberOfDigitChars(10);
-    size_t count = mo::Type::GetValue<mo::Int>(non_letter_chars_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(non_letter_chars_stat.GetData());
     EXPECT_EQ(count, 6);
 }
 
@@ -194,7 +196,7 @@ TEST(TestDataStats, TestGetNumberOfNonLetterChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic non_letter_chars_stat = stats.GetNumberOfNonLetterChars(10);
-    size_t count = mo::Type::GetValue<mo::Int>(non_letter_chars_stat.GetData());
+    std::size_t count = mo::Type::GetValue<mo::Int>(non_letter_chars_stat.GetData());
     EXPECT_EQ(count, 8);
 }
 
@@ -208,28 +210,28 @@ TEST(TestDataStats, TestGetVocab) {
 
 TEST(TestDataStats, TestGetNumberOfNulls) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    size_t num_nulls = stats_ptr->GetNumNulls(0);
+    std::size_t num_nulls = stats_ptr->GetNumNulls(0);
     EXPECT_EQ(num_nulls, 5);
 }
 
 TEST(TestDataStats, TestGetColumnsWithUniqueValues) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithUniqueValues();
-    std::vector<size_t> actual_cols = std::vector<size_t>{8, 9, 10, 11};
+    std::vector<std::size_t> expected_cols = stats_ptr->GetColumnsWithUniqueValues();
+    std::vector<std::size_t> actual_cols = std::vector<std::size_t>{8, 9, 10, 11};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
 TEST(TestDataStats, TestGetNullColumns) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kSimpleTypes);
-    std::vector<size_t> expected_cols = stats_ptr->GetNullColumns();
-    std::vector<size_t> actual_cols = std::vector<size_t>{1};
+    std::vector<std::size_t> expected_cols = stats_ptr->GetNullColumns();
+    std::vector<std::size_t> actual_cols = std::vector<std::size_t>{1};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
 TEST(TestDataStats, TestGetColumnsWithNull) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestMetric);
-    std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithNull();
-    std::vector<size_t> actual_cols = std::vector<size_t>{6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    std::vector<std::size_t> expected_cols = stats_ptr->GetColumnsWithNull();
+    std::vector<std::size_t> actual_cols = std::vector<std::size_t>{6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
@@ -243,7 +245,7 @@ TEST(TestDataStats, TestMedianAD) {
 
 TEST(TestDataStats, TestGetMedian) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    auto test = [&stats = *stats_ptr](size_t index) {
+    auto test = [&stats = *stats_ptr](std::size_t index) {
         algos::Statistic median_stat = stats.GetMedian(index);
         mo::Double median = mo::Type::GetValue<mo::Double>(median_stat.GetData());
         return median;
@@ -289,7 +291,7 @@ TEST(TestDataStats, TestNumberOfNegatives) {
 }
 
 TEST(TestDataStats, TestGetNumberOfZeros) {
-    auto test = [](CSVConfig const &csv_config, size_t index) {
+    auto test = [](CSVConfig const &csv_config, std::size_t index) {
         std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(csv_config);
         algos::DataStats &stats = *stats_ptr;
         algos::Statistic num_zeros_stat = stats.GetNumberOfZeros(index);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <deque>
 #include <set>
 #include <unordered_map>
@@ -15,6 +16,7 @@
 namespace model {
 
 using AgreeSet = Vertical;
+using std::size_t;
 
 enum class AgreeSetsGenMethod {
     kUsingVectorOfIDSets = 0, /*< Generates agree sets using identifier sets.

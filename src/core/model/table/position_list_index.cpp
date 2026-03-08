@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cmath>
 #include <deque>
 #include <map>
@@ -21,6 +22,7 @@
 
 namespace model {
 
+using std::size_t;
 int const PositionListIndex::kSingletonValueId = 0;
 unsigned long long PositionListIndex::micros_ = 0;
 int PositionListIndex::intersection_count_ = 0;

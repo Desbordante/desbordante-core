@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <cstddef>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -13,6 +14,9 @@
 #include "core/algorithms/cfd/model/cfd_types.h"
 
 namespace algos::cfd_verifier {
+
+using std::size_t;
+
 class CFDStatsCalculator {
 private:
     std::shared_ptr<cfd::CFDRelationData> relation_;

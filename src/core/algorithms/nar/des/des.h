@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "core/algorithms/nar/des/differential_functions.h"
 #include "core/algorithms/nar/des/encoded_nar.h"
 #include "core/algorithms/nar/des/enums.h"
@@ -23,7 +25,7 @@ private:
     static FeatureDomains FindFeatureDomains(TypedRelation const* typed_relation);
     std::vector<EncodedNAR> GetRandomPopulationInDomains(FeatureDomains const& domains,
                                                          RNG& rng) const;
-    EncodedNAR MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at,
+    EncodedNAR MutatedIndividual(std::vector<EncodedNAR> const& population, std::size_t at,
                                  RNG& rng) const;
 
 protected:

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/od/fastod/partitions/stripped_partition.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
@@ -15,19 +16,19 @@ class StrippedPartition;
 class RangeBasedStrippedPartition {
 private:
     std::vector<DataFrame::Range> indexes_;
-    std::vector<size_t> begins_;
+    std::vector<std::size_t> begins_;
     DataFrame const& data_;
     bool should_be_converted_to_sp_;
 
     static constexpr inline double kSmallRangesRatioToConvert = 0.5;
-    static constexpr inline size_t kMinMeaningfulRangeSize = static_cast<size_t>(10);
+    static constexpr inline std::size_t kMinMeaningfulRangeSize = static_cast<std::size_t>(10);
 
     RangeBasedStrippedPartition(DataFrame const& data, std::vector<DataFrame::Range> const& indexes,
-                                std::vector<size_t> const& begins);
+                                std::vector<std::size_t> const& begins);
 
     std::vector<DataFrame::ValueIndices> IntersectWithAttribute(model::ColumnIndex attribute,
-                                                                size_t group_start,
-                                                                size_t group_end);
+                                                                std::size_t group_start,
+                                                                std::size_t group_end);
 
 public:
     RangeBasedStrippedPartition() = delete;

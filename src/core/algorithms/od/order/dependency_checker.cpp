@@ -1,6 +1,7 @@
 #include "core/algorithms/od/order/dependency_checker.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <unordered_set>
 
 #include "core/model/table/tuple_index.h"
@@ -24,7 +25,7 @@ bool SubsetSetDifference(SortedPartition::EquivalenceClass const& a,
 
 ValidityType CheckForSwap(SortedPartition const& l, SortedPartition const& r) {
     ValidityType res = ValidityType::valid;
-    size_t l_i = 0, r_i = 0;
+    std::size_t l_i = 0, r_i = 0;
     bool next_l = true, next_r = true;
     SortedPartition::EquivalenceClass l_eq_class;
     SortedPartition::EquivalenceClass r_eq_class;

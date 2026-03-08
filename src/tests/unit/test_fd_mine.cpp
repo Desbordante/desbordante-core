@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <cstddef>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -40,7 +41,7 @@ using FDMineAlgorithmTest = tests::AlgorithmTest<FdMine>;
 
 std::vector<unsigned int> FdMineBitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
+    for (std::size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
         res.push_back(index);
     }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 #include <filesystem>
 #include <list>
 #include <memory>
@@ -22,6 +23,7 @@
 namespace model {
 
 using PartitionIndex = unsigned int;
+using std::size_t;
 
 /// column domain partition storing values in sorted order
 class DomainPartition {

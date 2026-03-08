@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <cstddef>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -13,11 +14,11 @@ private:
     std::unique_ptr<UCCTreeVertex> root_;
 
 public:
-    explicit UCCTree(size_t num_attributes) : root_(UCCTreeVertex::Create(num_attributes, false)) {
+    explicit UCCTree(std::size_t num_attributes) : root_(UCCTreeVertex::Create(num_attributes, false)) {
         root_->InitChildren(true);
     }
 
-    [[nodiscard]] size_t GetNumAttributes() const noexcept {
+    [[nodiscard]] std::size_t GetNumAttributes() const noexcept {
         return root_->GetNumAttributes();
     }
 

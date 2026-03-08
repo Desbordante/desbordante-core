@@ -4,6 +4,7 @@
 #include <deque>
 #include <string>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
@@ -49,13 +50,13 @@ public:
     }
 
     /* Returns the number of clusters where FD is violated */
-    size_t GetNumErrorClusters() const {
+    std::size_t GetNumErrorClusters() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumErrorClusters();
     }
 
     /* Returns the number of rows that violate the FD */
-    size_t GetNumErrorRows() const {
+    std::size_t GetNumErrorRows() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumErrorRows();
     }

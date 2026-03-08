@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstddef>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -9,6 +10,8 @@
 #include "core/algorithms/fd/raw_fd.h"
 
 namespace algos::hyfd::fd_tree {
+
+using std::size_t;
 
 /**
  * FD prefix tree.

@@ -3,8 +3,11 @@
 #include <functional>
 #include <numeric>
 #include <vector>
+#include <cstddef>
 
 namespace algos {
+
+using std::size_t;
 
 class Cluster {
 public:

@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <string_view>
+#include <cstdint>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
