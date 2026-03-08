@@ -28,7 +28,7 @@
 
 namespace algos::dd {
 
-Split::Split() : Algorithm({}) {
+Split::Split() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }

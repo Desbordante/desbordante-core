@@ -10,8 +10,7 @@
 
 namespace algos {
 
-ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+ARAlgorithm::ARAlgorithm() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kTable, kInputFormat});

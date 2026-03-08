@@ -91,16 +91,10 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
     // compute agree sets using identifier sets
     // using vector of identifier sets
     if (!identifier_sets.empty()) {
-        size_t const size = identifier_sets.size();
-        size_t const pairs_num = (size_t)(size * (size - 1) / 2);
-        double const percent_per_idset =
-                (pairs_num == 0) ? algos::FDAlgorithm::kTotalProgressPercent
-                                 : algos::FDAlgorithm::kTotalProgressPercent / pairs_num;
         auto back_it = std::prev(identifier_sets.end());
         for (auto p = identifier_sets.begin(); p != back_it; ++p) {
             for (auto q = std::next(p); q != identifier_sets.end(); ++q) {
                 agree_sets.insert(p->Intersect(*q));
-                AddProgress(percent_per_idset);
             }
         }
     }
@@ -132,11 +126,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
 
     // compute agree sets using identifier sets
     // metanome approach (using map of identifier sets)
-    double const percent_per_cluster =
-            max_representation.empty()
-                    ? algos::FDAlgorithm::kTotalProgressPercent
-                    : algos::FDAlgorithm::kTotalProgressPercent / max_representation.size();
-
     if (config_.threads_num > 1) {
         /* Not as fast and simple as it can be, need to use concurrent unordered_set.
          * Without concurrent data structure need to create separate unordered_set<AgreeSet>
@@ -158,9 +147,8 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
          */
         unsigned short const actual_threads_num =
                 std::min(max_representation.size(), (size_t)config_.threads_num);
-        auto task = [&identifier_sets, percent_per_cluster, actual_threads_num, &map_init_mutex,
-                     this, &threads_agree_sets, &map_init_cv,
-                     &map_initialized](SetOfVectors::value_type const& cluster) {
+        auto task = [&identifier_sets, actual_threads_num, &map_init_mutex, &threads_agree_sets,
+                     &map_init_cv, &map_initialized](SetOfVectors::value_type const& cluster) {
             std::thread::id const thread_id = std::this_thread::get_id();
 
             if (!map_initialized) {
@@ -182,7 +170,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
                     threads_agree_sets[thread_id].insert(id_set1.Intersect(id_set2));
                 }
             }
-            AddProgress(percent_per_cluster);
         };
 
         util::ParallelForeach(max_representation.begin(), max_representation.end(),
@@ -202,7 +189,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
                     agree_sets.insert(id_set1.Intersect(id_set2));
                 }
             }
-            AddProgress(percent_per_cluster);
         }
     }
 

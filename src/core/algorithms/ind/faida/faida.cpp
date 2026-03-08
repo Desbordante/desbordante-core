@@ -11,7 +11,7 @@
 
 namespace algos {
 
-Faida::Faida() : INDAlgorithm({}) {
+Faida::Faida() : INDAlgorithm() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(Option{&sample_size_, kSampleSize, kDSampleSize, 500});

@@ -12,7 +12,7 @@
 
 namespace algos {
 
-UCCVerifier::UCCVerifier() : Algorithm({}) {
+UCCVerifier::UCCVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }

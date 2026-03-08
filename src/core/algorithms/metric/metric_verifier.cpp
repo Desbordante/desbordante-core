@@ -18,7 +18,7 @@
 
 namespace algos::metric {
 
-MetricVerifier::MetricVerifier() : Algorithm({}) {
+MetricVerifier::MetricVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }

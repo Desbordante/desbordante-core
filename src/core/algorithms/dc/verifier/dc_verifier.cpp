@@ -37,7 +37,7 @@ namespace mo = model;
 using Point = dc::Point<dc::Component>;
 using Tree = util::KDTree<Point>;
 
-DCVerifier::DCVerifier() : Algorithm({}) {
+DCVerifier::DCVerifier() : Algorithm() {
     using namespace config::names;
 
     RegisterOptions();

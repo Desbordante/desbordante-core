@@ -20,8 +20,6 @@ bool FunQuadruple::Contains(Vertical const& that) const {
     return candidate_.Contains(that);
 }
 
-FUN::FUN() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
-
 void FUN::ResetStateFd() {
     fds_.clear();
 }
@@ -152,8 +150,6 @@ std::list<FunQuadruple> FUN::GenerateCandidate(Level const& l_k) const {
 unsigned long long FUN::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     schema_ = relation_->GetSchema();
-    double progress_step = kTotalProgressPercent / (schema_->GetNumColumns() + 1);
-    AddProgress(progress_step);
     Vertical empty_vertical = schema_->CreateEmptyVertical();
 
     r_ = empty_vertical;
@@ -180,7 +176,6 @@ unsigned long long FUN::ExecuteInternal() {
         PurePrune(l_k_minus_1, l_k);
         l_k_minus_1 = l_k;
         l_k = GenerateCandidate(l_k);
-        AddProgress(progress_step);
     }
     DisplayFD(l_k_minus_1);
 
@@ -192,7 +187,6 @@ unsigned long long FUN::ExecuteInternal() {
         }
     }
 
-    SetProgress(kTotalProgressPercent);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 

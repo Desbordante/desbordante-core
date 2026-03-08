@@ -6,8 +6,7 @@
 
 namespace algos {
 
-NARAlgorithm::NARAlgorithm(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+NARAlgorithm::NARAlgorithm() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kTable});

@@ -62,7 +62,7 @@ protected:
     unsigned long long ExecuteInternal() final;
 
 public:
-    explicit ARAlgorithm(std::vector<std::string_view> phase_names);
+    ARAlgorithm();
 
     std::list<model::ArIDs> const& GetArIDsList() const noexcept {
         return ar_collection_;

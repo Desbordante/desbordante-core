@@ -15,7 +15,7 @@ namespace algos {
 namespace fs = std::filesystem;
 namespace mo = model;
 
-DataStats::DataStats() : Algorithm({"Calculating statistics"}) {
+DataStats::DataStats() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
@@ -870,8 +870,7 @@ unsigned long long DataStats::ExecuteInternal() {
     }
 
     auto start_time = std::chrono::system_clock::now();
-    double percent_per_col = kTotalProgressPercent / all_stats_.size();
-    auto task = [percent_per_col, this](size_t index) {
+    auto task = [this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
         if (this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
             all_stats_[index].min = GetMin(index);
@@ -911,7 +910,6 @@ unsigned long long DataStats::ExecuteInternal() {
         all_stats_[index].is_categorical = IsCategorical(
                 index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
         all_stats_[index].type = this->col_data_[index].GetType().ToString().substr(1);
-        AddProgress(percent_per_col);
     };
 
     if (threads_num_ > 1) {
@@ -923,7 +921,6 @@ unsigned long long DataStats::ExecuteInternal() {
         for (size_t i = 0; i < all_stats_.size(); ++i) task(i);
     }
 
-    SetProgress(kTotalProgressPercent);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
