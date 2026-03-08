@@ -3,9 +3,11 @@
 #include <stdexcept>
 #include <string>
 
+#include "core/util/export.h"
+
 namespace config {
 
-class ConfigurationError : public std::exception {
+class DESBORDANTE_EXPORT ConfigurationError : public std::exception {
     std::string message_;
 
 public:
