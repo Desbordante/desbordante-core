@@ -71,6 +71,11 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    afd_metric SRCS afd_metric/bind_afd_metric_calculation.cpp LIBS Desbordante::fd::afd_metric
+    Boost::headers
+)
+
+desbordante_add_bind(
     ar
     SRCS
     ar/bind_ar.cpp

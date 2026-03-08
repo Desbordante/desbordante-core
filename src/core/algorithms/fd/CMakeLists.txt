@@ -1,4 +1,5 @@
 set(SUBDIRS
+    afd_metric
     aidfd
     depminer
     dfd
