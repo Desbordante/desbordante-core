@@ -209,6 +209,8 @@ add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
 add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
 
 add_compile_options("$<$<CONFIG:Release>:${RELEASE_BUILD_OPTS}>")
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
 if(DESBORDANTE_USE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
