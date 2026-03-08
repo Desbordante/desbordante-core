@@ -1,5 +1,6 @@
 #include <functional>
 #include <memory>
+#include <cstdlib>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <cstddef>
 #include <memory>
 #include <shared_mutex>
 #include <unordered_map>
@@ -11,6 +12,8 @@
 #include "core/util/custom_hashes.h"
 
 namespace model {
+
+using std::size_t;
 
 // difficulties with const methods
 

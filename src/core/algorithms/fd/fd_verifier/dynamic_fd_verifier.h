@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <deque>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,8 @@
 #include "core/model/table/dynamic_table_data.h"
 
 namespace algos::fd_verifier {
+
+using std::size_t;
 
 /* Algorithm used for verifying a particular FD and retrieving useful information about this FD in
  * case it doesn't hold. Algorithm works only for one FD, that we define during initialization,

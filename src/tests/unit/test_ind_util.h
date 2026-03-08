@@ -2,6 +2,7 @@
 #include <list>
 #include <set>
 #include <string>
+#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -28,7 +29,7 @@ void CheckINDsListsEqualityTest(std::unique_ptr<algos::INDAlgorithm> ind_algo,
 
 void CheckINDsResultContainsINDsTest(std::unique_ptr<algos::INDAlgorithm> ind_algo,
                                      INDTestSet const& expected_inds_subset,
-                                     size_t expected_result_size);
+                                     std::size_t expected_result_size);
 
 struct INDEqualityTestConfig {
     CSVConfigs csv_configs;

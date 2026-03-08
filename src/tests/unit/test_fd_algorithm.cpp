@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include <cstddef>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -36,7 +38,7 @@ namespace tests {
 
 std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
+    for (std::size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
         res.push_back(index);
     }

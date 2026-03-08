@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -10,6 +11,8 @@
 #include "core/model/transaction/transactional_input_format.h"
 
 namespace model {
+
+using std::size_t;
 
 class TransactionalData {
 private:

@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/config/indices/type.h"
@@ -11,6 +12,8 @@
 #include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::fd_verifier {
+
+using std::size_t;
 
 class StatsCalculator {
 private:

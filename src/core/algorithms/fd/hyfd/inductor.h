@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/dynamic_bitset.hpp>
+#include <cstddef>
 
 #include "core/algorithms/fd/hyfd/model/fd_tree.h"
 #include "core/algorithms/fd/hyfd/model/non_fd_list.h"
@@ -11,7 +12,7 @@ class Inductor {
 private:
     std::shared_ptr<fd_tree::FDTree> tree_;
 
-    void SpecializeTreeForNonFd(boost::dynamic_bitset<> const& lhs_bits, size_t rhs_id);
+    void SpecializeTreeForNonFd(boost::dynamic_bitset<> const& lhs_bits, std::size_t rhs_id);
 
 public:
     explicit Inductor(std::shared_ptr<fd_tree::FDTree> tree) noexcept : tree_(std::move(tree)) {}

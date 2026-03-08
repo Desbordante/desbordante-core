@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
 
+#include <cstddef>
+
 #include <boost/dynamic_bitset.hpp>
 
 // TODO: these methods are used in priority_queues, where operator> is needed. (>) !<=> (>=) due to
@@ -40,7 +42,7 @@ bool DependencyCandidate::FullArityErrorComparator(DependencyCandidate const& dc
             boost::dynamic_bitset<> dc1_cols = dc1.vertical_.GetColumnIndices();
             boost::dynamic_bitset<> dc2_cols = dc2.vertical_.GetColumnIndices();
 
-            for (size_t a = dc1_cols.find_first(), b = dc2_cols.find_first(); a < dc1_cols.size();
+            for (std::size_t a = dc1_cols.find_first(), b = dc2_cols.find_first(); a < dc1_cols.size();
                  a = dc1_cols.find_next(a), b = dc2_cols.find_next(b))
                 if (a != b) return (a < b);
         }
@@ -58,7 +60,7 @@ bool DependencyCandidate::operator<(DependencyCandidate const& other) const {
             boost::dynamic_bitset<> dc1_cols = vertical_.GetColumnIndices();
             boost::dynamic_bitset<> dc2_cols = other.vertical_.GetColumnIndices();
 
-            for (size_t a = dc1_cols.find_first(), b = dc2_cols.find_first(); a < dc1_cols.size();
+            for (std::size_t a = dc1_cols.find_first(), b = dc2_cols.find_first(); a < dc1_cols.size();
                  a = dc1_cols.find_next(a), b = dc2_cols.find_next(b))
                 if (a != b) return (a < b);
         }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
@@ -11,6 +12,7 @@
 
 namespace algos::cfd_verifier {
 
+using std::size_t;
 using CFDAttributeValuePair = std::pair<std::string, std::string>;
 
 class CFDVerifier : public Algorithm {

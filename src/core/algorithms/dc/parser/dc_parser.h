@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <cstddef>
 
 #include "core/algorithms/dc/model/dc.h"
 #include "core/algorithms/dc/model/operator.h"
@@ -9,6 +10,8 @@
 #include "core/model/table/typed_column_data.h"
 
 namespace algos::dc {
+
+using std::size_t;
 
 class DCParser {
 private:

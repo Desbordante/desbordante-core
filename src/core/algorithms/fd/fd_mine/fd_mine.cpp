@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <vector>
+#include <cstddef>
 
 #include <boost/unordered_map.hpp>
 
@@ -10,6 +11,7 @@
 namespace algos {
 
 using boost::dynamic_bitset;
+using std::size_t;
 
 void FdMine::ResetStateFd() {
     candidate_set_.clear();

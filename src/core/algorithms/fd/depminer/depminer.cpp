@@ -1,6 +1,7 @@
 #include "core/algorithms/fd/depminer/depminer.h"
 
 #include <chrono>
+#include <cstddef>
 #include <list>
 #include <memory>
 

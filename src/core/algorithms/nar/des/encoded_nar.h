@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "core/algorithms/nar/des/encoded_value_range.h"
 #include "core/algorithms/nar/nar.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
@@ -19,17 +21,17 @@ private:
     bool qualities_consistent_ = false;
 
 public:
-    size_t VectorSize() const;
-    size_t FeatureCount() const;
-    double& operator[](size_t index);
-    double const& operator[](size_t index) const;
+    std::size_t VectorSize() const;
+    std::size_t FeatureCount() const;
+    double& operator[](std::size_t index);
+    double const& operator[](std::size_t index) const;
 
     model::NARQualities const& GetQualities() const;
     NAR SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation, RNG& rng);
 
     NAR Decode(FeatureDomains& domains, RNG& rng) const;
     EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation, RNG& rng);
-    EncodedNAR(size_t feature_count, RNG& rng);
+    EncodedNAR(std::size_t feature_count, RNG& rng);
 };
 
 }  // namespace algos::des

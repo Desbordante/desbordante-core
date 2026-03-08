@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "core/algorithms/ind/faida/preprocessing/hashed_column_store.h"
 
 namespace algos::faida {
@@ -8,9 +10,9 @@ class Preprocessor {
 private:
     std::vector<std::unique_ptr<AbstractColumnStore>> stores_;
 
-    size_t null_hash_;
+    std::size_t null_hash_;
 
-    Preprocessor(std::vector<std::unique_ptr<AbstractColumnStore>>&& stores, size_t null_hash)
+    Preprocessor(std::vector<std::unique_ptr<AbstractColumnStore>>&& stores, std::size_t null_hash)
         : stores_(std::move(stores)), null_hash_(null_hash) {}
 
 public:
@@ -25,7 +27,7 @@ public:
         return stores_;
     }
 
-    size_t GetNullHash() const {
+    std::size_t GetNullHash() const {
         return null_hash_;
     }
 

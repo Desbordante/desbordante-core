@@ -1,6 +1,7 @@
 #include "core/model/table/dynamic_position_list_index.h"
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cmath>
 #include <map>

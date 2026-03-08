@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/relation_data.h"
 #include "core/model/table/typed_column_data.h"
@@ -7,6 +9,7 @@
 namespace model {
 
 using TypedRelationData = AbstractRelationData<TypedColumnData>;
+using std::size_t;
 
 class ColumnLayoutTypedRelationData final : public TypedRelationData {
 public:

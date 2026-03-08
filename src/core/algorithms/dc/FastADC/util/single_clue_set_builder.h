@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
@@ -8,6 +8,8 @@
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 
 namespace algos::fastadc {
+
+using std::size_t;
 
 /**
  * Constructs a clue set for a single PLI shard.

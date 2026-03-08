@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include "core/algorithms/nar/des/encoded_nar.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/nar/des/rng.h"
@@ -13,11 +15,11 @@ struct DifferentialOptions {
     DifferentialStrategy differential_strategy = DifferentialStrategy::best1Exp;
 };
 
-EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_index,
+EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, std::size_t candidate_index,
                     DifferentialOptions const& options, RNG& rng);
 
 using MutationFunction = EncodedNAR (*)(std::vector<EncodedNAR> const& population,
-                                        size_t candidate_index, DifferentialOptions const& options,
+                                        std::size_t candidate_index, DifferentialOptions const& options,
                                         RNG& rng);
 
 MutationFunction EnumToMutationStrategy(DifferentialStrategy strategy);

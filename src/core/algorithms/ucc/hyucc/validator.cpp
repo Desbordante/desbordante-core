@@ -1,6 +1,7 @@
 #include "core/algorithms/ucc/hyucc/validator.h"
 
 #include <future>
+#include <cstddef>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -15,13 +16,13 @@ using model::RawUCC;
 
 // Check out comment for Validator::ValidateAndExtendCandidates, it's appropriate for this function
 // too
-size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyucc::LhsPair>& next_level,
+std::size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyucc::LhsPair>& next_level,
                                         algos::hyucc::UCCTree& ucc_tree,
                                         std::vector<RawUCC> const& invalid_uccs,
-                                        size_t num_attributes) {
-    size_t candidates = 0;
+                                        std::size_t num_attributes) {
+    std::size_t candidates = 0;
     for (auto const& ucc : invalid_uccs) {
-        for (size_t attr = 0; attr < num_attributes; ++attr) {
+        for (std::size_t attr = 0; attr < num_attributes; ++attr) {
             if (ucc.test(attr)) {
                 continue;
             }
@@ -81,7 +82,7 @@ Validator::UCCValidations Validator::GetValidations(LhsPair const& vertex_and_uc
     validations.SetCountValidations(1);
     validations.SetCountIntersections(1);
 
-    size_t ucc_attr = ucc.find_first();
+    std::size_t ucc_attr = ucc.find_first();
     bool is_unique;
     if (current_level_number_ == 1) {
         assert(ucc_attr != boost::dynamic_bitset<>::npos);
@@ -157,10 +158,10 @@ Validator::UCCValidations Validator::ValidateAndExtend(std::vector<LhsPair> cons
 // introduced excessive complexity and reduced readability. As a result, it was decided to keep the
 // two functions separate and accept the minor duplication to maintain simplicity and clarity.
 hy::IdPairs Validator::ValidateAndExtendCandidates() {
-    size_t const num_attributes = plis_->size();
+    std::size_t const num_attributes = plis_->size();
     assert(num_attributes == tree_->GetNumAttributes());
 
-    size_t previous_num_invalid_uccs = 0;
+    std::size_t previous_num_invalid_uccs = 0;
     std::vector<LhsPair> current_level = tree_->GetLevel(current_level_number_);
     hy::IdPairs comparison_suggestions;
     while (!current_level.empty()) {
@@ -170,13 +171,13 @@ hy::IdPairs Validator::ValidateAndExtendCandidates() {
                                       result.ComparisonSuggestions().end());
         std::vector<LhsPair> next_level = hy::CollectCurrentChildren(current_level, num_attributes);
 
-        size_t candidates = AddExtendedCandidatesFromInvalid(
+        std::size_t candidates = AddExtendedCandidatesFromInvalid(
                 next_level, *tree_, result.InvalidInstances(), num_attributes);
 
         LogLevel(current_level, result, candidates, current_level_number_, "UCC");
 
-        size_t const num_invalid_uccs = result.InvalidInstances().size();
-        size_t const num_valid_uccs = result.CountValidations() - num_invalid_uccs;
+        std::size_t const num_invalid_uccs = result.InvalidInstances().size();
+        std::size_t const num_valid_uccs = result.CountValidations() - num_invalid_uccs;
         current_level = std::move(next_level);
         current_level_number_++;
 

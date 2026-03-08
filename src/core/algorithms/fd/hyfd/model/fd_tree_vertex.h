@@ -3,12 +3,15 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <cstddef>
 
 #include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/raw_fd.h"
 
 namespace algos::hyfd::fd_tree {
+
+using std::size_t;
 
 class FDTreeVertex;
 

@@ -3,6 +3,7 @@
 #include <memory>
 #include <queue>
 #include <vector>
+#include <cstddef>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -41,8 +42,8 @@ private:
     void InitializeEfficiencyQueueImpl();
     void InitializeEfficiencyQueue();
 
-    void Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
-               size_t second_record_id);
+    void Match(boost::dynamic_bitset<>& attributes, std::size_t first_record_id,
+               std::size_t second_record_id);
     template <typename F>
     void RunWindowImpl(Efficiency& efficiency, model::PositionListIndex const& pli, F store_match);
     std::vector<boost::dynamic_bitset<>> RunWindowRet(Efficiency& efficiency,

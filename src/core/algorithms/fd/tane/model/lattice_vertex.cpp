@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 
+#include <cstddef>
+
 #include "core/util/getting_ptr.h"
 
 namespace model {
@@ -56,7 +58,7 @@ std::ostream& operator<<(std::ostream& os, LatticeVertex& lv) {
     os << "Vertex: " << lv.vertical_.ToString() << endl;
 
     string rhs;
-    for (size_t index = lv.rhs_candidates_.find_first(); index != dynamic_bitset<>::npos;
+    for (std::size_t index = lv.rhs_candidates_.find_first(); index != dynamic_bitset<>::npos;
          index = lv.rhs_candidates_.find_next(index)) {
         rhs += std::to_string(index) + " ";
     }

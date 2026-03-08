@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
 #include <vector>
 
 #include "core/model/table/column_data.h"
@@ -18,7 +19,7 @@ class ColumnLayoutRelationData final : public RelationData {
 public:
     using RelationData::AbstractRelationData;
 
-    [[nodiscard]] size_t GetNumRows() const final {
+    [[nodiscard]] std::size_t GetNumRows() const final {
         if (column_data_.empty()) {
             return 0;
         }

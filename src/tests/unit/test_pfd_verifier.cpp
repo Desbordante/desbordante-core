@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <cstddef>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
@@ -14,13 +15,13 @@ namespace {
 struct PFDVerifyingParams {
     algos::StdParamsMap params;
     config::ErrorType const expected_error = 0;
-    size_t const num_violating_clusters = 0;
-    size_t const num_violating_rows = 0;
+    std::size_t const num_violating_clusters = 0;
+    std::size_t const num_violating_rows = 0;
     std::vector<model::PLI::Cluster> const clusters_violating_pfd;
 
     PFDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
                        config::PfdErrorMeasureType error_measure, config::ErrorType error,
-                       size_t num_violating_clusters, size_t num_violating_rows,
+                       std::size_t num_violating_clusters, std::size_t num_violating_rows,
                        std::vector<model::PLI::Cluster> clusters_violating_pfd,
                        CSVConfig const& csv_config)
         : params({

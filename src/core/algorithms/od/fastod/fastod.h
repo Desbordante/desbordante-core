@@ -2,6 +2,7 @@
 
 #include <initializer_list>
 #include <memory>
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -32,7 +33,7 @@ private:
 
     config::TimeLimitSecondsType time_limit_seconds_ = 0u;
     bool is_complete_ = true;
-    size_t level_ = 1;
+    std::size_t level_ = 1;
 
     std::vector<AscCanonicalOD> result_asc_;
     std::vector<DescCanonicalOD> result_desc_;

@@ -1,5 +1,7 @@
 #include "core/parser/graph_parser/graph_parser.h"
 
+#include <cstddef>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -15,7 +17,7 @@ std::vector<std::string> Split(std::string str, std::string sep) {
     if (str == "") {
         return result;
     }
-    size_t pos = 0;
+    std::size_t pos = 0;
     while ((pos = str.find(sep)) != std::string::npos) {
         result.push_back(str.substr(0, pos));
         str.erase(0, pos + sep.length());

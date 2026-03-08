@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -11,6 +12,8 @@
 #include "core/model/table/dynamic_table_data.h"
 
 namespace algos::fd_verifier {
+
+using std::size_t;
 
 class DynamicStatsCalculator {
 private:
