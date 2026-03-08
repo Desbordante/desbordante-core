@@ -13,6 +13,7 @@ target_sources(
             dynamic_position_list_index.cpp
             identifier_set.cpp
             position_list_index.cpp
+            position_list_index_with_singletons.cpp
             relational_schema.cpp
             typed_column_data.cpp
             vertical.cpp
