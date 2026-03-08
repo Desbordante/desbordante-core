@@ -70,7 +70,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindGfd,
                            BindCFDVerification,
                            BindDDVerification,
-                           BindAODVerification}) {
+                           BindAODVerification,
+                           BindAfdMetricCalculation}) {
         bind_func(module);
     }
 }
