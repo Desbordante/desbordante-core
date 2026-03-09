@@ -8,6 +8,7 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::fd::pli Boost::headers
+        ${DESBORDANTE_PREFIX}::afd::metric_calc 
 )
 
 # --- Tane ---
@@ -20,7 +21,7 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::tane::common ${DESBORDANTE_PREFIX}::fd::pli
-                    better-enums Boost::headers
+                    better-enums Boost::headers ${DESBORDANTE_PREFIX}::afd::metric_calc
 )
 
 # --- PFDTane ---
@@ -33,5 +34,5 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::tane::common ${DESBORDANTE_PREFIX}::fd::pli
-                    better-enums Boost::headers
+                    better-enums Boost::headers ${DESBORDANTE_PREFIX}::afd::metric_calc
 )
