@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bitset>
+#include <concepts>
 #include <functional>
 #include <unordered_map>
 #include <vector>
@@ -18,33 +19,52 @@
 
 namespace algos::fastadc {
 
-/* Maximum supported number of bits in clue is kPredicateBits */
-using Clue = model::Bitset<kPredicateBits>;
+template <typename T>
+concept HasNone = requires(T t) {
+    t.none();
+};
 
-struct ClueHash {
-    std::size_t operator()(Clue const& clue) const noexcept {
-        return std::hash<Clue>{}(clue);
+template <typename ClueT>
+[[nodiscard]] inline bool IsZeroClue(ClueT const& clue) {
+    if constexpr (HasNone<ClueT>) {
+        return clue.none();
+    } else {
+        return clue == 0;
+    }
+}
+
+template <typename ClueT>
+struct ClueHashT {
+    std::size_t operator()(ClueT const& clue) const noexcept {
+        return std::hash<ClueT>{}(clue);
     }
 };
 
+template <typename ClueT>
 #if UNORDERED_FLAT_MAP_AVAILABLE
-using ClueSet = boost::unordered::unordered_flat_map<Clue, int64_t, ClueHash>;
+using ClueSetT = boost::unordered::unordered_flat_map<ClueT, int64_t, ClueHashT<ClueT>>;
 #else
-using ClueSet = std::unordered_map<Clue, int64_t, ClueHash>;
+using ClueSetT = std::unordered_map<ClueT, int64_t, ClueHashT<ClueT>>;
 #endif
 
-template <typename... Vectors>
-ClueSet AccumulateClues(ClueSet& clue_set, Vectors const&... vectors) {
+/* Maximum supported number of bits in clue is kMaxPredicateBits */
+using Clue = model::Bitset<kMaxPredicateBits>;
+using ClueSet = ClueSetT<Clue>;
+
+template <typename ClueT, typename... Vectors>
+ClueSetT<ClueT> AccumulateClues(ClueSetT<ClueT>& clue_set, Vectors const&... vectors) {
     clue_set.clear();
     int64_t clue_zero_count = 0;
 
-    auto insert_clues = [&](std::vector<Clue> const& clues) {
+    auto insert_clues = [&](std::vector<ClueT> const& clues) {
         for (auto const& clue : clues) {
-            if (clue.none()) {
+            if (IsZeroClue(clue)) {
                 ++clue_zero_count;
             } else {
                 auto [it, inserted] = clue_set.emplace(clue, 1);
-                if (!inserted) it->second++;
+                if (!inserted) {
+                    it->second++;
+                }
             }
         }
     };
@@ -52,9 +72,10 @@ ClueSet AccumulateClues(ClueSet& clue_set, Vectors const&... vectors) {
     (insert_clues(vectors), ...);
 
     if (clue_zero_count > 0) {
-        clue_set[Clue(0)] = clue_zero_count;
+        clue_set[ClueT(0)] = clue_zero_count;
     }
 
     return clue_set;
 }
+
 }  // namespace algos::fastadc
