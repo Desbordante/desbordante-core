@@ -1,7 +1,9 @@
 #pragma once
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <stdexcept>
 #include <vector>
@@ -10,7 +12,6 @@
 #include "core/algorithms/dc/FastADC/model/operator.h"
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/providers/index_provider.h"
-#include "core/algorithms/dc/FastADC/util/common_clue_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
 #include "core/model/table/column.h"
 
@@ -21,28 +22,24 @@ struct PredicatePack {
     PredicatePtr eq;
     PredicatePtr gt;
     size_t left_idx, right_idx;
-    Clue eq_mask, gt_mask;
+    size_t eq_pos;
+    size_t gt_pos;
 
     PredicatePack(PredicatePtr eq, size_t eq_pos)
         : eq(eq),
           gt(nullptr),
           left_idx(eq->GetLeftOperand().GetColumn()->GetIndex()),
           right_idx(eq->GetRightOperand().GetColumn()->GetIndex()),
-          eq_mask(0),
-          gt_mask(0) {
-        eq_mask.set(eq_pos);
-    }
+          eq_pos(eq_pos),
+          gt_pos(0) {}
 
     PredicatePack(PredicatePtr eq, size_t eq_pos, PredicatePtr gt, size_t gt_pos)
         : eq(eq),
           gt(gt),
           left_idx(eq->GetLeftOperand().GetColumn()->GetIndex()),
           right_idx(eq->GetRightOperand().GetColumn()->GetIndex()),
-          eq_mask(0),
-          gt_mask(0) {
-        eq_mask.set(eq_pos);
-        gt_mask.set(gt_pos);
-    }
+          eq_pos(eq_pos),
+          gt_pos(gt_pos) {}
 };
 
 struct PredicatePacks {

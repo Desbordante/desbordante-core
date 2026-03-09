@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
@@ -9,18 +9,18 @@
 
 namespace algos::fastadc {
 
-/**
- * Constructs a clue set for a single PLI shard.
- */
-class SingleClueSetBuilder {
+template <typename ClueT>
+class SingleClueSetBuilderT {
 public:
-    SingleClueSetBuilder(PliShard const& shard);
-    SingleClueSetBuilder(SingleClueSetBuilder const& other) = delete;
-    SingleClueSetBuilder& operator=(SingleClueSetBuilder const& other) = delete;
-    SingleClueSetBuilder(SingleClueSetBuilder&& other) noexcept = default;
-    SingleClueSetBuilder& operator=(SingleClueSetBuilder&& other) noexcept = delete;
+    explicit SingleClueSetBuilderT(PliShard const& shard);
 
-    void BuildClueSet(PredicatePacks const& packs, std::vector<Clue>& clues, ClueSet& clue_set);
+    SingleClueSetBuilderT(SingleClueSetBuilderT const& other) = delete;
+    SingleClueSetBuilderT& operator=(SingleClueSetBuilderT const& other) = delete;
+    SingleClueSetBuilderT(SingleClueSetBuilderT&& other) noexcept = default;
+    SingleClueSetBuilderT& operator=(SingleClueSetBuilderT&& other) noexcept = delete;
+
+    void BuildClueSet(PredicatePacks const& packs, std::vector<ClueT>& clues,
+                     ClueSetT<ClueT>& clue_set);
 
 private:
     std::vector<Pli> const& plis_;
@@ -28,18 +28,23 @@ private:
     size_t tid_range_;
     size_t evidence_count_;
 
-    void SetSingleEQ(std::vector<Clue>& clues, Pli::Cluster const& cluster, Clue const& mask);
-    void CorrectStrSingle(std::vector<Clue>& clues, Pli const& pli, Clue const& mask);
-    void SetCrossEQ(std::vector<Clue>& clues, Pli::Cluster const& pivotCluster,
-                    Pli::Cluster const& probeCluster, Clue const& mask);
-    void CorrectStrCross(std::vector<Clue>& clues, Pli const& pivotPli, Pli const& probePli,
-                         Clue const& mask);
-    void SetGT(std::vector<Clue>& clues, Pli::Cluster const& pivotCluster, Pli const& probePli,
-               size_t from, Clue const& mask);
-    void CorrectNumSingle(std::vector<Clue>& clues, Pli const& pli, Clue const& eqMask,
-                          Clue const& gtMask);
-    void CorrectNumCross(std::vector<Clue>& clues, Pli const& pivotPli, Pli const& probePli,
-                         Clue const& eqMask, Clue const& gtMask);
+    void SetSingleEQ(std::vector<ClueT>& clues, Pli::Cluster const& cluster, size_t mask_pos);
+    void CorrectStrSingle(std::vector<ClueT>& clues, Pli const& pli, size_t mask_pos);
+
+    void SetCrossEQ(std::vector<ClueT>& clues, Pli::Cluster const& pivotCluster,
+                   Pli::Cluster const& probeCluster, size_t mask_pos);
+    void CorrectStrCross(std::vector<ClueT>& clues, Pli const& pivotPli, Pli const& probePli,
+                        size_t mask_pos);
+
+    void SetGT(std::vector<ClueT>& clues, Pli::Cluster const& pivotCluster, Pli const& probePli,
+              size_t from, size_t mask_pos);
+
+    void CorrectNumSingle(std::vector<ClueT>& clues, Pli const& pli, size_t eq_pos,
+                         size_t gt_pos);
+    void CorrectNumCross(std::vector<ClueT>& clues, Pli const& pivotPli, Pli const& probePli,
+                        size_t eq_pos, size_t gt_pos);
 };
+
+using SingleClueSetBuilder = SingleClueSetBuilderT<Clue>;
 
 }  // namespace algos::fastadc

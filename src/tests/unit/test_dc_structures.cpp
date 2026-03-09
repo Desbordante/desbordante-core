@@ -307,6 +307,7 @@ protected:
         evidence_set_builder_ =
                 new EvidenceSetBuilder(pli_shard_builder_->pli_shards,
                                        evidence_aux_structures_builder_->GetPredicatePacks(),
+                                       evidence_aux_structures_builder_->GetNumberOfBitsInClue(),
                                        use_parallel ? thread_pool_ptr : nullptr);
     }
 };
@@ -427,9 +428,11 @@ TEST_F(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
     for (size_t i = 0; i < packs.size(); ++i) {
         EXPECT_EQ(packs[i].left_idx, expected_column_indices[i].first);
         EXPECT_EQ(packs[i].right_idx, expected_column_indices[i].second);
-        EXPECT_EQ(packs[i].eq_mask, VectorToBitset(expected_eq_masks[i]));
+        ASSERT_EQ(expected_eq_masks[i].size(), 1);
+        EXPECT_EQ(packs[i].eq_pos, expected_eq_masks[i][0]);
         if (!expected_gt_masks[i].empty()) {
-            EXPECT_EQ(packs[i].gt_mask, VectorToBitset(expected_gt_masks[i]));
+            ASSERT_EQ(expected_gt_masks[i].size(), 1);
+            EXPECT_EQ(packs[i].gt_pos, expected_gt_masks[i][0]);
         }
     }
 
