@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/model/types/type.h"
+#include <algorithm>
 #include <cstring>
 
 namespace model {
@@ -24,18 +25,22 @@ public:
     }
 
     void ValueFromStr(std::byte* dst, std::string s) const override {
-        bool value = false;
+        s.erase(0, s.find_first_not_of(" \t\n\r"));
+        s.erase(s.find_last_not_of(" \t\n\r") + 1);
+        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 
-        if (s == "true" || s == "TRUE" || s == "True") {
+        bool value;
+
+        if (s == "true" || s == "t") {
             value = true;
-        } else if (s == "false" || s == "FALSE" || s == "False") {
+        } else if (s == "false" || s == "f") {
             value = false;
         } else {
             throw std::invalid_argument("Invalid bool literal: " + s);
         }
 
         std::memcpy(dst, &value, sizeof(bool));
-    }
+}
 
     CompareResult Compare(std::byte const* l, std::byte const* r) const override {
         bool lv, rv;
@@ -54,3 +59,5 @@ public:
 };
 
 } // namespace model
+
+

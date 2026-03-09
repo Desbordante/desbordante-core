@@ -179,7 +179,8 @@ private:
             {TypeId::kDate,
              boost::regex(
                      R"(^(\d{4})([-.\/]?)(1[0-2]|0[1-9]|[1-9])\2(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
-            {TypeId::kBool, boost::regex(R"(^\s*(true|false)\s*\r?\s*$)", boost::regex_constants::icase)},
+            {TypeId::kBool,
+             boost::regex(R"(^\s*(true|false|t|f)\s*$)", boost::regex_constants::icase)},
             {TypeId::kDouble,
              boost::regex(
                      R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
@@ -217,6 +218,14 @@ private:
             };
     inline static std::unordered_map<TypeId, std::function<bool(std::string const&)>> const
             kTypeIdToChecker = {
+                    {TypeId::kDate, [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
+                                (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
+                     }},
+                    {TypeId::kBool, 
+                     [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBool));
+                     }},
                     {TypeId::kDouble,
                      [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble));
@@ -225,17 +234,9 @@ private:
                      [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBigInt));
                      }},
-                    {TypeId::kBool, 
-                     [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBool));
-                     }},
                     {TypeId::kInt,
                      [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
-                     }},
-                    {TypeId::kDate, [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
-                                (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
                      }},
                 };
     // each 1 represents a possible type from kAllCandidateTypes
