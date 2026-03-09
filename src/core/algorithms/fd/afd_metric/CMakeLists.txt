@@ -1,5 +1,5 @@
-# --- AFD metrics ---
-set(NAME fd.afd_metric)
+# --- AFDMetricCalc ---
+set(NAME afd.metric_calc)
 desbordante_add_lib(NAME OBJECT)
 target_sources(${NAME} PRIVATE afd_metric_calculator.cpp)
 target_link_libraries(

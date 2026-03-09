@@ -338,6 +338,21 @@ desbordante_add_test(
     Boost::headers
 )
 
+# --- AFD ---
+desbordante_add_test(
+    afd.metric_calc
+    SRCS
+    test_afd_metric_calculator.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::afd::metric_calc
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    spdlog::spdlog_header_only
+    better-enums
+    Boost::headers
+)
+
 # --- GFD ---
 desbordante_add_test(
     gfd.miner

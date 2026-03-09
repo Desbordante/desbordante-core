@@ -15,6 +15,7 @@ set(SUBDIRS
     pyro
     pyrocommon
     sfd
+    afd_metric
     tane
 )
 
