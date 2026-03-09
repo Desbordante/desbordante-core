@@ -135,6 +135,8 @@ def get_result_set(df, algo_type, algo_config):
     algo = algo_type()
     algo.load_data(table=df, **algo_config)
     algo.execute(**algo_config)
+    if(algo_type == APPROXIMATE_ALGORITHM_TYPE):
+        return set(algo.get_afds())
     return set(algo.get_fds())
 
 
