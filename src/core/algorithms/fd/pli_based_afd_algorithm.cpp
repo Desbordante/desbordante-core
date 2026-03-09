@@ -5,8 +5,7 @@
 
 namespace algos {
 
-PliBasedAFDAlgorithm::PliBasedAFDAlgorithm(
-        std::vector<std::string_view> phase_names)
+PliBasedAFDAlgorithm::PliBasedAFDAlgorithm(std::vector<std::string_view> phase_names)
     : AFDAlgorithm(std::move(phase_names)) {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
@@ -18,7 +17,8 @@ void PliBasedAFDAlgorithm::RegisterOptions() {
 }
 
 void PliBasedAFDAlgorithm::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);;
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    ;
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: AFD mining is meaningless.");
