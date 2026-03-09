@@ -1,5 +1,11 @@
 #pragma once
 
+#include <bit>
+#include <cstddef>
+#include <cstdint>
+#include <utility>
+#include <vector>
+
 #include "core/algorithms/dc/FastADC/model/evidence_set.h"
 #include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
 #include "core/util/logger.h"
@@ -7,17 +13,60 @@
 
 namespace algos::fastadc {
 
-/**
- * Creates EvidenceSet, which is just a vector of evidences with some extra methods
- */
 class EvidenceSetBuilder {
 public:
     EvidenceSet evidence_set;
 
     EvidenceSetBuilder(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs,
-                       util::WorkerThreadPool* thread_pool = nullptr) {
-        clue_set_ = thread_pool ? BuildClueSetParallel(pli_shards, packs, thread_pool)
-                                : BuildClueSet(pli_shards, packs);
+                      size_t clue_bit_count,
+                      util::WorkerThreadPool* thread_pool = nullptr) {
+        if (clue_bit_count > kMaxPredicateBits) {
+            throw std::invalid_argument(
+                    "FastADC: predicate space is too large (clue bits exceed maximum supported).");
+        }
+
+        auto consume_scalar = [this](auto const& clue_set) {
+            clues_.reserve(clue_set.size());
+            for (auto const& [clue, count] : clue_set) {
+                PredicateBitset bitset;
+                uint64_t tmp = static_cast<uint64_t>(clue);
+                while (tmp != 0) {
+                    auto const pos = static_cast<size_t>(std::countr_zero(tmp));
+                    bitset.set(pos);
+                    tmp &= (tmp - 1);
+                }
+                clues_.emplace_back(bitset, count);
+            }
+        };
+
+        if (clue_bit_count <= 8) {
+            auto clue_set = thread_pool ? BuildClueSetParallel8(pli_shards, packs, thread_pool)
+                                        : BuildClueSet8(pli_shards, packs);
+            consume_scalar(clue_set);
+        } else if (clue_bit_count <= 16) {
+            auto clue_set = thread_pool ? BuildClueSetParallel16(pli_shards, packs, thread_pool)
+                                        : BuildClueSet16(pli_shards, packs);
+            consume_scalar(clue_set);
+        } else if (clue_bit_count <= 32) {
+            auto clue_set = thread_pool ? BuildClueSetParallel32(pli_shards, packs, thread_pool)
+                                        : BuildClueSet32(pli_shards, packs);
+            consume_scalar(clue_set);
+        } else if (clue_bit_count <= 64) {
+            auto clue_set = thread_pool ? BuildClueSetParallel64(pli_shards, packs, thread_pool)
+                                        : BuildClueSet64(pli_shards, packs);
+            consume_scalar(clue_set);
+        } else {
+            LOG_WARNING(
+                    "Using 128-bit representation for clues ({} bits required). Performance may be "
+                    "degraded.",
+                    clue_bit_count);
+            auto clue_set = thread_pool ? BuildClueSetParallel(pli_shards, packs, thread_pool)
+                                        : BuildClueSet(pli_shards, packs);
+            clues_.reserve(clue_set.size());
+            for (auto const& [clue, count] : clue_set) {
+                clues_.emplace_back(clue, count);
+            }
+        }
     }
 
     EvidenceSetBuilder(EvidenceSetBuilder const& other) = delete;
@@ -26,10 +75,10 @@ public:
     EvidenceSetBuilder& operator=(EvidenceSetBuilder&& other) noexcept = delete;
 
     void BuildEvidenceSet(std::vector<PredicateBitset> const& correction_map,
-                          PredicateBitset const& cardinality_mask) {
-        evidence_set.Reserve(clue_set_.size());
+                         PredicateBitset const& cardinality_mask) {
+        evidence_set.Reserve(clues_.size());
 
-        for (auto const& [clue, count] : clue_set_) {
+        for (auto const& [clue, count] : clues_) {
             evidence_set.EmplaceBack(clue, count, cardinality_mask, correction_map);
         }
 
@@ -38,7 +87,7 @@ public:
     }
 
 private:
-    ClueSet clue_set_;
+    std::vector<std::pair<PredicateBitset, int64_t>> clues_;
 };
 
 }  // namespace algos::fastadc
