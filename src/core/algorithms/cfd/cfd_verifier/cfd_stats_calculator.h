@@ -39,7 +39,7 @@ public:
         : relation_(std::move(relation)),
           rule_(std::move(rule)),
           lhs_attrs_(relation_->GetAttrVector(rule_.first)),
-          rhs_attr_index_(relation_->GetAttrIndex(rule_.second)) {};
+          rhs_attr_index_(relation_->GetAttrIndex(rule_.second)){};
 
     CFDStatsCalculator() = default;
 

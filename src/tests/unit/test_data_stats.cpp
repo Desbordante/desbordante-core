@@ -490,9 +490,9 @@ TEST(TestDataStats, TestGetTrueCount) {
     auto stats_ptr = MakeStatAlgorithm(kTestBool);
     algos::DataStats &stats = *stats_ptr;
 
-    stats.Execute(); 
+    stats.Execute();
 
-    auto stat = stats.GetTrueCount(0); 
+    auto stat = stats.GetTrueCount(0);
     ASSERT_TRUE(stat.HasValue());
     size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
     EXPECT_EQ(value, 3);
@@ -524,15 +524,15 @@ TEST(TestDataStats, TestGetZeroPercent) {
 }
 
 TEST(TestDataStats, TestGetDiacriticChars) {
-    auto stats_ptr = MakeStatAlgorithm(kTestDiacritics); 
+    auto stats_ptr = MakeStatAlgorithm(kTestDiacritics);
     algos::DataStats &stats = *stats_ptr;
 
     stats.Execute();
 
-    auto stat = stats.GetDiacriticChars(1); 
-    ASSERT_TRUE(stat.HasValue()); 
+    auto stat = stats.GetDiacriticChars(1);
+    ASSERT_TRUE(stat.HasValue());
     size_t count = mo::Type::GetValue<mo::Int>(stat.GetData());
-    EXPECT_EQ(count, 6); 
+    EXPECT_EQ(count, 6);
 }
 
 };  // namespace tests

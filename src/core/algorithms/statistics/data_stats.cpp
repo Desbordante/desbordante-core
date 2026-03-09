@@ -1,7 +1,6 @@
 #include "core/algorithms/statistics/data_stats.h"
 
 #include <set>
-#include "utf8/utf8.h"
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -10,6 +9,7 @@
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
+#include "utf8/utf8.h"
 
 namespace algos {
 
@@ -322,12 +322,10 @@ Statistic DataStats::GetNumberOfZeros(size_t index) const {
 Statistic DataStats::GetZeroPercent(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
 
-    if (!col.IsNumeric())
-        return {};
+    if (!col.IsNumeric()) return {};
 
     size_t total = NumberOfValues(index) - GetNumNulls(index);
-    if (total == 0)
-        return {};
+    if (total == 0) return {};
 
     Statistic zeros_stat = GetNumberOfZeros(index);
 
@@ -348,8 +346,7 @@ Statistic DataStats::GetNumberOfNegatives(size_t index) const {
 }
 
 Statistic DataStats::GetTrueCount(size_t index) const {
-    if (all_stats_[index].true_count.HasValue())
-        return all_stats_[index].true_count;
+    if (all_stats_[index].true_count.HasValue()) return all_stats_[index].true_count;
 
     mo::TypedColumnData const& col = col_data_[index];
     if (col.GetTypeId() != +mo::TypeId::kBool) return {};
@@ -369,8 +366,7 @@ Statistic DataStats::GetTrueCount(size_t index) const {
 }
 
 Statistic DataStats::GetFalseCount(size_t index) const {
-    if (all_stats_[index].false_count.HasValue())
-        return all_stats_[index].false_count;
+    if (all_stats_[index].false_count.HasValue()) return all_stats_[index].false_count;
 
     mo::TypedColumnData const& col = col_data_[index];
     if (col.GetTypeId() != +mo::TypeId::kBool) return {};
@@ -597,9 +593,9 @@ Statistic DataStats::GetDiacriticChars(size_t index) const {
 
         auto const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
 
-        for (auto it = str.begin(); it != str.end(); ) {
-            uint32_t cp = utf8::next(it, str.end()); 
-            if (cp > 127) count++;                 
+        for (auto it = str.begin(); it != str.end();) {
+            uint32_t cp = utf8::next(it, str.end());
+            if (cp > 127) count++;
         }
     }
 

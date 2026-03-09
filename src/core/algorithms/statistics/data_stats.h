@@ -174,7 +174,7 @@ public:
     Statistic GetTrueCount(size_t index) const;
     // Returns number of false values in a bool column.
     Statistic GetFalseCount(size_t index) const;
-    //Returns percentage of zero values in a numeric column.
+    // Returns percentage of zero values in a numeric column.
     Statistic GetZeroPercent(size_t index) const;
     // Returns the number of characters with diacritical marks in a string column.
     Statistic GetDiacriticChars(size_t index) const;

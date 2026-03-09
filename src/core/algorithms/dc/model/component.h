@@ -19,11 +19,11 @@ private:
     ValType val_type_;
 
 public:
-    Component() noexcept : val_(nullptr), type_(nullptr), val_type_(ValType::kFinite) {};
+    Component() noexcept : val_(nullptr), type_(nullptr), val_type_(ValType::kFinite){};
 
     Component(std::byte const* value, model::Type const* type,
               ValType val_type = ValType::kFinite) noexcept
-        : val_(value), type_(type), val_type_(val_type) {};
+        : val_(value), type_(type), val_type_(val_type){};
 
     std::string ToString() const;
 

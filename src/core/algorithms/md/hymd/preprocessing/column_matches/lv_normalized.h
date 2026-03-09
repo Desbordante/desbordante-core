@@ -161,7 +161,7 @@ public:
         : detail::DistanceBase<Function, Params...>(
                   SymmetricAndEq0, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
-                  {min_sim, std::move(picker)}) {};
+                  {min_sim, std::move(picker)}){};
 
     LVNormalized(std::string name, ColumnIdentifier left_column_identifier,
                  ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,

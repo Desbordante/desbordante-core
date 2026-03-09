@@ -125,7 +125,7 @@ private:
                          Rect<PointType> const& box) const;
 
 public:
-    KDTree() : root_(nullptr), size_(0) {};
+    KDTree() : root_(nullptr), size_(0){};
 
     KDTree(std::vector<PointType> const& points);
     KDTree(std::initializer_list<PointType> const& points);
