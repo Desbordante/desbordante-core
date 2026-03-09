@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <iostream>
 #include <iterator>
 
 #include "core/config/descriptions.h"
@@ -74,6 +75,19 @@ void AFDMetricCalculator::CalculateMetric() {
         case AFDMetric::fi:
             result_ = CalculateFI(lhs_pli.get(), rhs_pli.get(), num_rows);
             break;
+        case AFDMetric::g1:
+            result_ = CalculateG1Error(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get(),
+                                       num_rows);
+            break;
+        case AFDMetric::g3:
+            result_ = CalculateG3(lhs_pli.get(), rhs_pli.get(), num_rows);
+            break;
+        case AFDMetric::pdep:
+            result_ = CalculatePdepMeasure(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
+            break;
+        case AFDMetric::rho:
+            result_ = CalculateRhoMeasure(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
+            break;
     }
 }
 
@@ -93,6 +107,48 @@ long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::P
     }
 
     return num_error_rows / num_rows;
+}
+
+long double AFDMetricCalculator::CalculateG3(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                             size_t num_rows) {
+    if (num_rows <= 0) throw std::invalid_argument("received unpositive number of rows");
+
+    auto num_error_rows = 0.L;
+
+    auto const& lhs_clusters = lhs_pli->GetIndex();
+    auto pt_shared = rhs_pli->CalculateAndGetProbingTable();
+    auto const& pt = *pt_shared.get();
+    for (auto const& cluster : lhs_clusters) {
+        auto frequencies = model::PLI::CreateFrequencies(cluster, pt);
+        std::size_t size = 1;
+        for (auto const& val : frequencies) {
+            if (val.second > size) size = val.second;
+        }
+        num_error_rows += size;
+    }
+
+    return num_error_rows / num_rows;
+}
+
+config::ErrorType AFDMetricCalculator::CalculateRhoMeasure(model::PLIWS const* x_pli,
+                                                           model::PLIWS const* xa_pli) {
+    auto calculate_dom = [](model::PLIWS const* pli) {
+        auto index = pli->GetIndex();
+        size_t dom = index.size();
+
+        std::size_t cluster_rows_count = 0;
+        for (Cluster const& cluster : index) {
+            cluster_rows_count += cluster.size();
+        }
+
+        std::size_t unique_rows = pli->GetRelationSize() - cluster_rows_count;
+        dom += unique_rows;
+        return static_cast<config::ErrorType>(dom);
+    };
+
+    config::ErrorType dom_x = calculate_dom(x_pli);
+    config::ErrorType dom_xa = calculate_dom(xa_pli);
+    return dom_x / dom_xa;
 }
 
 long double AFDMetricCalculator::CalculatePdepSelf(model::PLIWithSingletons const* x_pli) {
@@ -217,6 +273,22 @@ long double AFDMetricCalculator::CalculateFI(model::PLIWS const* lhs_pli,
     conditional_entropy /= num_rows;
     auto mutual_information = entropy - conditional_entropy;
     return mutual_information / entropy;
+}
+
+config::ErrorType AFDMetricCalculator::CalculateZeroAryG1(ColumnData const* rhs,
+                                                          unsigned long long num_tuple_pairs) {
+    return 1 - rhs->GetPositionListIndex()->GetNepAsLong() /
+                       static_cast<config::ErrorType>(num_tuple_pairs);
+}
+
+config::ErrorType AFDMetricCalculator::CalculateG1Error(model::PLIWS const* lhs_pli,
+                                                        model::PLIWS const* joint_pli,
+                                                        unsigned long long num_tuple_pairs) {
+    // incorrect calculation, it uses number of pairs without repetitions, while it needed to be
+    // otherwise
+
+    return static_cast<config::ErrorType>((lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
+                                          static_cast<config::ErrorType>(num_tuple_pairs));
 }
 
 }  // namespace algos::afd_metric_calculator
