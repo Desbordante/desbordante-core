@@ -142,6 +142,8 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(max_white_spaces, "max_white_spaces");
     try_add_stat(true_count, "true_count");
     try_add_stat(false_count, "false_count");
+    try_add_stat(zero_percent, "zero_percent");
+    try_add_stat(diacritic_chars, "diacritic_chars");
 
     return res;
 }
