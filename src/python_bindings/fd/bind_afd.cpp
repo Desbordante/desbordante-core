@@ -21,7 +21,7 @@ void BindAfd(py::module_& main_module) {
     static constexpr auto kTaneName = "Tane";
     static constexpr auto kPFDTaneName = "PFDTane";
     auto afd_algos_module = BindPrimitive<Tane, PFDTane>(
-            afd_module, &AFDAlgorithm::SortedAfdList, "AfdAlgorithm", "get_afds",
+            afd_module, &AFDAlgorithm::SortedAfdList, "AfdAlgorithm", "get_fds",
             {kTaneName, kPFDTaneName}, pybind11::return_value_policy::copy);
 
     auto define_submodule = [&afd_algos_module, &main_module](char const* name,
