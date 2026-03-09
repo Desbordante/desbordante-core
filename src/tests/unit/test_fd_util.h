@@ -141,7 +141,7 @@ struct ApproximateDatasets<algos::EulerFD> {
             {tests::kWdcSymbols, 28289},
             {tests::kBreastCancer, 15121},
             {tests::kWdcKepler, 17294},  // empty answer, 0 clusters after stripping
-        }};
+    }};
 
     inline static std::vector<CSVConfigHash> const kHeavyDatasets = {{
             {tests::kAdult, 23075},
