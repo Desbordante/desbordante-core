@@ -18,11 +18,7 @@ namespace algos {
 using boost::dynamic_bitset;
 
 namespace tane {
-
-// TaneCommon::TaneCommon() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
-
-TaneCommon::TaneCommon()
-    : PliBasedAFDAlgorithm({kDefaultPhaseName}) {
+TaneCommon::TaneCommon() : PliBasedAFDAlgorithm({kDefaultPhaseName}) {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 

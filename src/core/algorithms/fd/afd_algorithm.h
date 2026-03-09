@@ -44,23 +44,21 @@ protected:
      * Should be overrided if custom behavior is needed
      */
     virtual void RegisterAfd(Vertical lhs, Column rhs, long double threeshold,
-                            std::shared_ptr<RelationalSchema const> const& schema) {
+                             std::shared_ptr<RelationalSchema const> const& schema) {
         if (lhs.GetArity() <= max_lhs_)
             afd_collection_.Register(std::move(lhs), std::move(rhs), std::move(threeshold), schema);
     }
 
     virtual void RegisterAfd(Vertical lhs, Column rhs,
-                            std::shared_ptr<RelationalSchema const> const& schema) {
+                             std::shared_ptr<RelationalSchema const> const& schema) {
         if (lhs.GetArity() <= max_lhs_)
             afd_collection_.Register(std::move(lhs), std::move(rhs), 0, schema);
     }
-
 
     virtual void RegisterAfd(AFD afd_to_register) {
         if (afd_to_register.GetLhs().GetArity() <= max_lhs_)
             afd_collection_.Register(std::move(afd_to_register));
     }
-
 
     template <typename Container>
     static std::string AFDsToJson(Container const& afds) {
