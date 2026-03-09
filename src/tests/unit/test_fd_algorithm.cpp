@@ -142,13 +142,13 @@ TYPED_TEST_P(AlgorithmTest, MaxLHSOptionWork) {
     MaxLhsTestFun(kCIPublicHighway700, algo_large->FdList(), max_lhs);
 }
 
-REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, MaxLHSOptionWork, ThrowsOnEmpty, ReturnsEmptyOnSingleNonKey,
-                            WorksOnLongDataset, WorksOnWideDataset, LightDatasetsConsistentHash,
-                            HeavyDatasetsConsistentHash, ConsistentRepeatedExecution);
+REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, MaxLHSOptionWork, ThrowsOnEmpty,
+                            ReturnsEmptyOnSingleNonKey, WorksOnLongDataset, WorksOnWideDataset,
+                            LightDatasetsConsistentHash, HeavyDatasetsConsistentHash,
+                            ConsistentRepeatedExecution);
 
-using Algorithms =
-        ::testing::Types<algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,
-                         algos::FDep, algos::FUN, algos::hyfd::HyFD>;
+using Algorithms = ::testing::Types<algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,
+                                    algos::FDep, algos::FUN, algos::hyfd::HyFD>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
 }  // namespace tests
