@@ -20,7 +20,7 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::tane::common ${DESBORDANTE_PREFIX}::fd::pli
-                    better-enums Boost::headers
+                    ${DESBORDANTE_PREFIX}::fd::afd_metric better-enums Boost::headers
 )
 
 # --- PFDTane ---

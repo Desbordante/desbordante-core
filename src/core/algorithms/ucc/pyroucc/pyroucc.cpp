@@ -13,7 +13,7 @@
 
 namespace algos {
 
-PyroUCC::PyroUCC() : UCCAlgorithm({kDefaultPhaseName}) {
+PyroUCC::PyroUCC() : UCCAlgorithm() {
     RegisterOptions();
     fd_consumer_ = nullptr;
     ucc_consumer_ = [this](auto const& ucc) {
@@ -82,7 +82,6 @@ unsigned long long PyroUCC::ExecuteInternal() {
     search_space_->SetContext(profiling_context.get());
     search_space_->EnsureInitialized();
     search_space_->Discover();
-    SetProgress(100);
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);

@@ -381,7 +381,7 @@ std::vector<std::size_t> get_rhs(std::size_t n, std::vector<std::size_t> const& 
 
 }  // namespace
 
-GfdMiner::GfdMiner() : Algorithm({}) {
+GfdMiner::GfdMiner() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable(
             {config::names::kGraphData, config::names::kGfdK, config::names::kGfdSigma});

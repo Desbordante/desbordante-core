@@ -138,7 +138,7 @@ public:
 
     GfdMiner();
 
-    GfdMiner(model::graph_t graph_) : Algorithm({}), graph_(graph_) {
+    GfdMiner(model::graph_t graph_) : Algorithm(), graph_(graph_) {
         ExecutePrepare();
     }
 

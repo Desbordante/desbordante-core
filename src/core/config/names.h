@@ -57,6 +57,8 @@ constexpr auto kDifferentialScale = "differential_scale";
 constexpr auto kDifferentialStrategy = "differential_strategy";
 constexpr auto kMaxFitnessEvaluations = "max_fitness_evaluations";
 constexpr auto kPopulationSize = "population_size";
+// FD verifiers
+constexpr auto kFd = "fd";
 // Dynamic FD verifier
 constexpr auto kDeleteStatements = "delete";
 constexpr auto kInsertStatements = "insert";

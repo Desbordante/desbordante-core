@@ -15,7 +15,7 @@
 namespace algos::des {
 using model::ValueRange;
 
-DES::DES() : NARAlgorithm({}) {
+DES::DES() : NARAlgorithm() {
     RegisterOptions();
 }
 

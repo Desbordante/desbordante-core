@@ -31,7 +31,7 @@ public:
     GfdHandler();
 
     GfdHandler(model::graph_t graph_, std::vector<model::Gfd> gfds_)
-        : Algorithm({}), graph_(graph_), gfds_(gfds_) {
+        : Algorithm(), graph_(graph_), gfds_(gfds_) {
         ExecutePrepare();
     }
 

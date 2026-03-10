@@ -30,7 +30,7 @@ public:
     };
 
     void ResetState() override;
-    explicit NARAlgorithm(std::vector<std::string_view> phase_names);
+    NARAlgorithm();
 };
 
 }  // namespace algos

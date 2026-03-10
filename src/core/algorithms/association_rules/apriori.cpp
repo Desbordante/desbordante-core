@@ -7,8 +7,6 @@
 
 namespace algos {
 
-Apriori::Apriori() : ARAlgorithm({}) {}
-
 void Apriori::GenerateCandidates(std::vector<Node>& children) {
     auto const last_child_iter = std::prev(children.end());
     for (auto child_iter = children.begin(); child_iter != last_child_iter; ++child_iter) {

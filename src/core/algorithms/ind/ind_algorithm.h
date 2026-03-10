@@ -33,11 +33,9 @@ private:
     virtual void ResetINDAlgorithmState() = 0;
 
 protected:
-    constexpr static std::string_view kDefaultPhaseName = "IND mining";
-
     config::InputTables input_tables_;
 
-    explicit INDAlgorithm(std::vector<std::string_view> phase_names);
+    explicit INDAlgorithm();
 
     virtual void RegisterIND(std::shared_ptr<model::ColumnCombination> lhs,
                              std::shared_ptr<model::ColumnCombination> rhs,

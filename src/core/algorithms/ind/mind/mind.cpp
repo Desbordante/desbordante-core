@@ -22,7 +22,7 @@
 
 namespace algos {
 
-Mind::Mind() : INDAlgorithm({}) {
+Mind::Mind() : INDAlgorithm() {
     MakeLoadOptsAvailable();
 
     RegisterOption(config::kErrorOpt(&max_ind_error_));

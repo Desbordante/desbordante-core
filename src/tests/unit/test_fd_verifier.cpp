@@ -4,9 +4,9 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
-#include "core/config/indices/type.h"
 #include "core/config/names.h"
 #include "core/model/types/builtin.h"
 #include "tests/common/all_csv_configs.h"
@@ -56,12 +56,11 @@ struct FDVerifyingParams {
     size_t const num_error_clusters = 0;
     size_t const num_error_rows = 0;
 
-    FDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                      size_t const num_error_clusters = 0, size_t const num_error_rows = 0,
-                      long double const error = 0., CSVConfig const& csv_config = kTestFD)
+    FDVerifyingParams(model::FdInput fd_input, size_t const num_error_clusters = 0,
+                      size_t const num_error_rows = 0, long double const error = 0.,
+                      CSVConfig const& csv_config = kTestFD)
         : params({{onam::kCsvConfig, csv_config},
-                  {onam::kLhsIndices, std::move(lhs_indices)},
-                  {onam::kRhsIndices, std::move(rhs_indices)},
+                  {onam::kFd, std::move(fd_input)},
                   {onam::kEqualNulls, true}}),
           error(error),
           num_error_clusters(num_error_clusters),
@@ -87,39 +86,39 @@ TEST_P(TestFDVerifying, DefaultTest) {
 INSTANTIATE_TEST_SUITE_P(
         FDVerifierTestSuite, TestFDVerifying,
         ::testing::Values(
-            FDVerifyingParams({1}, {0}),
-            FDVerifyingParams({2}, {0}),
-            FDVerifyingParams({2}, {1}),
-            FDVerifyingParams({0, 1, 2, 3, 4}, {5}),
-            FDVerifyingParams({2, 3}, {5}),
-            FDVerifyingParams({5}, {0}),
-            FDVerifyingParams({5}, {1}),
-            FDVerifyingParams({5}, {2}),
-            FDVerifyingParams({5}, {3}),
-            FDVerifyingParams({5}, {4}),
-            FDVerifyingParams({1, 3}, {4}),
-            FDVerifyingParams({5}, {0, 1, 2, 3, 4}),
-            FDVerifyingParams({2}, {0, 1}),
-            FDVerifyingParams({2, 3}, {0, 1, 4, 5}),
-            FDVerifyingParams({2, 4}, {0, 1, 3, 5}),
-            FDVerifyingParams({3, 4}, {0, 1}),
-            FDVerifyingParams({1, 4}, {0, 3}),
-            FDVerifyingParams({1, 3}, {0, 3}),
-            FDVerifyingParams({4}, {3}, 1, 2, 2.L/132),
-            FDVerifyingParams({3}, {4}, 2, 10, 26.L/132),
-            FDVerifyingParams({0}, {1}, 1, 12, 108.L/132),
-            FDVerifyingParams({1}, {2}, 4, 12, 16.L/132),
-            FDVerifyingParams({1}, {3}, 2, 6, 8.L/132),
-            FDVerifyingParams({1}, {2, 3}, 4, 12, 18.L/132),
-            FDVerifyingParams({2}, {5}, 1, 2, 2.L/132),
-            FDVerifyingParams({1, 3}, {5}, 3, 8, 10.L/132),
-            FDVerifyingParams({1, 2}, {0, 3}, 1, 2, 2.L/132),
-            FDVerifyingParams({3, 4}, {1, 2}, 3, 8, 10.L/132),
-            FDVerifyingParams({2}, {3, 4}, 1, 2, 2.L/132),
-            FDVerifyingParams({4}, {1, 2}, 4, 10, 12.L/132),
-            FDVerifyingParams({0}, {2, 3}, 1, 12, 126.L/132),
-            FDVerifyingParams({1, 4}, {2, 3, 5}, 3, 8, 10.L/132),
-            FDVerifyingParams({0, 1}, {1, 4}, 2, 6, 8.L/132)
+            FDVerifyingParams({{1}, {0}}),
+            FDVerifyingParams({{2}, {0}}),
+            FDVerifyingParams({{2}, {1}}),
+            FDVerifyingParams({{0, 1, 2, 3, 4}, {5}}),
+            FDVerifyingParams({{2, 3}, {5}}),
+            FDVerifyingParams({{5}, {0}}),
+            FDVerifyingParams({{5}, {1}}),
+            FDVerifyingParams({{5}, {2}}),
+            FDVerifyingParams({{5}, {3}}),
+            FDVerifyingParams({{5}, {4}}),
+            FDVerifyingParams({{1, 3}, {4}}),
+            FDVerifyingParams({{5}, {0, 1, 2, 3, 4}}),
+            FDVerifyingParams({{2}, {0, 1}}),
+            FDVerifyingParams({{2, 3}, {0, 1, 4, 5}}),
+            FDVerifyingParams({{2, 4}, {0, 1, 3, 5}}),
+            FDVerifyingParams({{3, 4}, {0, 1}}),
+            FDVerifyingParams({{1, 4}, {0, 3}}),
+            FDVerifyingParams({{1, 3}, {0, 3}}),
+            FDVerifyingParams({{4}, {3}}, 1, 2, 2.L/132),
+            FDVerifyingParams({{3}, {4}}, 2, 10, 26.L/132),
+            FDVerifyingParams({{0}, {1}}, 1, 12, 108.L/132),
+            FDVerifyingParams({{1}, {2}}, 4, 12, 16.L/132),
+            FDVerifyingParams({{1}, {3}}, 2, 6, 8.L/132),
+            FDVerifyingParams({{1}, {2, 3}}, 4, 12, 18.L/132),
+            FDVerifyingParams({{2}, {5}}, 1, 2, 2.L/132),
+            FDVerifyingParams({{1, 3}, {5}}, 3, 8, 10.L/132),
+            FDVerifyingParams({{1, 2}, {0, 3}}, 1, 2, 2.L/132),
+            FDVerifyingParams({{3, 4}, {1, 2}}, 3, 8, 10.L/132),
+            FDVerifyingParams({{2}, {3, 4}}, 1, 2, 2.L/132),
+            FDVerifyingParams({{4}, {1, 2}}, 4, 10, 12.L/132),
+            FDVerifyingParams({{0}, {2, 3}}, 1, 12, 126.L/132),
+            FDVerifyingParams({{1, 4}, {2, 3, 5}}, 3, 8, 10.L/132),
+            FDVerifyingParams({{0, 1}, {1, 4}}, 2, 6, 8.L/132)
             ));
 // clang-format on
 
