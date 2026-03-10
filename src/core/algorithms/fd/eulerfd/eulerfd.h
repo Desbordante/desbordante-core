@@ -13,21 +13,21 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/unordered_set.hpp>
 
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/eulerfd/mlfq.h"
 #include "core/algorithms/fd/eulerfd/search_tree.h"
-#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/single_attr_rhs_fd_storage.h"
 #include "core/config/custom_random_seed/option.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/option.h"
+#include "core/config/max_lhs/type.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/model/table/column.h"
-#include "core/model/table/relational_schema.h"
-#include "core/model/table/vertical.h"
+#include "core/model/table/table_header.h"
 #include "core/util/custom_random.h"
 
 namespace algos {
 
-class EulerFD : public FDAlgorithm {
+class EulerFD : public Algorithm {
     using Bitset = boost::dynamic_bitset<>;
     using RandomStrategy = Cluster::RandomStrategy;
 
@@ -40,9 +40,12 @@ class EulerFD : public FDAlgorithm {
     // Data from load data
     size_t number_of_attributes_{};
     size_t number_of_tuples_{};
+    config::MaxLhsType max_lhs_;
     config::InputTable input_table_;
-    std::shared_ptr<RelationalSchema> schema_{};
+    model::TableHeader table_header_;
     std::vector<std::vector<size_t>> tuples_;
+
+    SingleAttrRhsFdStorage::OwningPointer fd_storage_;
 
     config::EqNullsType is_null_equal_null_{};
 
@@ -80,7 +83,7 @@ class EulerFD : public FDAlgorithm {
 
     void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
-    void ResetStateFd() final;
+    void ResetState() final;
     void MakeExecuteOptsAvailable() final;
 
     [[nodiscard]] Bitset BuildAgreeSet(size_t t1, size_t t2) const;
@@ -112,5 +115,9 @@ class EulerFD : public FDAlgorithm {
 
 public:
     EulerFD();
+
+    SingleAttrRhsFdStorage::OwningPointer GetFdStorage() {
+        return fd_storage_;
+    }
 };
 }  // namespace algos
