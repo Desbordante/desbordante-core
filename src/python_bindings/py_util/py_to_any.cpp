@@ -9,6 +9,7 @@
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -146,7 +147,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<model::DDString>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
-        kNormalConvPair<std::pair<std::string, std::string>>};
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        kNormalConvPair<algos::cfd::RawCFD>};
 
 }  // namespace
 
