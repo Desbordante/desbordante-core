@@ -319,11 +319,11 @@ protected:
     // alias for choosing datasets' hashes specialization
     using AlgorithmType = T;
 
-    static std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
+    static std::unique_ptr<T> CreateAndConfToLoad(CSVConfig const& csv_config) {
         using namespace config::names;
         using algos::ConfigureFromMap, algos::StdParamsMap;
 
-        std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
+        std::unique_ptr<T> algorithm = std::make_unique<T>();
         ConfigureFromMap(*algorithm, StdParamsMap{{kTable, MakeInputTable(csv_config)}});
         return algorithm;
     }
@@ -341,7 +341,8 @@ protected:
             for (auto const& [csv_config, hash] : config_hashes) {
                 auto algorithm = CreateAlgorithmInstance(csv_config);
                 algorithm->Execute();
-                EXPECT_EQ(algorithm->Fletcher16(), hash)
+                std::string fds_string = FDsToJson(*algorithm->GetFdStorage());
+                EXPECT_EQ(Fletcher16(fds_string), hash)
                         << "FD collection hash changed for " << csv_config.path.filename();
             }
         } catch (std::runtime_error& e) {
@@ -352,7 +353,7 @@ protected:
     }
 
 public:
-    static std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(CSVConfig const& config) {
+    static std::unique_ptr<T> CreateAlgorithmInstance(CSVConfig const& config) {
         return algos::CreateAndLoadAlgorithm<T>(GetParamMap(config));
     }
 };
