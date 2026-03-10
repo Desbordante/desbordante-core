@@ -154,7 +154,7 @@ desbordante_add_test(
     SRCS
     test_dc_verifier.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::dc::dc_verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
     frozen
