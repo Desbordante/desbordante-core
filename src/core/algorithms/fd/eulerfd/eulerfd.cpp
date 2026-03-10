@@ -1,8 +1,10 @@
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 
+#include "core/config/max_lhs/option.h"
+
 namespace algos {
 
-EulerFD::EulerFD() : FDAlgorithm(), mlfq_(kQueuesNumber) {
+EulerFD::EulerFD() : Algorithm(), mlfq_(kQueuesNumber) {
     last_ncover_ratios_.fill(1);
     last_pcover_ratios_.fill(1);
     RegisterOption(config::kCustomRandomFlagOpt(&custom_random_opt_));
@@ -12,11 +14,11 @@ EulerFD::EulerFD() : FDAlgorithm(), mlfq_(kQueuesNumber) {
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 
-    max_lhs_ = std::numeric_limits<unsigned int>::max();
+    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
 }
 
 void EulerFD::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::kCustomRandomFlagOpt.GetName()});
+    MakeOptionsAvailable({config::kCustomRandomFlagOpt.GetName(), config::kMaxLhsOpt.GetName()});
 }
 
 void EulerFD::LoadDataInternal() {
@@ -25,12 +27,13 @@ void EulerFD::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-
-    for (size_t i = 0; i < number_of_attributes_; ++i) {
-        std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
-        schema_->AppendColumn(column_name);
+    std::size_t const attr_num = input_table_->GetNumberOfColumns();
+    std::vector<std::string> column_names;
+    column_names.reserve(attr_num);
+    for (size_t i = 0; i != attr_num; ++i) {
+        column_names.push_back(input_table_->GetColumnName(i));
     }
+    table_header_ = {input_table_->GetRelationName(), std::move(column_names)};
 
     // In each column mapping string values into integer values.
     // Using only hash isn't good idea because collisions don't processing.
@@ -60,7 +63,9 @@ void EulerFD::LoadDataInternal() {
     number_of_tuples_ = tuples_.size();
 }
 
-void EulerFD::ResetStateFd() {
+void EulerFD::ResetState() {
+    fd_storage_ = nullptr;
+
     // Data from sampling module
     clusters_.clear();
     constant_columns_.clear();
@@ -87,8 +92,11 @@ void EulerFD::ResetStateFd() {
 }
 
 void EulerFD::SaveAnswer() {
+    SingleAttrRhsFdStorage::LhsLimBuilder storage_builder{number_of_attributes_, max_lhs_};
+
     if (attribute_indexes_.empty()) {
         std::cout << "attribute_indexes_ size is 0\n";
+        fd_storage_ = storage_builder.Build(table_header_);
         return;
     }
 
@@ -101,12 +109,12 @@ void EulerFD::SaveAnswer() {
         // Then tree filling we use inverse indexes, so to get correct tree we inverse again
         size_t inv_rhs_attr = inv_indexes[rhs_attr];
         auto& tree = positive_cover_[inv_rhs_attr];
-        auto rhs = *schema_->GetColumn(rhs_attr);
         tree.ForEach([&](Bitset const& lhs_attr) {
-            auto lhs = schema_->GetVertical(ChangeAttributesOrder(lhs_attr, attribute_indexes_));
-            RegisterFd(lhs, rhs, schema_);
+            storage_builder.AddFd(rhs_attr, {ChangeAttributesOrder(lhs_attr, attribute_indexes_)});
         });
     }
+
+    fd_storage_ = storage_builder.Build(table_header_);
 }
 
 void EulerFD::InitCovers() {
