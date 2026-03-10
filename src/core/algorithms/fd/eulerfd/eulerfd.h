@@ -91,22 +91,22 @@ class EulerFD : public Algorithm {
     void InitCovers();
     void BuildPartition();
 
-    double SamplingInCluster(Cluster *cluster);
+    double SamplingInCluster(Cluster* cluster);
     void Sampling();
     size_t GenerateResults();
 
     [[nodiscard]] std::vector<size_t> GetAttributesSortedByFrequency(
-            std::vector<Bitset> const &neg_cover_vector);
-    [[nodiscard]] static Bitset ChangeAttributesOrder(Bitset const &initial_bitset,
-                                                      std::vector<size_t> const &new_order);
+            std::vector<Bitset> const& neg_cover_vector);
+    [[nodiscard]] static Bitset ChangeAttributesOrder(Bitset const& initial_bitset,
+                                                      std::vector<size_t> const& new_order);
 
     [[nodiscard]] std::vector<Bitset> CreateNegativeCover(
-            size_t rhs, std::vector<Bitset> const &neg_cover_vector);
-    size_t Invert(size_t rhs, std::vector<Bitset> const &neg);
+            size_t rhs, std::vector<Bitset> const& neg_cover_vector);
+    size_t Invert(size_t rhs, std::vector<Bitset> const& neg);
 
-    static void AddInvalidAtTree(SearchTreeEulerFD &tree, Bitset const &invalid);
-    static std::unordered_set<Bitset> RemoveGeneralizations(SearchTreeEulerFD &tree,
-                                                            Bitset const &invalid);
+    static void AddInvalidAtTree(SearchTreeEulerFD& tree, Bitset const& invalid);
+    static std::unordered_set<Bitset> RemoveGeneralizations(SearchTreeEulerFD& tree,
+                                                            Bitset const& invalid);
 
     bool IsNCoverGrowthSmall() const;
     bool IsPCoverGrowthSmall() const;
