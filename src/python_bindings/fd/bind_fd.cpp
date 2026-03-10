@@ -92,9 +92,9 @@ void BindFd(py::module_& main_module) {
         for (auto algo_name : algorithms) {
             algos_module.attr(algo_name) = fd_algos_module.attr(algo_name);
         }
-        algos_module.attr("Default") = algos_module.attr(algorithms.front());
+        //algos_module.attr("Default") = algos_module.attr(algorithms.front());
     };
 
-    define_submodule("afd_fast", {kPyroName});
+    define_submodule("afd", {kPyroName});
 }
 }  // namespace python_bindings
