@@ -6,13 +6,14 @@
 
 #include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
+#include "core/util/export.h"
 
 namespace pac::model {
 /// @brief Ordered domain in a metric space of attribute values.
 /// Despite the name, it can be a closed set.
 /// @note that @c tuple_type must agree with Domain, i. e.
 /// x in D iff exist a, b in D such that a <= x <= b
-class IDomain {
+class DESBORDANTE_EXPORT IDomain {
 protected:
     std::shared_ptr<TupleType> tuple_type_;
     bool dist_from_null_is_infty_ = false;
