@@ -7,224 +7,328 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_example[advanced/afd_multiple_error_thresholds.py-None-afd_multiple_error_thresholds_output] afd_multiple_error_thresholds_output'] = '''[[1 2 3] -> 4, [0 2 3] -> 4, [0 1 3] -> 4, [0 1 2] -> 4]
-[[3] -> 0, [3] -> 1, [3] -> 2, [3] -> 4, [2] -> 0, [2] -> 1, [2] -> 3, [2] -> 4, [1] -> 0, [1] -> 2, [1] -> 3, [1] -> 4, [0] -> 1, [0] -> 2, [0] -> 3, [0] -> 4]
-[[3] -> 0, [3] -> 1, [3] -> 2, [3] -> 4, [2] -> 0, [2] -> 1, [2] -> 3, [2] -> 4, [1] -> 0, [1] -> 2, [1] -> 3, [1] -> 4, [0] -> 1, [0] -> 2, [0] -> 3, [0] -> 4]
-[[4] -> 1, [4] -> 2, [4] -> 3, [3] -> 0, [3] -> 1, [3] -> 2, [3] -> 4, [2] -> 0, [2] -> 1, [2] -> 3, [2] -> 4, [1] -> 0, [1] -> 2, [1] -> 3, [1] -> 4, [0] -> 1, [0] -> 2, [0] -> 3, [0] -> 4]
+snapshots['test_example[advanced/verifying_pac/verifying_domain_pac_custom_domain.py-None-verifying_domain_pac_custom_domain_output] verifying_domain_pac_custom_domain_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+A Domain PAC on a column set X and domain D, with given ε and δ means that \x1b[1;37mPr(x ∈ D±ε) ≥ δ\x1b[0m.
+For more information, see "Checks and Balances: Monitoring Data Quality Problems in Network
+Traffic Databases" by Filp Korn et al (Proceedings of the 29th VLDB Conference, Berlin, 2003).
+If you have not read the basic Domain PAC examples yet (see the \x1b[36mexamples/basic/verifying_pac/\x1b[0m
+directory), it is recommended to start there.
+
+Assume we have a dataset of user preferences, where each user's interest in several topics is
+encoded as values in [0, 1], where 0 is "not interested at all" and 1 is "very interested":
+\x1b[1;37m  Databases    Networks    Machine learning
+-----------  ----------  ------------------
+     0.7           0.2                1
+     0.4           0.9                0.2
+     0.85          0.4                0
+     0.91          0.38               0.05
+     0.75          0.41               0.1
+     0.3           0.2                0.7
+     0.77          0.2                0.01
+     1             0.5                0.1
+     0.885         0.41               0.02
+     0.9009        0.4                0.037\x1b[0m
+
+We need to estimate whether this group of users will be interested in the original Domain PAC paper
+("Checks and Balances: ...").
+To do this, we represent each user profile as a vector in a multi-dimensional topic space:
+     ^ Topic 2
+     |
+     |   user
+     |  x
+     | /
+     |/    Topic 1
+    -+------->
+     |
+
+A "perfect" target reader might have the profile: \x1b[34m(0.9, 0.4, 0.05)\x1b[0m.
+This corresponds to:
+    * high interest in Databases;
+    * moderate interest in Networks;
+    * low interest in Machine Learning.
+Our goal is to measure how close real users are to this ideal profile.
+
+We use cosine distance, which measures the angle between two vectors rather then their absolute
+length. This is useful because we care about interest proportions, not total magnitude.
+    \x1b[1;37mdist(x, y) = 1 - cos(angle between x and y) = 1 - (x, y)/(|x| * |y|)\x1b[0m,
+where (x, y) is a dot product between x and y.
+
+A custom domain is defined by two parameters:
+    1. Distance function -- takes a value tuple and returns the distance to the domain.
+    2. Domain name (optional) -- used for readable output.
+In this example:
+    * distance function: \x1b[34mdist(x, (0.9, 0.4, 0.05))\x1b[0m;
+    * domain name: \x1b[34m"(0.9, 0.4, 0.05)"\x1b[0m.
+This effectively defines the domain as "users close to the ideal profile".
+
+We run the Domain PAC verifier with domain=\x1b[34m(0.9, 0.4, 0.05)\x1b[0m.
+Algorithm result:
+    \x1b[32mDomain PAC Pr(x ∈ (0.9, 0.4, 0.05)±0.37695) ≥ 0.9 on columns [Databases Networks Machine learning]\x1b[0m
+Now we lower the required probability threshold: min_delta=\x1b[34m0.6\x1b[0m.
+Algorithm result:
+    \x1b[32mDomain PAC Pr(x ∈ (0.9, 0.4, 0.05)±0.0141436) ≥ 0.7 on columns [Databases Networks Machine learning]\x1b[0m
+Interpretation:
+    * With a larger ε (\x1b[34m0.377\x1b[0m), nearly all users show some level of interest
+    * With a very small ε (\x1b[34m0.014\x1b[0m), only \x1b[34m70%\x1b[0m of users closely match the ideal reader.
+
+You can user highlights to identify which users are closer to or farther from the ideal profile.
+For an introduction to highlights, see \x1b[36mexamples/basic/verifying_pac/verifying_domain_pac1.py\x1b[0m.
 '''
 
-snapshots['test_example[advanced/aind_typos.py-None-aind_typos_output] aind_typos_output'] = '''This pipeline demonstrates the process of mining and verifying AINDs
-(approximate inclusion dependencies). This pipeline can be used for data
-cleaning by identifying typos in the datasets based on the identified AINDs.
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac1.py-None-verifying_domain_pac1_output] verifying_domain_pac1_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (PACs).
+A Domain PAC on column set X and domain D, with given ε and δ means that Pr(x ∈ D±ε) ≥ δ.
+For more information consult "Checks and Balances: Monitoring Data Quality Problems in Network
+Traffic Databases" by Flip Korn et al (Proceedings of the 29th VLDB Conference, Berlin, 2003).
 
-It consists of the following steps:
-1. Mine all possible AINDs from a set of tables.
-2. Filter out exact INDs (which have zero error).
-3. Verify the AINDs to identify clusters of data that violate the dependencies.
-4. Display detailed information about the dependencies.
+This is the first example in the "Basic Domain PAC verification" series. Others can be found in
+\x1b[36mexamples/basic/verifying_pac/\x1b[0m directory.
 
-Let's find all AINDs with an error threshold less than 0.4.
-The datasets under consideration for this scenario are  'orders', 'customers'
-and 'products'.
+Suppose we are working on a new model of engine. Its operating temperature range is \x1b[34m[85, 95]\x1b[0m°C.
+The engine is made of high-strength metal, so short-term temperature deviations are acceptable and
+will not cause immediate damage. In other words, engine operates properly when Pr(t ∈ [85, 95]±ε) ≥ δ.
+Based on engineering analysis, the acceptable limits are: ε = \x1b[34m5\x1b[0m, δ = \x1b[34m0.9\x1b[0m.
+In terms of Domain PACs, the following constraint should hold: \x1b[34mPr(x ∈ [85, 95]±5) ≥ 0.9\x1b[0m.
 
-Dataset 'orders':
-+----+------+---------------+-----------+
-|    |   id |   customer_id | product   |
-|----+------+---------------+-----------|
-|  0 |    1 |           101 | Laptop    |
-|  1 |    2 |           102 | Phone     |
-|  2 |    3 |           103 | Tablet    |
-|  3 |    4 |           104 | Monitor   |
-|  4 |    5 |           108 | Keyboard  |
-|  5 |    6 |           201 | Mouse     |
-|  6 |    7 |           102 | Charger   |
-+----+------+---------------+-----------+
+The following table contains readings from the engine temperature sensor:
+\x1b[1;37mt: [79, 78, 78, 78, 79, 80, 79, 85, 90, 89, 94, 96, 104, 93, 90, 88, 86, 84, 87, 90, 95, 92]\x1b[0m
 
-Dataset 'customers':
-+----+------+---------+-----------+
-|    |   id | name    | country   |
-|----+------+---------+-----------|
-|  0 |  101 | Alice   | USA       |
-|  1 |  102 | Bob     | UK        |
-|  2 |  103 | Charlie | Canada    |
-|  3 |  104 | David   | Germany   |
-|  4 |  105 | Eve     | France    |
-+----+------+---------+-----------+
+We now use the Domain PAC verifier to determine whether the engine is operating safely.
+First, we need to define the domain. A segment is a special case of a parallelepiped, so we use it here.
+We run algorithm with the following options: domain=\x1b[34m[85, 95]\x1b[0m.
+All other parameters use default values: min_epsilon=\x1b[34m0\x1b[0m, max_epsilon=\x1b[34m∞\x1b[0m, min_delta=\x1b[34m0.9\x1b[0m, delta_steps=\x1b[34m100\x1b[0m.
 
-Dataset 'products':
-+----+------+----------+-------------+
-|    |   id | name     | category    |
-|----+------+----------+-------------|
-|  0 |    1 | Laptop   | Electronics |
-|  1 |    2 | Phone    | Electronics |
-|  2 |    3 | Tablet   | Electronics |
-|  3 |    4 | Monitor  | Electronics |
-|  4 |    5 | Keyboard | Accessories |
-|  5 |    6 | Mouse    | Accessories |
-|  6 |    7 | Charger  | Accessories |
-+----+------+----------+-------------+
+Algorithm result: \x1b[33mDomain PAC Pr(x ∈ [85, 95]±7) ≥ 0.954545 on columns [t]\x1b[0m.
+This PAC is not very informative. Let's run algorithm with min_epsilon=\x1b[34m5\x1b[0m and max_epsilon=\x1b[34m5\x1b[0m.
+This will give us the exact δ, for which PAC with ε=\x1b[34m5\x1b[0m holds.
 
-Here is the list of exact INDs:
-(orders.csv, [id]) -> (products.csv, [id])
-(orders.csv, [product]) -> (products.csv, [name])
-(products.csv, [id]) -> (orders.csv, [id])
-(products.csv, [name]) -> (orders.csv, [product])
-(orders.csv, [id, product]) -> (products.csv, [id, name])
-(products.csv, [id, name]) -> (orders.csv, [id, product])
+Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.681818 on columns [t]\x1b[0m.
+Also, let's run algorithm with max_epsilon=\x1b[34m0\x1b[0m and min_delta=\x1b[34m0.9\x1b[0m to check which ε
+is needed to satisfy δ=\x1b[34m0.9\x1b[0m. With these parameters algorithm enters special mode and returns
+pair (ε, min_delta), so that we can validate PAC with the given δ.
 
-Here is the list of AINDs:
-AIND: (orders.csv, [customer_id]) -> (customers.csv, [id]) with error threshold = 0.333333
-AIND: (customers.csv, [id]) -> (orders.csv, [customer_id]) with error threshold = 0.2
+Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [85, 95]±7) ≥ 0.954545 on columns [t]\x1b[0m.
+Here algorithm gives δ=\x1b[34m0.9545454545454546\x1b[0m, which is greater than \x1b[34m0.9\x1b[0m, because achieving δ=\x1b[34m0.9\x1b[0m requires
+ε=\x1b[34m7.0\x1b[0m and PAC (\x1b[34m7.0\x1b[0m, \x1b[34m0.9545454545454546\x1b[0m) holds. So, this means that δ=\x1b[34m0.9\x1b[0m would also require ε=\x1b[34m7.0\x1b[0m.
 
-Let's see detailed information about AINDs:
-AIND: (orders.csv, [customer_id]) -> (customers.csv, [id]) with error threshold = 0.333333
-\x1b[1;41m AIND holds with error = 0.33 \x1b[0m
-Number of clusters violating IND: 2
-\x1b[1;46m #1 cluster: \x1b[1;49m\x1b[0m
-5: 201
-\x1b[1;46m #2 cluster: \x1b[1;49m\x1b[0m
-4: 108
+We can see that desired PAC doesn't hold, so the engine can blow up!
 
-AIND: (customers.csv, [id]) -> (orders.csv, [customer_id]) with error threshold = 0.2
-\x1b[1;41m AIND holds with error = 0.2 \x1b[0m
-Number of clusters violating IND: 1
-\x1b[1;46m #1 cluster: \x1b[1;49m\x1b[0m
-4: 105
+Let's look at values violating PAC. Domain PAC verifier can detect values between eps_1
+and eps_2, i. e. values that lie in D±eps_2 \\ D±eps_1. Such values are called highlights or outliers.
+Let's find outliers for different eps_1, eps_2 values:
+  eps_1    eps_2  highlights
+-------  -------  ------------------------
+      \x1b[34m0\x1b[0m        \x1b[34m1\x1b[0m  [96, 84]
+      \x1b[34m1\x1b[0m        \x1b[34m2\x1b[0m
+      \x1b[34m2\x1b[0m        \x1b[34m3\x1b[0m
+      \x1b[34m3\x1b[0m        \x1b[34m5\x1b[0m  [80]
+      \x1b[34m5\x1b[0m        \x1b[34m7\x1b[0m  [79, 79, 79, 78, 78, 78]
+      \x1b[34m7\x1b[0m       \x1b[34m10\x1b[0m  [104]
 
-Based on the analysis of the AINDs and their errors, we can make the following
-conclusions:
+We can see two problems:
+    1. The engine operated at low temperatures for an extended period, slightly below 80°C.
+    2. The peak temperature was too high, but this occurred only once.
 
-  First AIND: The AIND between `orders.customer_id` and `customers.id` holds
-with an error threshold of 0.33. The clusters violating the inclusion dependency
-indicate possible data issues.
-- The `orders.customer_id` value '201' does not match any entry in the
-`customers.id` column. This suggests that there might have been a typo where
-'201' should have been '101', indicating that the customer who bought the
-'Mouse' might actually be Alice.
-- Similarly, the `orders.customer_id` value '108' also violates the AIND. This
-suggests a missing customer entry in the `customers` table. The customer
-corresponding to '108' may not exist in the dataset, pointing to a data
-inconsistency.
+The second version of engine has:
+    1. A pre-heating system to prevent operation at low temperatures.
+    2. An emergency cooling system to limit peak temperatures.
+The updated sensor readings (modified values highlighted) are:
+\x1b[1;37mt: [79, \x1b[1;33m80\x1b[1;37m, \x1b[1;33m81\x1b[1;37m, \x1b[1;33m82\x1b[1;37m, \x1b[1;33m81\x1b[1;37m, \x1b[1;33m81\x1b[1;37m, \x1b[1;33m83\x1b[1;37m, 85, 90, 89, 94, 96, \x1b[1;33m100\x1b[1;37m, 93, 90, 88, 86, 84, 87, 90, 95, 92]\x1b[0m
 
-  Second AIND: The AIND between `customers.id` and `orders.customer_id` with an
-error threshold of 0.2 does not indicate any real typo. The issue here is that
-this AIND counts customers who have not placed any orders, which is expected
-behavior. This dependency does not reflect typos but instead reveals missing
-orders for certain customers. Since it's not a typo, this AIND is not useful for
-cleaning data.
+We run the Domain PAC verifier again.
+Algorithm result: \x1b[32mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.954545 on columns [t]\x1b[0m.
+The desired PAC now holds, which means the improved engine operates within acceptable limits.
 
-It's important to take the error threshold into account when working with AINDs.
-A higher threshold will reveal more potential errors, but it might also include
-non-typo cases, such as customers who have not made any orders yet.
+It is recommended to continue with the second example (\x1b[36mexamples/basic/verifying_pac/verifying_domain_pac2.py\x1b[0m),
+which demonstrates more advanced usage of the Parallelepiped domain.
 '''
 
-snapshots['test_example[advanced/comparison_mining_fd_approximate.py-None-comparison_mining_fd_approximate_output] comparison_mining_fd_approximate_output'] = '''
-=======================================================
-This example demonstrates key characteristics of the
-approximate functional dependency (FD) discovery
-algorithms, AID-FD and EulerFD.
-=======================================================
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac2.py-None-verifying_domain_pac2_output] verifying_domain_pac2_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs)
+on multiple columns. It continues the first Domain PAC verification example
+\x1b[36m(examples/basic/verifying_pac/verifying_domain_pac1.py)\x1b[0m. If you have not read the first part yet,
+it is recommended to start there.
 
+In the first example we verified \x1b[34mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9\x1b[0m on engine temperature sensor readings.
+Now, in addition to temperature readings, we also have tachometer data:
+\x1b[1;37m  t    rpm
+---  -----
+ 79    900
+ 78   2000
+ 78   3000
+ 78   2500
+ 79   3600
+ 80   3000
+ 79   2500
+ 85   1500
+ 90   1000
+ 89   1400
+ 94   1700
+ 96   1800
+104   3500
+ 93   2700
+ 90   2100
+ 88   1900
+ 86   1500
+ 84   2000
+ 87   3100
+ 90   3400
+ 95   4000
+ 92   2800\x1b[0m
 
-EulerFD is a randomized algorithm, and its results vary based on the seed value. For instance:
-With a seed of 2704, EulerFD found 76 FDs.
-With a seed of 1321, EulerFD found 78 FDs.
-With a seed of 9208, EulerFD found 80 FDs.
-An exact FD discovery algorithm, in contrast, consistently identified 78 FDs.
+The normal operating RPM for this engine is \x1b[34m[1500, 3500]\x1b[0m. Values outside this range are
+not harmful by themselves (as long as they are within \x1b[34m[0, 5000]\x1b[0m), but:
+    * A cold engine may stall at low RPM and can be damaged at high RPM.
+    * An overheated engine is especially vulnerable at RPM values outside \x1b[34m[1500, 3500]\x1b[0m, because
+      cooling efficiency depends on RPM.
+As in the first example, we use the Domain PAC verifier to check whether the engine operates properly.
 
-This highlights a key property of EulerFD: it may produce results with both
-false positives (extra FDs) and false negatives (missing FDs)
-compared to exact methods.
+Firstly, we need to create domain. We have a Cartesian product of two segments: \x1b[34m[85, 95] x [1500, 3500]\x1b[0m,
+so it would be natural to use parallelepiped.
+We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
+of two segments:
+    * temperature: [85, 95];
+    * RPM: [1500, 3500].
+This forms a parallelepiped domain: \x1b[34m[85, 95] x [1500, 3500]\x1b[0m.
 
+We run the Domain PAC verifier with the following parameters: domain=\x1b[34m[{85, 1500}, {95, 3500}]\x1b[0m,
+max_epsilon=\x1b[34m15\x1b[0m.
 
----------------------------------------------------------------------
-Let's examine the differences between the results of the exact algorithm and EulerFD.
+Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [{85, 1500}, {95, 3500}]±1) ≥ 0.5 on columns [t rpm]\x1b[0m.
+A result with δ = \x1b[34m0.5\x1b[0m is unexpected. To understand what is happening, we examine the highlights.
+Highlights between \x1b[34m0\x1b[0m and \x1b[34m1.0\x1b[0m are: \x1b[1;37m[{96, 1800}, {84, 2000}]\x1b[0m.
 
-First, consider the results with a seed of 2704, where EulerFD identified 76 FDs.
-Compared to the exact method, EulerFD failed to identify the following 4 FDs:
-[1 2 3 5 7 9 11 13] -> 8
-[1 2 3 5 7 9 13 14] -> 8
-[1 2 4 5 7 9 11 13] -> 8
-[1 2 4 5 7 9 13 14] -> 8
-Additionally, it incorrectly identified these 2 false FDs:
-[1 2 3 5 7 9 13] -> 8
-[1 2 4 5 7 9 13] -> 8
-Thus, a single run of EulerFD can both miss valid FDs and generate false FDs.
+There are very few highlights, which suggests that the parameters may not be chosen correctly.
 
-Next, let's analyze the results with a seed of 1321, where EulerFD identified 78 FDs
-EulerFD not found 0 FDs.
-EulerFD found 0 false FDs.
-Therefore, with the seed 1321, EulerFD obtained the exact result.
+The question is: what does ε = \x1b[34m1.0\x1b[0m mean in two-dimensional domain? Should ε correspond to:
+    * 10 degrees of temperature difference, or
+    * 1500 RPM difference?
+To answer this, we need to understand how distance is computed.
+
+The parallelepiped uses the Chebyshev metric to calculate distance between value tuples:
+    \x1b[1;37md(x, y) = max{|x[1] - y[1]|, ..., |x[n] - y[n]|}\x1b[0m
+In our case:
+    * temperature differences are on the order of tens;
+    * RPM differences are on the order of thousands.
+As a result, RPM differences dominate the distance computation, making temperature differences
+almost irrelevant. This issue affects all coordinate-wise metric-based domains (currently
+Parallelepiped and Ball, though custom domains can be implemented in C++).
+
+To address this, such domains support \x1b[36mleveling coefficients\x1b[0m, which rescale individual
+dimensions. With leveling coefficients, the distance becomes:
+    \x1b[1;37md(x, y) = max{|x[1] - y[1]| * lc[1], ..., |x[n] - y[n]| * lc[n]}\x1b[0m
+To normalize temperatures and RPM scales, we use leveling_coefficients=\x1b[34m[1, 0.01]\x1b[0m parameter.
+This treats a 100 RPM difference as comparable to a 1°C difference.
+
+With leveling coefficients applied, we rerun the algorithm.
+
+Algorithm result: \x1b[32mDomain PAC Pr(x ∈ [{85, 1500}, {95, 3500}]±7) ≥ 0.954545 on columns [t rpm]\x1b[0m.
+This result is now meaningful and consistent with the findings from the first example.
+
+It is recommended to continue with the third example (\x1b[36mexamples/basic/verifying_pac/verifying_domain_pac3.py\x1b[0m),
+which introduces another basic domain type: Ball.
 '''
 
-snapshots['test_example[advanced/comparison_pfd_vs_afd.py-None-comparison_pfd_vs_afd_output] comparison_pfd_vs_afd_output'] = '''pFDs \\ AFDs = OrderedSet(['[DeviceId] -> Data'])
-AFDs \\ pFDs = OrderedSet()
-AFDs ∩ pFDs = OrderedSet(['[Data] -> Id', '[Data] -> DeviceId', '[Id] -> DeviceId', '[Id] -> Data'])
-1 - PerValue([DeviceId] -> Data) = 0.1714285714
-e([DeviceId] -> Data) = 0.23076923076923078
-In case of PerValue error measure, violations on data from the single "glitchy"
-sensor device among many do not prevent dependecy from being found
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac3.py-None-verifying_domain_pac3_output] verifying_domain_pac3_output'] = '''This example demonstrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+It is the third example of "Basic Domain PAC verification" series (see the \x1b[36mexamples/basic/verifying_pac/\x1b[0m directory).
+If you haven't read first and second parts yet, it is recommended to start there.
+
+In the first example we verified the following Domain PAC on temperature sensor readings:
+    \x1b[34mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9\x1b[0m
+In the second example, we added tachometer readings and validated a Domain PAC on two columns using
+the Parallelepiped domain.
+
+The sensor readings are the same as before:
+\x1b[1;37m  t    rpm
+---  -----
+ 79    900
+ 78   2000
+ 78   3000
+ 78   2500
+ 79   3600
+ 80   3000
+ 79   2500
+ 85   1500
+ 90   1000
+ 89   1400
+ 94   1700
+ 96   1800
+104   3500
+ 93   2700
+ 90   2100
+ 88   1900
+ 86   1500
+ 84   2000
+ 87   3100
+ 90   3400
+ 95   4000
+ 92   2800\x1b[0m
+
+The parallelepiped \x1b[34m[{85, 1500}, {95, 3500}]\x1b[0m is a rectangle in the (temperature, RPM) space:
+    (95, 1500)      (95, 3500)
+            +--------+
+            |        |
+            +--------+
+    (85, 1500)      (85, 3500)
+Our task from the second example was:
+    The normal operating RPM for this engine is \x1b[34m[1500, 3500]\x1b[0m. Values outside this range are
+    not harmful by themselves (as long as they are within \x1b[34m[0, 5000]\x1b[0m), but:
+        * A cold engine may stall at low RPM and can be damaged at high RPM.
+        * An overheated engine is especially vulnerable at RPM values outside \x1b[34m[1500, 3500]\x1b[0m, because
+          cooling efficiency depends on RPM.
+
+A rectangle does not perfectly describe these conditions. For example,
+    * (80, 3900) is very harmful,
+    * (80, 1600) is mostly acceptable.
+However, both points have the same distance from the rectangle boundary. This shows that a shape
+with sharp corners does not model the risk accurately.
+What we rally want is a smooth shape without corners -- an ellipse.
+
+In this approach, ellipses (and their higher-dimensional equivalents) are represented by the Ball domain.
+You might wonder: a ball has the same radius in all dimensions, while an ellipse has different ones.
+The answer is leveling coefficients.
+
+In metric-space terms, a ball is defined as \x1b[34mB = {x : dist(x, center) < r}.
+The Ball domain uses the Euclidean metric:
+    \x1b[1;37mdist(x, y) = sqrt((x[1] - y[1])^2 * lc[1] + ... + (x[n] - y[n])^2 * lc[n])\x1b[0m
+Here, lc is the list of leveling coefficients, introduced in the second example. They allow us to
+scale dimensions differently -- effectively turning a circle into an ellipse.
+
+To balance temperature and RPM scales, we use levelling_coefficients=\x1b[34m[1, 0.005]\x1b[0m.
+This treats a 200 RPM difference as roughly equivalent to a 1°C difference.
+
+We now run the Domain PAC verifier with domain=\x1b[34mB({90, 2500}, 5)\x1b[0m.
+Algorithm result:
+    \x1b[32mDomain PAC Pr(x ∈ B({90, 2500}, 5)±7.29837) ≥ 0.909091 on columns [t rpm]\x1b[0m
+For comparison, the Parallelepiped domain previously produced:
+    \x1b[31mDomain PAC Pr(x ∈ [{85, 1500}, {95, 3500}]±7) ≥ 0.954545 on columns [t rpm]\x1b[0m
+
+Although the numerical values differ slightly, the Ball domain better reflects the actual operating
+conditions, because it models gradual risk changes instead of sharp rectangular boundaries.
+
+It is recommended to continue with the fourth example (\x1b[36mexamples/basic/verifying_pac/verifying_domain_pac3.py\x1b[0m),
+which demonstrates another practical usage of the Ball domain.
 '''
 
-snapshots['test_example[advanced/comparison_ucc_and_aucc_1.py-None-comparison_ucc_and_aucc_1_output] comparison_ucc_and_aucc_1_output'] = '''\x1b[1m\x1b[36mThis example illustrates the difference between exact and approximate Unique
-Column Combinations (UCC and AUCC). Intuitively, a UCC declares that some columns uniquely
-identify every tuple in a table. An AUCC allows a certain degree of violation. For more
-information on UCC, consult "A Hybrid Approach for Efficient Unique Column Combination Discovery"
-by T. Papenbrock and F. Naumann. For more information on AUCC, consult "Efficient Discovery of
-Approximate Dependencies" by S. Kruse and F. Naumann.
-\x1b[0m
-The following table contains records about employees:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
---------------------------------------------
-Mark     7       1150     10                
-Joyce    5       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    6       1200     1                 
-Samuel   1       950      9                 
-Nancy    2       800      3                 
-\x1b[0mWe'll try to find typos, using UCC mining and AUCC verifying algorithms.
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac4.py-None-verifying_domain_pac4_output] verifying_domain_pac4_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+It is the final example in the "Basic Domain PAC verification" series (see the \x1b[36mexamples/basic/verifying_pac/\x1b[0m directory).
+If you haven't read the first three parts yet, it is recommended to start there.
 
-Let's run UCC mining algorithm:
-Found UCCs:
-\t\x1b[1m\x1b[36m[Grade]\x1b[0m
-\t\x1b[1m\x1b[36m[Salary]\x1b[0m
-\t\x1b[1m\x1b[36m[Work_experience]\x1b[0m
+Consider the following dataset of users' attempts to type a difficult Spanish word:
+\x1b[1;37mQuery
+------------
+Desbordante
+Dezbordante
+Desbordanto
+Deezbardanta
+Desbordant
+Desbordante
+Disbordantah
+Desbbdante
+Desbordante
+desbordante\x1b[0m
 
-There is no UCC for \x1b[1m\x1b[36mName\x1b[0m column. Maybe it's an error?
-Let's run AUCC verification algorithm for column \x1b[1m\x1b[36mName\x1b[0m:
-\x1b[31mUCC does not hold\x1b[0m, but AUCC holds with threshold = 0.048
-Threshold is small. It means that, possibly, there is an error in this column.
-Let's look at the table again:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
---------------------------------------------
-Mark     7       1150     10                
-Joyce    5       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    6       1200     1                 
-Samuel   1       950      9                 
-Nancy    2       800      3                 
-\x1b[0m
-There are two \x1b[1m\x1b[36mHarrys\x1b[0m. They have different work experience, so they are
-two different employees. If they had unique names, AUCC would hold with threshold = 0, and
-\x1b[1m\x1b[36mName\x1b[0m could be used as a key:
-\x1b[1m\x1b[36mName          Grade   Salary   Work_experience   
--------------------------------------------------
-Mark          7       1150     10                
-Joyce         5       1100     5                 
-Harry Brown   3       1000     7                 
-Grace         4       900      12                
-Harry Adams   6       1200     1                 
-Samuel        1       950      9                 
-Nancy         2       800      3                 
-\x1b[0m
-Let's run UCC mining algorithm:
-Found UCCs:
-\t\x1b[1m\x1b[36m[Name]\x1b[0m
-\t\x1b[1m\x1b[36m[Grade]\x1b[0m
-\t\x1b[1m\x1b[36m[Salary]\x1b[0m
-\t\x1b[1m\x1b[36m[Work_experience]\x1b[0m
+We want to show that most users can remember difficult words almost exactly.
+In probabilistic terms, we want to verify the following Domain PAC:
+    \x1b[34mPr(dist(x, "Desbordante") ≤ 3) ≥ 0.9\x1b[0m
 
 Now we have cleaned the data and \x1b[1m\x1b[36mName\x1b[0m can now be used as a key.
 '''

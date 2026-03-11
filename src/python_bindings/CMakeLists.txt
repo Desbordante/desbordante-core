@@ -240,6 +240,19 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+	pac
+	SRCS
+	pac/bind_pac.cpp
+	pac/bind_pac_verification.cpp
+	LIBS
+	Desbordante::pac::verifier::domain_pac_verifier
+	Desbordante::pac::verifier
+	better-enums
+	spdlog::spdlog_header_only
+	Boost::headers
+)
+
+desbordante_add_bind(
     pfd
     SRCS
     pfd/bind_pfd_verification.cpp
