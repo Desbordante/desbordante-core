@@ -22,8 +22,8 @@ void BindNdVerification(pybind11::module_& main_module) {
             .def("__str__", &Highlight::ToValuesString)
             .def("to_short_string", &Highlight::ToIndicesString)
             .def("to_long_string", &Highlight::ToValuesString)
-            .def("get_occurences_indices", &Highlight::GetOccurencesIndices)
-            .def_property_readonly("occurences_number", &Highlight::GetOccurencesNumber)
+            .def("get_occurrences_indices", &Highlight::GetOccurrencesIndices)
+            .def_property_readonly("occurrences_number", &Highlight::GetOccurrencesNumber)
             .def_property_readonly("lhs_value", &Highlight::GetLhsValue)
             .def("get_rhs_values", &Highlight::GetRhsValues)
             .def_property_readonly("distinct_rhs_values_number",
