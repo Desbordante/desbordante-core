@@ -108,6 +108,10 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
 
+# Set hidden visibility for object symbols for smaller and faster loading binaries
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
+
 if(DESBORDANTE_BUILD_NATIVE)
     string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
 endif()

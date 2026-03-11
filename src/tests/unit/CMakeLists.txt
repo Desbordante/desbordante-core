@@ -258,6 +258,18 @@ desbordante_add_test(
     Boost::headers
 )
 desbordante_add_test(
+    fd.afd_metric
+    SRCS
+    test_afd_metric_calculator.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fd::afd_metric
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+desbordante_add_test(
     fd.mine
     SRCS
     test_fd_mine.cpp
