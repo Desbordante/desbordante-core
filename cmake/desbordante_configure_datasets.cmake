@@ -38,6 +38,12 @@ function(desbordante_fetch_datasets)
     set(local_hashfile "${arg_DOWNLOAD_DIR}/${hashfile_name}")
     set(hashfile_url "${BASE_URL}/${hashfile_name}")
 
+	set(local_hash "NO_LOCAL_HASHFILE")
+	if (EXISTS "${local_hashfile}")
+		file(READ "${local_hashfile}" local_hash)
+		string(STRIP "${local_hash}" local_hash)
+	endif()
+
     file(DOWNLOAD ${hashfile_url} ${local_hashfile} STATUS download_status LOG download_log)
     list(GET download_status 0 status_code)
     if(NOT status_code EQUAL 0)
@@ -57,7 +63,13 @@ function(desbordante_fetch_datasets)
     file(READ "${local_hashfile}" remote_hash)
     string(STRIP "${remote_hash}" remote_hash)
 
+    if ("${local_hash}" STREQUAL "${remote_hash}" AND EXISTS "${file_path}")
+        message(STATUS "-> ${filename} already up to date (delete ${local_hashfile} to force fetch)")
+        return()
+    endif()
+
     message(STATUS "-> Fetching ${filename}")
+
 	# TODO(p-senichenkov): Use automatic hash check when download error gets caught
     file(
         DOWNLOAD "${BASE_URL}/${filename}" "${file_path}"
