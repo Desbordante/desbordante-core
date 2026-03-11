@@ -1670,6 +1670,27 @@ confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
 
 
 '''
+snapshots['test_example[basic/mining_cfun.py-None-mining_cfd_output] mining_cfun_output'] = '''
+options: 
+MINIMUM SUPPORT = 3
+displaying the first five (or fewer) discovered CFDs:
+
+[Outlook] -> Play
+	.overcast.| (True)
+
+[Temperature] -> Humidity
+	.cool.| (normal)
+
+[Outlook Humidity] -> Play
+	.sunny..high.| (False)
+
+[Outlook Windy] -> Play
+	.rain..False.| (True)
+
+[Outlook Play] -> Humidity
+	.sunny..False.| (high)
+
+'''
 
 snapshots['test_example[basic/mining_dd.py-None-mining_dd_output] mining_dd_output'] = '''Consider the table containing some information about flights:
 +----+-----------------+------------+------------------------+------------------------+------------+------------+
