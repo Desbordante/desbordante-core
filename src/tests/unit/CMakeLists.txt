@@ -550,6 +550,21 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
 )
 
+# --- PAC ---
+desbordante_add_test(
+	pac.domain_pac_verifier
+	SRCS
+	test_domain_pac_verifier.cpp
+	LIBS
+	${DESBORDANTE_PREFIX}::pac::verifier::domain_pac_verifier
+	${DESBORDANTE_PREFIX}::testlib::common
+	spdlog::spdlog_header_only
+	better-enums
+	gmock
+	Boost::headers
+	${DESBORDANTE_PREFIX}::model::types
+)
+
 # --- UCC ---
 desbordante_add_test(
     ucc.algos
