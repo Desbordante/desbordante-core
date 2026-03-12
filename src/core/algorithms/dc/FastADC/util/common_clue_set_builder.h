@@ -20,9 +20,7 @@
 namespace algos::fastadc {
 
 template <typename T>
-concept HasNone = requires(T t) {
-    t.none();
-};
+concept HasNone = requires(T t) { t.none(); };
 
 template <typename ClueT>
 [[nodiscard]] inline bool IsZeroClue(ClueT const& clue) {

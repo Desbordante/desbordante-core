@@ -18,8 +18,7 @@ public:
     EvidenceSet evidence_set;
 
     EvidenceSetBuilder(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs,
-                      size_t clue_bit_count,
-                      util::WorkerThreadPool* thread_pool = nullptr) {
+                       size_t clue_bit_count, util::WorkerThreadPool* thread_pool = nullptr) {
         if (clue_bit_count > kMaxPredicateBits) {
             throw std::invalid_argument(
                     "FastADC: predicate space is too large (clue bits exceed maximum supported).");
@@ -56,7 +55,7 @@ public:
                                         : BuildClueSet64(pli_shards, packs);
             consume_scalar(clue_set);
         } else {
-            LOG_WARNING(
+            LOG_WARN(
                     "Using 128-bit representation for clues ({} bits required). Performance may be "
                     "degraded.",
                     clue_bit_count);
@@ -75,7 +74,7 @@ public:
     EvidenceSetBuilder& operator=(EvidenceSetBuilder&& other) noexcept = delete;
 
     void BuildEvidenceSet(std::vector<PredicateBitset> const& correction_map,
-                         PredicateBitset const& cardinality_mask) {
+                          PredicateBitset const& cardinality_mask) {
         evidence_set.Reserve(clues_.size());
 
         for (auto const& [clue, count] : clues_) {

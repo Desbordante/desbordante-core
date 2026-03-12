@@ -25,7 +25,7 @@ bool IsEmpty(PredicateSet const& ps) {
 }
 
 std::size_t MaxPredicateHash(PredicatePtr p, PredicateProvider* provider,
-                            std::hash<Predicate> const& hasher) {
+                             std::hash<Predicate> const& hasher) {
     auto const p_hash = hasher(*p);
     if (!provider) {
         return p_hash;
@@ -65,7 +65,7 @@ std::size_t DenialConstraintSet::DCHash::operator()(DenialConstraint const& dc) 
 }
 
 bool DenialConstraintSet::DCEqual::operator()(DenialConstraint const& lhs,
-                                             DenialConstraint const& rhs) const {
+                                              DenialConstraint const& rhs) const {
     if (&lhs == &rhs) {
         return true;
     }

@@ -8,7 +8,8 @@ struct Evidence {
     int64_t count;
     PredicateBitset evidence;
 
-    Evidence(PredicateBitset const& satisfied, int64_t count, PredicateBitset const& cardinalityMask,
+    Evidence(PredicateBitset const& satisfied, int64_t count,
+             PredicateBitset const& cardinalityMask,
              std::vector<PredicateBitset> const& correctionMap)
         : count(count) {
         evidence = cardinalityMask;

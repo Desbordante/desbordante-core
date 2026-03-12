@@ -26,9 +26,9 @@ CrossClueSetBuilderT<ClueT>::CrossClueSetBuilderT(PliShard const& shard1, PliSha
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::BuildClueSet(PredicatePacks const& packs,
-                                              std::vector<ClueT>& forward_clues,
-                                              std::vector<ClueT>& reverse_clues,
-                                              ClueSetT<ClueT>& clue_set) {
+                                               std::vector<ClueT>& forward_clues,
+                                               std::vector<ClueT>& reverse_clues,
+                                               ClueSetT<ClueT>& clue_set) {
     forward_clues.assign(evidence_count_, ClueT{});
     reverse_clues.assign(evidence_count_, ClueT{});
 
@@ -61,9 +61,8 @@ void CrossClueSetBuilderT<ClueT>::BuildClueSet(PredicatePacks const& packs,
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::SetSingleEQ(std::vector<ClueT>& clues1,
-                                             std::vector<ClueT>& clues2, Pli const& pli1,
-                                             size_t i, Pli const& pli2, size_t j,
-                                             size_t mask_pos) {
+                                              std::vector<ClueT>& clues2, Pli const& pli1, size_t i,
+                                              Pli const& pli2, size_t j, size_t mask_pos) {
     size_t beg1 = pli1.pli_shard_->Beg();
     size_t beg2 = pli2.pli_shard_->Beg();
     size_t range1 = pli1.pli_shard_->Range();
@@ -81,10 +80,8 @@ void CrossClueSetBuilderT<ClueT>::SetSingleEQ(std::vector<ClueT>& clues1,
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::CorrectStrSingle(std::vector<ClueT>& clues1,
-                                                  std::vector<ClueT>& clues2,
-                                                  Pli const& pivotPli,
-                                                  Pli const& probePli,
-                                                  size_t mask_pos) {
+                                                   std::vector<ClueT>& clues2, Pli const& pivotPli,
+                                                   Pli const& probePli, size_t mask_pos) {
     std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
 
     for (size_t i = 0; i < pivot_keys.size(); ++i) {
@@ -96,9 +93,8 @@ void CrossClueSetBuilderT<ClueT>::CorrectStrSingle(std::vector<ClueT>& clues1,
 }
 
 template <typename ClueT>
-void CrossClueSetBuilderT<ClueT>::SetCrossEQ(std::vector<ClueT>& clues, Pli const& pli1,
-                                            size_t i, Pli const& pli2, size_t j,
-                                            size_t mask_pos) {
+void CrossClueSetBuilderT<ClueT>::SetCrossEQ(std::vector<ClueT>& clues, Pli const& pli1, size_t i,
+                                             Pli const& pli2, size_t j, size_t mask_pos) {
     size_t tid_beg1 = pli1.pli_shard_->Beg();
     size_t tid_beg2 = pli2.pli_shard_->Beg();
     size_t tid_range2 = pli2.pli_shard_->Range();
@@ -113,7 +109,7 @@ void CrossClueSetBuilderT<ClueT>::SetCrossEQ(std::vector<ClueT>& clues, Pli cons
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::CorrectStrCross(std::vector<ClueT>& clues, Pli const& pivotPli,
-                                                 Pli const& probePli, size_t mask_pos) {
+                                                  Pli const& probePli, size_t mask_pos) {
     std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
 
     for (size_t i = 0; i < pivot_keys.size(); ++i) {
@@ -126,9 +122,8 @@ void CrossClueSetBuilderT<ClueT>::CorrectStrCross(std::vector<ClueT>& clues, Pli
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::SetReverseGT(std::vector<ClueT>& reverseArray,
-                                              Pli const& probePli, size_t to,
-                                              Pli const& pivotPli, size_t i,
-                                              size_t mask_pos) {
+                                               Pli const& probePli, size_t to, Pli const& pivotPli,
+                                               size_t i, size_t mask_pos) {
     size_t probe_beg = probePli.pli_shard_->Beg();
     size_t pivot_beg = pivotPli.pli_shard_->Beg();
     size_t pivot_range = pivotPli.pli_shard_->Range();
@@ -145,9 +140,8 @@ void CrossClueSetBuilderT<ClueT>::SetReverseGT(std::vector<ClueT>& reverseArray,
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::SetForwardGT(std::vector<ClueT>& forwardArray,
-                                              Pli const& pivotPli, size_t i,
-                                              Pli const& probePli, size_t from,
-                                              size_t mask_pos) {
+                                               Pli const& pivotPli, size_t i, Pli const& probePli,
+                                               size_t from, size_t mask_pos) {
     size_t pivot_beg = pivotPli.pli_shard_->Beg();
     size_t probe_beg = probePli.pli_shard_->Beg();
     size_t probe_range = probePli.pli_shard_->Range();
@@ -164,9 +158,9 @@ void CrossClueSetBuilderT<ClueT>::SetForwardGT(std::vector<ClueT>& forwardArray,
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::CorrectNumSingle(std::vector<ClueT>& forwardArray,
-                                                  std::vector<ClueT>& reverseArray,
-                                                  Pli const& pivotPli, Pli const& probePli,
-                                                  size_t eq_pos, size_t gt_pos) {
+                                                   std::vector<ClueT>& reverseArray,
+                                                   Pli const& pivotPli, Pli const& probePli,
+                                                   size_t eq_pos, size_t gt_pos) {
     std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
     std::vector<size_t> const& probe_keys = probePli.GetKeys();
 
@@ -194,9 +188,8 @@ void CrossClueSetBuilderT<ClueT>::CorrectNumSingle(std::vector<ClueT>& forwardAr
 
 template <typename ClueT>
 void CrossClueSetBuilderT<ClueT>::CorrectNumCross(std::vector<ClueT>& forwardArray,
-                                                 Pli const& pivotPli,
-                                                 Pli const& probePli, size_t eq_pos,
-                                                 size_t gt_pos) {
+                                                  Pli const& pivotPli, Pli const& probePli,
+                                                  size_t eq_pos, size_t gt_pos) {
     std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
     std::vector<size_t> const& probe_keys = probePli.GetKeys();
 

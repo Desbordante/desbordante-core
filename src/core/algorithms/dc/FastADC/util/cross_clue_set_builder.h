@@ -30,8 +30,8 @@ private:
                      size_t i, Pli const& pli2, size_t j, size_t mask_pos);
     void CorrectStrSingle(std::vector<ClueT>& clues1, std::vector<ClueT>& clues2,
                           Pli const& pivotPli, Pli const& probePli, size_t mask_pos);
-    void SetCrossEQ(std::vector<ClueT>& clues, Pli const& pli1, size_t i, Pli const& pli2,
-                    size_t j, size_t mask_pos);
+    void SetCrossEQ(std::vector<ClueT>& clues, Pli const& pli1, size_t i, Pli const& pli2, size_t j,
+                    size_t mask_pos);
     void CorrectStrCross(std::vector<ClueT>& clues, Pli const& pivotPli, Pli const& probePli,
                          size_t mask_pos);
     void SetReverseGT(std::vector<ClueT>& reverseArray, Pli const& probePli, size_t to,

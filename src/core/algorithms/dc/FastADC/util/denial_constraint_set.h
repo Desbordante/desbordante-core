@@ -49,7 +49,7 @@ private:
 
     struct MinimalDCCandidate {
         DenialConstraint const* dc = nullptr;
-        boost::dynamic_bitset<> bitset{kPredicateBits};
+        boost::dynamic_bitset<> bitset{kMaxPredicateBits};
 
         MinimalDCCandidate() = default;
 
