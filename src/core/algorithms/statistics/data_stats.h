@@ -166,6 +166,18 @@ public:
     Statistic GetNumberOfEntirelyUppercaseWords(size_t index) const;
     // Returns the amount of entirely lowercase words in a string column.
     Statistic GetNumberOfEntirelyLowercaseWords(size_t index) const;
+    // Returns minimal number of whitespaces in a string column.
+    Statistic GetMinWhiteSpaces(size_t index) const;
+    // Returns maximal number of whitespaces in a string column.
+    Statistic GetMaxWhiteSpaces(size_t index) const;
+    // Returns number of true values in a bool column.
+    Statistic GetTrueCount(size_t index) const;
+    // Returns number of false values in a bool column.
+    Statistic GetFalseCount(size_t index) const;
+    // Returns percentage of zero values in a numeric column.
+    Statistic GetZeroPercent(size_t index) const;
+    // Returns the number of characters with diacritical marks in a string column.
+    Statistic GetDiacriticChars(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;

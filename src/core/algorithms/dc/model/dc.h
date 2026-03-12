@@ -38,8 +38,8 @@ private:
     bool CheckTwoTuples() const;
 
 public:
-    DC(std::vector<Predicate>&& predicates) : predicates_(std::move(predicates)) {};
-    DC(std::vector<Predicate> const& predicates) : predicates_(predicates) {};
+    DC(std::vector<Predicate>&& predicates) : predicates_(std::move(predicates)){};
+    DC(std::vector<Predicate> const& predicates) : predicates_(predicates){};
     DC() = default;
 
     template <class Iter>

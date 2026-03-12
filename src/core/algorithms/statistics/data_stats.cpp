@@ -9,6 +9,7 @@
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
+#include "utf8/utf8.h"
 
 namespace algos {
 
@@ -318,9 +319,70 @@ Statistic DataStats::GetNumberOfZeros(size_t index) const {
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kEqual);
 }
 
+Statistic DataStats::GetZeroPercent(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+
+    if (!col.IsNumeric()) return {};
+
+    size_t total = NumberOfValues(index) - GetNumNulls(index);
+    if (total == 0) return {};
+
+    Statistic zeros_stat = GetNumberOfZeros(index);
+
+    mo::DoubleType double_type;
+
+    mo::Int zeros = mo::Type::GetValue<mo::Int>(zeros_stat.GetData());
+
+    double percent = static_cast<double>(zeros) / total;
+
+    std::byte* result = double_type.MakeValue(percent);
+
+    return Statistic(result, &double_type, false);
+}
+
 Statistic DataStats::GetNumberOfNegatives(size_t index) const {
     if (all_stats_[index].num_negatives.HasValue()) return all_stats_[index].num_negatives;
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kLess);
+}
+
+Statistic DataStats::GetTrueCount(size_t index) const {
+    if (all_stats_[index].true_count.HasValue()) return all_stats_[index].true_count;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kBool) return {};
+
+    size_t count = 0;
+    auto const& data = col.GetData();
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        bool value = *reinterpret_cast<bool const*>(data[i]);
+        if (value) count++;
+    }
+
+    mo::IntType int_type;
+    return Statistic(int_type.MakeValue(count), &int_type, false);
+}
+
+Statistic DataStats::GetFalseCount(size_t index) const {
+    if (all_stats_[index].false_count.HasValue()) return all_stats_[index].false_count;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kBool) return {};
+
+    size_t count = 0;
+    auto const& data = col.GetData();
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        bool value = *reinterpret_cast<bool const*>(data[i]);
+        if (!value) count++;
+    }
+
+    mo::IntType int_type;
+    return Statistic(int_type.MakeValue(count), &int_type, false);
 }
 
 Statistic DataStats::GetSumOfSquares(size_t index) const {
@@ -519,6 +581,28 @@ Statistic DataStats::GetNumberOfNonLetterChars(size_t index) const {
     return CountIfInColumn(pred, index);
 }
 
+Statistic DataStats::GetDiacriticChars(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    size_t count = 0;
+    mo::IntType int_type;
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        auto const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
+
+        for (auto it = str.begin(); it != str.end();) {
+            uint32_t cp = utf8::next(it, str.end());
+            if (cp > 127) count++;
+        }
+    }
+
+    std::byte const* res = int_type.MakeValue(count);
+    return Statistic(res, &int_type, false);
+}
+
 Statistic DataStats::GetNumberOfDigitChars(size_t index) const {
     if (all_stats_[index].num_digit_chars.HasValue()) return all_stats_[index].num_digit_chars;
 
@@ -667,6 +751,24 @@ Statistic DataStats::GetMaxNumberOfChars(size_t index) const {
     if (col.GetTypeId() != +mo::TypeId::kString) return {};
 
     return GetStringMaxOf(index, [](std::string const& line) { return line.size(); });
+}
+
+Statistic DataStats::GetMinWhiteSpaces(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    return GetStringMinOf(index, [](std::string const& line) {
+        return std::count(line.begin(), line.end(), ' ');
+    });
+}
+
+Statistic DataStats::GetMaxWhiteSpaces(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    return GetStringMaxOf(index, [](std::string const& line) {
+        return std::count(line.begin(), line.end(), ' ');
+    });
 }
 
 std::vector<std::string> DataStats::GetWordsInString(std::string line) {
@@ -873,7 +975,8 @@ unsigned long long DataStats::ExecuteInternal() {
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
     auto task = [percent_per_col, this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
-        if (this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
+        auto type_id = this->col_data_[index].GetTypeId();
+        if (type_id != +mo::TypeId::kMixed) {
             all_stats_[index].min = GetMin(index);
             all_stats_[index].max = GetMax(index);
             all_stats_[index].sum = GetSum(index);
@@ -886,6 +989,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].skewness = GetSkewness(index);
             all_stats_[index].STD = GetCorrectedSTD(index);
             all_stats_[index].num_zeros = GetNumberOfZeros(index);
+            all_stats_[index].zero_percent = GetZeroPercent(index);
             all_stats_[index].num_negatives = GetNumberOfNegatives(index);
             all_stats_[index].sum_of_squares = GetSumOfSquares(index);
             all_stats_[index].geometric_mean = GetGeometricMean(index);
@@ -906,6 +1010,15 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].num_words = GetNumberOfWords(index);
             all_stats_[index].num_entirely_uppercase = GetNumberOfEntirelyUppercaseWords(index);
             all_stats_[index].num_entirely_lowercase = GetNumberOfEntirelyLowercaseWords(index);
+            all_stats_[index].min_white_spaces = GetMinWhiteSpaces(index);
+            all_stats_[index].max_white_spaces = GetMaxWhiteSpaces(index);
+            all_stats_[index].diacritic_chars = GetDiacriticChars(index);
+
+            if (type_id == +mo::TypeId::kBool) {
+                // boolean counts
+                all_stats_[index].true_count = GetTrueCount(index);
+                all_stats_[index].false_count = GetFalseCount(index);
+            }
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(

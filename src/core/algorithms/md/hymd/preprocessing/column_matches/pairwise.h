@@ -74,14 +74,14 @@ public:
         : detail::PairwiseBase<SimilarityMeasure, Symmetric, EqMax, Params...>(
                   Symmetric && EqMax, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
-                  {{min_sim}, std::move(picker)}) {};
+                  {{min_sim}, std::move(picker)}){};
 
     Pairwise(std::string name, ColumnIdentifier left_column_identifier,
              ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
              std::size_t size_limit = 0, TransformFunctionsOption funcs = {})
         : Pairwise(std::move(name), std::move(left_column_identifier),
                    std::move(right_column_identifier), min_sim,
-                   ccv_id_pickers::IndexUniform<Similarity>(size_limit), std::move(funcs)) {};
+                   ccv_id_pickers::IndexUniform<Similarity>(size_limit), std::move(funcs)){};
 };
 
 template <auto SimilarityMeasure>

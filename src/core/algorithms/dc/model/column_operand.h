@@ -45,7 +45,7 @@ private:
     std::byte const* val_;
 
 public:
-    ColumnOperand() noexcept : column_(nullptr), val_(nullptr) {};
+    ColumnOperand() noexcept : column_(nullptr), val_(nullptr){};
 
     ColumnOperand(Column const* column, dc::Tuple tuple, model::Type const* type)
         : column_(column), tuple_(tuple), type_(type), val_(nullptr) {}

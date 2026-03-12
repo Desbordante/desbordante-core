@@ -23,14 +23,18 @@ namespace model {
 
 TypeId TypedColumnDataFactory::DeduceColumnType() const {
     bool is_undefined = true;
-    std::bitset<5> candidate_types_bitset("11111");
+    std::bitset<6> candidate_types_bitset("111111");
     TypeId first_type_id = +TypeId::kUndefined;
     for (std::size_t i = 0; i != unparsed_.size(); ++i) {
         if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
             is_undefined = false;
+
+            std::string value = unparsed_[i];
+            std::replace(value.begin(), value.end(), ',', '.');
+
             if (first_type_id != +TypeId::kUndefined) {
                 auto& type_check = kTypeIdToChecker.at(first_type_id);
-                if (type_check(unparsed_[i])) {
+                if (type_check(value)) {
                     // undelimited and delimited dates have different bitsets
                     if (first_type_id == +TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) {
                         candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
@@ -39,10 +43,10 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                 }
             }
 
-            std::bitset<5> new_candidate_types_bitset("00000");
+            std::bitset<6> new_candidate_types_bitset("000000");
             bool matched = false;
             for (auto const& [type_id, type_check] : kTypeIdToChecker) {
-                if (type_id != first_type_id && type_check(unparsed_[i])) {
+                if (type_check(value)) {
                     if (first_type_id == +TypeId::kUndefined && !matched) {
                         first_type_id = type_id;
                     }
@@ -57,11 +61,14 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                 }
             }
             if (!matched) {
+                std::cerr << "  -> No match, considered string\n";  // d
                 new_candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
             }
 
             candidate_types_bitset &= new_candidate_types_bitset;
             if (candidate_types_bitset.none()) {
+                std::cerr << "  -> candidate_types_bitset is empty, returning Mixed at row " << i
+                          << "\n";  // d
                 if (treat_mixed_as_string_) {
                     candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
                 } else {
@@ -75,7 +82,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
         return +TypeId::kUndefined;
     }
 
-    for (std::size_t i = 0; i < 5; i++) {
+    for (std::size_t i = 0; i < 6; i++) {
         if (candidate_types_bitset[i]) {
             return kAllCandidateTypes[i];
         }
