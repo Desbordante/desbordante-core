@@ -17,7 +17,7 @@ namespace {
 
 template <typename ClueT>
 ClueSetT<ClueT> BuildClueSetScalar(std::vector<PliShard> const& pliShards,
-                                  PredicatePacks const& packs) {
+                                   PredicatePacks const& packs) {
     if (pliShards.empty()) {
         return {};
     }
@@ -40,7 +40,7 @@ ClueSetT<ClueT> BuildClueSetScalar(std::vector<PliShard> const& pliShards,
         for (size_t j = i; j < pliShards.size(); j++) {
             if (i == j) {
                 SingleClueSetBuilderT<ClueT>{pliShards[i]}.BuildClueSet(packs, forward_clues,
-                                                                      partial_clue_set);
+                                                                        partial_clue_set);
             } else {
                 CrossClueSetBuilderT<ClueT>{pliShards[i], pliShards[j]}.BuildClueSet(
                         packs, forward_clues, reverse_clues, partial_clue_set);
@@ -98,8 +98,8 @@ struct ThreadLocalBuffersT {
 
 template <typename ClueT>
 ClueSetT<ClueT> BuildClueSetParallelScalar(std::vector<PliShard> const& pliShards,
-                                          PredicatePacks const& packs,
-                                          util::WorkerThreadPool* thread_pool) {
+                                           PredicatePacks const& packs,
+                                           util::WorkerThreadPool* thread_pool) {
     if (!thread_pool) {
         return BuildClueSetScalar<ClueT>(pliShards, packs);
     }
@@ -166,22 +166,23 @@ ClueSet BuildClueSet(std::vector<PliShard> const& pliShards, PredicatePacks cons
     return BuildClueSetScalar<Clue>(pliShards, packs);
 }
 
-ClueSetT<uint8_t> BuildClueSet8(std::vector<PliShard> const& pliShards, PredicatePacks const& packs) {
+ClueSetT<uint8_t> BuildClueSet8(std::vector<PliShard> const& pliShards,
+                                PredicatePacks const& packs) {
     return BuildClueSetScalar<uint8_t>(pliShards, packs);
 }
 
 ClueSetT<uint16_t> BuildClueSet16(std::vector<PliShard> const& pliShards,
-                                 PredicatePacks const& packs) {
+                                  PredicatePacks const& packs) {
     return BuildClueSetScalar<uint16_t>(pliShards, packs);
 }
 
 ClueSetT<uint32_t> BuildClueSet32(std::vector<PliShard> const& pliShards,
-                                 PredicatePacks const& packs) {
+                                  PredicatePacks const& packs) {
     return BuildClueSetScalar<uint32_t>(pliShards, packs);
 }
 
 ClueSetT<uint64_t> BuildClueSet64(std::vector<PliShard> const& pliShards,
-                                 PredicatePacks const& packs) {
+                                  PredicatePacks const& packs) {
     return BuildClueSetScalar<uint64_t>(pliShards, packs);
 }
 
@@ -191,26 +192,26 @@ ClueSet BuildClueSetParallel(std::vector<PliShard> const& pliShards, PredicatePa
 }
 
 ClueSetT<uint8_t> BuildClueSetParallel8(std::vector<PliShard> const& pliShards,
-                                       PredicatePacks const& packs,
-                                       util::WorkerThreadPool* thread_pool) {
+                                        PredicatePacks const& packs,
+                                        util::WorkerThreadPool* thread_pool) {
     return BuildClueSetParallelScalar<uint8_t>(pliShards, packs, thread_pool);
 }
 
 ClueSetT<uint16_t> BuildClueSetParallel16(std::vector<PliShard> const& pliShards,
-                                         PredicatePacks const& packs,
-                                         util::WorkerThreadPool* thread_pool) {
+                                          PredicatePacks const& packs,
+                                          util::WorkerThreadPool* thread_pool) {
     return BuildClueSetParallelScalar<uint16_t>(pliShards, packs, thread_pool);
 }
 
 ClueSetT<uint32_t> BuildClueSetParallel32(std::vector<PliShard> const& pliShards,
-                                         PredicatePacks const& packs,
-                                         util::WorkerThreadPool* thread_pool) {
+                                          PredicatePacks const& packs,
+                                          util::WorkerThreadPool* thread_pool) {
     return BuildClueSetParallelScalar<uint32_t>(pliShards, packs, thread_pool);
 }
 
 ClueSetT<uint64_t> BuildClueSetParallel64(std::vector<PliShard> const& pliShards,
-                                         PredicatePacks const& packs,
-                                         util::WorkerThreadPool* thread_pool) {
+                                          PredicatePacks const& packs,
+                                          util::WorkerThreadPool* thread_pool) {
     return BuildClueSetParallelScalar<uint64_t>(pliShards, packs, thread_pool);
 }
 

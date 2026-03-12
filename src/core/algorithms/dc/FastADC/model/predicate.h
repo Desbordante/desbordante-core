@@ -29,7 +29,7 @@ class PredicateProvider;
  * But for now we use kMaxPredicateBits as maximum amount of predicates
  */
 constexpr auto kMaxPredicateBits = 128;
-using PredicateBitset = model::Bitset<128>;
+using PredicateBitset = model::Bitset<kMaxPredicateBits>;
 
 /**
  * @brief Represents a predicate for FastADC.

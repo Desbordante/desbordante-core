@@ -20,7 +20,7 @@ public:
     SingleClueSetBuilderT& operator=(SingleClueSetBuilderT&& other) noexcept = delete;
 
     void BuildClueSet(PredicatePacks const& packs, std::vector<ClueT>& clues,
-                     ClueSetT<ClueT>& clue_set);
+                      ClueSetT<ClueT>& clue_set);
 
 private:
     std::vector<Pli> const& plis_;
@@ -32,17 +32,16 @@ private:
     void CorrectStrSingle(std::vector<ClueT>& clues, Pli const& pli, size_t mask_pos);
 
     void SetCrossEQ(std::vector<ClueT>& clues, Pli::Cluster const& pivotCluster,
-                   Pli::Cluster const& probeCluster, size_t mask_pos);
+                    Pli::Cluster const& probeCluster, size_t mask_pos);
     void CorrectStrCross(std::vector<ClueT>& clues, Pli const& pivotPli, Pli const& probePli,
-                        size_t mask_pos);
+                         size_t mask_pos);
 
     void SetGT(std::vector<ClueT>& clues, Pli::Cluster const& pivotCluster, Pli const& probePli,
-              size_t from, size_t mask_pos);
+               size_t from, size_t mask_pos);
 
-    void CorrectNumSingle(std::vector<ClueT>& clues, Pli const& pli, size_t eq_pos,
-                         size_t gt_pos);
+    void CorrectNumSingle(std::vector<ClueT>& clues, Pli const& pli, size_t eq_pos, size_t gt_pos);
     void CorrectNumCross(std::vector<ClueT>& clues, Pli const& pivotPli, Pli const& probePli,
-                        size_t eq_pos, size_t gt_pos);
+                         size_t eq_pos, size_t gt_pos);
 };
 
 using SingleClueSetBuilder = SingleClueSetBuilderT<Clue>;

@@ -53,8 +53,9 @@ std::vector<std::vector<size_t>> expected_correction_map = {
         {42, 43, 45, 46}, {44, 45, 46, 47}, {6, 7, 9, 10},    {8, 9, 10, 11},   {12, 13, 15, 16},
         {14, 15, 16, 17}, {30, 31, 33, 34}, {32, 33, 34, 35}};
 
-model::Bitset<algos::fastadc::kPredicateBits> VectorToBitset(std::vector<size_t> const& positions) {
-    model::Bitset<algos::fastadc::kPredicateBits> bset;
+model::Bitset<algos::fastadc::kMaxPredicateBits> VectorToBitset(
+        std::vector<size_t> const& positions) {
+    model::Bitset<algos::fastadc::kMaxPredicateBits> bset;
     for (auto pos : positions) {
         bset.set(pos);
     }

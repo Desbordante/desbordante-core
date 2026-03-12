@@ -27,8 +27,8 @@ SingleClueSetBuilderT<ClueT>::SingleClueSetBuilderT(PliShard const& shard)
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::BuildClueSet(PredicatePacks const& packs,
-                                               std::vector<ClueT>& clues,
-                                               ClueSetT<ClueT>& clue_set) {
+                                                std::vector<ClueT>& clues,
+                                                ClueSetT<ClueT>& clue_set) {
     clues.assign(evidence_count_, ClueT{});
 
     for (auto const& cat_pack : packs.str_single) {
@@ -45,13 +45,14 @@ void SingleClueSetBuilderT<ClueT>::BuildClueSet(PredicatePacks const& packs,
     }
 
     for (auto const& num_pack : packs.num_cross) {
-        CorrectNumCross(clues, plis_[num_pack.left_idx], plis_[num_pack.right_idx],
-                        num_pack.eq_pos, num_pack.gt_pos);
+        CorrectNumCross(clues, plis_[num_pack.left_idx], plis_[num_pack.right_idx], num_pack.eq_pos,
+                        num_pack.gt_pos);
     }
 
     AccumulateClues(clue_set, clues);
 
-    ClueT reflex_clue{};
+    // Reflex evidence check and removal:
+    ClueT reflex_clue{};  // All bits zero
     clue_set[reflex_clue] -= tid_range_;
     if (clue_set[reflex_clue] == 0) {
         clue_set.erase(clue_set.find(reflex_clue));
@@ -60,8 +61,7 @@ void SingleClueSetBuilderT<ClueT>::BuildClueSet(PredicatePacks const& packs,
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::SetSingleEQ(std::vector<ClueT>& clues,
-                                              Pli::Cluster const& cluster,
-                                              size_t mask_pos) {
+                                               Pli::Cluster const& cluster, size_t mask_pos) {
     for (size_t i = 0; i + 1 < cluster.size(); ++i) {
         int64_t t1 = cluster[i] - tid_beg_;
         int64_t r1 = t1 * tid_range_;
@@ -75,7 +75,7 @@ void SingleClueSetBuilderT<ClueT>::SetSingleEQ(std::vector<ClueT>& clues,
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::CorrectStrSingle(std::vector<ClueT>& clues, Pli const& pli,
-                                                   size_t mask_pos) {
+                                                    size_t mask_pos) {
     for (size_t i = 0; i < pli.Size(); ++i) {
         if (pli.Get(i).size() > 1) {
             SetSingleEQ(clues, pli.Get(i), mask_pos);
@@ -85,9 +85,8 @@ void SingleClueSetBuilderT<ClueT>::CorrectStrSingle(std::vector<ClueT>& clues, P
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::SetCrossEQ(std::vector<ClueT>& clues,
-                                             Pli::Cluster const& pivotCluster,
-                                             Pli::Cluster const& probeCluster,
-                                             size_t mask_pos) {
+                                              Pli::Cluster const& pivotCluster,
+                                              Pli::Cluster const& probeCluster, size_t mask_pos) {
     for (size_t tid1 : pivotCluster) {
         int64_t r1 = (tid1 - tid_beg_) * tid_range_ - tid_beg_;
         for (size_t tid2 : probeCluster) {
@@ -100,8 +99,7 @@ void SingleClueSetBuilderT<ClueT>::SetCrossEQ(std::vector<ClueT>& clues,
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::CorrectStrCross(std::vector<ClueT>& clues, Pli const& pivotPli,
-                                                  Pli const& probePli,
-                                                  size_t mask_pos) {
+                                                   Pli const& probePli, size_t mask_pos) {
     std::vector<Pli::Cluster> const& pivot_clusters = pivotPli.GetClusters();
     std::vector<Pli::Cluster> const& probe_clusters = probePli.GetClusters();
     std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
@@ -116,8 +114,8 @@ void SingleClueSetBuilderT<ClueT>::CorrectStrCross(std::vector<ClueT>& clues, Pl
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::SetGT(std::vector<ClueT>& clues,
-                                        Pli::Cluster const& pivotCluster, Pli const& probePli,
-                                        size_t from, size_t mask_pos) {
+                                         Pli::Cluster const& pivotCluster, Pli const& probePli,
+                                         size_t from, size_t mask_pos) {
     for (size_t pivot_tid : pivotCluster) {
         int64_t r1 = (pivot_tid - tid_beg_) * tid_range_ - tid_beg_;
         for (size_t j = from; j < probePli.Size(); ++j) {
@@ -132,7 +130,7 @@ void SingleClueSetBuilderT<ClueT>::SetGT(std::vector<ClueT>& clues,
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::CorrectNumSingle(std::vector<ClueT>& clues, Pli const& pli,
-                                                   size_t eq_pos, size_t gt_pos) {
+                                                    size_t eq_pos, size_t gt_pos) {
     for (size_t i = 0; i < pli.Size(); ++i) {
         Pli::Cluster const& cluster = pli.Get(i);
         if (cluster.size() > 1) {
@@ -146,8 +144,8 @@ void SingleClueSetBuilderT<ClueT>::CorrectNumSingle(std::vector<ClueT>& clues, P
 
 template <typename ClueT>
 void SingleClueSetBuilderT<ClueT>::CorrectNumCross(std::vector<ClueT>& clues, Pli const& pivotPli,
-                                                  Pli const& probePli,
-                                                  size_t eq_pos, size_t gt_pos) {
+                                                   Pli const& probePli, size_t eq_pos,
+                                                   size_t gt_pos) {
     std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
     std::vector<size_t> const& probe_keys = probePli.GetKeys();
 
