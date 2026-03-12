@@ -132,10 +132,9 @@ unsigned long long FastADC::ExecuteInternal() {
     evidence_aux_structures_builder.BuildAll();
 
     util::WorkerThreadPool* thread_pool = GetThreadPool();
-    EvidenceSetBuilder evidence_set_builder(pli_shard_builder.pli_shards,
-                                           evidence_aux_structures_builder.GetPredicatePacks(),
-                                           evidence_aux_structures_builder.GetNumberOfBitsInClue(),
-                                           thread_pool);
+    EvidenceSetBuilder evidence_set_builder(
+            pli_shard_builder.pli_shards, evidence_aux_structures_builder.GetPredicatePacks(),
+            evidence_aux_structures_builder.GetNumberOfBitsInClue(), thread_pool);
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 

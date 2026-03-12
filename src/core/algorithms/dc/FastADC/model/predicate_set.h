@@ -16,7 +16,7 @@ namespace algos::fastadc {
 
 class PredicateSet {
 private:
-    boost::dynamic_bitset<> bitset_{kPredicateBits};
+    boost::dynamic_bitset<> bitset_{kMaxPredicateBits};
     mutable std::unique_ptr<PredicateSet> inv_set_TS_;  // Cached inverse set
 
 public:
