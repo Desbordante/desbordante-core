@@ -65,13 +65,13 @@ desbordante_add_bind(
     SRCS
     ac/bind_ac.cpp
     LIBS
-    Desbordante::ac
+    ${DESBORDANTE_PREFIX}::ac
     better-enums
     Boost::headers
 )
 
 desbordante_add_bind(
-    afd_metric SRCS afd_metric/bind_afd_metric_calculation.cpp LIBS Desbordante::fd::afd_metric
+    afd_metric SRCS afd_metric/bind_afd_metric_calculation.cpp LIBS ${DESBORDANTE_PREFIX}::fd::afd_metric
     Boost::headers
 )
 
@@ -80,7 +80,7 @@ desbordante_add_bind(
     SRCS
     ar/bind_ar.cpp
     LIBS
-    Desbordante::ar
+    ${DESBORDANTE_PREFIX}::ar
     better-enums
     Boost::headers
 )
@@ -91,8 +91,8 @@ desbordante_add_bind(
     cfd/bind_cfd.cpp
     cfd/bind_cfd_verification.cpp
     LIBS
-    Desbordante::cfd
-    Desbordante::cfd::verifier
+    ${DESBORDANTE_PREFIX}::cfd
+    ${DESBORDANTE_PREFIX}::cfd::verifier
     better-enums
     Boost::headers
 )
@@ -103,11 +103,11 @@ desbordante_add_bind(
     dc/bind_dc_verification.cpp
     dc/bind_fastadc.cpp
     LIBS
-    Desbordante::dc::verifier
-    Desbordante::dc::fastadc
+    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::dc::fastadc
     frozen
     better-enums
-    Desbordante.bindlib.util
+    ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers
 )
@@ -118,8 +118,8 @@ desbordante_add_bind(
     dd/bind_dd_verification.cpp
     dd/bind_split.cpp
     LIBS
-    Desbordante::dd::verifier
-    Desbordante::dd::split
+    ${DESBORDANTE_PREFIX}::dd::verifier
+    ${DESBORDANTE_PREFIX}::dd::split
     better-enums
     Boost::headers
 )
@@ -130,20 +130,20 @@ desbordante_add_bind(
     fd/bind_fd.cpp
     fd/bind_fd_verification.cpp
     LIBS
-    Desbordante::fd::verifier
-    Desbordante::fd::hy
-    Desbordante::fd::aid
-    Desbordante::fd::euler
-    Desbordante::fd::depminer
-    Desbordante::fd::dfd
-    Desbordante::fd::fastfds
-    Desbordante::fd::fdep
-    Desbordante::fd::mine
-    Desbordante::fd::fun
-    Desbordante::fd::pyro
-    Desbordante::fd::tane
-    Desbordante::fd::tane::pfd
-    Desbordante.bindlib.util
+    ${DESBORDANTE_PREFIX}::fd::verifier
+    ${DESBORDANTE_PREFIX}::fd::hy
+    ${DESBORDANTE_PREFIX}::fd::aid
+    ${DESBORDANTE_PREFIX}::fd::euler
+    ${DESBORDANTE_PREFIX}::fd::depminer
+    ${DESBORDANTE_PREFIX}::fd::dfd
+    ${DESBORDANTE_PREFIX}::fd::fastfds
+    ${DESBORDANTE_PREFIX}::fd::fdep
+    ${DESBORDANTE_PREFIX}::fd::mine
+    ${DESBORDANTE_PREFIX}::fd::fun
+    ${DESBORDANTE_PREFIX}::fd::pyro
+    ${DESBORDANTE_PREFIX}::fd::tane
+    ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::bindlib::util
     better-enums
     spdlog::spdlog_header_only
     Boost::headers
@@ -154,7 +154,7 @@ desbordante_add_bind(
     SRCS
     dynamic/bind_dynamic_fd_verification.cpp
     LIBS
-    Desbordante::fd::verifier::dynamic
+    ${DESBORDANTE_PREFIX}::fd::verifier::dynamic
     better-enums
     spdlog::spdlog_header_only
     Boost::headers
@@ -166,8 +166,8 @@ desbordante_add_bind(
     gfd/bind_gfd.cpp
     gfd/bind_gfd_verification.cpp
     LIBS
-    Desbordante::gfd::miner
-    Desbordante::gfd::validator
+    ${DESBORDANTE_PREFIX}::gfd::miner
+    ${DESBORDANTE_PREFIX}::gfd::validator
     better-enums
     Boost::headers
 )
@@ -178,10 +178,10 @@ desbordante_add_bind(
     ind/bind_ind.cpp
     ind/bind_ind_verification.cpp
     LIBS
-    Desbordante::ind::verifier
-    Desbordante::ind::spider
-    Desbordante::ind::faida
-    Desbordante::ind::mind
+    ${DESBORDANTE_PREFIX}::ind::verifier
+    ${DESBORDANTE_PREFIX}::ind::spider
+    ${DESBORDANTE_PREFIX}::ind::faida
+    ${DESBORDANTE_PREFIX}::ind::mind
     Boost::headers
 )
 
@@ -191,8 +191,8 @@ desbordante_add_bind(
     md/bind_md.cpp
     md/bind_md_verification.cpp
     LIBS
-    Desbordante::md::verifier
-    Desbordante.bindlib.util
+    ${DESBORDANTE_PREFIX}::md::verifier
+    ${DESBORDANTE_PREFIX}::bindlib::util
     better-enums
     spdlog::spdlog_header_only
     Boost::headers
@@ -203,7 +203,7 @@ desbordante_add_bind(
     SRCS
     mfd/bind_mfd_verification.cpp
     LIBS
-    Desbordante::metric::verifier
+    ${DESBORDANTE_PREFIX}::metric::verifier
     better-enums
     Boost::headers
 )
@@ -213,7 +213,7 @@ desbordante_add_bind(
     SRCS
     nar/bind_nar.cpp
     LIBS
-    Desbordante::nar::des
+    ${DESBORDANTE_PREFIX}::nar::des
     better-enums
     Boost::headers
 )
@@ -224,8 +224,8 @@ desbordante_add_bind(
     nd/bind_nd.cpp
     nd/bind_nd_verification.cpp
     LIBS
-    Desbordante::nd::verifier
-    Desbordante::nd
+    ${DESBORDANTE_PREFIX}::nd::verifier
+    ${DESBORDANTE_PREFIX}::nd
     better-enums
     Boost::headers
 )
@@ -236,9 +236,9 @@ desbordante_add_bind(
     od/bind_od.cpp
     od/bind_od_verification.cpp
     LIBS
-    Desbordante::od::fast
-    Desbordante::od::order
-    Desbordante::od::set_based_aod_verifier
+    ${DESBORDANTE_PREFIX}::od::fast
+    ${DESBORDANTE_PREFIX}::od::order
+    ${DESBORDANTE_PREFIX}::od::set_based_aod_verifier
     better-enums
     spdlog::spdlog_header_only
     Boost::headers
@@ -249,7 +249,7 @@ desbordante_add_bind(
     SRCS
     pfd/bind_pfd_verification.cpp
     LIBS
-    Desbordante::fd::pfd_verifier
+    ${DESBORDANTE_PREFIX}::fd::pfd_verifier
     better-enums
     Boost::headers
 )
@@ -259,8 +259,8 @@ desbordante_add_bind(
     SRCS
     sfd/bind_sfd.cpp
     LIBS
-    Desbordante::fd::sfd::cords
-    Desbordante.bindlib.util
+    ${DESBORDANTE_PREFIX}::fd::sfd::cords
+    ${DESBORDANTE_PREFIX}::bindlib::util
     better-enums
     Boost::headers
 )
@@ -270,7 +270,7 @@ desbordante_add_bind(
     SRCS
     statistics/bind_statistics.cpp
     LIBS
-    Desbordante::datastats
+    ${DESBORDANTE_PREFIX}::datastats
     better-enums
     Boost::headers
 )
@@ -281,11 +281,11 @@ desbordante_add_bind(
     ucc/bind_ucc.cpp
     ucc/bind_ucc_verification.cpp
     LIBS
-    Desbordante::ucc::hpivalid
-    Desbordante::ucc::hy
-    Desbordante::ucc::pyro
-    Desbordante::ucc::verifier
-    Desbordante.bindlib.util
+    ${DESBORDANTE_PREFIX}::ucc::hpivalid
+    ${DESBORDANTE_PREFIX}::ucc::hy
+    ${DESBORDANTE_PREFIX}::ucc::pyro
+    ${DESBORDANTE_PREFIX}::ucc::verifier
+    ${DESBORDANTE_PREFIX}::bindlib::util
     better-enums
     Boost::headers
 )
