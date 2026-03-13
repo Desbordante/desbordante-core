@@ -1,4 +1,5 @@
 #include <memory>
+#include <optional>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -18,6 +19,7 @@
 #include "core/model/types/int_type.h"
 #include "core/model/types/string_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "core/util/worker_thread_pool.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/unit/test_dc_structures_correct_results.h"
 
@@ -293,10 +295,20 @@ protected:
         evidence_aux_structures_builder_ = new EvidenceAuxStructuresBuilder(*predicate_builder_);
     }
 
-    void CreateEvidenceSetBuilder() {
+    void CreateEvidenceSetBuilder(bool use_parallel = false) {
+        unsigned num_threads = 4;
+        std::optional<util::WorkerThreadPool> thread_pool;
+        util::WorkerThreadPool* thread_pool_ptr = nullptr;
+        if (num_threads > 1) {
+            thread_pool.emplace(num_threads);
+            thread_pool_ptr = &thread_pool.value();
+        }
+
         evidence_set_builder_ =
                 new EvidenceSetBuilder(pli_shard_builder_->pli_shards,
-                                       evidence_aux_structures_builder_->GetPredicatePacks());
+                                       evidence_aux_structures_builder_->GetPredicatePacks(),
+                                       evidence_aux_structures_builder_->GetNumberOfBitsInClue(),
+                                       use_parallel ? thread_pool_ptr : nullptr);
     }
 };
 
@@ -416,9 +428,11 @@ TEST_F(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
     for (size_t i = 0; i < packs.size(); ++i) {
         EXPECT_EQ(packs[i].left_idx, expected_column_indices[i].first);
         EXPECT_EQ(packs[i].right_idx, expected_column_indices[i].second);
-        EXPECT_EQ(packs[i].eq_mask, VectorToBitset(expected_eq_masks[i]));
+        ASSERT_EQ(expected_eq_masks[i].size(), 1);
+        EXPECT_EQ(packs[i].eq_pos, expected_eq_masks[i][0]);
         if (!expected_gt_masks[i].empty()) {
-            EXPECT_EQ(packs[i].gt_mask, VectorToBitset(expected_gt_masks[i]));
+            ASSERT_EQ(expected_gt_masks[i].size(), 1);
+            EXPECT_EQ(packs[i].gt_pos, expected_gt_masks[i][0]);
         }
     }
 
@@ -540,7 +554,7 @@ TEST_F(FastADC, DenialConstraints) {
     pli_shard_builder_->BuildPliShards(col_data_);
     CreatePackAndCorrectionMapBuilder();
     evidence_aux_structures_builder_->BuildAll();
-    CreateEvidenceSetBuilder();
+    CreateEvidenceSetBuilder(true);
     evidence_set_builder_->BuildEvidenceSet(evidence_aux_structures_builder_->GetCorrectionMap(),
                                             evidence_aux_structures_builder_->GetCardinalityMask());
 

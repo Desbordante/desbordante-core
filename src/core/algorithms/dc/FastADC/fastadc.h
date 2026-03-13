@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
@@ -9,6 +10,7 @@
 #include "core/algorithms/dc/FastADC/util/denial_constraint_set.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::dc {
 
@@ -21,6 +23,7 @@ private:
     double minimum_shared_value_;
     double comparable_threshold_;
     double evidence_threshold_;
+    unsigned threads_;
 
     config::InputTable input_table_;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
@@ -31,6 +34,9 @@ private:
     DoubleIndexProvider double_prov_;
     StringIndexProvider string_prov_;
     DenialConstraintSet dcs_;
+
+    std::optional<util::WorkerThreadPool> thread_pool_;
+    util::WorkerThreadPool* GetThreadPool();
 
     void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;

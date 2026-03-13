@@ -54,7 +54,7 @@ public:
     }
 
     boost::dynamic_bitset<> Retransform(boost::dynamic_bitset<> const& bitset) const {
-        boost::dynamic_bitset<> valid{kPredicateBits};
+        boost::dynamic_bitset<> valid{kMaxPredicateBits};
 
         for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
              i = bitset.find_next(i)) {
