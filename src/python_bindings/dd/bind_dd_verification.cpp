@@ -28,5 +28,7 @@ void BindDDVerification(py::module_& main_module) {
             .def("get_error", &dd::DDVerifier::GetError)
             .def("get_num_error_pairs", &dd::DDVerifier::GetNumErrorRhs)
             .def("get_highlights", &dd::DDVerifier::GetHighlights);
+
+    main_module.attr("add_verification") = dd_verification_module;
 }
 }  // namespace python_bindings
