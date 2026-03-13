@@ -58,8 +58,10 @@ function(desbordante_add_lib name)
 
     if(ARGV1 STREQUAL "INTERFACE")
         target_link_libraries(${full_name} INTERFACE ${DESBORDANTE_PREFIX}.compile_feats)
+        target_include_directories(${full_name} INTERFACE ${DESBORDANTE_COMMON_INCLUDE_DIRS})
     else()
         target_link_libraries(${full_name} PUBLIC ${DESBORDANTE_PREFIX}.compile_feats)
+        target_include_directories(${full_name} PUBLIC ${DESBORDANTE_COMMON_INCLUDE_DIRS})
     endif()
 
     string(REPLACE "." "::" alias ${full_name})
@@ -95,11 +97,7 @@ function(desbordante_add_bind name)
     set(bind_name "bind.${name}")
     desbordante_add_lib(bind_name OBJECT)
 
-    target_sources(
-        ${bind_name}
-        PRIVATE ${arg_SRCS}
-        PRIVATE FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-    )
+    target_sources(${bind_name} PRIVATE ${arg_SRCS})
 
     set_target_properties(${bind_name} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 

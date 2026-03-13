@@ -18,7 +18,6 @@ target_sources(
             typed_column_data.cpp
             vertical.cpp
             vertical_map.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::types spdlog::spdlog_header_only better-enums

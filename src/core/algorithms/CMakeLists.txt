@@ -33,7 +33,7 @@ target_sources(
            algorithm_types.h
            create_algorithm.h
            BASE_DIRS
-           "${PROJECT_SOURCE_DIR}/src"
+           "${DESBORDANTE_COMMON_INCLUDE_DIRS}"
 )
 target_link_libraries(
     ${NAME}
@@ -75,11 +75,7 @@ target_link_libraries(
 
 set(NAME algos)
 desbordante_add_lib(NAME)
-target_sources(
-    ${NAME}
-    PRIVATE algo_factory.cpp algorithm.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
