@@ -94,7 +94,7 @@ void BindMainClasses(py::module_& main_module) {
                         auto opt_value_info = algorithm.GetOptValues();
                         std::unordered_map<std::string_view, pybind11::object> res;
                         for (auto const& [name, value_info] : opt_value_info) {
-                            if (name == config::names::kTable) {
+                            if (name == config::names::kTable || name == config::names::kSequence) {
                                 continue;
                             }
                             res[name] = OptToPy(value_info.type, value_info.value);
