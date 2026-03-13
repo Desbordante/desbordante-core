@@ -11,7 +11,6 @@ target_sources(
             pruning_maps/dependencies_map.cpp
             pruning_maps/non_dependencies_map.cpp
             pruning_maps/pruning_map.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd::pli spdlog::spdlog_header_only Boost::headers

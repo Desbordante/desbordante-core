@@ -25,11 +25,7 @@ endforeach()
 # --- FD ---
 set(NAME fd)
 desbordante_add_lib(NAME OBJECT)
-target_sources(
-    ${NAME}
-    PRIVATE fd.cpp fd_algorithm.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE fd.cpp fd_algorithm.cpp)
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos Boost::headers
 )
@@ -37,9 +33,5 @@ target_link_libraries(
 # --- PliBasedFD ---
 set(NAME fd.pli)
 desbordante_add_lib(NAME OBJECT)
-target_sources(
-    ${NAME}
-    PRIVATE pli_based_fd_algorithm.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE pli_based_fd_algorithm.cpp)
 target_link_libraries(${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd Boost::headers)

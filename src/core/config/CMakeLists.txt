@@ -19,6 +19,5 @@ target_sources(
             tabular_data/input_tables/option.cpp
             thread_number/option.cpp
             time_limit/option.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(${NAME} PRIVATE better-enums Boost::headers)
