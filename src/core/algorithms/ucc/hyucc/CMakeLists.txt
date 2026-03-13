@@ -1,9 +1,8 @@
 set(NAME ucc.hy)
 desbordante_add_lib(NAME)
 target_sources(
-    ${NAME}
-    PRIVATE hyucc.cpp inductor.cpp validator.cpp model/ucc_tree.cpp model/ucc_tree_vertex.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
+    ${NAME} PRIVATE hyucc.cpp inductor.cpp validator.cpp model/ucc_tree.cpp
+                    model/ucc_tree_vertex.cpp
 )
 target_link_libraries(
     ${NAME}
