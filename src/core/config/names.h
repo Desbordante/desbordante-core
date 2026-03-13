@@ -141,12 +141,14 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
-
 // CIND
 constexpr auto kValidity = "validity";
 constexpr auto kCompleteness = "completeness";
 constexpr auto kConditionType = "condition_type";
 constexpr auto kAlgoType = "algo_type";
 constexpr auto kCindCondValues = "cind_condition_values";
-
+// SD verifier
+constexpr auto kSdG1 = "g1";
+constexpr auto kSdG2 = "g2";
+constexpr auto kSdIndices = "indices";
 }  // namespace config::names
