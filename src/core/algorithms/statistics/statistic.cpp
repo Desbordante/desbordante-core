@@ -118,8 +118,8 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(num_uppercase_chars, "num_uppercase_chars");
     try_add_stat(num_chars, "num_chars");
     try_add_stat(num_avg_chars, "avg_chars");
-    try_add_stat(min_num_words, "min_num_chars");
-    try_add_stat(max_num_words, "max_num_chars");
+    try_add_stat(min_num_chars, "min_num_chars");
+    try_add_stat(max_num_chars, "max_num_chars");
     try_add_stat(min_num_words, "min_num_words");
     try_add_stat(max_num_words, "max_num_words");
     try_add_stat(num_words, "num_words");
@@ -131,6 +131,13 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(special_chars_count, "special_chars_count");
     try_add_stat(first_char_freq, "first_char_freq");
     try_add_stat(last_char_freq, "last_char_freq");
+
+    try_add_stat(interquartile_range, "interquartile_range");
+    try_add_stat(coefficient_of_variation, "coefficient_of_variation");
+    try_add_stat(monotonicity, "monotonicity");
+    try_add_stat(jarque_bera_statistic, "jarque_bera_statistic");
+    try_add_stat(entropy, "entropy");
+    try_add_stat(gini_coefficient, "gini_coefficient");
 
     return res;
 }
