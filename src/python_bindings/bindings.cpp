@@ -31,6 +31,7 @@
 #include "python_bindings/od/bind_od_verification.h"
 #include "python_bindings/pfd/bind_pfd_verification.h"
 #include "python_bindings/py_util/logging.h"
+#include "python_bindings/sd/bind_sd_verification.h"
 #include "python_bindings/sfd/bind_sfd.h"
 #include "python_bindings/statistics/bind_statistics.h"
 #include "python_bindings/ucc/bind_ucc.h"
@@ -61,6 +62,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindSplit,
                            BindDynamicFdVerification,
                            BindNdVerification,
+                           BindSDVerification,
                            BindSFD,
                            BindMd,
                            BindMDVerification,
