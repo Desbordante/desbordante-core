@@ -1,10 +1,6 @@
 set(NAME dd.verifier)
 desbordante_add_lib(NAME)
-target_sources(
-    ${NAME}
-    PRIVATE dd_verifier.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE dd_verifier.cpp)
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::dd

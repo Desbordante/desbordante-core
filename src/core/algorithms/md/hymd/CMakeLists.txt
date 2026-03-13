@@ -11,7 +11,6 @@ target_sources(
             record_pair_inferrer.cpp
             similarity_data.cpp
             validator.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::md::hy::preprocessing ${DESBORDANTE_PREFIX}::md
@@ -31,7 +30,6 @@ target_sources(
             preprocessing/column_matches/levenshtein.cpp
             preprocessing/column_matches/monge_elkan.cpp
             preprocessing/column_matches/smith_waterman_gotoh.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only better-enums

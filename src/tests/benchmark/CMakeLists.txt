@@ -1,11 +1,8 @@
 # Create benchmark executable
 set(NAME ${DESBORDANTE_PREFIX}.benchmark)
 add_executable(${NAME})
-target_sources(
-    ${NAME}
-    PRIVATE main.cpp benchmark_cli.cpp benchmark_comparer.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE main.cpp benchmark_cli.cpp benchmark_comparer.cpp)
+target_include_directories(${NAME} PRIVATE ${DESBORDANTE_COMMON_INCLUDE_DIRS})
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::testlib::common

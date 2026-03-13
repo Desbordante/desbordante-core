@@ -34,11 +34,7 @@ target_link_libraries(
 
 set(NAME bindlib.data)
 desbordante_add_lib(NAME OBJECT)
-target_sources(
-    ${NAME}
-    PRIVATE data/bind_data_types.cpp
-    PRIVATE FILE_SET HEADERS BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/.."
-)
+target_sources(${NAME} PRIVATE data/bind_data_types.cpp)
 target_link_libraries(${NAME} PRIVATE pybind11::pybind11)
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
@@ -53,7 +49,6 @@ target_sources(
             py_util/opt_to_py.cpp
             py_util/py_to_any.cpp
             py_util/table_serialization.cpp
-    PRIVATE FILE_SET HEADERS BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/.."
 )
 target_link_libraries(
     ${NAME} PRIVATE better-enums spdlog::spdlog_header_only Boost::headers pybind11::pybind11
@@ -71,8 +66,8 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
-    afd_metric SRCS afd_metric/bind_afd_metric_calculation.cpp LIBS ${DESBORDANTE_PREFIX}::fd::afd_metric
-    Boost::headers
+    afd_metric SRCS afd_metric/bind_afd_metric_calculation.cpp LIBS
+    ${DESBORDANTE_PREFIX}::fd::afd_metric Boost::headers
 )
 
 desbordante_add_bind(

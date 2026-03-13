@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.25)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(desbordante_helpers)
 
+list(APPEND DESBORDANTE_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 # ---- CMake Policies ----
 if(POLICY CMP0167)
     # To search for the upstream BoostConfig.cmake. Added in version 3.30.

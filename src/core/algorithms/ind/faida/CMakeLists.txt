@@ -11,7 +11,6 @@ target_sources(
             preprocessing/preprocessor.cpp
             util/simple_ind.cpp
             faida.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
     ${NAME}
