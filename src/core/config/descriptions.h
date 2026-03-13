@@ -253,7 +253,6 @@ constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verif
 auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
 constexpr auto kDOFDContext = "Context of the OFD to verify";
 constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
-
 // CIND
 constexpr auto kDValidity =
         "Percentage of rows/groups that form IND when the pattern tuple is satisfied";
@@ -264,4 +263,8 @@ auto const kDAlgoType = details::kDAlgoTypeString.c_str();
 constexpr auto kDCindCondValues =
         "Condition values aligned with conditional attributes order. "
         "Use '-' or '_' as wildcard. If empty => all wildcards.";
+// SD verifier
+constexpr auto kDSdG1 = "Lower bound of the sequential interval (inclusive).";
+constexpr auto kDSdG2 = "Upper bound of the sequential interval (inclusive). Set -1 for Infinity.";
+constexpr auto kDSdIndices = "Subset of row indices to validate the SD on.";
 }  // namespace config::descriptions
