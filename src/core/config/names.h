@@ -129,4 +129,8 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
+// SD verifier
+constexpr auto kSdG1 = "g1";
+constexpr auto kSdG2 = "g2";
+constexpr auto kSdIndices = "indices";
 }  // namespace config::names

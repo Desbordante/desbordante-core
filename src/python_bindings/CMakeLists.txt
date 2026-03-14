@@ -290,6 +290,16 @@ desbordante_add_bind(
     Boost::headers
 )
 
+desbordante_add_bind(
+    sd
+    SRCS
+    sd/bind_sd_verification.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::sd::verifier
+    better-enums
+    Boost::headers
+)
+
 # ---- Installation Setup ----
 
 if(DESBORDANTE_BINDINGS STREQUAL "INSTALL")
