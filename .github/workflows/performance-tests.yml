@@ -24,7 +24,7 @@ jobs:
       # Number of run IDs to select
       num-runs: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install dependencies
         uses: ./.github/composite-actions/install-dependencies
         with:
@@ -75,7 +75,7 @@ jobs:
             echo 'EOF'
           } >>"$GITHUB_ENV"
       - name: Get baseline results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           # For some reason there's no "when not found" parameter,
           # but job don't fail if `name` is replaced with `pattern`
@@ -109,7 +109,7 @@ jobs:
 
       # All next steps should be ran even if this one has failed
       # Some of them may fail in that case, but it's not a problem
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: results-v2
           path: curr-results.json
@@ -129,7 +129,7 @@ jobs:
           fi
 
         if: ${{ !cancelled() }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: plots.pdf
           path: ${{ github.workspace }}/plots.pdf
@@ -142,7 +142,7 @@ jobs:
         run: cp curr-results.json baseline.json
         if: success()
       - name: Upload baseline
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: baseline-v2
           path: baseline.json
