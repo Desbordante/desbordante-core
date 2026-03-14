@@ -32,6 +32,18 @@ std::shared_ptr<RelationalSchema const> DeserializeRelationalSchema(py::tuple t)
     return schema;
 }
 
+// relational schema conversion suitable for py::hash
+py::tuple ConvertSchemaToImmutableTuple(RelationalSchema const* schema) {
+    std::vector<std::unique_ptr<Column>> const& columns = schema->GetColumns();
+
+    py::tuple col_tuple = py::tuple(columns.size());
+    for (size_t i = 0; i < columns.size(); i++) {
+        auto const& col_ptr = columns[i];
+        col_tuple[i] = py::make_tuple(col_ptr->GetName(), col_ptr->GetIndex());
+    }
+    return py::make_tuple(schema->GetName(), std::move(col_tuple));
+}
+
 py::tuple SerializeVertical(Vertical const& v) {
     std::vector<unsigned int> idx_vec = v.GetColumnIndicesAsVector();
     return py::make_tuple(std::move(idx_vec));
