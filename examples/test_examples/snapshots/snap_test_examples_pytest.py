@@ -5185,3 +5185,157 @@ Typo candidates and context:
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
 '''
+
+
+snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
+(SDs) using the Desbordante library. Algorithm is based on the
+article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
+and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB
+Endow. 2, 1 (August 2009), 574–585. 
+
+
+An SD expresses a relationship between ordered attributes,
+written as X -> [g1, g2] Y. This means that when the dataset
+is sorted by X, the difference between the Y-values of any
+two consecutive records must fall within the specified
+interval [g1, g2].
+
+Validation checks whether a user-specified SD holds for a given
+dataset, utilizing an edit-distance based confidence metric. 
+Confidence is determined by the minimum number of operations
+(OPS) — record insertions or deletions — required to make the
+sequence completely valid.
+
+Confidence = (N - OPS) / N, where N is the number of rows in the
+dataset. If confidence = 1, the dependency is a perfect fit for 
+the pattern with no outliers or exceptions. Confidence can't be
+exactly 0, because in the worst case we need to delete all but 
+one record so the SD holds; thus, confidence is at least 1/N.
+
+Desbordante detects SD violations, pinpointing exactly which
+rows must be deleted and where virtual records should be
+inserted to restore the correct sequence. Right now, X and 
+Y can be represented by a single column each; however, it
+can be expanded in the future.
+
+In this example, let's look at a dataset containing network
+performance statistics. Specifically, network polls probed
+periodically.
+
+Let's say we want to check whether the data collector probes
+the network routers at the expected frequency, e.g., every 9
+to 11 seconds.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         4    70
+4         5    80
+5         6    90
+6         7   100
+7         8   110
+8         9   120
+9        10   130
+10       11   140
+11       12   150
+12       13   152
+13       14   154
+14       15   240
+15       16   250
+16       17   260
+17       18   270
+18       19   280
+19       20   290
+20       21   300
+21       22   310
+22       23   320
+23       24   330
+24       25   340
+25       26   350
+26       27   360
+27       28   370
+28       29   380
+29       30   390
+30       31   890
+--- Original Data Results ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;31mFalse\x1b[0m
+Operations needed (OPS): 14
+Confidence: 0.5484
+
+\x1b[1;34m--- Detected Violations ---\x1b[0m
+  \x1b[1;43m#1 INSERTION:\x1b[0m Gap between row 2 and 3.
+       Values: 30.0 -> 70.0. Number of required insertions: from 3 to 3
+  \x1b[1;31m#2 DELETION:\x1b[0m Row index 12 must be deleted.
+  \x1b[1;31m#3 DELETION:\x1b[0m Row index 13 must be deleted.
+  \x1b[1;43m#4 INSERTION:\x1b[0m Gap between row 11 and 14.
+       Values: 150.0 -> 240.0. Number of required insertions: from 8 to 9
+  \x1b[1;31m#5 DELETION:\x1b[0m Row index 30 must be deleted.
+
+
+We can see that the rule is violated in several places.
+This may indicate missing data due to an unresponsive router,
+or spurious measurements.
+
+Let's run a simple python function to automatically fix the 
+dataset by deleting extra records and inserting missing ones.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         3    40
+4         3    50
+5         3    60
+6         4    70
+7         5    80
+8         6    90
+9         7   100
+10        8   110
+11        9   120
+12       10   130
+13       11   140
+14       12   150
+15       12   160
+16       12   170
+17       12   180
+18       12   190
+19       12   200
+20       12   210
+21       12   220
+22       12   230
+23       15   240
+24       16   250
+25       17   260
+26       18   270
+27       19   280
+28       20   290
+29       21   300
+30       22   310
+31       23   320
+32       24   330
+33       25   340
+34       26   350
+35       27   360
+36       28   370
+37       29   380
+38       30   390
+
+And now let's verify the fixed data:
+
+--- Verification of Fixed Data ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;32mTrue\x1b[0m
+Operations needed (OPS): 0
+Confidence: 1.0000
+
+Note: When inserting missing records to bridge the time gaps,
+we simply duplicate the 'PollNum' of the preceding valid
+record. This choice keeps the fix local and prevents the need
+to shift and rewrite all subsequent 'PollNum' values in the
+entire table.
+
+In conclusion, we've learned about SDs and how to verify them in
+your own datasets. Now, let's experiment with your own data!
+'''
