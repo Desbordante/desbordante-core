@@ -156,9 +156,9 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using Algorithms =
-        ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,
-                         algos::FDep, algos::FUN, algos::hyfd::HyFD, algos::PFDTane>;
+using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
+                                    algos::Depminer, algos::FDep, algos::FUN, algos::hyfd::HyFD,
+                                    algos::PFDTane, algos::fd::fdhits::FDHits>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
 }  // namespace tests

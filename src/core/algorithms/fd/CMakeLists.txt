@@ -8,6 +8,7 @@ set(SUBDIRS
     fd_mine
     fd_verifier
     fdep
+    fdhits
     fun
     hycommon
     hyfd

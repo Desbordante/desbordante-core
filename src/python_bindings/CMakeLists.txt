@@ -138,6 +138,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::fd::dfd
     ${DESBORDANTE_PREFIX}::fd::fastfds
     ${DESBORDANTE_PREFIX}::fd::fdep
+    ${DESBORDANTE_PREFIX}::fd::fdhits
     ${DESBORDANTE_PREFIX}::fd::mine
     ${DESBORDANTE_PREFIX}::fd::fun
     ${DESBORDANTE_PREFIX}::fd::pyro
