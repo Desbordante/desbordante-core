@@ -33,7 +33,7 @@ Alice    3       3000
 Bob      4       4000
 Carol    4       4000
 
-A possible DC here is: {CYAN}¬{{ t.Grade == s.Grade ∧ t.Salary != s.Salary }}{ENDC}
+A possible DC here is: {CYAN}¬( t.Grade == s.Grade ∧ t.Salary != s.Salary ){ENDC}
 
 This means: "It should never happen that two people have the same grade but different salaries.",
 or in other words, if two rows share the same Grade, they must share the same Salary.
@@ -69,7 +69,7 @@ We have two parameters in Desbordante's DC mining algorithm:
     print()
 
     print(f"""Note the following Denial Constraint we found:
-{CYAN}¬{{ t.State == s.State ∧ t.Salary <= s.Salary ∧ t.FedTaxRate >= s.FedTaxRate }}{ENDC}.
+{CYAN}¬( t.State == s.State ∧ t.Salary <= s.Salary ∧ t.FedTaxRate >= s.FedTaxRate ){ENDC}.
 It states that for all people in the same state, the person with a higher salary
 should have a higher tax rate. No pairs of rows should violate that rule.
 
@@ -91,9 +91,9 @@ This means we only require that at least half of all row pairs satisfy each DC (
     print()
 
     print(f"""Here, for example, the 'g1' metric values for a few approximate DCs are:
-{CYAN}¬{{ t.Salary <= s.Salary ∧ t.FedTaxRate <= s.FedTaxRate }}{ENDC} → 0.486111
-{CYAN}¬{{ t.Salary <= s.Salary ∧ t.FedTaxRate >= s.FedTaxRate }}{ENDC} → 0.458333
-{CYAN}¬{{ t.State == s.State }}{ENDC} → 0.25
+{CYAN}¬( t.Salary <= s.Salary ∧ t.FedTaxRate <= s.FedTaxRate ){ENDC} → 0.486111
+{CYAN}¬( t.Salary <= s.Salary ∧ t.FedTaxRate >= s.FedTaxRate ){ENDC} → 0.458333
+{CYAN}¬( t.State == s.State ){ENDC} → 0.25
 Note: A smaller 'g1' value means fewer violations, making the DC more exact.
 """)
 
@@ -105,8 +105,8 @@ We found both exact and approximate DCs.
 
 Therefore, an approximate DC can logically imply the exact one.
 For example, consider:
-Exact DC: {CYAN}¬{{ t.State == s.State ∧ t.Salary == s.Salary }}{ENDC}
-Approximate DC: {CYAN}¬{{ t.Salary == s.Salary }}{ENDC}
+Exact DC: {CYAN}¬( t.State == s.State ∧ t.Salary == s.Salary ){ENDC}
+Approximate DC: {CYAN}¬( t.Salary == s.Salary ){ENDC}
 
 If the approximate DC (which prohibits any two rows from having the same Salary)
 is satisfied for at least the chosen threshold, then clearly no two rows can share both
@@ -146,7 +146,7 @@ Let's see how the exact DC mining changes due to this additional record.
         print(f"  {CYAN}{dc}{ENDC}")
     print()
 
-    print(f"""We can see that the DC {CYAN}¬{{ t.State == s.State ∧ t.Salary <= s.Salary ∧ t.FedTaxRate >= s.FedTaxRate }}{ENDC}
+    print(f"""We can see that the DC {CYAN}¬( t.State == s.State ∧ t.Salary <= s.Salary ∧ t.FedTaxRate >= s.FedTaxRate ){ENDC}
 no longer appears because of the violation introduced by record index 9
 ({GREEN}(Texas, 5000, 0.05){ENDC}).
 

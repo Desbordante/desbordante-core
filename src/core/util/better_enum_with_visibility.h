@@ -8,5 +8,7 @@
 #pragma once
 #include "core/util/export.h"
 
+#ifndef BETTER_ENUMS_CLASS_ATTRIBUTE
 #define BETTER_ENUMS_CLASS_ATTRIBUTE DESBORDANTE_EXPORT
+#endif
 #include <enum.h>
