@@ -7,6 +7,7 @@
 #include "core/algorithms/fd/fastfds/fastfds.h"
 #include "core/algorithms/fd/fd_mine/fd_mine.h"
 #include "core/algorithms/fd/fdep/fdep.h"
+#include "core/algorithms/fd/fdhits/fdhits.h"
 #include "core/algorithms/fd/fun/fun.h"
 #include "core/algorithms/fd/hyfd/hyfd.h"
 #include "core/algorithms/fd/pyro/pyro.h"

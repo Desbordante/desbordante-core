@@ -165,6 +165,8 @@ constexpr auto kDShardLength =
         "segmentation of rows for parallel processing in the FastADC algorithm";
 // FastOD
 constexpr auto kDTimeLimitSeconds = "max running time of the algorithm. Pass 0 to remove limit";
+// FDHits
+constexpr auto kDFDHitsMode = "FDHits mode: union or per_target";
 // GFD
 constexpr auto kDGfdData = "Path to file with GFD";
 constexpr auto kDGraphData = "Path to dot-file with graph";

@@ -215,6 +215,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::fd::depminer
     ${DESBORDANTE_PREFIX}::fd::dfd
+    ${DESBORDANTE_PREFIX}::fd::fdhits
     ${DESBORDANTE_PREFIX}::fd::fastfds
     ${DESBORDANTE_PREFIX}::fd::fdep
     ${DESBORDANTE_PREFIX}::fd::fun

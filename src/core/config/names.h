@@ -76,6 +76,8 @@ constexpr auto kMinimumSharedValue = "minimum_shared_value";
 constexpr auto kShardLength = "shard_length";
 // FastOD
 constexpr auto kTimeLimitSeconds = "time_limit";
+// FDHits
+constexpr auto kFDHitsMode = "fdhits_mode";
 // GFD
 constexpr auto kGfdData = "gfd";
 constexpr auto kGraphData = "graph";

@@ -79,11 +79,12 @@ void BindFd(py::module_& main_module) {
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";
     static constexpr auto kPFDTaneName = "PFDTane";
+    static constexpr auto kFDHitsName = "FDHits";
     auto fd_algos_module = BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep,
-                                         FdMine, FUN, Pyro, Tane, PFDTane>(
+                                         FdMine, FUN, Pyro, Tane, PFDTane, fd::fdhits::FDHits>(
             fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
             {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine", "FUN",
-             kPyroName, kTaneName, kPFDTaneName},
+             kPyroName, kTaneName, kPFDTaneName, kFDHitsName},
             pybind11::return_value_policy::copy);
 
     auto define_submodule = [&fd_algos_module, &main_module](char const* name,
