@@ -11,7 +11,7 @@ using AlgorithmTypes =
                    fd_verifier::FDVerifier, HyUCC, PyroUCC, HPIValid, cfd::FDFirstAlgorithm,
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, Fastod, GfdValidator,
                    EGfdValidator, NaiveGfdValidator, order::Order, dd::Split, Cords, hymd::HyMD,
-                   PFDVerifier, cfd_verifier::CFDVerifier>;
+                   PFDVerifier, cfd_verifier::CFDVerifier, AlgoERMiner>;
 
 // clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
@@ -96,7 +96,10 @@ BETTER_ENUM(AlgorithmType, char,
     pfd_verifier,
 
 /* CFD verifier algorithm */
-    cfd_verifier
+    cfd_verifier,
+
+/* Sequential rules mining algorithm */
+    erminer
 )
 // clang-format on
 
