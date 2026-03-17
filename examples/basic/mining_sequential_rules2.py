@@ -151,42 +151,8 @@ def demo_size_constraints():
         for rule in rules_limit_ant[:3]:
             print(f"  {rule}")
 
-def demo_error_detection():
-    print_section("4. Error Detection with ERMiner",
-                 "Using sequential rules to find data inconsistencies")
-    
-    # Создаем синтетический датасет с аномалией
-    print(colored("\nAnalyzing customer purchase patterns...", bcolors.OKBLUE))
-    
-    # Нормальные данные: после покупки телефона (1) покупают чехол (2)
-    # Аномалия: один клиент купил чехол без телефона
-    
-    anomaly_dataset = """1 -1 2 -1 -2
-1 -1 2 -1 -2
-1 -1 2 -1 -2
-2 -1 -2  # Аномалия!
-1 -1 2 -1 -2
-"""
-    with open('temp_anomaly.txt', 'w') as f:
-        f.write(anomaly_dataset)
-    
-    algo = desbordante.erminer.algorithms.ERMiner()
-    algo.run_algorithm(0.6, 0.8, 'temp_anomaly.txt', 'temp_out.txt')
-    
-    rules = algo.get_rules()
-    print(colored("\nFound rules:", bcolors.OKGREEN))
-    for rule in rules:
-        print(f"  {rule}")
-        if rule.antecedent == [2] and rule.consequent == [1]:
-            print(colored("  This rule suggests that buying case (2) leads to phone (1)",
-                         bcolors.WARNING))
-            print("    But in our data, one customer bought case without phone!")
-    
-    Path('temp_anomaly.txt').unlink(missing_ok=True)
-
 def demo_performance_scaling():
-    """Демонстрация производительности на разных данных"""
-    print_section("5. Performance Scaling", 
+    print_section("4. Performance Scaling", 
                  "How algorithm performs on larger datasets")
     
     if not Path(DATASET_BIG).exists():

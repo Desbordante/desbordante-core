@@ -2,7 +2,7 @@ import desbordante
 
 DATASET = 'examples/datasets/erminer/SIGN.txt'
 
-algo = desbordante.erminer.ERMiner()
+algo = desbordante.erminer.algorithms.ERMiner()
 
 algo.run_algorithm(
     min_support=0.7,

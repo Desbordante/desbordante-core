@@ -3,7 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/erminer/ERMiner.hpp"
+#include "core/algorithms/erminer/ERMiner.hpp"
 #include "py_util/bind_primitive.h"
 
 namespace python_bindings {

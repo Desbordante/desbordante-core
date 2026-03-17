@@ -8,9 +8,9 @@
 #include <chrono>
 #include <filesystem>
 
-#include "algorithms/algorithm.h"
-#include "config/option.h"
-#include "config/names.h"
+#include "core/algorithms/algorithm.h"
+#include "core/config/option.h"
+#include "core/config/names.h"
 
 #include "SequenceDatabase.hpp"
 #include "Occurence.hpp"
