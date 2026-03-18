@@ -83,6 +83,10 @@ auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
 constexpr auto kDCfdTuplesNumber =
         "Number of tuples in the part of the dataset if you "
         "want to use algo not on the full dataset, but on its part";
+//CM-SPADE
+constexpr auto kDSequenceDatabase = "Path to file with collection sequences";
+constexpr auto kDCMSpadeMinimumSupport =
+        "A minimum support value (a percentage represented by a value between 0 and 1)";
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "

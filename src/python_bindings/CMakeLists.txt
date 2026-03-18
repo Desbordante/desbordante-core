@@ -86,6 +86,15 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    cmspade
+    SRCS cmspade/bind_cmspade.cpp
+    LIBS 
+    ${DESBORDANTE_PREFIX}::cmspade 
+    Boost::headers 
+    better-enums
+)
+
+desbordante_add_bind(
     cfd
     SRCS
     cfd/bind_cfd.cpp

@@ -9,6 +9,7 @@
 #include "python_bindings/bind_main_classes.h"
 #include "python_bindings/cfd/bind_cfd.h"
 #include "python_bindings/cfd/bind_cfd_verification.h"
+#include "python_bindings/cmspade/bind_cmspade.h"
 #include "python_bindings/data/bind_data_types.h"
 #include "python_bindings/dc/bind_dc_verification.h"
 #include "python_bindings/dc/bind_fastadc.h"
@@ -45,6 +46,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindLogging,
                            BindFd,
                            BindCfd,
+                           BindCMSpade,
                            BindAr,
                            BindUcc,
                            BindAc,
