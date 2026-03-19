@@ -12,7 +12,7 @@ using DDs = model::DDString;
 class ADDVerifier : public DDVerifier {
 private:
     double satisfaction_threshold_;
-    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs) override;
+    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs) override;
     void RegisterOptions();
     void CheckCorrectnessDd() const override;
 

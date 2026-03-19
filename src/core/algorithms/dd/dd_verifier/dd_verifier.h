@@ -37,7 +37,7 @@ protected:
     double CalculateDistance(model::ColumnIndex column_index,
                              std::pair<std::size_t, std::size_t> const &tuple_pair) const;
 
-    virtual void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs);
+    virtual void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs);
 
     void VerifyDD();
 

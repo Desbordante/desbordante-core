@@ -1,4 +1,5 @@
 #include "core/algorithms/dd/add_verifier/add_verifier.h"
+
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
@@ -8,7 +9,7 @@
 
 namespace algos::dd {
 
-ADDVerifier::ADDVerifier(): DDVerifier() {
+ADDVerifier::ADDVerifier() : DDVerifier() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
@@ -25,23 +26,22 @@ void ADDVerifier::RegisterOptions() {
                     .SetValueCheck(check_threshold));
 }
 
-
-void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs) {
+void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs) {
     double min_dist = -1.;
-    for (auto const &pair : lhs) {
+    for (auto const& pair : lhs) {
         auto curr_constraint = dd_.right.cbegin();
         for (auto const column_index : rhs_column_indices_) {
             double const dif = CalculateDistance(column_index, pair);
             if (!curr_constraint->constraint.Contains(dif)) {
                 highlights_.emplace_back(column_index, pair, dif);
-            	++num_error_rhs_;
-	    }
+                ++num_error_rhs_;
+            }
             min_dist = min_dist == -1 ? dif : std::min(min_dist, dif);
             ++curr_constraint;
         }
     }
     std::size_t num_pairs_with_min_dist = 0;
-    for (auto const &pair : lhs) {
+    for (auto const& pair : lhs) {
         auto curr_constraint = dd_.right.cbegin();
         for (auto const column_index : rhs_column_indices_) {
             double const dif = CalculateDistance(column_index, pair);
@@ -51,7 +51,8 @@ void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> 
             ++curr_constraint;
         }
     }
-    if (min_dist < dd_.right.cbegin()->constraint.lower_bound || min_dist > dd_.right.cbegin()->constraint.upper_bound) {
+    if (min_dist < dd_.right.cbegin()->constraint.lower_bound ||
+        min_dist > dd_.right.cbegin()->constraint.upper_bound) {
         error_ = 1.;
     } else {
         error_ = 1. - double(num_pairs_with_min_dist) / lhs.size();
@@ -65,11 +66,10 @@ bool ADDVerifier::DDHolds() const {
 void ADDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({kDDString, kSatisfactionThreshold});
-
 }
 
 void ADDVerifier::CheckCorrectnessDd() const {
-    auto check_constraint = [](auto const &constraint) {
+    auto check_constraint = [](auto const& constraint) {
         if (constraint.constraint.upper_bound < constraint.constraint.lower_bound) {
             throw std::invalid_argument("Invalid constraint bounds for column: " +
                                         constraint.column_name);

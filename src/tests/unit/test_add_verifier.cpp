@@ -15,13 +15,14 @@ struct ADDVerifyingParams {
     double const satisfaction_threshold = 0.;
 
     explicit ADDVerifyingParams(model::DDString const& add, std::size_t const num_error_pairs = 0,
-                               double const error = 0., 
-			       double const satisfaction_threshold = 0.,
-			       CSVConfig const& csv_config = kTestDD)
-        : params({{config::names::kCsvConfig, csv_config}, {config::names::kDDString, add}, {config::names::kSatisfactionThreshold, satisfaction_threshold}}),
+                                double const error = 0., double const satisfaction_threshold = 0.,
+                                CSVConfig const& csv_config = kTestDD)
+        : params({{config::names::kCsvConfig, csv_config},
+                  {config::names::kDDString, add},
+                  {config::names::kSatisfactionThreshold, satisfaction_threshold}}),
           error(error),
           num_error_pairs(num_error_pairs),
-	  satisfaction_threshold(satisfaction_threshold){}
+          satisfaction_threshold(satisfaction_threshold) {}
 };
 
 class TestADDHoldsVerifying : public ::testing::TestWithParam<ADDVerifyingParams> {};
@@ -31,7 +32,7 @@ TEST_P(TestADDHoldsVerifying, ADDHoldsTest) {
     auto const mp = algos::StdParamsMap(p.params);
     auto const verifier = algos::CreateAndLoadAlgorithm<algos::dd::ADDVerifier>(mp);
     verifier->Execute();
-EXPECT_EQ(verifier->DDHolds(), (1. - p.error) >= p.satisfaction_threshold);
+    EXPECT_EQ(verifier->DDHolds(), (1. - p.error) >= p.satisfaction_threshold);
     EXPECT_DOUBLE_EQ(verifier->GetError(), p.error);
     EXPECT_EQ(verifier->GetNumErrorRhs(), p.num_error_pairs);
 }
