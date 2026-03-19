@@ -1,6 +1,7 @@
 #include "python_bindings/dd/bind_add_verification.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dd/add_verifier/add_verifier.h"
@@ -13,7 +14,7 @@ namespace py = pybind11;
 void BindADDVerification(py::module_& main_module) {
     using namespace algos;
     auto add_verification_module = main_module.def_submodule("add_verification");
- 
+
     BindPrimitiveNoBase<dd::ADDVerifier>(add_verification_module, "ADDVerifier")
             .def("dd_holds", &dd::ADDVerifier::DDHolds)
             .def("get_error", &dd::ADDVerifier::GetError)

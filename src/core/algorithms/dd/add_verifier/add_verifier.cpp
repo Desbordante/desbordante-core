@@ -1,4 +1,5 @@
 #include "core/algorithms/dd/add_verifier/add_verifier.h"
+
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
@@ -8,7 +9,7 @@
 
 namespace algos::dd {
 
-ADDVerifier::ADDVerifier(): DDVerifier() {
+ADDVerifier::ADDVerifier() : DDVerifier() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
@@ -24,7 +25,6 @@ void ADDVerifier::RegisterOptions() {
             Option{&satisfaction_threshold_, kSatisfactionThreshold, kDSatisfactionThreshold, 0.}
                     .SetValueCheck(check_threshold));
 }
-
 
 void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs) {
     if (lhs.empty()) {
@@ -45,7 +45,7 @@ void ADDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> 
         }
     }
     std::size_t num_pairs_with_min_dist = 0;
-    for (auto const &pair : lhs) {
+    for (auto const& pair : lhs) {
         auto curr_constraint = dd_.right.cbegin();
         for (auto const column_index : rhs_column_indices_) {
             double const dif = CalculateDistance(column_index, pair);
@@ -69,7 +69,6 @@ bool ADDVerifier::DDHolds() const {
 void ADDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({kDDString, kSatisfactionThreshold});
-
 }
 
 void ADDVerifier::CheckCorrectnessDd() const {
