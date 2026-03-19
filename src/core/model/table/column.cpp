@@ -2,8 +2,6 @@
 
 #include "core/model/table/vertical.h"
 
-using namespace std;
-
 bool Column::operator<(Column const& rhs) const {
     // use assert here to check if Columns belong to the same schema?
     return index_ > rhs.index_ && *schema_ == *rhs.schema_;
