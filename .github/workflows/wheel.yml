@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install cibuildwheel
-        run: pipx install cibuildwheel==3.2.1
+        run: pipx install cibuildwheel==3.4.0
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install cibuildwheel
-        run: pipx install cibuildwheel==3.2.1
+        run: pipx install cibuildwheel==3.4.0
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -138,7 +138,7 @@ jobs:
           download-pybind: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v3.4.0
         with:
           only: ${{ matrix.only }}
         env:
