@@ -42,6 +42,7 @@
 #include "python_bindings/statistics/bind_statistics.h"
 #include "python_bindings/ucc/bind_ucc.h"
 #include "python_bindings/ucc/bind_ucc_verification.h"
+#include "python_bindings/dd/bind_add_verification.h"
 
 namespace python_bindings {
 
@@ -85,7 +86,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindCFDVerification,
                            BindDDVerification,
                            BindAODVerification,
-                           BindAfdMetricCalculation}) {
+                           BindAfdMetricCalculation,
+			   BindADDVerification}) {
         bind_func(module);
     }
 }
