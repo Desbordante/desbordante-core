@@ -168,6 +168,16 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    gspan
+    SRCS
+    gspan/bind_gspan.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fsm::gspan
+    better-enums
+    Boost::headers
+)
+
+desbordante_add_bind(
     ind
     SRCS
     ind/bind_ind.cpp
