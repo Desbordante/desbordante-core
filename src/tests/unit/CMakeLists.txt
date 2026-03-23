@@ -364,6 +364,21 @@ desbordante_add_test(
     Boost::headers
 )
 
+# --- FSM ---
+desbordante_add_test(
+    fsm.gspan
+    SRCS
+    test_gspan.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fsm::gspan
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::algos
+    spdlog::spdlog_header_only
+    better-enums
+    gmock
+    Boost::headers
+)
+
 # --- IND ---
 desbordante_add_test(
     ind.algos

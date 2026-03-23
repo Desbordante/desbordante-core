@@ -5,6 +5,7 @@ set(SUBDIRS
     dc
     dd
     fd
+    fsm
     gfd
     ind
     md
@@ -50,6 +51,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::fd::tane
               ${DESBORDANTE_PREFIX}::fd::tane::pfd
               ${DESBORDANTE_PREFIX}::fd::verifier
+              ${DESBORDANTE_PREFIX}::fsm::gspan
               ${DESBORDANTE_PREFIX}::gfd::validator
               ${DESBORDANTE_PREFIX}::ind::faida
               ${DESBORDANTE_PREFIX}::ind::spider
