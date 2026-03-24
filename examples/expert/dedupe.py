@@ -4,7 +4,7 @@ import desbordante
 import pandas
 
 # Algorithm that finds approximate FDs and its config
-ALGORITHM_TYPE = desbordante.afd.algorithms.Default
+ALGORITHM_TYPE = desbordante.afd.algorithms.Pyro
 ERROR = 0.001
 CONFIG = {'error': ERROR, 'max_lhs': 1}
 
