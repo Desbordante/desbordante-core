@@ -207,6 +207,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     spdlog::spdlog_header_only
     better-enums
     gmock
@@ -220,6 +221,7 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     ${DESBORDANTE_PREFIX}::fd::euler
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
@@ -249,6 +251,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     ${DESBORDANTE_PREFIX}::fd::pyro
     ${DESBORDANTE_PREFIX}::fd::mine
     ${DESBORDANTE_PREFIX}::testlib::common
@@ -263,6 +266,7 @@ desbordante_add_test(
     test_pfdtane.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
@@ -302,6 +306,7 @@ desbordante_add_test(
     test_tane_afd_measures.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
@@ -350,6 +355,31 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
     better-enums
+    Boost::headers
+)
+
+desbordante_add_test(
+    afd.algos
+    SRCS
+    test_afd_algorithm.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::fd::depminer
+    ${DESBORDANTE_PREFIX}::fd::dfd
+    ${DESBORDANTE_PREFIX}::fd::fastfds
+    ${DESBORDANTE_PREFIX}::fd::fdep
+    ${DESBORDANTE_PREFIX}::fd::fun
+    ${DESBORDANTE_PREFIX}::fd::hy
+    ${DESBORDANTE_PREFIX}::fd::pyro
+    ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::fd::tane
+    ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
+    spdlog::spdlog_header_only
+    better-enums
+    gmock
     Boost::headers
 )
 
