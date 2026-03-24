@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/algorithms/fd/pli_based_afd_algorithm.h"
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/algorithms/fd/tane/model/lattice_level.h"
 #include "core/config/error/type.h"
@@ -9,7 +10,7 @@
 
 namespace algos::tane {
 
-class TaneCommon : public PliBasedFDAlgorithm {
+class TaneCommon : public PliBasedAFDAlgorithm {
 protected:
     config::ErrorType max_fd_error_;
     config::ErrorType max_ucc_error_;
@@ -26,7 +27,9 @@ private:
                                                model::PLIWS const* joint_pli) = 0;
     static double CalculateUccError(model::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
+
     void RegisterAndCountFd(Vertical lhs, Column const* rhs);
+    void RegisterAndCountAfd(Vertical const& lhs, Column const* rhs, long double threeshold);
 
 public:
     TaneCommon();
