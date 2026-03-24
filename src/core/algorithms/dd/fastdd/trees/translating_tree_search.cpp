@@ -7,7 +7,8 @@
 namespace algos::dd {
 
 TranslatingTreeSearch::TranslatingTreeSearch(std::vector<std::size_t> priorities,
-                                             std::vector<boost::dynamic_bitset<>> const& bitsets) {
+                                             std::vector<boost::dynamic_bitset<>> const& bitsets)
+    : tree_(bitsets[0].size()) {
     std::vector<std::size_t> indices(priorities.size());
     std::iota(indices.begin(), indices.end(), 0);
     std::ranges::sort(indices, [&priorities](std::size_t i, std::size_t j) {
