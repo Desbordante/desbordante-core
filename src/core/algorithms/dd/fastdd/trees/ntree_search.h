@@ -20,6 +20,8 @@ class NTreeSearch {
 private:
     // Maps a bit-position to a child node
     std::unordered_map<std::size_t, std::unique_ptr<NTreeSearch>> children_;
+    // Bitset that shows for each bit-position whether a child node is present in the map
+    boost::dynamic_bitset<> children_bitset_;
 
     // Optional to hold a terminal bitset at this node.
     // If present, it represents a complete bitset stored here.
@@ -33,7 +35,8 @@ private:
 
         auto& child = children_[next_bit];
         if (!child) {
-            child = std::make_unique<NTreeSearch>();
+            child = std::make_unique<NTreeSearch>(bs.size());
+            children_bitset_.set(next_bit, true);
         }
 
         child->InsertImpl(bs, bs.find_next(next_bit));
@@ -46,12 +49,13 @@ private:
         }
 
         while (next_bit != boost::dynamic_bitset<>::npos) {
-            if (auto it = children_.find(next_bit); it != children_.end()) {
-                if (it->second->FindSubset(bs, bs.find_next(next_bit))) {
+            std::size_t next_index = bs.find_next(next_bit);
+            if (children_bitset_[next_bit]) {
+                if (children_.at(next_bit)->FindSubset(bs, next_index)) {
                     return true;
                 }
             }
-            next_bit = bs.find_next(next_bit);
+            next_bit = next_index;
         }
 
         return false;
@@ -65,15 +69,17 @@ private:
         }
 
         while (next_bit != boost::dynamic_bitset<>::npos) {
-            if (auto it = children_.find(next_bit); it != children_.end()) {
-                if (it->second->GetAndRemoveGeneralizations(bs, bs.find_next(next_bit), result)) {
+            std::size_t next_index = bs.find_next(next_bit);
+            if (children_bitset_[next_bit]) {
+                if (children_[next_bit]->GetAndRemoveGeneralizations(bs, next_index, result)) {
                     children_.erase(next_bit);
+                    children_bitset_.set(next_bit, false);
                 }
             }
-            next_bit = bs.find_next(next_bit);
+            next_bit = next_index;
         }
 
-        return children_.empty();
+        return children_bitset_.none();
     }
 
 public:
@@ -85,8 +91,8 @@ public:
         using reference = value_type const&;
 
         Iterator(NTreeSearch* root, bool is_end = false) : traversal_() {
-            if (!is_end && (!root->children_.empty() || root->stored_bitset_)) {
-                traversal_.emplace(root, root->children_.cbegin());
+            if (!is_end && (!root->children_bitset_.none() || root->stored_bitset_)) {
+                traversal_.emplace(root, root->children_bitset_.find_first());
                 FindNext();
             }
         }
@@ -99,13 +105,16 @@ public:
         Iterator& operator++() {
             Node cur_node = traversal_.top();
             auto cur_it_copy = cur_node.second;
-            while (cur_node.second == cur_node.first->children_.cend() ||
-                   ++cur_it_copy == cur_node.first->children_.cend()) {
+            while (cur_node.second == boost::dynamic_bitset<>::npos ||
+                   cur_node.first->children_bitset_.find_next(cur_it_copy) ==
+                           boost::dynamic_bitset<>::npos) {
                 cur_it_copy = cur_node.second;
-                if (cur_it_copy != cur_node.first->children_.cend() &&
-                    ++cur_it_copy == cur_node.first->children_.cend() &&
+                if (cur_it_copy != boost::dynamic_bitset<>::npos &&
+                    cur_node.first->children_bitset_.find_next(cur_it_copy) ==
+                            boost::dynamic_bitset<>::npos &&
                     cur_node.first->stored_bitset_) {
-                    ++traversal_.top().second;
+                    traversal_.top().second =
+                            cur_node.first->children_bitset_.find_next(traversal_.top().second);
                     return *this;
                 }
                 traversal_.pop();
@@ -116,7 +125,8 @@ public:
                 cur_it_copy = cur_node.second;
             }
 
-            ++traversal_.top().second;
+            traversal_.top().second =
+                    traversal_.top().first->children_bitset_.find_next(traversal_.top().second);
             FindNext();
 
             return *this;
@@ -138,18 +148,16 @@ public:
         }
 
     private:
-        using Node = std::pair<
-                NTreeSearch*,
-                std::unordered_map<std::size_t, std::unique_ptr<NTreeSearch>>::const_iterator>;
+        using Node = std::pair<NTreeSearch*, std::size_t>;
 
         void FindNext() {
             while (!traversal_.empty()) {
                 Node cur_node = traversal_.top();
-                if (cur_node.first->children_.empty()) {
+                if (cur_node.first->children_bitset_.none()) {
                     return;
                 }
-                NTreeSearch* child = (cur_node.second)->second.get();
-                traversal_.emplace(child, child->children_.cbegin());
+                NTreeSearch* child = cur_node.first->children_[cur_node.second].get();
+                traversal_.emplace(child, child->children_bitset_.find_first());
             }
         }
 
@@ -178,6 +186,16 @@ public:
 
     Iterator end() {
         return Iterator(this, true);
+    }
+
+    explicit NTreeSearch(std::size_t bitset_size = 64UL)
+        : children_(), children_bitset_(bitset_size), stored_bitset_() {
+        children_.reserve(bitset_size);
+    }
+
+    NTreeSearch(std::size_t bitset_size, std::optional<boost::dynamic_bitset<>> const& bs)
+        : children_(), children_bitset_(bitset_size), stored_bitset_(bs) {
+        children_.reserve(bitset_size);
     }
 };
 
