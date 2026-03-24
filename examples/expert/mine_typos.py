@@ -18,7 +18,7 @@ EXACT_ALGORITHM_TYPE = desbordante.fd.algorithms.Default
 EXACT_ALGO_CONFIG = {}
 
 # Algorithm that finds approximate FDs and its config.
-APPROXIMATE_ALGORITHM_TYPE = desbordante.afd.algorithms.Default
+APPROXIMATE_ALGORITHM_TYPE = desbordante.afd.algorithms.Pyro
 ERROR = 0.005  # Highest error for almost holding FDs.
 APPROXIMATE_ALGO_CONFIG = {'error': ERROR}
 
