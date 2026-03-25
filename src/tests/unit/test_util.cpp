@@ -14,7 +14,7 @@
 
 namespace tests {
 
-using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, model::AgreeSetFactory,
+using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, std::log, model::AgreeSetFactory,
         model::MCGenMethod, model::AgreeSetsGenMethod;
 using ::testing::ContainerEq, ::testing::Eq;
 

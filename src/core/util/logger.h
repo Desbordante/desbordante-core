@@ -4,8 +4,12 @@
 #include <string>
 #include <vector>
 
+// IWYU pragma: begin_exports
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/fmt/fmt.h>
+#include <spdlog/fmt/bundled/base.h>
+// IWYU pragma: end_exports
 
 #include "core/util/export.h"
 
