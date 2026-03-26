@@ -52,53 +52,10 @@ public:
 
     void HandleInvalid(boost::dynamic_bitset<> const& invalid_bitset);
 
-    struct Iterator {
-        using iterator_category = std::forward_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = boost::dynamic_bitset<>;
-        using pointer = value_type const*;
-        using reference = value_type const&;
-
-        Iterator(NTreeSearch::Iterator it, BitsetTranslator const& translator)
-            : it_(it), translator_(translator) {}
-
-        reference operator*() const {
-            cur_bitset_ = translator_.Retransform(*it_);
-            return cur_bitset_;
-        }
-
-        Iterator& operator++() {
-            ++it_;
-            return *this;
-        }
-
-        Iterator operator++(int) {
-            Iterator tmp = *this;
-            ++(*this);
-
-            return tmp;
-        }
-
-        friend bool operator==(Iterator const& a, Iterator const& b) {
-            return a.it_ == b.it_;
-        }
-
-        friend bool operator!=(Iterator const& a, Iterator const& b) {
-            return !(a == b);
-        }
-
-    private:
-        NTreeSearch::Iterator it_;
-        BitsetTranslator const& translator_;
-        boost::dynamic_bitset<> mutable cur_bitset_;  // Looks weird. Is there a better way?
-    };
-
-    Iterator begin() {
-        return Iterator{tree_.begin(), translator_};
-    }
-
-    Iterator end() {
-        return Iterator{tree_.end(), translator_};
+    void ForEach(std::function<void(boost::dynamic_bitset<> const&)> const& consumer) {
+        tree_.ForEach([&consumer, this](boost::dynamic_bitset<> const& bitset) {
+            consumer(translator_.Retransform(bitset));
+        });
     }
 };
 
