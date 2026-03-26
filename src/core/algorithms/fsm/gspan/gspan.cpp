@@ -24,42 +24,42 @@ std::vector<vertex_t> FindAllWithLabel(int target_label, graph_t const& graph) {
 
 // Find all isomorphisms between graph described by DFSCode and boost::graph, each
 // isomorphism is represented by a map
-std::vector<std::unordered_map<int, vertex_t>> SubgraphIsomorphisms(DFSCode const& code,
-                                                                    graph_t const& graph) {
+std::vector<std::vector<vertex_t>> SubgraphIsomorphisms(DFSCode const& code, graph_t const& graph) {
     LOG_TRACE("Finding subgraph isomorphisms: pattern size={}, target vertices={}, edges={}",
               code.Size(), boost::num_vertices(graph), boost::num_edges(graph));
-    std::vector<std::unordered_map<int, vertex_t>> isoms;
+    std::vector<std::vector<vertex_t>> isoms;
 
     // Initial isomorphisms by finding all vertices with same label as vertex 0 in code
     int start_label = code.GetExtendedEdges()[0].vertex1.label;
-    for (vertex_t vertex : FindAllWithLabel(start_label, graph)) {
-        std::unordered_map<int, vertex_t> map;
-        map[0] = vertex;
-        isoms.push_back(std::move(map));
+    auto const vertices = FindAllWithLabel(start_label, graph);
+    isoms.reserve(vertices.size());
+
+    for (vertex_t vertex : vertices) {
+        isoms.push_back({vertex});
     }
     LOG_TRACE("Initial candidate mappings: {}", isoms.size());
 
     // Each extended edge will update partial isomorphisms.
     // For forward edge, each isomorphism will be either extended or discarded.
     // For backward edge, each isomorphism will be either unchanged or discarded.
+    std::vector<int> inv(boost::num_vertices(graph), -1);
+
     for (ExtendedEdge const& ee : code.GetExtendedEdges()) {
         int v1 = ee.vertex1.id;
         int v2 = ee.vertex2.id;
         int v2_label = ee.vertex2.label;
         int edge_label = ee.label;
 
-        std::vector<std::unordered_map<int, vertex_t>> update_isoms;
+        std::vector<std::vector<vertex_t>> update_isoms;
+        update_isoms.reserve(isoms.size());
         for (auto& iso : isoms) {
             auto mapped_v1 = iso[v1];
 
             // If it is a forward edge extension
             if (v1 < v2) {
-                auto n = boost::num_vertices(graph);
-                std::vector<int> inv(n, -1);
-                for (auto& [dfs_id, graph_vertex] : iso) {
-                    inv[graph_vertex] = dfs_id;
+                for (int dfs_id = 0; dfs_id < iso.size(); ++dfs_id) {
+                    inv[iso[dfs_id]] = dfs_id;
                 }
-
                 // For each neighbor of the vertex corresponding to v1
                 for (auto edge : boost::make_iterator_range(boost::out_edges(mapped_v1, graph))) {
                     vertex_t mapped_v2 = (boost::source(edge, graph) == mapped_v1)
@@ -69,8 +69,10 @@ std::vector<std::unordered_map<int, vertex_t>> SubgraphIsomorphisms(DFSCode cons
 
                     if (v2_label == graph[mapped_v2].label && (inv[mapped_v2] == -1) &&
                         (edge_label == mapped_edge.label)) {
-                        std::unordered_map<int, vertex_t> temp_map(iso);
-                        temp_map[v2] = mapped_v2;
+                        std::vector<vertex_t> temp_map;
+                        temp_map.reserve(iso.size() + 1);
+                        temp_map = iso;
+                        temp_map.push_back(mapped_v2);  
 
                         update_isoms.push_back(std::move(temp_map));
                     }
@@ -81,11 +83,15 @@ std::vector<std::unordered_map<int, vertex_t>> SubgraphIsomorphisms(DFSCode cons
                 auto mapped_v2 = iso[v2];
                 auto [mapped_edge, is_neighbors] = boost::edge(mapped_v1, mapped_v2, graph);
                 if (is_neighbors && edge_label == graph[mapped_edge].label) {
-                    update_isoms.push_back(iso);
+                    update_isoms.push_back(std::move(iso));
                 }
             }
+
+            for (int dfs_id = 0; dfs_id < iso.size(); ++dfs_id) {
+                inv[iso[dfs_id]] = -1;
+            }
         }
-        isoms = update_isoms;
+        isoms = std::move(update_isoms);
     }
 
     LOG_TRACE("Found {} valid isomorphisms", isoms.size());
@@ -404,14 +410,14 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emi
     } else {
         // If we want to extend a subgraph
         auto rightmost = code.GetRightMost();
-        std::vector<std::unordered_map<int, vertex_t>> isoms = SubgraphIsomorphisms(code, graph);
+        std::vector<std::vector<vertex_t>> isoms = SubgraphIsomorphisms(code, graph);
+        auto n = boost::num_vertices(graph);
+        std::vector<int> inverted_isom(n, -1);
         LOG_TRACE("Found {} embeddings for extension", isoms.size());
         for (auto& isom : isoms) {
             // Backward extensions from rightmost child
-            auto n = boost::num_vertices(graph);
-            std::vector<int> inverted_isom(n, -1);
-            for (auto& [dfs_id, graph_vertex] : isom) {
-                inverted_isom[graph_vertex] = dfs_id;
+            for (int dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
+                inverted_isom[isom[dfs_id]] = dfs_id;
             }
 
             auto mapped_rightmost = isom[rightmost];
@@ -453,6 +459,9 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emi
                         emit(ee);
                     }
                 }
+            }
+            for (int dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
+                inverted_isom[isom[dfs_id]] = -1;
             }
         }
     }
