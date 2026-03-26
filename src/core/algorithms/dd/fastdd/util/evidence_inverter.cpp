@@ -21,7 +21,7 @@ std::vector<std::size_t> EvidenceInverter::CountDFFrequencies() const {
     return freqs;
 }
 
-std::unordered_set<boost::dynamic_bitset<>> EvidenceInverter::GetCovers() const {
+std::vector<boost::dynamic_bitset<>> EvidenceInverter::GetCovers() const {
     TranslatingTreeSearch positive_cover(CountDFFrequencies(), column_to_dif_funcs_);
     LOG_TRACE("Built translating tree search");
 
@@ -41,8 +41,7 @@ std::unordered_set<boost::dynamic_bitset<>> EvidenceInverter::GetCovers() const 
     }
     LOG_TRACE("Handled invalid");
 
-    std::unordered_set<boost::dynamic_bitset<>> covers(positive_cover.begin(),
-                                                       positive_cover.end());
+    std::vector<boost::dynamic_bitset<>> covers(positive_cover.begin(), positive_cover.end());
 
     return covers;
 }

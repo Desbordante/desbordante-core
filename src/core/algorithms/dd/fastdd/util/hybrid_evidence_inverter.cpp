@@ -163,8 +163,7 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::BuildDDs() {
             EvidenceInverter inverter(std::move(cur_diff_bitsets), dif_func_info_->dif_func_num_,
                                       column_to_dif_funcs_, i);
             LOG_DEBUG("Built inverter");
-            std::unordered_set<boost::dynamic_bitset<>> covers_set = inverter.GetCovers();
-            std::vector<boost::dynamic_bitset<>> covers(covers_set.begin(), covers_set.end());
+            std::vector<boost::dynamic_bitset<>> covers = inverter.GetCovers();
             LOG_DEBUG("Got covers: {}", covers.size());
             std::vector<DifferentialDependency> minimized_covers =
                     Minimize(std::move(covers), i, j - 1);

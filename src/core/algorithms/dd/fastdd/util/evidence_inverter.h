@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -34,7 +33,7 @@ public:
         }
     }
 
-    std::unordered_set<boost::dynamic_bitset<>> GetCovers() const;
+    std::vector<boost::dynamic_bitset<>> GetCovers() const;
 };
 
 }  // namespace algos::dd
