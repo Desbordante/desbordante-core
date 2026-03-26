@@ -2,6 +2,7 @@
 
 #include <Python.h>
 
+#include <cstddef>
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -10,7 +11,9 @@
 #include <vector>
 
 #include <boost/core/demangle.hpp>
+#include <pybind11/functional.h>
 #include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/cfd/enums.h"
@@ -25,7 +28,6 @@
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
-#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/tabular_data/input_table_type.h"
