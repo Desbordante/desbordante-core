@@ -36,6 +36,9 @@ std::string const kDDifferentialStrategyString =
         util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
 std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
                                      util::EnumToAvailableValues<algos::od::Ordering>();
+std::string const kDDefaultPACMetricsNote =
+        "You can pass nullptr for some columns or leave the entire list empty to use default "
+        "metrics, deduced from column type.";
 }  // namespace details
 
 // Common
@@ -220,6 +223,12 @@ constexpr auto kDDiagonalThreshold =
         "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
         "containing N rows is not considered a change (default is 1e-5).";
 constexpr auto kDDomain = "Ordered domain for Domain PAC.";
+constexpr auto kDLhsDeltas =
+        "Maximum distances between values in left-hand side of FD PAC. "
+        "If a single value is passed, it is used for all columns.";
+auto const kDLhsMetrics = "Metrics for left-hand side columns. " + details::kDDefaultPACMetricsNote;
+auto const kDRhsMetrics =
+        "Metrics for right-hand side columns. " + details::kDDefaultPACMetricsNote;
 constexpr auto kDMaxEpsilon =
         "Maximal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is +infinity).";
