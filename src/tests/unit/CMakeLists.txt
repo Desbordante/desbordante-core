@@ -556,7 +556,23 @@ desbordante_add_test(
 	SRCS
 	test_domain_pac_verifier.cpp
 	LIBS
+	${DESBORDANTE_PREFIX}::pac
 	${DESBORDANTE_PREFIX}::pac::verifier::domain_pac_verifier
+	${DESBORDANTE_PREFIX}::testlib::common
+	spdlog::spdlog_header_only
+	better-enums
+	gmock
+	Boost::headers
+	${DESBORDANTE_PREFIX}::model::types
+)
+
+desbordante_add_test(
+	pac.fd_pac_verifier
+	SRCS
+	test_fd_pac_verifier.cpp
+	LIBS
+	${DESBORDANTE_PREFIX}::pac
+	${DESBORDANTE_PREFIX}::pac::verifier::fd_pac_verifier
 	${DESBORDANTE_PREFIX}::testlib::common
 	spdlog::spdlog_header_only
 	better-enums
