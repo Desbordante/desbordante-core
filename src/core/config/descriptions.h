@@ -39,6 +39,9 @@ std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD
                                      util::EnumToAvailableValues<algos::od::Ordering>();
 std::string const kDDomainTypeString =
         "Domain type\n" + util::EnumToAvailableValues<pac::model::DomainType>();
+std::string const kDDefaultPACMetricsNote =
+        "You can pass nullptr for some columns or leave the whole list empty to use default "
+        "metrics, deduced from column type.";
 }  // namespace details
 
 // Common
@@ -221,6 +224,12 @@ constexpr auto kDLast = "Upper bound of n-ary parallelepiped.";
 constexpr auto kDLevelingCoeffs =
         "Coefficients by which distances between individual coordinates are multiplied (for "
         "domains based on coordinate-wise metrics). Default is [1, 1, ..., 1].";
+constexpr auto kDLhsDeltas =
+        "Maximum distances between values in left-hand side of FD PAC. "
+        "If a single value is passed, it is used for all columns.";
+auto const kDLhsMetrics = "Metrics for left-hand side columns. " + details::kDDefaultPACMetricsNote;
+auto const kDRhsMetrics =
+        "Metrics for right-hand side columns. " + details::kDDefaultPACMetricsNote;
 constexpr auto kDMaxEpsilon =
         "Maximal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is +infinity).";
