@@ -2,6 +2,7 @@
 
 #include <Python.h>
 
+#include <cstddef>
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -10,7 +11,9 @@
 #include <vector>
 
 #include <boost/core/demangle.hpp>
+#include <pybind11/functional.h>
 #include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/cfd/enums.h"

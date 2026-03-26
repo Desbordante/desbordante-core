@@ -6,13 +6,17 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <typeindex>
 #include <unordered_map>
+#include <vector>
 
 #include <boost/any.hpp>
 #include <boost/core/demangle.hpp>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
+#include <pybind11/typing.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/cfd/enums.h"
@@ -270,6 +274,10 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        {typeid(config::CustomMetricType), CustomMetricToAny},
+        {typeid(config::CustomMetricsType), CustomMetricsToAny},
+        {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
+        kNormalConvPair<std::vector<double>>,
 };
 
 }  // namespace
