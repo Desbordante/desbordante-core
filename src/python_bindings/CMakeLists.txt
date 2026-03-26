@@ -257,8 +257,9 @@ desbordante_add_bind(
     pac/bind_pac.cpp
     pac/bind_pac_verification.cpp
     LIBS
-    Desbordante::pac::verifier::domain_pac_verifier
-    Desbordante::pac::verifier
+    ${DESBORDANTE_PREFIX}::pac::verifier::domain_pac_verifier
+    ${DESBORDANTE_PREFIX}::pac::verifier::fd_pac_verifier
+    ${DESBORDANTE_PREFIX}::pac::verifier
     better-enums
     spdlog::spdlog_header_only
     Boost::headers

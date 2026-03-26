@@ -8,15 +8,18 @@
 #include <utility>
 #include <vector>
 
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/fd_pac_highlight.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/fd_pac_verifier.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
+using namespace algos::pac_verifier;
 
 namespace python_bindings {
 void BindPACVerification(py::module_& main_module) {
-    using namespace algos::pac_verifier;
     using namespace model;
     using namespace std::string_literals;
     using namespace pybind11::literals;
@@ -25,6 +28,7 @@ void BindPACVerification(py::module_& main_module) {
     auto algos_module = pac_verification_module.def_submodule("algorithms");
 
     BindDomainPACVerification(pac_verification_module);
+    BindFDPACVerification(pac_verification_module, algos_module);
 }
 
 void BindDomainPACVerification(py::module_& pac_verification_module) {
@@ -53,5 +57,22 @@ void BindDomainPACVerification(py::module_& pac_verification_module) {
                     .def("get_pac", &DomainPACVerifier::GetPAC)
                     .def("get_highlights", &DomainPACVerifier::GetHighlights, "eps_1"_a = -1,
                          "eps_2"_a = -1);
+}
+
+void BindFDPACVerification(py::module_& pac_verification_module, py::module_& algorithms_module) {
+    using namespace py::literals;
+
+    py::class_<FDPACHighlight>(pac_verification_module, "FDPACHighlight")
+            .def_property_readonly("row_indices", &FDPACHighlight::RowIndices)
+            .def_property_readonly("num_pairs", &FDPACHighlight::NumPairs)
+            .def_property_readonly("string_data", &FDPACHighlight::StringData)
+            .def("__str__", &FDPACHighlight::ToString)
+            .doc() = "A set of tuple pairs that violate FD PAC.";
+
+    // Have to use low-level facility, because BindPrimitiveNoBase would overwrite ".default"
+    // attribute on each call
+    detail::RegisterAlgorithm<FDPACVerifier, algos::Algorithm>(algorithms_module, "FDPACVerifier")
+            .def("get_pac", &FDPACVerifier::GetPAC)
+            .def("get_highlights", &FDPACVerifier::GetHighlights, "eps_1"_a = 0, "eps_2"_a = -1);
 }
 }  // namespace python_bindings

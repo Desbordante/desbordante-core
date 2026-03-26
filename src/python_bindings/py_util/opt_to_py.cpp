@@ -15,6 +15,8 @@
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/config/custom_metric/custom_metric.h"
+#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/error/type.h"
@@ -51,6 +53,9 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<std::vector<std::string>>,
         normal_conv_pair<std::vector<double>>,
         normal_conv_pair<std::shared_ptr<pac::model::IDomain>>,
+        normal_conv_pair<std::shared_ptr<config::ICustomMetric>>,
+        normal_conv_pair<std::vector<std::shared_ptr<config::ICustomMetric>>>,
+        normal_conv_pair<std::shared_ptr<config::ICustomVectorMetric>>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,
