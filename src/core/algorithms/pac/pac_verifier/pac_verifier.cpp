@@ -57,6 +57,10 @@ void PACVerifier::ProcessCommonExecuteOpts() {
     if (max_epsilon_ > 0 && max_epsilon_ < min_epsilon_) {
         throw config::ConfigurationError("Min epsilon must be less or equal to max epsilon");
     }
+
+    LOG_DEBUG(
+            "Common PAC verifier options: min delta: {}, min eps: {}, max eps: {}, delta steps: {}",
+            min_delta_, min_epsilon_, max_epsilon_, delta_steps_);
 }
 
 unsigned long long PACVerifier::ExecuteInternal() {
