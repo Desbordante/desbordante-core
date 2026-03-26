@@ -15,10 +15,14 @@
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/column_metric.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/fd_pac_highlight.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/fd_pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
+using namespace algos::pac_verifier;
 
 namespace python_bindings {
 /// @brief Register concrete PAC verifier.
@@ -37,7 +41,6 @@ auto BindPACVerifier(py::module_& algos_module, auto&& name) {
 }
 
 void BindPACVerification(py::module_& main_module) {
-    using namespace algos::pac_verifier;
     using namespace model;
     using namespace std::string_literals;
     using namespace pybind11::literals;
@@ -53,11 +56,11 @@ void BindPACVerification(py::module_& main_module) {
     auto cli_module = algos_module.def_submodule("cli");
 
     BindDomainPACVerification(pac_verification_module, algos_module, cli_module);
+    BindFDPACVerification(pac_verification_module, algos_module, cli_module);
 }
 
 void BindDomainPACVerification(py::module_& pac_verification_module, py::module_& algos_module,
                                py::module_& cli_module) {
-    using namespace algos::pac_verifier;
     using namespace pybind11::literals;
     using namespace std::string_literals;
 
@@ -91,5 +94,37 @@ void BindDomainPACVerification(py::module_& pac_verification_module, py::module_
             "options, which should be used only in CLI.\n"
             "Consider using desbordante.pac_verification.algorithms.DomainPACVerifer in Python.\n" +
             domain_pac_verifier_cli.doc().cast<std::string>();
+}
+
+void BindFDPACVerificaion(py::module_& pac_verification_module, py::module_& algos_module,
+                          py::module_& cli_module) {
+    using namespace py::literals;
+
+    py::class_<FDPACHighlight>(pac_verification_module, "FDPACHighlight")
+            .def_property_readonly("row_indices", &FDPACHighlight::RowIndices)
+            .def_property_readonly("num_pairs", &FDPACHighlight::NumPairs)
+            .def_property_readonly("string_data", &FDPACHighlight::StringData)
+            .def("__str__", &FDPACHighlight::ToString)
+            .doc() = "A set of tuple pairs that violate FD PAC.";
+
+    py::class_<algos::pac_verifier::detail::FakeValueMetric>(pac_verification_module, "ValueMetric")
+            .doc() =
+            "A wrapper around [None | Callable], where Callable has signature (str, str) -> "
+            "float.\n"
+            "Most probably, you won't need to use this class directly.";
+
+    auto fd_pac_verifier =
+            BindPACVerifier<FDPACVerifier<true>, model::FDPAC>(algos_module, "FDPACVerifier")
+                    .def("get_highlights", &FDPACVerifier<true>::GetHighlights, "eps_1"_a = 0,
+                         "eps_2"_a = -1);
+    algos_module.attr("Default") = fd_pac_verifier;
+
+    auto fd_pac_verifier_cli =
+            BindPACVerifier<FDPACVerifier<false>, model::FDPAC>(cli_module, "FDPACVerifierCLI");
+    fd_pac_verifier_cli.doc() =
+            "NOTE: This algorithm is a wrapper around FDPACVerifier with a restricted set of "
+            "options, which should be used only in CLI.\n"
+            "Consider using desbordante.pac_verification.algorithms.FDPACVerifier in Python.\n" +
+            fd_pac_verifier_cli.doc().cast<std::string>();
 }
 }  // namespace python_bindings

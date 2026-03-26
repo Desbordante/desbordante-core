@@ -15,6 +15,7 @@
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/default_domains/domain_type.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/column_metric.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/error/type.h"
@@ -51,6 +52,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<std::vector<std::string>>,
         normal_conv_pair<std::vector<double>>,
         normal_conv_pair<std::shared_ptr<pac::model::IDomain>>,
+        normal_conv_pair<std::vector<algos::pac_verifier::ValueMetric>>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,
