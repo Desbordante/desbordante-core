@@ -41,7 +41,9 @@ std::vector<boost::dynamic_bitset<>> EvidenceInverter::GetCovers() const {
     }
     LOG_TRACE("Handled invalid");
 
-    std::vector<boost::dynamic_bitset<>> covers(positive_cover.begin(), positive_cover.end());
+    std::vector<boost::dynamic_bitset<>> covers;
+    positive_cover.ForEach(
+            [&covers](boost::dynamic_bitset<> const& bitset) { covers.push_back(bitset); });
 
     return covers;
 }

@@ -110,87 +110,6 @@ private:
     }
 
 public:
-    struct Iterator {
-        using iterator_category = std::forward_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = boost::dynamic_bitset<>;
-        using pointer = value_type const*;
-        using reference = value_type const&;
-
-        Iterator(NTreeSearch* root, bool is_end = false) : traversal_() {
-            if (!is_end && (!root->children_bitset_.none() || root->stored_bitset_)) {
-                traversal_.emplace(root, root->children_bitset_.find_first());
-                FindNext();
-            }
-        }
-
-        reference operator*() const {
-            Node cur_node = traversal_.top();
-            return cur_node.first->stored_bitset_.value();
-        }
-
-        Iterator& operator++() {
-            Node cur_node = traversal_.top();
-            auto cur_it_copy = cur_node.second;
-            while (cur_node.second == boost::dynamic_bitset<>::npos ||
-                   cur_node.first->children_bitset_.find_next(cur_it_copy) ==
-                           boost::dynamic_bitset<>::npos) {
-                cur_it_copy = cur_node.second;
-                if (cur_it_copy != boost::dynamic_bitset<>::npos &&
-                    cur_node.first->children_bitset_.find_next(cur_it_copy) ==
-                            boost::dynamic_bitset<>::npos &&
-                    cur_node.first->stored_bitset_) {
-                    traversal_.top().second =
-                            cur_node.first->children_bitset_.find_next(traversal_.top().second);
-                    return *this;
-                }
-                traversal_.pop();
-                if (traversal_.empty()) {
-                    return *this;
-                }
-                cur_node = traversal_.top();
-                cur_it_copy = cur_node.second;
-            }
-
-            traversal_.top().second =
-                    traversal_.top().first->children_bitset_.find_next(traversal_.top().second);
-            FindNext();
-
-            return *this;
-        }
-
-        Iterator operator++(int) {
-            Iterator tmp = *this;
-            ++(*this);
-
-            return tmp;
-        }
-
-        friend bool operator==(Iterator const& a, Iterator const& b) {
-            return a.traversal_ == b.traversal_;
-        }
-
-        friend bool operator!=(Iterator const& a, Iterator const& b) {
-            return !(a == b);
-        }
-
-    private:
-        using Node = std::pair<NTreeSearch*, std::size_t>;
-
-        void FindNext() {
-            while (!traversal_.empty()) {
-                Node cur_node = traversal_.top();
-                if (cur_node.first->children_bitset_.none()) {
-                    return;
-                }
-                NTreeSearch* child = cur_node.first->children_[cur_node.second].get();
-                traversal_.emplace(child, child->children_bitset_.find_first());
-            }
-        }
-
-        std::stack<Node> traversal_;
-    };
-
     void Insert(boost::dynamic_bitset<> const& bs) {
         InsertImpl(bs, boost::dynamic_bitset<>::npos, bs.find_first());
     }
@@ -207,12 +126,15 @@ public:
         return removed;
     }
 
-    Iterator begin() {
-        return Iterator(this);
-    }
+    void ForEach(std::function<void(boost::dynamic_bitset<> const&)> const& consumer) {
+        if (stored_bitset_) {
+            consumer(*stored_bitset_);
+        }
 
-    Iterator end() {
-        return Iterator(this, true);
+        for (std::size_t index = children_bitset_.find_first();
+             index != boost::dynamic_bitset<>::npos; index = children_bitset_.find_next(index)) {
+            children_[index]->ForEach(consumer);
+        }
     }
 
     explicit NTreeSearch(std::size_t bitset_size = 64UL)
