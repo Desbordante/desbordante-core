@@ -1,7 +1,9 @@
 #include "python_bindings/pac/bind_pac.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
@@ -13,11 +15,15 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/pac/domain_pac.h"
+#include "core/algorithms/pac/fd_pac.h"
 #include "core/algorithms/pac/model/default_domains/ball.h"
 #include "core/algorithms/pac/model/default_domains/parallelepiped.h"
 #include "core/algorithms/pac/model/default_domains/untyped_domain.h"
 #include "core/algorithms/pac/model/idomain.h"
 #include "core/algorithms/pac/pac.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
+#include "python_bindings/py_util/table_serialization.h"
 
 namespace py = pybind11;
 
@@ -37,6 +43,30 @@ py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
     }
     return result;
 }
+
+/// @brief Convert FD PAC to a Python tuple, which elements are (concatenated):
+///   1. Lhs column indices
+///	  2. Rhs column indices
+/// Lhs deltas, epsilons and delta are not included in tuple, because there's no proper way to hash
+/// doubles
+py::tuple FDPAcToTuple(model::FDPAC const& fd_pac) {
+    auto const lhs_col_indices = fd_pac.GetLhs().GetColumnIndicesAsVector();
+    auto const rhs_col_indices = fd_pac.GetRhs().GetColumnIndicesAsVector();
+
+    auto add_to_tuple = [](py::tuple& tp, auto const& vec, std::size_t& shift) {
+        for (std::size_t i = 0; i < vec.size(); ++i) {
+            tp[shift + i] = vec[i];
+        }
+        shift += vec.size();
+    };
+
+    py::tuple result(lhs_col_indices.size() + rhs_col_indices.size());
+    std::size_t shift = 0;
+    add_to_tuple(result, lhs_col_indices, shift);
+    add_to_tuple(result, rhs_col_indices, shift);
+
+    return result;
+}
 }  // namespace
 
 namespace python_bindings {
@@ -44,8 +74,10 @@ void BindPAC(py::module& main_module) {
     using namespace model;
     using namespace pac::model;
     using namespace pybind11::literals;
+    using namespace table_serialization;
 
     constexpr static double kEpsilon = 1e-12;
+    auto approx_equal = [](double a, double b) { return std::abs(a - b) < kEpsilon; };
 
     auto pac_module = main_module.def_submodule("pac");
 
@@ -67,14 +99,72 @@ void BindPAC(py::module& main_module) {
                                    })
             .def_property_readonly("column_names", &model::DomainPAC::GetColumnNames)
             .def("__eq__",
-                 [](DomainPAC const& a, DomainPAC const& b) {
+                 [approx_equal](DomainPAC const& a, DomainPAC const& b) {
                      return a.GetDomain().ToString() == b.GetDomain().ToString() &&
                             a.GetColumns() == b.GetColumns() &&
-                            std::abs(a.GetEpsilon() - b.GetEpsilon()) < kEpsilon &&
-                            std::abs(a.GetDelta() - b.GetDelta()) < kEpsilon;
+                            approx_equal(a.GetEpsilon(), b.GetEpsilon()) &&
+                            approx_equal(a.GetDelta(), b.GetDelta());
                  })
             .def("__hash__",
                  [](DomainPAC const& d_pac) { return py::hash(DomainPACToTuple(d_pac)); });
+
+    auto get_col_names = [](Vertical const& vert) {
+        std::vector<std::string> col_names;
+        col_names.reserve(vert.GetArity());
+        std::ranges::transform(vert.GetColumns(), std::back_inserter(col_names),
+                               [](Column const* col) { return col->GetName(); });
+        return col_names;
+    };
+    py::class_<FDPAC, PAC>(pac_module, "FDPAC")
+            .def_property_readonly("epsilons", &PAC::GetEpsilons)
+            .def_property_readonly("deltas", &PAC::GetDeltas)
+            .def_property_readonly("lhs_deltas", &FDPAC::GetLhsDeltas)
+            .def_property_readonly(
+                    "lhs_indices",
+                    [](FDPAC const& fd_pac) { return fd_pac.GetLhs().GetColumnIndicesAsVector(); })
+            .def_property_readonly(
+                    "rhs_indices",
+                    [](FDPAC const& fd_pac) { return fd_pac.GetRhs().GetColumnIndicesAsVector(); })
+            .def_property_readonly("lhs_column_names",
+                                   [&get_col_names](FDPAC const& fd_pac) {
+                                       return get_col_names(fd_pac.GetLhs());
+                                   })
+            .def_property_readonly("rhs_column_names",
+                                   [&get_col_names](FDPAC const& fd_pac) {
+                                       return get_col_names(fd_pac.GetRhs());
+                                   })
+            .def("__eq__",
+                 [approx_equal](FDPAC const& a, FDPAC const& b) {
+                     return a.GetLhs() == b.GetLhs() && a.GetRhs() == b.GetRhs() &&
+                            std::ranges::equal(a.GetLhsDeltas(), b.GetLhsDeltas(), approx_equal) &&
+                            std::ranges::equal(a.GetEpsilons(), b.GetEpsilons(), approx_equal) &&
+                            approx_equal(a.GetDelta(), b.GetDelta());
+                 })
+            .def("__hash__", [](FDPAC const& fd_pac) { return py::hash(FDPAcToTuple(fd_pac)); })
+            .def(py::pickle(
+                    // __getstate__
+                    [](FDPAC const& fd_pac) {
+                        auto schema_state = SerializeRelationalSchema(fd_pac.GetRelSchema().get());
+                        auto lhs_state = SerializeVertical(fd_pac.GetLhs());
+                        auto rhs_state = SerializeVertical(fd_pac.GetRhs());
+                        return py::make_tuple(std::move(schema_state), std::move(lhs_state),
+                                              std::move(rhs_state), fd_pac.GetLhsDeltas(),
+                                              fd_pac.GetEpsilons(), fd_pac.GetDelta());
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 6) {
+                            throw std::runtime_error("Invalid state for FD PAC pickle");
+                        }
+                        auto schema = DeserializeRelationalSchema(t[0].cast<py::tuple>());
+                        auto lhs = DeserializeVertical(t[1].cast<py::tuple>(), schema.get());
+                        auto rhs = DeserializeVertical(t[2].cast<py::tuple>(), schema.get());
+                        auto lhs_deltas = t[3].cast<std::vector<double>>();
+                        auto epsilons = t[4].cast<std::vector<double>>();
+                        auto delta = t[5].cast<double>();
+                        return FDPAC(std::move(schema), std::move(lhs), std::move(rhs),
+                                     std::move(lhs_deltas), std::move(epsilons), delta);
+                    }));
 
     // Domains
     auto domains_module = pac_module.def_submodule("domains");

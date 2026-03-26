@@ -3,12 +3,20 @@
 #include <functional>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <typeindex>
 #include <unordered_map>
+#include <vector>
 
 #include <boost/any.hpp>
 #include <boost/core/demangle.hpp>
+#include <pybind11/cast.h>
+#include <pybind11/functional.h>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
+#include <pybind11/typing.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -22,6 +30,7 @@
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/default_domains/domain_type.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/column_metric.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -121,6 +130,26 @@ boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     return parsers;
 }
 
+boost::any FDPACVerifierValueMetricsToAny(std::string_view option_name, py::handle obj) {
+    using namespace algos::pac_verifier;
+
+    auto metric_handles = CastAndReplaceCastError<std::vector<py::object>>(option_name, obj);
+    std::vector<ValueMetric> metrics;
+    metrics.reserve(metric_handles.size());
+    for (auto const& handle : metric_handles) {
+        if (handle.is_none()) {
+            metrics.push_back(nullptr);
+        } else if (py::isinstance<py::typing::Callable<double(std::string, std::string)>>(handle)) {
+            metrics.emplace_back(py::cast<StringDataMetric>(handle));
+        } else {
+            throw config::ConfigurationError(
+                    "FD PAC Verfier's Value metric must be either None or Callable[[str, str], "
+                    "float]");
+        }
+    }
+    return metrics;
+}
+
 std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<double>,
@@ -156,6 +185,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<pac::model::DomainType>,
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        kNormalConvPair<std::vector<double>>,
+        {typeid(std::vector<algos::pac_verifier::ValueMetric>), FDPACVerifierValueMetricsToAny},
 };
 
 }  // namespace
