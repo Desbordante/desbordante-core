@@ -2,7 +2,6 @@
 
 #include <array>
 #include <cstdlib>
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <numeric>

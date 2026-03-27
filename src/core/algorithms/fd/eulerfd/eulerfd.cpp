@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 
+#include "core/util/logger.h"
+
 namespace algos {
 
 EulerFD::EulerFD() : FDAlgorithm(), mlfq_(kQueuesNumber) {
@@ -88,7 +90,7 @@ void EulerFD::ResetStateFd() {
 
 void EulerFD::SaveAnswer() {
     if (attribute_indexes_.empty()) {
-        std::cout << "attribute_indexes_ size is 0\n";
+        LOG_INFO("attribute_indexes_ size is 0");
         return;
     }
 
@@ -391,7 +393,7 @@ unsigned long long EulerFD::ExecuteInternal() {
     BuildPartition();
     if (clusters_.empty()) {
         // In small datasets sometimes after clusters stripping there are no clusters for sampling
-        std::cout << "number of clusters is 0*\n";
+        LOG_INFO("number of clusters is 0*");
         return 0;
     }
 
