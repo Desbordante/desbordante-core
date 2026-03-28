@@ -181,11 +181,11 @@ std::vector<std::pair<double, double>> FDPACVerifier<MetricOpt>::CalculateEmpiri
     //           = delta * |sorted_gamma_| + total_tuples * (delta - 1) / 2
     auto get_num_pairs = [total_tuples, gamma_sz = sorted_gamma_->size()](double delta) -> double {
         double num_pairs = delta * gamma_sz + (delta - 1) * total_tuples / 2;
-		// get_delta(0) > 0 when total_tuples > 0  =>
-		//     exists some minimal delta > 0 such that num_pairs(delta) = 0
-		if (num_pairs < 0) {
-			num_pairs = 0;
-		}
+        // get_delta(0) > 0 when total_tuples > 0  =>
+        //     exists some minimal delta > 0 such that num_pairs(delta) = 0
+        if (num_pairs < 0) {
+            num_pairs = 0;
+        }
         return num_pairs;
     };
     auto get_delta = [total_tuples,
@@ -202,7 +202,7 @@ std::vector<std::pair<double, double>> FDPACVerifier<MetricOpt>::CalculateEmpiri
     std::size_t min_pairs_num = std::ceil(get_num_pairs(MinDelta()));
     LOG_TRACE("Min pairs num: {} = {} * {} + {} * {} / 2", min_pairs_num, MinDelta(),
               sorted_gamma_->size(), MinDelta() - 1, total_tuples);
-	assert(min_pairs_num <= total_pairs);
+    assert(min_pairs_num <= total_pairs);
 
     std::size_t pairs_step;
     if (DeltaSteps() <= 1) {
@@ -366,19 +366,18 @@ FDPACVerifier<MetricOpt>::FDPACVerifier() : PACVerifier() {
     }
 
     // Execute options
-    RegisterOption(
-            Option(&lhs_Deltas_, kLhsDeltas, kDLhsDeltas, std::vector<double>{kDefaultLhsDelta})
-                    .SetValueCheck([this](std::vector<double> const& value) {
-                        if (value.size() > lhs_indices_.size()) {
-                            throw config::ConfigurationError("Too many LHS deltas");
-                        }
-                    })
-                    .SetNormalizeFunc([this](std::vector<double>& value) {
-                        if (value.empty()) {
-                            value.push_back(kDefaultLhsDelta);
-                        }
-                        value.resize(lhs_indices_.size(), value.back());
-                    }));
+    RegisterOption(Option(&lhs_Deltas_, kLhsDeltas, kDLhsDeltas, std::vector<double>{})
+                           .SetValueCheck([this](std::vector<double> const& value) {
+                               if (value.size() > lhs_indices_.size()) {
+                                   throw config::ConfigurationError("Too many LHS deltas");
+                               }
+                           })
+                           .SetNormalizeFunc([this](std::vector<double>& value) {
+                               if (value.empty()) {
+                                   value.push_back(kDefaultLhsDelta);
+                               }
+                               value.resize(lhs_indices_.size(), value.back());
+                           }));
 
     MakeOptionsAvailable({kLhsIndices, kRhsIndices});
     if constexpr (MetricOpt) {

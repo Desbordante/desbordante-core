@@ -9,6 +9,7 @@
 #include "core/config/exceptions.h"
 #include "core/model/types/imetrizable_type.h"
 #include "core/model/types/type.h"
+#include "core/util/export.h"
 
 namespace algos::pac_verifier {
 using RawDataMetric = std::function<double(std::byte const*, std::byte const*, model::Type const*)>;
@@ -20,7 +21,7 @@ namespace detail {
 // pybind11::type::of, which is used by our GetPyType, cannot work with standard types.
 // So we need this wrapper around ValueMetric (which is std::variant).
 // The only place this class is used is `get_opt_type` method of FDPACVerifier<true>.
-class FakeValueMetric {
+class DESBORDANTE_EXPORT FakeValueMetric {
 private:
     ValueMetric value_metric_;
 
