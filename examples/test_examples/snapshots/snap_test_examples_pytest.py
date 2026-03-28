@@ -5056,6 +5056,8 @@ Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
 '''
 
+snapshots['test_example[basic/verifying_pac/util.py-None-util_output] util_output'] = ''
+
 snapshots['test_example[basic/verifying_pac/verifying_domain_pac1.py-None-verifying_domain_pac1_output] verifying_domain_pac1_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (PACs).
 A Domain PAC on column set X and domain D, with given ε and δ means that all attribute values x fall
 within ε of D with at least probability δ:
@@ -5353,6 +5355,121 @@ outliers (see previous examples).
 Now that you have completed all basic examples, you can continue with the advanced example:
 \x1b[36mexamples/advanced/verifying_pac/verifying_domain_pac_custom_domain.py\x1b[0m.
 This example demonstrates how to define and use a Custom domain.
+'''
+
+snapshots['test_example[basic/verifying_pac/verifying_fd_pac.py-None-verifying_fd_pac_output] verifying_fd_pac_output'] = '''This example illustrates the usage of Functional Dependency Probabilistic Approximate Constraints (FD PACs).
+Given columns sets X and Y, and a set of numbers {Δᵢ}, an FD PAC X → Y with parameters {εᵢ}, {δᵢ} means that
+    \x1b[1;37mif, for some tuples t₁, t₂, d(t₁[Aᵢ], t₂[Aᵢ]) < Δᵢ for each Aᵢ ∈ X, then
+    Pr(d(t₁[Bᵢ], t₂[Bᵢ]) ≤ εᵢ) ≥ δᵢ for each Bᵢ ∈ Y\x1b[0m
+For more information consult "Checks and Balances: Monitoring Data Quality Problems in Network
+Traffic Databases" by Flip Korn et al (Proceedings of the 29th VLDB Conference, Berlin, 2003).
+
+\x1b[36mIn this example, we use FD PACs with a single ε, i. e. ε₁ = ε₂ = ... = ε, since the FD PAC Verifier
+supports only this setting.\x1b[0m
+
+Consider a study of a population of marine urchins in a coastal bay.
+For each individual, we measured:
+ - Age (in days)
+ - Size (diameter in millimeters)
+ - Water quality in the habitat, labeled from A (excellent) to D (poor)
+The collected data is shown below:
+\x1b[1;37m  Age (days)    Size (mm)  Water quality
+------------  -----------  ---------------
+          10           30  A
+          12           32  A
+          15           35  A
+          18           37  A
+          20           40  A
+          11           20  D
+          14           22  D
+          17           25  D
+          19           27  D
+          21           30  D
+          30           50  B
+          32           52  B
+          35           55  B
+          38           57  B
+          40           60  B
+          31           45  C
+          34           47  C
+          37           50  C
+          39           52  C
+          41           55  C
+          50           70  A
+          52           72  A
+          55           75  A
+          58           77  A
+          60           80  A
+          51           55  D
+          54           58  D
+          57           60  D
+          59           62  D
+          61           65  D\x1b[0m
+
+We start with a natural hypothesis:
+    \x1b[1;37mThe size of a marine urchin roughly depends on its age\x1b[0m
+In terms of FD PAC, we expect the dependency \x1b[34m{Age} → {Size}\x1b[0m to hold with reasonable parameters.
+
+Let's run FD PAC verifier with the following parameters: lhs_indices=\x1b[34m[0]\x1b[0m, rhs_indices=\x1b[34m[1]\x1b[0m,
+lhs_deltas=\x1b[34m[10]\x1b[0m.
+
+Algorithm result: \x1b[31mFD PAC d([Age (days)]) ≤ 10.000000}) => Pr(d([Size (mm)]) ≤ 22.000000) ≥ 0.993464\x1b[0m.
+
+At first glance, the probability δ is high. However, the required ε = 22.0 is quite large -- it
+covers nearly half of the observed size range.
+This indicates that age alone is not sufficient to explain the variability in size.
+
+A natural explanation is environmental:
+    \x1b[1;37mUrchins living in poorer water conditions tend to be smaller than those in cleaner water.\x1b[0m
+This suggests refining the dependency: \x1b[34m{Age, Water quality} → {Size}\x1b[0m.
+
+To validate this, we include \x1b[34mWater quality\x1b[0m in the left-hand side. Since the column is categorical,
+we define a custom metric:
+    \x1b[36mA ~ 1, B ~ 2, C ~ 3, D ~ 4\x1b[0m
+This way, we respect the ordering of water quality levels instead of relying on the default
+Levenshtein distance.
+
+Algorithm result: \x1b[32mFD PAC d([Age (days) Water quality]) ≤ {10, 1}}) => Pr(d([Size (mm)]) ≤ 13.000000) ≥ 0.980583\x1b[0m.
+
+Now both parameters are meaningful:
+ - ε = 13.0: reasonable size tolerance
+ - δ = 0.981: strong statistical support
+This confirms that the refined hypothesis holds.
+
+To better understand, why the PAC holds (or does not hold), we can examine outliers (also called
+highlights) -- pairs of tuples for which the PAC does not hold for a given ε.
+
+Let's inspect the outliers between ε=\x1b[34m9\x1b[0m and ε=\x1b[34m10\x1b[0m.
+Outliers in (9, 10]:
+\t[50, A] -> 70,  [60, A] -> 80
+\t[31, C] -> 45,  [41, C] -> 55
+\t[11, D] -> 20,  [21, D] -> 30
+\t[35, B] -> 55,  [31, C] -> 45
+\t[30, B] -> 50,  [40, B] -> 60
+\t[40, B] -> 60,  [50, A] -> 70
+\t[38, B] -> 57,  [34, C] -> 47
+\t[51, D] -> 55,  [61, D] -> 65
+\t[10, A] -> 30,  [20, A] -> 40
+\t[20, A] -> 40,  [30, B] -> 50
+\t[40, B] -> 60,  [37, C] -> 50
+\t[60, A] -> 80,  [50, A] -> 70
+\t[41, C] -> 55,  [31, C] -> 45
+\t[21, D] -> 30,  [11, D] -> 20
+\t[31, C] -> 45,  [35, B] -> 55
+\t[40, B] -> 60,  [30, B] -> 50
+\t[50, A] -> 70,  [40, B] -> 60
+\t[34, C] -> 47,  [38, B] -> 57
+\t[61, D] -> 65,  [51, D] -> 55
+\t[20, A] -> 40,  [10, A] -> 30
+\t[30, B] -> 50,  [20, A] -> 40
+\t[37, C] -> 50,  [40, B] -> 60
+
+These pairs have distances in the right-hand side between \x1b[34m9\x1b[0m and \x1b[34m10\x1b[0m, which means that if
+we removed these pairs from the table, the PAC with ε=\x1b[34m9\x1b[0m and the same δ=\x1b[34m0.981\x1b[0m would hold.
+
+You can find more interesting usages of outliers in Domain PAC examples. Note that, unlike
+Domain PAC, FD PAC outliers are not individual tuples, but pairs of tuples. It can be useful to
+cluster them before processing.
 '''
 
 snapshots['test_example[basic/verifying_pfd.py-None-verifying_pfd_output] verifying_pfd_output'] = '''Dataset: examples/datasets/glitchy_sensor_2.csv
