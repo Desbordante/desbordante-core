@@ -87,7 +87,7 @@ protected:
     }
 
 public:
-    PACVerifier() : Algorithm({}) {
+    PACVerifier() : Algorithm() {
         RegisterOptions();
         MakeOptionsAvailable({config::kTableOpt.GetName(), config::names::kDistFromNullIsInfinity});
     }
