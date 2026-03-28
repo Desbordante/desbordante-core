@@ -38,7 +38,7 @@ inline std::shared_ptr<spdlog::logger> GetLogger(std::string const& logger_name 
 }
 
 inline std::shared_ptr<spdlog::logger>& GetCachedLogger() {
-    static thread_local std::shared_ptr<spdlog::logger> s_logger = ::util::logging::GetLogger();
+    static std::shared_ptr<spdlog::logger> s_logger = ::util::logging::GetLogger();
     return s_logger;
 }
 }  // namespace util::logging
