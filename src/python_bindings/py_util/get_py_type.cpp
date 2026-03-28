@@ -1,6 +1,8 @@
 #include "python_bindings/py_util/get_py_type.h"
 
 #include <functional>
+#include <sstream>
+#include <stdexcept>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
@@ -117,7 +119,14 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
     };
-    return type_map.at(type_index)();
+
+    auto const it = type_map.find(type_index);
+    if (it == type_map.end()) {
+        std::ostringstream oss;
+        oss << "Cannot get Python type for " << type_index.name() << " (GetPyType)";
+        throw std::runtime_error(oss.str());
+    }
+    return it->second();
 }
 
 }  // namespace python_bindings

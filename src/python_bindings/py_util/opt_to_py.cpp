@@ -1,6 +1,8 @@
 #include "python_bindings/py_util/opt_to_py.h"
 
 #include <functional>
+#include <sstream>
+#include <stdexcept>
 #include <typeinfo>
 #include <unordered_map>
 
@@ -52,6 +54,12 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
 
 namespace python_bindings {
 py::object OptToPy(std::type_index type, boost::any val) {
-    return kConverters.at(type)(val);
+    auto const it = kConverters.find(type);
+    if (it == kConverters.end()) {
+        std::ostringstream oss;
+        oss << "Unknown option type: " << type.name() << " (OptToPy)";
+        throw std::runtime_error(oss.str());
+    }
+    return it->second(val);
 }
 }  // namespace python_bindings
