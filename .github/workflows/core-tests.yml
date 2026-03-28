@@ -103,4 +103,4 @@ jobs:
             export CTEST_ARGS="-j ${nproc}"
           fi
 
-          ctest --exclude-regex ".*HeavyDatasets.*" $CTEST_ARGS
+          ctest --exclude-regex ".*HeavyDatasets.*" --output-on-failure $CTEST_ARGS
