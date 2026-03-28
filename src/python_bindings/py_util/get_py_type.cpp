@@ -1,11 +1,14 @@
 #include "python_bindings/py_util/get_py_type.h"
 
 #include <functional>
+#include <sstream>
+#include <stdexcept>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
 
 #include <Python.h>
+#include <boost/core/demangle.hpp>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -117,7 +120,15 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
     };
-    return type_map.at(type_index)();
+
+    auto const it = type_map.find(type_index);
+    if (it == type_map.end()) [[unlikely]] {
+        std::ostringstream oss;
+        oss << "Cannot get Python type for " << boost::core::demangle(type_index.name())
+            << " (GetPyType)";
+        throw std::runtime_error(oss.str());
+    }
+    return it->second();
 }
 
 }  // namespace python_bindings
