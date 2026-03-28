@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include <boost/any.hpp>
+#include <boost/core/demangle.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
@@ -165,7 +166,8 @@ boost::any PyToAny(std::string_view option_name, std::type_index index, py::hand
     auto const it = kConverters.find(index);
     if (it == kConverters.end()) {
         std::ostringstream oss;
-        oss << "Cannot get type for option " << option_name << ": " << index.name() << " (PyToAny)";
+        oss << "Cannot get type for option " << option_name << ": "
+            << boost::core::demangle(index.name()) << " (PyToAny)";
         throw std::runtime_error(oss.str());
     }
     return it->second(option_name, obj);

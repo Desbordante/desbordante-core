@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <Python.h>
+#include <boost/core/demangle.hpp>
 #include <pybind11/functional.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
@@ -140,7 +141,8 @@ py::tuple GetPyType(std::type_index type_index) {
     auto const it = type_map.find(type_index);
     if (it == type_map.end()) {
         std::ostringstream oss;
-        oss << "Cannot get Python type for " << type_index.name() << " (GetPyType)";
+        oss << "Cannot get Python type for " << boost::core::demangle(type_index.name())
+            << " (GetPyType)";
         throw std::runtime_error(oss.str());
     }
     return it->second();

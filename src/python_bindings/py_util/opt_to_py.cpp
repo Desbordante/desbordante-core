@@ -6,6 +6,7 @@
 #include <typeinfo>
 #include <unordered_map>
 
+#include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -67,7 +68,7 @@ py::object OptToPy(std::type_index type, boost::any val) {
     auto const it = kConverters.find(type);
     if (it == kConverters.end()) {
         std::ostringstream oss;
-        oss << "Unknown option type: " << type.name() << " (OptToPy)";
+        oss << "Unknown option type: " << boost::core::demangle(type.name()) << " (OptToPy)";
         throw std::runtime_error(oss.str());
     }
     return it->second(val);
