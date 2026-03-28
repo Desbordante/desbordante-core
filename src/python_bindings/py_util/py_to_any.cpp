@@ -154,6 +154,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<pac::model::DomainType>,
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        kNormalConvPair<std::vector<double>>,
 };
 
 }  // namespace

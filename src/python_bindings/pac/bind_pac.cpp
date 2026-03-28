@@ -117,7 +117,7 @@ void BindPAC(py::module& main_module) {
     };
     py::class_<FDPAC, PAC>(pac_module, "FDPAC")
             .def_property_readonly("epsilons", &PAC::GetEpsilons)
-            .def_property_readonly("delta", &PAC::GetDelta)
+            .def_property_readonly("deltas", &PAC::GetDeltas)
             .def_property_readonly("lhs_deltas", &FDPAC::GetLhsDeltas)
             .def_property_readonly(
                     "lhs_indices",

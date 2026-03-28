@@ -96,8 +96,8 @@ void BindDomainPACVerification(py::module_& pac_verification_module, py::module_
             domain_pac_verifier_cli.doc().cast<std::string>();
 }
 
-void BindFDPACVerificaion(py::module_& pac_verification_module, py::module_& algos_module,
-                          py::module_& cli_module) {
+void BindFDPACVerification(py::module_& pac_verification_module, py::module_& algos_module,
+                           py::module_& cli_module) {
     using namespace py::literals;
 
     py::class_<FDPACHighlight>(pac_verification_module, "FDPACHighlight")
