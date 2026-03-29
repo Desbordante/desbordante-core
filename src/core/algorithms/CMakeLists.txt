@@ -14,6 +14,7 @@ set(SUBDIRS
     od/fastod
     od/order
     od/set_based_verifier
+    pac
     statistics
     ucc
 )
@@ -59,6 +60,8 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::nar::des
               ${DESBORDANTE_PREFIX}::od::fast
               ${DESBORDANTE_PREFIX}::od::order
+              ${DESBORDANTE_PREFIX}::pac::verifier::domain_pac_verifier
+              ${DESBORDANTE_PREFIX}::pac::verifier::fd_pac_verifier
               ${DESBORDANTE_PREFIX}::ucc::hy
               ${DESBORDANTE_PREFIX}::ucc::pyro
               ${DESBORDANTE_PREFIX}::ucc::hpivalid

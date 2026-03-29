@@ -1,9 +1,12 @@
 #include "python_bindings/py_util/opt_to_py.h"
 
 #include <functional>
+#include <sstream>
+#include <stdexcept>
 #include <typeinfo>
 #include <unordered_map>
 
+#include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -11,6 +14,9 @@
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/default_domains/domain_type.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac_verifier/fd_pac_verifier/column_metric.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/error/type.h"
@@ -37,21 +43,34 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<long double>,
         normal_conv_pair<unsigned int>,
         normal_conv_pair<bool>,
+        normal_conv_pair<std::string>,
         normal_conv_pair<config::ThreadNumType>,
         normal_conv_pair<config::CustomRandomSeedType>,
         normal_conv_pair<config::MaxLhsType>,
         normal_conv_pair<config::ErrorType>,
         normal_conv_pair<config::IndicesType>,
         normal_conv_pair<model::DDString>,
+        normal_conv_pair<std::vector<std::string>>,
+        normal_conv_pair<std::vector<double>>,
+        normal_conv_pair<std::shared_ptr<pac::model::IDomain>>,
+        normal_conv_pair<std::vector<algos::pac_verifier::ValueMetric>>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
-        enum_conv_pair<algos::od::Ordering>};
+        enum_conv_pair<algos::od::Ordering>,
+        enum_conv_pair<pac::model::DomainType>,
+};
 }  // namespace
 
 namespace python_bindings {
 py::object OptToPy(std::type_index type, boost::any val) {
-    return kConverters.at(type)(val);
+    auto const it = kConverters.find(type);
+    if (it == kConverters.end()) {
+        std::ostringstream oss;
+        oss << "Unknown option type: " << boost::core::demangle(type.name()) << " (OptToPy)";
+        throw std::runtime_error(oss.str());
+    }
+    return it->second(val);
 }
 }  // namespace python_bindings

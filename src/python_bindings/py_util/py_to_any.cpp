@@ -1,7 +1,10 @@
 #include <functional>
+#include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 
 #include <boost/any.hpp>
+#include <boost/core/demangle.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
@@ -16,6 +19,8 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/default_domains/domain_type.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -146,14 +151,26 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<model::DDString>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
-        kNormalConvPair<std::pair<std::string, std::string>>};
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        kEnumConvPair<pac::model::DomainType>,
+        kNormalConvPair<std::vector<std::string>>,
+        kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        kNormalConvPair<std::vector<double>>,
+};
 
 }  // namespace
 
 namespace python_bindings {
 
 boost::any PyToAny(std::string_view option_name, std::type_index index, py::handle obj) {
-    return kConverters.at(index)(option_name, obj);
+    auto const it = kConverters.find(index);
+    if (it == kConverters.end()) {
+        std::ostringstream oss;
+        oss << "Cannot get type for option " << option_name << ": "
+            << boost::core::demangle(index.name()) << " (PyToAny)";
+        throw std::runtime_error(oss.str());
+    }
+    return it->second(option_name, obj);
 }
 
 }  // namespace python_bindings
