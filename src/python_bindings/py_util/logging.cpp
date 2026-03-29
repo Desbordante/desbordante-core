@@ -131,7 +131,7 @@ void SetupLoggingBridge() {
         auto python_sink = GetGlobalPythonSink();
         python_sink->RegisterLogger(std::move(py_logger));
 
-        ::util::logging::EnsureInitialized("desbordante", {std::move(python_sink)});
+        ::util::logging::Initialize({std::move(python_sink)});
     } catch (py::error_already_set const& e) {
         py::print("ERROR: Error during Python logging setup:", e.what(),
                   py::arg("file") = py::module_::import("sys").attr("stderr"));
