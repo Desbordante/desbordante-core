@@ -15,6 +15,7 @@
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -116,6 +117,8 @@ py::tuple GetPyType(std::type_index type_index) {
                  return MakeTypeTuple(kPyList,
                                       py::type::of<algos::md::ColumnSimilarityClassifier>());
              }},
+            {typeid(std::vector<model::Gdd>),
+             []() { return MakeTypeTuple(kPyList, py::type::of<model::Gdd>()); }},
             PyTypePair<std::filesystem::path, kPyStr>,
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,

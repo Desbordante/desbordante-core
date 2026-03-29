@@ -16,10 +16,9 @@
 #include "core/algorithms/gdd/gdd_validator/gdd_validator.h"
 #include "core/algorithms/gdd/gdd_validator/naive_gdd_validator.h"
 #include "core/parser/graph_parser/graph_parser.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace python_bindings {
-
-namespace py = pybind11;
 
 namespace {
 
@@ -104,11 +103,8 @@ std::string Repr(model::gdd::detail::CmpOp op) {
 
 }  // namespace
 
-void BindGdd(py::module_& main_module) {
-    using py::literals::operator""_a;
-
-    auto gdd_module = main_module.def_submodule("gdd");
-
+void BindGdd(pybind11::module_& main_module) {
+    namespace py = pybind11;
     using algos::Algorithm;
     using algos::GddValidator;
     using algos::NaiveGddValidator;
@@ -123,6 +119,9 @@ void BindGdd(py::module_& main_module) {
     using model::gdd::detail::GddToken;
     using model::gdd::detail::RelTag;
     using model::gdd::detail::TokenField;
+    using py::literals::operator""_a;
+
+    auto gdd_module = main_module.def_submodule("gdd");
 
     py::enum_<DistanceMetric>(gdd_module, "DistanceMetric")
             .value("ABS_DIFF", DistanceMetric::kAbsDiff)
@@ -460,31 +459,11 @@ void BindGdd(py::module_& main_module) {
             },
             "pattern_dot_file"_a, "lhs"_a, "rhs"_a);
 
-    py::class_<GddValidator, Algorithm>(gdd_module, "GddValidator")
-            .def("get_result", &GddValidator::GetResult,
-                 py::return_value_policy::reference_internal);
+    auto const gdd_algos_module = BindPrimitive<NaiveGddValidator>(
+            gdd_module, &GddValidator::GetResult, "GddValidator", "get_result",
+            {"NaiveGddValidator"}, py::return_value_policy::copy);
 
-    py::class_<NaiveGddValidator, GddValidator>(gdd_module, "NaiveGddValidator",
-                                                py::multiple_inheritance())
-            .def(py::init<>())
-            .def(py::init([](std::string const& graph_dot, std::vector<Gdd> gdds) {
-                     std::istringstream is(graph_dot);
-                     auto validator = std::make_unique<NaiveGddValidator>(
-                             parser::graph_parser::gdd::ReadGraph(is), std::move(gdds));
-                     validator->LoadData();
-                     return validator;
-                 }),
-                 "graph_dot"_a, "gdds"_a)
-            .def(py::init([](std::filesystem::path const& graph_dot_file, std::vector<Gdd> gdds) {
-                     auto validator = std::make_unique<NaiveGddValidator>(
-                             parser::graph_parser::gdd::ReadGraph(graph_dot_file), std::move(gdds));
-                     validator->LoadData();
-                     return validator;
-                 }),
-                 "graph_dot_file"_a, "gdds"_a)
-            .def("__repr__", [](NaiveGddValidator const&) { return "NaiveGddValidator()"; });
-
-    gdd_module.attr("Default") = gdd_module.attr("NaiveGddValidator");
+    gdd_module.attr("Default") = gdd_algos_module.attr("Default");
 }
 
 }  // namespace python_bindings
