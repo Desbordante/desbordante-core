@@ -15,21 +15,19 @@ unsigned long long GddValidator::ExecuteInternal() {
 }
 
 void GddValidator::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(config::Option{&graph_path_, kGraphData, kDGraphData});
-    RegisterOption(config::Option{&gdds_, kGddData, kDGddData});
+    RegisterOption(Option{&graph_path_, kGraphData, kDGraphData});
+    RegisterOption(Option{&gdds_, kGddData, kDGddData});
 }
 
-GddValidator::GddValidator() : Algorithm({}) {
+GddValidator::GddValidator() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::names::kGraphData, config::names::kGddData});
 }
 
 GddValidator::GddValidator(model::gdd::graph_t const& graph, std::vector<model::Gdd> gdds)
-    : Algorithm({}), graph_(graph), gdds_(std::move(gdds)) {}
+    : Algorithm(), graph_(graph), gdds_(std::move(gdds)) {}
 
 void GddValidator::LoadDataInternal() {
     graph_ = parser::graph_parser::gdd::ReadGraph(graph_path_);

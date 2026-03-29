@@ -18,6 +18,11 @@ private:
     void FilterValidGdds();
     void RegisterOptions();
 
+    virtual unsigned long long ExecuteInternal() final;
+
+    virtual void ResetState() final {}
+    virtual void LoadDataInternal() final;
+
 protected:
     model::gdd::graph_t const& GetGraph() const noexcept {
         return graph_;
@@ -26,11 +31,6 @@ protected:
     std::vector<model::Gdd> const& GetGdds() const noexcept {
         return gdds_;
     }
-
-    virtual unsigned long long ExecuteInternal() final;
-
-    virtual void ResetState() final {}
-    virtual void LoadDataInternal() final;
 
     virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) = 0;
 
@@ -47,7 +47,7 @@ public:
     GddValidator(GddValidator&&) = delete;
     GddValidator& operator=(GddValidator const&) = delete;
     GddValidator& operator=(GddValidator&&) = delete;
-    virtual ~GddValidator() = default;
+    virtual ~GddValidator() override = default;
 };
 
 }  // namespace algos

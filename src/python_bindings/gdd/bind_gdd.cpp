@@ -41,11 +41,11 @@ std::string Repr(model::gdd::detail::GddToken const& token) {
     using model::gdd::detail::AttrTag;
     using model::gdd::detail::RelTag;
 
-    std::string field_repr = std::visit(Overloaded{
-                                                [](AttrTag const& tag) { return Repr(tag); },
-                                                [](RelTag const& tag) { return Repr(tag); },
-                                        },
-                                        token.field);
+    std::string const field_repr = std::visit(Overloaded{
+                                                      [](AttrTag const& tag) { return Repr(tag); },
+                                                      [](RelTag const& tag) { return Repr(tag); },
+                                              },
+                                              token.field);
 
     return "GddToken(pattern_vertex_id=" + std::to_string(token.pattern_vertex_id) +
            ", field=" + field_repr + ")";
@@ -428,6 +428,9 @@ void BindGdd(pybind11::module_& main_module) {
             .def("__repr__", [](Gdd const& gdd) {
                 return "Gdd(lhs_size=" + std::to_string(gdd.GetLhs().size()) +
                        ", rhs_size=" + std::to_string(gdd.GetRhs().size()) + ")";
+            })
+            .def("__eq__", [](Gdd const& lhs, Gdd const& rhs) {
+                return lhs == rhs;
             });
 
     gdd_module.def(
@@ -459,9 +462,9 @@ void BindGdd(pybind11::module_& main_module) {
             },
             "pattern_dot_file"_a, "lhs"_a, "rhs"_a);
 
-    auto const gdd_algos_module = BindPrimitive<NaiveGddValidator>(
-            gdd_module, &GddValidator::GetResult, "GddValidator", "get_result",
-            {"NaiveGddValidator"}, py::return_value_policy::copy);
+    auto const gdd_algos_module =
+            BindPrimitive<NaiveGddValidator>(gdd_module, &GddValidator::GetResult, "GddValidator",
+                                             "get_result", {"NaiveGddValidator"});
 
     gdd_module.attr("Default") = gdd_algos_module.attr("Default");
 }

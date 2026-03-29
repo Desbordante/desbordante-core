@@ -24,11 +24,11 @@ struct RelTag {
     bool operator==(RelTag const&) const = default;
 };
 
-// entity id is currently out of scope
+// entity id from paper is currently out of scope
 using TokenField = std::variant<AttrTag, RelTag>;
 
 struct GddToken {
-    size_t pattern_vertex_id;
+    std::size_t pattern_vertex_id;
     TokenField field;
 
     bool operator==(GddToken const&) const = default;
@@ -37,8 +37,8 @@ struct GddToken {
 using ConstValue = std::variant<int64_t, double, std::string>;
 using DistanceOperand = std::variant<GddToken, ConstValue>;
 
-enum class DistanceMetric : uint8_t { kAbsDiff, kEditDistance };
-enum class CmpOp : uint8_t { kEq, kLe };
+enum class DistanceMetric : std::uint8_t { kAbsDiff, kEditDistance };
+enum class CmpOp : std::uint8_t { kEq, kLe };
 
 struct DistanceConstraint {
     DistanceOperand lhs;
@@ -103,6 +103,7 @@ public:
         return rhs_;
     }
 
+    // Testing purposes only
     bool operator==(Gdd const& other) const {
         return lhs_ == other.lhs_ && rhs_ == other.rhs_ &&
                gdd::detail::IsSubgraph(pattern_, other.pattern_) &&

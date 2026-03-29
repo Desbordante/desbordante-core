@@ -338,6 +338,23 @@ desbordante_add_test(
     Boost::headers
 )
 
+# --- GDD ---
+desbordante_add_test(
+        gdd.validator
+        SRCS
+        test_gdd_validator.cpp
+        test_gdd_constraint_satisfaction.cpp
+        test_gdd_equality.cpp
+        test_gdd_graph_parsing.cpp
+        LIBS
+        ${DESBORDANTE_PREFIX}::gdd
+        ${DESBORDANTE_PREFIX}::gdd::validator
+        spdlog::spdlog_header_only
+        better-enums
+        gmock
+        Boost::headers
+)
+
 # --- GFD ---
 desbordante_add_test(
     gfd.miner
