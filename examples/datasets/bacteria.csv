@@ -1,0 +1,15 @@
+Oxygen_Level,Temperature_C,pH,Nutrient_Level,Growth_Rate,Population_Count
+Low,25,6.5,Low,Slow,15
+Low,25,6.5,Medium,Medium,95
+Low,25,6.5,Medium,Slow,30
+Low,25,7.5,High,Very_Fast,525
+Low,25,7.5,High,Very_Fast,530
+Low,25,6.5,High,Slow,10
+Medium,25,7.0,Medium,Medium,95
+Medium,25,7.0,Medium,Medium,100
+Medium,25,7.5,Medium,Slow,45
+Medium,35,7.0,High,Fast,290
+Medium,40,6.5,Low,Dead,0
+Medium,40,6.5,Low,Dead,0
+High,35,7.5,High,Very_Fast,500
+High,40,7.0,High,Dead,0
