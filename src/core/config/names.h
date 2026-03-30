@@ -95,11 +95,29 @@ constexpr auto kRightTable = "right_table";
 constexpr auto kCsvConfigs = "csv_configs";
 constexpr auto kTables = "tables";
 // Metric verifier
-constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
 constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
+// Metric verifier, PAC
+constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
+// PAC
+constexpr auto kCenter = "center";
+constexpr auto kColumnIndices = "column_indices";
+constexpr auto kDeltaSteps = "delta_steps";
+constexpr auto kDiagonalThreshold = "diagonal_threshold";
+constexpr auto kDomain = "domain";
+constexpr auto kDomainName = "domain_name";
+constexpr auto kDomainType = "domain_type";
+constexpr auto kFirst = "lower_bound";
+constexpr auto kLast = "upper_bound";
+constexpr auto kLevelingCoeffs = "leveling_coefficients";
+constexpr auto kMinDelta = "min_delta";
+constexpr auto kMaxEpsilon = "max_epsilon";
+constexpr auto kMinEpsilon = "min_epsilon";
+constexpr auto kStringDistFromDomain = "dist_from_domain";
+// PAC, Typo miner
+constexpr auto kRadius = "radius";
 // Pyro
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider
@@ -115,7 +133,6 @@ constexpr auto kPfdErrorMeasure = "pfd_error_measure";
 // Typo miner
 constexpr auto kApproximateAlgorithm = "approximate_algorithm";
 constexpr auto kPreciseAlgorithm = "precise_algorithm";
-constexpr auto kRadius = "radius";
 constexpr auto kRatio = "ratio";
 // UCC verifier
 constexpr auto kUCCIndices = "ucc_indices";
