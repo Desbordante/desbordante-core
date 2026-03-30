@@ -16,7 +16,7 @@ private:
     static DomainT BuildDomain(model::gdd::graph_t const& pattern,
                                model::gdd::graph_t const& graph);
     bool ExistsCounterexample(model::Gdd const& gdd, model::gdd::graph_t const& graph,
-                              MappingT& partial_map);
+                              MappingT& partial_map, std::size_t depth = 0);
 
 protected:
     virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) final;

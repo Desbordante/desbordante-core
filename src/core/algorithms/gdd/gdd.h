@@ -105,7 +105,8 @@ public:
 
     // Testing purposes only
     bool operator==(Gdd const& other) const {
-        return lhs_ == other.lhs_ && rhs_ == other.rhs_ &&
+        return std::ranges::is_permutation(lhs_, other.lhs_) &&
+               std::ranges::is_permutation(rhs_, other.rhs_) &&
                gdd::detail::IsSubgraph(pattern_, other.pattern_) &&
                gdd::detail::IsSubgraph(other.pattern_, pattern_);
     }

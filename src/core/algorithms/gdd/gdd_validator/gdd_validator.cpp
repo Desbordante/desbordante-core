@@ -19,11 +19,14 @@ void GddValidator::RegisterOptions() {
 
     RegisterOption(Option{&graph_path_, kGraphData, kDGraphData});
     RegisterOption(Option{&gdds_, kGddData, kDGddData});
+    RegisterOption(Option{&print_reason_, kGddPrintNotHoldsReason, kDGddPrintNotHoldsReason});
+    RegisterOption(Option{&print_reason_, kGddPrintNotHoldsReason, kDGddPrintNotHoldsReason, false});
 }
 
 GddValidator::GddValidator() : Algorithm() {
     RegisterOptions();
-    MakeOptionsAvailable({config::names::kGraphData, config::names::kGddData});
+    MakeOptionsAvailable({config::names::kGraphData, config::names::kGddData,
+                          config::names::kGddPrintNotHoldsReason});
 }
 
 GddValidator::GddValidator(model::gdd::graph_t const& graph, std::vector<model::Gdd> gdds)

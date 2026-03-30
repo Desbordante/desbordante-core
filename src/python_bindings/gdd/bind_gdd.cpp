@@ -126,23 +126,28 @@ void BindGdd(pybind11::module_& main_module) {
     py::enum_<DistanceMetric>(gdd_module, "DistanceMetric")
             .value("ABS_DIFF", DistanceMetric::kAbsDiff)
             .value("EDIT_DISTANCE", DistanceMetric::kEditDistance)
-            .export_values();
+            .export_values()
+            .def("__eq__",
+                 [](DistanceMetric const& lhs, DistanceMetric const& rhs) { return lhs == rhs; });
 
     py::enum_<CmpOp>(gdd_module, "CmpOp")
             .value("EQ", CmpOp::kEq)
             .value("LE", CmpOp::kLe)
-            .export_values();
+            .export_values()
+            .def("__eq__", [](CmpOp const& lhs, CmpOp const& rhs) { return lhs == rhs; });
 
     py::class_<AttrTag>(gdd_module, "AttrTag")
             .def(py::init<>())
             .def(py::init<std::string>(), "name"_a)
             .def_readwrite("name", &AttrTag::name)
+            .def("__eq__", [](AttrTag const& lhs, AttrTag const& rhs) { return lhs == rhs; })
             .def("__repr__", [](AttrTag const& tag) { return Repr(tag); });
 
     py::class_<RelTag>(gdd_module, "RelTag")
             .def(py::init<>())
             .def(py::init<std::string>(), "name"_a)
             .def_readwrite("name", &RelTag::name)
+            .def("__eq__", [](RelTag const& lhs, RelTag const& rhs) { return lhs == rhs; })
             .def("__repr__", [](RelTag const& tag) { return Repr(tag); });
 
     py::class_<GddToken>(gdd_module, "GddToken")
@@ -158,6 +163,7 @@ void BindGdd(pybind11::module_& main_module) {
                  "pattern_vertex_id"_a, "field"_a)
             .def_readwrite("pattern_vertex_id", &GddToken::pattern_vertex_id)
             .def_readwrite("field", &GddToken::field)
+            .def("__eq__", [](GddToken const& lhs, GddToken const& rhs) { return lhs == rhs; })
             .def("__repr__", [](GddToken const& token) { return Repr(token); })
             .def("is_attr_tag",
                  [](GddToken const& token) { return std::holds_alternative<AttrTag>(token.field); })
@@ -299,6 +305,8 @@ void BindGdd(pybind11::module_& main_module) {
             .def_readwrite("metric", &DistanceConstraint::metric)
             .def_readwrite("op", &DistanceConstraint::op)
 
+            .def("__eq__", [](DistanceConstraint const& lhs,
+                              DistanceConstraint const& rhs) { return lhs == rhs; })
             .def("__repr__", [](DistanceConstraint const& c) {
                 return "DistanceConstraint(lhs=" + Repr(c.lhs) + ", rhs=" + Repr(c.rhs) +
                        ", threshold=" + std::to_string(c.threshold) + ", metric=" + Repr(c.metric) +
@@ -425,13 +433,12 @@ void BindGdd(pybind11::module_& main_module) {
             .def_property_readonly("lhs", [](Gdd const& gdd) { return gdd.GetLhs(); })
             .def_property_readonly("rhs", [](Gdd const& gdd) { return gdd.GetRhs(); })
 
-            .def("__repr__", [](Gdd const& gdd) {
-                return "Gdd(lhs_size=" + std::to_string(gdd.GetLhs().size()) +
-                       ", rhs_size=" + std::to_string(gdd.GetRhs().size()) + ")";
-            })
-            .def("__eq__", [](Gdd const& lhs, Gdd const& rhs) {
-                return lhs == rhs;
-            });
+            .def("__repr__",
+                 [](Gdd const& gdd) {
+                     return "Gdd(lhs_size=" + std::to_string(gdd.GetLhs().size()) +
+                            ", rhs_size=" + std::to_string(gdd.GetRhs().size()) + ")";
+                 })
+            .def("__eq__", [](Gdd const& lhs, Gdd const& rhs) { return lhs == rhs; });
 
     gdd_module.def(
             "GddFromDot",

@@ -50,6 +50,18 @@ DistanceConstraint EqStrAttrToConst(std::size_t pattern_vid, std::string attr_na
     };
 }
 
+DistanceConstraint EditLeAttrToAttr(std::size_t lhs_pattern_vid, std::string lhs_attr_name,
+                                    std::size_t rhs_pattern_vid, std::string rhs_attr_name,
+                                    double threshold) {
+    return DistanceConstraint{
+            .lhs = GddToken{lhs_pattern_vid, AttrTag{std::move(lhs_attr_name)}},
+            .rhs = GddToken{rhs_pattern_vid, AttrTag{std::move(rhs_attr_name)}},
+            .threshold = threshold,
+            .metric = DistanceMetric::kEditDistance,
+            .op = CmpOp::kLe,
+    };
+}
+
 DistanceConstraint EditLeStrAttrToConst(std::size_t pattern_vid, std::string attr_name,
                                         std::string value, double t) {
     return DistanceConstraint{
@@ -221,6 +233,97 @@ std::string Graph_NoMatchesForCompanyCity_Dot() {
     })";
 }
 
+std::string DblpLikeGraph_Dot() {
+    return R"(digraph G {
+        1 [label="Author", name="Jiawei Han", canonical_author_id="author:han_jiawei"];
+        2 [label="Author", name="J. Han",     canonical_author_id="author:han_jiawei"];
+
+        3 [label="Author", name="Philip S. Yu", canonical_author_id="author:yu_philip"];
+
+        4 [label="Author", name="Yi Zhang", canonical_author_id="author:zhang_yi"];
+        5 [label="Author", name="Yu Zhang", canonical_author_id="author:zhang_yu"];
+
+        101 [label="Paper", title="Mining Frequent Patterns",     year="2000"];
+        102 [label="Paper", title="Mining Frequent Pattern Sets", year="2000"];
+        103 [label="Paper", title="Scalable Pattern Search",      year="2023"];
+        104 [label="Paper", title="Efficient Pattern Search",     year="2023"];
+
+        201 [label="Venue", name="SIGMOD"];
+        202 [label="Venue", name="KDD"];
+
+        1 -> 101 [label="authored"];
+        3 -> 101 [label="authored"];
+
+        2 -> 102 [label="authored"];
+        3 -> 102 [label="authored"];
+
+        4 -> 103 [label="authored"];
+        5 -> 104 [label="authored"];
+
+        101 -> 201 [label="published_in"];
+        102 -> 201 [label="published_in"];
+        103 -> 202 [label="published_in"];
+        104 -> 202 [label="published_in"];
+    })";
+}
+
+graph_t PatternDblpStrong() {
+    return ReadGraphFromDot(R"(digraph P {
+        0 [label="Author"];
+        1 [label="Author"];
+        2 [label="Paper"];
+        3 [label="Paper"];
+        4 [label="Author"];
+        5 [label="Venue"];
+
+        0 -> 2 [label="authored"];
+        1 -> 3 [label="authored"];
+        4 -> 2 [label="authored"];
+        4 -> 3 [label="authored"];
+        2 -> 5 [label="published_in"];
+        3 -> 5 [label="published_in"];
+    })");
+}
+
+graph_t PatternDblpWeak() {
+    return ReadGraphFromDot(R"(digraph P {
+        0 [label="Author"];
+        1 [label="Author"];
+        2 [label="Paper"];
+        3 [label="Paper"];
+        4 [label="Venue"];
+
+        0 -> 2 [label="authored"];
+        1 -> 3 [label="authored"];
+        2 -> 4 [label="published_in"];
+        3 -> 4 [label="published_in"];
+    })");
+}
+
+Gdd MakeGdd_DblpStrongAuthorResolution() {
+    auto pattern = PatternDblpStrong();
+    Gdd::Phi lhs{
+            EditLeAttrToAttr(0, "name", 1, "name", 8.0),
+            EditLeAttrToAttr(2, "year", 3, "year", 0.0),
+    };
+    Gdd::Phi rhs{
+            EditLeAttrToAttr(0, "canonical_author_id", 1, "canonical_author_id", 0.0),
+    };
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+Gdd MakeGdd_DblpWeakAuthorResolution() {
+    auto pattern = PatternDblpWeak();
+    Gdd::Phi lhs{
+            EditLeAttrToAttr(0, "name", 1, "name", 2.0),
+            EditLeAttrToAttr(2, "year", 3, "year", 0.0),
+    };
+    Gdd::Phi rhs{
+            EditLeAttrToAttr(0, "canonical_author_id", 1, "canonical_author_id", 0.0),
+    };
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
 }  // namespace
 
 class GddValidatorTest : public ::testing::Test {
@@ -309,6 +412,23 @@ TEST_F(GddValidatorTest, GenerateSatisfied_EmptyMatchSet_ShouldBeSatisfied) {
     auto const out = validator->GetResult();
 
     EXPECT_EQ(out, std::vector{gdd});
+}
+
+TEST_F(GddValidatorTest, GenerateSatisfied_DblpLikeAuthorResolution_StrongHoldsWeakFails) {
+    auto const graph_path = WriteTempDotFile(DblpLikeGraph_Dot(), "gdd_dblp_like_graph.dot");
+
+    auto const weak_gdd = MakeGdd_DblpWeakAuthorResolution();
+    auto const strong_gdd = MakeGdd_DblpStrongAuthorResolution();
+
+    std::vector const gdds{weak_gdd, strong_gdd};
+
+    auto const validator = CreateGddValidatorInstance(graph_path, gdds);
+    validator->Execute();
+    auto const out = validator->GetResult();
+
+    EXPECT_EQ(out.size(), 1);
+    EXPECT_TRUE(std::ranges::find(out, strong_gdd) != out.end());
+    EXPECT_TRUE(std::ranges::find(out, weak_gdd) == out.end());
 }
 
 }  // namespace tests

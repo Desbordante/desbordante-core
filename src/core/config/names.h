@@ -92,6 +92,7 @@ constexpr auto kGfdK = "gfd_k";
 constexpr auto kGfdSigma = "gfd_sigma";
 // GDD
 constexpr auto kGddData = "gdd";
+constexpr auto kGddPrintNotHoldsReason = "print_reason";
 // HyMD
 constexpr auto kColumnMatches = "column_matches";
 constexpr auto kLeftTable = "left_table";

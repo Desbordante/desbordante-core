@@ -15,6 +15,8 @@ private:
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
 
+    bool print_reason_ = false;
+
     void FilterValidGdds();
     void RegisterOptions();
 
@@ -24,6 +26,10 @@ private:
     virtual void LoadDataInternal() final;
 
 protected:
+    bool GetPrintReasonFlag() const noexcept {
+        return print_reason_;
+    }
+
     model::gdd::graph_t const& GetGraph() const noexcept {
         return graph_;
     }
