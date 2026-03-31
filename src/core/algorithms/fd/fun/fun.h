@@ -72,7 +72,7 @@ public:
     bool Contains(Vertical const& that) const;
 };
 
-class FUN : public PliBasedFDAlgorithm {
+class FUN : public LegacyPliBasedFDAlgorithm {
     // Entities from the algorithm itself
 private:
     Vertical r_;

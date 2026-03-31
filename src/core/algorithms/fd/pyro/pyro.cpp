@@ -16,7 +16,7 @@ namespace algos {
 
 std::mutex search_spaces_mutex;
 
-Pyro::Pyro() : PliBasedFDAlgorithm() {
+Pyro::Pyro() : LegacyPliBasedFDAlgorithm() {
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
@@ -121,7 +121,7 @@ unsigned long long Pyro::ExecuteInternal() {
     LOG_INFO("Total ascension time: {} ms", total_ascension);
     LOG_INFO("Total trickle time: {} ms", total_trickle);
     LOG_INFO("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
-    LOG_INFO("HASH: {}", PliBasedFDAlgorithm::Fletcher16());
+    LOG_INFO("HASH: {}", LegacyPliBasedFDAlgorithm::Fletcher16());
     return elapsed_milliseconds.count();
 }
 

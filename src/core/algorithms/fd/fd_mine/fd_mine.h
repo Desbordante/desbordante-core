@@ -13,7 +13,7 @@
 
 namespace algos {
 
-class FdMine : public PliBasedFDAlgorithm {
+class FdMine : public LegacyPliBasedFDAlgorithm {
 private:
     RelationalSchema const* schema_;
 
