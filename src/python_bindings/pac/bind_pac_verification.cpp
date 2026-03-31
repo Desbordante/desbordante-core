@@ -109,8 +109,7 @@ void BindFDPACVerification(py::module_& pac_verification_module, py::module_& al
 
     py::class_<algos::pac_verifier::detail::FakeValueMetric>(pac_verification_module, "ValueMetric")
             .doc() =
-            "A wrapper around [None | Callable], where Callable has signature (str, str) -> "
-            "float.\n"
+            "A wrapper around [None | Callable[[str, str], float]].\n"
             "Most probably, you won't need to use this class directly.";
 
     auto fd_pac_verifier =
