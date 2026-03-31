@@ -12,7 +12,7 @@
 
 namespace algos {
 
-DFD::DFD() : PliBasedFDAlgorithm() {
+DFD::DFD() : LegacyPliBasedFDAlgorithm() {
     RegisterOptions();
 }
 
@@ -79,7 +79,7 @@ unsigned long long DFD::ExecuteInternal() {
     long long apriori_millis = elapsed_milliseconds.count();
 
     LOG_INFO("> FD COUNT: {}", fd_collection_.Size());
-    LOG_INFO("> HASH: {}", PliBasedFDAlgorithm::Fletcher16());
+    LOG_INFO("> HASH: {}", LegacyPliBasedFDAlgorithm::Fletcher16());
 
     return apriori_millis;
 }

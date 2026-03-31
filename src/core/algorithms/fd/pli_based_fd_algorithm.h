@@ -9,7 +9,7 @@
 
 namespace algos {
 
-class PliBasedFDAlgorithm : public FDAlgorithm {
+class LegacyPliBasedFDAlgorithm : public FDAlgorithm {
     config::InputTable input_table_;
 
     void RegisterOptions();
@@ -26,7 +26,7 @@ protected:
     }
 
 public:
-    PliBasedFDAlgorithm();
+    LegacyPliBasedFDAlgorithm();
 };
 
 }  // namespace algos
