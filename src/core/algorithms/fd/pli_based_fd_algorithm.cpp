@@ -5,16 +5,16 @@
 
 namespace algos {
 
-PliBasedFDAlgorithm::PliBasedFDAlgorithm() : FDAlgorithm() {
+LegacyPliBasedFDAlgorithm::LegacyPliBasedFDAlgorithm() : FDAlgorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
-void PliBasedFDAlgorithm::RegisterOptions() {
+void LegacyPliBasedFDAlgorithm::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
 }
 
-void PliBasedFDAlgorithm::LoadDataInternal() {
+void LegacyPliBasedFDAlgorithm::LoadDataInternal() {
     relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
 
     if (relation_->GetColumnData().empty()) {
