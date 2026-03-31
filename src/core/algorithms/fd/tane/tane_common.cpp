@@ -18,7 +18,7 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon() : PliBasedFDAlgorithm() {
+TaneCommon::TaneCommon() : LegacyPliBasedFDAlgorithm() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 

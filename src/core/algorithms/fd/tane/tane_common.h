@@ -9,7 +9,7 @@
 
 namespace algos::tane {
 
-class TaneCommon : public PliBasedFDAlgorithm {
+class TaneCommon : public LegacyPliBasedFDAlgorithm {
 protected:
     config::ErrorType max_fd_error_;
     config::ErrorType max_ucc_error_;

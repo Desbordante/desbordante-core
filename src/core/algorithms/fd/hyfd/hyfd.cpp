@@ -19,7 +19,7 @@
 
 namespace algos::hyfd {
 
-HyFD::HyFD() : PliBasedFDAlgorithm() {
+HyFD::HyFD() : LegacyPliBasedFDAlgorithm() {
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 

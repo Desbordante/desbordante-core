@@ -12,7 +12,7 @@
 
 namespace algos {
 
-DFD::DFD() : PliBasedFDAlgorithm() {
+DFD::DFD() : LegacyPliBasedFDAlgorithm() {
     RegisterOptions();
 }
 
@@ -73,7 +73,7 @@ void DFD::ExecuteInternal() {
     search_space_pool.join();
 
     LOG_INFO("> FD COUNT: {}", fd_collection_.Size());
-    LOG_INFO("> HASH: {}", PliBasedFDAlgorithm::Fletcher16());
+    LOG_INFO("> HASH: {}", LegacyPliBasedFDAlgorithm::Fletcher16());
 }
 
 }  // namespace algos

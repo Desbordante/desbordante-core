@@ -13,7 +13,7 @@
 
 namespace algos {
 
-Pyro::Pyro() : PliBasedFDAlgorithm() {
+Pyro::Pyro() : LegacyPliBasedFDAlgorithm() {
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
@@ -101,7 +101,7 @@ void Pyro::ExecuteInternal() {
     }
 
     LOG_INFO("Error calculation count: {}", total_error_calc_count);
-    LOG_INFO("HASH: {}", PliBasedFDAlgorithm::Fletcher16());
+    LOG_INFO("HASH: {}", LegacyPliBasedFDAlgorithm::Fletcher16());
 }
 
 }  // namespace algos

@@ -36,7 +36,7 @@ namespace algos::hyfd {
  * '16). Association for Computing Machinery, New York, NY, USA, 821–833.
  * https://doi.org/10.1145/2882903.2915203
  */
-class HyFD : public PliBasedFDAlgorithm {
+class HyFD : public LegacyPliBasedFDAlgorithm {
 private:
     void ResetStateFd() final {}
 
