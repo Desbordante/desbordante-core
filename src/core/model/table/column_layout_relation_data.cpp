@@ -4,16 +4,18 @@
 //
 #include "core/model/table/column_layout_relation_data.h"
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <utility>
 
 #include "core/util/logger.h"
+#include "core/model/index.h"
 
 std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
-    int num_columns = schema_->GetNumColumns();
+    std::size_t num_columns = column_data_.size();
     std::vector<int> tuple = std::vector<int>(num_columns);
-    for (int column_index = 0; column_index < num_columns; column_index++) {
+    for (model::Index column_index = 0; column_index < num_columns; column_index++) {
         tuple[column_index] = column_data_[column_index].GetProbingTableValue(tuple_index);
     }
     return tuple;
