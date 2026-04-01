@@ -22,7 +22,6 @@ private:
     AFDMetric metric_ = AFDMetric::_values()[0];
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
-    config::EqNullsType is_null_equal_null_;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
 

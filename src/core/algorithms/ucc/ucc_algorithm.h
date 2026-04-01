@@ -29,7 +29,6 @@ protected:
 
     // Collection of all mined UCCs. Every UCC mining algorithm must register found uccs here.
     util::PrimitiveCollection<model::UCC> ucc_collection_;
-    config::EqNullsType is_null_equal_null_{};
 
 public:
     UCCAlgorithm();

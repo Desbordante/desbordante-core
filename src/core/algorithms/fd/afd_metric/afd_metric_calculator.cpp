@@ -18,7 +18,7 @@ using Cluster = model::PositionListIndex::Cluster;
 
 AFDMetricCalculator::AFDMetricCalculator() : Algorithm() {
     RegisterOptions();
-    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
 void AFDMetricCalculator::RegisterOptions() {
@@ -27,7 +27,6 @@ void AFDMetricCalculator::RegisterOptions() {
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
     RegisterOption(Option{&metric_, kMetric, kDAFDMetric});
