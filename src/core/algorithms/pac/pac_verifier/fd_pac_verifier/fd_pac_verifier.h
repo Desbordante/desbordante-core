@@ -153,12 +153,6 @@ void FDPACVerifier<MetricOpt>::PreparePairs() {
         }
     }
     std::ranges::sort(*sorted_gamma_, {}, [](TuplePair const& p) { return p.rhs_dist; });
-
-    LOG_TRACE("Sorted gamma:");
-    for ([[maybe_unused]] TuplePair const& pair : *sorted_gamma_) {
-        LOG_TRACE("\tFirst: {}, second: {}, rhs_dist: {}", pair.first_idx, pair.second_idx,
-                  pair.rhs_dist);
-    }
 }
 
 template <bool MetricOpt>
