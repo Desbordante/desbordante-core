@@ -20,7 +20,6 @@ private:
 
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
-    config::EqNullsType is_null_equal_null_;
     config::PfdErrorMeasureType error_measure_ = +PfdErrorMeasure::per_tuple;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;

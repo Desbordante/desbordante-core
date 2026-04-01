@@ -7,14 +7,14 @@ import desbordante as desb
 OptionContainer = namedtuple("OptionContainer", ['path', 'load_options', 'execute_options'])
 FailureCaseContainer = namedtuple("FailureCaseContainer", ['path', 'options'])
 
-ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER = OptionContainer(
-    "WDC_satellites.csv", {"is_null_equal_null": False}, {}
+TABLE_ONLY_CONTAINER = OptionContainer(
+    "WDC_satellites.csv", {}, {}
 )
 
 
 def get_common_option_container(execute_options):
     return OptionContainer(
-        "WDC_satellites.csv", {"is_null_equal_null": False}, execute_options
+        "WDC_satellites.csv", {}, execute_options
     )
 
 
@@ -30,11 +30,11 @@ def check_metric_verifier_failure(dataset, options) -> bool:
 
 
 ALGO_CORRECT_OPTIONS_INFO = [
-    (desb.fd.algorithms.Depminer, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.fd.algorithms.FUN, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.fd.algorithms.FdMine, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.fd.algorithms.HyFD, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.fd.algorithms.EulerFD, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
+    (desb.fd.algorithms.Depminer, [TABLE_ONLY_CONTAINER]),
+    (desb.fd.algorithms.FUN, [TABLE_ONLY_CONTAINER]),
+    (desb.fd.algorithms.FdMine, [TABLE_ONLY_CONTAINER]),
+    (desb.fd.algorithms.HyFD, [TABLE_ONLY_CONTAINER]),
+    (desb.fd.algorithms.EulerFD, [TABLE_ONLY_CONTAINER]),
     (desb.afd.algorithms.Pyro, [
         get_common_option_container(
             {"seed": 1, "max_lhs": 12, "threads": 5, "error": 0.015}
