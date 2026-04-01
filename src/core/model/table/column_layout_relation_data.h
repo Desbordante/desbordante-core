@@ -16,8 +16,6 @@
 
 class ColumnLayoutRelationData final : public RelationData {
 public:
-    static constexpr int kNullValueId = -1;
-
     using RelationData::AbstractRelationData;
 
     [[nodiscard]] size_t GetNumRows() const final {
@@ -35,6 +33,5 @@ public:
     [[nodiscard]] std::shared_ptr<model::PLIWS const> CalculatePLIWS(
             std::vector<unsigned int> const& indices) const;
 
-    static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(model::IDatasetStream& data_stream,
-                                                                bool is_null_eq_null);
+    static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(model::IDatasetStream& data_stream);
 };
