@@ -37,6 +37,7 @@ extern CSVConfig const kIris;
 extern CSVConfig const kLegacyPayors;
 extern CSVConfig const kLetter;
 extern CSVConfig const kLineItem;
+extern CSVConfig const kMarineUrchins;
 extern CSVConfig const kMetricAddresses;
 extern CSVConfig const kMetricCoords;
 extern CSVConfig const kMetricMovies;

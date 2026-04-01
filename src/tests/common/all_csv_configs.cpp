@@ -47,6 +47,7 @@ CSVConfig const kIris = CreateCsvConfig("iris.csv", ',', false);
 CSVConfig const kLegacyPayors = CreateCsvConfig("LegacyPayors.csv", '|', true);
 CSVConfig const kLetter = CreateCsvConfig("letter.csv", ',', false);
 CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
+CSVConfig const kMarineUrchins = CreateCsvConfig("pac_data/marine_urchins.csv", ',', true);
 CSVConfig const kMetricAddresses = CreateCsvConfig("MetricAddresses.csv", ';', true);
 CSVConfig const kMetricCoords = CreateCsvConfig("MetricCoords.csv", ';', true);
 CSVConfig const kMetricMovies = CreateCsvConfig("MetricMovies.csv", ',', true);

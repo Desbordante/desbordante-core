@@ -87,7 +87,17 @@ INSTANTIATE_TEST_SUITE_P(
                 // Single cluster on the left-hand side ("anti-UCC PAC")
                 FDPACVerifyingParams(kMetricCoords, {2}, {3}, 120.093, 0.787, {20}, 0.7),
                 // Check that min_pairs = 0 does not spoil the result
-                FDPACVerifyingParams(kMetricCoords, {2}, {3}, 120.093, 0.787, {20}, 0)));
+                FDPACVerifyingParams(kMetricCoords, {2}, {3}, 120.093, 0.787, {20}, 0),
+                // Different combinations of custom and default metrics
+                //   a. Explicitly say that we want to use default metrics
+                FDPACVerifyingParams(kMarineUrchins, {0}, {1}, 22, 0.993, {10}, 0.7, -1, -1, 400,
+                                     false, {nullptr}, {nullptr}),
+                //   b. [default] -> [custom]
+                FDPACVerifyingParams(kMarineUrchins, {0}, {2}, 1, 0.673, {10}, 0.6, -1, -1, 0,
+                                     false, {}, {kAlphabetMetric}),
+                //   b. [default, custom] -> [default]
+                FDPACVerifyingParams(kMarineUrchins, {0, 2}, {1}, 10, 0.961, {10, 1}, 0.7, -1, -1,
+                                     350, false, {nullptr, kAlphabetMetric}, {})));
 
 INSTANTIATE_TEST_SUITE_P(
         FDPACVerifierHeavyDatasets, TestFDPACVerifier,
