@@ -17,7 +17,6 @@ class UCCVerifier : public Algorithm {
 private:
     /* input options */
     config::IndicesType column_indices_;
-    config::EqNullsType is_null_equal_null_{};
 
     config::InputTable input_table_;
     std::shared_ptr<ColumnLayoutRelationData> relation_;

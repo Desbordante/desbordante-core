@@ -7,12 +7,11 @@ namespace algos {
 
 PliBasedFDAlgorithm::PliBasedFDAlgorithm() : FDAlgorithm() {
     RegisterOptions();
-    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
 void PliBasedFDAlgorithm::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
 }
 
 void PliBasedFDAlgorithm::LoadDataInternal() {
