@@ -12,7 +12,7 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
     std::vector<std::vector<std::string>> columns(num_columns);
     std::vector<std::string> row;
 
-    /* Parsing is very similar to ColumnLayoutRelationData::CreateFrom().
+    /* Parsing is very similar to LegacyColumnLayoutRelationData::CreateFrom().
      * Maybe we need column-based parsing in addition to row-based in CSVParser
      * (now IDatasetStream) */
     while (data_stream.HasNextRow()) {

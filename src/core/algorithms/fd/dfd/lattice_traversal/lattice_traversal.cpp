@@ -5,7 +5,7 @@
 #include "core/model/table/position_list_index.h"
 
 LatticeTraversal::LatticeTraversal(Column const* const rhs,
-                                   ColumnLayoutRelationData const* const relation,
+                                   LegacyColumnLayoutRelationData const* const relation,
                                    std::vector<Vertical> const& unique_verticals,
                                    PartitionStorage* const partition_storage)
     : rhs_(rhs),

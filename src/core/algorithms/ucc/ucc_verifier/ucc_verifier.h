@@ -19,7 +19,7 @@ private:
     config::IndicesType column_indices_;
 
     config::InputTable input_table_;
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     std::unique_ptr<UCCStatsCalculator> stats_calculator_;
     /* results of work */
     size_t num_rows_violating_ucc_ = 0;

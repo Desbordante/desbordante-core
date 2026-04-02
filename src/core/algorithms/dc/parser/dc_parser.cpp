@@ -15,7 +15,7 @@ namespace mo = model;
 
 namespace algos::dc {
 
-DCParser::DCParser(std::string dc_string, ColumnLayoutRelationData const* relation,
+DCParser::DCParser(std::string dc_string, LegacyColumnLayoutRelationData const* relation,
                    std::vector<model::TypedColumnData> const& data)
     : relation_(relation),
       data_(data),

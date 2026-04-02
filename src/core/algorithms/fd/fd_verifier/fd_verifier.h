@@ -25,7 +25,7 @@ private:
     config::EqNullsType is_null_equal_null_;
 
     model::TableHeader table_header_;
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::unique_ptr<StatsCalculator> stats_calculator_;
 

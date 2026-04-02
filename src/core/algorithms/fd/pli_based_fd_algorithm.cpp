@@ -15,7 +15,7 @@ void LegacyPliBasedFDAlgorithm::RegisterOptions() {
 }
 
 void LegacyPliBasedFDAlgorithm::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");

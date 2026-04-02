@@ -6,7 +6,7 @@
 #include "core/algorithms/cind/condition_miners/position_lists_set.h"
 #include "core/model/table/column.h"
 
-class ColumnLayoutRelationData;
+class LegacyColumnLayoutRelationData;
 
 namespace model {
 class DynamicPositionListIndex {

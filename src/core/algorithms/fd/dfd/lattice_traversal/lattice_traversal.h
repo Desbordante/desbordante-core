@@ -23,7 +23,7 @@ private:
     ColumnOrder const column_order_;
 
     std::vector<Vertical> const& unique_columns_;
-    ColumnLayoutRelationData const* const relation_;
+    LegacyColumnLayoutRelationData const* const relation_;
     PartitionStorage* const partition_storage_;
 
     std::random_device rd_;
@@ -39,7 +39,7 @@ private:
                              std::unordered_set<Vertical> const& set_to_subtract);
 
 public:
-    LatticeTraversal(Column const* const rhs, ColumnLayoutRelationData const* const relation,
+    LatticeTraversal(Column const* const rhs, LegacyColumnLayoutRelationData const* const relation,
                      std::vector<Vertical> const& unique_verticals,
                      PartitionStorage* const partition_storage);
 

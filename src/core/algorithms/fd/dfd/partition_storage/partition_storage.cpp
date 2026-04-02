@@ -10,7 +10,7 @@ model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
 }
 
-PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data)
+PartitionStorage::PartitionStorage(LegacyColumnLayoutRelationData* relation_data)
     : relation_data_(relation_data),
       index_(std::make_unique<model::BlockingVerticalMap<model::PositionListIndex>>(
               relation_data->GetSchema())) {

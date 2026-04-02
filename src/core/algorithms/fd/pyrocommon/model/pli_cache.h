@@ -26,7 +26,7 @@ private:
     };
 
     // using CacheMap = VerticalMap<PositionListIndex>;
-    ColumnLayoutRelationData* relation_data_;
+    LegacyColumnLayoutRelationData* relation_data_;
     std::unique_ptr<VerticalMap<PositionListIndex>> index_;
     // usageCounter - for parallelism
 
@@ -54,7 +54,7 @@ private:
             ProfilingContext* profiling_context);
 
 public:
-    PLICache(ColumnLayoutRelationData* relation_data, CachingMethod caching_method,
+    PLICache(LegacyColumnLayoutRelationData* relation_data, CachingMethod caching_method,
              CacheEvictionMethod eviction_method, double caching_method_value, double min_entropy,
              double mean_entropy, double median_entropy, double maximum_entropy, double median_gini,
              double median_inverted_entropy);
@@ -69,7 +69,7 @@ public:
 
     size_t Size() const;
 
-    // returns ownership of single column PLIs back to ColumnLayoutRelationData
+    // returns ownership of single column PLIs back to LegacyColumnLayoutRelationData
     virtual ~PLICache();
 };
 

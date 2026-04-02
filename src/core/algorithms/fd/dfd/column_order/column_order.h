@@ -8,7 +8,7 @@ private:
     std::vector<int> order_;
 
 public:
-    explicit ColumnOrder(ColumnLayoutRelationData const* const relation_data);
+    explicit ColumnOrder(LegacyColumnLayoutRelationData const* const relation_data);
     ColumnOrder() = default;
 
     std::vector<int> GetOrderHighDistinctCount(Vertical const& columns) const;

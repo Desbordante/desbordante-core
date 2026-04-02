@@ -15,7 +15,7 @@
 #include "core/model/table/relation_data.h"
 #include "core/model/table/relational_schema.h"
 
-class ColumnLayoutRelationData final : public RelationData {
+class LegacyColumnLayoutRelationData final : public RelationData {
 public:
     using RelationData::AbstractRelationData;
 
@@ -34,5 +34,6 @@ public:
     [[nodiscard]] std::shared_ptr<model::PLIWS const> CalculatePLIWS(
             std::vector<unsigned int> const& indices) const;
 
-    static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(model::IDatasetStream& data_stream);
+    static std::unique_ptr<LegacyColumnLayoutRelationData> CreateFrom(
+            model::IDatasetStream& data_stream);
 };

@@ -5,7 +5,7 @@
 namespace model {
 
 std::unique_ptr<ListAgreeSetSample> ListAgreeSetSample::CreateFocusedFor(
-        ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
+        LegacyColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
         PositionListIndex const* restriction_p_li, unsigned int sample_size, CustomRandom& random) {
     return AgreeSetSample::CreateFocusedFor<ListAgreeSetSample>(
             relation, restriction_vertical, restriction_p_li, sample_size, random);
@@ -24,8 +24,8 @@ std::unique_ptr<std::vector<unsigned long long>> ListAgreeSetSample::BitSetToLon
 }
 
 ListAgreeSetSample::ListAgreeSetSample(
-        ColumnLayoutRelationData const* relation, Vertical const& focus, unsigned int sample_size,
-        unsigned long long population_size,
+        LegacyColumnLayoutRelationData const* relation, Vertical const& focus,
+        unsigned int sample_size, unsigned long long population_size,
         std::unordered_map<boost::dynamic_bitset<>, int> const& agree_set_counters)
     : AgreeSetSample(relation, focus, sample_size, population_size) {
     for (auto& el : agree_set_counters) {

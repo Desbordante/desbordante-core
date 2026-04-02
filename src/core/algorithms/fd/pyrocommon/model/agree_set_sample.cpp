@@ -11,7 +11,7 @@ namespace model {
 
 using namespace std;
 
-AgreeSetSample::AgreeSetSample(ColumnLayoutRelationData const* relation_data, Vertical focus,
+AgreeSetSample::AgreeSetSample(LegacyColumnLayoutRelationData const* relation_data, Vertical focus,
                                unsigned int sample_size, unsigned long long population_size)
     : relation_data_(relation_data),
       focus_(std::move(focus)),
