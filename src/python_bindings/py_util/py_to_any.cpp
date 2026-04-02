@@ -12,6 +12,7 @@
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -118,6 +119,26 @@ boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     return parsers;
 }
 
+boost::any StringVectorToAny(std::string_view option_name, py::handle obj) {
+    if (obj.is_none()) {
+        return std::vector<std::string>{};
+    }
+
+    if (!py::isinstance<py::sequence>(obj) || py::isinstance<py::str>(obj)) {
+        throw config::ConfigurationError("Option \"" + std::string(option_name) +
+                                         "\" must be a list of strings");
+    }
+
+    std::vector<std::string> out;
+    auto seq = py::reinterpret_borrow<py::sequence>(obj);
+    out.reserve(py::len(seq));
+
+    for (py::handle item : seq) {
+        out.push_back(py::cast<std::string>(py::str(item)));
+    }
+    return out;
+}
+
 std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<double>,
@@ -140,9 +161,12 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::od::Ordering>,
+        kEnumConvPair<algos::cind::CondType>,
+        kEnumConvPair<algos::cind::AlgoType>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(config::InputTables), InputTablesToAny},
+        {typeid(std::vector<std::string>), StringVectorToAny},
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
         kNormalConvPair<std::unordered_set<size_t>>,
