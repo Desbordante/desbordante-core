@@ -16,9 +16,9 @@ class LegacyPliBasedFDAlgorithm : public FDAlgorithm {
     void LoadDataInternal() final;
 
 protected:
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
 
-    ColumnLayoutRelationData const& GetRelation() const noexcept {
+    LegacyColumnLayoutRelationData const& GetRelation() const noexcept {
         // GetRelation should be called after the dataset has been parsed, i.e. after algorithm
         // execution
         assert(relation_ != nullptr);

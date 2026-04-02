@@ -61,7 +61,7 @@ void DCVerifier::MakeExecuteOptsAvailable() {
 void DCVerifier::LoadDataInternal() {
     data_ = model::CreateTypedColumnData(*input_table_, true);
     input_table_->Reset();
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
 }
 
 unsigned long long int DCVerifier::ExecuteInternal() {

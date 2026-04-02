@@ -28,7 +28,7 @@ private:
     algos::pyro::Parameters parameters_;
     std::unique_ptr<model::PLICache> pli_cache_;
     std::unique_ptr<model::VerticalMap<model::AgreeSetSample>> agree_set_samples_;
-    ColumnLayoutRelationData* relation_data_;
+    LegacyColumnLayoutRelationData* relation_data_;
     std::mt19937 random_;
     CustomRandom custom_random_;
 
@@ -39,7 +39,8 @@ private:
 public:
     enum class ObjectToCache { kPli, kAs };
 
-    ProfilingContext(algos::pyro::Parameters parameters, ColumnLayoutRelationData* relation_data,
+    ProfilingContext(algos::pyro::Parameters parameters,
+                     LegacyColumnLayoutRelationData* relation_data,
                      std::function<void(PartialKey const&)> const& ucc_consumer,
                      std::function<void(PartialFD const&)> const& fd_consumer,
                      CachingMethod const& caching_method,
@@ -65,7 +66,7 @@ public:
         return parameters_;
     }
 
-    ColumnLayoutRelationData const* GetColumnLayoutRelationData() const {
+    LegacyColumnLayoutRelationData const* GetColumnLayoutRelationData() const {
         return relation_data_;
     }
 
@@ -86,15 +87,15 @@ public:
 
     ~ProfilingContext() override;
 
-    static double GetMaximumEntropy(ColumnLayoutRelationData const* cd1);
-    static double GetMinEntropy(ColumnLayoutRelationData const* cd1);
-    static double GetMedianEntropy(ColumnLayoutRelationData const* relation_data);
-    static double GetMedianInvertedEntropy(ColumnLayoutRelationData const* relation_data);
-    static double GetMeanEntropy(ColumnLayoutRelationData const* relation_data);
-    static double GetMedianGini(ColumnLayoutRelationData const* relation_data);
+    static double GetMaximumEntropy(LegacyColumnLayoutRelationData const* cd1);
+    static double GetMinEntropy(LegacyColumnLayoutRelationData const* cd1);
+    static double GetMedianEntropy(LegacyColumnLayoutRelationData const* relation_data);
+    static double GetMedianInvertedEntropy(LegacyColumnLayoutRelationData const* relation_data);
+    static double GetMeanEntropy(LegacyColumnLayoutRelationData const* relation_data);
+    static double GetMedianGini(LegacyColumnLayoutRelationData const* relation_data);
 
 private:
     static double GetMedianValue(std::vector<double>&& values, std::string const& measure_name);
-    static double SetMaximumEntropy(ColumnLayoutRelationData const* relation_data,
+    static double SetMaximumEntropy(LegacyColumnLayoutRelationData const* relation_data,
                                     CachingMethod const& caching_method);
 };

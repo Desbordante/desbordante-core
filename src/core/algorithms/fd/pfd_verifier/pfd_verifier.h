@@ -22,7 +22,7 @@ private:
     config::IndicesType rhs_indices_;
     config::PfdErrorMeasureType error_measure_ = +PfdErrorMeasure::per_tuple;
 
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     std::unique_ptr<PFDStatsCalculator> stats_calculator_;
 
     void ResetState() override {

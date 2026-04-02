@@ -6,7 +6,7 @@
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/relational_schema.h"
 
-ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
+ColumnOrder::ColumnOrder(LegacyColumnLayoutRelationData const* const relation_data)
     : order_(relation_data->GetSchema()->GetNumColumns()) {
     std::set<OrderedPartition> partitions;
     for (auto const& column_data : relation_data->GetColumnData()) {
