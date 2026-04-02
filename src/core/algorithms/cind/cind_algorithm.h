@@ -14,7 +14,7 @@
 namespace algos::cind {
 class CindAlgorithm final : public Algorithm {
 public:
-    explicit CindAlgorithm(std::vector<std::string_view> phase_names = {});
+    CindAlgorithm();
 
     [[nodiscard]] std::uint64_t TimeTaken() const noexcept {
         return timings_.total;

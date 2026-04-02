@@ -93,6 +93,17 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    cind
+    SRCS
+    cind/bind_cind.cpp
+    cind/bind_cind_verification.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cind
+    ${DESBORDANTE_PREFIX}::cind::verifier
+    Boost::headers
+)
+
+desbordante_add_bind(
     dc
     SRCS
     dc/bind_dc_verification.cpp

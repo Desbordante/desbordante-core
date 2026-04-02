@@ -19,8 +19,7 @@
 #include "core/util/timed_invoke.h"
 
 namespace algos::cind {
-CindAlgorithm::CindAlgorithm(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+CindAlgorithm::CindAlgorithm() {
     CreateSpiderAlgo();
 
     RegisterOption(config::kAlgoTypeOpt(&algo_type_));

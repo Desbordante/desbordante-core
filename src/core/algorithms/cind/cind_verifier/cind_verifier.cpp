@@ -98,7 +98,7 @@ std::vector<model::EncodedColumnData const*> BuildOrderedColumns(EncTable const&
 
 }  // namespace
 
-CINDVerifier::CINDVerifier() : Algorithm({}), condition_type_(CondType::group) {
+CINDVerifier::CINDVerifier() : condition_type_(CondType::group) {
     RegisterOptions();
     MakeOptionsAvailable({config::kTablesOpt.GetName()});
 }
