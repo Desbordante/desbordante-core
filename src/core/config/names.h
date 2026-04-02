@@ -100,6 +100,9 @@ constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
+//ERMiner
+constexpr auto kERMinerMinSupport = "erminer_minsup";
+constexpr auto kERMinerMinConfidence = "erminer_minconf";
 // Pyro
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider

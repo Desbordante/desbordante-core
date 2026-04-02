@@ -285,6 +285,16 @@ desbordante_add_bind(
     Boost::headers
 )
 
+desbordante_add_bind(
+    erminer
+    SRCS
+    erminer/bind_erminer.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::erminer
+    better-enums
+    Boost::headers
+)
+
 # ---- Installation Setup ----
 
 if(DESBORDANTE_BINDINGS STREQUAL "INSTALL")
