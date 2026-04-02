@@ -25,7 +25,7 @@ private:
                                                [[maybe_unused]] model::PLIWS const* rhs_pli,
                                                model::PLIWS const* joint_pli) = 0;
     static double CalculateUccError(model::PositionListIndex const* pli,
-                                    ColumnLayoutRelationData const* relation_data);
+                                    LegacyColumnLayoutRelationData const* relation_data);
     void RegisterAndCountFd(Vertical lhs, Column const* rhs);
 
 public:

@@ -17,7 +17,7 @@ class StatsCalculator {
 private:
     using ClusterIndex = model::PLI::Cluster::value_type;
 
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
     std::vector<model::Index> lhs_indices_;
@@ -86,7 +86,7 @@ public:
     HighlightCompareFunction CompareHighlightsByLhsAscending() const;
     HighlightCompareFunction CompareHighlightsByLhsDescending() const;
 
-    explicit StatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
+    explicit StatsCalculator(std::shared_ptr<LegacyColumnLayoutRelationData> relation,
                              std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
                              std::vector<model::Index> lhs_indices,
                              std::vector<model::Index> rhs_indices)

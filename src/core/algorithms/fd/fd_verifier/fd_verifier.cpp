@@ -101,7 +101,7 @@ void FDVerifier::LoadDataInternal() {
     table_header_ = model::TableHeader::FromDatasetStream(*input_table_);
 
     // TODO: get rid of RelationalSchema in this class too.
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
     input_table_->Reset();
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD verifying is meaningless.");

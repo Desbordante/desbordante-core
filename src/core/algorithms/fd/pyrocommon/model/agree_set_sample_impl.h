@@ -9,7 +9,7 @@
 namespace model {
 
 template <typename T>
-std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData const* relation,
+std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(LegacyColumnLayoutRelationData const* relation,
                                                     Vertical const& restriction_vertical,
                                                     PositionListIndex const* restriction_pli,
                                                     unsigned int sample_size,

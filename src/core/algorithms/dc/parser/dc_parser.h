@@ -13,7 +13,7 @@ namespace algos::dc {
 class DCParser {
 private:
     std::vector<std::string> str_operators_;
-    ColumnLayoutRelationData const* relation_;
+    LegacyColumnLayoutRelationData const* relation_;
     std::vector<model::TypedColumnData> const& data_;
     static constexpr std::string_view const kSep = " and ";
     std::string dc_string_;
@@ -22,7 +22,7 @@ private:
     size_t cur_;
 
 public:
-    DCParser(std::string dc_string, ColumnLayoutRelationData const* relation,
+    DCParser(std::string dc_string, LegacyColumnLayoutRelationData const* relation,
              std::vector<model::TypedColumnData> const& data);
 
     DC Parse();

@@ -24,7 +24,7 @@ TaneCommon::TaneCommon() : LegacyPliBasedFDAlgorithm() {
 }
 
 double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
-                                     ColumnLayoutRelationData const* relation_data) {
+                                     LegacyColumnLayoutRelationData const* relation_data) {
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 

@@ -10,7 +10,7 @@
 namespace algos {
 class UCCStatsCalculator {
 private:
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     size_t num_rows_;
     double aucc_error_ = 0.0;
     /* results of work */
@@ -18,7 +18,7 @@ private:
     std::vector<model::PLI::Cluster> clusters_violating_ucc_;
 
 public:
-    UCCStatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation)
+    UCCStatsCalculator(std::shared_ptr<LegacyColumnLayoutRelationData> relation)
         : num_rows_(relation->GetNumRows()) {}
 
     UCCStatsCalculator(size_t num_rows) : num_rows_(num_rows) {}
