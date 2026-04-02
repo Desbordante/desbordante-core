@@ -1,5 +1,4 @@
 #pragma once
-
 #include <compare>
 #include <list>
 #include <optional>
@@ -12,6 +11,7 @@
 
 #include "core/model/types/builtin.h"
 #include "core/model/types/double_type.h"
+#include "core/util/export.h"
 
 namespace model {
 
@@ -129,7 +129,7 @@ struct DFStringConstraint {
     }
 };
 
-struct DDString {
+struct DESBORDANTE_EXPORT DDString {
     std::list<DFStringConstraint> left;
     std::list<DFStringConstraint> right;
 

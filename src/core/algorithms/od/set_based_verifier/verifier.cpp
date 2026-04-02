@@ -13,7 +13,7 @@
 
 namespace algos::od {
 
-SetBasedAodVerifier::SetBasedAodVerifier() : Algorithm({}) {
+SetBasedAodVerifier::SetBasedAodVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }

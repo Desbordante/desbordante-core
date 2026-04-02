@@ -10,7 +10,7 @@
 
 namespace algos::cfd_verifier {
 
-CFDVerifier::CFDVerifier() : Algorithm({}) {
+CFDVerifier::CFDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }

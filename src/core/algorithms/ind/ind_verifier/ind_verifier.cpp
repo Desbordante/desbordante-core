@@ -22,7 +22,7 @@
 
 namespace algos {
 
-INDVerifier::INDVerifier() : Algorithm({}) {
+INDVerifier::INDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTablesOpt.GetName()});
 }

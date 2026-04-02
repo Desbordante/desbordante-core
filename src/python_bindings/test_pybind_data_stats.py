@@ -46,6 +46,12 @@ class TestDataStats(unittest.TestCase):
         self.assertIsNone(self.data_stats.get_number_of_words(0))
         self.assertIsNone(self.data_stats.get_number_of_entirely_uppercase_words(0))
         self.assertIsNone(self.data_stats.get_number_of_entirely_lowercase_words(0))
+        self.assertIsNone(self.data_stats.get_whitespace_only_count(0))
+        self.assertIsNone(self.data_stats.get_leading_whitespace_count(0))
+        self.assertIsNone(self.data_stats.get_trailing_whitespace_count(0))
+        self.assertIsNone(self.data_stats.get_special_chars_count(0))
+        self.assertIsNone(self.data_stats.get_first_char_frequency(0))
+        self.assertIsNone(self.data_stats.get_last_char_frequency(0))
 
     def test_get_number_of_values(self) -> None:
         res = self.data_stats.get_number_of_values(0)
@@ -249,6 +255,145 @@ class TestDataStats(unittest.TestCase):
         res = self.data_stats.get_words(6)
         expected = {"abc", "abd", "abe", "eeee", "ggg", "gre", "grg"}
         self.assertEqual(expected, res)
+    
+    def test_whitespace_only_count(self) -> None:
+        res = self.data_stats.get_whitespace_only_count(11)
+        expected = 0
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_whitespace_only_count(10)
+        expected = 0
+        self.assertEqual(expected, res)
+    
+    def test_leading_whitespace_count(self) -> None:
+        res = self.data_stats.get_leading_whitespace_count(11)
+        expected = 3
+        self.assertEqual(expected, res)
+    
+    def test_trailing_whitespace_count(self) -> None:
+        res = self.data_stats.get_trailing_whitespace_count(11)
+        expected = 4
+        self.assertEqual(expected, res)
+    
+    def test_special_chars_count(self) -> None:
+        res = self.data_stats.get_special_chars_count(11)
+        expected = 3
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_special_chars_count(10)
+        expected = 1
+        self.assertEqual(expected, res)
+    
+    def test_first_char_frequency(self) -> None:
+        res = self.data_stats.get_first_char_frequency(11)
+        expected = " :3"
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_first_char_frequency(10)
+        expected = "a:3"
+        self.assertEqual(expected, res)
+    
+    def test_last_char_frequency(self) -> None:
+        res = self.data_stats.get_last_char_frequency(11)
+        expected = " :4"
+        self.assertEqual(expected, res)
+        
+        res = self.data_stats.get_last_char_frequency(10)
+        expected = "d:2"
+        self.assertEqual(expected, res)
+
+    def test_interquartile_range(self) -> None:
+        res = self.data_stats.get_interquartile_range(4)
+        self.assertIsNotNone(res)
+        self.assertAlmostEqual(res, 2.0, places=6)
+
+        res = self.data_stats.get_interquartile_range(1)
+        self.assertIsNone(res)
+
+    def test_coefficient_of_variation(self) -> None:
+        res = self.data_stats.get_coefficient_of_variation(2)
+        self.assertIsNotNone(res)
+        self.assertGreater(res, 0.0)
+
+        res = self.data_stats.get_coefficient_of_variation(1)
+        self.assertIsNone(res)
+
+    def test_monotonicity(self) -> None:
+        res = self.data_stats.get_monotonicity(0)
+        self.assertIsNone(res)
+
+        res = self.data_stats.get_monotonicity(1)
+        self.assertIsNotNone(res)
+        self.assertEqual(res, "ascending")
+
+        res = self.data_stats.get_monotonicity(2)
+        self.assertIsNotNone(res)
+        self.assertEqual(res, "none")
+
+        res = self.data_stats.get_monotonicity(3)
+        self.assertIsNotNone(res)
+        self.assertEqual(res, "ascending")
+
+    def test_jarque_bera_statistic(self) -> None:
+        res = self.data_stats.get_jarque_bera_statistic(7)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+
+        res = self.data_stats.get_jarque_bera_statistic(1)
+        self.assertIsNone(res)
+
+    def test_entropy(self) -> None:
+        res = self.data_stats.get_entropy(6)
+        self.assertIsNotNone(res)
+        self.assertGreater(res, 0.0)
+
+        res = self.data_stats.get_entropy(2)
+        self.assertIsNone(res)
+
+    def test_gini_coefficient(self) -> None:
+        res = self.data_stats.get_gini_coefficient(6)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+        self.assertLess(res, 1.0)
+
+        res = self.data_stats.get_gini_coefficient(2)
+        self.assertIsNone(res)
+
+    def test_all_new_statistics(self) -> None:
+        for i in range(self.data_stats.get_number_of_columns()):
+            try:
+                iqr = self.data_stats.get_interquartile_range(i)
+                cv = self.data_stats.get_coefficient_of_variation(i)
+                monotonicity = self.data_stats.get_monotonicity(i)
+                jb = self.data_stats.get_jarque_bera_statistic(i)
+                entropy = self.data_stats.get_entropy(i)
+                gini = self.data_stats.get_gini_coefficient(i)
+
+                if iqr is not None:
+                    self.assertIsInstance(iqr, (int, float))
+
+                if cv is not None:
+                    self.assertIsInstance(cv, (int, float))
+
+                if monotonicity is not None:
+                    self.assertIsInstance(monotonicity, str)
+                    self.assertIn(monotonicity, ["ascending", "descending", "none", "equal"])
+
+                if jb is not None:
+                    self.assertIsInstance(jb, (int, float))
+                    self.assertGreaterEqual(jb, 0.0)
+
+                if entropy is not None:
+                    self.assertIsInstance(entropy, (int, float))
+                    self.assertGreaterEqual(entropy, 0.0)
+
+                if gini is not None:
+                    self.assertIsInstance(gini, (int, float))
+                    self.assertGreaterEqual(gini, 0.0)
+                    self.assertLess(gini, 1.0)
+
+            except Exception as e:
+                self.fail(f"Failed for column {i}: {e}")
 
 if __name__ == "__main__":
     unittest.main()

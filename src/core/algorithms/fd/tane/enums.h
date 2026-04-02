@@ -1,6 +1,6 @@
 #pragma once
 
-#include <enum.h>
+#include "core/util/better_enum_with_visibility.h"
 
 namespace algos {
 BETTER_ENUM(PfdErrorMeasure, char, per_tuple = 0, per_value)

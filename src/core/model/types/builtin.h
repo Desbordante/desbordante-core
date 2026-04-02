@@ -4,7 +4,8 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/serialization/strong_typedef.hpp>
-#include <enum.h>
+
+#include "core/util/better_enum_with_visibility.h"
 
 namespace model {
 
@@ -46,7 +47,6 @@ using AllValueTypes = std::tuple<Int, Double, BigInt, String, Null, Empty>;
  * Maybe we need to use separate enums to describe column types and value types to
  * avoid confusion.
  */
-// clang-format off
 BETTER_ENUM(TypeId, char,
     kInt = 0,   /* Except for nulls and empties column contains only ints
                  * (fixed-precision integer value) */
@@ -63,8 +63,6 @@ BETTER_ENUM(TypeId, char,
     kUndefined, /* Column contains only nulls and empties */
     kMixed      /* Except for nulls and empties column contains more than one type */
 );
-
-// clang-format on
 
 template <typename T>
 struct TypeConverter {};

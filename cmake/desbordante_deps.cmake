@@ -26,10 +26,18 @@ CPMAddPackage(
     SYSTEM YES
 )
 
-include_directories(SYSTEM "${spdlog_SOURCE_DIR}/include")
+# Set log level based on user input or build type
+target_compile_definitions(
+        spdlog_header_only
+        INTERFACE
+        $<$<BOOL:${DESBORDANTE_LOG_LEVEL}>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${DESBORDANTE_LOG_LEVEL}>
+        $<$<AND:$<NOT:$<BOOL:${DESBORDANTE_LOG_LEVEL}>>,$<CONFIG:Debug>>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG>
+        $<$<AND:$<NOT:$<BOOL:${DESBORDANTE_LOG_LEVEL}>>,$<NOT:$<CONFIG:Debug>>>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO>
+)
 
 CPMAddPackage("gh:ktprime/emhash#5f327039a2776f38910e600889acf924a2d99ea3")
-include_directories(SYSTEM "${emhash_SOURCE_DIR}")
+add_library(emhash INTERFACE)
+target_include_directories(emhash SYSTEM INTERFACE ${emhash_SOURCE_DIR})
 
 CPMAddPackage(
     NAME frozen
@@ -37,7 +45,8 @@ CPMAddPackage(
     GIT_TAG 1.2.0
     DOWNLOAD_ONLY True
 )
-include_directories(SYSTEM "${frozen_SOURCE_DIR}/include")
+add_library(frozen INTERFACE)
+target_include_directories(frozen SYSTEM INTERFACE "${frozen_SOURCE_DIR}/include")
 
 CPMAddPackage(
     NAME better-enums
@@ -45,7 +54,8 @@ CPMAddPackage(
     GIT_TAG 0.11.3
     DOWNLOAD_ONLY True
 )
-include_directories(SYSTEM "${better-enums_SOURCE_DIR}")
+add_library(better-enums INTERFACE)
+target_include_directories(better-enums SYSTEM INTERFACE "${better-enums_SOURCE_DIR}")
 
 CPMAddPackage(
     NAME atomicbitvector
@@ -53,7 +63,10 @@ CPMAddPackage(
     GIT_TAG e295358fea9532fa4c37197630d037a4a53ddede
     DOWNLOAD_ONLY True
 )
-include_directories(SYSTEM "${atomicbitvector_SOURCE_DIR}/include")
+add_library(atomic_bitvector INTERFACE)
+target_include_directories(
+        atomic_bitvector SYSTEM INTERFACE "${atomicbitvector_SOURCE_DIR}/include"
+)
 
 if(DESBORDANTE_BUILD_TESTS)
     CPMAddPackage(
@@ -73,10 +86,6 @@ if(DESBORDANTE_BUILD_TESTS)
     endif()
 endif()
 
-if(DESBORDANTE_BINDINGS)
-    CPMAddPackage("gh:pybind/pybind11@2.13.4")
-endif()
-
 # Configure boost
 set(Boost_USE_STATIC_LIBS OFF)
 
@@ -86,12 +95,3 @@ if(DESBORDANTE_BUILD_BENCHMARKS)
 endif()
 
 find_package(Boost 1.85.0 REQUIRED COMPONENTS ${boost_libraries})
-if(Boost_FOUND)
-    message(STATUS "Found Boost include dirs: ${Boost_INCLUDE_DIRS}")
-    include_directories(${Boost_INCLUDE_DIRS})
-    message(STATUS "Found Boost library dirs: ${Boost_LIBRARY_DIRS}")
-else()
-    message(FATAL_ERROR "Boost not found. If boost is installed specify environment"
-                        "variables like \"BOOST_ROOT\" for hint to CMake where to search"
-    )
-endif()

@@ -19,7 +19,7 @@ namespace algos {
 
 using std::vector, std::set;
 
-FastFDs::FastFDs() : PliBasedFDAlgorithm({"Agree sets generation", "Finding minimal covers"}) {
+FastFDs::FastFDs() : PliBasedFDAlgorithm() {
     RegisterOptions();
 }
 
@@ -37,13 +37,10 @@ void FastFDs::ResetStateFd() {
 
 unsigned long long FastFDs::ExecuteInternal() {
     schema_ = relation_->GetSchema();
-    percent_per_col_ = kTotalProgressPercent / schema_->GetNumColumns();
 
     auto start_time = std::chrono::system_clock::now();
 
     GenDiffSets();
-    SetProgress(kTotalProgressPercent);
-    ToNextProgressPhase();
 
     auto elapsed_mills_to_gen_diff_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
@@ -68,8 +65,6 @@ unsigned long long FastFDs::ExecuteInternal() {
         if (!(diff_sets_mod.size() == 1 && diff_sets_mod.back().IsEmpty())) {
             set<Column, OrderingComparator> init_ordering = GetInitOrdering(diff_sets_mod, *column);
             FindCovers(*column, diff_sets_mod, diff_sets_mod, empty_vertical, init_ordering);
-        } else {
-            AddProgress(percent_per_col_);
         }
     };
 
@@ -86,8 +81,6 @@ unsigned long long FastFDs::ExecuteInternal() {
             task(column);
         }
     }
-
-    SetProgress(kTotalProgressPercent);
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
@@ -132,11 +125,6 @@ void FastFDs::FindCovers(Column const& attribute, vector<DiffSet> const& diff_se
 
         auto next_ordering = GetNextOrdering(next_diff_sets, column, ordering);
         FindCovers(attribute, diff_sets_mod, next_diff_sets, path.Union(column), next_ordering);
-
-        // First FindCovers call, calculate progress
-        if (path.GetArity() == 0) {
-            AddProgress(percent_per_col_ / ordering.size());
-        }
     }
 }
 
@@ -270,7 +258,7 @@ void FastFDs::GenDiffSets() {
         // Not implemented properly, check the description of AgreeSetFactory::GenMcParallel()
         // c.mc_gen_method = MCGenMethod::kParallel;
     }
-    model::AgreeSetFactory factory(relation_.get(), c, this);
+    model::AgreeSetFactory factory(relation_.get(), c);
     model::AgreeSetFactory::SetOfAgreeSets agree_sets = factory.GenAgreeSets();
 
     LOG_DEBUG("Agree sets:");

@@ -24,7 +24,7 @@ jobs:
       # Number of run IDs to select
       num-runs: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install dependencies
         uses: ./.github/composite-actions/install-dependencies
         with:
@@ -75,7 +75,7 @@ jobs:
             echo 'EOF'
           } >>"$GITHUB_ENV"
       - name: Get baseline results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           # For some reason there's no "when not found" parameter,
           # but job don't fail if `name` is replaced with `pattern`
@@ -99,17 +99,33 @@ jobs:
 
       - name: Test
         working-directory: ${{github.workspace}}/build/target
+        # Disable '-e' in this step
+        shell: bash --noprofile --norc -o pipefail {0}
         run: |
+          # 256 Kb should be enough to exit gracefully
+          MEMORY_LIMIT="$((16 * 1024 - 256))"
+          TIME_LIMIT='5400' # 1.5 hours
+
           if [[ -a 'baseline.json' ]]; then
-            ./Desbordante_benchmark --baseline ${{ github.workspace }}/baseline.json \
+            systemd-run --user --scope -p MemoryMax="$MEMORY_LIMIT" -p RuntimeMaxSec="$TIME_LIMIT" \
+              ./Desbordante.benchmark --baseline ${{ github.workspace }}/baseline.json \
               --output ${{ github.workspace }}/curr-results.json
           else
-            ./Desbordante_benchmark --output ${{ github.workspace }}/curr-results.json
+            systemd-run --user --scope -p MemoryMax="$MEMORY_LIMIT" -p RuntimeMaxSec="$TIME_LIMIT" \
+              ./Desbordante.benchmark --output ${{ github.workspace }}/curr-results.json
           fi
+          EXIT_CODE="$?"
+
+          if [ "$EXIT_CODE" -eq 137 ]; then
+            echo '::error::Out of memory'
+          elif [ "$EXIT_CODE" -eq 143 ]; then
+            echo '::error::Killed by timeout'
+          fi
+          exit "$EXIT_CODE"
 
       # All next steps should be ran even if this one has failed
       # Some of them may fail in that case, but it's not a problem
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: results-v2
           path: curr-results.json
@@ -129,7 +145,7 @@ jobs:
           fi
 
         if: ${{ !cancelled() }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: plots.pdf
           path: ${{ github.workspace }}/plots.pdf
@@ -142,7 +158,7 @@ jobs:
         run: cp curr-results.json baseline.json
         if: success()
       - name: Upload baseline
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: baseline-v2
           path: baseline.json

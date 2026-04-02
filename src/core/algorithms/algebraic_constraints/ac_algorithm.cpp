@@ -13,7 +13,7 @@
 
 namespace algos {
 
-ACAlgorithm::ACAlgorithm() : Algorithm({}) {
+ACAlgorithm::ACAlgorithm() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
     ac_exception_finder_ = std::make_unique<algebraic_constraints::ACExceptionFinder>();

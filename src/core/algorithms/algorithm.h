@@ -14,13 +14,11 @@
 #include "core/config/option.h"
 #include "core/model/table/idataset_stream.h"
 #include "core/parser/csv_parser/csv_parser.h"
-#include "core/util/progress.h"
 
 namespace algos {
 
 class Algorithm {
 private:
-    util::Progress progress_;
     // All options the algorithm may use
     std::unordered_map<std::string_view, std::unique_ptr<config::IOption>> possible_options_;
     // All options that can be set at the moment
@@ -41,18 +39,6 @@ private:
     bool AllRequiredOptionsAreSet() const noexcept;
 
 protected:
-    void AddProgress(double val) noexcept {
-        progress_.AddProgress(val);
-    }
-
-    void SetProgress(double val) noexcept {
-        progress_.SetProgress(val);
-    }
-
-    void ToNextProgressPhase() noexcept {
-        progress_.ToNextProgressPhase();
-    }
-
     void MakeOptionsAvailable(std::vector<std::string_view> const& option_names);
 
     template <typename T>
@@ -81,17 +67,13 @@ protected:
     virtual void MakeExecuteOptsAvailable();
 
 public:
-    constexpr static double kTotalProgressPercent = util::Progress::kTotalProgressPercent;
-
     Algorithm(Algorithm const& other) = delete;
     Algorithm& operator=(Algorithm const& other) = delete;
     Algorithm(Algorithm&& other) = delete;
     Algorithm& operator=(Algorithm&& other) = delete;
     virtual ~Algorithm() = default;
 
-    // The constructor accepts vector of names of the mining algorithm phases.
-    // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
-    explicit Algorithm(std::vector<std::string_view> phase_names);
+    Algorithm() = default;
 
     void LoadData();
 
@@ -103,15 +85,6 @@ public:
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 
     void UnsetOption(std::string_view option_name) noexcept;
-
-    // See util::Progress::GetProgress description
-    std::pair<uint8_t, double> GetProgress() const noexcept {
-        return progress_.GetProgress();
-    }
-
-    std::vector<std::string_view> const& GetPhaseNames() const noexcept {
-        return progress_.GetPhaseNames();
-    }
 
     std::type_index GetTypeIndex(std::string_view option_name) const;
 

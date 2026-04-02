@@ -1,8 +1,7 @@
 #pragma once
 
-#include <enum.h>
-
 #include "core/algorithms/od/order/sorted_partitions.h"
+#include "core/util/better_enum_with_visibility.h"
 
 namespace algos::order {
 

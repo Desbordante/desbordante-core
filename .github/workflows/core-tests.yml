@@ -77,7 +77,7 @@ jobs:
 
     runs-on: ${{ matrix.system.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install dependencies
         uses: ./.github/composite-actions/install-dependencies
         with:
@@ -103,4 +103,4 @@ jobs:
             export CTEST_ARGS="-j ${nproc}"
           fi
 
-          ctest --exclude-regex ".*HeavyDatasets.*" $CTEST_ARGS
+          ctest --exclude-regex ".*HeavyDatasets.*" --output-on-failure $CTEST_ARGS

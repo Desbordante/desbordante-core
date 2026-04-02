@@ -1,11 +1,12 @@
 #pragma once
-
 #include <string>
 #include <vector>
 
+#include "core/util/export.h"
+
 namespace model {
 
-class IDatasetStream {
+class DESBORDANTE_EXPORT IDatasetStream {
 public:
     using Row = std::vector<std::string>;
 

@@ -241,7 +241,6 @@ void BindMd(py::module_& main_module) {
                          .none(false))
             .doc() = R"(Defines a column match with a custom similarity measure.)";
 
-    BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"},
-                        pybind11::return_value_policy::copy);
+    BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"});
 }
 }  // namespace python_bindings

@@ -23,20 +23,20 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Pull clang-format
         run: |
-          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main'
+          sudo add-apt-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main'
           wget https://apt.llvm.org/llvm-snapshot.gpg.key
           sudo apt-key add llvm-snapshot.gpg.key
           sudo apt-get update
-          sudo apt-get install -y clang-format-18
+          sudo apt-get install -y clang-format-22
       - name: Check formatting
         run: |
           set +e
-          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-18 -p 1)
+          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-22 -p 1)
 
           if [ "$formatterOutput" != "" ]
           then
@@ -54,7 +54,7 @@ jobs:
   clang-tidy-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Install dependencies
         uses: ./.github/composite-actions/install-dependencies
         with:

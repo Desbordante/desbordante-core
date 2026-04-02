@@ -77,9 +77,6 @@ public:
 };
 
 class FUN : public PliBasedFDAlgorithm {
-public:
-    FUN();
-
     // Entities from the algorithm itself
 private:
     Vertical r_;

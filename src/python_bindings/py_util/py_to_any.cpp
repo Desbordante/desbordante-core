@@ -1,7 +1,10 @@
 #include <functional>
+#include <sstream>
+#include <stdexcept>
 #include <unordered_map>
 
 #include <boost/any.hpp>
+#include <boost/core/demangle.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
@@ -11,6 +14,7 @@
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -152,6 +156,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,
         kEnumConvPair<config::AfdErrorMeasureType>,
+        kEnumConvPair<algos::afd_metric_calculator::AFDMetric>,
         kEnumConvPair<algos::InputFormat>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
@@ -175,11 +180,12 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
 namespace python_bindings {
 
 boost::any PyToAny(std::string_view option_name, std::type_index index, py::handle obj) {
-    auto it = kConverters.find(index);
-    if (it == kConverters.end()) {
-        throw config::ConfigurationError("No Python->C++ converter registered for option \"" +
-                                         std::string(option_name) +
-                                         "\" (C++ type: " + std::string(index.name()) + ")");
+    auto const it = kConverters.find(index);
+    if (it == kConverters.end()) [[unlikely]] {
+        std::ostringstream oss;
+        oss << "Cannot get type for option " << option_name << ": "
+            << boost::core::demangle(index.name()) << " (PyToAny)";
+        throw std::runtime_error(oss.str());
     }
     return it->second(option_name, obj);
 }

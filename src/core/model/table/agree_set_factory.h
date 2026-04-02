@@ -8,7 +8,6 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "core/algorithms/fd/fd_algorithm.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
 #include "core/util/custom_hashes.h"
@@ -137,9 +136,8 @@ public:
     using SetOfAgreeSets = std::unordered_set<AgreeSet>;
 
     explicit AgreeSetFactory(ColumnLayoutRelationData const* const rel,
-                             Configuration const& c = Configuration(),
-                             algos::FDAlgorithm* algo = nullptr)
-        : relation_(rel), config_(c), algo_(algo) {}
+                             Configuration const& c = Configuration())
+        : relation_(rel), config_(c) {}
 
     ColumnLayoutRelationData const* GetRelation() const {
         return relation_;
@@ -190,16 +188,9 @@ private:
     using VectorComp = std::function<bool(std::vector<int> const&, std::vector<int> const&)>;
     std::set<std::vector<int>, VectorComp> GenSortedEqvClasses(VectorComp comp) const;
 
-    void AddProgress(double const val) const noexcept {
-        if (algo_ != nullptr) {
-            algo_->AddProgress(val);
-        }
-    }
-
     ColumnLayoutRelationData const* const relation_;
 
     Configuration config_;
-    algos::FDAlgorithm* algo_;
 };
 
 }  // namespace model

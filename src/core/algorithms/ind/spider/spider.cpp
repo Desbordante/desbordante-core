@@ -23,7 +23,9 @@ namespace algos {
 
 using AttributeIndex = spider::AttributeIndex;
 
-Spider::Spider() : INDAlgorithm({}) {
+Spider::Spider() : INDAlgorithm() {
+    DESBORDANTE_OPTION_USING;
+
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
     RegisterOption(config::kMemLimitMbOpt(&mem_limit_mb_));

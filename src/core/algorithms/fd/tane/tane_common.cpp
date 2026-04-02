@@ -19,7 +19,7 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+TaneCommon::TaneCommon() : PliBasedFDAlgorithm() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
@@ -93,14 +93,14 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
         Vertical xa = xa_vertex->GetVertical();
         // Calculate XA PLI
         if (xa_vertex->GetPositionListIndex() == nullptr) {
-            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndex();
-            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndex();
-            xa_vertex->AcquirePositionListIndex(parent_pli_1->Intersect(parent_pli_2));
+            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndexWithSingletons();
+            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndexWithSingletons();
+            xa_vertex->AcquirePLIWithSingletons(parent_pli_1->Intersect(parent_pli_2));
         }
 
         dynamic_bitset<> xa_indices = xa.GetColumnIndices();
         dynamic_bitset<> a_candidates = xa_vertex->GetRhsCandidates();
-        auto xa_pli = xa_vertex->GetPositionListIndex();
+        auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
         for (auto const& x_vertex : xa_vertex->GetParents()) {
             Vertical const& lhs = x_vertex->GetVertical();
 
@@ -110,8 +110,8 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             if (!a_candidates[a_index]) {
                 continue;
             }
-            auto x_pli = x_vertex->GetPositionListIndex();
-            auto a_pli = relation_->GetColumnData(a_index).GetPositionListIndex();
+            auto x_pli = x_vertex->GetPositionListIndexWithSingletons();
+            auto a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
             // Check X -> A
             config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
             if (error <= max_fd_error_) {
@@ -144,7 +144,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
                   avg_partners);
     }
     auto start_time = std::chrono::system_clock::now();
-    double progress_step = 100.0 / (schema->GetNumColumns() + 1);
 
     // Initialize level 0
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
@@ -153,7 +152,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
     level0->Add(std::make_unique<model::LatticeVertex>(schema->CreateEmptyVertical()));
     model::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
     levels.push_back(std::move(level0));
-    AddProgress(progress_step);
 
     // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
@@ -166,7 +164,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
         vertex->AddRhsCandidates(schema->GetColumns());
         vertex->GetParents().push_back(empty_vertex);
         vertex->SetKeyCandidate(true);
-        vertex->SetPositionListIndex(column_data.GetPositionListIndex());
+        vertex->SetPLIWithSingletons(column_data.GetPLWSIndex());
 
         // check FDs: 0->A
         double fd_error = CalculateZeroAryFdError(&column_data);
@@ -211,7 +209,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
         }
     }
     levels.push_back(std::move(level1));
-    AddProgress(progress_step);
 
     unsigned int max_arity =
             max_lhs_ == std::numeric_limits<unsigned int>::max() ? max_lhs_ : max_lhs_ + 1;
@@ -233,10 +230,8 @@ unsigned long long TaneCommon::ExecuteInternal() {
 
         Prune(level);
         // TODO: printProfilingData
-        AddProgress(progress_step);
     }
 
-    SetProgress(100);
     std::chrono::milliseconds elapsed_milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
                                                                   start_time);

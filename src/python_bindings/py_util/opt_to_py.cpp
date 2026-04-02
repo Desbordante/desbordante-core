@@ -1,9 +1,12 @@
 #include "python_bindings/py_util/opt_to_py.h"
 
 #include <functional>
+#include <sstream>
+#include <stdexcept>
 #include <typeinfo>
 #include <unordered_map>
 
+#include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -53,6 +56,12 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
 
 namespace python_bindings {
 py::object OptToPy(std::type_index type, boost::any val) {
-    return kConverters.at(type)(val);
+    auto const it = kConverters.find(type);
+    if (it == kConverters.end()) [[unlikely]] {
+        std::ostringstream oss;
+        oss << "Unknown option type: " << boost::core::demangle(type.name()) << " (OptToPy)";
+        throw std::runtime_error(oss.str());
+    }
+    return it->second(val);
 }
 }  // namespace python_bindings
