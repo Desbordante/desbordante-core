@@ -7,4 +7,4 @@ target_sources(
             pli_cind.cpp
             position_lists_set.cpp
 )
-target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers)
+target_link_libraries(${NAME} PRIVATE better-enums spdlog::spdlog_header_only Boost::headers)

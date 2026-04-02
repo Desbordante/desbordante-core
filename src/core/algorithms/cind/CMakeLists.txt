@@ -9,5 +9,6 @@ target_link_libraries(
     PRIVATE ${DESBORDANTE_PREFIX}::cind::miners
             ${DESBORDANTE_PREFIX}::ind::spider
             better-enums
+            spdlog::spdlog_header_only
             Boost::headers
 )

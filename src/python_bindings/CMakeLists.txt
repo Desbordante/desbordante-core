@@ -100,6 +100,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cind
     ${DESBORDANTE_PREFIX}::cind::verifier
+    better-enums
     Boost::headers
 )
 
