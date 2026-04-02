@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -18,8 +17,8 @@
 namespace algos::cind {
 
 namespace {
-struct VectorStringHash {
-    std::size_t operator()(std::vector<std::string> const& vec) const noexcept {
+struct VectorIntHash {
+    std::size_t operator()(std::vector<int> const& vec) const noexcept {
         return boost::hash_value(vec);
     }
 };
@@ -37,12 +36,12 @@ CIND PliCind::ExecuteSingle(model::IND const& aind) {
 }
 
 std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes const& attrs) {
-    std::unordered_set<std::vector<std::string>, VectorStringHash> rhs_values;
+    std::unordered_set<std::vector<int>, VectorIntHash> rhs_values;
     for (size_t index = 0; index < attrs.rhs_inclusion.front()->GetNumRows(); ++index) {
-        std::vector<std::string> row;
+        std::vector<int> row;
         row.reserve(attrs.rhs_inclusion.size());
-        for (auto& attr : attrs.rhs_inclusion) {
-            row.push_back(attr->GetStringValue(index));
+        for (auto const& attr : attrs.rhs_inclusion) {
+            row.push_back(attr->GetValue(index));
         }
         rhs_values.insert(std::move(row));
     }
@@ -50,20 +49,23 @@ std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes c
     // included row_id for rows, group_id for groups
     std::vector<int> included_pos;
 
-    std::unordered_map<std::vector<std::string>, int, VectorStringHash> group_idx;
+    bool const is_group = (condition_type_._value == CondType::group);
+    std::unordered_map<std::vector<int>, int, VectorIntHash> group_idx;
     std::vector<int> row_to_group;
-    row_to_group.reserve(attrs.lhs_inclusion.front()->GetNumRows());
+    if (is_group) {
+        row_to_group.reserve(attrs.lhs_inclusion.front()->GetNumRows());
+    }
 
     for (size_t index = 0; index < attrs.lhs_inclusion.front()->GetNumRows(); ++index) {
-        std::vector<std::string> row;
+        std::vector<int> row;
         row.reserve(attrs.lhs_inclusion.size());
-        for (auto& attr : attrs.lhs_inclusion) {
-            row.push_back(attr->GetStringValue(index));
+        for (auto const& attr : attrs.lhs_inclusion) {
+            row.push_back(attr->GetValue(index));
         }
 
         int included_pos_id = static_cast<int>(index);
 
-        if (condition_type_._value == CondType::group) {
+        if (is_group) {
             auto it = group_idx.find(row);
             if (it == group_idx.end()) {
                 included_pos_id = static_cast<int>(group_idx.size());

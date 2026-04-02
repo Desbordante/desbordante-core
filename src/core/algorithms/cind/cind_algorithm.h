@@ -13,30 +13,18 @@
 
 namespace algos::cind {
 class CindAlgorithm final : public Algorithm {
-public:
-    explicit CindAlgorithm(std::vector<std::string_view> phase_names = {});
-
-    [[nodiscard]] std::uint64_t TimeTaken() const noexcept {
-        return timings_.total;
-    }
-
-    [[nodiscard]] auto const& AINDList() const noexcept {
-        return spider_algo_->INDList();
-    }
-
-    [[nodiscard]] auto const& CINDList() const noexcept {
-        return cind_miner_->CINDList();
-    }
-
 private:
-    /// timing information for algorithm stages
     struct StageTimings {
-        std::uint64_t load{0};    /**< time taken for the data loading */
-        std::uint64_t compute{0}; /**< time taken for the inds computing */
-        std::uint64_t total{0};   /**< total time taken for all stages */
+        std::uint64_t load{0};
+        std::uint64_t compute{0};
+        std::uint64_t total{0};
     };
 
-private:
+    std::unique_ptr<Spider> spider_algo_;
+    std::unique_ptr<CindMiner> cind_miner_;
+    AlgoType algo_type_{AlgoType::pli_cind};
+    StageTimings timings_{};
+
     void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
     void ResetState() final;
@@ -50,11 +38,19 @@ private:
     void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const final;
 
-private:
-    std::unique_ptr<Spider> spider_algo_;
-    std::unique_ptr<CindMiner> cind_miner_;
-    AlgoType algo_type_{AlgoType::pli_cind};
+public:
+    CindAlgorithm();
 
-    StageTimings timings_{};
+    [[nodiscard]] std::uint64_t TimeTaken() const noexcept {
+        return timings_.total;
+    }
+
+    [[nodiscard]] auto const& AINDList() const noexcept {
+        return spider_algo_->INDList();
+    }
+
+    [[nodiscard]] auto const& CINDList() const noexcept {
+        return cind_miner_->CINDList();
+    }
 };
 }  // namespace algos::cind

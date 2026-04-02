@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -13,12 +14,19 @@
 #include "table/encoded_column_data.h"
 
 namespace algos::cind {
-char const* const kAnyValue = "-";
+constexpr auto kAnyValue = "-";
 
 struct Condition {
     std::vector<std::string> condition_attrs_values;
     double validity;
     double completeness;
+
+    Condition() = default;
+
+    Condition(std::vector<std::string> attrs_values, double validity, double completeness)
+        : condition_attrs_values(std::move(attrs_values)),
+          validity(validity),
+          completeness(completeness) {}
 
     static constexpr double kDoubleEps = 1e-9;
 
@@ -50,9 +58,9 @@ struct Condition {
 
     Condition(std::vector<int> const& cluster_attrs_ids,
               model::PLSet::ClusterValue const& cluster_value,
-              std::vector<model::EncodedColumnData const*> const& condition_attrs, double _validity,
-              double _completeness)
-        : validity(_validity), completeness(_completeness) {
+              std::vector<model::EncodedColumnData const*> const& condition_attrs, double validity,
+              double completeness)
+        : validity(validity), completeness(completeness) {
         condition_attrs_values.reserve(condition_attrs.size());
 
         size_t item_id = 0;
@@ -68,16 +76,13 @@ struct Condition {
     }
 
     std::string ToString() const {
-        std::string result = "(";
+        std::ostringstream oss;
+        oss << "(";
         for (auto const& value : condition_attrs_values) {
-            result.append("\"").append(value).append("\", ");
+            oss << "\"" << value << "\", ";
         }
-        result.append("validity = ")
-                .append(std::to_string(validity))
-                .append(", completeness = ")
-                .append(std::to_string(completeness))
-                .append(")");
-        return result;
+        oss << "validity = " << validity << ", completeness = " << completeness << ")";
+        return oss.str();
     }
 
     bool operator==(Condition const& that) const {

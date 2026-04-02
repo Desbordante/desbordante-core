@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "condition.h"
 #include "core/algorithms/ind/ind.h"
 
@@ -10,22 +12,21 @@ struct CIND {
     std::vector<std::string> conditional_attributes;
 
     std::string ToString() const {
-        std::string result = ind.ToLongString();
-        result.append("\nPossible conditions number: ");
-        result.append(std::to_string(conditions.size()));
-        result.append("\n");
-        if (!conditions.empty()) {
-            result.append("Possible conditions:\n\t(");
-            for (auto const& attr : conditional_attributes) {
-                result.append(attr).append(", ");
-            }
-            result.resize(result.size() - 2);
-            result.append(");\n");
-            for (auto const& condition : conditions) {
-                result.append("\t").append(condition.ToString()).append(";\n");
-            }
+        std::ostringstream oss;
+        oss << ind.ToLongString() << "\nPossible conditions number: " << conditions.size() << "\n";
+        if (conditions.empty()) {
+            return oss.str();
         }
-        return result;
+        oss << "Possible conditions:\n\t(";
+        for (size_t i = 0; i < conditional_attributes.size(); ++i) {
+            if (i != 0) oss << ", ";
+            oss << conditional_attributes[i];
+        }
+        oss << ");\n";
+        for (auto const& condition : conditions) {
+            oss << "\t" << condition.ToString() << ";\n";
+        }
+        return oss.str();
     }
 
     size_t ConditionsNumber() const noexcept {
@@ -45,4 +46,5 @@ struct CIND {
         return result;
     }
 };
+
 }  // namespace algos::cind

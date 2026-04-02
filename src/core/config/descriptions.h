@@ -4,6 +4,7 @@
 #include <string>
 
 #include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cind/types.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -36,6 +37,10 @@ std::string const kDDifferentialStrategyString =
         util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
 std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
                                      util::EnumToAvailableValues<algos::od::Ordering>();
+std::string const kDConditionTypeString =
+        "CIND condition types to use\n" + util::EnumToAvailableValues<algos::cind::CondType>();
+std::string const kDAlgoTypeString =
+        "CIND algorithm types to use\n" + util::EnumToAvailableValues<algos::cind::AlgoType>();
 }  // namespace details
 
 // Common
@@ -248,5 +253,9 @@ constexpr auto kDValidity =
         "Percentage of rows/groups that form IND when the pattern tuple is satisfied";
 constexpr auto kDCompleteness =
         "Percentage of rows/groups from IND that satisfies the pattern tuple";
-constexpr auto kDConditionType = "Type of condition units: can be either rows or groups";
+auto const kDConditionType = details::kDConditionTypeString.c_str();
+auto const kDAlgoType = details::kDAlgoTypeString.c_str();
+constexpr auto kDCindCondValues =
+        "Condition values aligned with conditional attributes order. "
+        "Use '-' or '_' as wildcard. If empty => all wildcards.";
 }  // namespace config::descriptions

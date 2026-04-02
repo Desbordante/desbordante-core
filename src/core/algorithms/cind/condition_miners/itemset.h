@@ -11,6 +11,14 @@
 
 namespace algos::cind {
 class Itemset {
+private:
+    std::shared_ptr<ItemsetNode> root_;
+    std::vector<std::shared_ptr<ItemsetNode>> prev_items_;
+    std::vector<std::shared_ptr<ItemsetNode>> items_;
+
+    std::size_t included_baskets_cnt_{0};
+    double min_completeness_{0.0};
+
 public:
     using ItemsMap = std::unordered_map<Item, std::vector<BasketInfo>>;
 
@@ -66,10 +74,10 @@ public:
     void CreateNewLayer(
             std::vector<std::tuple<std::shared_ptr<ItemsetNode>, Item, std::vector<BasketInfo>>>
                     new_items_info) {
-        std::vector<std::shared_ptr<ItemsetNode>> new_items;
-        new_items.reserve(new_items_info.size());
+        items_.clear();
+        prev_items_.clear();
+        items_.reserve(new_items_info.size());
 
-        std::vector<std::shared_ptr<ItemsetNode>> new_prev_items;
         std::unordered_set<ItemsetNode*> seen_parents;
         seen_parents.reserve(new_items_info.size());
 
@@ -80,23 +88,12 @@ public:
                 continue;
             }
 
-            new_items.push_back(child);
+            items_.push_back(child);
 
             if (seen_parents.insert(parent.get()).second) {
-                new_prev_items.push_back(parent);
+                prev_items_.push_back(parent);
             }
         }
-
-        items_ = std::move(new_items);
-        prev_items_ = std::move(new_prev_items);
     }
-
-private:
-    std::shared_ptr<ItemsetNode> root_;
-    std::vector<std::shared_ptr<ItemsetNode>> prev_items_;
-    std::vector<std::shared_ptr<ItemsetNode>> items_;
-
-    std::size_t included_baskets_cnt_{0};
-    double min_completeness_{0.0};
 };
 }  // namespace algos::cind

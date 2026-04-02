@@ -1,14 +1,16 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "cind/types.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_tables_type.h"
-#include "table/tuple_index.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/cind/types.h"
+#include "core/config/indices/type.h"
+#include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/table/encoded_tables.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos::cind {
 
@@ -23,6 +25,7 @@ public:
 
 private:
     config::InputTables input_tables_;
+    std::unique_ptr<model::EncodedTables> encoded_tables_;
 
     struct RawIND {
         config::IndicesType lhs;
@@ -45,7 +48,6 @@ private:
     double real_validity_{-1.0};
     double real_completeness_{0.0};
 
-private:
     void RegisterOptions();
     void ResetState() final;
 

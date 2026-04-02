@@ -14,14 +14,8 @@ using PLSetShared = std::shared_ptr<model::PLSet>;
 class PliCind final : public CindMiner {
 private:
     std::vector<PLSetShared> attr_idx_to_pls_;
-    size_t relation_size_;  // num of groups/rows
+    size_t relation_size_;
 
-public:
-    PliCind(config::InputTables& input_tables);
-
-    std::vector<Condition> GetConditions(Attributes const& attrs);
-
-private:
     CIND ExecuteSingle(model::IND const& aind) final;
     void MakePLs(Attributes const& attrs);
 
@@ -33,6 +27,11 @@ private:
                                    std::vector<int> const& included_pos);
 
     void Reset();
+
+public:
+    PliCind(config::InputTables& input_tables);
+
+    std::vector<Condition> GetConditions(Attributes const& attrs);
 };
 
 }  // namespace algos::cind

@@ -13,6 +13,15 @@ namespace algos::cind {
 using BasketInfo = std::tuple<size_t, std::vector<size_t>, bool>;
 
 class ItemsetNode : public std::enable_shared_from_this<ItemsetNode> {
+private:
+    Item value_;
+    std::vector<BasketInfo> baskets_info_;
+    double validity_;
+    double completeness_;
+
+    std::unordered_map<Item, std::shared_ptr<ItemsetNode>> child_nodes_;
+    std::weak_ptr<ItemsetNode> parent_node_;
+
 public:
     ItemsetNode(std::shared_ptr<ItemsetNode> parent, Item value,
                 std::vector<BasketInfo> baskets_info, double validity, double completeness)
@@ -25,8 +34,8 @@ public:
     std::shared_ptr<ItemsetNode> CreateChild(Item value, std::vector<BasketInfo> baskets_info,
                                              size_t included_baskets_cnt, double min_completeness) {
         double included_contained_baskets_cnt = 0.0;
-        for (auto const& [_, real_id, is_included] : baskets_info) {
-            included_contained_baskets_cnt += is_included;
+        for (auto const& [_, __, is_included] : baskets_info) {
+            included_contained_baskets_cnt += is_included ? 1 : 0;
         }
 
         double const completeness = (included_baskets_cnt == 0)
@@ -34,20 +43,21 @@ public:
                                             : included_contained_baskets_cnt /
                                                       static_cast<double>(included_baskets_cnt);
 
-        if (completeness >= min_completeness) {
-            double const validity = baskets_info.empty()
-                                            ? -1.0
-                                            : included_contained_baskets_cnt /
-                                                      static_cast<double>(baskets_info.size());
-
-            auto new_element =
-                    std::make_shared<ItemsetNode>(shared_from_this(), std::move(value),
-                                                  std::move(baskets_info), validity, completeness);
-
-            child_nodes_.emplace(new_element->GetValue(), new_element);
-            return new_element;
+        if (completeness < min_completeness) {
+            return nullptr;
         }
-        return nullptr;
+
+        double const validity =
+                baskets_info.empty()
+                        ? -1.0
+                        : included_contained_baskets_cnt / static_cast<double>(baskets_info.size());
+
+        auto new_element =
+                std::make_shared<ItemsetNode>(shared_from_this(), std::move(value),
+                                              std::move(baskets_info), validity, completeness);
+
+        child_nodes_.emplace(new_element->GetValue(), new_element);
+        return new_element;
     }
 
     std::vector<Item> GetContents() const {
@@ -96,14 +106,6 @@ public:
             parent->Erase(shared_from_this());
         }
     }
-
-private:
-    Item value_;
-    std::vector<BasketInfo> baskets_info_;
-    double validity_;
-    double completeness_;
-    std::unordered_map<Item, std::shared_ptr<ItemsetNode>> child_nodes_;
-    std::weak_ptr<ItemsetNode> parent_node_;
 };
 
 }  // namespace algos::cind

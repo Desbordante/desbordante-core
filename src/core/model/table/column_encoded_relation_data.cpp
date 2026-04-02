@@ -23,14 +23,15 @@ std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom
                      num_columns, row.size());
             continue;
         }
-        for (size_t index = 0; index < row.size(); ++index) {
-            std::string const& field = row[index];
-            unique_values[index].insert(field);
+        size_t index = 0;
+        for (auto&& field : row) {
             if (field.empty()) {
                 column_vectors[index].push_back(kNullValueId);
             } else {
                 column_vectors[index].push_back(value_dictionary->ToInt(field));
             }
+            unique_values[index].insert(std::move(field));
+            ++index;
         }
     }
 

@@ -1,8 +1,10 @@
 #include "cind_miner.h"
 
-#include "cind/types.h"
-#include "table/encoded_tables.h"
-#include "timed_invoke.h"
+#include <unordered_set>
+
+#include "core/algorithms/cind/types.h"
+#include "core/model/table/encoded_tables.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables)
@@ -21,27 +23,24 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
     auto const rhs_table = rhs.GetTableIndex();
     bool const same_table = (lhs_table == rhs_table);
 
+    std::unordered_set<model::ColumnIndex> lhs_set(lhs_indices.begin(), lhs_indices.end());
+    std::unordered_set<model::ColumnIndex> rhs_set(rhs_indices.begin(), rhs_indices.end());
+
     for (auto const& column : tables_.GetTable(lhs_table).GetColumnData()) {
         auto const col_index = column.GetColumn()->GetIndex();
 
-        if (std::ranges::find(lhs_indices, col_index) != lhs_indices.end()) {
+        if (lhs_set.contains(col_index)) {
             result.lhs_inclusion.push_back(&column);
+        } else if (same_table && rhs_set.contains(col_index)) {
             continue;
-        }
-
-        if (!same_table) {
-            result.conditional.push_back(&column);
-            continue;
-        }
-
-        if (std::ranges::find(rhs_indices, col_index) == rhs_indices.end()) {
+        } else {
             result.conditional.push_back(&column);
         }
     }
 
     for (auto const& column : tables_.GetTable(rhs_table).GetColumnData()) {
         auto const col_index = column.GetColumn()->GetIndex();
-        if (std::ranges::find(rhs_indices, col_index) != rhs_indices.end()) {
+        if (rhs_set.contains(col_index)) {
             result.rhs_inclusion.push_back(&column);
         }
     }

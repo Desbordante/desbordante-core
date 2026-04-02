@@ -189,7 +189,7 @@ void Cinderella::CreateNewItemsets(Itemset& itemset) const {
         }
     }
 
-    itemset.CreateNewLayer(new_items_info);
+    itemset.CreateNewLayer(std::move(new_items_info));
 }
 
 }  // namespace algos::cind
