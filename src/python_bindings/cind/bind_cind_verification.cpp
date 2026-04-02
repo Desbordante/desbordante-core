@@ -1,6 +1,7 @@
 #include "bind_cind_verification.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "algorithms/cind/cind_verifier/cind_verifier.h"
@@ -19,11 +20,24 @@ void BindCindVerification(py::module_& main_module) {
 
     py::class_<ViolatingCluster>(m, "ViolatingCluster")
             .def_readonly("basket_rows", &ViolatingCluster::basket_rows)
-            .def_readonly("violating_rows", &ViolatingCluster::violating_rows);
+            .def_readonly("violating_rows", &ViolatingCluster::violating_rows)
+            .def(py::pickle(
+                    // __getstate__
+                    [](ViolatingCluster const& vc) {
+                        return py::make_tuple(vc.basket_rows, vc.violating_rows);
+                    },
+                    // __setstate__
+                    [](py::tuple st) {
+                        if (st.size() != 2) {
+                            throw std::runtime_error("Invalid state for ViolatingCluster pickle!");
+                        }
+                        return ViolatingCluster{
+                                .basket_rows = st[0].cast<CINDVerifier::Cluster>(),
+                                .violating_rows = st[1].cast<CINDVerifier::Cluster>()};
+                    }));
 
-    auto cls = BindPrimitiveNoBase<CINDVerifier>(m, "CINDVerifier");
-
-    cls.def("holds", &CINDVerifier::Holds)
+    BindPrimitiveNoBase<CINDVerifier>(m, "CINDVerifier")
+            .def("holds", &CINDVerifier::Holds)
             .def("get_real_validity", &CINDVerifier::GetRealValidity)
             .def("get_real_completeness", &CINDVerifier::GetRealCompleteness)
             .def("get_violating_rows_count", &CINDVerifier::GetViolatingRowsCount)
@@ -32,9 +46,6 @@ void BindCindVerification(py::module_& main_module) {
             .def("get_supporting_baskets", &CINDVerifier::GetSupportingBaskets)
             .def("get_included_supporting_baskets", &CINDVerifier::GetIncludedSupportingBaskets)
             .def("get_included_baskets_total", &CINDVerifier::GetIncludedBasketsTotal);
-
-    py::module_ alg = m.def_submodule("algorithms");
-    alg.attr("Default") = py::reinterpret_borrow<py::object>(cls);
 }
 
 }  // namespace python_bindings

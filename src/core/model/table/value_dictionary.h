@@ -41,6 +41,12 @@ public:
         }
     }
 
+    int ToInt(std::string const& value) const {
+        auto it = to_int_map_.find(value);
+        assert(it != to_int_map_.end());
+        return it->second;
+    }
+
 private:
     std::vector<std::string> to_string_map_{""};
     std::unordered_map<std::string, int> to_int_map_;

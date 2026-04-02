@@ -9,9 +9,6 @@
 
 namespace algos::cind {
 class Cinderella final : public CindMiner {
-public:
-    explicit Cinderella(config::InputTables& input_tables);
-
 private:
     CIND ExecuteSingle(model::IND const& aind) final;
 
@@ -21,5 +18,8 @@ private:
                                          AttrsType const& condition_attrs) const;
 
     void CreateNewItemsets(Itemset& itemset) const;
+
+public:
+    explicit Cinderella(config::InputTables& input_tables);
 };
 }  // namespace algos::cind

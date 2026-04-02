@@ -55,6 +55,10 @@ public:
         return unique_values_;
     }
 
+    ValueDictionary const& GetValueDict() const noexcept {
+        return *value_dictionary_;
+    }
+
     std::string DecodeValue(int value) const {
         // 0 is treated as NULL value id
         constexpr int k_null_value_id = 0;
