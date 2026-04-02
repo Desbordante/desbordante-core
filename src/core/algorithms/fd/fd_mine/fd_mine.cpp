@@ -5,13 +5,24 @@
 
 #include <boost/unordered_map.hpp>
 
+#include "core/algorithms/fd/make_plain_table_mask_pair_adder.h"
+#include "core/config/max_lhs/option.h"
 #include "core/util/logger.h"
 
-namespace algos {
+namespace algos::fd {
 
 using boost::dynamic_bitset;
 
-void FdMine::ResetStateFd() {
+FdMine::FdMine() {
+    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
+}
+
+void FdMine::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName()});
+}
+
+void FdMine::ResetState() {
+    fd_view_ = nullptr;
     candidate_set_.clear();
     eq_set_.clear();
     fd_set_.clear();
@@ -23,19 +34,18 @@ void FdMine::ResetStateFd() {
 
 void FdMine::ExecuteInternal() {
     // 1
-    schema_ = relation_->GetSchema();
+    std::size_t const attr_num = table_header_.column_names.size();
+    relation_indices_ = dynamic_bitset<>(table_header_.column_names.size());
 
-    relation_indices_ = dynamic_bitset<>(schema_->GetNumColumns());
-
-    for (size_t column_index = 0; column_index < schema_->GetNumColumns(); column_index++) {
-        dynamic_bitset<> tmp(schema_->GetNumColumns());
+    for (size_t column_index = 0; column_index < attr_num; column_index++) {
+        dynamic_bitset<> tmp(attr_num);
         tmp[column_index] = 1;
         relation_indices_[column_index] = 1;
         candidate_set_.insert(std::move(tmp));
     }
 
     for (auto const& candidate : candidate_set_) {
-        closure_[candidate] = dynamic_bitset<>(schema_->GetNumColumns());
+        closure_[candidate] = dynamic_bitset<>(attr_num);
     }
 
     // 2
@@ -58,22 +68,23 @@ void FdMine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
     if (!closure_.count(xi)) {
         closure_[xi] = dynamic_bitset<>(xi.size());
     }
-    for (size_t column_index = 0; column_index < schema_->GetNumColumns(); column_index++) {
+    std::size_t const attr_num = table_header_.column_names.size();
+    for (std::size_t column_index = 0; column_index < attr_num; column_index++) {
         if ((relation_indices_ - xi - closure_[xi])[column_index]) {
             dynamic_bitset<> candidate_xy = xi;
-            dynamic_bitset<> candidate_y(schema_->GetNumColumns());
+            dynamic_bitset<> candidate_y(attr_num);
             candidate_xy[column_index] = 1;
             candidate_y[column_index] = 1;
 
             if (xi.count() == 1) {
-                auto candidate_x_pli =
-                        relation_->GetColumnData(xi.find_first()).GetPositionListIndex();
-                auto candidate_y_pli =
-                        relation_->GetColumnData(column_index).GetPositionListIndex();
+                model::PositionListIndex const& candidate_x_pli =
+                        stripped_partitions_[xi.find_first()];
+                model::PositionListIndex const& candidate_y_pli =
+                        stripped_partitions_[column_index];
 
-                plis_[candidate_xy] = candidate_x_pli->Intersect(candidate_y_pli);
+                plis_[candidate_xy] = candidate_x_pli.Intersect(&candidate_y_pli);
 
-                if (candidate_x_pli->GetNumCluster() == plis_[candidate_xy]->GetNumCluster()) {
+                if (candidate_x_pli.GetNumCluster() == plis_[candidate_xy]->GetNumCluster()) {
                     closure_[xi][column_index] = 1;
                 }
 
@@ -81,9 +92,9 @@ void FdMine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
             }
 
             if (!plis_.count(candidate_xy)) {
-                auto candidate_y_pli =
-                        relation_->GetColumnData(candidate_y.find_first()).GetPositionListIndex();
-                plis_[candidate_xy] = plis_[xi]->Intersect(candidate_y_pli);
+                model::PositionListIndex const& candidate_y_pli =
+                        stripped_partitions_[candidate_y.find_first()];
+                plis_[candidate_xy] = plis_[xi]->Intersect(&candidate_y_pli);
             }
 
             if (plis_[xi]->GetNumCluster() == plis_[candidate_xy]->GetNumCluster()) {
@@ -175,11 +186,11 @@ void FdMine::GenerateNextLevelCandidates() {
                 if (!(candidate_j).is_subset_of(fd_set_[candidate_i]) &&
                     !(candidate_i).is_subset_of(fd_set_[candidate_j])) {
                     if (candidate_i.count() == 1) {
-                        auto candidate_i_pli = relation_->GetColumnData(candidate_i.find_first())
-                                                       .GetPositionListIndex();
-                        auto candidate_j_pli = relation_->GetColumnData(candidate_j.find_first())
-                                                       .GetPositionListIndex();
-                        plis_[candidate_ij] = candidate_i_pli->Intersect(candidate_j_pli);
+                        model::PositionListIndex const& candidate_i_pli =
+                                stripped_partitions_[candidate_i.find_first()];
+                        model::PositionListIndex const& candidate_j_pli =
+                                stripped_partitions_[candidate_j.find_first()];
+                        plis_[candidate_ij] = candidate_i_pli.Intersect(&candidate_j_pli);
                     } else {
                         plis_[candidate_ij] =
                                 plis_[candidate_i]->Intersect(plis_[candidate_j].get());
@@ -251,6 +262,8 @@ void FdMine::Reconstruct() {
         }
 
         for (auto const& lhs : observed) {
+            // TODO: investigate how this check can be pushed into an earlier stage.
+            if (lhs.count() > max_lhs_) continue;
             auto [it, is_new] = final_fd_set_.try_emplace(lhs, rhs_copy);
             if (!is_new) {
                 it->second |= rhs_copy;
@@ -260,22 +273,19 @@ void FdMine::Reconstruct() {
 }
 
 void FdMine::Display() {
-    unsigned int fd_counter = 0;
+    TableMaskPairFdView::Storage storage;
+    auto report_fd = MakePlainTableMaskPairAdder(storage);
 
-    for (auto const& [lhs, rhs] : final_fd_set_) {
-        for (size_t j = 0; j < rhs.size(); j++) {
-            if (!rhs[j] || (rhs[j] && lhs[j])) {
-                continue;
-            }
-            Vertical lhs_vertical(schema_, lhs);
-            LOG_DEBUG("Discovered FD: {} -> {}", lhs_vertical.ToString(),
-                      schema_->GetColumn(j)->GetName());
-            RegisterFd(std::move(lhs_vertical), *schema_->GetColumn(j),
-                       relation_->GetSharedPtrSchema());
-            fd_counter++;
-        }
+    for (auto it = final_fd_set_.begin(); it != final_fd_set_.end();) {
+        auto node = final_fd_set_.extract(it++);
+        boost::dynamic_bitset<> lhs = std::move(node.key());
+        boost::dynamic_bitset<> rhs = std::move(node.mapped());
+        rhs -= lhs;
+        if (rhs.none()) continue;
+        report_fd(std::move(lhs), std::move(rhs));
     }
-    LOG_DEBUG("TOTAL FDs: {}", fd_counter);
+
+    fd_view_ = std::make_shared<TableMaskPairFdView>(table_header_, std::move(storage));
 }
 
-}  // namespace algos
+}  // namespace algos::fd
