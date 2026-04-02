@@ -252,6 +252,28 @@ def scenario_partial_validity_and_fix():
     print()
     print_clusters(algo_fixed, lhs_df, [0])
 
+def scenario_wrong_condition_values_count():
+    prints("Scenario 4: passing the wrong number of condition values.")
+    print()
+
+    lhs_df = get_table_df("cind_test_en")
+    rhs_df = get_table_df("cind_test_de")
+
+    prints("The EN table has 5 columns. With lhs_indices=[0], there are 4 conditional "
+           "attributes (cent, birthplace, deathplace, desc). "
+           "If we pass only 2 condition values instead of 4, the verifier raises an error:")
+    print()
+
+    try:
+        algo = desbordante.cind_verification.algorithms.Default()
+        algo.load_data(tables=[lhs_df, rhs_df])
+        algo.execute(lhs_indices=[0], rhs_indices=[0],
+                     cind_condition_values=["18", "_"])
+    except Exception as e:
+        print(f"  Caught exception: {e}")
+
+    print()
+
 prints("This example demonstrates CIND verification on your datasets (EN and DE).")
 prints("Place these files into: examples/datasets/cind_datasets/")
 prints("  - cind_test_en.csv")
@@ -267,3 +289,7 @@ print()
 print("=" * 80)
 print()
 scenario_partial_validity_and_fix()
+print()
+print("=" * 80)
+print()
+scenario_wrong_condition_values_count()
