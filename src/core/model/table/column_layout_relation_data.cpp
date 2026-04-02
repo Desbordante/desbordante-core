@@ -9,8 +9,8 @@
 #include <memory>
 #include <utility>
 
-#include "core/util/logger.h"
 #include "core/model/index.h"
+#include "core/util/logger.h"
 
 std::vector<int> LegacyColumnLayoutRelationData::GetTuple(int tuple_index) const {
     std::size_t num_columns = column_data_.size();
