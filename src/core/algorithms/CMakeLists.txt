@@ -38,3 +38,10 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::parser::csv ${DESBORDANTE_PREFIX}::parser::sequence
             ${DESBORDANTE_PREFIX}::model::sequence spdlog::spdlog_header_only
 )
+
+set(NAME algos.partition_only_algorithm)
+desbordante_add_lib(NAME)
+target_sources(${NAME} PRIVATE partition_only_algorithm.cpp)
+target_link_libraries(
+    ${NAME} PUBLIC ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
+)
