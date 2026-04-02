@@ -23,7 +23,7 @@ private:
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
 
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
 
     long double result_ = 0.L;
 

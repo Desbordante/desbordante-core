@@ -40,7 +40,7 @@ private:
     // it means that that DC is a one-tuple one and it sufficient
     // for a single tuple to violate it. e.g. {{2, 2}}
     std::set<std::pair<size_t, size_t>, dc::SetComparator> violations_;
-    std::unique_ptr<ColumnLayoutRelationData> relation_;
+    std::unique_ptr<LegacyColumnLayoutRelationData> relation_;
     std::vector<model::TypedColumnData> data_;
     config::InputTable input_table_;
     bool do_collect_violations_;

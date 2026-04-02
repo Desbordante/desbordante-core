@@ -11,7 +11,7 @@
 #include "core/model/table/column.h"
 #include "core/model/table/position_list_index.h"
 
-class ColumnLayoutRelationData;
+class LegacyColumnLayoutRelationData;
 
 namespace model {
 
@@ -37,7 +37,7 @@ public:
     }
 
     std::unique_ptr<PLIWithSingletons> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
+                                                LegacyColumnLayoutRelationData& relation_data);
 
     std::unique_ptr<PLIWithSingletons> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;
