@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <functional>
+#include <iostream>
 #include <typeindex>
 #include <typeinfo>
 
@@ -148,8 +149,9 @@ T Option<T>::ConvertValue(boost::any const &value) const {
         if (!default_func_) throw ConfigurationError(no_value_no_default);
         return default_func_();
     } else {
-        if (value.type() != typeid(T))
+        if (value.type().name() != typeid(T).name()) {
             throw ConfigurationError(std::string("Incorrect type for option ") + name_.data());
+        }
         return boost::any_cast<T>(value);
     }
 }

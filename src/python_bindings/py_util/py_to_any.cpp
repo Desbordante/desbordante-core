@@ -136,6 +136,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<config::PfdErrorMeasureType>,
         kEnumConvPair<config::AfdErrorMeasureType>,
         kEnumConvPair<algos::afd_metric_calculator::AFDMetric>,
+        kEnumConvPair<config::ADCErrorMeasureType>,
         kEnumConvPair<algos::InputFormat>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,

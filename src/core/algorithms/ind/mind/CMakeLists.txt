@@ -3,5 +3,5 @@ desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE mind.cpp)
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::create_algo spdlog::spdlog_header_only better-enums
-                    Boost::headers
+                    Boost::headers frozen
 )

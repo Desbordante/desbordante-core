@@ -4,6 +4,8 @@
 #include "core/algorithms/association_rules/mining_algorithms.h"
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "core/algorithms/cfd/mining_algorithms.h"
+#include "core/algorithms/dc/mining_alrorithms.h"
+#include "core/algorithms/dc/verification_algorithms.h"
 #include "core/algorithms/dd/mining_algorithms.h"
 #include "core/algorithms/fd/mining_algorithms.h"
 #include "core/algorithms/fd/sfd/cords.h"

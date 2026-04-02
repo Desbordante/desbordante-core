@@ -27,6 +27,7 @@ target_link_libraries(
             Boost::headers
             Desbordante.bindlib.util
             Desbordante.bindlib.data
+            frozen
 )
 
 # Uncomment to debug linker issues
@@ -51,7 +52,7 @@ target_sources(
             py_util/table_serialization.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE better-enums spdlog::spdlog_header_only Boost::headers pybind11::pybind11
+    ${NAME} PRIVATE better-enums spdlog::spdlog_header_only Boost::headers pybind11::pybind11 frozen
 )
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
@@ -95,10 +96,12 @@ desbordante_add_bind(
 desbordante_add_bind(
     dc
     SRCS
+    dc/bind_adc_verification.cpp
     dc/bind_dc_verification.cpp
     dc/bind_fastadc.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::dc::adc_verifier
+    ${DESBORDANTE_PREFIX}::dc::dc_verifier
     ${DESBORDANTE_PREFIX}::dc::fastadc
     frozen
     better-enums
@@ -153,6 +156,7 @@ desbordante_add_bind(
     better-enums
     spdlog::spdlog_header_only
     Boost::headers
+    frozen
 )
 
 desbordante_add_bind(

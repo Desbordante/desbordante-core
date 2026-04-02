@@ -4,7 +4,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
-#include "core/algorithms/dc/verifier/dc_verifier.h"
+#include "core/algorithms/dc/dc_verifier/dc_verifier.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace python_bindings {
