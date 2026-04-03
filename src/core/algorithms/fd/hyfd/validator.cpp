@@ -1,6 +1,7 @@
 #include "core/algorithms/fd/hyfd/validator.h"
 
 #include <algorithm>
+#include <cassert>
 #include <future>
 #include <utility>
 #include <vector>
@@ -283,6 +284,7 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
                                         boost::dynamic_bitset<>(num_attributes));
     }
 
+    auto const max_lhs = std::min<std::size_t>(max_lhs_, fds_->GetNumAttributes());
     size_t previous_num_invalid_fds = 0;
     algos::hy::IdPairs comparison_suggestions;
     while (!cur_level_vertices.empty()) {
@@ -296,9 +298,10 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
         comparison_suggestions.insert(comparison_suggestions.end(),
                                       result.ComparisonSuggestions().begin(),
                                       result.ComparisonSuggestions().end());
-        if (current_level_number_ >= fds_->GetNumAttributes()) {
+        if (current_level_number_ == max_lhs) {
             break;
         }
+        assert(current_level_number_ < max_lhs);
 
         std::vector<LhsPair> next_level =
                 algos::hy::CollectCurrentChildren(cur_level_vertices, num_attributes);
