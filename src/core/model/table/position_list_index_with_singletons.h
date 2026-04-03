@@ -11,7 +11,7 @@
 #include "core/model/table/column.h"
 #include "core/model/table/position_list_index.h"
 
-class ColumnLayoutRelationData;
+class LegacyColumnLayoutRelationData;
 
 namespace model {
 
@@ -20,16 +20,14 @@ private:
     std::deque<Cluster> singletons_;
 
 public:
-    PLIWithSingletons(std::deque<Cluster> index, std::deque<Cluster> singletons,
-                      Cluster null_cluster, unsigned int size, double entropy,
-                      unsigned long long nep, unsigned int relation_size,
+    PLIWithSingletons(std::deque<Cluster> index, std::deque<Cluster> singletons, unsigned int size,
+                      double entropy, unsigned long long nep, unsigned int relation_size,
                       unsigned int original_relation_size, double inverted_entropy = 0,
                       double gini_impurity = 0);
 
     PLIWithSingletons(std::unique_ptr<PositionListIndex> positional_list_index);
 
-    static std::unique_ptr<PLIWithSingletons> CreateFor(std::vector<int>& data,
-                                                        bool is_null_eq_null);
+    static std::unique_ptr<PLIWithSingletons> CreateFor(std::vector<int>& data);
 
     /* Returns all clusters, including singletons */
     std::deque<Cluster> GetAllClusters() const {
@@ -39,7 +37,7 @@ public:
     }
 
     std::unique_ptr<PLIWithSingletons> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
+                                                LegacyColumnLayoutRelationData& relation_data);
 
     std::unique_ptr<PLIWithSingletons> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;

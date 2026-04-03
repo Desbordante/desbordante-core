@@ -60,7 +60,7 @@ TEST_P(TestTanePdepSelfValidation, SelfCalculationTest) {
     auto const& p = GetParam();
     double eps = 0.001;
     auto table = std::make_shared<CSVParser>(p.csv_config);
-    auto relation = ColumnLayoutRelationData::CreateFrom(*table, true);
+    auto relation = LegacyColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [column_id, expected_error] : p.errors) {
         auto const& column_pli = relation->GetColumnData(column_id).GetPLWSIndex();
         config::ErrorType error = algos::PdepSelf(column_pli);
@@ -76,7 +76,7 @@ TEST_P(TestTaneAfdMeasuresValidation, ErrorCalculationTest) {
     auto const& p = GetParam();
     double eps = 0.00001;
     auto table = std::make_shared<CSVParser>(p.csv_config);
-    auto relation = ColumnLayoutRelationData::CreateFrom(*table, true);
+    auto relation = LegacyColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [lhs_id, rhs_id, expected_error] : p.afds) {
         auto const& lhs = relation->GetColumnData(lhs_id).GetPLWSIndex();
         auto const& rhs = relation->GetColumnData(rhs_id).GetPLWSIndex();

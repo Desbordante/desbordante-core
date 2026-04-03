@@ -7,12 +7,11 @@ namespace algos {
 
 UCCAlgorithm::UCCAlgorithm() : Algorithm() {
     RegisterOptions();
-    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
 void UCCAlgorithm::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
 }
 
 }  // namespace algos

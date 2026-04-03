@@ -2,6 +2,17 @@
 
 #include "core/model/types/bitset.h"
 
+namespace {
+template <typename Bitset>
+static boost::dynamic_bitset<> BitsetToDynamicBitset(Bitset const& b, std::size_t const size) {
+    boost::dynamic_bitset<> dyn_bitset(size);
+    for (std::size_t i = 0; i < size; ++i) {
+        dyn_bitset.set(i, b[i]);
+    }
+    return dyn_bitset;
+}
+}  // namespace
+
 FDTreeElement::FDTreeElement(size_t max_attribute_number)
     : max_attribute_number_(max_attribute_number) {
     children_.resize(max_attribute_number);
@@ -196,87 +207,25 @@ void FDTreeElement::FilterSpecializationsHelper(
     }
 }
 
-void FDTreeElement::PrintDep(std::string const& file_name,
-                             std::vector<std::string>& column_names) const {
-    std::ofstream file;
-    file.open(file_name);
-    model::Bitset<kMaxAttrNum> active_path;
-    PrintDependencies(active_path, file, column_names);
-    file.close();
+void FDTreeElement::CreateAnswer(std::size_t attr_num,
+                                 algos::MultiAttrRhsFdStorage::LhsLimBuilder& builder,
+                                 unsigned int max_lhs) const {
+    boost::dynamic_bitset<> lhs(attr_num);
+    this->TransformTreeFdCollection(lhs, builder, max_lhs);
 }
 
-void FDTreeElement::PrintDependencies(model::Bitset<FDTreeElement::kMaxAttrNum>& active_path,
-                                      std::ofstream& file,
-                                      std::vector<std::string>& column_names) const {
-    std::string column_id;
-    if (std::isdigit(column_names[0][0])) {
-        column_id = "column";
-    }
-    std::string out;
-    for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
-        if (this->is_fd_[attr - 1]) {
-            out = "{";
+void FDTreeElement::TransformTreeFdCollection(boost::dynamic_bitset<>& lhs,
+                                              algos::MultiAttrRhsFdStorage::LhsLimBuilder& builder,
+                                              unsigned int max_lhs) const {
+    if (lhs.count() > max_lhs) return;
 
-            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
-                 i = active_path._Find_next(i)) {
-                if (!column_id.empty())
-                    out += column_id + std::to_string(std::stoi(column_names[i - 1]) + 1) + ",";
-                else
-                    out += column_names[i - 1] + ",";
-            }
+    if (is_fd_.any()) builder.AddFd({lhs, BitsetToDynamicBitset(is_fd_, lhs.size())});
 
-            if (out.size() > 1) {
-                out = out.substr(0, out.size() - 1);
-            }
-            if (!column_id.empty())
-                out += "} -> " + column_id + std::to_string(std::stoi(column_names[attr - 1]) + 1);
-            else
-                out += "} -> " + column_id + column_names[attr - 1];
-            file << out << std::endl;
-        }
-    }
-
-    for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
-        if (this->children_[attr - 1]) {
-            active_path.set(attr);
-            this->children_[attr - 1]->PrintDependencies(active_path, file, column_names);
-            active_path.reset(attr);
-        }
-    }
-}
-
-void FDTreeElement::FillFdCollection(std::shared_ptr<RelationalSchema> const& scheme,
-                                     std::list<FD>& fd_collection, unsigned int max_lhs) const {
-    model::Bitset<kMaxAttrNum> active_path;
-    this->TransformTreeFdCollection(active_path, fd_collection, scheme, max_lhs);
-}
-
-void FDTreeElement::TransformTreeFdCollection(
-        model::Bitset<FDTreeElement::kMaxAttrNum>& active_path, std::list<FD>& fd_collection,
-        std::shared_ptr<RelationalSchema> const& scheme, unsigned int max_lhs) const {
-    if (active_path.count() > max_lhs) return;
-
-    for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
-        if (this->is_fd_[attr - 1]) {
-            boost::dynamic_bitset<> lhs_bitset(kMaxAttrNum);
-            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
-                 i = active_path._Find_next(i)) {
-                if (i > 0) {
-                    lhs_bitset.set(i - 1);
-                }
-            }
-            Vertical lhs(scheme.get(), lhs_bitset);
-            Column rhs(scheme.get(), scheme->GetColumn(attr - 1)->GetName(), attr - 1);
-            fd_collection.emplace_back(FD{lhs, rhs, scheme});
-        }
-    }
-
-    for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
-        if (this->children_[attr - 1]) {
-            active_path.set(attr);
-            this->children_[attr - 1]->TransformTreeFdCollection(active_path, fd_collection, scheme,
-                                                                 max_lhs);
-            active_path.reset(attr);
+    for (size_t attr = 0; attr != lhs.size(); ++attr) {
+        if (this->children_[attr]) {
+            lhs.set(attr);
+            this->children_[attr]->TransformTreeFdCollection(lhs, builder, max_lhs);
+            lhs.reset(attr);
         }
     }
 }

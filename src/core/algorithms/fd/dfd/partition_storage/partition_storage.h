@@ -18,7 +18,7 @@ private:
             : vertical_(vertical), pli_(pli), added_arity_(initial_arity) {}
     };
 
-    ColumnLayoutRelationData* relation_data_;
+    LegacyColumnLayoutRelationData* relation_data_;
     std::unique_ptr<model::VerticalMap<model::PositionListIndex>> index_;
 
     mutable std::mutex getting_pli_mutex_;
@@ -27,7 +27,7 @@ private:
     CachingProcess(Vertical const& vertical, std::unique_ptr<model::PositionListIndex> pli);
 
 public:
-    PartitionStorage(ColumnLayoutRelationData* relation_data);
+    PartitionStorage(LegacyColumnLayoutRelationData* relation_data);
 
     model::PositionListIndex* Get(Vertical const& vertical);
     std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>

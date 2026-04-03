@@ -11,7 +11,7 @@ PositionListIndex* PLICache::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
 }
 
-PLICache::PLICache(ColumnLayoutRelationData* relation_data, CachingMethod caching_method,
+PLICache::PLICache(LegacyColumnLayoutRelationData* relation_data, CachingMethod caching_method,
                    CacheEvictionMethod eviction_method, double caching_method_value,
                    double min_entropy, double mean_entropy, double median_entropy,
                    double maximum_entropy, double median_gini, double median_inverted_entropy)

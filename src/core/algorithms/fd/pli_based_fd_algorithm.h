@@ -9,17 +9,16 @@
 
 namespace algos {
 
-class PliBasedFDAlgorithm : public FDAlgorithm {
+class LegacyPliBasedFDAlgorithm : public FDAlgorithm {
     config::InputTable input_table_;
-    config::EqNullsType is_null_equal_null_;
 
     void RegisterOptions();
     void LoadDataInternal() final;
 
 protected:
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
 
-    ColumnLayoutRelationData const& GetRelation() const noexcept {
+    LegacyColumnLayoutRelationData const& GetRelation() const noexcept {
         // GetRelation should be called after the dataset has been parsed, i.e. after algorithm
         // execution
         assert(relation_ != nullptr);
@@ -27,7 +26,7 @@ protected:
     }
 
 public:
-    PliBasedFDAlgorithm();
+    LegacyPliBasedFDAlgorithm();
 };
 
 }  // namespace algos

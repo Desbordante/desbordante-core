@@ -135,11 +135,11 @@ public:
     using SetOfVectors = std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>;
     using SetOfAgreeSets = std::unordered_set<AgreeSet>;
 
-    explicit AgreeSetFactory(ColumnLayoutRelationData const* const rel,
+    explicit AgreeSetFactory(LegacyColumnLayoutRelationData const* const rel,
                              Configuration const& c = Configuration())
         : relation_(rel), config_(c) {}
 
-    ColumnLayoutRelationData const* GetRelation() const {
+    LegacyColumnLayoutRelationData const* GetRelation() const {
         return relation_;
     }
 
@@ -188,7 +188,7 @@ private:
     using VectorComp = std::function<bool(std::vector<int> const&, std::vector<int> const&)>;
     std::set<std::vector<int>, VectorComp> GenSortedEqvClasses(VectorComp comp) const;
 
-    ColumnLayoutRelationData const* const relation_;
+    LegacyColumnLayoutRelationData const* const relation_;
 
     Configuration config_;
 };

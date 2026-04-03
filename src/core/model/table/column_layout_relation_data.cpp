@@ -4,23 +4,25 @@
 //
 #include "core/model/table/column_layout_relation_data.h"
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <utility>
 
+#include "core/model/index.h"
 #include "core/util/logger.h"
 
-std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
-    int num_columns = schema_->GetNumColumns();
+std::vector<int> LegacyColumnLayoutRelationData::GetTuple(int tuple_index) const {
+    std::size_t num_columns = column_data_.size();
     std::vector<int> tuple = std::vector<int>(num_columns);
-    for (int column_index = 0; column_index < num_columns; column_index++) {
+    for (model::Index column_index = 0; column_index < num_columns; column_index++) {
         tuple[column_index] = column_data_[column_index].GetProbingTableValue(tuple_index);
     }
     return tuple;
 }
 
-std::shared_ptr<model::PLI const> ColumnLayoutRelationData::CalculatePLI(
-        std::vector<unsigned int> const& indices) const {
+std::shared_ptr<model::PLI const> LegacyColumnLayoutRelationData::CalculatePLI(
+        std::vector<model::Index> const& indices) const {
     if (indices.size() <= 0) throw std::invalid_argument("received unpositive number of indices");
 
     std::shared_ptr<model::PLI const> pli = GetColumnData(indices[0]).GetPliOwnership();
@@ -31,7 +33,7 @@ std::shared_ptr<model::PLI const> ColumnLayoutRelationData::CalculatePLI(
     return pli;
 }
 
-std::shared_ptr<model::PLIWS const> ColumnLayoutRelationData::CalculatePLIWS(
+std::shared_ptr<model::PLIWS const> LegacyColumnLayoutRelationData::CalculatePLIWS(
         std::vector<unsigned int> const& indices) const {
     if (indices.size() <= 0) throw std::invalid_argument("received unpositive number of indices");
 
@@ -43,12 +45,11 @@ std::shared_ptr<model::PLIWS const> ColumnLayoutRelationData::CalculatePLIWS(
     return pliws;
 }
 
-std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
-        model::IDatasetStream& data_stream, bool is_null_eq_null) {
+std::unique_ptr<LegacyColumnLayoutRelationData> LegacyColumnLayoutRelationData::CreateFrom(
+        model::IDatasetStream& data_stream) {
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     std::unordered_map<std::string, int> value_dictionary;
-    int next_value_id = 1;
-    int const null_value_id = kNullValueId;
+    int next_value_id = 0;
     size_t const num_columns = data_stream.GetNumberOfColumns();
     std::vector<std::vector<int>> column_vectors = std::vector<std::vector<int>>(num_columns);
     std::vector<std::string> row;
@@ -66,20 +67,16 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
 
         for (size_t index = 0; index < row.size(); ++index) {
             std::string const& field = row[index];
-            if (field.empty()) {
-                column_vectors[index].push_back(null_value_id);
+            auto location = value_dictionary.find(field);
+            int value_id;
+            if (location == value_dictionary.end()) {
+                value_dictionary[field] = next_value_id;
+                value_id = next_value_id;
+                next_value_id++;
             } else {
-                auto location = value_dictionary.find(field);
-                int value_id;
-                if (location == value_dictionary.end()) {
-                    value_dictionary[field] = next_value_id;
-                    value_id = next_value_id;
-                    next_value_id++;
-                } else {
-                    value_id = location->second;
-                }
-                column_vectors[index].push_back(value_id);
+                value_id = location->second;
             }
+            column_vectors[index].push_back(value_id);
         }
     }
 
@@ -87,9 +84,10 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
     for (size_t i = 0; i < num_columns; ++i) {
         auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
-        auto pli = model::PLIWithSingletons::CreateFor(column_vectors[i], is_null_eq_null);
+        auto pli = model::PLIWithSingletons::CreateFor(column_vectors[i]);
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
 
-    return std::make_unique<ColumnLayoutRelationData>(std::move(schema), std::move(column_data));
+    return std::make_unique<LegacyColumnLayoutRelationData>(std::move(schema),
+                                                            std::move(column_data));
 }

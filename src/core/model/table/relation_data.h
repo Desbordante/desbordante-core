@@ -51,7 +51,7 @@ public:
     }
 
     size_t GetNumColumns() const {
-        return schema_->GetNumColumns();
+        return column_data_.size();
     }
 
     double GetMaximumNip() const {

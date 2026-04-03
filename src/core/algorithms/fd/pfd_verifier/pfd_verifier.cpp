@@ -15,7 +15,6 @@ namespace algos {
 void PFDVerifier::RegisterOptions() {
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
     RegisterOption(config::kPfdErrorMeasureOpt(&error_measure_));
@@ -27,7 +26,7 @@ void PFDVerifier::MakeExecuteOptsAvailable() {
 }
 
 void PFDVerifier::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: pFD verifying is meaningless.");
     }
@@ -61,7 +60,7 @@ std::shared_ptr<model::PLI const> PFDVerifier::CalculatePLI(
 PFDVerifier::PFDVerifier() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kTable, kEqualNulls});
+    MakeOptionsAvailable({kTable});
 }
 
 }  // namespace algos

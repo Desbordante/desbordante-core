@@ -41,7 +41,7 @@ private:
     bool metric_fd_holds_ = false;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    std::shared_ptr<ColumnLayoutRelationData> relation_;  // temporarily parsing twice
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;  // temporarily parsing twice
     std::unique_ptr<PointsCalculator> points_calculator_;
     std::unique_ptr<HighlightCalculator> highlight_calculator_;
 

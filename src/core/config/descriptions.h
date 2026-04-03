@@ -130,6 +130,8 @@ constexpr auto kDMaxFitnessEvaluations =
         "the algorithm will be stopped after calculating the fitness "
         "function this many times";
 constexpr auto kDPopulationSize = "the number of individuals in the population at any given time";
+// FD verifiers
+constexpr auto kDFd = "the functional dependency to be verified";
 // Dynamic FD verifier
 constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
 constexpr auto kDInsertStatements = "Rows to be inserted into the table using the insert operation";

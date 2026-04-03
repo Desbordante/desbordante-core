@@ -36,7 +36,7 @@ void PyroUCC::MakeExecuteOptsAvailable() {
 }
 
 void PyroUCC::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: UCC mining is meaningless.");

@@ -11,7 +11,7 @@
 
 #include "core/model/table/column.h"
 
-class ColumnLayoutRelationData;
+class LegacyColumnLayoutRelationData;
 
 namespace model {
 
@@ -30,11 +30,10 @@ protected:
     }
 
     static void SortClusters(std::deque<Cluster>& clusters);
-    static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
+    static bool TakeProbe(int position, LegacyColumnLayoutRelationData& relation_data,
                           Vertical const& probing_columns, std::vector<int>& probe);
 
 private:
-    Cluster null_cluster_;
     double entropy_;
     double inverted_entropy_;
     double gini_impurity_;
@@ -48,13 +47,12 @@ public:
     static unsigned long long micros_;
     static int const kSingletonValueId;
 
-    PositionListIndex(std::deque<Cluster> index, Cluster null_cluster, unsigned int size,
-                      double entropy, unsigned long long nep, unsigned int relation_size,
+    PositionListIndex(std::deque<Cluster> index, unsigned int size, double entropy,
+                      unsigned long long nep, unsigned int relation_size,
                       unsigned int original_relation_size, double inverted_entropy = 0,
                       double gini_impurity = 0);
 
-    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data,
-                                                        bool is_null_eq_null);
+    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data);
 
     static std::unordered_map<int, unsigned> CreateFrequencies(
             Cluster const& cluster, std::vector<int> const& probing_table);
@@ -152,7 +150,7 @@ public:
     std::unique_ptr<PositionListIndex> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;
     std::unique_ptr<PositionListIndex> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
+                                                LegacyColumnLayoutRelationData& relation_data);
     std::string ToString() const;
 };
 

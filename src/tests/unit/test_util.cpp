@@ -21,33 +21,11 @@ using ::testing::ContainerEq, ::testing::Eq;
 namespace fs = std::filesystem;
 
 TEST(pliChecker, first) {
-    deque<vector<int>> ans = {
-            {0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}  // null
-    };
+    deque<vector<int>> ans = {{0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}};
     deque<vector<int>> index;
     try {
         auto input_table = MakeInputTable(kTest1);
-        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
-        auto column_data = test->GetColumnData(0);
-        index = column_data.GetPositionListIndex()->GetIndex();
-    } catch (std::runtime_error& e) {
-        cout << "Exception raised in test: " << e.what() << endl;
-        FAIL();
-    }
-    ASSERT_THAT(index, ContainerEq(ans));
-}
-
-TEST(pliChecker, second) {
-    deque<vector<int>> ans = {
-            {0, 2, 8, 11},
-            {1, 5, 9},
-            {4, 14},
-            {6, 7, 18},
-    };
-    deque<vector<int>> index;
-    try {
-        auto input_table = MakeInputTable(kTest1);
-        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, false);
+        auto test = LegacyColumnLayoutRelationData::CreateFrom(*input_table);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPositionListIndex()->GetIndex();
     } catch (std::runtime_error& e) {
@@ -65,8 +43,8 @@ TEST(pliIntersectChecker, first) {
         auto input_table_1 = MakeInputTable(kProbeTest1);
         auto input_table_2 = MakeInputTable(kProbeTest2);
 
-        auto test1 = ColumnLayoutRelationData::CreateFrom(*input_table_1, false);
-        auto test2 = ColumnLayoutRelationData::CreateFrom(*input_table_2, false);
+        auto test1 = LegacyColumnLayoutRelationData::CreateFrom(*input_table_1);
+        auto test2 = LegacyColumnLayoutRelationData::CreateFrom(*input_table_2);
         auto pli1 = test1->GetColumnData(0).GetPositionListIndex();
         auto pli2 = test2->GetColumnData(0).GetPositionListIndex();
 
@@ -79,39 +57,13 @@ TEST(pliIntersectChecker, first) {
 }
 
 TEST(pliwsChecker, first) {
-    deque<vector<int>> ans_index = {
-            {0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}  // null
-    };
+    deque<vector<int>> ans_index = {{0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}};
     deque<vector<int>> ans_sngt = {{3}, {12}, {13}, {15}, {16}};
     deque<vector<int>> index;
     deque<vector<int>> sngt;
     try {
         auto input_table = MakeInputTable(kTest1);
-        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
-        auto column_data = test->GetColumnData(0);
-        index = column_data.GetPLWSIndex()->GetIndex();
-        sngt = column_data.GetPLWSIndex()->GetSingletons();
-    } catch (std::runtime_error& e) {
-        cout << "Exception raised in test: " << e.what() << endl;
-        FAIL();
-    }
-    ASSERT_THAT(index, ContainerEq(ans_index));
-    ASSERT_THAT(sngt, ContainerEq(ans_sngt));
-}
-
-TEST(pliwsChecker, second) {
-    deque<vector<int>> ans_index = {
-            {0, 2, 8, 11},
-            {1, 5, 9},
-            {4, 14},
-            {6, 7, 18},
-    };
-    deque<vector<int>> ans_sngt = {{3}, {12}, {13}, {15}, {16}};
-    deque<vector<int>> index;
-    deque<vector<int>> sngt;
-    try {
-        auto input_table = MakeInputTable(kTest1);
-        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, false);
+        auto test = LegacyColumnLayoutRelationData::CreateFrom(*input_table);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPLWSIndex()->GetIndex();
         sngt = column_data.GetPLWSIndex()->GetSingletons();
@@ -132,8 +84,8 @@ TEST(pliwsIntersectChecker, first) {
         auto input_table_1 = MakeInputTable(kProbeTest1);
         auto input_table_2 = MakeInputTable(kProbeTest2);
 
-        auto test1 = ColumnLayoutRelationData::CreateFrom(*input_table_1, false);
-        auto test2 = ColumnLayoutRelationData::CreateFrom(*input_table_2, false);
+        auto test1 = LegacyColumnLayoutRelationData::CreateFrom(*input_table_1);
+        auto test2 = LegacyColumnLayoutRelationData::CreateFrom(*input_table_2);
         auto pli1 = test1->GetColumnData(0).GetPLWSIndex();
         auto pli2 = test2->GetColumnData(0).GetPLWSIndex();
 
@@ -151,7 +103,7 @@ TEST(pliEntropyTest, first) {
 
     try {
         auto input_table = MakeInputTable(kTestFD);
-        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
+        auto test = LegacyColumnLayoutRelationData::CreateFrom(*input_table);
         res_pli = test->GetColumnData(1).GetPliOwnership();
     } catch (std::runtime_error& e) {
         cout << "Exception raised in test: " << e.what() << endl;
@@ -169,7 +121,7 @@ TEST(pliEntropyTest, second) {
 
     try {
         auto input_table = MakeInputTable(kTestFD);
-        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
+        auto test = LegacyColumnLayoutRelationData::CreateFrom(*input_table);
 
         auto pli1 = test->GetColumnData(4).GetPositionListIndex();
         auto pli2 = test->GetColumnData(5).GetPositionListIndex();
@@ -209,7 +161,7 @@ TEST(IdentifierSetTest, Computation) {
 
     try {
         auto input_table = MakeInputTable(kBernoulliRelation);
-        auto relation = ColumnLayoutRelationData::CreateFrom(*input_table, false);
+        auto relation = LegacyColumnLayoutRelationData::CreateFrom(*input_table);
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
             id_sets.insert(model::IdentifierSet(relation.get(), i).ToString());
@@ -230,7 +182,7 @@ TEST(IdentifierSetTest, Intersection) {
 
     try {
         auto input_table = MakeInputTable(kBernoulliRelation);
-        auto relation = ColumnLayoutRelationData::CreateFrom(*input_table, false);
+        auto relation = LegacyColumnLayoutRelationData::CreateFrom(*input_table);
         std::vector<model::IdentifierSet> id_sets;
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
@@ -259,7 +211,7 @@ void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
 
     try {
         auto input_table = MakeInputTable(kBernoulliRelation);
-        auto relation = ColumnLayoutRelationData::CreateFrom(*input_table, false);
+        auto relation = LegacyColumnLayoutRelationData::CreateFrom(*input_table);
         AgreeSetFactory factory(relation.get(), c);
         for (model::AgreeSet const& agree_set : factory.GenAgreeSets()) {
             agree_sets_actual.insert(agree_set.ToString());
