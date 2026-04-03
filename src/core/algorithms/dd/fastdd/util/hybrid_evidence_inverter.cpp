@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "core/algorithms/dd/fastdd/trees/translating_minimize_tree.h"
+#include "core/algorithms/dd/fastdd/trees/tree_search.h"
 #include "core/algorithms/dd/fastdd/util/evidence_inverter.h"
 #include "core/util/logger.h"
 
@@ -159,6 +160,8 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::BuildDDs() {
                 cur_diff_bitsets.push_back(std::move(diff_bitset));
             }
             LOG_DEBUG("Col {}; Dif_func {}; {}", i, j - 1, dif_funcs_[i][j - 1].ToString());
+            cur_diff_bitsets = MinimizeDifferentialSet(std::move(cur_diff_bitsets));
+            LOG_TRACE("Minimized differential set: {}", cur_diff_bitsets.size());
 
             EvidenceInverter inverter(std::move(cur_diff_bitsets), dif_func_info_->dif_func_num_,
                                       column_to_dif_funcs_, i);
@@ -175,6 +178,29 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::BuildDDs() {
     result = RemoveTransitive(std::move(result));
 
     return result;
+}
+
+std::vector<boost::dynamic_bitset<>> HybridEvidenceInverter::MinimizeDifferentialSet(
+        std::vector<boost::dynamic_bitset<>> bitsets) const {
+    LOG_TRACE("Start minimize");
+    std::ranges::sort(bitsets,
+                      [](boost::dynamic_bitset<> const& a, boost::dynamic_bitset<> const& b) {
+                          int diff = b.count() - a.count();
+                          return diff != 0 ? diff < 0 : b < a;
+                      });
+    LOG_TRACE("Sorted");
+
+    TreeSearch negative_search;
+    LOG_TRACE("Built negative search: {}", bitsets.size());
+    std::ranges::for_each(bitsets, [&negative_search](boost::dynamic_bitset<> const& bitset) {
+        if (!negative_search.FindSuperSet(bitset)) {
+            negative_search.Add(bitset);
+        }
+    });
+    LOG_TRACE("Iterate");
+    std::vector<boost::dynamic_bitset<>> remaining_bitsets(negative_search.begin(),
+                                                           negative_search.end());
+    return remaining_bitsets;
 }
 
 std::vector<DifferentialDependency> HybridEvidenceInverter::Minimize(

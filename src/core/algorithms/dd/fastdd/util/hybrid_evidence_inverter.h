@@ -28,6 +28,8 @@ private:
     std::unordered_map<std::size_t, std::shared_ptr<TranslatingMinimizeTree>> minimize_tree_map_;
 
     void BuildClueIndices();
+    std::vector<boost::dynamic_bitset<>> MinimizeDifferentialSet(
+            std::vector<boost::dynamic_bitset<>> bitsets) const;
     std::vector<DifferentialDependency> Minimize(std::vector<boost::dynamic_bitset<>> covers,
                                                  std::size_t rhs_column, std::size_t rhs_offset);
     std::vector<DifferentialDependency> RemoveTransitive(
