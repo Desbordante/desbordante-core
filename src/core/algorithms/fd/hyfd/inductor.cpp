@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/hyfd/inductor.h"
 
+#include <cassert>
+
 #include <boost/dynamic_bitset.hpp>
 
 namespace algos::hyfd {
@@ -25,6 +27,8 @@ void Inductor::SpecializeTreeForNonFd(boost::dynamic_bitset<> const& lhs_bits, s
 
     for (auto& invalid_lhs_bits : invalid_lhss) {
         tree_->Remove(invalid_lhs_bits, rhs_id);
+        if (invalid_lhs_bits.count() == max_lhs_) continue;
+        assert(invalid_lhs_bits.count() < max_lhs_);
 
         for (size_t i = 0; i < tree_->GetNumAttributes(); ++i) {
             if (i == rhs_id || lhs_bits.test(i)) {
