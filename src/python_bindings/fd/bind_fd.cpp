@@ -19,7 +19,7 @@ template <typename ElementType>
 py::tuple VectorToTuple(std::vector<ElementType> vec) {
     std::size_t const size = vec.size();
     py::tuple tuple(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (std::size_t i = 0; i != size; ++i) {
         tuple[i] = std::move(vec[i]);
     }
     return tuple;
