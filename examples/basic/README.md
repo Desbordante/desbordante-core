@@ -27,6 +27,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ucc.py) — a scenario showing how to discover exact unique column combinations.
 
 # Verification
++ [verifying_add.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_add.py) — a scenario showing how to verify an approximate differential dependency.
 + [verifying_aucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_aucc.py) — a scenario showing how to verify an approximate unique column combination.
 + [verifying_cfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_cfd.py) — a scenario showing how to verify a conditional functional dependency.
 + [verifying_dc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_dc.py) — a scenario showing how to verify a denial constraint.
