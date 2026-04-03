@@ -2,6 +2,7 @@ set(SUBDIRS
     algebraic_constraints
     association_rules
     cfd
+    cmspade
     dc
     dd
     fd
@@ -33,6 +34,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::ar
               ${DESBORDANTE_PREFIX}::cfd
               ${DESBORDANTE_PREFIX}::cfd::verifier
+              ${DESBORDANTE_PREFIX}::cmspade
               ${DESBORDANTE_PREFIX}::datastats
               ${DESBORDANTE_PREFIX}::dd::split
               ${DESBORDANTE_PREFIX}::fd::aid
