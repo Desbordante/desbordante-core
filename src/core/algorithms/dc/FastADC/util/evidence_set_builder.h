@@ -27,14 +27,7 @@ public:
         auto consume_scalar = [this](auto const& clue_set) {
             clues_.reserve(clue_set.size());
             for (auto const& [clue, count] : clue_set) {
-                PredicateBitset bitset;
-                uint64_t tmp = static_cast<uint64_t>(clue);
-                while (tmp != 0) {
-                    auto const pos = static_cast<size_t>(std::countr_zero(tmp));
-                    bitset.set(pos);
-                    tmp &= (tmp - 1);
-                }
-                clues_.emplace_back(bitset, count);
+                clues_.emplace_back(PredicateBitset(static_cast<uint64_t>(clue)), count);
             }
         };
 
