@@ -47,8 +47,8 @@ void HyFD::ExecuteInternal() {
     Sampler sampler(plis_, pli_records_, threads_num_);
 
     auto const positive_cover_tree = std::make_shared<fd_tree::FDTree>(schema_->GetNumColumns());
-    Inductor inductor(positive_cover_tree);
-    Validator validator(positive_cover_tree, plis_, pli_records_, threads_num_);
+    Inductor inductor(positive_cover_tree, max_lhs_);
+    Validator validator(positive_cover_tree, plis_, pli_records_, threads_num_, max_lhs_);
 
     IdPairs comparison_suggestions;
 
