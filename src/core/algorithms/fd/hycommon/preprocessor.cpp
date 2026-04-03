@@ -74,6 +74,8 @@ using namespace util;
 
 std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(
         LegacyColumnLayoutRelationData* relation) {
+    // There is absolutely no benefit to using the already created PLIs, we should build everything
+    // at the same time from scratch.
     PLIs plis = BuildPLIs(relation);
 
     auto og_mapping = SortAndGetMapping(plis);
