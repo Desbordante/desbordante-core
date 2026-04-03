@@ -15,8 +15,6 @@ private:
     std::vector<boost::dynamic_bitset<>> column_to_dif_funcs_;
 
     std::vector<std::size_t> CountDFFrequencies() const;
-    std::vector<boost::dynamic_bitset<>> MinimizeDifferentialSet(
-            std::vector<boost::dynamic_bitset<>> bitsets) const;
 
 public:
     explicit EvidenceInverter(std::vector<boost::dynamic_bitset<>> bitsets, std::size_t df_num,
@@ -33,7 +31,7 @@ public:
         }
     }
 
-    std::vector<boost::dynamic_bitset<>> GetCovers() const;
+    std::vector<boost::dynamic_bitset<>> GetCovers();
 };
 
 }  // namespace algos::dd
