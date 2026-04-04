@@ -1,6 +1,6 @@
 set(SUBDIRS
     algebraic_constraints
-    association_rules
+    ar
     cfd
     dc
     dd
@@ -32,6 +32,7 @@ target_link_libraries(
     ${NAME}
     INTERFACE ${DESBORDANTE_PREFIX}::ac
               ${DESBORDANTE_PREFIX}::ar
+              ${DESBORDANTE_PREFIX}::ar::verifier
               ${DESBORDANTE_PREFIX}::cfd
               ${DESBORDANTE_PREFIX}::cfd::verifier
               ${DESBORDANTE_PREFIX}::datastats

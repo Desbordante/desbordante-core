@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/algorithms/association_rules/node.h"
+#include "core/algorithms/ar/apriori/node.h"
 #include "core/model/transaction/transactional_data.h"
 
 namespace algos {
