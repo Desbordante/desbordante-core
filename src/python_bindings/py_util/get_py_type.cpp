@@ -1,5 +1,7 @@
 #include "python_bindings/py_util/get_py_type.h"
 
+#include <Python.h>
+
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -7,7 +9,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <Python.h>
 #include <boost/core/demangle.hpp>
 #include <pybind11/stl/filesystem.h>
 

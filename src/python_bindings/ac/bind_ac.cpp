@@ -1,6 +1,7 @@
 #include "python_bindings/ac/bind_ac.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/algebraic_constraints/ac.h"

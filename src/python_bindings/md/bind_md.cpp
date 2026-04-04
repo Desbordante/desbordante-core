@@ -1,8 +1,9 @@
 #include "python_bindings/md/bind_md.h"
 
+#include <pybind11/pybind11.h>
+
 #include <pybind11/cast.h>
 #include <pybind11/functional.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/typing.h>
 

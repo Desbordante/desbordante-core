@@ -1,6 +1,7 @@
 #include "python_bindings/od/bind_od_verification.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/od/set_based_verifier/verifier.h"

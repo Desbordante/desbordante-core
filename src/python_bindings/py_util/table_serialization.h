@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
-
 #include <pybind11/pybind11.h>
+
+#include <memory>
 
 #include "core/model/table/column.h"
 #include "core/model/table/column_combination.h"
