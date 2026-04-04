@@ -1,5 +1,7 @@
 #include "python_bindings/py_util/logging.h"
 
+#include <pybind11/pybind11.h>
+
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
@@ -7,7 +9,6 @@
 #include <unordered_map>
 
 #include <pybind11/detail/common.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #ifdef PYBIND11_HAS_SUBINTERPRETER_SUPPORT

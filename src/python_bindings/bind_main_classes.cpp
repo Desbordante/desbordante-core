@@ -1,9 +1,10 @@
 #include "python_bindings/bind_main_classes.h"
 
+#include <pybind11/pybind11.h>
+
 #include <typeindex>
 #include <typeinfo>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/algo_factory.h"
