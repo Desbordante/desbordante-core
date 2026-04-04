@@ -16,6 +16,7 @@
 #include "core/algorithms/metric/verification_algorithms.h"
 #include "core/algorithms/nar/mining_algorithms.h"
 #include "core/algorithms/od/mining_algorithms.h"
+#include "core/algorithms/sd/sd_verifier/sd_verifier.h"
 #include "core/algorithms/statistics/algorithms.h"
 #include "core/algorithms/ucc/mining_algorithms.h"
 #include "core/algorithms/ucc/verification_algorithms.h"

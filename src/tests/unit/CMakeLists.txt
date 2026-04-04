@@ -586,6 +586,18 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::hy::model
 )
 
+# --- SD ---
+desbordante_add_test(
+    sd.verifier
+    SRCS
+    test_sd_verifier.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::sd::verifier
+    Boost::headers
+    better-enums
+    spdlog::spdlog_header_only
+)
+
 # --- Util ---
 desbordante_add_test(
     util

@@ -232,4 +232,8 @@ constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verif
 auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
 constexpr auto kDOFDContext = "Context of the OFD to verify";
 constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
+// SD verifier
+constexpr auto kDSdG1 = "Lower bound of the sequential interval (inclusive).";
+constexpr auto kDSdG2 = "Upper bound of the sequential interval (inclusive). Set -1 for Infinity.";
+constexpr auto kDSdIndices = "Subset of row indices to validate the SD on.";
 }  // namespace config::descriptions
