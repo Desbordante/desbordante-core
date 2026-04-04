@@ -1,11 +1,12 @@
 #include "python_bindings/py_util/dataframe_reader.h"
 
+#include <pybind11/pybind11.h>
+
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <Python.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 

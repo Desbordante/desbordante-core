@@ -1,6 +1,7 @@
 #include "python_bindings/dc/bind_fastadc.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dc/FastADC/fastadc.h"
