@@ -76,6 +76,7 @@ constexpr auto kMaximumArity = "max_arity";
 // FEM
 constexpr auto kSequence = "sequence";
 constexpr auto kWindowSize = "window_size";
+constexpr auto kEpisodesNum = "episodes_num";
 // FastADC
 constexpr auto kAllowCrossColumns = "allow_cross_columns";
 constexpr auto kComparableThreshold = "comparable_threshold";
