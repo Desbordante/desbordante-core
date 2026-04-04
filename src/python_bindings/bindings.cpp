@@ -1,7 +1,7 @@
+#include <pybind11/pybind11.h>
+
 #include <filesystem>
 #include <initializer_list>
-
-#include <pybind11/pybind11.h>
 
 #include "python_bindings/ac/bind_ac.h"
 #include "python_bindings/afd_metric/bind_afd_metric_calculation.h"
