@@ -1,3 +1,7 @@
+// clang-format off
+#include <pybind11/pybind11.h>
+// clang-format on
+
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -9,11 +13,11 @@
 #include <boost/any.hpp>
 #include <boost/core/demangle.hpp>
 #include <pybind11/functional.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 #include <pybind11/typing.h>
+#include <pybind11/cast.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -36,6 +40,7 @@
 #include "core/parser/csv_parser/csv_parser.h"
 #include "core/util/enum_to_available_values.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
+#include "core/util/logger.h"
 
 namespace {
 
@@ -134,9 +139,12 @@ boost::any FDPACVerifierValueMetricsToAny(std::string_view option_name, py::hand
     std::vector<ValueMetric> metrics;
     metrics.reserve(metric_handles.size());
     for (auto const& handle : metric_handles) {
+		LOG_INFO("Processing handle...");
         if (handle.is_none()) {
+			LOG_INFO("None");
             metric_handles.push_back(nullptr);
         } else if (py::isinstance<py::typing::Callable<double(std::string, std::string)>>(handle)) {
+			LOG_INFO("Function");
             metrics.emplace_back(py::cast<StringDataMetric>(handle));
         } else {
             throw config::ConfigurationError(
