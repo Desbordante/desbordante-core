@@ -10,12 +10,14 @@ WhitespaceSensitiveMacros:
   - BETTER_ENUM
 
 IncludeCategories:
-  - Regex: '<(spdlog|boost|enum|gmock|gtest|pybind11|Python|frozen).+>'
-    Priority: 2
-  - Regex: '<.+>'
+  - Regex: <pybind11/pybind11[.]h>
     Priority: 1
-  - Regex: '.+'
+  - Regex: '<(spdlog|boost|enum|gmock|gtest|pybind11|Python|frozen).+>'
     Priority: 3
+  - Regex: '<.+>'
+    Priority: 2
+  - Regex: '.+'
+    Priority: 4
 QualifierAlignment: Custom
 QualifierOrder: ['inline', 'static', 'type', 'const', 'volatile' ]
 SeparateDefinitionBlocks: Always
