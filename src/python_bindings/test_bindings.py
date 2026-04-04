@@ -132,7 +132,7 @@ METRIC_VERIFIER_FAILURE_CASES = [
             "rhs_indices": [1, 2],
         }
     ),
-    
+
     FailureCaseContainer(
         "TestLong.csv",
         {
@@ -195,7 +195,7 @@ class TestPythonBindings(unittest.TestCase):
             with self.subTest(msg=f"metric_verifier_load: {load}"):
                 with self.assertRaises(desb.ConfigurationError):
                     check_metric_verifier_failure(load.path, load.options)
-                
+
 
 
 if __name__ == "__main__":
