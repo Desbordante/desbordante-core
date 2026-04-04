@@ -49,3 +49,77 @@ exclude = [
     "src/tests/*",
     "examples/*",
 ]
+
+[tool.typos]
+[tool.typos.files]
+extend-exclude = [
+    "test_input_data/",
+]
+[tool.typos.default]
+extend-ignore-re = [
+    # C++ STD library
+    "countr_zero",
+
+    # Dummy strings used in tests and examples
+    '"ba"',
+    '"helo"',
+    "abd",
+
+    # Numerical Dependencies (ND) phrases
+    "# --- ND ---",
+    "// AC, ND",
+    "// ND",
+    "an ND",
+    "clusters violating ND",
+    "ND holds",
+    "ND verification",
+    "Weight of ND",
+
+    # Others
+    "7ND-93L",
+    "BA thesis\\.pdf",
+    "Comput\\. J\\.",
+    "Peter J\\. Hass",
+]
+
+[tool.typos.default.extend-identifiers]
+# Numerical Dependencies (ND)
+bind_nd = "bind_nd"
+BindNd = "BindNd"
+bind_nd_verification = "bind_nd_verification"
+BindNdVerification = "BindNdVerification"
+kTestND = "kTestND"
+MakeNdNameTuple = "MakeNdNameTuple"
+nd = "nd"
+ND = "ND"
+nd1 = "nd1"
+nd2 = "nd2"
+nd_holds = "nd_holds"
+NDHolds = "NDHolds"
+nd_module = "nd_module"
+nd_verification = "nd_verification"
+nd_verification_datasets = "nd_verification_datasets"
+nd_verification_module = "nd_verification_module"
+nd_verifier = "nd_verifier"
+NDVerifier = "NDVerifier"
+NDVerifierHeavyDatasets = "NDVerifierHeavyDatasets"
+NDVerifierTestNullEqualNull = "NDVerifierTestNullEqualNull"
+NDVerifierTestSuite = "NDVerifierTestSuite"
+NDVerifyingParams = "NDVerifyingParams"
+TestND = "TestND"
+test_nd_verifier = "test_nd_verifier"
+TestNDVerifying = "TestNDVerifying"
+VerifyND = "VerifyND"
+verifying_nd = "verifying_nd"
+verifying_nd_1 = "verifying_nd_1"
+verifying_nd_1_output = "verifying_nd_1_output"
+verifying_nd_2 = "verifying_nd_2"
+verifying_nd_2_output = "verifying_nd_2_output"
+verifying_nd_3 = "verifying_nd_3"
+verifying_nd_3_output = "verifying_nd_3_output"
+
+[tool.typos.type.jupyter]
+extend-ignore-re = [
+    '\"id":\s*"[^"\n]*"',
+    '"outputs"\s*:\s*\[(\s*\{[^}]*\}(?:,\s*\{[^}]*\})*)?\s*\]'
+]

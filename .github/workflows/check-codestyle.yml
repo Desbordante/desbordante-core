@@ -36,7 +36,15 @@ jobs:
       - name: Check formatting
         run: |
           set +e
-          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-22 -p 1)
+          files=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD \
+            -- ':(exclude)*.ipynb' ':(exclude)*.json' ':(exclude)*.md' || true)
+
+          if [ -z "$files" ]; then
+            echo "### No files to check for formatting :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD -- $files | clang-format-diff-22 -p 1)
 
           if [ "$formatterOutput" != "" ]
           then
@@ -84,3 +92,11 @@ jobs:
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
         run: exit 1
+
+  typos-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check spelling with typos
+        uses: crate-ci/typos@v1.43.5

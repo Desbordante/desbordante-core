@@ -21,7 +21,7 @@ private:
             "Benchmark runner and comparer\n"
             "Usage: Desbordante_benchmark [--baseline <baseline filename>] [--output <output "
             "filename>]\n"
-            "Availible options";
+            "Available options";
 
     boost::program_options::options_description description_{kHelpMsg};
     boost::program_options::variables_map var_map_;
