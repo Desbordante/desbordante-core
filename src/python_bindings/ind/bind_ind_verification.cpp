@@ -1,6 +1,7 @@
 #include "python_bindings/ind/bind_ind_verification.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/ind/verification_algorithms.h"

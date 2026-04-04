@@ -1,6 +1,7 @@
 #include "python_bindings/gfd/bind_gfd_verification.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/gfd/gfd_validator/verification_algorithms.h"

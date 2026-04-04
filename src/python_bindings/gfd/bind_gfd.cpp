@@ -1,6 +1,7 @@
 #include "python_bindings/gfd/bind_gfd.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/gfd/gfd_miner/gfd_miner.h"
