@@ -12,6 +12,7 @@
 #include "core/algorithms/dd/fastdd/trees/translating_minimize_tree.h"
 #include "core/algorithms/dd/fastdd/util/dif_func_info.h"
 #include "core/algorithms/dd/fastdd/util/differential_function_builder.h"
+#include "core/algorithms/dd/fastdd/util/hitting_set_enumeration_strategy.h"
 
 namespace algos::dd {
 
@@ -26,6 +27,8 @@ private:
     std::vector<boost::dynamic_bitset<>> dif_func_to_not_satisfied_bitsets_;
 
     std::unordered_map<std::size_t, std::shared_ptr<TranslatingMinimizeTree>> minimize_tree_map_;
+
+    static constexpr HittingSetEnumerationStrategy strategy_ = HittingSetEnumerationStrategy::MMCS;
 
     void BuildClueIndices();
     std::vector<boost::dynamic_bitset<>> MinimizeDifferentialSet(
