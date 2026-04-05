@@ -8,6 +8,7 @@
 #include "core/algorithms/dd/fastdd/trees/translating_minimize_tree.h"
 #include "core/algorithms/dd/fastdd/trees/tree_search.h"
 #include "core/algorithms/dd/fastdd/util/evidence_inverter.h"
+#include "core/algorithms/dd/fastdd/util/mmcs.h"
 #include "core/util/logger.h"
 
 namespace algos::dd {
@@ -164,11 +165,19 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::BuildDDs() {
             cur_diff_bitsets = MinimizeDifferentialSet(std::move(cur_diff_bitsets));
             LOG_TRACE("Minimized differential set: {}", cur_diff_bitsets.size());
 
-            EvidenceInverter inverter(std::move(cur_diff_bitsets), dif_func_info_->dif_func_num_,
-                                      column_to_dif_funcs_, i);
-            LOG_DEBUG("Built inverter");
-            std::vector<boost::dynamic_bitset<>> covers = inverter.GetCovers();
+            std::vector<boost::dynamic_bitset<>> covers;
+            if constexpr (strategy_ == HittingSetEnumerationStrategy::EvidenceInverter) {
+                EvidenceInverter inverter(std::move(cur_diff_bitsets),
+                                          dif_func_info_->dif_func_num_, column_to_dif_funcs_, i);
+                LOG_DEBUG("Built inverter");
+                covers = inverter.GetCovers();
+            } else {
+                MMCS mmcs(std::move(cur_diff_bitsets), column_to_dif_funcs_, i);
+                LOG_DEBUG("Built MMCS");
+                covers = mmcs.GetCovers();
+            }
             LOG_DEBUG("Got covers: {}", covers.size());
+
             std::vector<DifferentialDependency> minimized_covers =
                     Minimize(std::move(covers), i, j - 1);
             LOG_DEBUG("Minimized covers: {}", minimized_covers.size());
