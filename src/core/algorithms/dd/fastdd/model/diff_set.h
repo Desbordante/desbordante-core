@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
@@ -30,10 +30,10 @@ public:
         }
     }
 
-    void Build(std::unordered_map<std::size_t, std::size_t> const& clue_map) {
-        match_dfs_.reserve(clue_map.size());
-        for (auto const& [clue, count] : clue_map) {
-            match_dfs_.emplace_back(clue, count, bitset_size_, offset_to_predicates_,
+    void Build(std::unordered_set<std::size_t> const& clue_set) {
+        match_dfs_.reserve(clue_set.size());
+        for (std::size_t clue : clue_set) {
+            match_dfs_.emplace_back(clue, bitset_size_, offset_to_predicates_,
                                     isn_info_->GetBases());
         }
     }

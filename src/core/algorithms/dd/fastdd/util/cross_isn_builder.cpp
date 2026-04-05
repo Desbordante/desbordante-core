@@ -7,18 +7,7 @@
 
 namespace algos::dd {
 
-std::unordered_map<std::size_t, std::size_t> CrossISNBuilder::AccumulateClues(
-        std::vector<std::size_t> const& clues) const {
-    std::unordered_map<std::size_t, std::size_t> clue_map;
-    for (auto const& clue : clues) {
-        auto [it, inserted] = clue_map.try_emplace(clue, 1);
-        if (!inserted) it->second++;
-    }
-
-    return clue_map;
-}
-
-std::unordered_map<std::size_t, std::size_t> CrossISNBuilder::BuildISNs() {
+std::unordered_set<std::size_t> CrossISNBuilder::BuildISNs() {
     std::size_t num_tuple_pairs = first_pli_shard_.Range() * second_pli_shard_.Range();
     clues_.resize(num_tuple_pairs, 0UL);
     std::vector<DFPack> const& df_packs = isn_info_->GetDFPacks();
@@ -30,7 +19,7 @@ std::unordered_map<std::size_t, std::size_t> CrossISNBuilder::BuildISNs() {
         }
     }
 
-    return AccumulateClues(clues_);
+    return std::unordered_set<std::size_t>(clues_.begin(), clues_.end());
 }
 
 void CrossISNBuilder::SetNumMask(Cluster const& first_cluster, Cluster const& second_cluster,
