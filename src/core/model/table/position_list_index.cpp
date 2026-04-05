@@ -27,8 +27,7 @@ int PositionListIndex::intersection_count_ = 0;
 
 PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigned int size,
                                      double entropy, unsigned long long nep,
-                                     unsigned int relation_size,
-                                     unsigned int original_relation_size, double inverted_entropy,
+                                     unsigned int relation_size, double inverted_entropy,
                                      double gini_impurity)
     : index_(std::move(index)),
       relation_size_(relation_size),
@@ -37,7 +36,6 @@ PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigne
       inverted_entropy_(inverted_entropy),
       gini_impurity_(gini_impurity),
       nep_(nep),
-      original_relation_size_(original_relation_size),
       probing_table_cache_() {}
 
 std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>& data) {
@@ -77,7 +75,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>
 
     SortClusters(clusters);
     return std::make_unique<PositionListIndex>(std::move(clusters), size, entropy, nep, data.size(),
-                                               data.size(), inv_ent, gini_impurity);
+                                               inv_ent, gini_impurity);
 }
 
 std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
@@ -107,7 +105,7 @@ void PositionListIndex::SortClusters(std::deque<std::vector<int>>& clusters) {
 std::shared_ptr<std::vector<int> const> PositionListIndex::CalculateAndGetProbingTable() const {
     if (probing_table_cache_ != nullptr) return probing_table_cache_;
 
-    std::vector<int> probing_table = std::vector<int>(original_relation_size_, kSingletonValueId);
+    std::vector<int> probing_table = std::vector<int>(relation_size_, kSingletonValueId);
     int next_cluster_id = kSingletonValueId + 1;
     for (auto& cluster : index_) {
         int value_id = next_cluster_id++;

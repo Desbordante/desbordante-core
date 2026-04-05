@@ -22,11 +22,9 @@ namespace model {
 PLIWithSingletons::PLIWithSingletons(std::deque<std::vector<int>> index,
                                      std::deque<std::vector<int>> singletons, unsigned int size,
                                      double entropy, unsigned long long nep,
-                                     unsigned int relation_size,
-                                     unsigned int original_relation_size, double inverted_entropy,
+                                     unsigned int relation_size, double inverted_entropy,
                                      double gini_impurity)
-    : PositionListIndex(index, size, entropy, nep, relation_size, original_relation_size,
-                        inverted_entropy, gini_impurity),
+    : PositionListIndex(index, size, entropy, nep, relation_size, inverted_entropy, gini_impurity),
       singletons_(std::move(singletons)) {}
 
 PLIWithSingletons::PLIWithSingletons(std::unique_ptr<PositionListIndex> positional_list_index)
@@ -83,8 +81,7 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::CreateFor(std::vector<int>
     SortClusters(singletons);
     SortClusters(clusters);
     return std::make_unique<PLIWithSingletons>(std::move(clusters), std::move(singletons), size,
-                                               entropy, nep, data.size(), data.size(), inv_ent,
-                                               gini_impurity);
+                                               entropy, nep, data.size(), inv_ent, gini_impurity);
 }
 
 std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Probe(

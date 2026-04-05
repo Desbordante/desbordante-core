@@ -22,8 +22,7 @@ private:
 public:
     PLIWithSingletons(std::deque<Cluster> index, std::deque<Cluster> singletons, unsigned int size,
                       double entropy, unsigned long long nep, unsigned int relation_size,
-                      unsigned int original_relation_size, double inverted_entropy = 0,
-                      double gini_impurity = 0);
+                      double inverted_entropy = 0, double gini_impurity = 0);
 
     PLIWithSingletons(std::unique_ptr<PositionListIndex> positional_list_index);
 
