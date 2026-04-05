@@ -150,6 +150,7 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::BuildDDs() {
                 continue;
             }
             std::vector<boost::dynamic_bitset<>> cur_diff_bitsets;
+            cur_diff_bitsets.reserve(cur_bitset.count());
             for (std::size_t index = cur_bitset.find_first();
                  index != boost::dynamic_bitset<>::npos; index = cur_bitset.find_next(index)) {
                 boost::dynamic_bitset<> diff_bitset = match_dfs_[index].GetBitset();

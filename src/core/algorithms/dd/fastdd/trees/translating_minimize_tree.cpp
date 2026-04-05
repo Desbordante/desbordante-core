@@ -34,10 +34,8 @@ std::unordered_set<boost::dynamic_bitset<>> TranslatingMinimizeTree::Minimize(
         std::vector<boost::dynamic_bitset<>> candidates) {
     std::ranges::sort(candidates,
                       [](boost::dynamic_bitset<> const& a, boost::dynamic_bitset<> const& b) {
-                          if (a.count() == b.count()) {
-                              return a < b;
-                          }
-                          return a.count() < b.count();
+                          int diff = a.count() - b.count();
+                          return diff != 0 ? diff < 0 : a < b;
                       });
 
     std::unordered_set<boost::dynamic_bitset<>> result;
