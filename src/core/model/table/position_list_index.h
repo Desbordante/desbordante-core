@@ -38,7 +38,6 @@ private:
     double inverted_entropy_;
     double gini_impurity_;
     unsigned long long nep_;
-    unsigned int original_relation_size_;
     std::shared_ptr<std::vector<int> const> probing_table_cache_;
     unsigned int freq_ = 0;
 
@@ -49,8 +48,7 @@ public:
 
     PositionListIndex(std::deque<Cluster> index, unsigned int size, double entropy,
                       unsigned long long nep, unsigned int relation_size,
-                      unsigned int original_relation_size, double inverted_entropy = 0,
-                      double gini_impurity = 0);
+                      double inverted_entropy = 0, double gini_impurity = 0);
 
     static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data);
 
@@ -99,7 +97,7 @@ public:
     }
 
     unsigned int GetNumCluster() const {
-        return index_.size() + original_relation_size_ - size_;
+        return index_.size() + relation_size_ - size_;
     }
 
     unsigned int GetFreq() const {
