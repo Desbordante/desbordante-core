@@ -14,6 +14,7 @@ target_sources(
             util/hybrid_evidence_inverter.cpp
             util/isn_info.cpp
             util/min_max_dif_calculator.cpp
+            util/mmcs.cpp
             util/single_isn_builder.cpp
 )
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
