@@ -1,10 +1,11 @@
 #pragma once
 
+#include <pybind11/pybind11.h>
+
 #include <algorithm>
 #include <stdexcept>
 #include <string>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/md/hymd/lowest_bound.h"

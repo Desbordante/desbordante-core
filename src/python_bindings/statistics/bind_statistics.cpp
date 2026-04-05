@@ -1,6 +1,7 @@
 #include "python_bindings/statistics/bind_statistics.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/statistics/data_stats.h"

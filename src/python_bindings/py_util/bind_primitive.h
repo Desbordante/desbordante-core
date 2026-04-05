@@ -1,12 +1,12 @@
 #pragma once
 
+#include <pybind11/pybind11.h>
+
 #include <array>
 #include <cstddef>
 #include <sstream>
 #include <string>
 #include <type_traits>
-
-#include <pybind11/pybind11.h>
 
 #include "core/algorithms/algorithm.h"
 #include "core/util/mem_ptr_deduce.h"

@@ -1,9 +1,10 @@
 #include "python_bindings/ucc/bind_ucc.h"
 
+#include <pybind11/pybind11.h>
+
 #include <cstddef>
 #include <vector>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/ucc/mining_algorithms.h"

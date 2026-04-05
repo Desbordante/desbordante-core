@@ -1,6 +1,7 @@
 #include "python_bindings/ucc/bind_ucc_verification.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/ucc/verification_algorithms.h"
