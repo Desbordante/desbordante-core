@@ -2,7 +2,7 @@
 
 #include <cstddef>
 #include <memory>
-#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "core/algorithms/dd/fastdd/model/pli_shard.h"
@@ -24,8 +24,6 @@ private:
                     std::size_t const base, std::size_t const offset);
     std::vector<std::size_t> CalculateOffsets(DFPack const& df_pack,
                                               std::size_t const start_cluster_num) const;
-    std::unordered_map<std::size_t, std::size_t> AccumulateClues(
-            std::vector<std::size_t> const& clues) const;
 
 public:
     SingleISNBuilder(std::shared_ptr<ISNInfo> isn_info,
@@ -33,7 +31,7 @@ public:
                      PliShard const& pli_shard)
         : isn_info_(isn_info), distance_calculator_(distance_calculator), pli_shard_(pli_shard) {}
 
-    std::unordered_map<std::size_t, std::size_t> BuildISNs();
+    std::unordered_set<std::size_t> BuildISNs();
 };
 
 }  // namespace algos::dd
