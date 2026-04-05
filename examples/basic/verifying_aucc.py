@@ -14,7 +14,7 @@ def print_results(ucc_verifier):
         print('Clusters violating UCC:')
         print(f'found {ucc_verifier.get_num_clusters_violating_ucc()} clusters violating UCC:')
         table = pd.read_csv('examples/datasets/AUCC_example.csv')
-        violating_clusters = ucc_verifier.get_clusters_violating_ucc()        
+        violating_clusters = ucc_verifier.get_clusters_violating_ucc()
 
         cluster_number = 0
         number_names = ['First','Second','Third']
@@ -27,7 +27,7 @@ def print_results(ucc_verifier):
                 if i not in violating_cluster:
                     continue
                 violating_series.append(row)
-            print(pd.DataFrame(violating_series))     
+            print(pd.DataFrame(violating_series))
     print()
 
 

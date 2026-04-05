@@ -22,11 +22,8 @@ See python3 display_benchmarks.py --help for more info.
 '''
 
 from os import scandir
-from sys import argv
-from collections import namedtuple
 from pathlib import Path
-from dataclasses import dataclass
-from typing import Any, Annotated
+from typing import Annotated
 from datetime import timedelta, date
 
 import matplotlib.pyplot as plt

@@ -7,13 +7,17 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_example[advanced/afd_multiple_error_thresholds.py-None-afd_multiple_error_thresholds_output] afd_multiple_error_thresholds_output'] = '''[[1 2 3] -> 4, [0 2 3] -> 4, [0 1 3] -> 4, [0 1 2] -> 4]
+snapshots[
+    "test_example[advanced/afd_multiple_error_thresholds.py-None-afd_multiple_error_thresholds_output] afd_multiple_error_thresholds_output"
+] = """[[1 2 3] -> 4, [0 2 3] -> 4, [0 1 3] -> 4, [0 1 2] -> 4]
 [[3] -> 0, [3] -> 1, [3] -> 2, [3] -> 4, [2] -> 0, [2] -> 1, [2] -> 3, [2] -> 4, [1] -> 0, [1] -> 2, [1] -> 3, [1] -> 4, [0] -> 1, [0] -> 2, [0] -> 3, [0] -> 4]
 [[3] -> 0, [3] -> 1, [3] -> 2, [3] -> 4, [2] -> 0, [2] -> 1, [2] -> 3, [2] -> 4, [1] -> 0, [1] -> 2, [1] -> 3, [1] -> 4, [0] -> 1, [0] -> 2, [0] -> 3, [0] -> 4]
 [[4] -> 1, [4] -> 2, [4] -> 3, [3] -> 0, [3] -> 1, [3] -> 2, [3] -> 4, [2] -> 0, [2] -> 1, [2] -> 3, [2] -> 4, [1] -> 0, [1] -> 2, [1] -> 3, [1] -> 4, [0] -> 1, [0] -> 2, [0] -> 3, [0] -> 4]
-'''
+"""
 
-snapshots['test_example[advanced/aind_typos.py-None-aind_typos_output] aind_typos_output'] = '''This pipeline demonstrates the process of mining and verifying AINDs
+snapshots[
+    "test_example[advanced/aind_typos.py-None-aind_typos_output] aind_typos_output"
+] = """This pipeline demonstrates the process of mining and verifying AINDs
 (approximate inclusion dependencies). This pipeline can be used for data
 cleaning by identifying typos in the datasets based on the identified AINDs.
 
@@ -116,9 +120,11 @@ cleaning data.
 It's important to take the error threshold into account when working with AINDs.
 A higher threshold will reveal more potential errors, but it might also include
 non-typo cases, such as customers who have not made any orders yet.
-'''
+"""
 
-snapshots['test_example[advanced/comparison_mining_fd_approximate.py-None-comparison_mining_fd_approximate_output] comparison_mining_fd_approximate_output'] = '''
+snapshots[
+    "test_example[advanced/comparison_mining_fd_approximate.py-None-comparison_mining_fd_approximate_output] comparison_mining_fd_approximate_output"
+] = """
 =======================================================
 This example demonstrates key characteristics of the
 approximate functional dependency (FD) discovery
@@ -155,18 +161,22 @@ Next, let's analyze the results with a seed of 1321, where EulerFD identified 78
 EulerFD not found 0 FDs.
 EulerFD found 0 false FDs.
 Therefore, with the seed 1321, EulerFD obtained the exact result.
-'''
+"""
 
-snapshots['test_example[advanced/comparison_pfd_vs_afd.py-None-comparison_pfd_vs_afd_output] comparison_pfd_vs_afd_output'] = '''pFDs \\ AFDs = OrderedSet(['[DeviceId] -> Data'])
+snapshots[
+    "test_example[advanced/comparison_pfd_vs_afd.py-None-comparison_pfd_vs_afd_output] comparison_pfd_vs_afd_output"
+] = """pFDs \\ AFDs = OrderedSet(['[DeviceId] -> Data'])
 AFDs \\ pFDs = OrderedSet()
 AFDs ∩ pFDs = OrderedSet(['[Data] -> Id', '[Data] -> DeviceId', '[Id] -> DeviceId', '[Id] -> Data'])
 1 - PerValue([DeviceId] -> Data) = 0.1714285714
 e([DeviceId] -> Data) = 0.23076923076923078
 In case of PerValue error measure, violations on data from the single "glitchy"
 sensor device among many do not prevent dependency from being found
-'''
+"""
 
-snapshots['test_example[advanced/comparison_ucc_and_aucc_1.py-None-comparison_ucc_and_aucc_1_output] comparison_ucc_and_aucc_1_output'] = '''\x1b[1m\x1b[36mThis example illustrates the difference between exact and approximate Unique
+snapshots[
+    "test_example[advanced/comparison_ucc_and_aucc_1.py-None-comparison_ucc_and_aucc_1_output] comparison_ucc_and_aucc_1_output"
+] = """\x1b[1m\x1b[36mThis example illustrates the difference between exact and approximate Unique
 Column Combinations (UCC and AUCC). Intuitively, a UCC declares that some columns uniquely
 identify every tuple in a table. An AUCC allows a certain degree of violation. For more
 information on UCC, consult "A Hybrid Approach for Efficient Unique Column Combination Discovery"
@@ -174,15 +184,15 @@ by T. Papenbrock and F. Naumann. For more information on AUCC, consult "Efficien
 Approximate Dependencies" by S. Kruse and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     10                
-Joyce    5       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    6       1200     1                 
-Samuel   1       950      9                 
-Nancy    2       800      3                 
+Mark     7       1150     10
+Joyce    5       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    6       1200     1
+Samuel   1       950      9
+Nancy    2       800      3
 \x1b[0mWe'll try to find typos, using UCC mining and AUCC verifying algorithms.
 
 Let's run UCC mining algorithm:
@@ -196,28 +206,28 @@ Let's run AUCC verification algorithm for column \x1b[1m\x1b[36mName\x1b[0m:
 \x1b[31mUCC does not hold\x1b[0m, but AUCC holds with threshold = 0.048
 Threshold is small. It means that, possibly, there is an error in this column.
 Let's look at the table again:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     10                
-Joyce    5       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    6       1200     1                 
-Samuel   1       950      9                 
-Nancy    2       800      3                 
+Mark     7       1150     10
+Joyce    5       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    6       1200     1
+Samuel   1       950      9
+Nancy    2       800      3
 \x1b[0m
 There are two \x1b[1m\x1b[36mHarrys\x1b[0m. They have different work experience, so they are
 two different employees. If they had unique names, AUCC would hold with threshold = 0, and
 \x1b[1m\x1b[36mName\x1b[0m could be used as a key:
-\x1b[1m\x1b[36mName          Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName          Grade   Salary   Work_experience
 -------------------------------------------------
-Mark          7       1150     10                
-Joyce         5       1100     5                 
-Harry Brown   3       1000     7                 
-Grace         4       900      12                
-Harry Adams   6       1200     1                 
-Samuel        1       950      9                 
-Nancy         2       800      3                 
+Mark          7       1150     10
+Joyce         5       1100     5
+Harry Brown   3       1000     7
+Grace         4       900      12
+Harry Adams   6       1200     1
+Samuel        1       950      9
+Nancy         2       800      3
 \x1b[0m
 Let's run UCC mining algorithm:
 Found UCCs:
@@ -227,9 +237,11 @@ Found UCCs:
 \t\x1b[1m\x1b[36m[Work_experience]\x1b[0m
 
 Now we have cleaned the data and \x1b[1m\x1b[36mName\x1b[0m can now be used as a key.
-'''
+"""
 
-snapshots['test_example[advanced/comparison_ucc_and_aucc_2.py-None-comparison_ucc_and_aucc_2_output] comparison_ucc_and_aucc_2_output'] = '''\x1b[1m\x1b[36mThis example illustrates the difference between exact and approximate Unique
+snapshots[
+    "test_example[advanced/comparison_ucc_and_aucc_2.py-None-comparison_ucc_and_aucc_2_output] comparison_ucc_and_aucc_2_output"
+] = """\x1b[1m\x1b[36mThis example illustrates the difference between exact and approximate Unique
 Column Combinations (UCC and AUCC). Intuitively, a UCC declares that some columns uniquely
 identify every tuple in a table. An AUCC allows a certain degree of violation. For more
 information on UCC, consult "A Hybrid Approach for Efficient Unique Column Combination Discovery"
@@ -237,27 +249,27 @@ by T. Papenbrock and F. Naumann. For more information on AUCC, consult "Efficien
 Approximate Dependencies" by S. Kruse and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1000     12                
-Joyce        Harris      6       1000     5                 
-Harry        Roberts             1000     7                 
-Grace                    4       900      13                
-Harry        Walker      4       1000     4                 
-Allen                    4       900      9                 
-Nancy        Adams       2       1000     3                 
-Grace        Weaver      6       1000     6                 
-Maria        Clark               1400     10                
-Dorothy      Weaver      2                25                
-Nancy        Cruz        2       700      8                 
-Betty        Howell              950      11                
-Grace        Caroll      11      800      16                
-Jesse        Mitchell    4       1000     1                 
-Dorothy      Weaver      4                2                 
-Melissa      Wright      2       1200     15                
-Peter        Clark               1500     14                
-Margaret     Cooper      6       800      19                
-Allen                    4       1000     18                
+Mark         Harris      7       1000     12
+Joyce        Harris      6       1000     5
+Harry        Roberts             1000     7
+Grace                    4       900      13
+Harry        Walker      4       1000     4
+Allen                    4       900      9
+Nancy        Adams       2       1000     3
+Grace        Weaver      6       1000     6
+Maria        Clark               1400     10
+Dorothy      Weaver      2                25
+Nancy        Cruz        2       700      8
+Betty        Howell              950      11
+Grace        Caroll      11      800      16
+Jesse        Mitchell    4       1000     1
+Dorothy      Weaver      4                2
+Melissa      Wright      2       1200     15
+Peter        Clark               1500     14
+Margaret     Cooper      6       800      19
+Allen                    4       1000     18
 \x1b[0mWe'll try to find typos, using UCC and AUCC mining algorithms.
 
 Let's run AUCC mining algorithm with threshold = 0.013:
@@ -285,52 +297,52 @@ ACCs - UCCs =
 same first name may have same grade or salary. But \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m must
 hold -- even if two employees have same names, their records in our table should be uniquely
 identifiable by \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m pair. Let's look at the table again:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1000     12                
-Joyce        Harris      6       1000     5                 
-Harry        Roberts             1000     7                 
-Grace                    4       900      13                
-Harry        Walker      4       1000     4                 
-Allen                    4       900      9                 
-Nancy        Adams       2       1000     3                 
-Grace        Weaver      6       1000     6                 
-Maria        Clark               1400     10                
-Dorothy      Weaver      2                25                
-Nancy        Cruz        2       700      8                 
-Betty        Howell              950      11                
-Grace        Caroll      11      800      16                
-Jesse        Mitchell    4       1000     1                 
-Dorothy      Weaver      4                2                 
-Melissa      Wright      2       1200     15                
-Peter        Clark               1500     14                
-Margaret     Cooper      6       800      19                
-Allen                    4       1000     18                
+Mark         Harris      7       1000     12
+Joyce        Harris      6       1000     5
+Harry        Roberts             1000     7
+Grace                    4       900      13
+Harry        Walker      4       1000     4
+Allen                    4       900      9
+Nancy        Adams       2       1000     3
+Grace        Weaver      6       1000     6
+Maria        Clark               1400     10
+Dorothy      Weaver      2                25
+Nancy        Cruz        2       700      8
+Betty        Howell              950      11
+Grace        Caroll      11      800      16
+Jesse        Mitchell    4       1000     1
+Dorothy      Weaver      4                2
+Melissa      Wright      2       1200     15
+Peter        Clark               1500     14
+Margaret     Cooper      6       800      19
+Allen                    4       1000     18
 \x1b[0m
 There are two \x1b[1m\x1b[36mAllens\x1b[0m without the last name and two \x1b[1m\x1b[36mDorothy
 Weawer's\x1b[0m. All they have different experience, therefore all of them are different
 employees. Thus, it is an oversight or typo in the table. Let's improve the quality of this data:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1000     12                
-Joyce        Harris      6       1000     5                 
-Harry        Roberts             1000     7                 
-Grace                    4       900      13                
-Harry        Walker      4       1000     4                 
-Allen        Kelley      4       900      9                 
-Nancy        Adams       2       1000     3                 
-Grace        Weaver      6       1000     6                 
-Maria        Clark               1400     10                
-Dorothy      Weaver_1    2                25                
-Nancy        Cruz        2       700      8                 
-Betty        Howell              950      11                
-Grace        Caroll      11      800      16                
-Jesse        Mitchell    4       1000     1                 
-Dorothy      Weaver_2    4                2                 
-Melissa      Wright      2       1200     15                
-Peter        Clark               1500     14                
-Margaret     Cooper      6       800      19                
-Allen        Smith       4       1000     18                
+Mark         Harris      7       1000     12
+Joyce        Harris      6       1000     5
+Harry        Roberts             1000     7
+Grace                    4       900      13
+Harry        Walker      4       1000     4
+Allen        Kelley      4       900      9
+Nancy        Adams       2       1000     3
+Grace        Weaver      6       1000     6
+Maria        Clark               1400     10
+Dorothy      Weaver_1    2                25
+Nancy        Cruz        2       700      8
+Betty        Howell              950      11
+Grace        Caroll      11      800      16
+Jesse        Mitchell    4       1000     1
+Dorothy      Weaver_2    4                2
+Melissa      Wright      2       1200     15
+Peter        Clark               1500     14
+Margaret     Cooper      6       800      19
+Allen        Smith       4       1000     18
 \x1b[0m
 Now UCC \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m should hold. Let's run UCC mining algorithm again:
 Found UCCs:
@@ -341,9 +353,11 @@ Found UCCs:
 
 UCC \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m holds, and we have found and resolved two
 inconsistencies in the data.
-'''
+"""
 
-snapshots['test_example[advanced/md_semantic_checks.py-None-md_semantic_checks_output] md_semantic_checks_output'] = '''In this example we find a meaningful MD and try to use it to enforce data integrity.
+snapshots[
+    "test_example[advanced/md_semantic_checks.py-None-md_semantic_checks_output] md_semantic_checks_output"
+] = """In this example we find a meaningful MD and try to use it to enforce data integrity.
 We are going to use a dataset of flights between cities.
  id Source             From               To  Distance (km)
   1    ac1 Saint-Petersburg         Helsinki            315
@@ -487,9 +501,9 @@ Found MDs:
 [ jaccard(From, From)>=0.769231 | jaccard(To, To)>=0.769231 | equality(Region, Region)>=1 ] -> normalized_distance(Distance (km), Distance (km))>=0.990939
 We have now fixed our data.
 We can see that there are new dependencies in the result. They are not getting pruned by the support requirement like before, and they also are not meaningful. With larger data quantities they will disappear naturally. We may also try increasing the minimum support threshold, but unfortunately not in this particular case, as the amount of data is small.
-'''
+"""
 
-snapshots['test_example[basic/data_stats.py-None-data_stats_output] data_stats_output'] = '''Columns with null: []
+snapshots["test_example[basic/data_stats.py-None-data_stats_output] data_stats_output"] = """Columns with null: []
 Columns with all unique values: [0, 1]
 Number of columns: 6
 
@@ -775,9 +789,11 @@ type = String
 first_char_freq = S:339
 
 
-'''
+"""
 
-snapshots['test_example[basic/dynamic_verifying_afd.py-None-dynamic_verifying_afd_output] dynamic_verifying_afd_output'] = '''\x1b[1;49mThis example shows how to verify AFD in the dynamic table using dynamic_fd_verification.
+snapshots[
+    "test_example[basic/dynamic_verifying_afd.py-None-dynamic_verifying_afd_output] dynamic_verifying_afd_output"
+] = """\x1b[1;49mThis example shows how to verify AFD in the dynamic table using dynamic_fd_verification.
 If you want to know how to use dynamic_fd_verification, please see dynamic_verifying_fd.py example.
 \x1b[1;49mFirst, let's look at the DnD.csv table and try verifying the [Creature, HaveMagic] -> [Strength] FD.\x1b[0m
 
@@ -857,9 +873,11 @@ Number of clusters violating FD: 1
 5: ['Elf', np.False_] -> [np.int64(3)]
 Most frequent rhs value proportion: 0.6
 Num distinct rhs values: 2
-'''
+"""
 
-snapshots['test_example[basic/dynamic_verifying_fd.py-None-dynamic_verifying_fd_output] dynamic_verifying_fd_output'] = '''\x1b[1;49mThis example shows how to use dynamic FD verification algorithm.\x1b[0m
+snapshots[
+    "test_example[basic/dynamic_verifying_fd.py-None-dynamic_verifying_fd_output] dynamic_verifying_fd_output"
+] = """\x1b[1;49mThis example shows how to use dynamic FD verification algorithm.\x1b[0m
 \x1b[1;49mFirst, let's look at the DnD.csv table and try to verify the functional dependency [Creature, HaveMagic] -> [Strength].\x1b[0m
 Note: The current version of the algorithm supports checking only one FD defined in the load_data method.
 
@@ -995,15 +1013,17 @@ Number of clusters violating FD: 1
 Most frequent rhs value proportion: 0.5
 Num distinct rhs values: 2
 
-'''
+"""
 
-snapshots['test_example[basic/mining_ac.py-None-mining_ac_output] mining_ac_output'] = '''This example is dedicated to Fuzzy Algebraic Constraints (AC). The definition and algorithm 
-are based on article "B-HUNT: Automatic Discovery of Fuzzy Algebraic Constraints in Relational 
+snapshots[
+    "test_example[basic/mining_ac.py-None-mining_ac_output] mining_ac_output"
+] = """This example is dedicated to Fuzzy Algebraic Constraints (AC). The definition and algorithm
+are based on article "B-HUNT: Automatic Discovery of Fuzzy Algebraic Constraints in Relational
 Data" by Paul G. Brown & Peter J. Haas presented at VLDB in 2003.
 
-First of all, let's figure out what AC is. However, to avoid going too deep, we will give you 
-a simple definition without formalization. AC represents the results of applying binary 
-operations between two table columns, with values grouped into meaningful intervals. 
+First of all, let's figure out what AC is. However, to avoid going too deep, we will give you
+a simple definition without formalization. AC represents the results of applying binary
+operations between two table columns, with values grouped into meaningful intervals.
 Let's illustrate this with an example.
 
 We have a table examples/datasets/player_stats.csv with the following data:
@@ -1027,8 +1047,8 @@ Let\'s apply binary operation "+" to the Strength and Agility columns and observ
 Rows in which the result of the chosen operation (+) is \x1b[1;41moutside\x1b[1;49m of discovered ranges:
 \x1b[1;46mNone\x1b[1;49m
 
-As shown, the sum of Strength and Agility falls within either the (4, 5) or (22, 24) ranges. 
-This pattern may emerge because player characters with similar combined attribute values 
+As shown, the sum of Strength and Agility falls within either the (4, 5) or (22, 24) ranges.
+This pattern may emerge because player characters with similar combined attribute values
 likely belong to the same tier.
 
 
@@ -1047,35 +1067,35 @@ bumps_limit
 iterations_limit
 ac_seed
 \x1b[0m
-\x1b[1;42mWeight\x1b[0m accepts values in the range (0, 1]. 
-Values closer to 1 force the algorithm to produce fewer larger intervals (up to a single 
+\x1b[1;42mWeight\x1b[0m accepts values in the range (0, 1].
+Values closer to 1 force the algorithm to produce fewer larger intervals (up to a single
 interval covering all values).
 Values closer to 0 force the algorithm to produce smaller intervals.
 
-\x1b[1;42mFuzziness\x1b[0m belongs to (0,1) range while \x1b[1;42mp_fuzz\x1b[0m belongs to [0,1] range. These parameters 
+\x1b[1;42mFuzziness\x1b[0m belongs to (0,1) range while \x1b[1;42mp_fuzz\x1b[0m belongs to [0,1] range. These parameters
 control precision and the number of considered rows.
-Fuzziness values closer to 0 and p_fuzz values closer to 1 force the algorithm to include 
+Fuzziness values closer to 0 and p_fuzz values closer to 1 force the algorithm to include
 more rows (higher accuracy).
-Fuzziness values closer to 1 and p_fuzz values closer to 0 force the algorithm to include 
+Fuzziness values closer to 1 and p_fuzz values closer to 0 force the algorithm to include
 fewer rows (higher chance of skipping rows, lower precision, but faster execution).
 
-\x1b[1;42mBumps_limit\x1b[0m accepts only natural numbers from the range [1, inf) and limits the number of 
+\x1b[1;42mBumps_limit\x1b[0m accepts only natural numbers from the range [1, inf) and limits the number of
 intervals for all column pairs. To set bumps_limit to inf you should use the 0 value.
 
-\x1b[1;42mIterations_limit\x1b[0m accepts only natural numbers. 
+\x1b[1;42mIterations_limit\x1b[0m accepts only natural numbers.
 Lower values (close to 1) reduce accuracy due to algorithm performing fewer iterations.
 
-\x1b[1;42mAC_seed\x1b[0m accepts only natural numbers. 
-B-HUNT is a randomized algorithm that accepts the seed parameter (AC_seed). Fixing this 
-parameter ensures reproducible results, which are necessary for verifying results during 
-testing of the algorithm. Furthermore, we need to fix it in this example for demonstration 
-purposes; otherwise, we may obtain a different number of intervals with different boundaries 
+\x1b[1;42mAC_seed\x1b[0m accepts only natural numbers.
+B-HUNT is a randomized algorithm that accepts the seed parameter (AC_seed). Fixing this
+parameter ensures reproducible results, which are necessary for verifying results during
+testing of the algorithm. Furthermore, we need to fix it in this example for demonstration
+purposes; otherwise, we may obtain a different number of intervals with different boundaries
 that will not correspond to the text we wrote for our output.
 
-Let's proceed to a visual example. We will use dataset from this path: 
+Let's proceed to a visual example. We will use dataset from this path:
 examples/datasets/cargo_march.csv.
 For default parameters we will use those values:
-binary operation is "-", weight - 0.1, fuzziness - 0.2, p_fuzz - 0.85, bumps_limit - 0, 
+binary operation is "-", weight - 0.1, fuzziness - 0.2, p_fuzz - 0.85, bumps_limit - 0,
 iterations_limit - 4, AC_seed - 11.
 
 Let's see the result of the algorithm with these parameters.
@@ -1099,20 +1119,20 @@ Dispatch date: 11
 Delivery date: 22
 Difference: 11
 
-You can see that the algorithm creates two intervals for the binary operation "-": (2-7) and 
-(15-22). This means that the difference between the dispatch date and delivery date always 
-falls within these intervals, except for three rows where the difference lies outside the 
+You can see that the algorithm creates two intervals for the binary operation "-": (2-7) and
+(15-22). This means that the difference between the dispatch date and delivery date always
+falls within these intervals, except for three rows where the difference lies outside the
 discovered ranges. From this, we can infer that:
 \x1b[1;33mPackages for some addresses are typically delivered within 7 days.\x1b[0m
 \x1b[1;33mPackages for some addresses take up to 22 days.\x1b[0m
 
-Why these two intervals? To answer this question, more context is needed; that is, we should 
-look into the underlying data. We can imagine several reasons for this result, such as: 1) 
+Why these two intervals? To answer this question, more context is needed; that is, we should
+look into the underlying data. We can imagine several reasons for this result, such as: 1)
 nearby addresses versus far addresses; 2) air shipping versus regular shipping.
 
-There are three parcels that fall outside of these delivery intervals. Why? This is a point 
-for further investigation, which requires additional context. There are many possible reasons 
-for this: 1) on these dates there was a workers' strike in some regions; or 2) an incorrect 
+There are three parcels that fall outside of these delivery intervals. Why? This is a point
+for further investigation, which requires additional context. There are many possible reasons
+for this: 1) on these dates there was a workers' strike in some regions; or 2) an incorrect
 address was specified, which increased the delivery time; or 3) it is just a typo in the table.
 
 Now we reduce the value of the parameter weight to 0.05.
@@ -1123,23 +1143,25 @@ Now we reduce the value of the parameter weight to 0.05.
 Rows in which the result of the chosen operation (-) is \x1b[1;41moutside\x1b[1;49m of discovered ranges:
 \x1b[1;46mNone\x1b[1;49m
 
-You can see that the number of intervals increases, and there is no longer any data outside of 
+You can see that the number of intervals increases, and there is no longer any data outside of
 the discovered ranges.
-However, with this number of intervals, it is difficult to draw immediate conclusions about the 
-delivery date. In this case, a detailed analysis of other attributes might enable more meaningful 
-predictions for delivery times. For example, it may be a good idea to partition data by the region 
-attribute (or by month/quarter) and consider each partition individually. 
+However, with this number of intervals, it is difficult to draw immediate conclusions about the
+delivery date. In this case, a detailed analysis of other attributes might enable more meaningful
+predictions for delivery times. For example, it may be a good idea to partition data by the region
+attribute (or by month/quarter) and consider each partition individually.
 
-Another option is to try to find a parameter combination that will result in a smaller number of 
-intervals. Next, remember that the algorithm is randomized (unless you run it with the exact 
+Another option is to try to find a parameter combination that will result in a smaller number of
+intervals. Next, remember that the algorithm is randomized (unless you run it with the exact
 settings) — it can skip some rows, so you can also try to alter the seed.
 
 Finally, cleaning up the data by removing duplicate and incomplete rows might also help.
-Thus, the quantity and quality of the intervals are the user's responsibility. It may take several 
+Thus, the quantity and quality of the intervals are the user's responsibility. It may take several
 attempts to achieve something interesting. Experiment!
-'''
+"""
 
-snapshots['test_example[basic/mining_adc.py-None-mining_adc_output] mining_adc_output'] = '''\x1b[33mUnderstanding Denial Constraints (DCs)\x1b[0m
+snapshots[
+    "test_example[basic/mining_adc.py-None-mining_adc_output] mining_adc_output"
+] = """\x1b[33mUnderstanding Denial Constraints (DCs)\x1b[0m
 In this walkthrough, we follow the definitions described in the paper
 "Fast approximate denial constraint discovery" by Xiao, Tan,
 Wang, and Ma (2022) [Proc. VLDB Endow. 16(2), 269–281].
@@ -1275,9 +1297,11 @@ no longer appears because of the violation introduced by record index 9
 
 Those violations occur in pairs like \x1b[31m(6, 9), (7, 9), (8, 9)\x1b[0m,
 where each number is a record index in the dataset.
-'''
+"""
 
-snapshots['test_example[basic/mining_afd.py-None-mining_afd_output] mining_afd_output'] = '''==============================================
+snapshots[
+    "test_example[basic/mining_afd.py-None-mining_afd_output] mining_afd_output"
+] = """==============================================
 In Desbordante we consider an approximate functional dependency (AFD)
 any kind of functional dependency (FD) that employs an error metric and is not named
 (e.g. soft functional dependencies). This metric is used to calculate the extent of
@@ -1287,7 +1311,7 @@ will find all AFDs, which have their error equal or less than the threshold, acc
 
 Currently, Desbordante supports:
 1) Five metrics: g1, pdep, tau, mu+, rho.
-2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest. 
+2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest.
 Unfortunately, Pyro can handle only the g1 metric, for the rest use Tane.
 
 For more information consider:
@@ -1350,9 +1374,11 @@ rho:
 [Id] -> ProductName
 [Id] -> Price
 
-'''
+"""
 
-snapshots['test_example[basic/mining_aind.py-None-mining_aind_output] mining_aind_output'] = '''==============================================
+snapshots[
+    "test_example[basic/mining_aind.py-None-mining_aind_output] mining_aind_output"
+] = """==============================================
 In Desbordante, we consider an approximate inclusion dependency (AIND)
 as any inclusion dependency (IND) that utilizes an error metric to measure
 violations. This metric calculates the proportion of distinct values in the
@@ -1420,9 +1446,11 @@ For automatically detecting violating clusters, you can create a
 pipeline using the AIND verifier in combination with a mining algorithm.
 
 For an additional example, refer to the examples/advanced/aind_typos.py
-'''
+"""
 
-snapshots['test_example[basic/mining_ar.py-None-mining_ar_output] mining_ar_output'] = '''As the first example, let\'s look at the dataset containing receipts from some supermarket using input_format="tabular". In this format, each table row lists all items participating in the same transaction. Note that, in this table, some rows may be shorter than others.
+snapshots[
+    "test_example[basic/mining_ar.py-None-mining_ar_output] mining_ar_output"
+] = """As the first example, let\'s look at the dataset containing receipts from some supermarket using input_format="tabular". In this format, each table row lists all items participating in the same transaction. Note that, in this table, some rows may be shorter than others.
 
 |--:|:------:|:------:|:------:|:----:|
 | 0 | Bread  | Butter |  Milk  | nan  |
@@ -1480,9 +1508,9 @@ conf: \x1b[1;33m0.67 \x1b[0m\tsup: \x1b[1;33m0.40 \x1b[0m\t['Eggs'] -> ['Yogurt'
 conf: \x1b[1;32m1.00 \x1b[0m\tsup: \x1b[1;33m0.40 \x1b[0m\t['Eggs', 'Yogurt'] -> ['Milk']
 conf: \x1b[1;33m0.67 \x1b[0m\tsup: \x1b[1;33m0.40 \x1b[0m\t['Milk', 'Yogurt'] -> ['Eggs']
 
-Now you can see that the number of association rules have decreased significantly. This happened due to minsup being set to 0.4. 
+Now you can see that the number of association rules have decreased significantly. This happened due to minsup being set to 0.4.
 
-A typical approach to controlling the algorithm is to employ \x1b[1;33m"usefulness"\x1b[0m, which is defined as confidence * support. In the last example, we set up min "usefulness" = 0.6 * 0.4 = 0.24. 
+A typical approach to controlling the algorithm is to employ \x1b[1;33m"usefulness"\x1b[0m, which is defined as confidence * support. In the last example, we set up min "usefulness" = 0.6 * 0.4 = 0.24.
 
 Now, let\'s try with \x1b[32mminsup=0.6\x1b[0m, \x1b[32mminconf=0.6\x1b[0m and \x1b[1;33m"usefulness"=0.36\x1b[0m.
 
@@ -1532,23 +1560,25 @@ Yogurt
 
 Now you have all of the items used in this dataset.
 
-'''
+"""
 
-snapshots['test_example[basic/mining_aucc.py-None-mining_aucc_output] mining_aucc_output'] = '''\x1b[1m\x1b[36mThis example illustrates the usage of approximate Unique Column Combinations
+snapshots[
+    "test_example[basic/mining_aucc.py-None-mining_aucc_output] mining_aucc_output"
+] = """\x1b[1m\x1b[36mThis example illustrates the usage of approximate Unique Column Combinations
 (AUCC). Intuitively, an AUCC declares that some columns uniquely identify every tuple in a table,
 but allows a certain degree of violation. For more information consult "Efficient Discovery of
 Approximate Dependencies" by S. Kruse and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     12                
-Joyce    2       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    4       1000     5                 
-Samuel   1       900      9                 
-Nancy    2       1000     3                 
+Mark     7       1150     12
+Joyce    2       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    4       1000     5
+Samuel   1       900      9
+Nancy    2       1000     3
 \x1b[0mWe need to select a column that will serve as a unique key (ID).
 
 The AUCC mining algorithm with different error threshold will be used. The smaller
@@ -1580,29 +1610,29 @@ Found AUCCs:
 Out of single-column UCCs, \x1b[1m\x1b[36mName\x1b[0m requires the smallest threshold to be "unique".
 It means that \x1b[1m\x1b[36mName\x1b[0m has less violations than other columns.
 Let's look at the table again, paying a special attention to the \x1b[1m\x1b[36mName\x1b[0m column:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     12                
-Joyce    2       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    4       1000     5                 
-Samuel   1       900      9                 
-Nancy    2       1000     3                 
+Mark     7       1150     12
+Joyce    2       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    4       1000     5
+Samuel   1       900      9
+Nancy    2       1000     3
 \x1b[0m
 There are two \x1b[1m\x1b[36mHarrys\x1b[0m. They have different work experience and salary,
 therefore they are two different employees. This is most likely an error/oversight in data.
 If we represented their records using unique names, the \x1b[1m\x1b[36mName\x1b[0m AUCC would hold with
 threshold = 0, and \x1b[1m\x1b[36mName\x1b[0m could be used as a key:
-\x1b[1m\x1b[36mName      Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName      Grade   Salary   Work_experience
 ---------------------------------------------
-Mark      7       1150     12                
-Joyce     2       1100     5                 
-Harry_1   3       1000     7                 
-Grace     4       900      12                
-Harry_2   4       1000     5                 
-Samuel    1       900      9                 
-Nancy     2       1000     3                 
+Mark      7       1150     12
+Joyce     2       1100     5
+Harry_1   3       1000     7
+Grace     4       900      12
+Harry_2   4       1000     5
+Samuel    1       900      9
+Nancy     2       1000     3
 \x1b[0m
 Let's run algorithm once more with threshold = 0:
 Found UCCs:
@@ -1611,9 +1641,9 @@ Found UCCs:
 \t\x1b[1m\x1b[36m[Grade Work_experience]\x1b[0m
 \t\x1b[1m\x1b[36m[Salary Work_experience]\x1b[0m
 Now we can use \x1b[1m\x1b[36mName\x1b[0m as a key
-'''
+"""
 
-snapshots['test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output'] = '''options: 
+snapshots["test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output"] = """options:
 MINIMUM SUPPORT = 8 , MINIMUM CONFIDENCE = 0.7 , MAXIMUM LHS COUNT = 3
 displaying the first five (or fewer) discovered CFDs:
 
@@ -1737,9 +1767,11 @@ confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
 
 
 
-'''
+"""
 
-snapshots['test_example[basic/mining_dd.py-None-mining_dd_output] mining_dd_output'] = '''Consider the table containing some information about flights:
+snapshots[
+    "test_example[basic/mining_dd.py-None-mining_dd_output] mining_dd_output"
+] = """Consider the table containing some information about flights:
 +----+-----------------+------------+------------------------+------------------------+------------+------------+
 |    | Flight Number   | Date       | Departure              | Arrival                |   Distance |   Duration |
 |----+-----------------+------------+------------------------+------------------------+------------+------------|
@@ -1920,9 +1952,9 @@ The result for the algorithm executed with this difference table is following:
 
 Note that the distance constraint in the third DD has been changed from "Arrival [0, 3]" to "Arrival [0, 0]".
 That has happened because the constraint "Arrival [0, 3]" is no more in the search space.
-'''
+"""
 
-snapshots['test_example[basic/mining_fd.py-None-mining_fd_output] mining_fd_output'] = '''FDs:
+snapshots["test_example[basic/mining_fd.py-None-mining_fd_output] mining_fd_output"] = """FDs:
 [Professor] -> Course
 [Professor Semester] -> Classroom
 [Classroom Semester] -> Course
@@ -1930,9 +1962,11 @@ snapshots['test_example[basic/mining_fd.py-None-mining_fd_output] mining_fd_outp
 [Course Semester] -> Classroom
 [Course Semester] -> Professor
 [Course Classroom] -> Professor
-'''
+"""
 
-snapshots['test_example[basic/mining_fd_approximate.py-None-mining_fd_approximate_output] mining_fd_approximate_output'] = '''
+snapshots[
+    "test_example[basic/mining_fd_approximate.py-None-mining_fd_approximate_output] mining_fd_approximate_output"
+] = """
 =======================================================
 This example demonstrates how Desbordante can perform
 approximate functional dependency (FD) discovery
@@ -1957,7 +1991,7 @@ to the following publications:
 We will now demonstrate how to invoke EulerFD and
 AID-FD in Desbordante.
 
-EulerFD: 
+EulerFD:
 [name] -> age
 [name] -> blood
 [name] -> gender
@@ -1967,7 +2001,7 @@ EulerFD:
 [age gender medicine] -> name
 [age blood gender] -> name
 -------------------------------
-AID-FD: 
+AID-FD:
 [name] -> age
 [name] -> blood
 [name] -> gender
@@ -1977,9 +2011,11 @@ AID-FD:
 [age gender medicine] -> name
 [age blood gender] -> name
 In the advanced section, a more complex example will showcase additional features of the algorithms.
-'''
+"""
 
-snapshots['test_example[basic/mining_gfd/mining_gfd1.py-None-mining_gfd1_output] mining_gfd1_output'] = '''Our profiler supports two tasks related to graph functional dependencies (GFDs): validation and mining (discovery). In this example, we will focus on the mining task (for validation, we refer the reader to another example). The mining algorithm used in our profiler is described in the article "Discovering Graph Functional Dependencies" by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Pinge, presented at SIGMOD \'18.
+snapshots[
+    "test_example[basic/mining_gfd/mining_gfd1.py-None-mining_gfd1_output] mining_gfd1_output"
+] = """Our profiler supports two tasks related to graph functional dependencies (GFDs): validation and mining (discovery). In this example, we will focus on the mining task (for validation, we refer the reader to another example). The mining algorithm used in our profiler is described in the article "Discovering Graph Functional Dependencies" by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Pinge, presented at SIGMOD \'18.
 
 GFDs are functional dependencies that consist of a pattern - a graph that specifies the scope - and a rule. The nature of this object will become clearer through the example that follows.
 
@@ -2002,7 +2038,7 @@ Let's run the algorithm and look at the result. We will set k=3 and sigma=2.
 
 Let's print found dependency (in DOT language):
 
-1.role=teacher 
+1.role=teacher
 graph G {
 0[label=article];
 1[label=person];
@@ -2024,9 +2060,11 @@ The discovered dependency can be expressed as the following fact: If a person ha
 It is recommended to look at the second example for a deeper understanding of graph functional dependency mining. It is located in the file "mining_gfd2.py".
 
 \x1b[93mClose the image window to finish.\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/mining_gfd/mining_gfd2.py-None-mining_gfd2_output] mining_gfd2_output'] = '''Our profiler supports two tasks related to graph functional dependencies (GFDs): validation and mining (discovery). In this example, we will focus on the mining task (for validation, we refer the reader to another example). The mining algorithm used in our profiler is described in the article "Discovering Graph Functional Dependencies" by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Pinge, presented at SIGMOD \'18.
+snapshots[
+    "test_example[basic/mining_gfd/mining_gfd2.py-None-mining_gfd2_output] mining_gfd2_output"
+] = """Our profiler supports two tasks related to graph functional dependencies (GFDs): validation and mining (discovery). In this example, we will focus on the mining task (for validation, we refer the reader to another example). The mining algorithm used in our profiler is described in the article "Discovering Graph Functional Dependencies" by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Pinge, presented at SIGMOD \'18.
 
 GFDs are functional dependencies that consist of a pattern - a graph that specifies the scope - and a rule. The nature of this object will become clearer through the example that follows.
 
@@ -2050,8 +2088,8 @@ Let's run the algorithm and look at the result. We will set k=2 and sigma=3.
 \x1b[95mDesbordante > \x1b[0mMined GFDs: 1
 
 Let's print found dependency (in DOT language):
-0.difficulty=hard 
-1.degree=master 1.year=2 
+0.difficulty=hard
+1.degree=master 1.year=2
 graph G {
 0[label=task];
 1[label=student];
@@ -2071,9 +2109,11 @@ The dependency found indicates that only second-year master's students are worki
 It is recommended to look at the first example for a deeper understanding of graph functional dependency mining. It is located in the file "mining_gfd1.py".
 
 \x1b[93mClose the image window to finish.\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/mining_ind.py-None-mining_ind_output] mining_ind_output'] = '''Found inclusion dependencies (-> means "is included in"):
+snapshots[
+    "test_example[basic/mining_ind.py-None-mining_ind_output] mining_ind_output"
+] = """Found inclusion dependencies (-> means "is included in"):
 
 (course.csv, [Department name]) -> (department.csv, [Department name])
 (instructor.csv, [Department name]) -> (department.csv, [Department name])
@@ -2084,32 +2124,32 @@ snapshots['test_example[basic/mining_ind.py-None-mining_ind_output] mining_ind_o
 Tables for first IND:
 course.csv:
 
-Course ID   Title              Department name                       
+Course ID   Title              Department name
 ---------------------------------------------------------------------
-IT-1        Computer Science   Institute of Information Technology   
-MM-3        Algebra            Mathematics and Mechanics Faculty     
-H-1         History            Institute of History                  
-FL-2        English            Faculty of Foreign Languages          
-IT-2        Programming        Institute of Information Technology   
-S-5         Philosophy         Faculty of Sociology                  
-P-2         Physics            Faculty of Physics                    
-C-8         Chemistry          Institute of Chemistry                
+IT-1        Computer Science   Institute of Information Technology
+MM-3        Algebra            Mathematics and Mechanics Faculty
+H-1         History            Institute of History
+FL-2        English            Faculty of Foreign Languages
+IT-2        Programming        Institute of Information Technology
+S-5         Philosophy         Faculty of Sociology
+P-2         Physics            Faculty of Physics
+C-8         Chemistry          Institute of Chemistry
 
 department.csv:
 
-Department name                       Building             
+Department name                       Building
 -----------------------------------------------------------
-Institute of Information Technology   5 Academic av.       
-Mathematics and Mechanics Faculty     3 Academic av.       
-Institute of History                  29A University st.   
-Faculty of Foreign Languages          10 Science sq.       
-Faculty of Sociology                  29C University st.   
-Faculty of Physics                    10 Academic av.      
-Institute of Chemistry                11 Academic av.      
-Graduate School of Managemment        49 Science sq.       
-'''
+Institute of Information Technology   5 Academic av.
+Mathematics and Mechanics Faculty     3 Academic av.
+Institute of History                  29A University st.
+Faculty of Foreign Languages          10 Science sq.
+Faculty of Sociology                  29C University st.
+Faculty of Physics                    10 Academic av.
+Institute of Chemistry                11 Academic av.
+Graduate School of Managemment        49 Science sq.
+"""
 
-snapshots['test_example[basic/mining_list_od.py-None-mining_list_od_output] mining_list_od_output'] = '''
+snapshots["test_example[basic/mining_list_od.py-None-mining_list_od_output] mining_list_od_output"] = """
 +----+----------+-----------------+--------+
 |    |   weight |   shipping cost |   days |
 |----+----------+-----------------+--------|
@@ -2127,7 +2167,7 @@ Resulting dependencies for this table are:
 ['weight'] -> ['shipping cost']
 
 Dependency [weight] -> [shipping cost] means that ordering table by weight
-will also order table by shipping cost automatically. Let's order by weight: 
+will also order table by shipping cost automatically. Let's order by weight:
 
 +----+----------+-----------------+--------+
 |    |   weight |   shipping cost |   days |
@@ -2158,9 +2198,11 @@ that ordering by shipping cost will also lexicographically order [weight, days]:
 |  5 |       20 |              40 |      8 |
 +----+----------+-----------------+--------+
 
-'''
+"""
 
-snapshots['test_example[basic/mining_md.py-None-mining_md_output] mining_md_output'] = '''In this example we are discovering MDs as defined in "Efficient Discovery of Matching Dependencies" by Schirmer et al. Initially, we define columns the values of which are going to be compared and the measure according to which similarity of values is going to be determined. The HyMD algorithm then finds the set of decision boundaries of all MDs that are enough to infer MDs that satisfy some requirements (interestingness criteria) and hold on the data.
+snapshots[
+    "test_example[basic/mining_md.py-None-mining_md_output] mining_md_output"
+] = """In this example we are discovering MDs as defined in "Efficient Discovery of Matching Dependencies" by Schirmer et al. Initially, we define columns the values of which are going to be compared and the measure according to which similarity of values is going to be determined. The HyMD algorithm then finds the set of decision boundaries of all MDs that are enough to infer MDs that satisfy some requirements (interestingness criteria) and hold on the data.
 First, the animals_beverages dataset will be inspected.
        name     zoo animal  diet
 0     Simba  berlin   lion  meat
@@ -2243,9 +2285,11 @@ We can also increase the minimum support requirement. This can help us find the 
 Searching for MDs...
 Found MDs:
 0 [ jaccard(From, From)>=0.769231 | jaccard(To, To)>=0.769231 ] -> normalized_distance(Distance (km), Distance (km))>=0.977417
-'''
+"""
 
-snapshots['test_example[basic/mining_nar.py-None-mining_nar_output] mining_nar_output'] = '''Numerical Association Rules (NAR) are an extension of traditional Association Rules (AR), which help to discover patterns in data. Unlike ARs, which work with binary attributes (e.g., whether an item was purchased or not), NARs can handle numerical data (e.g., how many units of an item were purchased). This makes NARs more flexible for discovering relationships in datasets with numerical data.
+snapshots[
+    "test_example[basic/mining_nar.py-None-mining_nar_output] mining_nar_output"
+] = """Numerical Association Rules (NAR) are an extension of traditional Association Rules (AR), which help to discover patterns in data. Unlike ARs, which work with binary attributes (e.g., whether an item was purchased or not), NARs can handle numerical data (e.g., how many units of an item were purchased). This makes NARs more flexible for discovering relationships in datasets with numerical data.
 Suppose we have a table containing students' exam grades and how many hours they studied for the exam. Such a table might hold the following numerical association rule:
 
 \x1b[1mStudy_Hours[15.5 - 30.2] \x1b[34m⎤-Antecedent
@@ -2282,9 +2326,9 @@ Fragment of the dog_breeds.csv table:
 A fragment of the table is presented above. In total, each dog breed has 14 attributes.
 Now, let's mine some NARs. We will use a minimum support of 0.1 and a minimum confidence of 0.7. We will also use a population size of 500 and max_fitness_evaluations of 700. Larger values for max_fitness_evaluations tend to return larger rules encompassing more attributes. The population size parameter affects the number of NARs being generated and mutated. Larger values are slower but output more NARs.
 
-Finally, as the DES algorithm is a randomized one, we need to set the seed parameter to the specially-selected value in order: 
-1) to present you an interesting and illustrative example of NAR and, 
-2) to ensure the repeatability of this example (i.e., that NAR found stays the same over different runs) 
+Finally, as the DES algorithm is a randomized one, we need to set the seed parameter to the specially-selected value in order:
+1) to present you an interesting and illustrative example of NAR and,
+2) to ensure the repeatability of this example (i.e., that NAR found stays the same over different runs)
 Note that if you do not set the seed parameter, the default value would be used.
 NAR 1:\x1b[1m
 Type[Hound]
@@ -2378,14 +2422,16 @@ Training Difficulty[4 - 9]
    confidence = 0.7222222222222222
 \x1b[0m
 These found NARs are less striking, but nevertheless they represent some thought-provoking facts.
-'''
+"""
 
-snapshots['test_example[basic/mining_pfd.py-None-mining_pfd_output] mining_pfd_output'] = '''per_value pFDs:
+snapshots["test_example[basic/mining_pfd.py-None-mining_pfd_output] mining_pfd_output"] = """per_value pFDs:
 [Y] -> X
 per_tuple pFDs:
-'''
+"""
 
-snapshots['test_example[basic/mining_set_od_1.py-None-mining_set_od_1_output] mining_set_od_1_output'] = '''+----+--------+------------------+--------------+
+snapshots[
+    "test_example[basic/mining_set_od_1.py-None-mining_set_od_1_output] mining_set_od_1_output"
+] = """+----+--------+------------------+--------------+
 |    |   year |   employee_grade |   avg_salary |
 |----+--------+------------------+--------------|
 |  0 |   2020 |               24 |         1000 |
@@ -2493,9 +2539,11 @@ each of these classes contains only one element, so constancy within
 each class occurs automatically.
 
 To better understand such dependencies, refer to the second example.
-'''
+"""
 
-snapshots['test_example[basic/mining_set_od_2.py-None-mining_set_od_2_output] mining_set_od_2_output'] = '''+----+--------+------------+-----------+
+snapshots[
+    "test_example[basic/mining_set_od_2.py-None-mining_set_od_2_output] mining_set_od_2_output"
+] = """+----+--------+------------+-----------+
 |    |   year | position   | percent   |
 |----+--------+------------+-----------|
 |  0 |   2020 | director   | 10%       |
@@ -2629,23 +2677,25 @@ Dependency "{1,2} : [] -> 3<=" no longer exists:
 |   \x1b[35m2021\x1b[0m | \x1b[35mother\x1b[0m      | \x1b[35m55%\x1b[0m       |
 |   \x1b[36m2021\x1b[0m | \x1b[36mdirector\x1b[0m   | \x1b[36m10%\x1b[0m       |
 +--------+------------+-----------+
-'''
+"""
 
-snapshots['test_example[basic/mining_ucc.py-None-mining_ucc_output] mining_ucc_output'] = '''\x1b[1m\x1b[36mThis example illustrates the usage of exact Unique Column Combinations (UCC).
+snapshots[
+    "test_example[basic/mining_ucc.py-None-mining_ucc_output] mining_ucc_output"
+] = """\x1b[1m\x1b[36mThis example illustrates the usage of exact Unique Column Combinations (UCC).
 Intuitively, a UCC declares that some columns uniquely identify every tuple in a table.
 For more information consult "A Hybrid Approach for Efficient Unique Column Combination Discovery"
 by T. Papenbrock and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1150     12                
-Joyce        Harris      2       1100     5                 
-Harry        Roberts     3       1000     7                 
-Grace        Brown       4       900      12                
-Harry        Walker      4       1000     5                 
-Samuel       Brown       1       900      9                 
-Nancy        Adams       2       1000     3                 
+Mark         Harris      7       1150     12
+Joyce        Harris      2       1100     5
+Harry        Roberts     3       1000     7
+Grace        Brown       4       900      12
+Harry        Walker      4       1000     5
+Samuel       Brown       1       900      9
+Nancy        Adams       2       1000     3
 \x1b[0mWe need to select a column or a combination of columns that will serve as a unique key (ID).
 
 Let's run UCC mining algorithm:
@@ -2662,9 +2712,11 @@ Found UCCs:
 There are no unary UCCs, so there is no single column that can define a key.
 We need to select a combination of two columns, that will serve as an ID.
 \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m is a good candidate.
-'''
+"""
 
-snapshots['test_example[basic/verifying_aod.py-None-verifying_aod_output] verifying_aod_output'] = '''This example verifies set-based Order Dependencies (ODs).
+snapshots[
+    "test_example[basic/verifying_aod.py-None-verifying_aod_output] verifying_aod_output"
+] = """This example verifies set-based Order Dependencies (ODs).
 Set-based ODs were first introduced in the paper [1] Jaroslaw Szlichta, Parke
 Godfrey, Lukasz Golab, Mehdi Kargar, and Divesh Srivastava. 2017. Effective and
 complete discovery of order dependencies via set-based axiomatization. Proc.
@@ -2834,9 +2886,11 @@ result and what a removal set is.
 Feel free to play around with the code: modify the table with different values,
 try verifying other AODs, or even load your own datasets to see what you can
 discover!
-'''
+"""
 
-snapshots['test_example[basic/verifying_aucc.py-None-verifying_aucc_output] verifying_aucc_output'] = '''Dataset AUCC_example.csv:
+snapshots[
+    "test_example[basic/verifying_aucc.py-None-verifying_aucc_output] verifying_aucc_output"
+] = """Dataset AUCC_example.csv:
    ID  name  card_num  card_active
 0   1  Alex       665         True
 1   2  Liam       667         True
@@ -2900,9 +2954,11 @@ It should hold, cards with identical numbers are not active simultaneously
 UCC holds, showing stats for AUCC is useless
 
 --------------------------------------------------------------------------------
-'''
+"""
 
-snapshots['test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output'] = '''This example demonstrates how to validate Conditional Functional Dependencies (CFDs) using the Desbordante library.
+snapshots[
+    "test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output"
+] = """This example demonstrates how to validate Conditional Functional Dependencies (CFDs) using the Desbordante library.
 The definitions are taken from the paper 'Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”' (ECML PKDD 2018).
 CFD expresses a relationship in which a subset of attributes X defines Y, written as (X -> Y, t), where t is a certain template tuple.
 A template tuple t is a tuple where each attribute can either have a fixed constant value or a wildcard symbol ('_'), allowing for generalization across different data records.
@@ -2968,9 +3024,11 @@ Confidence: 1.00
 Number of clusters violating FD: 0
 
 Thats all for CFD validation. Desbordante is also capable of CFD discovery, which is discussed in "mining_cfd.py".
-'''
+"""
 
-snapshots['test_example[basic/verifying_dc.py-None-verifying_dc_output] verifying_dc_output'] = '''This is a basic example explaining how to use Denial Constraint (DC) verification for checking hypotheses on data.
+snapshots[
+    "test_example[basic/verifying_dc.py-None-verifying_dc_output] verifying_dc_output"
+] = """This is a basic example explaining how to use Denial Constraint (DC) verification for checking hypotheses on data.
 A more advanced example of using Denial Constraints is located in examples/expert/data_cleaning_dc.py.
 
 DC verification is performed by the Rapidash algorithm:
@@ -3032,13 +3090,15 @@ Now we can see that the same DC we examined on the previous dataset doesn't hold
 The issue is that for the last record (Texas, 5000, 0.05), there are people in Texas with a lower salary
 but a higher tax rate.
 
-Such pairs of records that contradict a DC are called violations. We can retrieve these 
+Such pairs of records that contradict a DC are called violations. We can retrieve these
 violations from the algorithm object. In this case, the following pairs are the violations:
 (8, 11), (9, 11), (10, 11), where each number is an index of a record in the table.
 
-'''
+"""
 
-snapshots['test_example[basic/verifying_dd.py-None-verifying_dd_output] verifying_dd_output'] = '''This is an example of validating differential dependencies.
+snapshots[
+    "test_example[basic/verifying_dd.py-None-verifying_dd_output] verifying_dd_output"
+] = """This is an example of validating differential dependencies.
 
 Differential dependencies were introduced by Song, Shaoxu,
 and Chen, Lei in their 2011 article, "Differential
@@ -3186,7 +3246,7 @@ the store location.
 
 To address this, we refine the dependency
 by adding a constraint on the product_category.
-Next DD, which we are going to check: 
+Next DD, which we are going to check:
 
 \x1b[1;33mstore_name [0, 0] ; category [0, 0] -> stock_quantity [0, 25]\x1b[0m
 
@@ -3269,9 +3329,11 @@ correct this error and observe the subsequent changes.
 
 After correcting the error, the error threshold
 dropped to \x1b[1;32m0.0\x1b[0m and the \x1b[1;32mDD holds.\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/verifying_fd_afd.py-None-verifying_fd_afd_output] verifying_fd_afd_output'] = '''First, let's look at the duplicates_short.csv table and try to verify the functional dependency in it.
+snapshots[
+    "test_example[basic/verifying_fd_afd.py-None-verifying_fd_afd_output] verifying_fd_afd_output"
+] = """First, let's look at the duplicates_short.csv table and try to verify the functional dependency in it.
 
        id             name  ...  phone country
 0      26      Björn Smith  ...     25      RI
@@ -3361,9 +3423,11 @@ Num distinct rhs values: 2
 Most frequent rhs value proportion: 0.5
 Num distinct rhs values: 2
 
-'''
+"""
 
-snapshots['test_example[basic/verifying_gfd/verifying_gfd1.py-None-verifying_gfd1_output] verifying_gfd1_output'] = '''The graph is depicted in figure. The following abbreviations were used: A - account, B - blog. Vertices labeled A have a "name" attribute showing the nickname; vertices labeled B - "author", indicating who wrote the blog. The values of these attributes are labeled next to the vertices. The edges are also labeled as: "post", which indicates who wrote the blog, and "like", which indicates approval by another person. In the drawing, the edges are marked "post" in bold.
+snapshots[
+    "test_example[basic/verifying_gfd/verifying_gfd1.py-None-verifying_gfd1_output] verifying_gfd1_output"
+] = """The graph is depicted in figure. The following abbreviations were used: A - account, B - blog. Vertices labeled A have a "name" attribute showing the nickname; vertices labeled B - "author", indicating who wrote the blog. The values of these attributes are labeled next to the vertices. The edges are also labeled as: "post", which indicates who wrote the blog, and "like", which indicates approval by another person. In the drawing, the edges are marked "post" in bold.
 
 If the graph functional dependency on a figure is not satisfied, the data are erroneous because the information contained in the edge label contradicts the information about the author contained at the vertex of the blog.
 
@@ -3384,9 +3448,11 @@ Run algorithm:
 As you can see, the modified graph does not satisfy this dependency, indicating that it has errors.
 
 \x1b[93mClose the image window to finish.\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/verifying_gfd/verifying_gfd2.py-None-verifying_gfd2_output] verifying_gfd2_output'] = '''The graph is depicted in the figure. The following abbreviations were used: A - account, B - blog. Vertices labeled A have a "name" attribute showing the nickname; vertices labeled B - "author", indicating who wrote the blog. The values of these attributes are labeled next to the vertices. The edges are also labeled as: "post", which indicates who wrote the blog, and "like", which indicates approval by another person. In the drawing, the edges are marked "post" in bold.
+snapshots[
+    "test_example[basic/verifying_gfd/verifying_gfd2.py-None-verifying_gfd2_output] verifying_gfd2_output"
+] = """The graph is depicted in the figure. The following abbreviations were used: A - account, B - blog. Vertices labeled A have a "name" attribute showing the nickname; vertices labeled B - "author", indicating who wrote the blog. The values of these attributes are labeled next to the vertices. The edges are also labeled as: "post", which indicates who wrote the blog, and "like", which indicates approval by another person. In the drawing, the edges are marked "post" in bold.
 
 The dependency on the figure suggests that one blog cannot have two authors. That is, satisfiability of this dependency ensures that there are no errors related to the number of authors in the data.
 
@@ -3407,9 +3473,11 @@ Run algorithm:
 As you can see, the modified graph does not satisfy this dependency, indicating that it has errors.
 
 \x1b[93mClose the image window to finish.\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/verifying_gfd/verifying_gfd3.py-None-verifying_gfd3_output] verifying_gfd3_output'] = '''Figure provides an example of a graph dependency and graph. The vertices of the graph have labels of C (Channel) or U (User). Depending on the label, the vertex has its own set of attributes. In this example, all vertices have a single element list of attributes. At the vertices labeled C it consists of the element "topic", and at the vertices labeled U - "age_group". On the figure the specific values of these attributes are specified next to the vertices.
+snapshots[
+    "test_example[basic/verifying_gfd/verifying_gfd3.py-None-verifying_gfd3_output] verifying_gfd3_output"
+] = """Figure provides an example of a graph dependency and graph. The vertices of the graph have labels of C (Channel) or U (User). Depending on the label, the vertex has its own set of attributes. In this example, all vertices have a single element list of attributes. At the vertices labeled C it consists of the element "topic", and at the vertices labeled U - "age_group". On the figure the specific values of these attributes are specified next to the vertices.
 
 Dependency means that if a user is signed on a channel whose topic is entertainment, he must be a kid.
 
@@ -3420,9 +3488,11 @@ Let's check if this dependency holds.
 The test found that the constructed dependency is not satisfied because in the graph there is an example in which a teenager subscribes to the entertainment channel.
 
 \x1b[93mClose the image window to finish.\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/verifying_ind_aind.py-None-verifying_ind_aind_output] verifying_ind_aind_output'] = '''==============================================
+snapshots[
+    "test_example[basic/verifying_ind_aind.py-None-verifying_ind_aind_output] verifying_ind_aind_output"
+] = """==============================================
 In Desbordante, we consider an approximate inclusion dependency (AIND)
 as any inclusion dependency (IND) that utilizes an error metric to measure
 violations. This metric calculates the proportion of distinct values in the
@@ -3617,9 +3687,9 @@ Checking the IND [orders.customer_id] -> [customers.id]
 The missing customer has been successfully added to the 'customers' dataset.
 
 All issues in the 'orders' and 'customers' datasets have been resolved.
-'''
+"""
 
-snapshots['test_example[basic/verifying_md.py-None-verifying_md_output] verifying_md_output'] = '''\x1b[1;49m
+snapshots["test_example[basic/verifying_md.py-None-verifying_md_output] verifying_md_output"] = """\x1b[1;49m
 This example demonstrates how to verify matching dependencies (MDs) using the Desbordante library. Matching dependencies are defined in "Efficient Discovery of Matching Dependencies" by Schirmer et al., ACM Transactions on Database Systems (TODS), Vol. 45, No. 3, Article 13, pp. 1–33.
 
 The matching dependency verification algorithm accepts a dependency and determines whether it holds over the specified dataset. If the dependency does not hold, the algorithm returns a list of exceptions (tuples that violate the MD) and suggests adjustments to the dependency to make it hold.
@@ -3638,7 +3708,7 @@ As the first example, let's look at the animals_beverages.csv dataset.
 0     Simba  berlin   lion  meat
 1  Clarence  london   lion  mead
 2     Baloo  berlin   bear  fish
-3      Pooh  london   beer  fish 
+3      Pooh  london   beer  fish
 
 Let's try to check if the Matching Dependency
 
@@ -3710,7 +3780,7 @@ Now let's re-check the original matching dependency with decision boundaries set
 
 \x1b[1;42mMD holds\x1b[1;49m
 
----------------------------------------------------------------------------------------------------- 
+----------------------------------------------------------------------------------------------------
 
 On our next example let's take a view at employee_typos.csv dataset:
 
@@ -3720,7 +3790,7 @@ On our next example let's take a view at employee_typos.csv dataset:
 2  Edward    Black    Clerk  Washington D. C.     Third St 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Suppose we already know the following facts about this dataset:
 1. Each city has a single office, i.e. there is a functional dependency [City] -> OfficeLocation.
@@ -3764,7 +3834,7 @@ Now let's fix the typos:
 2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Let's try again:
 
@@ -3807,7 +3877,7 @@ Now we see the problem. Let's fix it:
 2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Let's re-check the matching dependency again:
 
@@ -3885,13 +3955,13 @@ Invoking the algorithm with a decision boundary of 0.8 helped us locate issues i
 2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Invoking the algorithm with a decision boundary of 0.2 revealed some additional, but meaningless, patterns. For example, it considered the value "Clerk" in record 2 and "Chief" in record 5 similar enough.
 
 As a result, we can conclude that this approach allows locating typos without prior knowledge of column dependencies, but requires care in selecting decision boundaries and in analyzing the algorithm's results.
 
----------------------------------------------------------------------------------------------------- 
+----------------------------------------------------------------------------------------------------
 
 Now let's examine another example. We will use the flights_dd.csv dataset for this purpose:
 
@@ -3907,7 +3977,7 @@ Now let's examine another example. We will use the flights_dd.csv dataset for th
 8         DP 967  2024-03-07            Moscow (VKO)             Minsk (MSQ)       622        73
 9         B2 981  2024-03-08             Minsk (MSQ)            Moscow (VKO)       622        61
 10        DP 261  2024-03-06            Moscow (VKO)       Kaliningrad (KGD)      1059       144
-11        DP 536  2024-03-05       Kaliningrad (KGD)  Saint Petersburg (LED)       798        92 
+11        DP 536  2024-03-05       Kaliningrad (KGD)  Saint Petersburg (LED)       798        92
 
 Imagine we want to check that when the departure city and the arrival city are the same, flight times do not differ significantly. We will treat all Moscow airports as equivalent and need to determine a decision boundary for this purpose.
 
@@ -3925,7 +3995,7 @@ Let's create a copy of our table and add new Departure and Arrival columns with 
 8             Moscow (VKO)            Moscow             Minsk (MSQ)             Minsk
 9              Minsk (MSQ)             Minsk            Moscow (VKO)            Moscow
 10            Moscow (VKO)            Moscow       Kaliningrad (KGD)       Kaliningrad
-11       Kaliningrad (KGD)       Kaliningrad  Saint Petersburg (LED)  Saint Petersburg 
+11       Kaliningrad (KGD)       Kaliningrad  Saint Petersburg (LED)  Saint Petersburg
 
 Now let's check the following matching dependency:
 
@@ -4009,9 +4079,9 @@ As a result, we can conclude that durations differ by about 10% for flights with
 
 In conclusion, the matching dependency verification algorithm can be helpful for analyzing data, extracting facts, and finding typos. It is a powerful pattern but requires experimentation with decision boundaries and similarity measures.
 
-'''
+"""
 
-snapshots['test_example[basic/verifying_mfd.py-None-verifying_mfd_output] verifying_mfd_output'] = '''\x1b[1;49m
+snapshots["test_example[basic/verifying_mfd.py-None-verifying_mfd_output] verifying_mfd_output"] = """\x1b[1;49m
 \x1b[1;46mMetric Functional Dependency\x1b[1;49m (MFD) is a type of relaxed functional dependency designed to account for small deviations that would otherwise invalidate regular functional dependencies. Those deviations are measured using an arbitrary metric defined by the user, making this definition applicable in a variety of situations.
 
 Semi-formal definition for those interested:
@@ -4144,24 +4214,26 @@ New York Av.  Washington    D.C.   1   1   1   1   1  ...   1   1   1   1   1   
 [2 rows x 31 columns]
 Let\'s interpret the rows in the table as coordinates of two vectors. We have ways to compare them. For example, we can assess how similar they are by calculating S(A, B) = A*B / (||A||*||B||), where A*B is a dot product, and ||A|| is a magnitude of vector A. This is called "cosine similarity". To quantify how different two strings are, we\'ll use the metric Δ(x, y) = 1 - S(x, y), also known as "cosine distance".
 In this example, a parameter of δ = 0.1 is sufficient for the algorithm to not consider "New York Av., Washington, D.C." and "New York Ave., Washington, D.C." to be different addresses.
-'''
+"""
 
-snapshots['test_example[basic/verifying_nd/verifying_nd_1.py-None-verifying_nd_1_output] verifying_nd_1_output'] = '''\x1b[1m\x1b[36mThis example illustrates the usage of Numerical Dependencies (NDs).
+snapshots[
+    "test_example[basic/verifying_nd/verifying_nd_1.py-None-verifying_nd_1_output] verifying_nd_1_output"
+] = """\x1b[1m\x1b[36mThis example illustrates the usage of Numerical Dependencies (NDs).
 Intuitively, given two sets of attributes X and Y, there is an ND from X to Y (denoted X -> Y, weight = k)
 if each value of X can never be associated to more than k distinct values of Y.
 For more information consult "Efficient derivation of numerical dependencies" by Paolo Ciaccia et al.
 \x1b[0m
 Citizens of Arstozka can have no more than two documents: one Arstozka passport and one exit permit.
 The following table contains records of some citizens' documents:
-\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date
 --------------------------------------------------------------------------------
-Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        
-Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        
-Grant Baker      8H6-772                       Antegria       19.11.2029        
-Kordon Kallo     7ND-93L                       Cobrastan      08.06.2001        
-Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028
+Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon Kallo     7JH-35A                       Orbistan       07.01.2027
+Grant Baker      8H6-772                       Antegria       19.11.2029
+Kordon Kallo     7ND-93L                       Cobrastan      08.06.2001
+Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 We need to validate these data
 Let's run ND verification algorithm to check that every citizen has no more than two records:
@@ -4171,42 +4243,44 @@ Let's run ND verification algorithm to check that every citizen has no more than
 
 Let's look at clusters violating ND:
 Number of clusters: 1
-\x1b[1m\x1b[36mName           ID            Issuing city   Entry permit   Expiration date   
+\x1b[1m\x1b[36mName           ID            Issuing city   Entry permit   Expiration date
 -----------------------------------------------------------------------------
-Kordon Kallo   375F0-KE12I   Orvech Vonor                  05.03.2040        
-Kordon Kallo   7JH-35A                      Orbistan       07.01.2027        
-Kordon Kallo   7ND-93L                      Cobrastan      08.06.2001        
+Kordon Kallo   375F0-KE12I   Orvech Vonor                  05.03.2040
+Kordon Kallo   7JH-35A                      Orbistan       07.01.2027
+Kordon Kallo   7ND-93L                      Cobrastan      08.06.2001
 \x1b[0m
 So, (Kordon Kallo) has 3 documents
 One of them is expired and shouldn't appear in this table. Let's remove this line:
-\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date
 --------------------------------------------------------------------------------
-Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        
-Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        
-Grant Baker      8H6-772                       Antegria       19.11.2029        
-Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028
+Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon Kallo     7JH-35A                       Orbistan       07.01.2027
+Grant Baker      8H6-772                       Antegria       19.11.2029
+Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/verifying_nd/verifying_nd_2.py-None-verifying_nd_2_output] verifying_nd_2_output'] = '''\x1b[1m\x1b[36mThis example illustrates the usage of Numerical Dependencies (NDs).
+snapshots[
+    "test_example[basic/verifying_nd/verifying_nd_2.py-None-verifying_nd_2_output] verifying_nd_2_output"
+] = """\x1b[1m\x1b[36mThis example illustrates the usage of Numerical Dependencies (NDs).
 Intuitively, given two sets of attributes X and Y, there is an ND from X to Y (denoted X -> Y, weight = k)
 if each value of X can never be associated to more than k distinct values of Y.
 For more information consult "Efficient derivation of numerical dependencies" by Paolo Ciaccia et al.
 \x1b[0m
 Citizens of Arstozka can have no more than two documents: one Arstozka passport and one exit permit.
 The following table contains records of some citizens' documents:
-\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   Birth date   
+\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   Birth date
 ---------------------------------------------------------------------------------------------
-Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001   
-Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        09.10.1993   
-Kordon Kallo     1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989   
-Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        05.03.2001   
-Kordon Kallo     8H6-772                       Antegria       19.11.2029        28.07.1989   
-Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004   
+Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001
+Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        09.10.1993
+Kordon Kallo     1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989
+Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        05.03.2001
+Kordon Kallo     8H6-772                       Antegria       19.11.2029        28.07.1989
+Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004
 \x1b[0m
 We need to validate these data
 Let's run ND verification algorithm to check that every citizen has no more than two records:
@@ -4216,45 +4290,47 @@ Let's run ND verification algorithm to check that every citizen has no more than
 
 Let's look at clusters violating ND:
 Number of clusters: 1
-\x1b[1m\x1b[36mName           ID            Issuing city    Entry permit   Expiration date   Birth date   
+\x1b[1m\x1b[36mName           ID            Issuing city    Entry permit   Expiration date   Birth date
 -------------------------------------------------------------------------------------------
-Kordon Kallo   375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001   
-Kordon Kallo   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989   
-Kordon Kallo   7JH-35A                       Orbistan       07.01.2027        05.03.2001   
-Kordon Kallo   8H6-772                       Antegria       19.11.2029        28.07.1989   
+Kordon Kallo   375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001
+Kordon Kallo   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989
+Kordon Kallo   7JH-35A                       Orbistan       07.01.2027        05.03.2001
+Kordon Kallo   8H6-772                       Antegria       19.11.2029        28.07.1989
 \x1b[0m
 So, (Kordon Kallo) has 4 documents. It's twice as much as needed.
 Look at birth date. (Kordon Kallo) has two different values.
 Maybe, we have two different (Kordon Kallo)? Let's split them:
-\x1b[1m\x1b[36mName               ID            Issuing city    Entry permit   Expiration date   Birth date   
+\x1b[1m\x1b[36mName               ID            Issuing city    Entry permit   Expiration date   Birth date
 -----------------------------------------------------------------------------------------------
-Kordon Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001   
-Nathan Cykelek     9I2-4H2                       Kolechia       09.10.2028        09.10.1993   
-Kordon Kallo (1)   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989   
-Kordon Kallo       7JH-35A                       Orbistan       07.01.2027        05.03.2001   
-Kordon Kallo (1)   8H6-772                       Antegria       19.11.2029        28.07.1989   
-Khaled Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004   
+Kordon Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001
+Nathan Cykelek     9I2-4H2                       Kolechia       09.10.2028        09.10.1993
+Kordon Kallo (1)   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989
+Kordon Kallo       7JH-35A                       Orbistan       07.01.2027        05.03.2001
+Kordon Kallo (1)   8H6-772                       Antegria       19.11.2029        28.07.1989
+Khaled Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004
 \x1b[0m
 Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/verifying_nd/verifying_nd_3.py-None-verifying_nd_3_output] verifying_nd_3_output'] = '''\x1b[1m\x1b[36mThis example illustrates the usage of Numerical Dependencies (NDs).
+snapshots[
+    "test_example[basic/verifying_nd/verifying_nd_3.py-None-verifying_nd_3_output] verifying_nd_3_output"
+] = """\x1b[1m\x1b[36mThis example illustrates the usage of Numerical Dependencies (NDs).
 Intuitively, given two sets of attributes X and Y, there is an ND from X to Y (denoted X -> Y, weight = k)
 if each value of X can never be associated to more than k distinct values of Y.
 For more information consult "Efficient derivation of numerical dependencies" by Paolo Ciaccia et al.
 \x1b[0m
 Citizens of Arstozka can have no more than two documents: one Arstozka passport and one exit permit.
 The following table contains records of some citizens' documents:
-\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date
 ----------------------------------------------------------------------------------------
-Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028        
-Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027        
-Khaled       Baker       8H6-772                       Antegria       19.11.2029        
-Kordon       Kallo       7ND-93L                       Cobrastan      08.06.2001        
-Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028
+Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027
+Khaled       Baker       8H6-772                       Antegria       19.11.2029
+Kordon       Kallo       7ND-93L                       Cobrastan      08.06.2001
+Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 We need to validate these data
 In this table, the first names and last names are separated into different columns.
@@ -4266,28 +4342,30 @@ Let's run ND verification algorithm to check that every citizen has no more than
 
 Let's look at clusters violating ND:
 Number of clusters: 1
-\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city   Entry permit   Expiration date   
+\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city   Entry permit   Expiration date
 ---------------------------------------------------------------------------------------
-Kordon       Kallo       375F0-KE12I   Orvech Vonor                  05.03.2040        
-Kordon       Kallo       7JH-35A                      Orbistan       07.01.2027        
-Kordon       Kallo       7ND-93L                      Cobrastan      08.06.2001        
+Kordon       Kallo       375F0-KE12I   Orvech Vonor                  05.03.2040
+Kordon       Kallo       7JH-35A                      Orbistan       07.01.2027
+Kordon       Kallo       7ND-93L                      Cobrastan      08.06.2001
 \x1b[0m
 So, (Kordon, Kallo) has 3 documents
 One of them is expired and shouldn't appear in this table. Let's remove this line:
-\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date
 ----------------------------------------------------------------------------------------
-Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028        
-Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027        
-Khaled       Baker       8H6-772                       Antegria       19.11.2029        
-Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028
+Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027
+Khaled       Baker       8H6-772                       Antegria       19.11.2029
+Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
-'''
+"""
 
-snapshots['test_example[basic/verifying_pfd.py-None-verifying_pfd_output] verifying_pfd_output'] = '''Dataset: examples/datasets/glitchy_sensor_2.csv
+snapshots[
+    "test_example[basic/verifying_pfd.py-None-verifying_pfd_output] verifying_pfd_output"
+] = """Dataset: examples/datasets/glitchy_sensor_2.csv
     Id DeviceId  Data
 0    1      D-1  1001
 1    2      D-1  1002
@@ -4342,9 +4420,11 @@ Third violating cluster:
 14  15      D-5  1015
 15  16      D-5  1015
 
-'''
+"""
 
-snapshots['test_example[basic/verifying_ucc.py-None-verifying_ucc_output] verifying_ucc_output'] = '''Checking whether (First Name) UCC holds
+snapshots[
+    "test_example[basic/verifying_ucc.py-None-verifying_ucc_output] verifying_ucc_output"
+] = """Checking whether (First Name) UCC holds
 UCC does not hold
 Total number of rows violating UCC: 2
 Number of clusters violating UCC: 1
@@ -4362,9 +4442,11 @@ Clusters violating UCC:
 [2, 3, 4]
 [6, 7]
 
-'''
+"""
 
-snapshots['test_example[expert/anomaly_detection.py-None-anomaly_detection_output] anomaly_detection_output'] = '''FDs found for dataset 1:
+snapshots[
+    "test_example[expert/anomaly_detection.py-None-anomaly_detection_output] anomaly_detection_output"
+] = """FDs found for dataset 1:
 [item_id] -> item_weight
 [item_weight] -> item_id
 [record_id] -> cargo_id
@@ -4408,9 +4490,11 @@ AFDs found for dataset 3:
 [timestamp] -> item_weight
 [timestamp] -> record_id
 MFD holds.
-'''
+"""
 
-snapshots['test_example[expert/data_cleaning_dc.py-None-data_cleaning_dc_output] data_cleaning_dc_output'] = '''This is an advanced example explaining how to use Denial Constraint (DC) verification for data cleaning.
+snapshots[
+    "test_example[expert/data_cleaning_dc.py-None-data_cleaning_dc_output] data_cleaning_dc_output"
+] = """This is an advanced example explaining how to use Denial Constraint (DC) verification for data cleaning.
 A basic example of using Denial Constraints is located in examples/basic/verifying_dc.py.
 
 DC verification is performed by the Rapidash algorithm:
@@ -4506,9 +4590,9 @@ Now we can check if the constraint holds by running the algorithm again.
 DC !(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate) holds: True
 
 After fixing the typos in the initial dataset, the constraint holds.
-'''
+"""
 
-snapshots['test_example[expert/dedupe.py-dedupe_input.txt-dedupe_output] dedupe_output'] = '''Deduplication parameters:
+snapshots["test_example[expert/dedupe.py-dedupe_input.txt-dedupe_output] dedupe_output"] = """Deduplication parameters:
 ALGORITHM='Pyro'
 ERROR=0.00100
 DATASET_PATH='examples/datasets/duplicates.csv'
@@ -4558,7 +4642,7 @@ index: Column: address. Which value to use?
 0: 27
 1: 28
 index: Column: city. Which value to use?
-0: 
+0:
 1: Kustruma
 index:    id          name address    city                       email phone country
 5  27     Björn Sue      26    Roit      Björn.Sue702@cmail.com    26      CM
@@ -4571,20 +4655,20 @@ Command:       id        name address       city                       email pho
 Command:        id       name address    city                     email phone country
 50     60  Lisa Wolf      59  Syndye   Lisa.Wolf3540@cmail.com    59      FC
 51      7  Mary Dawn       6  Syndye  Mary.Dawn42@atomlema.ocg     6      PR
-52   5930   Mary Doe          Lumdum  Mary.Doe-5926@ferser.edu     0        
+52   5930   Mary Doe          Lumdum  Mary.Doe-5926@ferser.edu     0
 53  11859   Mary Doe          Lumdum  Mary.Doe-5926@ferser.edu     0      EU
 54      1   Mary Doe          Lumdum         Mary.Doe0@muli.ry     4      EU
 Command: Column: id. Which value to use?
 0: 11859
 1: 5930
 index: Column: country. Which value to use?
-0: 
+0:
 1: EU
 index:     id       name address    city                     email phone country
 50  60  Lisa Wolf      59  Syndye   Lisa.Wolf3540@cmail.com    59      FC
 51   7  Mary Dawn       6  Syndye  Mary.Dawn42@atomlema.ocg     6      PR
 54   1   Mary Doe          Lumdum         Mary.Doe0@muli.ry     4      EU
-Command: 
+Command:
 Resulting records: 75. Duplicates found: 3
     id             name address       city                          email phone country
 0   31       Björn Dawn      30     Muxicu     Björn.Dawn930@atomlema.ocg    30      JU
@@ -4600,9 +4684,11 @@ Resulting records: 75. Duplicates found: 3
 74  18      Steve Smith      17     Lumdum       Steve.Smith306@cmail.com    17      EU
 
 [75 rows x 7 columns]
-'''
+"""
 
-snapshots['test_example[expert/mine_typos.py-None-mine_typos_output] mine_typos_output'] = '''Starting typo discovery scenario with parameters:
+snapshots[
+    "test_example[expert/mine_typos.py-None-mine_typos_output] mine_typos_output"
+] = """Starting typo discovery scenario with parameters:
 RADIUS=3
 RATIO=0.1
 ERROR=0.005
@@ -4646,4 +4732,4 @@ Typo candidates and context:
                                      id       worker_name supervisor_surname     workshop salary                 job_post
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
-'''
+"""

@@ -14,7 +14,7 @@ def print_rule_part(rule_part, columns):
 def print_10_nars(nars, df_columns):
     for i, nar in enumerate(nars[:10], start=1):
         print(f"NAR {i}:{Style.BRIGHT}")
-        print_rule_part(nar.ante, df_columns)   
+        print_rule_part(nar.ante, df_columns)
         print(DOWN_ARROW)
         print_rule_part(nar.cons, df_columns)
         print(f"   support = {nar.support}")

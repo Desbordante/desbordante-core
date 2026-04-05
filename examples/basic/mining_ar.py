@@ -36,7 +36,7 @@ def print_ars(ars):
         else:
             print(COLOR_CODES['bold_red'], end='')
 
-        print('{:1.2f}'.format(ar.confidence), 
+        print('{:1.2f}'.format(ar.confidence),
               COLOR_CODES['default'], end='\t')
         print('sup: ', end='')
 
@@ -141,7 +141,7 @@ def scenario_singular():
     print('\nThis format is just a different table representation. Desbordante '
           'is perfectly capable of rules discovery in such tables, and the '
           'discovered objects are represented by the same '
-          'type of objects as in the previous examples ' 
+          'type of objects as in the previous examples '
           '(i.e., they have the same methods and fields).\n\n')
     print('Next, we will show you how to list all '
           'of the unique items in the dataset.\n')
