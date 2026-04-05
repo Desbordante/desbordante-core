@@ -63,7 +63,7 @@ for fd in sorted(diff_76, key=str):
 print("Thus, a single run of EulerFD can both miss valid FDs and generate false FDs.")
 
 print()
-print(f"Next, let's analyze the results with a seed of {SEED_78_FD}, where EulerFD identified 78 FDs") 
+print(f"Next, let's analyze the results with a seed of {SEED_78_FD}, where EulerFD identified 78 FDs")
 print(f"EulerFD not found {len(result_exact - result78)} FDs.")
 print(f"EulerFD found {len(result78 - result_exact)} false FDs.")
 print(f"Therefore, with the seed {SEED_78_FD}, EulerFD obtained the exact result.")

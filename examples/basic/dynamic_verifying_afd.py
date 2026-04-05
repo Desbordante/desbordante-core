@@ -81,7 +81,7 @@ def update_and_print_data_table(data, insert_df=None, delete_set=None, update_df
 
 def main_scenario(table='examples/datasets/DnD.csv'):
     global max_data_index
-    print(BOLD_CODE + 'This example shows how to verify AFD in the dynamic table using dynamic_fd_verification.\n' + 
+    print(BOLD_CODE + 'This example shows how to verify AFD in the dynamic table using dynamic_fd_verification.\n' +
           'If you want to know how to use dynamic_fd_verification, please see dynamic_verifying_fd.py example.')
     print(f"{BOLD_CODE}First, let's look at the DnD.csv table and try verifying the [Creature, HaveMagic] -> [Strength] FD.{DEFAULT_COLOR_CODE}")
     data = pd.read_csv(table, header=[0])

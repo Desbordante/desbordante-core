@@ -85,7 +85,7 @@ print(f"""Now we can see that the same DC we examined on the previous dataset do
 The issue is that for the last record (Texas, 5000, 0.05), there are people in Texas with a lower salary
 but a higher tax rate.
 
-Such pairs of records that contradict a DC are called violations. We can retrieve these 
+Such pairs of records that contradict a DC are called violations. We can retrieve these
 violations from the algorithm object. In this case, the following pairs are the violations:
 {viol_str}, where each number is an index of a record in the table.
 """)

@@ -174,15 +174,15 @@ by T. Papenbrock and F. Naumann. For more information on AUCC, consult "Efficien
 Approximate Dependencies" by S. Kruse and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     10                
-Joyce    5       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    6       1200     1                 
-Samuel   1       950      9                 
-Nancy    2       800      3                 
+Mark     7       1150     10
+Joyce    5       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    6       1200     1
+Samuel   1       950      9
+Nancy    2       800      3
 \x1b[0mWe'll try to find typos, using UCC mining and AUCC verifying algorithms.
 
 Let's run UCC mining algorithm:
@@ -196,28 +196,28 @@ Let's run AUCC verification algorithm for column \x1b[1m\x1b[36mName\x1b[0m:
 \x1b[31mUCC does not hold\x1b[0m, but AUCC holds with threshold = 0.048
 Threshold is small. It means that, possibly, there is an error in this column.
 Let's look at the table again:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     10                
-Joyce    5       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    6       1200     1                 
-Samuel   1       950      9                 
-Nancy    2       800      3                 
+Mark     7       1150     10
+Joyce    5       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    6       1200     1
+Samuel   1       950      9
+Nancy    2       800      3
 \x1b[0m
 There are two \x1b[1m\x1b[36mHarrys\x1b[0m. They have different work experience, so they are
 two different employees. If they had unique names, AUCC would hold with threshold = 0, and
 \x1b[1m\x1b[36mName\x1b[0m could be used as a key:
-\x1b[1m\x1b[36mName          Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName          Grade   Salary   Work_experience
 -------------------------------------------------
-Mark          7       1150     10                
-Joyce         5       1100     5                 
-Harry Brown   3       1000     7                 
-Grace         4       900      12                
-Harry Adams   6       1200     1                 
-Samuel        1       950      9                 
-Nancy         2       800      3                 
+Mark          7       1150     10
+Joyce         5       1100     5
+Harry Brown   3       1000     7
+Grace         4       900      12
+Harry Adams   6       1200     1
+Samuel        1       950      9
+Nancy         2       800      3
 \x1b[0m
 Let's run UCC mining algorithm:
 Found UCCs:
@@ -237,27 +237,27 @@ by T. Papenbrock and F. Naumann. For more information on AUCC, consult "Efficien
 Approximate Dependencies" by S. Kruse and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1000     12                
-Joyce        Harris      6       1000     5                 
-Harry        Roberts             1000     7                 
-Grace                    4       900      13                
-Harry        Walker      4       1000     4                 
-Allen                    4       900      9                 
-Nancy        Adams       2       1000     3                 
-Grace        Weaver      6       1000     6                 
-Maria        Clark               1400     10                
-Dorothy      Weaver      2                25                
-Nancy        Cruz        2       700      8                 
-Betty        Howell              950      11                
-Grace        Caroll      11      800      16                
-Jesse        Mitchell    4       1000     1                 
-Dorothy      Weaver      4                2                 
-Melissa      Wright      2       1200     15                
-Peter        Clark               1500     14                
-Margaret     Cooper      6       800      19                
-Allen                    4       1000     18                
+Mark         Harris      7       1000     12
+Joyce        Harris      6       1000     5
+Harry        Roberts             1000     7
+Grace                    4       900      13
+Harry        Walker      4       1000     4
+Allen                    4       900      9
+Nancy        Adams       2       1000     3
+Grace        Weaver      6       1000     6
+Maria        Clark               1400     10
+Dorothy      Weaver      2                25
+Nancy        Cruz        2       700      8
+Betty        Howell              950      11
+Grace        Caroll      11      800      16
+Jesse        Mitchell    4       1000     1
+Dorothy      Weaver      4                2
+Melissa      Wright      2       1200     15
+Peter        Clark               1500     14
+Margaret     Cooper      6       800      19
+Allen                    4       1000     18
 \x1b[0mWe'll try to find typos, using UCC and AUCC mining algorithms.
 
 Let's run AUCC mining algorithm with threshold = 0.013:
@@ -285,52 +285,52 @@ ACCs - UCCs =
 same first name may have same grade or salary. But \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m must
 hold -- even if two employees have same names, their records in our table should be uniquely
 identifiable by \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m pair. Let's look at the table again:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1000     12                
-Joyce        Harris      6       1000     5                 
-Harry        Roberts             1000     7                 
-Grace                    4       900      13                
-Harry        Walker      4       1000     4                 
-Allen                    4       900      9                 
-Nancy        Adams       2       1000     3                 
-Grace        Weaver      6       1000     6                 
-Maria        Clark               1400     10                
-Dorothy      Weaver      2                25                
-Nancy        Cruz        2       700      8                 
-Betty        Howell              950      11                
-Grace        Caroll      11      800      16                
-Jesse        Mitchell    4       1000     1                 
-Dorothy      Weaver      4                2                 
-Melissa      Wright      2       1200     15                
-Peter        Clark               1500     14                
-Margaret     Cooper      6       800      19                
-Allen                    4       1000     18                
+Mark         Harris      7       1000     12
+Joyce        Harris      6       1000     5
+Harry        Roberts             1000     7
+Grace                    4       900      13
+Harry        Walker      4       1000     4
+Allen                    4       900      9
+Nancy        Adams       2       1000     3
+Grace        Weaver      6       1000     6
+Maria        Clark               1400     10
+Dorothy      Weaver      2                25
+Nancy        Cruz        2       700      8
+Betty        Howell              950      11
+Grace        Caroll      11      800      16
+Jesse        Mitchell    4       1000     1
+Dorothy      Weaver      4                2
+Melissa      Wright      2       1200     15
+Peter        Clark               1500     14
+Margaret     Cooper      6       800      19
+Allen                    4       1000     18
 \x1b[0m
 There are two \x1b[1m\x1b[36mAllens\x1b[0m without the last name and two \x1b[1m\x1b[36mDorothy
 Weawer's\x1b[0m. All they have different experience, therefore all of them are different
 employees. Thus, it is an oversight or typo in the table. Let's improve the quality of this data:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1000     12                
-Joyce        Harris      6       1000     5                 
-Harry        Roberts             1000     7                 
-Grace                    4       900      13                
-Harry        Walker      4       1000     4                 
-Allen        Kelley      4       900      9                 
-Nancy        Adams       2       1000     3                 
-Grace        Weaver      6       1000     6                 
-Maria        Clark               1400     10                
-Dorothy      Weaver_1    2                25                
-Nancy        Cruz        2       700      8                 
-Betty        Howell              950      11                
-Grace        Caroll      11      800      16                
-Jesse        Mitchell    4       1000     1                 
-Dorothy      Weaver_2    4                2                 
-Melissa      Wright      2       1200     15                
-Peter        Clark               1500     14                
-Margaret     Cooper      6       800      19                
-Allen        Smith       4       1000     18                
+Mark         Harris      7       1000     12
+Joyce        Harris      6       1000     5
+Harry        Roberts             1000     7
+Grace                    4       900      13
+Harry        Walker      4       1000     4
+Allen        Kelley      4       900      9
+Nancy        Adams       2       1000     3
+Grace        Weaver      6       1000     6
+Maria        Clark               1400     10
+Dorothy      Weaver_1    2                25
+Nancy        Cruz        2       700      8
+Betty        Howell              950      11
+Grace        Caroll      11      800      16
+Jesse        Mitchell    4       1000     1
+Dorothy      Weaver_2    4                2
+Melissa      Wright      2       1200     15
+Peter        Clark               1500     14
+Margaret     Cooper      6       800      19
+Allen        Smith       4       1000     18
 \x1b[0m
 Now UCC \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m should hold. Let's run UCC mining algorithm again:
 Found UCCs:
@@ -997,13 +997,13 @@ Num distinct rhs values: 2
 
 '''
 
-snapshots['test_example[basic/mining_ac.py-None-mining_ac_output] mining_ac_output'] = '''This example is dedicated to Fuzzy Algebraic Constraints (AC). The definition and algorithm 
-are based on article "B-HUNT: Automatic Discovery of Fuzzy Algebraic Constraints in Relational 
+snapshots['test_example[basic/mining_ac.py-None-mining_ac_output] mining_ac_output'] = '''This example is dedicated to Fuzzy Algebraic Constraints (AC). The definition and algorithm
+are based on article "B-HUNT: Automatic Discovery of Fuzzy Algebraic Constraints in Relational
 Data" by Paul G. Brown & Peter J. Haas presented at VLDB in 2003.
 
-First of all, let's figure out what AC is. However, to avoid going too deep, we will give you 
-a simple definition without formalization. AC represents the results of applying binary 
-operations between two table columns, with values grouped into meaningful intervals. 
+First of all, let's figure out what AC is. However, to avoid going too deep, we will give you
+a simple definition without formalization. AC represents the results of applying binary
+operations between two table columns, with values grouped into meaningful intervals.
 Let's illustrate this with an example.
 
 We have a table examples/datasets/player_stats.csv with the following data:
@@ -1027,8 +1027,8 @@ Let\'s apply binary operation "+" to the Strength and Agility columns and observ
 Rows in which the result of the chosen operation (+) is \x1b[1;41moutside\x1b[1;49m of discovered ranges:
 \x1b[1;46mNone\x1b[1;49m
 
-As shown, the sum of Strength and Agility falls within either the (4, 5) or (22, 24) ranges. 
-This pattern may emerge because player characters with similar combined attribute values 
+As shown, the sum of Strength and Agility falls within either the (4, 5) or (22, 24) ranges.
+This pattern may emerge because player characters with similar combined attribute values
 likely belong to the same tier.
 
 
@@ -1047,35 +1047,35 @@ bumps_limit
 iterations_limit
 ac_seed
 \x1b[0m
-\x1b[1;42mWeight\x1b[0m accepts values in the range (0, 1]. 
-Values closer to 1 force the algorithm to produce fewer larger intervals (up to a single 
+\x1b[1;42mWeight\x1b[0m accepts values in the range (0, 1].
+Values closer to 1 force the algorithm to produce fewer larger intervals (up to a single
 interval covering all values).
 Values closer to 0 force the algorithm to produce smaller intervals.
 
-\x1b[1;42mFuzziness\x1b[0m belongs to (0,1) range while \x1b[1;42mp_fuzz\x1b[0m belongs to [0,1] range. These parameters 
+\x1b[1;42mFuzziness\x1b[0m belongs to (0,1) range while \x1b[1;42mp_fuzz\x1b[0m belongs to [0,1] range. These parameters
 control precision and the number of considered rows.
-Fuzziness values closer to 0 and p_fuzz values closer to 1 force the algorithm to include 
+Fuzziness values closer to 0 and p_fuzz values closer to 1 force the algorithm to include
 more rows (higher accuracy).
-Fuzziness values closer to 1 and p_fuzz values closer to 0 force the algorithm to include 
+Fuzziness values closer to 1 and p_fuzz values closer to 0 force the algorithm to include
 fewer rows (higher chance of skipping rows, lower precision, but faster execution).
 
-\x1b[1;42mBumps_limit\x1b[0m accepts only natural numbers from the range [1, inf) and limits the number of 
+\x1b[1;42mBumps_limit\x1b[0m accepts only natural numbers from the range [1, inf) and limits the number of
 intervals for all column pairs. To set bumps_limit to inf you should use the 0 value.
 
-\x1b[1;42mIterations_limit\x1b[0m accepts only natural numbers. 
+\x1b[1;42mIterations_limit\x1b[0m accepts only natural numbers.
 Lower values (close to 1) reduce accuracy due to algorithm performing fewer iterations.
 
-\x1b[1;42mAC_seed\x1b[0m accepts only natural numbers. 
-B-HUNT is a randomized algorithm that accepts the seed parameter (AC_seed). Fixing this 
-parameter ensures reproducible results, which are necessary for verifying results during 
-testing of the algorithm. Furthermore, we need to fix it in this example for demonstration 
-purposes; otherwise, we may obtain a different number of intervals with different boundaries 
+\x1b[1;42mAC_seed\x1b[0m accepts only natural numbers.
+B-HUNT is a randomized algorithm that accepts the seed parameter (AC_seed). Fixing this
+parameter ensures reproducible results, which are necessary for verifying results during
+testing of the algorithm. Furthermore, we need to fix it in this example for demonstration
+purposes; otherwise, we may obtain a different number of intervals with different boundaries
 that will not correspond to the text we wrote for our output.
 
-Let's proceed to a visual example. We will use dataset from this path: 
+Let's proceed to a visual example. We will use dataset from this path:
 examples/datasets/cargo_march.csv.
 For default parameters we will use those values:
-binary operation is "-", weight - 0.1, fuzziness - 0.2, p_fuzz - 0.85, bumps_limit - 0, 
+binary operation is "-", weight - 0.1, fuzziness - 0.2, p_fuzz - 0.85, bumps_limit - 0,
 iterations_limit - 4, AC_seed - 11.
 
 Let's see the result of the algorithm with these parameters.
@@ -1099,20 +1099,20 @@ Dispatch date: 11
 Delivery date: 22
 Difference: 11
 
-You can see that the algorithm creates two intervals for the binary operation "-": (2-7) and 
-(15-22). This means that the difference between the dispatch date and delivery date always 
-falls within these intervals, except for three rows where the difference lies outside the 
+You can see that the algorithm creates two intervals for the binary operation "-": (2-7) and
+(15-22). This means that the difference between the dispatch date and delivery date always
+falls within these intervals, except for three rows where the difference lies outside the
 discovered ranges. From this, we can infer that:
 \x1b[1;33mPackages for some addresses are typically delivered within 7 days.\x1b[0m
 \x1b[1;33mPackages for some addresses take up to 22 days.\x1b[0m
 
-Why these two intervals? To answer this question, more context is needed; that is, we should 
-look into the underlying data. We can imagine several reasons for this result, such as: 1) 
+Why these two intervals? To answer this question, more context is needed; that is, we should
+look into the underlying data. We can imagine several reasons for this result, such as: 1)
 nearby addresses versus far addresses; 2) air shipping versus regular shipping.
 
-There are three parcels that fall outside of these delivery intervals. Why? This is a point 
-for further investigation, which requires additional context. There are many possible reasons 
-for this: 1) on these dates there was a workers' strike in some regions; or 2) an incorrect 
+There are three parcels that fall outside of these delivery intervals. Why? This is a point
+for further investigation, which requires additional context. There are many possible reasons
+for this: 1) on these dates there was a workers' strike in some regions; or 2) an incorrect
 address was specified, which increased the delivery time; or 3) it is just a typo in the table.
 
 Now we reduce the value of the parameter weight to 0.05.
@@ -1123,19 +1123,19 @@ Now we reduce the value of the parameter weight to 0.05.
 Rows in which the result of the chosen operation (-) is \x1b[1;41moutside\x1b[1;49m of discovered ranges:
 \x1b[1;46mNone\x1b[1;49m
 
-You can see that the number of intervals increases, and there is no longer any data outside of 
+You can see that the number of intervals increases, and there is no longer any data outside of
 the discovered ranges.
-However, with this number of intervals, it is difficult to draw immediate conclusions about the 
-delivery date. In this case, a detailed analysis of other attributes might enable more meaningful 
-predictions for delivery times. For example, it may be a good idea to partition data by the region 
-attribute (or by month/quarter) and consider each partition individually. 
+However, with this number of intervals, it is difficult to draw immediate conclusions about the
+delivery date. In this case, a detailed analysis of other attributes might enable more meaningful
+predictions for delivery times. For example, it may be a good idea to partition data by the region
+attribute (or by month/quarter) and consider each partition individually.
 
-Another option is to try to find a parameter combination that will result in a smaller number of 
-intervals. Next, remember that the algorithm is randomized (unless you run it with the exact 
+Another option is to try to find a parameter combination that will result in a smaller number of
+intervals. Next, remember that the algorithm is randomized (unless you run it with the exact
 settings) — it can skip some rows, so you can also try to alter the seed.
 
 Finally, cleaning up the data by removing duplicate and incomplete rows might also help.
-Thus, the quantity and quality of the intervals are the user's responsibility. It may take several 
+Thus, the quantity and quality of the intervals are the user's responsibility. It may take several
 attempts to achieve something interesting. Experiment!
 '''
 
@@ -1287,7 +1287,7 @@ will find all AFDs, which have their error equal or less than the threshold, acc
 
 Currently, Desbordante supports:
 1) Five metrics: g1, pdep, tau, mu+, rho.
-2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest. 
+2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest.
 Unfortunately, Pyro can handle only the g1 metric, for the rest use Tane.
 
 For more information consider:
@@ -1480,9 +1480,9 @@ conf: \x1b[1;33m0.67 \x1b[0m\tsup: \x1b[1;33m0.40 \x1b[0m\t['Eggs'] -> ['Yogurt'
 conf: \x1b[1;32m1.00 \x1b[0m\tsup: \x1b[1;33m0.40 \x1b[0m\t['Eggs', 'Yogurt'] -> ['Milk']
 conf: \x1b[1;33m0.67 \x1b[0m\tsup: \x1b[1;33m0.40 \x1b[0m\t['Milk', 'Yogurt'] -> ['Eggs']
 
-Now you can see that the number of association rules have decreased significantly. This happened due to minsup being set to 0.4. 
+Now you can see that the number of association rules have decreased significantly. This happened due to minsup being set to 0.4.
 
-A typical approach to controlling the algorithm is to employ \x1b[1;33m"usefulness"\x1b[0m, which is defined as confidence * support. In the last example, we set up min "usefulness" = 0.6 * 0.4 = 0.24. 
+A typical approach to controlling the algorithm is to employ \x1b[1;33m"usefulness"\x1b[0m, which is defined as confidence * support. In the last example, we set up min "usefulness" = 0.6 * 0.4 = 0.24.
 
 Now, let\'s try with \x1b[32mminsup=0.6\x1b[0m, \x1b[32mminconf=0.6\x1b[0m and \x1b[1;33m"usefulness"=0.36\x1b[0m.
 
@@ -1540,15 +1540,15 @@ but allows a certain degree of violation. For more information consult "Efficien
 Approximate Dependencies" by S. Kruse and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     12                
-Joyce    2       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    4       1000     5                 
-Samuel   1       900      9                 
-Nancy    2       1000     3                 
+Mark     7       1150     12
+Joyce    2       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    4       1000     5
+Samuel   1       900      9
+Nancy    2       1000     3
 \x1b[0mWe need to select a column that will serve as a unique key (ID).
 
 The AUCC mining algorithm with different error threshold will be used. The smaller
@@ -1580,29 +1580,29 @@ Found AUCCs:
 Out of single-column UCCs, \x1b[1m\x1b[36mName\x1b[0m requires the smallest threshold to be "unique".
 It means that \x1b[1m\x1b[36mName\x1b[0m has less violations than other columns.
 Let's look at the table again, paying a special attention to the \x1b[1m\x1b[36mName\x1b[0m column:
-\x1b[1m\x1b[36mName     Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName     Grade   Salary   Work_experience
 --------------------------------------------
-Mark     7       1150     12                
-Joyce    2       1100     5                 
-Harry    3       1000     7                 
-Grace    4       900      12                
-Harry    4       1000     5                 
-Samuel   1       900      9                 
-Nancy    2       1000     3                 
+Mark     7       1150     12
+Joyce    2       1100     5
+Harry    3       1000     7
+Grace    4       900      12
+Harry    4       1000     5
+Samuel   1       900      9
+Nancy    2       1000     3
 \x1b[0m
 There are two \x1b[1m\x1b[36mHarrys\x1b[0m. They have different work experience and salary,
 therefore they are two different employees. This is most likely an error/oversight in data.
 If we represented their records using unique names, the \x1b[1m\x1b[36mName\x1b[0m AUCC would hold with
 threshold = 0, and \x1b[1m\x1b[36mName\x1b[0m could be used as a key:
-\x1b[1m\x1b[36mName      Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mName      Grade   Salary   Work_experience
 ---------------------------------------------
-Mark      7       1150     12                
-Joyce     2       1100     5                 
-Harry_1   3       1000     7                 
-Grace     4       900      12                
-Harry_2   4       1000     5                 
-Samuel    1       900      9                 
-Nancy     2       1000     3                 
+Mark      7       1150     12
+Joyce     2       1100     5
+Harry_1   3       1000     7
+Grace     4       900      12
+Harry_2   4       1000     5
+Samuel    1       900      9
+Nancy     2       1000     3
 \x1b[0m
 Let's run algorithm once more with threshold = 0:
 Found UCCs:
@@ -1613,7 +1613,7 @@ Found UCCs:
 Now we can use \x1b[1m\x1b[36mName\x1b[0m as a key
 '''
 
-snapshots['test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output'] = '''options: 
+snapshots['test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output'] = '''options:
 MINIMUM SUPPORT = 8 , MINIMUM CONFIDENCE = 0.7 , MAXIMUM LHS COUNT = 3
 displaying the first five (or fewer) discovered CFDs:
 
@@ -1957,7 +1957,7 @@ to the following publications:
 We will now demonstrate how to invoke EulerFD and
 AID-FD in Desbordante.
 
-EulerFD: 
+EulerFD:
 [name] -> age
 [name] -> blood
 [name] -> gender
@@ -1967,7 +1967,7 @@ EulerFD:
 [age gender medicine] -> name
 [age blood gender] -> name
 -------------------------------
-AID-FD: 
+AID-FD:
 [name] -> age
 [name] -> blood
 [name] -> gender
@@ -2002,7 +2002,7 @@ Let's run the algorithm and look at the result. We will set k=3 and sigma=2.
 
 Let's print found dependency (in DOT language):
 
-1.role=teacher 
+1.role=teacher
 graph G {
 0[label=article];
 1[label=person];
@@ -2050,8 +2050,8 @@ Let's run the algorithm and look at the result. We will set k=2 and sigma=3.
 \x1b[95mDesbordante > \x1b[0mMined GFDs: 1
 
 Let's print found dependency (in DOT language):
-0.difficulty=hard 
-1.degree=master 1.year=2 
+0.difficulty=hard
+1.degree=master 1.year=2
 graph G {
 0[label=task];
 1[label=student];
@@ -2084,29 +2084,29 @@ snapshots['test_example[basic/mining_ind.py-None-mining_ind_output] mining_ind_o
 Tables for first IND:
 course.csv:
 
-Course ID   Title              Department name                       
+Course ID   Title              Department name
 ---------------------------------------------------------------------
-IT-1        Computer Science   Institute of Information Technology   
-MM-3        Algebra            Mathematics and Mechanics Faculty     
-H-1         History            Institute of History                  
-FL-2        English            Faculty of Foreign Languages          
-IT-2        Programming        Institute of Information Technology   
-S-5         Philosophy         Faculty of Sociology                  
-P-2         Physics            Faculty of Physics                    
-C-8         Chemistry          Institute of Chemistry                
+IT-1        Computer Science   Institute of Information Technology
+MM-3        Algebra            Mathematics and Mechanics Faculty
+H-1         History            Institute of History
+FL-2        English            Faculty of Foreign Languages
+IT-2        Programming        Institute of Information Technology
+S-5         Philosophy         Faculty of Sociology
+P-2         Physics            Faculty of Physics
+C-8         Chemistry          Institute of Chemistry
 
 department.csv:
 
-Department name                       Building             
+Department name                       Building
 -----------------------------------------------------------
-Institute of Information Technology   5 Academic av.       
-Mathematics and Mechanics Faculty     3 Academic av.       
-Institute of History                  29A University st.   
-Faculty of Foreign Languages          10 Science sq.       
-Faculty of Sociology                  29C University st.   
-Faculty of Physics                    10 Academic av.      
-Institute of Chemistry                11 Academic av.      
-Graduate School of Managemment        49 Science sq.       
+Institute of Information Technology   5 Academic av.
+Mathematics and Mechanics Faculty     3 Academic av.
+Institute of History                  29A University st.
+Faculty of Foreign Languages          10 Science sq.
+Faculty of Sociology                  29C University st.
+Faculty of Physics                    10 Academic av.
+Institute of Chemistry                11 Academic av.
+Graduate School of Managemment        49 Science sq.
 '''
 
 snapshots['test_example[basic/mining_list_od.py-None-mining_list_od_output] mining_list_od_output'] = '''
@@ -2127,7 +2127,7 @@ Resulting dependencies for this table are:
 ['weight'] -> ['shipping cost']
 
 Depenency [weight] -> [shipping cost] means that ordering table by weight
-will also order table by shipping cost automatically. Let's order by weight: 
+will also order table by shipping cost automatically. Let's order by weight:
 
 +----+----------+-----------------+--------+
 |    |   weight |   shipping cost |   days |
@@ -2282,9 +2282,9 @@ Fragment of the dog_breeds.csv table:
 A fragment of the table is presented above. In total, each dog breed has 14 attributes.
 Now, let's mine some NARs. We will use a minimum support of 0.1 and a minimum confidence of 0.7. We will also use a population size of 500 and max_fitness_evaluations of 700. Larger values for max_fitness_evaluations tend to return larger rules encompassing more attributes. The population size parameter affects the number of NARs being generated and mutated. Larger values are slower but output more NARs.
 
-Finally, as the DES algorithm is a randomized one, we need to set the seed parameter to the specially-selected value in order: 
-1) to present you an interesting and illustrative example of NAR and, 
-2) to ensure the repeatability of this example (i.e., that NAR found stays the same over different runs) 
+Finally, as the DES algorithm is a randomized one, we need to set the seed parameter to the specially-selected value in order:
+1) to present you an interesting and illustrative example of NAR and,
+2) to ensure the repeatability of this example (i.e., that NAR found stays the same over different runs)
 Note that if you do not set the seed parameter, the default value would be used.
 NAR 1:\x1b[1m
 Type[Hound]
@@ -2637,15 +2637,15 @@ For more information consult "A Hybrid Approach for Efficient Unique Column Comb
 by T. Papenbrock and F. Naumann.
 \x1b[0m
 The following table contains records about employees:
-\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience   
+\x1b[1m\x1b[36mFirst_name   Last_name   Grade   Salary   Work_experience
 ------------------------------------------------------------
-Mark         Harris      7       1150     12                
-Joyce        Harris      2       1100     5                 
-Harry        Roberts     3       1000     7                 
-Grace        Brown       4       900      12                
-Harry        Walker      4       1000     5                 
-Samuel       Brown       1       900      9                 
-Nancy        Adams       2       1000     3                 
+Mark         Harris      7       1150     12
+Joyce        Harris      2       1100     5
+Harry        Roberts     3       1000     7
+Grace        Brown       4       900      12
+Harry        Walker      4       1000     5
+Samuel       Brown       1       900      9
+Nancy        Adams       2       1000     3
 \x1b[0mWe need to select a column or a combination of columns that will serve as a unique key (ID).
 
 Let's run UCC mining algorithm:
@@ -3032,7 +3032,7 @@ Now we can see that the same DC we examined on the previous dataset doesn't hold
 The issue is that for the last record (Texas, 5000, 0.05), there are people in Texas with a lower salary
 but a higher tax rate.
 
-Such pairs of records that contradict a DC are called violations. We can retrieve these 
+Such pairs of records that contradict a DC are called violations. We can retrieve these
 violations from the algorithm object. In this case, the following pairs are the violations:
 (8, 11), (9, 11), (10, 11), where each number is an index of a record in the table.
 
@@ -3186,7 +3186,7 @@ the store location.
 
 To address this, we refine the dependency
 by adding a constraint on the product_category.
-Next DD, which we are going to check: 
+Next DD, which we are going to check:
 
 \x1b[1;33mstore_name [0, 0] ; category [0, 0] -> stock_quantity [0, 25]\x1b[0m
 
@@ -3638,7 +3638,7 @@ As the first example, let's look at the animals_beverages.csv dataset.
 0     Simba  berlin   lion  meat
 1  Clarence  london   lion  mead
 2     Baloo  berlin   bear  fish
-3      Pooh  london   beer  fish 
+3      Pooh  london   beer  fish
 
 Let's try to check if the Matching Dependency
 
@@ -3710,7 +3710,7 @@ Now let's re-check the original matching dependency with decision boundaries set
 
 \x1b[1;42mMD holds\x1b[1;49m
 
----------------------------------------------------------------------------------------------------- 
+----------------------------------------------------------------------------------------------------
 
 On our next example let's take a view at employee_typos.csv dataset:
 
@@ -3720,7 +3720,7 @@ On our next example let's take a view at employee_typos.csv dataset:
 2  Edward    Black    Clerk  Washington D. C.     Third St 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Suppose we already know the following facts about this dataset:
 1. Each city has a single office, i.e. there is a functional dependency [City] -> OfficeLocation.
@@ -3764,7 +3764,7 @@ Now let's fix the typos:
 2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Let's try again:
 
@@ -3807,7 +3807,7 @@ Now we see the problem. Let's fix it:
 2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Let's re-check the matching dependency again:
 
@@ -3885,13 +3885,13 @@ Invoking the algorithm with a decision boundary of 0.8 helped us locate issues i
 2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
 3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
 4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes
 
 Invoking the algorithm with a decision boundary of 0.2 revealed some additional, but meaningless, patterns. For example, it considered the value "Clerk" in record 2 and "Chief" in record 5 similar enough.
 
 As a result, we can conclude that this approach allows locating typos without prior knowledge of column dependencies, but requires care in selecting decision boundaries and in analyzing the algorithm's results.
 
----------------------------------------------------------------------------------------------------- 
+----------------------------------------------------------------------------------------------------
 
 Now let's examine another example. We will use the flights_dd.csv dataset for this purpose:
 
@@ -3907,7 +3907,7 @@ Now let's examine another example. We will use the flights_dd.csv dataset for th
 8         DP 967  2024-03-07            Moscow (VKO)             Minsk (MSQ)       622        73
 9         B2 981  2024-03-08             Minsk (MSQ)            Moscow (VKO)       622        61
 10        DP 261  2024-03-06            Moscow (VKO)       Kaliningrad (KGD)      1059       144
-11        DP 536  2024-03-05       Kaliningrad (KGD)  Saint Petersburg (LED)       798        92 
+11        DP 536  2024-03-05       Kaliningrad (KGD)  Saint Petersburg (LED)       798        92
 
 Imagine we want to check that when the departure city and the arrival city are the same, flight times do not differ significantly. We will treat all Moscow airports as equivalent and need to determine a decision boundary for this purpose.
 
@@ -3925,7 +3925,7 @@ Let's create a copy of our table and add new Departure and Arrival columns with 
 8             Moscow (VKO)            Moscow             Minsk (MSQ)             Minsk
 9              Minsk (MSQ)             Minsk            Moscow (VKO)            Moscow
 10            Moscow (VKO)            Moscow       Kaliningrad (KGD)       Kaliningrad
-11       Kaliningrad (KGD)       Kaliningrad  Saint Petersburg (LED)  Saint Petersburg 
+11       Kaliningrad (KGD)       Kaliningrad  Saint Petersburg (LED)  Saint Petersburg
 
 Now let's check the following matching dependency:
 
@@ -4153,15 +4153,15 @@ For more information consult "Efficient derivation of numerical dependencies" by
 \x1b[0m
 Citizens of Arstozka can have no more than two documents: one Arstozka passport and one exit permit.
 The following table contains records of some citizens' documents:
-\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date
 --------------------------------------------------------------------------------
-Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        
-Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        
-Grant Baker      8H6-772                       Antegria       19.11.2029        
-Kordon Kallo     7ND-93L                       Cobrastan      08.06.2001        
-Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028
+Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon Kallo     7JH-35A                       Orbistan       07.01.2027
+Grant Baker      8H6-772                       Antegria       19.11.2029
+Kordon Kallo     7ND-93L                       Cobrastan      08.06.2001
+Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 We need to validate these data
 Let's run ND verification algorithm to check that every citizen has no more than two records:
@@ -4171,22 +4171,22 @@ Let's run ND verification algorithm to check that every citizen has no more than
 
 Let's look at clusters violating ND:
 Number of clusters: 1
-\x1b[1m\x1b[36mName           ID            Issuing city   Entry permit   Expiration date   
+\x1b[1m\x1b[36mName           ID            Issuing city   Entry permit   Expiration date
 -----------------------------------------------------------------------------
-Kordon Kallo   375F0-KE12I   Orvech Vonor                  05.03.2040        
-Kordon Kallo   7JH-35A                      Orbistan       07.01.2027        
-Kordon Kallo   7ND-93L                      Cobrastan      08.06.2001        
+Kordon Kallo   375F0-KE12I   Orvech Vonor                  05.03.2040
+Kordon Kallo   7JH-35A                      Orbistan       07.01.2027
+Kordon Kallo   7ND-93L                      Cobrastan      08.06.2001
 \x1b[0m
 So, (Kordon Kallo) has 3 documents
 One of them is expired and shouldn't appear in this table. Let's remove this line:
-\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date
 --------------------------------------------------------------------------------
-Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        
-Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        
-Grant Baker      8H6-772                       Antegria       19.11.2029        
-Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028
+Grant Baker      1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon Kallo     7JH-35A                       Orbistan       07.01.2027
+Grant Baker      8H6-772                       Antegria       19.11.2029
+Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
@@ -4199,14 +4199,14 @@ For more information consult "Efficient derivation of numerical dependencies" by
 \x1b[0m
 Citizens of Arstozka can have no more than two documents: one Arstozka passport and one exit permit.
 The following table contains records of some citizens' documents:
-\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   Birth date   
+\x1b[1m\x1b[36mName             ID            Issuing city    Entry permit   Expiration date   Birth date
 ---------------------------------------------------------------------------------------------
-Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001   
-Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        09.10.1993   
-Kordon Kallo     1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989   
-Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        05.03.2001   
-Kordon Kallo     8H6-772                       Antegria       19.11.2029        28.07.1989   
-Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004   
+Kordon Kallo     375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001
+Nathan Cykelek   9I2-4H2                       Kolechia       09.10.2028        09.10.1993
+Kordon Kallo     1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989
+Kordon Kallo     7JH-35A                       Orbistan       07.01.2027        05.03.2001
+Kordon Kallo     8H6-772                       Antegria       19.11.2029        28.07.1989
+Khaled Istom     9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004
 \x1b[0m
 We need to validate these data
 Let's run ND verification algorithm to check that every citizen has no more than two records:
@@ -4216,24 +4216,24 @@ Let's run ND verification algorithm to check that every citizen has no more than
 
 Let's look at clusters violating ND:
 Number of clusters: 1
-\x1b[1m\x1b[36mName           ID            Issuing city    Entry permit   Expiration date   Birth date   
+\x1b[1m\x1b[36mName           ID            Issuing city    Entry permit   Expiration date   Birth date
 -------------------------------------------------------------------------------------------
-Kordon Kallo   375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001   
-Kordon Kallo   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989   
-Kordon Kallo   7JH-35A                       Orbistan       07.01.2027        05.03.2001   
-Kordon Kallo   8H6-772                       Antegria       19.11.2029        28.07.1989   
+Kordon Kallo   375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001
+Kordon Kallo   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989
+Kordon Kallo   7JH-35A                       Orbistan       07.01.2027        05.03.2001
+Kordon Kallo   8H6-772                       Antegria       19.11.2029        28.07.1989
 \x1b[0m
 So, (Kordon Kallo) has 4 documents. It's twice as much as needed.
 Look at birth date. (Kordon Kallo) has two different values.
 Maybe, we have two different (Kordon Kallo)? Let's split them:
-\x1b[1m\x1b[36mName               ID            Issuing city    Entry permit   Expiration date   Birth date   
+\x1b[1m\x1b[36mName               ID            Issuing city    Entry permit   Expiration date   Birth date
 -----------------------------------------------------------------------------------------------
-Kordon Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001   
-Nathan Cykelek     9I2-4H2                       Kolechia       09.10.2028        09.10.1993   
-Kordon Kallo (1)   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989   
-Kordon Kallo       7JH-35A                       Orbistan       07.01.2027        05.03.2001   
-Kordon Kallo (1)   8H6-772                       Antegria       19.11.2029        28.07.1989   
-Khaled Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004   
+Kordon Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        05.03.2001
+Nathan Cykelek     9I2-4H2                       Kolechia       09.10.2028        09.10.1993
+Kordon Kallo (1)   1GMFL-5LRD6   East Greshtin                  28.07.2039        28.07.1989
+Kordon Kallo       7JH-35A                       Orbistan       07.01.2027        05.03.2001
+Kordon Kallo (1)   8H6-772                       Antegria       19.11.2029        28.07.1989
+Khaled Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        21.12.2004
 \x1b[0m
 Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
@@ -4246,15 +4246,15 @@ For more information consult "Efficient derivation of numerical dependencies" by
 \x1b[0m
 Citizens of Arstozka can have no more than two documents: one Arstozka passport and one exit permit.
 The following table contains records of some citizens' documents:
-\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date
 ----------------------------------------------------------------------------------------
-Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028        
-Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027        
-Khaled       Baker       8H6-772                       Antegria       19.11.2029        
-Kordon       Kallo       7ND-93L                       Cobrastan      08.06.2001        
-Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028
+Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027
+Khaled       Baker       8H6-772                       Antegria       19.11.2029
+Kordon       Kallo       7ND-93L                       Cobrastan      08.06.2001
+Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 We need to validate these data
 In this table, the first names and last names are separated into different columns.
@@ -4266,22 +4266,22 @@ Let's run ND verification algorithm to check that every citizen has no more than
 
 Let's look at clusters violating ND:
 Number of clusters: 1
-\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city   Entry permit   Expiration date   
+\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city   Entry permit   Expiration date
 ---------------------------------------------------------------------------------------
-Kordon       Kallo       375F0-KE12I   Orvech Vonor                  05.03.2040        
-Kordon       Kallo       7JH-35A                      Orbistan       07.01.2027        
-Kordon       Kallo       7ND-93L                      Cobrastan      08.06.2001        
+Kordon       Kallo       375F0-KE12I   Orvech Vonor                  05.03.2040
+Kordon       Kallo       7JH-35A                      Orbistan       07.01.2027
+Kordon       Kallo       7ND-93L                      Cobrastan      08.06.2001
 \x1b[0m
 So, (Kordon, Kallo) has 3 documents
 One of them is expired and shouldn't appear in this table. Let's remove this line:
-\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date   
+\x1b[1m\x1b[36mFirst name   Last name   ID            Issuing city    Entry permit   Expiration date
 ----------------------------------------------------------------------------------------
-Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040        
-Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028        
-Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039        
-Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027        
-Khaled       Baker       8H6-772                       Antegria       19.11.2029        
-Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041        
+Kordon       Kallo       375F0-KE12I   Orvech Vonor                   05.03.2040
+Nathan       Kallo       9I2-4H2                       Kolechia       09.10.2028
+Khaled       Baker       1GMFL-5LRD6   East Greshtin                  28.07.2039
+Kordon       Kallo       7JH-35A                       Orbistan       07.01.2027
+Khaled       Baker       8H6-772                       Antegria       19.11.2029
+Khaled       Istom       9KLA2-HH66N   East Greshtin                  21.12.2041
 \x1b[0m
 Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
@@ -4558,7 +4558,7 @@ index: Column: address. Which value to use?
 0: 27
 1: 28
 index: Column: city. Which value to use?
-0: 
+0:
 1: Kustruma
 index:    id          name address    city                       email phone country
 5  27     Björn Sue      26    Roit      Björn.Sue702@cmail.com    26      CM
@@ -4571,20 +4571,20 @@ Command:       id        name address       city                       email pho
 Command:        id       name address    city                     email phone country
 50     60  Lisa Wolf      59  Syndye   Lisa.Wolf3540@cmail.com    59      FC
 51      7  Mary Dawn       6  Syndye  Mary.Dawn42@atomlema.ocg     6      PR
-52   5930   Mary Doe          Lumdum  Mary.Doe-5926@ferser.edu     0        
+52   5930   Mary Doe          Lumdum  Mary.Doe-5926@ferser.edu     0
 53  11859   Mary Doe          Lumdum  Mary.Doe-5926@ferser.edu     0      EU
 54      1   Mary Doe          Lumdum         Mary.Doe0@muli.ry     4      EU
 Command: Column: id. Which value to use?
 0: 11859
 1: 5930
 index: Column: country. Which value to use?
-0: 
+0:
 1: EU
 index:     id       name address    city                     email phone country
 50  60  Lisa Wolf      59  Syndye   Lisa.Wolf3540@cmail.com    59      FC
 51   7  Mary Dawn       6  Syndye  Mary.Dawn42@atomlema.ocg     6      PR
 54   1   Mary Doe          Lumdum         Mary.Doe0@muli.ry     4      EU
-Command: 
+Command:
 Resulting records: 75. Duplicates found: 3
     id             name address       city                          email phone country
 0   31       Björn Dawn      30     Muxicu     Björn.Dawn930@atomlema.ocg    30      JU
