@@ -20,6 +20,7 @@ private:
 
     void BuildNotDistanceOrdered(DFPack const& df_pack);
     void BuildDistanceOrdered(DFPack const& df_pack);
+    void SetNumMask(Cluster const& cluster, std::size_t const base, std::size_t const offset);
     void SetNumMask(Cluster const& first_cluster, Cluster const& second_cluster,
                     std::size_t const base, std::size_t const offset);
     std::vector<std::size_t> CalculateOffsets(DFPack const& df_pack,
