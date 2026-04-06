@@ -7,7 +7,7 @@
 
 namespace algos::dd {
 
-std::unordered_set<std::size_t> SingleISNBuilder::BuildISNs() {
+boost::unordered::unordered_flat_set<std::size_t> SingleISNBuilder::BuildISNs() {
     std::size_t num_tuple_pairs = pli_shard_.Range() * (pli_shard_.Range() - 1) / 2;
     clues_.resize(num_tuple_pairs, 0UL);
     std::vector<DFPack> const& df_packs = isn_info_->GetDFPacks();
@@ -19,7 +19,7 @@ std::unordered_set<std::size_t> SingleISNBuilder::BuildISNs() {
         }
     }
 
-    return std::unordered_set<std::size_t>(clues_.begin(), clues_.end());
+    return boost::unordered::unordered_flat_set<std::size_t>(clues_.begin(), clues_.end());
 }
 
 void SingleISNBuilder::SetNumMask(Cluster const& cluster, std::size_t const base,

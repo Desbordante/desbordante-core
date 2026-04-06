@@ -2,8 +2,9 @@
 
 #include <cstddef>
 #include <memory>
-#include <unordered_set>
 #include <vector>
+
+#include <boost/unordered/unordered_flat_set.hpp>
 
 #include "core/algorithms/dd/fastdd/model/pli_shard.h"
 #include "core/algorithms/dd/fastdd/util/distance_calculator.h"
@@ -32,7 +33,7 @@ public:
                      PliShard const& pli_shard)
         : isn_info_(isn_info), distance_calculator_(distance_calculator), pli_shard_(pli_shard) {}
 
-    std::unordered_set<std::size_t> BuildISNs();
+    boost::unordered::unordered_flat_set<std::size_t> BuildISNs();
 };
 
 }  // namespace algos::dd

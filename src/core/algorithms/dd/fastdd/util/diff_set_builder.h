@@ -2,8 +2,9 @@
 
 #include <cstddef>
 #include <memory>
-#include <unordered_set>
 #include <vector>
+
+#include <boost/unordered/unordered_flat_set.hpp>
 
 #include "core/algorithms/dd/fastdd/model/diff_set.h"
 #include "core/algorithms/dd/fastdd/model/pli_shard.h"
@@ -18,7 +19,8 @@ private:
     std::shared_ptr<DistanceCalculator> distance_calculator_;
     DiffSet diff_set_;
 
-    std::unordered_set<std::size_t> BuildISNs(std::vector<PliShard> pli_shards) const;
+    boost::unordered::unordered_flat_set<std::size_t> BuildISNs(
+            std::vector<PliShard> pli_shards) const;
 
 public:
     DiffSetBuilder(DifferentialFunctionBuilder const& df_builder,
