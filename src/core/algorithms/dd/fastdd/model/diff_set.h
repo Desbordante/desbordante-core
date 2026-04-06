@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstddef>
-#include <unordered_set>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
 
 #include "core/algorithms/dd/fastdd/model/match_df.h"
 #include "core/algorithms/dd/fastdd/util/differential_function_builder.h"
@@ -30,7 +30,7 @@ public:
         }
     }
 
-    void Build(std::unordered_set<std::size_t> const& clue_set) {
+    void Build(boost::unordered::unordered_flat_set<std::size_t> const& clue_set) {
         match_dfs_.reserve(clue_set.size());
         for (std::size_t clue : clue_set) {
             match_dfs_.emplace_back(clue, bitset_size_, offset_to_predicates_,

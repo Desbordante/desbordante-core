@@ -7,7 +7,7 @@
 
 namespace algos::dd {
 
-std::unordered_set<std::size_t> CrossISNBuilder::BuildISNs() {
+boost::unordered::unordered_flat_set<std::size_t> CrossISNBuilder::BuildISNs() {
     std::size_t num_tuple_pairs = first_pli_shard_.Range() * second_pli_shard_.Range();
     clues_.resize(num_tuple_pairs, 0UL);
     std::vector<DFPack> const& df_packs = isn_info_->GetDFPacks();
@@ -19,7 +19,7 @@ std::unordered_set<std::size_t> CrossISNBuilder::BuildISNs() {
         }
     }
 
-    return std::unordered_set<std::size_t>(clues_.begin(), clues_.end());
+    return boost::unordered::unordered_flat_set<std::size_t>(clues_.begin(), clues_.end());
 }
 
 void CrossISNBuilder::SetNumMask(Cluster const& first_cluster, Cluster const& second_cluster,
