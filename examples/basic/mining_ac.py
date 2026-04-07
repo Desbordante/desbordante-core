@@ -1,9 +1,8 @@
 import operator
 
 import desbordante
-import pandas
+import pandas as pd
 from tabulate import tabulate
-
 
 COLOR_CODES = {
     'bold_green': '\033[1;32m',
@@ -64,13 +63,13 @@ def run_ac_mining(table_, columns_, p_fuzz_=P_FUZZ, fuzziness_=FUZZINESS,
     for ac_range in ac_ranges:
         l_col = table_scoped.columns[ac_range.column_indices[0]]
         r_col = table_scoped.columns[ac_range.column_indices[1]]
-        print(f'{COLOR_CODES["green_bg"]}Discovered ranges{COLOR_CODES["default"]} ' +
+        print(f'{COLOR_CODES["green_bg"]}Discovered ranges{COLOR_CODES["default"]} '
               f'for ({l_col} {bin_operation_} {r_col}) are:')
         print(ac_range.ranges)
 
     ac_exceptions = algo.get_ac_exceptions()
     print()
-    print(f'Rows in which the result of the chosen operation ({bin_operation_}) is ' +
+    print(f'Rows in which the result of the chosen operation ({bin_operation_}) is '
           f'{COLOR_CODES["red_bg"]}outside{COLOR_CODES["default_bg"]} of discovered ranges:')
     for ac_exception in ac_exceptions:
         id_range, column_0, column_1 = table_.iloc[ac_exception.row_index]
@@ -100,7 +99,7 @@ Let's illustrate this with an example.
 
 print('We have a table examples/datasets/player_stats.csv with the following data:')
 
-table_for_example = pandas.read_csv(SIMPLE_TABLE, sep=SEPARATOR, header=HEADER)
+table_for_example = pd.read_csv(SIMPLE_TABLE, sep=SEPARATOR, header=HEADER)
 
 print_table(table_for_example, headers_=['id', 'Strength', 'Agility'])
 print('Let\'s apply binary operation "+" to the Strength and Agility columns and observe the results.')
@@ -188,7 +187,7 @@ iterations_limit - {ITERATIONS_LIMIT}, AC_seed - {AC_SEED}.
 
 print('Let\'s see the result of the algorithm with these parameters.')
 
-table_for_example = pandas.read_csv(TABLE, sep=SEPARATOR, header=HEADER)
+table_for_example = pd.read_csv(TABLE, sep=SEPARATOR, header=HEADER)
 run_ac_mining(table_for_example, ['Delivery date', 'Dispatch date'])
 
 print(
@@ -218,7 +217,7 @@ address was specified, which increased the delivery time; or 3) it is just a typ
 
 print('Now we reduce the value of the parameter weight to 0.05.')
 
-table_for_example = pandas.read_csv(TABLE, sep=SEPARATOR, header=HEADER)
+table_for_example = pd.read_csv(TABLE, sep=SEPARATOR, header=HEADER)
 run_ac_mining(table_for_example, ['Delivery date', 'Dispatch date'], weight_=REDUCED_WEIGHT)
 
 print(
