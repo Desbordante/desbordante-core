@@ -8,6 +8,7 @@
 
 #include <pybind11/detail/common.h>
 #include <pybind11/functional.h>
+#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
@@ -17,7 +18,6 @@
 #include "core/algorithms/pac/model/default_domains/parallelepiped.h"
 #include "core/algorithms/pac/model/default_domains/untyped_domain.h"
 #include "core/algorithms/pac/model/idomain.h"
-#include "core/algorithms/pac/pac.h"
 
 namespace py = pybind11;
 
@@ -30,7 +30,7 @@ py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
     py::tuple result(column_indices.size() + 1);
     // It's unlikely that set of Domain PACs will contain PACs on different domains, so using
     // Domain's string representation shouldn't lead to a lot of collisions.
-    result[0] = d_pac.GetDomain().ToString();
+    result[0] = d_pac.GetDomainName();
     // Cannot use std::copy, because py::tuple provides only const iterators
     for (std::size_t i = 0; i < column_indices.size(); ++i) {
         result[i + 1] = column_indices[i];
@@ -45,34 +45,23 @@ void BindPAC(py::module& main_module) {
     using namespace pac::model;
     using namespace pybind11::literals;
 
-    constexpr static double kEpsilon = 1e-12;
-
     auto pac_module = main_module.def_submodule("pac");
 
     // PACs
-    py::class_<PAC>(pac_module, "PAC")
-            .def("to_short_string", &PAC::ToShortString)
-            .def("to_long_string", &PAC::ToLongString)
-            .def("__str__", &PAC::ToLongString);
-
     // Domain PACs cannot be pickled, because they contain user-defined metrics
-    py::class_<DomainPAC, PAC>(pac_module, "DomainPAC")
-            .def_property_readonly("epsilon", &PAC::GetEpsilon)
-            .def_property_readonly("delta", &PAC::GetDelta)
-            .def_property_readonly("domain", &DomainPAC::GetDomain,
-                                   pybind11::return_value_policy::reference)
+    py::class_<DomainPAC>(pac_module, "DomainPAC")
+            .def_property_readonly("epsilon", &DomainPAC::GetEpsilon)
+            .def_property_readonly("delta", &DomainPAC::GetDelta)
+            .def_property_readonly("domain", &DomainPAC::GetDomainName)
             .def_property_readonly("column_indices",
                                    [](model::DomainPAC const& d_pac) {
                                        return d_pac.GetColumns().GetColumnIndicesAsVector();
                                    })
             .def_property_readonly("column_names", &model::DomainPAC::GetColumnNames)
-            .def("__eq__",
-                 [](DomainPAC const& a, DomainPAC const& b) {
-                     return a.GetDomain().ToString() == b.GetDomain().ToString() &&
-                            a.GetColumns() == b.GetColumns() &&
-                            std::abs(a.GetEpsilon() - b.GetEpsilon()) < kEpsilon &&
-                            std::abs(a.GetDelta() - b.GetDelta()) < kEpsilon;
-                 })
+            .def("to_short_string", &DomainPAC::ToShortString)
+            .def("to_long_string", &DomainPAC::ToLongString)
+            .def("__str__", &DomainPAC::ToLongString)
+            .def(py::self == py::self)
             .def("__hash__",
                  [](DomainPAC const& d_pac) { return py::hash(DomainPACToTuple(d_pac)); });
 

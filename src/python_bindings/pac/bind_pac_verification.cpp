@@ -10,32 +10,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "core/algorithms/algorithm.h"
-#include "core/algorithms/pac/domain_pac.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
-#include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
 
 namespace python_bindings {
-/// @brief Register concrete PAC verifier.
-/// Inheritance cannot be used for this purpose, because abstract PAC cannot be copied (and PAC
-/// *must* be copied out from algorithm, because algorithm can be executed again and overwrite PAC)
-template <typename VerifierT, typename PACType>
-auto BindPACVerifier(py::module_& algos_module, auto&& name) {
-    // BindPrimitiveNoBase cannot be used here, because it cannot bind different methods for
-    // different classes.
-    return detail::RegisterAlgorithm<VerifierT, algos::pac_verifier::PACVerifier>(algos_module,
-                                                                                  std::move(name))
-            .def(
-                    "get_pac",
-                    [](VerifierT const& ver) { return dynamic_cast<PACType const&>(ver.GetPAC()); },
-                    py::return_value_policy::copy);
-}
-
 void BindPACVerification(py::module_& main_module) {
     using namespace algos::pac_verifier;
     using namespace model;
@@ -43,13 +25,7 @@ void BindPACVerification(py::module_& main_module) {
     using namespace pybind11::literals;
 
     auto pac_verification_module = main_module.def_submodule("pac_verification");
-
     auto algos_module = pac_verification_module.def_submodule("algorithms");
-    py::class_<PACVerifier, algos::Algorithm>(algos_module, "PACVerifier")
-            // Just define interface. It will be overwritten in derived classes.
-            .def("get_pac", []() {
-                throw py::attribute_error{"Cannot call get_pac on abstract class PACVerifier"};
-            });
     auto cli_module = algos_module.def_submodule("cli");
 
     BindDomainPACVerification(pac_verification_module, algos_module, cli_module);
@@ -78,7 +54,8 @@ void BindDomainPACVerification(py::module_& pac_verification_module, py::module_
             });
 
     auto domain_pac_verifier =
-            BindPACVerifier<DomainPACVerifier, model::DomainPAC>(algos_module, "DomainPACVerifier")
+            BindPrimitiveNoBase<DomainPACVerifier>(algos_module, "DomainPACVerifier")
+                    .def("get_pac", &DomainPACVerifier::GetPAC)
                     .def("get_highlights", &DomainPACVerifier::GetHighlights, "eps_1"_a = -1,
                          "eps_2"_a = -1);
     algos_module.attr("Default") = domain_pac_verifier;

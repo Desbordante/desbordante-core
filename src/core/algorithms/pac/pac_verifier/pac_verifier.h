@@ -1,12 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
-#include "core/algorithms/pac/pac.h"
 #include "core/config/names.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -29,7 +27,6 @@ private:
     unsigned long delta_steps_;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    std::shared_ptr<model::PAC> pac_;
 
     void RegisterOptions();
 
@@ -58,11 +55,6 @@ protected:
         return *typed_relation_;
     }
 
-    template <typename PACT, typename... Args>
-    void MakePAC(Args&&... args) {
-        pac_ = std::make_shared<PACT>(std::forward<Args>(args)...);
-    }
-
     virtual void LoadDataInternal() override;
     virtual void MakeExecuteOptsAvailable() override;
 
@@ -85,10 +77,6 @@ protected:
     /// @brief Get (refined) epsilon-delta pair with specific epsilon
     virtual std::pair<double, double> GetEpsilonDeltaForEpsilon(double epsilon) const = 0;
 
-    void ResetState() override {
-        pac_ = nullptr;
-    }
-
 public:
     PACVerifier() : Algorithm() {
         RegisterOptions();
@@ -96,23 +84,5 @@ public:
     }
 
     virtual ~PACVerifier() = default;
-
-    model::PAC const& GetPAC() const {
-        if (!pac_) {
-            throw std::runtime_error("Cannot get PAC: it's nullptr");
-        }
-        return *pac_;
-    }
-
-    model::PAC& GetPAC() {
-        if (!pac_) {
-            throw std::runtime_error("Cannot get PAC: it's nullptr");
-        }
-        return *pac_;
-    }
-
-    std::shared_ptr<model::PAC> GetPACPtr() {
-        return pac_;
-    }
 };
 }  // namespace algos::pac_verifier

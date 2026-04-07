@@ -235,8 +235,7 @@ INSTANTIATE_TEST_SUITE_P(
                 CustomMetricBallsIntervalsParams(2, 5, 4.709, 0.991),
                 // (min_eps, ??) is considered a point too, and here it wins
                 DomainPACVerifyingParams(kSimpleTypos, {1},
-                                         std::make_shared<Parallelepiped>("5", "7"), 1, 0.5, 0.5,
-                                         1),
+                                         std::make_shared<Parallelepiped>("5", "7"), 1, 0.1, 0, 1),
                 // Min_delta is greater than delta for max_eps => should return (??, min_delta)
                 CustomMetricBallsIntervalsParams(0, 1, 2.60487, 0.9, 0.9),
                 // -- Validation --

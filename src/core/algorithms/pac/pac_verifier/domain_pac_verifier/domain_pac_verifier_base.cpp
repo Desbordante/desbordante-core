@@ -13,7 +13,6 @@
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
 #include "core/config/column_index/validate_index.h"
-#include "core/config/names.h"
 #include "core/util/bitset_utils.h"
 #include "core/util/logger.h"
 
@@ -127,11 +126,11 @@ void DomainPACVerifierBase::PACTypeExecuteInternal() {
     auto [eps, delta] = FindEpsilonDelta(std::move(empirical_probabilities));
 
     auto const schema = TypedRelation().GetSharedPtrSchema();
-    MakePAC<model::DomainPAC>(
-            schema, eps, delta, domain_,
-            schema->GetVertical(util::IndicesToBitset(column_indices_, schema->GetNumColumns())));
+    pac_ = model::DomainPAC{
+            eps, delta, domain_->ToString(),
+            schema->GetVertical(util::IndicesToBitset(column_indices_, schema->GetNumColumns()))};
 
-    LOG_INFO("Result: {}", GetPAC().ToLongString());
+    LOG_INFO("Result: {}", pac_->ToLongString());
 }
 
 std::pair<double, double> DomainPACVerifierBase::GetEpsilonDeltaForEpsilon(double epsilon) const {
@@ -149,8 +148,12 @@ std::pair<double, double> DomainPACVerifierBase::GetEpsilonDeltaForEpsilon(doubl
 }
 
 DomainPACHighlight DomainPACVerifierBase::GetHighlights(double eps_1, double eps_2) const {
+    if (!pac_) {
+        throw std::runtime_error("Execute must be called before GetHighlights");
+    }
+
     if (eps_2 < 0) {
-        eps_2 = GetPAC().GetEpsilon();
+        eps_2 = pac_->GetEpsilon();
     }
 
     if (eps_2 <= eps_1) {
