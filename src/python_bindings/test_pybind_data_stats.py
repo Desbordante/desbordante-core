@@ -1,4 +1,5 @@
 import unittest
+
 import desbordante as db
 
 DATASET_PATH = "TestDataStats.csv"

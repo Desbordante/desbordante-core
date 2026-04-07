@@ -1,6 +1,6 @@
 import desbordante
-import pandas
-from colorama import Fore, Style, Back
+import pandas as pd
+from colorama import Back, Fore, Style
 
 TABLE = 'examples/datasets/dog_breeds.csv'
 
@@ -54,7 +54,7 @@ if __name__ == '__main__':
           "algorithm.\n")
     print("As a demonstration of working with some of DES' parameters, let's inspect "
           "a dataset containing information about 159 dog breeds.\n")
-    df = pandas.read_csv(TABLE)
+    df = pd.read_csv(TABLE)
 
     print("Fragment of the dog_breeds.csv table:")
     print(df)

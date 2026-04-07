@@ -1,7 +1,6 @@
 import desbordante
 import pandas as pd
 
-
 RED_CODE = "\033[1;41m"
 GREEN_CODE = "\033[1;42m"
 BLUE_CODE = "\033[1;46m"

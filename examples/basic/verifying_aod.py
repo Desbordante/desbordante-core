@@ -1,7 +1,8 @@
+import textwrap
+
 import desbordante
 import pandas as pd
 from tabulate import tabulate
-import textwrap
 
 # Auxiliary print functions
 

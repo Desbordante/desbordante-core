@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import desbordante
-import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 
 class bcolors:
