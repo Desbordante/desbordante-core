@@ -10,11 +10,10 @@
 #include <utility>
 
 #include "core/algorithms/dd/fastdd/model/pli_shard.h"
-#include "core/algorithms/dd/fastdd/util/diff_set_builder.h"
 #include "core/algorithms/dd/fastdd/util/differential_function_builder.h"
 #include "core/algorithms/dd/fastdd/util/distance_calculator.h"
-#include "core/algorithms/dd/fastdd/util/hybrid_evidence_inverter.h"
 #include "core/algorithms/dd/fastdd/util/min_max_dif_calculator.h"
+#include "core/algorithms/dd/fastdd/util/static_bitset.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -143,20 +142,21 @@ unsigned long long FastDD::ExecuteInternal() {
             std::chrono::system_clock::now() - start_time);
     LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
 
-    DiffSetBuilder diff_set_builder(df_builder, distance_calculator);
-    diff_set_builder.BuildDiffSet(std::move(pli_shards));
-    DiffSet diff_set = diff_set_builder.GetDiffSet();
-    LOG_INFO("Built Diff-Set");
-    std::vector<MatchDF> match_dfs = diff_set.GetMatchDFs();
-    LOG_INFO("Diff-Set size: {}", match_dfs.size());
-    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
+    std::size_t dif_func_num = df_builder.GetDifFuncNum();
 
-    HybridEvidenceInverter hybrid_evidence_inverter(std::move(match_dfs), df_builder);
-    LOG_INFO("Built Inverter");
-
-    dds_ = hybrid_evidence_inverter.BuildDDs();
+    if (dif_func_num <= 32) {
+        RunAlgo<StaticBitset<32>>(df_builder, distance_calculator, std::move(pli_shards),
+                                  start_time);
+    } else if (dif_func_num <= 64) {
+        RunAlgo<StaticBitset<64>>(df_builder, distance_calculator, std::move(pli_shards),
+                                  start_time);
+    } else if (dif_func_num <= 128) {
+        RunAlgo<StaticBitset<128>>(df_builder, distance_calculator, std::move(pli_shards),
+                                   start_time);
+    } else {
+        RunAlgo<boost::dynamic_bitset<>>(df_builder, distance_calculator, std::move(pli_shards),
+                                         start_time);
+    }
 
     std::ranges::for_each(dds_, [this](auto const& dd) {
         auto df_to_constraint = [](DifferentialFunction const& df) {

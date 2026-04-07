@@ -81,8 +81,6 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "core/util/logger.h"
-
 namespace model {
 
 namespace bitset_impl {
@@ -205,6 +203,21 @@ public:
             return true;
         }
         return !std::memcmp(words_, x.words_, NumWords * sizeof(WordT));
+    }
+
+    constexpr bool IsLess(BaseBitset<NumWords> const& x) const noexcept {
+        // if (std::is_constant_evaluated()) {
+        for (size_t i{NumWords}; i > 0; --i) {
+            if (words_[i - 1] < x.words_[i - 1]) {
+                return true;
+            }
+            if (words_[i - 1] > x.words_[i - 1]) {
+                return false;
+            }
+        }
+        return false;
+        //}
+        // return std::memcmp(words_, x.words_, NumWords * sizeof(WordT)) < 0;
     }
 
     template <size_t NumBits>
@@ -454,6 +467,10 @@ public:
         return word_ == x.word_;
     }
 
+    constexpr bool IsLess(BaseBitset<1> const& x) const noexcept {
+        return word_ < x.word_;
+    }
+
     template <size_t NumBits>
     constexpr bool AreAll() const noexcept {
         return word_ == (~static_cast<WordT>(0) >> (kBitsPerWord - NumBits));
@@ -534,10 +551,8 @@ public:
 
     // Here's the only place where users of zero-length bitsets are penalized
     // This function is unreachable until _Unchecked methods are used
-    [[noreturn]] WordT& GetWord([[maybe_unused]] size_t) noexcept {
-        // Originally, here is `throw` statement, but it violates `noexcept` specification
-        // throw std::out_of_range("BaseBitset::GetWord");
-        LOG_INFO("Out of range in BaseBitset::GetWord (zero-length bitset).");
+    [[noreturn]] WordT& GetWord([[maybe_unused]] size_t) {
+        throw std::out_of_range("BaseBitset::GetWord");
         __builtin_unreachable();
     }
 
@@ -567,6 +582,10 @@ public:
 
     constexpr bool IsEqual([[maybe_unused]] BaseBitset<0> const&) const noexcept {
         return true;
+    }
+
+    constexpr bool IsLess([[maybe_unused]] BaseBitset<0> const&) const noexcept {
+        return false;
     }
 
     template <size_t NumBits>
@@ -916,6 +935,10 @@ public:
 
     bool operator==(BitsetImpl<NumBits> const& rhs) const noexcept {
         return this->IsEqual(rhs);
+    }
+
+    bool operator<(BitsetImpl<NumBits> const& rhs) const noexcept {
+        return this->IsLess(rhs);
     }
 
     bool test(size_t position) const {
