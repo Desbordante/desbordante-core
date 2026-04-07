@@ -21,14 +21,14 @@ Output:
 See python3 display_benchmarks.py --help for more info.
 '''
 
+from datetime import date, timedelta
 from os import scandir
 from pathlib import Path
 from typing import Annotated
-from datetime import timedelta, date
 
+import click
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import click
 from pydantic import BaseModel, BeforeValidator, PlainSerializer
 
 MillisTimeDelta = Annotated[
@@ -51,7 +51,7 @@ class Results(BaseModel):
 
 # Read serialized results from JSON file
 def read_results(filename: str) -> Results:
-    with open(filename, 'r') as file:
+    with open(filename) as file:
         return Results.model_validate_json(file.read())
 
 

@@ -1,12 +1,13 @@
 import desbordante
 import pandas as pd
 
+
 def print_results(ucc_verifier):
     if ucc_verifier.ucc_holds():
         print('UCC holds, showing stats for AUCC is useless')
     else:
         print('UCC does not hold')
-        print(f'But AUCC with error = {"{:.4f}".format(algo.get_error())} holds')
+        print(f'But AUCC with error = {f"{algo.get_error():.4f}"} holds')
         print()
         print('Also:')
         print(f'Total number of rows violating UCC: {ucc_verifier.get_num_rows_violating_ucc()}')
