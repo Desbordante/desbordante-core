@@ -4,17 +4,11 @@ target_sources(
     ${NAME}
     PRIVATE model/pli_shard.cpp
             trees/minimize_tree.cpp
-            trees/node.cpp
-            trees/translating_minimize_tree.cpp
             trees/translating_tree_search.cpp
             util/cross_isn_builder.cpp
-            util/diff_set_builder.cpp
             util/differential_function_builder.cpp
-            util/evidence_inverter.cpp
-            util/hybrid_evidence_inverter.cpp
             util/isn_info.cpp
             util/min_max_dif_calculator.cpp
-            util/mmcs.cpp
             util/single_isn_builder.cpp
 )
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)

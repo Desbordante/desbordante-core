@@ -1,29 +1,30 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
 
-#include <boost/dynamic_bitset.hpp>
+#include "core/algorithms/dd/fastdd/util/bitset_concept.h"
 
 namespace algos::dd {
 
+template <BoostDynamicBitsetCompatible Bitset>
 class MatchDF {
 private:
-    boost::dynamic_bitset<> bitset_;
+    Bitset bitset_;
 
 public:
     MatchDF(std::size_t clue, std::size_t const bitset_size,
-            std::vector<std::vector<boost::dynamic_bitset<>>> const& count_to_predicates,
+            std::vector<std::vector<Bitset>> const& count_to_predicates,
             std::vector<std::size_t> const& bases)
         : bitset_(bitset_size) {
         for (std::size_t i = count_to_predicates.size(); i != 0; --i) {
             std::size_t const offset = clue / bases[i - 1];
             clue %= bases[i - 1];
-            boost::dynamic_bitset<> cur_bitset = count_to_predicates[i - 1][offset];
-            bitset_.operator|=(cur_bitset);
+            bitset_ |= count_to_predicates[i - 1][offset];
         }
     }
 
-    boost::dynamic_bitset<> const& GetBitset() const noexcept {
+    Bitset const& GetBitset() const noexcept {
         return bitset_;
     }
 };

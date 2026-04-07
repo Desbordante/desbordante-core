@@ -11,43 +11,43 @@
 
 namespace algos::dd {
 
+template <typename Bitset>
 class TreeSearch {
 private:
-    std::unique_ptr<Node> root_ = std::make_unique<Node>();
+    std::unique_ptr<Node<Bitset>> root_ = std::make_unique<Node<Bitset>>();
 
 public:
-    void Add(boost::dynamic_bitset<> const& bitset) {
-        std::unique_ptr<Node> new_root = Node::Add(std::move(root_), bitset, 0);
+    void Add(Bitset const& bitset) {
+        std::unique_ptr<Node<Bitset>> new_root = Node<Bitset>::Add(std::move(root_), bitset, 0);
         root_ = std::move(new_root);
     }
 
-    std::optional<boost::dynamic_bitset<>> FindSuperSet(
-            boost::dynamic_bitset<> const& bitset) const {
+    std::optional<Bitset> FindSuperSet(Bitset const& bitset) const {
         return root_->FindSuperSet(bitset);
     }
 
     struct Iterator {
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = boost::dynamic_bitset<>;
+        using value_type = Bitset;
         using pointer = value_type const*;
         using reference = value_type const&;
 
-        Iterator(Node* root, bool is_end = false) : traversal_() {
-            if (!is_end && root->node_type_ != Node::NodeType::EmptyNode) {
+        Iterator(Node<Bitset>* root, bool is_end = false) : traversal_() {
+            if (!is_end && root->node_type_ != Node<Bitset>::NodeType::EmptyNode) {
                 traversal_.emplace(root);
                 FindNext();
             }
         }
 
         reference operator*() const {
-            Node* cur_node = traversal_.top().node;
+            Node<Bitset>* cur_node = traversal_.top().node;
             return cur_node->GetBitset();
         }
 
         Iterator& operator++() {
             StackNode cur_node = traversal_.top();
-            while (cur_node.node->node_type_ == Node::NodeType::LeafNode ||
+            while (cur_node.node->node_type_ == Node<Bitset>::NodeType::LeafNode ||
                    cur_node.is_right_child) {
                 traversal_.pop();
                 if (traversal_.empty()) {
@@ -80,7 +80,7 @@ public:
 
     private:
         struct StackNode {
-            Node* node;
+            Node<Bitset>* node;
             bool is_right_child;
 
             bool operator==(StackNode const& other) const = default;
@@ -89,7 +89,7 @@ public:
         void FindNext() {
             while (!traversal_.empty()) {
                 StackNode cur_node = traversal_.top();
-                if (cur_node.node->node_type_ == Node::NodeType::LeafNode) {
+                if (cur_node.node->node_type_ == Node<Bitset>::NodeType::LeafNode) {
                     return;
                 }
                 traversal_.emplace(cur_node.is_right_child ? cur_node.node->GetRightChild().get()
