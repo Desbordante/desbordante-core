@@ -1,7 +1,6 @@
 import desbordante
 import pandas as pd
 
-
 RED_CODE = "\033[1;41m"
 GREEN_CODE = "\033[1;42m"
 BLUE_CODE = "\033[1;46m"
@@ -110,7 +109,7 @@ def main_scenario(table='examples/datasets/DnD.csv'):
     print_results_for_fd(algo, data, [0, 2], [1])
 
     print(f"{BOLD_CODE}Now, let's try to update some rows in the table.{DEFAULT_COLOR_CODE}")
-    print('Note: Update statements are defined using Pandas DataFrame/read_csv.\n      The first column should be named \'_id\' and represent the indexes of the rows that we want to update.' +
+    print('Note: Update statements are defined using Pandas DataFrame/read_csv.\n      The first column should be named \'_id\' and represent the indexes of the rows that we want to update.'
           '\n      The remaining columns must have the same names and order as the columns in the original table.')
     update_df1 = pd.DataFrame({'_id': [2, 3, 7], 'Creature': ['Dragon', 'Dragon', 'Dragon'], 'Strength': [999, 998, 999], 'HaveMagic': [True, True, True]})
     algo.execute(update=update_df1)
