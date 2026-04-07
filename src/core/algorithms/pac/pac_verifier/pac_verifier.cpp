@@ -154,8 +154,7 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         // Don't add (min_eps, delta_{j - 1}) if j == 0, because delta_{-1} is less than min_delta
         if (begin != empirical_probabilities.begin()) {
             std::advance(begin, -1);
-            begin->first = min_epsilon_;
-            begin->second = std::max(begin->second, min_delta_);
+            *begin = GetEpsilonDeltaForEpsilon(min_epsilon_);
         }
 
         // If begin != empirical_probs.begin, a new pair is added.

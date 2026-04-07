@@ -115,7 +115,7 @@ pac = algo.get_pac()
 print(f'''Algorithm result: {GREEN}{pac}{ENDC}.
 This result is now meaningful and consistent with the findings from the first example.
 
-To better understand the effect of levelling coefficients, let's inspect the outliers.
+To better understand the effect of leveling coefficients, let's inspect the outliers.
 Outliers between {BLUE}+0{ENDC} and {BLUE}+5{ENDC}: {BOLD}{algo.get_highlights(0, 5)}{ENDC}.
 You can observe that the outliers reflect the normalized distance.
 

@@ -67,11 +67,11 @@ The answer is leveling coefficients.
 
 In metric-space terms, a ball is defined as {BLUE}B = {{x : dist(x, center) < r}}.
 The Ball domain uses the Euclidean metric:
-    {BOLD}dist(x, y) = sqrt((x[1] - y[1])^2 * lc[1] + ... + (x[n] - y[n])^2 * lc[n]){ENDC}
+    {BOLD}dist(x, y) = sqrt(((x[1] - y[1]) * lc[1])^2 + ... + ((x[n] - y[n]) * lc[n])^2){ENDC}
 Here, lc is the list of leveling coefficients, introduced in the second example. They allow us to
 scale dimensions differently -- effectively turning a circle into an ellipse.
 
-To balance temperature and RPM scales, we use levelling_coefficients={BLUE}[1, 0.005]{ENDC}.
+To balance temperature and RPM scales, we use leveling_coefficients={BLUE}[1, 0.005]{ENDC}.
 This treats a 200 RPM difference as roughly equivalent to a 1°C difference.
 ''')
 

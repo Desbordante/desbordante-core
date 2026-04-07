@@ -33,7 +33,7 @@ py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
     result[0] = d_pac.GetDomain().ToString();
     // Cannot use std::copy, because py::tuple provides only const iterators
     for (std::size_t i = 0; i < column_indices.size(); ++i) {
-        result[i] = column_indices[i];
+        result[i + 1] = column_indices[i];
     }
     return result;
 }

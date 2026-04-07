@@ -222,7 +222,7 @@ constexpr auto kDDiagonalThreshold =
         "Maximal k such that diagonal segment of ECDF with slope coefficient of k is considered "
         "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
         "containing N rows is not considered a change (default is 1e-5).";
-constexpr auto kDDomain = "Ordered domain for Domain PAC. ";
+constexpr auto kDDomain = "Ordered domain for Domain PAC.";
 constexpr auto kDDomainName =
         "Optional name for custom domain. This name is displayed as a part of Domain PAC's string "
         "reprsentation, so short unique names are preferrable.";

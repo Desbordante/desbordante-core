@@ -82,6 +82,9 @@ protected:
     std::pair<double, double> FindEpsilonDelta(
             std::vector<std::pair<double, double>>&& empirical_probabilities) const;
 
+    /// @brief Get (refined) epsilon-delta pair with specific epsilon
+    virtual std::pair<double, double> GetEpsilonDeltaForEpsilon(double epsilon) const = 0;
+
     void ResetState() override {
         pac_ = nullptr;
     }

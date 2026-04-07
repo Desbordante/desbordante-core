@@ -13,6 +13,7 @@
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
 #include "core/config/column_index/validate_index.h"
+#include "core/config/names.h"
 #include "core/util/bitset_utils.h"
 #include "core/util/logger.h"
 
@@ -131,6 +132,20 @@ void DomainPACVerifierBase::PACTypeExecuteInternal() {
             schema->GetVertical(util::IndicesToBitset(column_indices_, schema->GetNumColumns())));
 
     LOG_INFO("Result: {}", GetPAC().ToLongString());
+}
+
+std::pair<double, double> DomainPACVerifierBase::GetEpsilonDeltaForEpsilon(double epsilon) const {
+    auto it = std::ranges::lower_bound(
+            dists_from_domain_, epsilon, {},
+            [](std::pair<TuplesIter, double> const& pair) { return pair.second; });
+    // Refine delta
+    auto eps = it->second;
+    while (it != dists_from_domain_.end() && it->second - eps < PACVerifier::kDistThreshold) {
+        std::advance(it, 1);
+    }
+    auto delta = static_cast<double>(std::distance(dists_from_domain_.begin(), it)) /
+                 original_value_tuples_->size();
+    return {eps, delta};
 }
 
 DomainPACHighlight DomainPACVerifierBase::GetHighlights(double eps_1, double eps_2) const {

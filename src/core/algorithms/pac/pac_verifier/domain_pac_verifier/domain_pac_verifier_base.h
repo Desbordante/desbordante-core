@@ -44,6 +44,7 @@ protected:
     virtual void ProcessPACTypeOptions() override;
     virtual void PreparePACTypeData() override;
     void PACTypeExecuteInternal() override;
+    std::pair<double, double> GetEpsilonDeltaForEpsilon(double epsilon) const override;
 
 public:
     DomainPACVerifierBase() : PACVerifier() {
