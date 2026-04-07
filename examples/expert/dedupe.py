@@ -1,7 +1,7 @@
 from collections import defaultdict, deque
 
 import desbordante
-import pandas
+import pandas as pd
 
 # Algorithm that finds approximate FDs and its config
 ALGORITHM_TYPE = desbordante.afd.algorithms.Default
@@ -55,12 +55,12 @@ def count_matches(row1, row2, rhs: list[int]):
 
 
 def configure_dataframe_print():
-    pandas.set_option('display.max_columns', None)
-    pandas.set_option('display.width', None)
-    pandas.set_option('display.max_colwidth', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', None)
 
 
-def print_fd_info(df: pandas.DataFrame, fds: list[tuple[int, int]]):
+def print_fd_info(df: pd.DataFrame, fds: list[tuple[int, int]]):
     fd_dict = defaultdict(list)
     for lhs, rhs in fds:
         fd_dict[lhs].append(df.columns[rhs])
@@ -86,7 +86,7 @@ def choose_index(col_name, distinct_values):
     return int(input('index: '))
 
 
-def merge_handler(df: pandas.DataFrame, new_rows, remaining_rows, used_rows):
+def merge_handler(df: pd.DataFrame, new_rows, remaining_rows, used_rows):
     if not used_rows:
         return
     new_row = []
@@ -104,7 +104,7 @@ def unknown_handler(df, new_rows, remaining_rows, used_rows):
     print('Unknown command.')
 
 
-def ask_rows(df: pandas.DataFrame, window: deque[tuple[int, object]]) -> list:
+def ask_rows(df: pd.DataFrame, window: deque[tuple[int, object]]) -> list:
     commands = {
         'keepall': keepall_handler,
         'drop': drop_handler,
@@ -130,7 +130,7 @@ def is_similar(row_info, window, chosen_cols, matches_required):
                for prev_row_info in window)
 
 
-def get_deduped_rows(df: pandas.DataFrame, chosen_cols: list[int], matches_required: int,
+def get_deduped_rows(df: pd.DataFrame, chosen_cols: list[int], matches_required: int,
                      fds: list[tuple[int, int]]):
     df.sort_values([df.columns[rhs_col] for _, rhs_col in fds if rhs_col in chosen_cols],
                    inplace=True)
@@ -161,7 +161,7 @@ def main():
     print(CONFIG_STRING)
     print()
 
-    df = pandas.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER,
+    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER,
                          dtype='string', index_col=False, na_filter=False)
     print('Dataset sample:')
     print(df)
@@ -184,7 +184,7 @@ def main():
     print()
 
     print(f'Resulting records: {len(new_rows)}. Duplicates found: {len(df) - len(new_rows)}')
-    new_df = pandas.DataFrame(new_rows, columns=df.columns)
+    new_df = pd.DataFrame(new_rows, columns=df.columns)
 
     print(new_df)
     new_df.to_csv(OUTPUT_FILE, index=False)

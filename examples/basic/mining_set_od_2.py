@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 from tabulate import tabulate
 
 TABLE = 'examples/datasets/position_distribution.csv'
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     desc_ods = algo.get_desc_ods()
     simple_ods = algo.get_simple_ods()
 
-    table = pandas.read_csv(TABLE)
+    table = pd.read_csv(TABLE)
 
     print_data_frame(table)
     print()

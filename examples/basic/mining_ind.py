@@ -1,5 +1,7 @@
-import desbordante
 import csv
+
+import desbordante
+
 
 def row_to_padded_string(row, widths):
     return ''.join(field.ljust(width) for width, field in zip(widths, row))

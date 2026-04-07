@@ -1,7 +1,8 @@
+import textwrap
+
 import desbordante
 import pandas as pd
 from tabulate import tabulate
-import textwrap
 
 GREEN_CODE = "\033[1;42m"
 RED_CODE = "\033[1;41m"

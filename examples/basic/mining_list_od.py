@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 from tabulate import tabulate
 
 TABLE = 'examples/datasets/shipping.csv'
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     ods = algo.get_list_ods()
 
-    df = pandas.read_csv(TABLE)
+    df = pd.read_csv(TABLE)
 
     print()
     print_data_frame(df)

@@ -1,10 +1,9 @@
+from typing import TypedDict
+
 import desbordante
 import pandas as pd
-
-
-from typing import TypedDict
 from desbordante.md import ColumnSimilarityClassifier
-from desbordante.md.column_matches import Levenshtein, Custom, Equality
+from desbordante.md.column_matches import Custom, Equality, Levenshtein
 
 # These options allow to print pandas dataframes without skipping columns and wrapping columns to the next line
 # Feel free to modify these options if you have issues with the output format

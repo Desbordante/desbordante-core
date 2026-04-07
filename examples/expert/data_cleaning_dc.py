@@ -1,7 +1,8 @@
-from typing import Dict, List, Tuple
 from collections import defaultdict
-import matplotlib.pyplot as plt
+from typing import Dict, List, Tuple
+
 import desbordante as db
+import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 
