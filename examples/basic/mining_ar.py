@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 from tabulate import tabulate
 
 TABLE_TABULAR = 'examples/datasets/rules_book_rows.csv'
@@ -36,7 +36,7 @@ def print_ars(ars):
         else:
             print(COLOR_CODES['bold_red'], end='')
 
-        print('{:1.2f}'.format(ar.confidence),
+        print(f'{ar.confidence:1.2f}',
               COLOR_CODES['default'], end='\t')
         print('sup: ', end='')
 
@@ -47,7 +47,7 @@ def print_ars(ars):
         else:
             print(COLOR_CODES['bold_red'], end='')
 
-        print('{:1.2f}'.format(ar.support),
+        print(f'{ar.support:1.2f}',
               COLOR_CODES['default'], end='\t')
         print(ar.left, '->', ar.right, )
 
@@ -62,7 +62,7 @@ def scenario_tabular():
     algo = desbordante.ar.algorithms.Default()
     algo.load_data(table=(TABLE_TABULAR, ',', False), input_format='tabular')
     algo.execute(minconf=1)
-    table = pandas.read_csv(TABLE_TABULAR, header=None)
+    table = pd.read_csv(TABLE_TABULAR, header=None)
 
     print("As the first example, let's look at the dataset containing receipts "
           'from some supermarket using input_format="tabular". In this '
@@ -130,7 +130,7 @@ def scenario_singular():
     algo = desbordante.ar.algorithms.Default()
     algo.load_data(table=(TABLE_SINGULAR, ',', False), input_format='singular')
     algo.execute()
-    table = pandas.read_csv(TABLE_SINGULAR, header=None, index_col=0)
+    table = pd.read_csv(TABLE_SINGULAR, header=None, index_col=0)
 
     print("\nFor the second example, let's take a dataset "
           'with the same receipts from the same supermarket, '
