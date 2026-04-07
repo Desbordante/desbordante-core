@@ -1,5 +1,7 @@
 #include "python_bindings/pac/bind_pac_verification.h"
 
+#include <pybind11/pybind11.h>
+
 #include <iterator>
 #include <numeric>
 #include <string>
@@ -7,7 +9,6 @@
 #include <vector>
 
 #include <pybind11/detail/common.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"

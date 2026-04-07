@@ -1,5 +1,7 @@
 #include "python_bindings/pac/bind_pac.h"
 
+#include <pybind11/pybind11.h>
+
 #include <cstdlib>
 #include <functional>
 #include <memory>
@@ -9,7 +11,6 @@
 #include <pybind11/detail/common.h>
 #include <pybind11/functional.h>
 #include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
