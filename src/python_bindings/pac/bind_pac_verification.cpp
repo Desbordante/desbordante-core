@@ -11,6 +11,7 @@
 #include <pybind11/detail/common.h>
 #include <pybind11/stl.h>
 
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
@@ -29,11 +30,10 @@ void BindPACVerification(py::module_& main_module) {
     auto algos_module = pac_verification_module.def_submodule("algorithms");
     auto cli_module = algos_module.def_submodule("cli");
 
-    BindDomainPACVerification(pac_verification_module, algos_module, cli_module);
+    BindDomainPACVerification(pac_verification_module, cli_module);
 }
 
-void BindDomainPACVerification(py::module_& pac_verification_module, py::module_& algos_module,
-                               py::module_& cli_module) {
+void BindDomainPACVerification(py::module_& pac_verification_module, py::module_& cli_module) {
     using namespace algos::pac_verifier;
     using namespace pybind11::literals;
     using namespace std::string_literals;
@@ -55,14 +55,13 @@ void BindDomainPACVerification(py::module_& pac_verification_module, py::module_
             });
 
     auto domain_pac_verifier =
-            BindPrimitiveNoBase<DomainPACVerifier>(algos_module, "DomainPACVerifier")
+            BindPrimitiveNoBase<DomainPACVerifier>(pac_verification_module, "DomainPACVerifier")
                     .def("get_pac", &DomainPACVerifier::GetPAC)
                     .def("get_highlights", &DomainPACVerifier::GetHighlights, "eps_1"_a = -1,
                          "eps_2"_a = -1);
-    algos_module.attr("Default") = domain_pac_verifier;
 
     auto domain_pac_verifier_cli =
-            detail::RegisterAlgorithm<DomainPACVerifierCLIAdapter, PACVerifier>(
+            detail::RegisterAlgorithm<DomainPACVerifierCLIAdapter, algos::Algorithm>(
                     cli_module, "DomainPACVerifierCLI");
     domain_pac_verifier_cli.doc() =
             "NOTE: This algorithm is a wrapper around DomainPACVerifer with a restricted set of "
