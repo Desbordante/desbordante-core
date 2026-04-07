@@ -116,9 +116,10 @@ public:
                 typed_relation_->GetColumnData(column_index).GetTypeId());
     }
 
-    std::vector<boost::dynamic_bitset<>> const& GetSatisfiedDFs(
-            model::ColumnIndex const column_index) const {
-        return zone_to_bitset_[column_index];
+    template <typename Bitset>
+    std::vector<Bitset> GetSatisfiedDFs(model::ColumnIndex const column_index) const {
+        return std::vector<Bitset>(zone_to_bitset_[column_index].begin(),
+                                   zone_to_bitset_[column_index].end());
     }
 
     std::size_t GetZoneNum(model::ColumnIndex const column_index) const {
