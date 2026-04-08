@@ -1,4 +1,7 @@
 #pragma once
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <functional>
 #include <cstddef>
 #include <memory>
@@ -6,10 +9,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
+#include <utility>
 
 #include "core/util/custom_hashes.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 

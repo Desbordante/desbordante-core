@@ -5,11 +5,15 @@
 #include <queue>
 #include <shared_mutex>
 #include <unordered_set>
+#include <algorithm>
+#include <stdexcept>
+#include <variant>
 
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
 #include "core/algorithms/fd/pyrocommon/core/vertical_info.h"
 #include "core/algorithms/fd/pyrocommon/model/agree_set_sample.h"
 #include "core/model/table/position_list_index.h"
+#include "core/util/custom_hashes.h"
 
 namespace model {
 

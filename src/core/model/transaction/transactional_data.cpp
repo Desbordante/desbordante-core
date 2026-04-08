@@ -1,7 +1,6 @@
 #include "core/model/transaction/transactional_data.h"
 
 #include <cassert>
-#include <stdexcept>
 #include <unordered_map>
 
 namespace model {
