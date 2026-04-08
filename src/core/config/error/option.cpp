@@ -1,5 +1,9 @@
 #include "core/config/error/option.h"
 
+#include <optional>
+#include <string>
+#include <variant>
+
 #include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
 

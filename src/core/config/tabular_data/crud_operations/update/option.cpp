@@ -1,5 +1,9 @@
 #include "core/config/tabular_data/crud_operations/update/option.h"
 
+#include <memory>
+#include <optional>
+#include <variant>
+
 #include "core/config/names_and_descriptions.h"
 
 namespace config {

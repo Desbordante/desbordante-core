@@ -1,6 +1,13 @@
 #include "core/config/indices/option.h"
 
+#include <assert.h>
 #include <algorithm>
+#include <optional>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "core/config/column_index/validate_index.h"
 #include "core/config/exceptions.h"
