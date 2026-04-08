@@ -452,16 +452,6 @@ void BindGdd(pybind11::module_& main_module) {
 
     gdd_module.def(
             "GddFromDotFile",
-            [](std::string const& pattern_dot_file, std::vector<DistanceConstraint> lhs,
-               std::vector<DistanceConstraint> rhs) {
-                graph_t pattern = parser::graph_parser::gdd::ReadGraph(
-                        std::filesystem::path(pattern_dot_file));
-                return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
-            },
-            "pattern_dot_file"_a, "lhs"_a, "rhs"_a);
-
-    gdd_module.def(
-            "GddFromDotFile",
             [](std::filesystem::path const& pattern_dot_file, std::vector<DistanceConstraint> lhs,
                std::vector<DistanceConstraint> rhs) {
                 graph_t pattern = parser::graph_parser::gdd::ReadGraph(pattern_dot_file);
