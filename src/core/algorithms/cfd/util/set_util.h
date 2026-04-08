@@ -11,6 +11,8 @@
 #include <random>
 #include <ranges>
 #include <vector>
+#include <iterator>
+#include <utility>
 
 // see algorithms/cfd/LICENSE
 

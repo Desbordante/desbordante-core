@@ -11,6 +11,7 @@
 
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/model/tuple.h"
 
 namespace algos::dc {
 

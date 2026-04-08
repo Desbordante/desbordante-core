@@ -5,11 +5,16 @@
  */
 #include "core/algorithms/ind/ind_verifier/ind_verifier.h"
 
+#include <boost/container_hash/hash.hpp>
 #include <set>
 #include <sstream>
 #include <unordered_set>
-
-#include <boost/functional/hash.hpp>
+#include <functional>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
 
 #include "core/config/indices/option.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -19,6 +24,9 @@
 #include "core/model/table/table_index.h"
 #include "core/model/table/tuple_index.h"
 #include "core/util/timed_invoke.h"
+#include "core/config/column_index/type.h"
+#include "core/config/exceptions.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace algos {
 

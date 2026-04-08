@@ -1,13 +1,13 @@
 #pragma once
 
+#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <memory>
 #include <string>
 #include <cstddef>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include <boost/functional/hash.hpp>
 
 #include "core/algorithms/cfd/cfd_verifier/highlight.h"
 #include "core/algorithms/cfd/model/cfd_relation_data.h"

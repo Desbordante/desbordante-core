@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <bitset>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"

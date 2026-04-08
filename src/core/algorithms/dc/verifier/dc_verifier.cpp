@@ -1,20 +1,18 @@
 #include "core/algorithms/dc/verifier/dc_verifier.h"
 
+#include <assert.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/regex.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
-#include <cstring>
-#include <ctime>
 #include <functional>
-#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include <cmath>
+#include <exception>
+#include <string_view>
 
 #include "core/algorithms/dc/model/component.h"
 #include "core/algorithms/dc/model/point.h"
@@ -29,6 +27,14 @@
 #include "core/util/get_preallocated_vector.h"
 #include "core/util/kdtree.h"
 #include "core/util/logger.h"
+#include "core/algorithms/dc/model/column_operand.h"
+#include "core/algorithms/dc/model/operator.h"
+#include "core/algorithms/dc/model/tuple.h"
+#include "core/config/common_option.h"
+#include "core/config/option.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/types/type.h"
 
 namespace algos {
 

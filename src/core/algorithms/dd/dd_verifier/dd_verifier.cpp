@@ -5,14 +5,24 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <iterator>
+#include <list>
+#include <string_view>
 
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/model/table/vertical.h"
 #include "core/util/logger.h"
 #include "core/util/timed_invoke.h"
+#include "core/config/common_option.h"
+#include "core/config/option.h"
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/imetrizable_type.h"
+#include "core/model/types/type.h"
 
 namespace algos::dd {
 DDVerifier::DDVerifier() : Algorithm() {

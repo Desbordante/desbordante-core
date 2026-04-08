@@ -2,6 +2,10 @@
 
 #include <stdexcept>
 #include <vector>
+#include <chrono>
+#include <cstddef>
+#include <string_view>
+#include <utility>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/approximate_evidence_inverter.h"
@@ -14,6 +18,10 @@
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/util/logger.h"
+#include "core/config/common_option.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
 
 namespace algos::dc {
 

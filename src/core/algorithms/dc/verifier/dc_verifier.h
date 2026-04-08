@@ -1,12 +1,16 @@
 #pragma once
 
+#include <frozen/unordered_map.h>
 #include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <frozen/unordered_map.h>
+#include <algorithm>
+#include <optional>
+#include <set>
+#include <unordered_set>
+#include <utility>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/dc/model/dc.h"
@@ -16,6 +20,9 @@
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/util/kdtree.h"
+#include "core/algorithms/dc/model/component.h"
+#include "core/algorithms/dc/model/predicate.h"
+#include "core/model/table/column.h"
 
 namespace algos {
 

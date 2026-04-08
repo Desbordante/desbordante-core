@@ -5,17 +5,20 @@
  */
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
+#include <memory>
 
 #include "core/config/error/type.h"
 #include "core/model/table/column_combination.h"
 #include "core/model/table/column_domain_iterator.h"
 #include "core/model/table/column_index.h"
 #include "core/util/bitset_utils.h"
+#include "core/model/table/column_domain.h"
 
 namespace algos::spider {
 

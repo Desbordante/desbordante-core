@@ -2,6 +2,11 @@
 
 #include <algorithm>
 #include <unordered_set>
+#include <iterator>
+#include <memory>
+#include <utility>
+
+#include "core/algorithms/ind/faida/util/simple_cc.h"
 
 namespace algos::faida::apriori_candidate_generator {
 
