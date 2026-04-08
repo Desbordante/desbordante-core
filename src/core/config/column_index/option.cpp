@@ -1,5 +1,9 @@
 #include "core/config/column_index/option.h"
 
+#include <optional>
+#include <utility>
+#include <variant>
+
 #include "core/config/column_index/validate_index.h"
 
 namespace config {

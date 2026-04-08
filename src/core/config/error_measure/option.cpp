@@ -1,5 +1,8 @@
 #include "core/config/error_measure/option.h"
 
+#include <optional>
+#include <variant>
+
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/config/names_and_descriptions.h"
 
