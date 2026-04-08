@@ -7,11 +7,13 @@
 #include "core/algorithms/dc/FastADC/fastadc.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace py = pybind11;
 using namespace algos::fastadc;
 
 namespace fastadc_serialization {
+using DC = algos::fastadc::DenialConstraint;
 
 py::tuple SerializeColumnOperand(ColumnOperand const& operand) {
     return py::make_tuple(operand.GetColumn()->GetIndex(), operand.GetTuple()._to_string());
@@ -38,32 +40,71 @@ PredicatePtr DeserializePredicate(py::tuple t, std::shared_ptr<RelationalSchema 
     ColumnOperand rhs = DeserializeColumnOperand(t[2].cast<py::tuple>(), std::move(schema));
     return new Predicate(Operator(op_type), lhs, rhs);
 }
-}  // namespace fastadc_serialization
 
-namespace {
-using DC = algos::fastadc::DenialConstraint;
+py::tuple SerializeDc(DC const& dc) {
+    py::tuple schema_state = table_serialization::SerializeRelationalSchema(dc.GetSchema().get());
 
-py::tuple GetSortedPredicatesAsTuple(DC const& dc) {
+    py::list provider_state;
+    auto const& objs = dc.GetPredicateSet().provider->GetObjects();
+    for (PredicatePtr const& p : objs) {
+        provider_state.append(fastadc_serialization::SerializePredicate(p));
+    }
+
+    py::list bit_indices;
+    auto const& bs = dc.GetPredicateSet().GetBitset();
+    util::ForEachIndex(bs, [&bit_indices](size_t i) { bit_indices.append(i); });
+
+    return py::make_tuple(std::move(schema_state), std::move(provider_state),
+                          std::move(bit_indices));
+}
+
+DC DeserializeDc(py::tuple t) {
+    if (t.size() != 3) throw std::runtime_error("Invalid state for DC pickle!");
+
+    auto schema = table_serialization::DeserializeRelationalSchema(t[0].cast<py::tuple>());
+
+    auto provider = std::make_shared<PredicateIndexProvider>();
+    for (auto h : t[1].cast<py::list>()) {
+        PredicatePtr p = fastadc_serialization::DeserializePredicate(h.cast<py::tuple>(), schema);
+        provider->GetIndex(p);
+    }
+
+    boost::dynamic_bitset<> bitset(provider->Size());
+    for (auto py_idx : t[2].cast<py::list>()) {
+        size_t idx = py_idx.cast<size_t>();
+        bitset.set(idx);
+    }
+
+    return DC(bitset, std::move(provider), std::move(schema));
+}
+
+py::tuple SerializePredicateSetCanonical(PredicateSet const& set) {
     std::vector<PredicatePtr> predicate_ptrs;
-    for (PredicatePtr predicate : dc.GetPredicateSet()) {
+    for (PredicatePtr predicate : set) {
         predicate_ptrs.push_back(predicate);
     }
-    std::sort(predicate_ptrs.begin(), predicate_ptrs.end(),
-              [](PredicatePtr const& p1, PredicatePtr const& p2) {
-                  return p1->ToString() < p2->ToString();
-              });
-    py::tuple predicates(predicate_ptrs.size());
-    for (size_t i = 0; i < predicate_ptrs.size(); i++) {
-        predicates[i] = fastadc_serialization::SerializePredicate(predicate_ptrs[i]);
-    }
-    return predicates;
+    std::ranges::sort(predicate_ptrs, [](auto const& p1, auto const& p2) {
+        return p1->ToString() < p2->ToString();
+    });
+    return python_bindings::VectorToTuple(predicate_ptrs, [](auto elem) {
+        return fastadc_serialization::SerializePredicate(elem);
+    });
 }
-}  // namespace
+
+py::tuple ConvertDcToImmutableTuple(DC const& dc) {
+    py::tuple dc_predicates_tuple = SerializePredicateSetCanonical(dc.GetPredicateSet());
+    py::tuple schema_tuple =
+            table_serialization::ConvertSchemaToImmutableTuple(dc.GetSchema().get());
+
+    return py::make_tuple(std::move(dc_predicates_tuple), std::move(schema_tuple));
+}
+}  // namespace fastadc_serialization
 
 namespace python_bindings {
+using DC = algos::fastadc::DenialConstraint;
+
 void BindFastADC(py::module_& main_module) {
     using namespace algos;
-    using DC = algos::fastadc::DenialConstraint;
 
     auto dc_module = main_module.def_submodule("dc");
     py::class_<DC>(dc_module, "DC")
@@ -74,68 +115,23 @@ void BindFastADC(py::module_& main_module) {
                      if (&dc1 == &dc2) {
                          return true;
                      }
-                     if (*dc1.GetSchema() != *dc2.GetSchema()) {
-                         return false;
-                     }
+                     py::tuple tuple1 = fastadc_serialization::ConvertDcToImmutableTuple(dc1);
+                     py::tuple tuple2 = fastadc_serialization::ConvertDcToImmutableTuple(dc2);
 
-                     py::tuple dc1_predicates = GetSortedPredicatesAsTuple(dc1);
-                     py::tuple dc2_predicates = GetSortedPredicatesAsTuple(dc2);
-
-                     return dc1_predicates.equal(dc2_predicates);
+                     return tuple1.equal(tuple2);
                  })
             .def("__hash__",
                  [](DC const& dc) {
-                     py::tuple dc_predicates_tuple = GetSortedPredicatesAsTuple(dc);
-                     py::tuple schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(
-                             dc.GetSchema().get());
-
-                     py::tuple state_tuple = py::make_tuple(std::move(dc_predicates_tuple),
-                                                            std::move(schema_tuple));
+                     py::tuple state_tuple = fastadc_serialization::ConvertDcToImmutableTuple(dc);
 
                      return py::hash(state_tuple);
                  })
             .def(py::pickle(
                     //__getstate__
-                    [](DenialConstraint const& dc) {
-                        py::tuple schema_state = table_serialization::SerializeRelationalSchema(
-                                dc.GetSchema().get());
-
-                        py::list provider_state;
-                        auto const& objs = dc.GetPredicateSet().provider->GetObjects();
-                        for (PredicatePtr const& p : objs) {
-                            provider_state.append(fastadc_serialization::SerializePredicate(p));
-                        }
-
-                        py::list bit_indices;
-                        auto const& bs = dc.GetPredicateSet().GetBitset();
-                        util::ForEachIndex(bs, [&bit_indices](size_t i) { bit_indices.append(i); });
-
-                        return py::make_tuple(std::move(schema_state), std::move(provider_state),
-                                              std::move(bit_indices));
-                    },
+                    [](DC const& dc) { return fastadc_serialization::SerializeDc(dc); },
 
                     // __setstate__
-                    [](py::tuple t) {
-                        if (t.size() != 3) throw std::runtime_error("Invalid state for DC pickle!");
-
-                        auto schema = table_serialization::DeserializeRelationalSchema(
-                                t[0].cast<py::tuple>());
-
-                        auto provider = std::make_shared<PredicateIndexProvider>();
-                        for (auto h : t[1].cast<py::list>()) {
-                            PredicatePtr p = fastadc_serialization::DeserializePredicate(
-                                    h.cast<py::tuple>(), schema);
-                            provider->GetIndex(p);
-                        }
-
-                        boost::dynamic_bitset<> bitset(provider->Size());
-                        for (auto py_idx : t[2].cast<py::list>()) {
-                            size_t idx = py_idx.cast<size_t>();
-                            bitset.set(idx);
-                        }
-
-                        return DenialConstraint(bitset, std::move(provider), std::move(schema));
-                    }));
+                    [](py::tuple t) { return fastadc_serialization::DeserializeDc(t); }));
 
     BindPrimitiveNoBase<dc::FastADC>(dc_module, "FastADC")
             .def("get_dcs", &dc::FastADC::GetDCs, py::return_value_policy::copy);

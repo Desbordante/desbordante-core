@@ -1,5 +1,7 @@
 #include "python_bindings/md/bind_md_verification.h"
 
+#include <memory>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"

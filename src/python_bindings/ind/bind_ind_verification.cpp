@@ -25,7 +25,7 @@ void BindIndVerification(pybind11::module_& main_module) {
                      py::dict kwargs;
                      kwargs["lhs_indices"] = py::cast(ind.GetLhs().GetColumnIndices());
                      kwargs["rhs_indices"] = py::cast(ind.GetRhs().GetColumnIndices());
-                     configure_algorithm_bind_main_classes::ConfigureAlgo(verifier, kwargs);
+                     configure_algorithm::ConfigureAlgo(verifier, kwargs);
                      verifier.Execute();
                  })
             .def("ind_holds", &INDVerifier::Holds)

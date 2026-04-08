@@ -6,23 +6,15 @@
 
 #include "core/algorithms/nd/nd.h"
 #include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace py = pybind11;
 
 namespace {
-template <typename ElementType>
-py::tuple VectorToTuple(std::vector<ElementType> vec) {
-    std::size_t const size = vec.size();
-    py::tuple tuple(size);
-    for (std::size_t i = 0; i < size; ++i) {
-        tuple[i] = std::move(vec[i]);
-    }
-    return tuple;
-}
-
 py::tuple MakeNdNameTuple(model::ND const& nd) {
     auto [lhs, rhs, weight] = nd.ToNameTuple();
-    return py::make_tuple(VectorToTuple(std::move(lhs)), VectorToTuple(std::move(rhs)), weight);
+    return py::make_tuple(python_bindings::VectorToTuple(lhs), python_bindings::VectorToTuple(rhs),
+                          weight);
 }
 }  // namespace
 
