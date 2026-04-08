@@ -2,13 +2,12 @@
 
 #include <algorithm>
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
-
-#include "core/algorithms/fem/tke/composite_episode_miner.h"
+#include "core/algorithms/fem/tke/composite_topk_miner.h"
+#include "core/algorithms/fem/tke/parallel_topk_miner.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
 #include "core/config/thread_number/option.h"
+#include "core/model/sequence/timed_event_set.h"
 #include "core/util/logger.h"
 #include "core/util/timed_invoke.h"
 
@@ -18,7 +17,7 @@ TKE::TKE() {
     RegisterOption(config::Option{
             &episodes_num_,
             config::names::kEpisodesNum,
-            "Number of episodes to be found",
+            "Number of top frequent episodes (k)",
             10ul,
     });
     RegisterOption(config::Option{
@@ -49,55 +48,68 @@ void TKE::FindFrequentEpisodes() {
     LOG_DEBUG("Episodes num: {}. Window length: {}", episodes_num_, window_length_);
     LOG_DEBUG("Threads num: {}", threads_num_);
     LOG_DEBUG("Sequence length: {}", event_sequence_->Size());
-    RemoveInfrequentEvents();
-    auto parallel_episodes = FindFrequentParallelEpisodes();
-    LOG_DEBUG("Frequent parallel episodes number: {}", parallel_episodes.size());
-    FindFrequentCompositeEpisodes(parallel_episodes);
-}
 
-void TKE::RemoveInfrequentEvents() {
-    std::map<model::Event, size_t> events_supports = GetEventsSupports();
-    model::Event new_events_num = model::kStartEvent;
-    reverse_mapping_.resize(new_events_num);
+    std::map<model::Event, size_t> const raw_supports = GetEventsSupports();
 
-    for (auto const& [event, support] : events_supports) {
-        mapping_[event] = new_events_num;
-        reverse_mapping_.push_back(event);
-        new_events_num++;
+    std::vector<size_t> supports_vec;
+    supports_vec.reserve(raw_supports.size());
+    for (auto const& [_, s] : raw_supports) {
+        supports_vec.push_back(s);
     }
-    events_num_ = new_events_num;
-    LOG_DEBUG("Remaining events number: {}", events_num_);
 
-    for (auto& event_set : *event_sequence_) {
-        event_set.MapEventsAndRemoveInfrequent(mapping_);
+    size_t sei_threshold = 1;
+    if (supports_vec.size() > episodes_num_) {
+        auto const nth = supports_vec.end() - static_cast<std::ptrdiff_t>(episodes_num_);
+        std::nth_element(supports_vec.begin(), nth, supports_vec.end());
+        sei_threshold = *nth;
     }
+
+    RemoveInfrequentEventsAfterSei(raw_supports, sei_threshold);
+
+    ParallelTopKMiner parallel_miner(events_num_, episodes_num_, BuildEventsLocationLists());
+    std::vector<ParallelEpisode> parallel_episodes = parallel_miner.Mine();
+    LOG_DEBUG("Parallel episodes after top-k mining: {}", parallel_episodes.size());
+
+    size_t const parallel_minsup = (parallel_episodes.size() >= episodes_num_)
+                                           ? parallel_episodes.front().GetSupport()
+                                           : 1;
+    LOG_DEBUG("Initial minsup for composite phase (from parallel): {}", parallel_minsup);
+
+    CompositeTopKMiner composite_miner(episodes_num_, window_length_);
+    DecodeAndStoreResults(composite_miner.Mine(std::move(parallel_episodes), parallel_minsup));
 }
 
 std::map<model::Event, size_t> TKE::GetEventsSupports() const {
     std::map<model::Event, size_t> supports;
-    for (auto const& event_set : *event_sequence_) {
+    for (model::TimedEventSet const& event_set : *event_sequence_) {
         for (model::Event const event : event_set) {
             supports[event] += 1;
         }
     }
-    LOG_DEBUG("Events number: {}", supports.size());
+    LOG_DEBUG("Distinct raw events: {}", supports.size());
     return supports;
 }
 
-std::vector<ParallelEpisode> TKE::FindFrequentParallelEpisodes() const {
-    auto events_loc_lists = BuildEventsLocationLists();
-    std::vector<ParallelEpisode> seeds =
-            ParallelEpisode::BuildParallelEpisodesWithEvents(events_loc_lists, events_num_);
-    std::vector<ParallelEpisode> parallel_episodes;
+void TKE::RemoveInfrequentEventsAfterSei(std::map<model::Event, size_t> const& events_supports,
+                                         size_t event_minsup) {
+    model::Event new_events_num = model::kStartEvent;
+    reverse_mapping_.clear();
+    reverse_mapping_.resize(new_events_num);
+    mapping_.clear();
 
-    for (auto const& seed : seeds) {
-        FindFrequentParallelEpisodesRecursive(seed, events_loc_lists, parallel_episodes);
+    for (auto const& [event, support] : events_supports) {
+        if (support >= event_minsup) {
+            mapping_[event] = new_events_num;
+            reverse_mapping_.push_back(event);
+            new_events_num++;
+        }
     }
+    events_num_ = new_events_num;
+    LOG_DEBUG("Frequent events after SEI: {}", events_num_);
 
-    parallel_episodes.insert(parallel_episodes.end(), std::make_move_iterator(seeds.begin()),
-                             std::make_move_iterator(seeds.end()));
-
-    return parallel_episodes;
+    for (model::TimedEventSet& event_set : *event_sequence_) {
+        event_set.MapEventsAndRemoveInfrequent(mapping_);
+    }
 }
 
 std::vector<std::shared_ptr<LocationList>> TKE::BuildEventsLocationLists() const {
@@ -105,35 +117,27 @@ std::vector<std::shared_ptr<LocationList>> TKE::BuildEventsLocationLists() const
     std::generate(location_lists.begin(), location_lists.end(),
                   []() { return std::make_shared<LocationList>(); });
 
-    for (auto const& event_set : *event_sequence_) {
+    for (model::TimedEventSet const& event_set : *event_sequence_) {
+        model::Timestamp const ts = event_set.GetTimestamp();
         for (model::Event const event : event_set) {
-            location_lists[event]->PushBack(event_set.GetTimestamp());
+            location_lists[event]->PushBack(ts);
         }
     }
     return location_lists;
 }
 
-void TKE::FindFrequentParallelEpisodesRecursive(
-        ParallelEpisode const& current_episode,
-        std::vector<std::shared_ptr<LocationList>> const& events_loc_lists,
-        std::vector<ParallelEpisode>& results) const {
-    for (model::Event event = current_episode.GetLastEvent() + 1; event < events_num_; ++event) {
-        ParallelEpisode new_episode =
-                current_episode.ParallelExtension(event, *events_loc_lists[event]);
-        if (new_episode.GetSupport() >= min_support_) {
-            FindFrequentParallelEpisodesRecursive(new_episode, events_loc_lists, results);
-            results.push_back(std::move(new_episode));
+void TKE::DecodeAndStoreResults(std::vector<CompositeEpisode>&& composites) {
+    top_k_frequent_episodes_.clear();
+    top_k_frequent_episodes_.reserve(composites.size());
+    for (CompositeEpisode& ce : composites) {
+        CompositeEpisode::RawEpisode raw = ce.GetRaw();
+        for (std::vector<model::Event>& block : raw.first) {
+            for (model::Event& ev : block) {
+                ev = reverse_mapping_[ev];
+            }
         }
+        top_k_frequent_episodes_.push_back(std::move(raw));
     }
-}
-
-void TKE::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes) {
-    CompositeEpisodeMiner miner(min_support_, window_length_, threads_num_, tasks_num_multiplier_);
-    std::vector<MaxEpisodesCollection> raw_results = miner.Mine(parallel_episodes);
-
-    max_episodes_collection_.BatchFill(raw_results);
-    max_frequent_episodes_ =
-            max_episodes_collection_.GetResult(reverse_mapping_, parallel_episodes);
 }
 
 }  // namespace algos::tke

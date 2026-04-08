@@ -14,6 +14,8 @@ private:
     std::vector<model::Timestamp> ends_;
 
 public:
+    BoundList() = default;
+
     BoundList(std::vector<model::Timestamp> starts, std::vector<model::Timestamp> ends)
         : starts_(std::move(starts)), ends_(std::move(ends)) {}
 

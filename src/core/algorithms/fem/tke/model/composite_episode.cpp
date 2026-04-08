@@ -2,12 +2,25 @@
 
 namespace algos::tke {
 
-CompositeEpisode::CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence,
-                                   size_t support)
-    : model::CompositeEpisode(std::move(sequence)), support_(support) {
-    for (auto const& event_set : sequence_) {
-        CountDataForEventSet(*event_set);
+CompositeEpisode::CompositeEpisode(ParallelEpisode const& seed)
+    : model::CompositeEpisode({seed.GetEventSetPtr()}),
+      support_(seed.GetSupport()),
+      bound_list_(seed) {
+    CountDataForEventSet(*seed.GetEventSetPtr());
+}
+
+std::optional<CompositeEpisode> CompositeEpisode::TryExtend(ParallelEpisode const& ext,
+                                                             size_t min_support,
+                                                             size_t window_length) const {
+    std::optional<BoundList> new_bound =
+            bound_list_.Extend(ext.GetLocationList(), min_support, window_length);
+    if (!new_bound) {
+        return std::nullopt;
     }
+    CompositeEpisode child = *this;
+    child.Extend(ext, new_bound->GetSupport());
+    child.bound_list_ = std::move(*new_bound);
+    return child;
 }
 
 void CompositeEpisode::CountDataForEventSet(model::EventSet const& event_set, bool add) {
@@ -75,18 +88,5 @@ CompositeEpisode::RawEpisode CompositeEpisode::GetRaw() const {
     return result;
 }
 
-bool CompositeEpisodeComparator::operator()(std::unique_ptr<CompositeEpisode> const& lhs,
-                                            std::unique_ptr<CompositeEpisode> const& rhs) const {
-    if (lhs->GetEventsSum() != rhs->GetEventsSum()) {
-        return lhs->GetEventsSum() < rhs->GetEventsSum();
-    }
-    return lhs < rhs;
-}
-
-bool DescendingCompositeEpisodeComparator::operator()(
-        std::unique_ptr<CompositeEpisode> const& lhs,
-        std::unique_ptr<CompositeEpisode> const& rhs) const {
-    return comparator(rhs, lhs);
-}
 
 }  // namespace algos::tke

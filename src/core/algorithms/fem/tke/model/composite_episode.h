@@ -1,5 +1,8 @@
 #pragma once
 
+#include <optional>
+
+#include "core/algorithms/fem/tke/model/bound_list.h"
 #include "core/algorithms/fem/tke/model/parallel_episode.h"
 #include "core/model/sequence/composite_episode.h"
 
@@ -11,17 +14,25 @@ private:
     model::Event sum_of_odd_items_ = 0;
     size_t events_count_ = 0;
     size_t support_ = 0;
+    BoundList bound_list_;
 
     void CountDataForEventSet(model::EventSet const& event_set, bool add = true);
 
 public:
     CompositeEpisode() {}
 
-    CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence, size_t support);
+    explicit CompositeEpisode(ParallelEpisode const& seed);
 
     void Extend(ParallelEpisode const& parallel_episode, size_t new_support);
 
     void Shorten(size_t new_support);
+
+    std::optional<CompositeEpisode> TryExtend(ParallelEpisode const& ext, size_t min_support,
+                                              size_t window_length) const;
+
+    size_t GetSupport() const {
+        return support_;
+    }
 
     model::Event GetEventsSum() const {
         return sum_of_even_items_ + sum_of_odd_items_;
@@ -40,17 +51,6 @@ public:
     using RawEpisode = std::pair<std::vector<std::vector<model::Event>>, size_t>;
 
     RawEpisode GetRaw() const;
-};
-
-struct CompositeEpisodeComparator {
-    bool operator()(std::unique_ptr<CompositeEpisode> const& lhs,
-                    std::unique_ptr<CompositeEpisode> const& rhs) const;
-};
-
-struct DescendingCompositeEpisodeComparator {
-    CompositeEpisodeComparator comparator;
-    bool operator()(std::unique_ptr<CompositeEpisode> const& lhs,
-                    std::unique_ptr<CompositeEpisode> const& rhs) const;
 };
 
 }  // namespace algos::tke
