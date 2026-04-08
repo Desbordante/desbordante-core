@@ -1,7 +1,15 @@
 #pragma once
+#include <map>
+#include <set>
+#include <utility>
+#include <vector>
+
+// IWYU pragma: keep - needed for config namespaces
+#include "core/config/names_and_descriptions.h"
+
 #include "core/algorithms/gfd/gfd.h"
 #include "core/algorithms/gfd/gfd_validator/gfd_handler.h"
-#include "core/config/names_and_descriptions.h"
+#include "core/algorithms/gfd/graph_descriptor.h"
 
 namespace algos {
 
