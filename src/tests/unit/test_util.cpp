@@ -1,8 +1,19 @@
-#include <iostream>
-#include <thread>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <math.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <iostream>
+#include <chrono>
+#include <cstddef>
+#include <deque>
+#include <iterator>
+#include <memory>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/pyrocommon/model/list_agree_set_sample.h"
 #include "core/model/table/agree_set_factory.h"
@@ -11,6 +22,11 @@
 #include "core/util/levenshtein_distance.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/position_list_index_with_singletons.h"
+#include "core/model/table/vertical.h"
+#include "core/util/custom_hashes.h"
 
 namespace tests {
 

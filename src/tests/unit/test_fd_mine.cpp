@@ -1,20 +1,34 @@
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <algorithm>
 #include <iostream>
 #include <cstddef>
-
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <filesystem>
+#include <list>
+#include <memory>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_mine/fd_mine.h"
 #include "core/algorithms/fd/pyro/pyro.h"
-#include "core/algorithms/fd/tane/pfdtane.h"
-#include "core/algorithms/fd/tane/tane.h"
 #include "core/config/error/type.h"
 #include "core/config/names.h"
-#include "core/model/table/relational_schema.h"
 #include "tests/common/csv_config_util.h"
 #include "tests/unit/test_fd_util.h"
+#include "core/algorithms/fd/fd.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/pyrocommon/core/parameters.h"
+#include "core/algorithms/fd/raw_fd.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;

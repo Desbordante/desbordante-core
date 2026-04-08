@@ -1,12 +1,21 @@
-#include <gmock/gmock.h>
-
+#include <gtest/gtest.h>
 #include <cstddef>
+#include <cmath>
+#include <memory>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/statistics/data_stats.h"
 #include "core/config/names.h"
 #include "core/util/logger.h"
 #include "tests/common/all_csv_configs.h"
+#include "core/algorithms/statistics/statistic.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 namespace mo = model;
