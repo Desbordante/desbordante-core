@@ -1,8 +1,12 @@
 #include "core/algorithms/fd/pyrocommon/model/list_agree_set_sample.h"
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cstddef>
+#include <algorithm>
+#include <string>
 
 #include "core/util/logger.h"
+#include "core/algorithms/fd/pyrocommon/model/agree_set_sample_impl.h"
 
 namespace model {
 

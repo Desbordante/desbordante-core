@@ -1,7 +1,10 @@
 #pragma once
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <cstddef>
+#include <memory>
+#include <utility>
 
 #include "core/algorithms/fd/hyfd/model/fd_tree.h"
 #include "core/algorithms/fd/hyfd/model/non_fd_list.h"

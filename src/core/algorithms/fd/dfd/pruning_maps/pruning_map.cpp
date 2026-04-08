@@ -1,6 +1,10 @@
 #include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
 
 PruningMap::PruningMap(RelationalSchema const* schema) {
     for (auto const& column : schema->GetColumns()) {

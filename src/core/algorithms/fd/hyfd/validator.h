@@ -10,6 +10,8 @@
 #include "core/config/thread_number/type.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/types/types.h"
+#include "core/algorithms/fd/hycommon/types.h"
+#include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 
 namespace algos::hyfd {
 

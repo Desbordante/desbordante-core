@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
 
+#include <ostream>
+
 namespace model {
 
 std::ostream& operator<<(std::ostream& ofs, ConfidenceInterval const& confidence_interval) {

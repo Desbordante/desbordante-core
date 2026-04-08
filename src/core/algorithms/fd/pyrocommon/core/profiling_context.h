@@ -2,6 +2,9 @@
 
 #include <random>
 #include <string>
+#include <functional>
+#include <memory>
+#include <vector>
 
 #include "core/algorithms/fd/pyrocommon/core/dependency_consumer.h"
 #include "core/algorithms/fd/pyrocommon/core/parameters.h"
@@ -11,12 +14,15 @@
 #include "core/util/cache_eviction_method.h"
 #include "core/util/caching_method.h"
 #include "core/util/custom_random.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 
 // forward declaration
 class PLICache;
-
 template <class Value>
 class VerticalMap;
 

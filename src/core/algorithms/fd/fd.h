@@ -1,10 +1,17 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <tuple>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "core/algorithms/fd/raw_fd.h"
 #include "core/model/table/column.h"
 #include "core/model/table/vertical.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/relational_schema.h"
 
 class FD {
 private:

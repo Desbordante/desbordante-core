@@ -5,6 +5,7 @@
 #include <queue>
 #include <vector>
 #include <cstddef>
+#include <utility>
 
 #include "core/algorithms/fd/eulerfd/cluster.h"
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <memory>
 
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/fdep/fd_tree_element.h"

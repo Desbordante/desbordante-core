@@ -1,10 +1,23 @@
 #include "core/algorithms/fd/pyrocommon/core/search_space.h"
 
+#include <assert.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <boost/optional/optional.hpp>
 #include <queue>
 #include <variant>
 #include <cstddef>
+#include <algorithm>
+#include <chrono>
+#include <iterator>
+#include <stdexcept>
 
 #include "core/util/logger.h"
+#include "core/algorithms/fd/pyrocommon/core/parameters.h"
+#include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/util/custom_hashes.h"
 
 // TODO: extra careful with const& -> shared_ptr conversions via make_shared-smart pointer may
 // delete the object - pass empty deleter [](*) {}

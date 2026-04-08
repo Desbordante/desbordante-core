@@ -1,14 +1,17 @@
 #pragma once
 
+#include <boost/thread/mutex.hpp>
 #include <functional>
 #include <set>
-
-#include <boost/thread/mutex.hpp>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
 
 namespace algos {
 

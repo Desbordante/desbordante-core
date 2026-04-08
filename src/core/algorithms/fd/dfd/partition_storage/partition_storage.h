@@ -2,9 +2,13 @@
 
 #include <mutex>
 #include <cstddef>
+#include <memory>
+#include <variant>
 
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical_map.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/vertical.h"
 
 class PartitionStorage {
 private:

@@ -2,8 +2,6 @@
 
 #include <utility>
 
-#include <boost/dynamic_bitset.hpp>
-
 namespace algos::hy {
 
 void AllColumnCombinations::Add(boost::dynamic_bitset<>&& column_set) {
