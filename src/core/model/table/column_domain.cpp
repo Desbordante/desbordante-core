@@ -10,12 +10,15 @@
 #include <fstream>
 #include <numeric>
 #include <string>
+#include <iterator>
+#include <stdexcept>
 
 #include "core/config/thread_number/type.h"
 #include "core/model/table/block_dataset_stream.h"
 #include "core/model/table/dataset_stream_fixed.h"
 #include "core/util/logger.h"
 #include "core/util/parallel_for.h"
+#include "core/model/table/block_data.h"
 
 namespace model {
 

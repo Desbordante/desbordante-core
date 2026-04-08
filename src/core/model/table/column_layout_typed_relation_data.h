@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
+#include <vector>
 
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/relation_data.h"

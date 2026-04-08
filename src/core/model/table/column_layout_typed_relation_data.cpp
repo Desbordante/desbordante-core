@@ -1,6 +1,11 @@
 #include "core/model/table/column_layout_typed_relation_data.h"
 
+#include <string>
+#include <utility>
+
 #include "core/util/logger.h"
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
 
 namespace model {
 

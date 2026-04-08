@@ -2,6 +2,12 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <cstddef>
+#include <optional>
+#include <string>
+#include <typeindex>
+#include <unordered_set>
+#include <utility>
 
 #include "core/model/table/column.h"
 
