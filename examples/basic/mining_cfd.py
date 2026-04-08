@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import desbordante
 import numpy as np
-import pandas
+import pandas as pd
 
 # CFD Discovery parameters:
 TABLE_PATH = 'examples/datasets/play_tennis.csv'
@@ -25,7 +25,7 @@ def items_to_indices(items):
 def get_supported_mask(pattern, table):
     table_height = table.shape[0]
     true_array = np.full(shape=table_height, fill_value=True, dtype=np.bool_)
-    mask = pandas.Series(true_array)
+    mask = pd.Series(true_array)
     for cfd_item in pattern:
         item_value = cfd_item.value
         if item_value is None:
@@ -92,7 +92,7 @@ def visualize_cfd(cfd, table):
 
 
 if __name__ == '__main__':
-    tableDF = pandas.read_csv(TABLE_PATH)
+    tableDF = pd.read_csv(TABLE_PATH)
     algo = desbordante.cfd.algorithms.Default()
     algo.load_data(table=tableDF)
     algo.execute(cfd_minconf=MINIMUM_CONFIDENCE,

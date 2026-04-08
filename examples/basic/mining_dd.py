@@ -1,5 +1,6 @@
-import desbordante
 import csv
+
+import desbordante
 from tabulate import tabulate
 
 COLOR_CODES = {

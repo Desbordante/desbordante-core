@@ -1,7 +1,8 @@
-from typing import Dict, List, Tuple
 from collections import defaultdict
-import matplotlib.pyplot as plt
+from typing import Dict, List, Tuple
+
 import desbordante as db
+import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 
@@ -127,7 +128,7 @@ def main():
 
     # Start cleaning algorithm
     cleaner = DataCleaner(violations)
-    
+
     cleaner.draw("Graph before", False)
     cleaner.clean()
     cleaner.draw("Graph after")
@@ -156,7 +157,7 @@ def main():
     print_table(TABLE_2)
 
     print("Now we can check if the constraint holds by running the algorithm again.\n\n"
-    f"DC " + DC + " holds: " + str(dc_holds), end='\n\n'
+    "DC " + DC + " holds: " + str(dc_holds), end='\n\n'
     "After fixing the typos in the initial dataset, the constraint holds.\n")
 
 

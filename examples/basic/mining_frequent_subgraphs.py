@@ -1,6 +1,6 @@
 try:
-    import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    import matplotlib.pyplot as plt
     import networkx as nx
     HAS_VISUALIZATION = True
 except ImportError:

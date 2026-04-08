@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 from tabulate import tabulate
 
 TABLE = 'examples/datasets/shipping.csv'
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     ods = algo.get_list_ods()
 
-    df = pandas.read_csv(TABLE)
+    df = pd.read_csv(TABLE)
 
     print()
     print_data_frame(df)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     print()
     print("Depenency [weight] -> [shipping cost] means that ordering table by weight")
     print("will also order table by shipping cost automatically. Let's order by weight: ")
-    
+
     df_sorted = df.sort_values("weight")
     print()
     print_data_frame(df_sorted)
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     print("We can see that shipping cost is sorted too. And dependency seems reasonable:")
     print("the more the package weights, the more expensive it will be to send it.")
     print()
-    
+
     print("Order dependencies are called lexicographical, because ordering for multiple")
     print("columns is lexicographical. For example [shipping cost] -> [weight, days] implies")
     print("that ordering by shipping cost will also lexicographically order [weight, days]:")

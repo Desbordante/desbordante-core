@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import desbordante
-import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 
 
 class bcolors:
@@ -74,7 +74,7 @@ def execute_algo(algo, graph):
 
 
 def show_example(title, graph_path):
-    _, axarr = plt.subplots(1, 2, figsize=(12, 5), gridspec_kw={'width_ratios': [7, 2], 'wspace': 0.5}) 
+    _, axarr = plt.subplots(1, 2, figsize=(12, 5), gridspec_kw={'width_ratios': [7, 2], 'wspace': 0.5})
     axarr[0].set_axis_off()
     axarr[0].set_title(title)
     axarr[0].imshow(mpimg.imread(graph_path))

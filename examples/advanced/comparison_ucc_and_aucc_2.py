@@ -1,5 +1,6 @@
-import desbordante
 from csv import reader
+
+import desbordante
 
 RED = '\033[31m'
 GREEN = '\033[32m'

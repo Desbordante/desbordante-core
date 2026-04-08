@@ -1,13 +1,13 @@
 import desbordante
 import pandas as pd
-import termcolor
+
 
 def print_results(ucc_verifier):
     if ucc_verifier.ucc_holds():
         print('UCC holds, showing stats for AUCC is useless')
     else:
         print('UCC does not hold')
-        print(f'But AUCC with error = {"{:.4f}".format(algo.get_error())} holds')
+        print(f'But AUCC with error = {f"{algo.get_error():.4f}"} holds')
         print()
         print('Also:')
         print(f'Total number of rows violating UCC: {ucc_verifier.get_num_rows_violating_ucc()}')
@@ -15,7 +15,7 @@ def print_results(ucc_verifier):
         print('Clusters violating UCC:')
         print(f'found {ucc_verifier.get_num_clusters_violating_ucc()} clusters violating UCC:')
         table = pd.read_csv('examples/datasets/AUCC_example.csv')
-        violating_clusters = ucc_verifier.get_clusters_violating_ucc()        
+        violating_clusters = ucc_verifier.get_clusters_violating_ucc()
 
         cluster_number = 0
         number_names = ['First','Second','Third']
@@ -28,7 +28,7 @@ def print_results(ucc_verifier):
                 if i not in violating_cluster:
                     continue
                 violating_series.append(row)
-            print(pd.DataFrame(violating_series))     
+            print(pd.DataFrame(violating_series))
     print()
 
 
