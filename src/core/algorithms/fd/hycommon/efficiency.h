@@ -1,3 +1,4 @@
+#pragma once
 #include <cstddef>
 
 #include "core/algorithms/fd/hycommon/sampler.h"

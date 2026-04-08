@@ -1,3 +1,4 @@
+#pragma once
 /* This file contatins simplified implementation of std::bitset with SGI extensions
  * (_Find_first and _Find_next) implemented.
  *
