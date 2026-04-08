@@ -1,8 +1,10 @@
 
+#pragma once
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/config/error/type.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/position_list_index.h"
+#include "core/model/table/position_list_index_with_singletons.h"
 
 namespace algos {
 config::ErrorType CalculateZeroAryG1(ColumnData const* rhs, unsigned long long num_tuple_pairs);
