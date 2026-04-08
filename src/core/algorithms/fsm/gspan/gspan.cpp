@@ -357,7 +357,7 @@ void GSpan::GSpanDFS(gspan::DFSCode const& code, std::unordered_set<int> graph_i
             RightMostPathExtensions(code, std::move(graph_ids));
     LOG_TRACE("Found {} candidate extensions", extensions.size());
 
-    for (auto const& [extension, new_graph_ids] : extensions) {
+    for (auto& [extension, new_graph_ids] : extensions) {
         int sup = new_graph_ids.size();
 
         // If the support is enough
