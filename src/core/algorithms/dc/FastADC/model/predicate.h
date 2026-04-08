@@ -1,12 +1,12 @@
 #pragma once
 
+#include <boost/container_hash/hash.hpp>
 #include <bitset>
 #include <cstddef>
 #include <span>
 #include <string>
 #include <vector>
-
-#include <boost/container_hash/hash.hpp>
+#include <typeindex>
 
 #include "core/algorithms/dc/FastADC/model/column_operand.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"

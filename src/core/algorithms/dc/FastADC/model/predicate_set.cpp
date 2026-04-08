@@ -1,6 +1,7 @@
 #include "core/algorithms/dc/FastADC/model/predicate_set.h"
 
 #include <algorithm>
+#include <sstream>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 

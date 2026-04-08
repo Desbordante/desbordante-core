@@ -1,6 +1,8 @@
 #include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
 
 #include <cstddef>
+#include <bitset>
+#include <utility>
 
 #include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/single_clue_set_builder.h"

@@ -1,11 +1,11 @@
 #pragma once
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <cstddef>
 #include <vector>
-
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/util/dc_candidate.h"
