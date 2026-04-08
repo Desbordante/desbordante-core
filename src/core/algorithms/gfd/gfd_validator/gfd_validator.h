@@ -1,11 +1,17 @@
 #pragma once
 #include <thread>
+#include <tuple>
+#include <variant>
+#include <vector>
+
+// IWYU pragma: keep - needed for config namespaces
+#include "core/config/names_and_descriptions.h"
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gfd/gfd.h"
 #include "core/algorithms/gfd/gfd_validator/gfd_handler.h"
-#include "core/config/names_and_descriptions.h"
 #include "core/config/thread_number/type.h"
+#include "core/algorithms/gfd/graph_descriptor.h"
 
 namespace algos {
 
