@@ -2,7 +2,7 @@ set(NAME pac.verifier.domain_pac_verifier)
 desbordante_add_lib(NAME)
 target_sources(
     ${NAME}
-    PRIVATE domain_pac_verifier_base.cpp domain_pac_verifier_cli_adapter.cpp
+    PRIVATE domain_pac_verifier.cpp
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(

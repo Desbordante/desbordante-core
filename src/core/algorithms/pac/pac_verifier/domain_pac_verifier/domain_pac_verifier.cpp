@@ -1,4 +1,4 @@
-#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
 
 #include <algorithm>
 #include <cmath>
@@ -18,7 +18,7 @@
 
 namespace algos::pac_verifier {
 
-void DomainPACVerifierBase::ProcessPACTypeOptions() {
+void DomainPACVerifier::ProcessPACTypeOptions() {
     auto max_idx = *std::ranges::max_element(column_indices_);
     config::ValidateIndex(max_idx, TypedRelation().GetNumColumns());
 
@@ -33,7 +33,7 @@ void DomainPACVerifierBase::ProcessPACTypeOptions() {
     tuple_type_ = domain_->GetTupleTypePtr();
 }
 
-void DomainPACVerifierBase::PreparePACTypeData() {
+void DomainPACVerifier::PreparePACTypeData() {
     original_value_tuples_ =
             pac::util::MakeTuples(TypedRelation().GetColumnData(), column_indices_);
 
@@ -45,7 +45,7 @@ void DomainPACVerifierBase::PreparePACTypeData() {
     std::ranges::sort(dists_from_domain_, {}, [](auto const& p) { return p.second; });
 }
 
-std::vector<std::pair<double, double>> DomainPACVerifierBase::FindEpsilons() const {
+std::vector<std::pair<double, double>> DomainPACVerifier::FindEpsilons() const {
     auto total_tuples_num = original_value_tuples_->size();
     // Tuples number needed to satisfy min_delta
     std::size_t min_tuples_num = std::ceil(MinDelta() * total_tuples_num);
@@ -101,7 +101,7 @@ std::vector<std::pair<double, double>> DomainPACVerifierBase::FindEpsilons() con
     return result;
 }
 
-void DomainPACVerifierBase::PACTypeExecuteInternal() {
+void DomainPACVerifier::PACTypeExecuteInternal() {
     std::ostringstream oss;
     oss << '{';
     for (auto it = column_indices_.begin(); it != column_indices_.end(); ++it) {
@@ -133,7 +133,7 @@ void DomainPACVerifierBase::PACTypeExecuteInternal() {
     LOG_INFO("Result: {}", pac_->ToLongString());
 }
 
-std::pair<double, double> DomainPACVerifierBase::GetEpsilonDeltaForEpsilon(double epsilon) const {
+std::pair<double, double> DomainPACVerifier::GetEpsilonDeltaForEpsilon(double epsilon) const {
     auto it = std::ranges::lower_bound(
             dists_from_domain_, epsilon, {},
             [](std::pair<TuplesIter, double> const& pair) { return pair.second; });
@@ -147,7 +147,7 @@ std::pair<double, double> DomainPACVerifierBase::GetEpsilonDeltaForEpsilon(doubl
     return {eps, delta};
 }
 
-DomainPACHighlight DomainPACVerifierBase::GetHighlights(double eps_1, double eps_2) const {
+DomainPACHighlight DomainPACVerifier::GetHighlights(double eps_1, double eps_2) const {
     if (!pac_) {
         throw std::runtime_error("Execute must be called before GetHighlights");
     }

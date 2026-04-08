@@ -8,13 +8,8 @@
 #include <utility>
 #include <vector>
 
-#include <pybind11/detail/common.h>
-#include <pybind11/stl.h>
-
-#include "core/algorithms/algorithm.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
-#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
@@ -28,12 +23,11 @@ void BindPACVerification(py::module_& main_module) {
 
     auto pac_verification_module = main_module.def_submodule("pac_verification");
     auto algos_module = pac_verification_module.def_submodule("algorithms");
-    auto cli_module = algos_module.def_submodule("cli");
 
-    BindDomainPACVerification(pac_verification_module, cli_module);
+    BindDomainPACVerification(pac_verification_module);
 }
 
-void BindDomainPACVerification(py::module_& pac_verification_module, py::module_& cli_module) {
+void BindDomainPACVerification(py::module_& pac_verification_module) {
     using namespace algos::pac_verifier;
     using namespace pybind11::literals;
     using namespace std::string_literals;
@@ -59,14 +53,5 @@ void BindDomainPACVerification(py::module_& pac_verification_module, py::module_
                     .def("get_pac", &DomainPACVerifier::GetPAC)
                     .def("get_highlights", &DomainPACVerifier::GetHighlights, "eps_1"_a = -1,
                          "eps_2"_a = -1);
-
-    auto domain_pac_verifier_cli =
-            detail::RegisterAlgorithm<DomainPACVerifierCLIAdapter, algos::Algorithm>(
-                    cli_module, "DomainPACVerifierCLI");
-    domain_pac_verifier_cli.doc() =
-            "NOTE: This algorithm is a wrapper around DomainPACVerifer with a restricted set of "
-            "options, which should be used only in CLI.\n"
-            "Consider using desbordante.pac_verification.algorithms.DomainPACVerifer in Python.\n" +
-            domain_pac_verifier_cli.doc().cast<std::string>();
 }
 }  // namespace python_bindings
