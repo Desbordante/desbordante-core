@@ -4,7 +4,7 @@
 
 #include "core/algorithms/algorithm.h"
 
-namespace configure_algorithm_bind_main_classes {
+namespace configure_algorithm {
 void ConfigureAlgo(algos::Algorithm& algorithm, pybind11::kwargs const& kwargs);
 }
 

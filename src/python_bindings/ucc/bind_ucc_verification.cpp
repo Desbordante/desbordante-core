@@ -2,10 +2,14 @@
 
 #include <pybind11/pybind11.h>
 
+#include <cstddef>
+#include <vector>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/ucc/ucc.h"
 #include "core/algorithms/ucc/verification_algorithms.h"
+#include "core/model/table/column.h"
 #include "python_bindings/bind_main_classes.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
@@ -14,7 +18,7 @@ namespace py = pybind11;
 }  // namespace
 
 namespace python_bindings {
-void BindUccVerification(pybind11::module_& main_module) {
+void BindUccVerification(py::module_& main_module) {
     using namespace algos;
 
     auto ucc_verification_module = main_module.def_submodule("ucc_verification");
@@ -30,7 +34,7 @@ void BindUccVerification(pybind11::module_& main_module) {
                          indices_tuple[i] = columns[i]->GetIndex();
                      }
                      kwargs["ucc_indices"] = indices_tuple;
-                     configure_algorithm_bind_main_classes::ConfigureAlgo(verifier, kwargs);
+                     configure_algorithm::ConfigureAlgo(verifier, kwargs);
                      verifier.Execute();
                  })
             .def("ucc_holds", &UCCVerifier::UCCHolds)
