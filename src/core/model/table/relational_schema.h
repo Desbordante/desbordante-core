@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <functional>
 #include <list>
 #include <memory>
@@ -13,12 +15,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "core/util/bitset_utils.h"
 
 class Column;
-
 class Vertical;
 
 class RelationalSchema {

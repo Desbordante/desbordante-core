@@ -1,7 +1,9 @@
 #include "core/model/table/vertical.h"
 
+#include <assert.h>
 #include <cstddef>
 #include <utility>
+#include <memory>
 
 Vertical::Vertical(RelationalSchema const* rel_schema, boost::dynamic_bitset<> indices)
     : column_indices_(std::move(indices)), schema_(rel_schema) {}

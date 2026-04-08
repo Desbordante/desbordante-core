@@ -5,13 +5,15 @@
 
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
 
 class Vertical {
 private:

@@ -1,13 +1,15 @@
 #pragma once
 
+#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <cstddef>
 #include <deque>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include <boost/functional/hash.hpp>
+#include <functional>
+#include <string>
 
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"

@@ -4,11 +4,15 @@
 //
 #include "core/model/table/column_layout_relation_data.h"
 
-#include <map>
 #include <memory>
 #include <utility>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
 
 #include "core/util/logger.h"
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
 
 std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
     int num_columns = schema_->GetNumColumns();
