@@ -1,6 +1,9 @@
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 
+#include <assert.h>
 #include <cstddef>
+#include <ostream>
+#include <type_traits>
 
 #include "core/util/getting_ptr.h"
 
