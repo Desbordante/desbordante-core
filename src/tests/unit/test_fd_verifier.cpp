@@ -1,17 +1,19 @@
+#include <gtest/gtest.h>
 #include <algorithm>
 #include <memory>
 #include <cstddef>
-
-#include <gtest/gtest.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
-#include "core/model/types/builtin.h"
 #include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace {
 using namespace algos::fd_verifier;

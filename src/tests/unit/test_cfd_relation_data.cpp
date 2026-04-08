@@ -1,6 +1,7 @@
-#include <memory>
-
 #include <gtest/gtest.h>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/cfd/model/cfd_relation_data.h"
 #include "tests/common/all_csv_configs.h"

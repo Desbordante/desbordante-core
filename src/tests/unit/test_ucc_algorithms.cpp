@@ -1,10 +1,14 @@
-#include <memory>
-#include <ostream>
-#include <string>
-
-#include <boost/dynamic_bitset.hpp>
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <assert.h>
+#include <memory>
+#include <string>
+#include <algorithm>
+#include <exception>
+#include <filesystem>
+#include <iostream>
+#include <iterator>
+#include <list>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/ucc/hyucc/hyucc.h"
@@ -15,6 +19,10 @@
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 #include "tests/unit/test_hash_util.h"
+#include "core/algorithms/ucc/hpivalid/hpivalid.h"
+#include "core/algorithms/ucc/pyroucc/pyroucc.h"
+#include "core/model/table/vertical.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();

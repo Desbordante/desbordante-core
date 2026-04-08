@@ -1,10 +1,17 @@
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <filesystem>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/gfd/gfd_validator/gfd_validator.h"
 #include "core/config/names.h"
 #include "tests/unit/all_gfd_paths.h"
+#include "core/algorithms/gfd/gfd.h"
+#include "core/algorithms/gfd/gfd_validator/egfd_validator.h"
+#include "core/algorithms/gfd/gfd_validator/gfd_handler.h"
+#include "core/algorithms/gfd/gfd_validator/naivegfd_validator.h"
 
 using namespace algos;
 using algos::StdParamsMap;
