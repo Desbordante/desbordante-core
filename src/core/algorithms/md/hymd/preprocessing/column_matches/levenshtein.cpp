@@ -3,11 +3,13 @@
 #include <algorithm>
 #include <cstddef>
 #include <numeric>
+#include <functional>
+#include <ranges>
 
 #include "core/algorithms/md/hymd/lowest_bound.h"
 #include "core/model/index.h"
-#include "core/model/types/string_type.h"
 #include "core/util/desbordante_assume.h"
+#include "core/algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
 
 namespace {
 using namespace algos::hymd;

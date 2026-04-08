@@ -5,6 +5,11 @@
 #include <iterator>
 #include <numeric>
 #include <type_traits>
+#include <compare>
+#include <map>
+#include <memory>
+#include <ranges>
+#include <tuple>
 
 #include "core/algorithms/md/hymd/lattice/md_specialization.h"
 #include "core/algorithms/md/hymd/lattice/multi_md_specialization.h"
@@ -16,6 +21,11 @@
 #include "core/algorithms/md/hymd/utility/zip.h"
 #include "core/util/desbordante_assume.h"
 #include "core/util/erase_if_replace.h"
+#include "core/algorithms/md/hymd/lattice/lhs_specialization.h"
+#include "core/algorithms/md/hymd/lattice/node_base.h"
+#include "core/algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/utility/exclusion_list.h"
+#include "core/util/get_preallocated_vector.h"
 
 namespace {
 using model::Index;

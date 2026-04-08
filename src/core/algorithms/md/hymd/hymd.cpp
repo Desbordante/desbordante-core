@@ -1,8 +1,16 @@
 #include "core/algorithms/md/hymd/hymd.h"
 
+#include <assert.h>
 #include <algorithm>
 #include <cstddef>
 #include <limits>
+#include <chrono>
+#include <functional>
+#include <optional>
+#include <ranges>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "core/algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice.h"
@@ -20,9 +28,25 @@
 #include "core/config/option_using.h"
 #include "core/config/thread_number/option.h"
 #include "core/model/index.h"
-#include "core/model/table/column.h"
 #include "core/util/get_preallocated_vector.h"
 #include "core/util/worker_thread_pool.h"
+#include "core/algorithms/md/column_match.h"
+#include "core/algorithms/md/column_similarity_classifier.h"
+#include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
+#include "core/algorithms/md/hymd/lattice/md_node.h"
+#include "core/algorithms/md/hymd/lattice/rhs.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
+#include "core/algorithms/md/hymd/validator.h"
+#include "core/algorithms/md/lhs_column_similarity_classifier.h"
+#include "core/algorithms/md/md.h"
+#include "core/config/common_option.h"
+#include "core/config/exceptions.h"
+#include "core/config/option.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/util/desbordante_assume.h"
 
 namespace {
 using namespace algos::hymd;

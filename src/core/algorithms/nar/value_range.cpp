@@ -1,5 +1,11 @@
 #include "core/algorithms/nar/value_range.h"
 
+#include <ranges>
+#include <sstream>
+#include <unordered_set>
+
+#include "core/model/table/column_layout_typed_relation_data.h"
+
 namespace model {
 
 ValueRange::~ValueRange() {}

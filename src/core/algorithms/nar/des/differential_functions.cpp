@@ -1,6 +1,9 @@
 #include "core/algorithms/nar/des/differential_functions.h"
 
+#include <assert.h>
 #include <algorithm>
+#include <set>
+#include <stdexcept>
 
 namespace algos::des {
 

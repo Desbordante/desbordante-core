@@ -1,8 +1,13 @@
 #include "core/algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
 
+#include <assert.h>
+#include <utility>
+#include <vector>
+
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lowest_cc_value_id.h"
 #include "core/util/erase_if_replace.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::lattice::cardinality {
 

@@ -1,5 +1,12 @@
 #include "core/algorithms/metric/points_calculator.h"
 
+#include <stdexcept>
+
+#include "core/algorithms/metric/highlight.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
+
 namespace {
 
 void AssignToVector(long double coord, std::vector<long double>& point, [[maybe_unused]] size_t j) {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/any.hpp>
+#include <assert.h>
 #include <filesystem>
 #include <string_view>
 #include <cstdint>
@@ -8,8 +10,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
-
-#include <boost/any.hpp>
+#include <memory>
 
 #include "core/config/ioption.h"
 #include "core/config/option.h"

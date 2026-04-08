@@ -2,21 +2,31 @@
 
 #include <algorithm>
 #include <optional>
+#include <cstddef>
+#include <functional>
+#include <iterator>
+#include <ranges>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "core/algorithms/md/hymd/utility/index_range.h"
 #include "core/algorithms/md/lhs_column_similarity_classifier.h"
 #include "core/algorithms/md/md_verifier/cmptr.h"
 #include "core/algorithms/md/md_verifier/validation/validation.h"
-#include "core/config/equal_nulls/option.h"
 #include "core/config/exceptions.h"
-#include "core/config/indices/option.h"
-#include "core/config/indices/type.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
-#include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/timed_invoke.h"
 #include "core/util/worker_thread_pool.h"
+#include "core/algorithms/md/column_match.h"
+#include "core/algorithms/md/column_similarity_classifier.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
+#include "core/config/common_option.h"
+#include "core/config/option.h"
+#include "core/model/index.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace {
 struct PoolHolder {

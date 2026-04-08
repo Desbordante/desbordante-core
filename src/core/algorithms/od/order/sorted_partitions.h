@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <cstddef>
+#include <utility>
 
 #include "core/model/table/tuple_index.h"
 

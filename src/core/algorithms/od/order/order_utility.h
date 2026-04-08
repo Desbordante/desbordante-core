@@ -1,10 +1,11 @@
 #pragma once
 
+#include <boost/container_hash/hash.hpp>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include <boost/container_hash/hash.hpp>
+#include <cstddef>
+#include <utility>
 
 #include "core/model/table/column_index.h"
 #include "core/model/table/tuple_index.h"

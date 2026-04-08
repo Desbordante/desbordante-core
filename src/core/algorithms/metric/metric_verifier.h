@@ -22,6 +22,8 @@
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/util/convex_hull.h"
 #include "core/util/qgram_vector.h"
+#include "core/algorithms/metric/highlight.h"
+#include "core/model/types/string_type.h"
 
 namespace algos::metric {
 

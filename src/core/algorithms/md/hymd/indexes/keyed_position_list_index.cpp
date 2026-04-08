@@ -1,5 +1,7 @@
 #include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
 
+#include <utility>
+
 namespace algos::hymd::indexes {
 
 ValueIdentifier KeyedPositionListIndex::AddNextValue(GlobalValueIdentifier value) {

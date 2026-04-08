@@ -1,5 +1,10 @@
 #pragma once
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <cstddef>
+#include <utility>
+#include <vector>
+
 #include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 #include "core/algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 #include "core/algorithms/md/hymd/lattice/level_getter.h"
@@ -8,6 +13,8 @@
 #include "core/algorithms/md/hymd/similarity_data.h"
 #include "core/algorithms/md/hymd/validator.h"
 #include "core/util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/lattice/validation_info.h"
+#include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 
 namespace algos::hymd {
 

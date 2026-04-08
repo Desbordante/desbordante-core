@@ -3,6 +3,8 @@
 #include <functional>
 #include <unordered_map>
 #include <vector>
+#include <cstddef>
+#include <memory>
 
 #include "core/algorithms/algebraic_constraints/ac.h"
 #include "core/algorithms/algebraic_constraints/ac_exception.h"
@@ -16,6 +18,8 @@
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/types.h"
 #include "core/util/better_enum_with_visibility.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/numeric_type.h"
 
 namespace algos {
 
