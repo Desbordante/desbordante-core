@@ -1,10 +1,13 @@
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <unordered_map>
 #include <utility>
 #include <cstddef>
-
-#include <boost/dynamic_bitset.hpp>
+#include <functional>
+#include <memory>
 
 namespace algos {
 

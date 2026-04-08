@@ -1,8 +1,13 @@
 #pragma once
+#include <cmath>
+#include <memory>
+#include <string>
+
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
 #include "core/algorithms/fd/pyrocommon/core/dependency_consumer.h"
 #include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
 #include "core/model/table/vertical.h"
+#include "core/model/table/column.h"
 
 class SearchSpace;
 

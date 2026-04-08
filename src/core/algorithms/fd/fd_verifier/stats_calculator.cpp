@@ -4,8 +4,13 @@
 #include <cassert>
 #include <numeric>
 #include <unordered_map>
+#include <deque>
 
 #include "core/util/logger.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/mixed_type.h"
+#include "core/model/types/string_type.h"
+#include "core/model/types/type.h"
 
 namespace {
 

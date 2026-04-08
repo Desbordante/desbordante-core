@@ -1,9 +1,12 @@
 #pragma once
 #include <vector>
 #include <cstddef>
+#include <string>
 
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/algorithms/fd/sfd/sample.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos {
 class ContingencyTable {

@@ -5,11 +5,15 @@
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <unordered_map>
+#include <utility>
 
 #include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/config/indices/type.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/types/builtin.h"
 
 namespace algos::fd_verifier {
 

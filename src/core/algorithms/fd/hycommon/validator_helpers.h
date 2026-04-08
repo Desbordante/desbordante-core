@@ -1,12 +1,12 @@
 #pragma once
 
-#include <cstddef>
-#include <string_view>
-#include <vector>
-
 #include <boost/container_hash/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/version.hpp>
+#include <boost/unordered/unordered_flat_map_fwd.hpp>
+#include <cstddef>
+#include <string_view>
+#include <vector>
 
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/util/logger.h"

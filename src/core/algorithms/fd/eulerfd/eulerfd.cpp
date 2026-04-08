@@ -1,6 +1,24 @@
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 
 #include <ctime>
+#include <algorithm>
+#include <chrono>
+#include <iostream>
+#include <limits>
+#include <numeric>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+
+#include "core/config/common_option.h"
+#include "core/config/custom_random_seed/option.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/vertical.h"
 
 namespace algos {
 

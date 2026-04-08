@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "core/algorithms/fd/dfd/column_order/column_order.h"
 #include "core/algorithms/fd/dfd/node_category.h"

@@ -1,8 +1,9 @@
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <cstddef>
-
-#include <boost/dynamic_bitset.hpp>
+#include <ostream>
 
 // TODO: these methods are used in priority_queues, where operator> is needed. (>) !<=> (>=) due to
 // strict weak ordering

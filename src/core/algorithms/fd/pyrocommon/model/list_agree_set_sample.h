@@ -1,10 +1,17 @@
 #pragma once
 
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <map>
 #include <utility>
 #include <vector>
+#include <memory>
+#include <unordered_map>
 
 #include "core/algorithms/fd/pyrocommon/model/agree_set_sample.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/vertical.h"
+#include "core/util/custom_random.h"
 
 namespace model {
 
