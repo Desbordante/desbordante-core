@@ -1,8 +1,14 @@
 #include "python_bindings/ind/bind_ind.h"
 
-#include <cmath>
-
 #include <pybind11/pybind11.h>
+
+#include <cmath>
+#include <memory>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <pybind11/stl.h>
 
@@ -11,36 +17,37 @@
 #include "core/algorithms/ind/mining_algorithms.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace py = pybind11;
 
 namespace {
-constexpr double kRoundingValue = 1e12;
+constexpr double kRoundingValue = 1e9;
 
 }  // namespace
 
 namespace ind_serialization {
+using namespace model;
+using IND = model::IND;
 
-py::tuple SerializeInd(model::IND const& ind) {
+py::tuple SerializeInd(IND const& ind) {
     py::object lhs_state = py::cast(ind.GetLhs());
     py::object rhs_state = py::cast(ind.GetRhs());
 
     std::vector<std::unique_ptr<RelationalSchema>> const& schemas_vec = *(ind.GetSchemas());
     std::vector<py::tuple> schemas_state;
     for (auto const& schema : schemas_vec) {
-        std::string s_name = schema->GetName();
-        std::vector<std::string> s_col_names;
+        std::vector<std::string> col_names;
         for (std::unique_ptr<Column> const& col_ptr : schema->GetColumns()) {
-            s_col_names.push_back(col_ptr->GetName());
+            col_names.push_back(col_ptr->GetName());
         }
-        schemas_state.push_back(py::make_tuple(std::move(s_name), std::move(s_col_names)));
+        schemas_state.push_back(py::make_tuple(schema->GetName(), std::move(col_names)));
     }
-    double error = ind.GetError();
     return py::make_tuple(std::move(lhs_state), std::move(rhs_state), std::move(schemas_state),
-                          error);
+                          ind.GetError());
 }
 
-py::tuple ConvertIndToImmutableTuple(model::IND const& ind) {
+py::tuple ConvertIndToImmutableTuple(IND const& ind) {
     auto lhs_schema_index = ind.GetLhs().GetTableIndex();
     auto rhs_schema_index = ind.GetRhs().GetTableIndex();
 
@@ -54,16 +61,11 @@ py::tuple ConvertIndToImmutableTuple(model::IND const& ind) {
             table_serialization::ConvertSchemaToImmutableTuple(rhs_schema.get());
 
     std::vector<unsigned int> lhs_indices = ind.GetLhs().GetColumnIndices();
-    py::tuple lhs_tuple = py::tuple(lhs_indices.size());
-    for (size_t i = 0; i < lhs_indices.size(); ++i) {
-        lhs_tuple[i] = lhs_indices[i];
-    }
+
+    py::tuple lhs_tuple = python_bindings::VectorToTuple(lhs_indices);
 
     std::vector<unsigned int> rhs_indices = ind.GetRhs().GetColumnIndices();
-    py::tuple rhs_tuple = py::tuple(rhs_indices.size());
-    for (size_t i = 0; i < rhs_indices.size(); ++i) {
-        rhs_tuple[i] = rhs_indices[i];
-    }
+    py::tuple rhs_tuple = python_bindings::VectorToTuple(rhs_indices);
 
     auto round_double_val = [](double d) {
         return std::round(d * kRoundingValue) / kRoundingValue;
@@ -71,6 +73,32 @@ py::tuple ConvertIndToImmutableTuple(model::IND const& ind) {
 
     return py::make_tuple(round_double_val(ind.GetError()), std::move(lhs_schema_tuple),
                           std::move(lhs_tuple), std::move(rhs_schema_tuple), std::move(rhs_tuple));
+}
+
+IND DeserializeInd(py::tuple t) {
+    if (t.size() != 4) {
+        throw std::runtime_error("Invalid state for IND pickle!");
+    }
+    ColumnCombination lhs_cc = t[0].cast<ColumnCombination>();
+    ColumnCombination rhs_cc = t[1].cast<ColumnCombination>();
+    auto lhs_ptr = std::make_shared<ColumnCombination>(lhs_cc);
+    auto rhs_ptr = std::make_shared<ColumnCombination>(rhs_cc);
+
+    auto schemas_state = t[2].cast<std::vector<py::tuple>>();
+    std::vector<std::unique_ptr<RelationalSchema>> schemas;
+    for (py::tuple const& s_state : schemas_state) {
+        std::string s_name = s_state[0].cast<std::string>();
+        std::vector<std::string> s_col_names = s_state[1].cast<std::vector<std::string>>();
+        auto schema = std::make_unique<RelationalSchema>(std::move(s_name));
+        for (std::string const& col_name : s_col_names) {
+            schema->AppendColumn(col_name);
+        }
+        schemas.push_back(std::move(schema));
+    }
+    auto schemas_ptr =
+            std::make_shared<std::vector<std::unique_ptr<RelationalSchema>>>(std::move(schemas));
+    double error = t[3].cast<double>();
+    return IND(std::move(lhs_ptr), std::move(rhs_ptr), std::move(schemas_ptr), error);
 }
 }  // namespace ind_serialization
 
@@ -108,34 +136,7 @@ void BindInd(py::module_& main_module) {
                     // __getstate__
                     [](IND const& ind) { return ind_serialization::SerializeInd(ind); },
                     // __setstate__
-                    [](py::tuple t) {
-                        if (t.size() != 4) {
-                            throw std::runtime_error("Invalid state for IND pickle!");
-                        }
-                        ColumnCombination lhs_cc = t[0].cast<ColumnCombination>();
-                        ColumnCombination rhs_cc = t[1].cast<ColumnCombination>();
-                        auto lhs_ptr = std::make_shared<ColumnCombination>(lhs_cc);
-                        auto rhs_ptr = std::make_shared<ColumnCombination>(rhs_cc);
-
-                        auto schemas_state = t[2].cast<std::vector<py::tuple>>();
-                        std::vector<std::unique_ptr<RelationalSchema>> schemas;
-                        for (py::tuple const& s_state : schemas_state) {
-                            std::string s_name = s_state[0].cast<std::string>();
-                            std::vector<std::string> s_col_names =
-                                    s_state[1].cast<std::vector<std::string>>();
-                            auto schema = std::make_unique<RelationalSchema>(std::move(s_name));
-                            for (std::string const& col_name : s_col_names) {
-                                schema->AppendColumn(col_name);
-                            }
-                            schemas.push_back(std::move(schema));
-                        }
-                        auto schemas_ptr =
-                                std::make_shared<std::vector<std::unique_ptr<RelationalSchema>>>(
-                                        std::move(schemas));
-                        double error = t[3].cast<double>();
-                        return IND(std::move(lhs_ptr), std::move(rhs_ptr), std::move(schemas_ptr),
-                                   error);
-                    }));
+                    [](py::tuple t) { return ind_serialization::DeserializeInd(t); }));
 
     static constexpr auto kSpiderName = "Spider";
     static constexpr auto kMindName = "Mind";
@@ -143,7 +144,7 @@ void BindInd(py::module_& main_module) {
 
     auto ind_algos_module =
             BindPrimitive<Spider, Faida, Mind>(ind_module, &INDAlgorithm::INDList, "IndAlgorithm",
-                                               "get_inds", {kSpiderName, "Faida", kMindName});
+                                               "get_inds", {kSpiderName, kFaidaName, kMindName});
     auto define_submodule = [&ind_algos_module, &main_module](char const* name,
                                                               std::vector<char const*> algorithms) {
         auto algos_module = main_module.def_submodule(name).def_submodule("algorithms");
