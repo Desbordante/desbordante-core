@@ -1,8 +1,12 @@
 #include "core/algorithms/fd/tane/model/lattice_level.h"
 
+#include <assert.h>
 #include <algorithm>
+#include <utility>
 
 #include "core/util/logger.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 

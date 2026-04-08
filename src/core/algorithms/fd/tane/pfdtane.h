@@ -5,6 +5,7 @@
 #include "core/config/error/type.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/position_list_index.h"
+#include "core/model/table/position_list_index_with_singletons.h"
 
 namespace algos {
 
