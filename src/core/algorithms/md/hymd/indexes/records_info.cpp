@@ -1,12 +1,13 @@
 #include "core/algorithms/md/hymd/indexes/records_info.h"
 
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <string>
 #include <vector>
 
-#include <boost/unordered/unordered_flat_map.hpp>
-
 #include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
 #include "core/util/logger.h"
+#include "core/model/index.h"
 
 namespace {
 using namespace algos::hymd::indexes;

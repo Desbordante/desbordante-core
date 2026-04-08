@@ -4,6 +4,9 @@
 #include <queue>
 #include <stack>
 #include <vector>
+#include <memory>
+#include <string>
+#include <unordered_map>
 
 #include "core/algorithms/association_rules/ar_algorithm.h"
 #include "core/algorithms/association_rules/candidate_hash_tree.h"

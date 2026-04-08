@@ -1,14 +1,31 @@
 #include "core/algorithms/md/hymd/record_pair_inferrer.h"
 
+#include <assert.h>
+#include <boost/core/pointer_traits.hpp>
+#include <boost/unordered/unordered_map.hpp>
 #include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <ranges>
 #include <vector>
+#include <compare>
+#include <functional>
+#include <initializer_list>
+#include <variant>
 
 #include "core/algorithms/md/hymd/utility/index_range.h"
 #include "core/util/get_preallocated_vector.h"
 #include "core/util/logger.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/compressed_records.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
+#include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "core/algorithms/md/hymd/indexes/pli_cluster.h"
+#include "core/algorithms/md/hymd/indexes/similarity_index.h"
+#include "core/algorithms/md/hymd/indexes/similarity_matrix.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/utility/zip.h"
 
 namespace {
 algos::hymd::ColumnClassifierValueId GetCCVId(algos::hymd::indexes::SimilarityMatrixRow const& row,

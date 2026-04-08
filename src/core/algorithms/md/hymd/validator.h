@@ -1,8 +1,14 @@
 #pragma once
 
+#include <boost/core/pointer_traits.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <boost/unordered/unordered_map.hpp>
 #include <cstddef>
 #include <unordered_set>
 #include <vector>
+#include <algorithm>
+#include <unordered_map>
+#include <utility>
 
 #include "core/algorithms/md/hymd/column_match_info.h"
 #include "core/algorithms/md/hymd/indexes/records_info.h"
@@ -13,6 +19,17 @@
 #include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "core/model/index.h"
 #include "core/util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/compressed_record.h"
+#include "core/algorithms/md/hymd/indexes/compressed_records.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
+#include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "core/algorithms/md/hymd/indexes/similarity_index.h"
+#include "core/algorithms/md/hymd/indexes/similarity_matrix.h"
+#include "core/algorithms/md/hymd/lattice/rhs.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/md_element.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd {
 

@@ -2,6 +2,10 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iterator>
+#include <utility>
+
+#include "core/model/transaction/itemset.h"
 
 namespace algos {
 

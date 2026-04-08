@@ -3,9 +3,11 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <memory>
 
 #include "core/model/types/create_type.h"
 #include "core/model/types/mixed_type.h"
+#include "core/model/types/type.h"
 
 namespace algos::nd_verifier::util {
 

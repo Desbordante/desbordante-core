@@ -1,6 +1,5 @@
 #include "core/algorithms/od/order/dependency_checker.h"
 
-#include <algorithm>
 #include <cstddef>
 #include <unordered_set>
 

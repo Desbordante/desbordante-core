@@ -5,12 +5,16 @@
 #include <cstddef>
 #include <memory>
 #include <vector>
+#include <iterator>
+#include <string_view>
+#include <utility>
 
 #include "core/algorithms/nar/value_range.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
-#include "core/config/tabular_data/input_table/option.h"
-#include "core/model/types/types.h"
+#include "core/algorithms/nar/des/enums.h"
+#include "core/algorithms/nar/nar.h"
+#include "core/config/option.h"
 
 namespace algos::des {
 using model::ValueRange;

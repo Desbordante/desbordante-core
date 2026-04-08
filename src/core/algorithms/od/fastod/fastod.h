@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <utility>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/od/fastod/model/attribute_pair.h"
@@ -17,6 +18,9 @@
 #include "core/config/error/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/time_limit/type.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/model/table/column_index.h"
 
 namespace algos {
 

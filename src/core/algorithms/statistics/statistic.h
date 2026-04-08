@@ -1,8 +1,12 @@
 #pragma once
 
 #include <unordered_map>
+#include <cstddef>
+#include <memory>
+#include <string>
 
 #include "core/model/types/types.h"
+#include "core/model/types/type.h"
 
 namespace algos {
 

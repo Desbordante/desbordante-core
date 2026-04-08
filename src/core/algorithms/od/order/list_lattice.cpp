@@ -1,6 +1,8 @@
 #include "core/algorithms/od/order/list_lattice.h"
 
 #include <cstddef>
+#include <initializer_list>
+#include <utility>
 
 #include "core/algorithms/od/order/order_utility.h"
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <cmath>
 
 #include "core/algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
 

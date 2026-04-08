@@ -1,9 +1,11 @@
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <memory>
 #include <cstddef>
-
-#include <boost/dynamic_bitset.hpp>
+#include <vector>
 
 #include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
 

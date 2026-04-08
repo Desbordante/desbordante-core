@@ -17,6 +17,8 @@
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
 #include "core/model/index.h"
 #include "core/util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 
 namespace algos::hymd {
 

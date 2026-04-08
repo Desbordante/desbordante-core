@@ -9,6 +9,7 @@
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
 #include "core/model/table/tuple_index.h"
+#include "core/model/table/column_index.h"
 
 namespace algos::fastod {
 

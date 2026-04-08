@@ -1,13 +1,24 @@
 #include "core/algorithms/ucc/hyucc/hyucc.h"
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <chrono>
+#include <list>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
 
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/algorithms/ucc/hyucc/inductor.h"
-#include "core/algorithms/ucc/hyucc/preprocessor.h"
 #include "core/algorithms/ucc/hyucc/sampler.h"
 #include "core/algorithms/ucc/hyucc/validator.h"
 #include "core/util/logger.h"
+#include "core/algorithms/fd/hycommon/preprocessor.h"
+#include "core/algorithms/ucc/hyucc/model/non_ucc_list.h"
+#include "core/algorithms/ucc/hyucc/model/ucc_tree.h"
+#include "core/algorithms/ucc/ucc.h"
+#include "core/model/table/relational_schema.h"
+#include "core/util/primitive_collection.h"
 
 namespace algos {
 
