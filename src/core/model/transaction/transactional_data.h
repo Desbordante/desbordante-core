@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <utility>
 
 #include "core/model/table/idataset_stream.h"
 #include "core/model/transaction/itemset.h"
