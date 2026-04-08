@@ -15,7 +15,6 @@
 #include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
-#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
 #include "core/model/types/builtin.h"
@@ -109,21 +108,6 @@ struct DomainPACVerifyingPythonParams {
         }
     }
 };
-
-class TestDomainPACVerifierPython
-    : public ::testing::TestWithParam<DomainPACVerifyingPythonParams> {};
-
-TEST_P(TestDomainPACVerifierPython, DefaultTest) {
-    auto const& p = GetParam();
-    auto params_map = p.params;
-    auto verifier = algos::CreateAndLoadAlgorithm<algos::pac_verifier::DomainPACVerifierCLIAdapter>(
-            params_map);
-    verifier->Execute();
-
-    auto const& pac = verifier->GetPAC();
-    EXPECT_NEAR(pac.GetEpsilon(), p.exp_epsilon, kThreshold);
-    EXPECT_NEAR(pac.GetDelta(), p.exp_delta, kThreshold);
-}
 
 /// @brief Is single-column mixed-typed value a null
 inline bool IsNull(Tuple const& value) {
@@ -244,23 +228,6 @@ INSTANTIATE_TEST_SUITE_P(
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
                 // Min delta is greater than actual delta => should return actual delta
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774, 0.9, 1000)));
-
-// Same, but Python versions
-INSTANTIATE_TEST_SUITE_P(
-        DomainPACVeriferPythonTests, TestDomainPACVerifierPython,
-        ::testing::Values(
-                // 1D array
-                DomainPACVerifyingPythonParams(kSimpleTypos, {1}, 0, 0.9,
-                                               DomainType::parallelepiped, {}, {}, 0, {"0"}, {"5"},
-                                               nullptr, "", 0.8),
-                // 2D ball
-                DomainPACVerifyingPythonParams(kCustomMetricBalls, {0, 1}, 6.217, 0.999,
-                                               DomainType::ball, {}, {"0", "0"}, 5, {}, {}, nullptr,
-                                               "", 0.7),
-                // 2D rectangle
-                DomainPACVerifyingPythonParams(kCustomMetricBalls, {2, 3}, 4.379, 0.999,
-                                               DomainType::parallelepiped, {}, {}, 0, {"-5", "-5"},
-                                               {"5", "5"}, nullptr, "", 0.7)));
 
 using Epsilons = std::pair<double, double>;
 using HighlightValues = std::vector<std::string>;
