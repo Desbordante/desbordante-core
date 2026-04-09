@@ -4,6 +4,8 @@
 
 #include <pybind11/stl.h>
 
+#include "core/algorithms/fd/afd.h"
+#include "core/algorithms/fd/afd_algorithm.h"
 #include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/mining_algorithms.h"
@@ -78,13 +80,12 @@ void BindFd(py::module_& main_module) {
                     }));
 
     static constexpr auto kPyroName = "Pyro";
-    static constexpr auto kTaneName = "Tane";
-    static constexpr auto kPFDTaneName = "PFDTane";
-    auto fd_algos_module = BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep,
-                                         FdMine, FUN, Pyro, Tane, PFDTane>(
-            fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
-            {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine", "FUN",
-             kPyroName, kTaneName, kPFDTaneName});
+    auto fd_algos_module =
+            BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep, FdMine, FUN,
+                          Pyro>(fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
+                                {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep",
+                                 "FdMine", "FUN", kPyroName},
+                                pybind11::return_value_policy::copy);
 
     auto define_submodule = [&fd_algos_module, &main_module](char const* name,
                                                              std::vector<char const*> algorithms) {
@@ -92,10 +93,8 @@ void BindFd(py::module_& main_module) {
         for (auto algo_name : algorithms) {
             algos_module.attr(algo_name) = fd_algos_module.attr(algo_name);
         }
-        algos_module.attr("Default") = algos_module.attr(algorithms.front());
     };
 
-    define_submodule("afd", {kPyroName, kTaneName});
-    define_submodule("pfd", {kPFDTaneName});
+    define_submodule("afd", {kPyroName});
 }
 }  // namespace python_bindings

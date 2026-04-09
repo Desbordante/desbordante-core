@@ -63,8 +63,8 @@ TEST_P(TestTanePdepSelfValidation, SelfCalculationTest) {
     auto relation = ColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [column_id, expected_error] : p.errors) {
         auto const& column_pli = relation->GetColumnData(column_id).GetPLWSIndex();
-        config::ErrorType error = algos::PdepSelf(column_pli);
-        error = algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(column_pli);
+        config::ErrorType error =
+                algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(column_pli);
         EXPECT_NEAR(error, expected_error, eps)
                 << "column_id = " << column_id << "\n"
                 << "error = " << error << "\n"
@@ -83,23 +83,20 @@ TEST_P(TestTaneAfdMeasuresValidation, ErrorCalculationTest) {
         config::ErrorType error;
         switch (p.error_measure) {
             case +algos::AfdErrorMeasure::pdep:
-                // error =
-                // algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(lhs,
-                // lhs->Intersect(rhs).get());
-                error = algos::CalculatePdepMeasure(lhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(
+                        lhs, lhs->Intersect(rhs).get());
                 break;
             case +algos::AfdErrorMeasure::tau:
-                // error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs, rhs,
-                // lhs->Intersect(rhs).get());
-                error = algos::CalculateTauMeasure(lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateTau(
+                        lhs, rhs, lhs->Intersect(rhs).get());
                 break;
             case +algos::AfdErrorMeasure::mu_plus:
-                // error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs,
-                // rhs, lhs->Intersect(rhs).get());
-                error = algos::CalculateMuPlusMeasure(lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(
+                        lhs, rhs, lhs->Intersect(rhs).get());
                 break;
             case +algos::AfdErrorMeasure::rho:
-                error = algos::CalculateRhoMeasure(lhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateRhoMeasure(
+                        lhs, lhs->Intersect(rhs).get());
                 break;
             default:
                 FAIL();
