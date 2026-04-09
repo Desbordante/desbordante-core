@@ -1,7 +1,7 @@
 #include "core/config/indices/option.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
 #include <optional>
 #include <string>
 #include <type_traits>

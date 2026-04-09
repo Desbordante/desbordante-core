@@ -1,28 +1,28 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <list>
 #include <queue>
 #include <span>
+#include <tuple>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <cstddef>
-#include <tuple>
 
+#include "core/algorithms/md/hymd/column_match_info.h"
+#include "core/algorithms/md/hymd/compressed_record.h"
+#include "core/algorithms/md/hymd/indexes/records_info.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice.h"
 #include "core/algorithms/md/hymd/lhs_ccv_ids_info.h"
 #include "core/algorithms/md/hymd/pair_comparison_result.h"
 #include "core/algorithms/md/hymd/recommendation.h"
 #include "core/algorithms/md/hymd/similarity_data.h"
-#include "core/util/desbordante_assume.h"
-#include "core/util/worker_thread_pool.h"
-#include "core/algorithms/md/hymd/column_match_info.h"
-#include "core/algorithms/md/hymd/compressed_record.h"
-#include "core/algorithms/md/hymd/indexes/records_info.h"
 #include "core/algorithms/md/hymd/table_identifiers.h"
 #include "core/model/index.h"
+#include "core/util/desbordante_assume.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::hymd {
 

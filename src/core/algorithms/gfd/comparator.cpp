@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/gfd/gfd.h"
 

@@ -5,15 +5,16 @@
 
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <memory>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 #include "core/model/table/vertical.h"
 #include "core/util/custom_random.h"
-#include "core/model/table/position_list_index.h"
 
 namespace model {
 

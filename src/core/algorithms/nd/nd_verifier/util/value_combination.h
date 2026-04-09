@@ -5,8 +5,8 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "core/model/types/builtin.h"
 

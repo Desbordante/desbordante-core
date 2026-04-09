@@ -6,8 +6,8 @@
 #include <utility>
 #include <vector>
 
-#include "core/algorithms/ind/faida/preprocessing/hashed_column_store.h"
 #include "core/algorithms/ind/faida/preprocessing/abstract_column_store.h"
+#include "core/algorithms/ind/faida/preprocessing/hashed_column_store.h"
 #include "core/model/table/idataset_stream.h"
 
 namespace algos::faida {

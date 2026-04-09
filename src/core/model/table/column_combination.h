@@ -1,11 +1,11 @@
 #pragma once
 
-#include <numeric>
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <cstddef>
+#include <numeric>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "core/model/table/arity_index.h"
 #include "core/model/table/column_index.h"

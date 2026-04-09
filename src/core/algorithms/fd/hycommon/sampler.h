@@ -1,19 +1,20 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
+#include <cstddef>
 #include <memory>
 #include <queue>
 #include <vector>
-#include <cstddef>
+
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/algorithms/fd/hycommon/all_column_combinations.h"
+#include "core/algorithms/fd/hycommon/column_combination_list.h"
 #include "core/algorithms/fd/hycommon/efficiency_threshold.h"
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/position_list_index.h"
-#include "core/algorithms/fd/hycommon/column_combination_list.h"
 
 namespace boost::asio {
 // Forward declare thread_pool to avoid including boost::asio::thread_pool implementation since

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string_view>
 #include <functional>
+#include <string_view>
 
 #include "core/config/column_index/type.h"
 #include "core/config/common_option.h"

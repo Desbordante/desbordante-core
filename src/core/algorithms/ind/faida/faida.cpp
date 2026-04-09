@@ -8,14 +8,14 @@
 
 #include "core/algorithms/ind/faida/candidate_generation/apriori_candidate_generator.h"
 #include "core/algorithms/ind/faida/inclusion_testing/combined_inclusion_tester.h"
+#include "core/config/common_option.h"
 #include "core/config/max_arity/option.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/thread_number/option.h"
-#include "core/util/logger.h"
-#include "core/config/common_option.h"
-#include "core/config/option.h"
 #include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

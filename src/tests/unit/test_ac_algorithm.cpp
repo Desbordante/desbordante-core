@@ -1,4 +1,3 @@
-#include <gtest/gtest.h>
 #include <chrono>
 #include <cstddef>
 #include <memory>
@@ -6,18 +5,20 @@
 #include <utility>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algebraic_constraints/ac_algorithm.h"
-#include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
-#include "core/algorithms/algo_factory.h"
-#include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
 #include "core/algorithms/algebraic_constraints/ac_exception.h"
+#include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/algebraic_constraints/ranges_collection.h"
 #include "core/algorithms/algebraic_constraints/typed_column_pair.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/config/names.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/double_type.h"
 #include "core/model/types/numeric_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace {
 void AssertRanges(std::vector<model::Double>& expected_ranges,

@@ -7,9 +7,9 @@
 #include <future>
 #include <memory>
 #include <mutex>
+#include <utility>
 #include <variant>
 #include <vector>
-#include <utility>
 
 #include "core/model/index.h"
 #include "core/util/auto_join_thread.h"

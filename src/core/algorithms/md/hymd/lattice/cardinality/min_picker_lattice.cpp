@@ -1,9 +1,10 @@
 #include "core/algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cassert>
 #include <map>
 #include <utility>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 #include "core/algorithms/md/hymd/utility/reserve_more.h"
 

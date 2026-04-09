@@ -1,8 +1,8 @@
 #include "core/util/levenshtein_distance.h"
 
 #include <algorithm>
-#include <cstddef>
 #include <cassert>
+#include <cstddef>
 #include <vector>
 
 namespace util {

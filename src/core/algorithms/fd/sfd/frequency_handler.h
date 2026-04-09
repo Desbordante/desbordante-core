@@ -1,9 +1,9 @@
 #pragma once
 
-#include <unordered_map>
-#include <vector>
 #include <cstddef>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "core/model/table/column_index.h"
 #include "core/model/table/typed_column_data.h"
@@ -17,7 +17,7 @@ private:
     std::vector<std::unordered_map<std::string, std::size_t>> frequency_maps_;
 
 public:
-    void InitFrequencyHandler(std::vector<model::TypedColumnData> const &data,
+    void InitFrequencyHandler(std::vector<model::TypedColumnData> const& data,
                               model::ColumnIndex columns, std::size_t max_amount_of_categories);
 
     [[nodiscard]] std::size_t GetColumnFrequencySum(model::ColumnIndex col_ind) const {
@@ -28,12 +28,12 @@ public:
         return cardinality_[col_ind];
     }
 
-    [[nodiscard]] std::size_t GetValueOrdinalNumberAtColumn(std::string const &val,
-                                                       model::ColumnIndex col_ind) const {
+    [[nodiscard]] std::size_t GetValueOrdinalNumberAtColumn(std::string const& val,
+                                                            model::ColumnIndex col_ind) const {
         return frequency_maps_[col_ind].at(val);
     }
 
-    [[nodiscard]] bool ContainsValAtColumn(std::string const &val,
+    [[nodiscard]] bool ContainsValAtColumn(std::string const& val,
                                            model::ColumnIndex col_ind) const {
         return frequency_maps_[col_ind].find(val) != frequency_maps_[col_ind].end();
     }

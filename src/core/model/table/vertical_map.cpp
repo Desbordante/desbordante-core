@@ -1,12 +1,12 @@
 #include "core/model/table/vertical_map.h"
 
+#include <algorithm>
 #include <exception>
 #include <mutex>
 #include <queue>
 #include <shared_mutex>
-#include <unordered_set>
-#include <algorithm>
 #include <stdexcept>
+#include <unordered_set>
 #include <variant>
 
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"

@@ -1,36 +1,37 @@
 #include "core/algorithms/dd/split/split.h"
 
-#include <boost/regex.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <limits>
 #include <list>
 #include <numeric>
+#include <optional>
 #include <ranges>
 #include <set>
+#include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <optional>
-#include <stdexcept>
-#include <string_view>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <boost/regex.hpp>
 
 #include "core/algorithms/dd/split/model/distance_position_list_index.h"
+#include "core/config/common_option.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_index.h"
-#include "core/util/logger.h"
-#include "core/config/common_option.h"
-#include "core/config/option.h"
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/imetrizable_type.h"
 #include "core/model/types/type.h"
+#include "core/util/logger.h"
 
 namespace algos::dd {
 

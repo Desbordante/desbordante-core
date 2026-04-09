@@ -1,13 +1,13 @@
 #pragma once
 
 #include <list>
-#include <mutex>
 #include <memory>
+#include <mutex>
 
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/algorithms/fd/pyrocommon/core/dependency_consumer.h"
-#include "core/algorithms/fd/pyrocommon/core/search_space.h"
 #include "core/algorithms/fd/pyrocommon/core/parameters.h"
+#include "core/algorithms/fd/pyrocommon/core/search_space.h"
 #include "core/util/cache_eviction_method.h"
 #include "core/util/caching_method.h"
 

@@ -1,38 +1,38 @@
 #include "core/algorithms/gfd/gfd_validator/gfd_validator.h"
 
 // IWYU pragma: keep - needed for config namespace
-#include "core/config/names_and_descriptions.h"
+#include <cstddef>
+#include <functional>
+#include <iterator>
+#include <list>
+#include <map>
+#include <set>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <utility>
 
+#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/eccentricity.hpp>
 #include <boost/graph/exterior_property.hpp>
 #include <boost/graph/floyd_warshall_shortest.hpp>
-#include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/iteration_macros.hpp>
 #include <boost/graph/named_function_params.hpp>
 #include <boost/graph/properties.hpp>
 #include <boost/graph/property_maps/constant_property_map.hpp>
 #include <boost/graph/property_maps/container_property_map.hpp>
+#include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/property_map/property_map.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <set>
-#include <thread>
-#include <cstddef>
-#include <functional>
-#include <iterator>
-#include <list>
-#include <map>
-#include <string>
-#include <unordered_map>
-#include <utility>
 
 #include "core/algorithms/gfd/gfd_validator/balancer.h"
+#include "core/config/common_option.h"
+#include "core/config/names_and_descriptions.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
-#include "core/config/common_option.h"
 
 namespace {
 

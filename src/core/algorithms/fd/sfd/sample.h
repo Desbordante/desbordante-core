@@ -26,19 +26,20 @@ private:
     std::size_t concat_cardinality_;
 
 public:
-    Sample(bool fixed_sample, unsigned long long sample_size, std::size_t rows, model::ColumnIndex lhs,
-           model::ColumnIndex rhs, std::vector<model::TypedColumnData> const &data,
-           RelationalSchema const *rel_schema_);
-    void Filter(FrequencyHandler const &handler, std::vector<model::TypedColumnData> const &data,
+    Sample(bool fixed_sample, unsigned long long sample_size, std::size_t rows,
+           model::ColumnIndex lhs, model::ColumnIndex rhs,
+           std::vector<model::TypedColumnData> const& data, RelationalSchema const* rel_schema_);
+    void Filter(FrequencyHandler const& handler, std::vector<model::TypedColumnData> const& data,
                 model::ColumnIndex col_ind);
 
     /* Formulae (2) from "CORDS: Automatic Discovery of Correlations and Soft Functional
        Dependencies."*/
-    static unsigned long long CalculateSampleSize(std::size_t lhs_cardinality, std::size_t rhs_cardinality,
+    static unsigned long long CalculateSampleSize(std::size_t lhs_cardinality,
+                                                  std::size_t rhs_cardinality,
                                                   long double max_false_positive_probability,
                                                   long double delta);
 
-    [[nodiscard]] std::vector<std::size_t> const &GetRowIndices() const {
+    [[nodiscard]] std::vector<std::size_t> const& GetRowIndices() const {
         return row_indices_;
     }
 

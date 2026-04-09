@@ -1,17 +1,18 @@
 #pragma once
 
-#include <boost/container/flat_map.hpp>
-#include <boost/unordered/unordered_flat_set.hpp>
-#include <boost/container/container_fwd.hpp>
-#include <boost/container/vector.hpp>
-#include <boost/unordered/unordered_flat_set_fwd.hpp>
 #include <cassert>
-#include <map>
-#include <mutex>
-#include <vector>
 #include <functional>
+#include <map>
 #include <memory>
+#include <mutex>
 #include <utility>
+#include <vector>
+
+#include <boost/container/container_fwd.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/container/vector.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
+#include <boost/unordered/unordered_flat_set_fwd.hpp>
 
 #include "core/algorithms/md/hymd/column_classifier_value_id.h"
 #include "core/algorithms/md/hymd/table_identifiers.h"

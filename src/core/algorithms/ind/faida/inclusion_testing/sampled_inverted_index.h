@@ -1,21 +1,22 @@
 #pragma once
 
 #include <atomic_bitvector.hpp>
+#include <cstddef>
 #include <hash_set2.hpp>
 #include <hash_table8.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
-#include <cstddef>
-#include <memory>
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+
 #include "core/algorithms/ind/faida/inclusion_testing/hll_data.h"
-#include "core/algorithms/ind/faida/util/simple_ind.h"
 #include "core/algorithms/ind/faida/util/simple_cc.h"
+#include "core/algorithms/ind/faida/util/simple_ind.h"
 
 namespace algos::faida {
 

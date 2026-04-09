@@ -1,13 +1,13 @@
 #include "core/algorithms/od/fastod/storage/data_frame.h"
 
-#include <memory>
-#include <stdexcept>
 #include <algorithm>
 #include <iterator>
+#include <memory>
+#include <stdexcept>
 
 #include "core/algorithms/od/fastod/util/type_util.h"
-#include "core/parser/csv_parser/csv_parser.h"
 #include "core/model/types/builtin.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace algos::fastod {
 
@@ -29,13 +29,13 @@ DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
                    ExtractRangesFromColumn);
 
     for (size_t column = 0; column < cols_num; ++column) {
-        const size_t tuple_count = data_[column].size();
+        size_t const tuple_count = data_[column].size();
 
         std::vector<size_t> curr_column_item_placement;
         curr_column_item_placement.reserve(tuple_count);
 
         for (size_t i = 0; i < tuple_count; ++i) {
-            const std::optional<size_t> range_index = FindRangeIndexByItem(i, data_ranges_[column]);
+            std::optional<size_t> const range_index = FindRangeIndexByItem(i, data_ranges_[column]);
 
             if (!range_index.has_value()) {
                 throw std::logic_error("Range index not found");
@@ -104,8 +104,8 @@ void DataFrame::RecognizeAttributesWithRanges() {
     double constexpr accept_factor = 0.001;
 
     for (size_t i = 0; i < data_ranges_.size(); ++i) {
-        const size_t items_count = data_[i].size();
-        const size_t ranges_count = data_ranges_[i].size();
+        size_t const items_count = data_[i].size();
+        size_t const ranges_count = data_ranges_[i].size();
 
         if (static_cast<double>(ranges_count) / items_count >= accept_factor) {
             attrs_with_ranges_.Set(i, true);
@@ -115,7 +115,7 @@ void DataFrame::RecognizeAttributesWithRanges() {
 
 std::vector<std::pair<std::byte const*, int>> DataFrame::CreateIndexedColumnData(
         model::TypedColumnData const& column) {
-    const std::vector<std::byte const*> data = column.GetData();
+    std::vector<std::byte const*> const data = column.GetData();
     std::vector<std::pair<std::byte const*, int>> indexed_column_data(data.size());
 
     for (size_t i = 0; i < data.size(); ++i) {

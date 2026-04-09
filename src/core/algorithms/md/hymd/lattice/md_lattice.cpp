@@ -2,29 +2,29 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iterator>
-#include <numeric>
-#include <type_traits>
 #include <compare>
+#include <iterator>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <ranges>
 #include <tuple>
+#include <type_traits>
 
+#include "core/algorithms/md/hymd/lattice/lhs_specialization.h"
 #include "core/algorithms/md/hymd/lattice/md_specialization.h"
 #include "core/algorithms/md/hymd/lattice/multi_md_specialization.h"
+#include "core/algorithms/md/hymd/lattice/node_base.h"
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lattice/spec_generalization_checker.h"
 #include "core/algorithms/md/hymd/lattice/total_generalization_checker.h"
 #include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/utility/exclusion_list.h"
 #include "core/algorithms/md/hymd/utility/index_range.h"
 #include "core/algorithms/md/hymd/utility/zip.h"
 #include "core/util/desbordante_assume.h"
 #include "core/util/erase_if_replace.h"
-#include "core/algorithms/md/hymd/lattice/lhs_specialization.h"
-#include "core/algorithms/md/hymd/lattice/node_base.h"
-#include "core/algorithms/md/hymd/md_element.h"
-#include "core/algorithms/md/hymd/utility/exclusion_list.h"
 #include "core/util/get_preallocated_vector.h"
 
 namespace {

@@ -1,4 +1,3 @@
-#include <gtest/gtest.h>
 #include <cstddef>
 #include <list>
 #include <memory>
@@ -6,16 +5,18 @@
 #include <utility>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/ucc.h"
 #include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
-#include "core/algorithms/ucc/hyucc/hyucc.h"
-#include "core/algorithms/ucc/ucc.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/position_list_index.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;
@@ -63,6 +64,7 @@ public:
     double GetExpectedError() const {
         return expected_error_;
     }
+
     std::vector<model::PLI::Cluster> const& GetExpectedClustersViolatingUCC() const {
         return clusters_violating_ucc_;
     }

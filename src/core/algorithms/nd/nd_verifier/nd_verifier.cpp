@@ -2,15 +2,16 @@
 
 #include <chrono>
 #include <cstddef>
+#include <functional>
 #include <stdexcept>
 #include <string>
-#include <vector>
-#include <functional>
 #include <string_view>
 #include <unordered_set>
+#include <vector>
 
 #include "core/algorithms/nd/nd_verifier/util/stats_calculator.h"
 #include "core/algorithms/nd/nd_verifier/util/value_combination.h"
+#include "core/config/common_option.h"
 #include "core/config/descriptions.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/indices/option.h"
@@ -19,14 +20,13 @@
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/builtin.h"
 #include "core/util/logger.h"
 #include "core/util/range_to_string.h"
 #include "core/util/timed_invoke.h"
-#include "core/config/common_option.h"
-#include "core/model/table/idataset_stream.h"
-#include "core/model/table/relational_schema.h"
 
 namespace algos::nd_verifier {
 

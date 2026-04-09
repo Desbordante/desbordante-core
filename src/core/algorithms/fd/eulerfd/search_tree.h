@@ -1,13 +1,14 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
-#include <unordered_map>
-#include <utility>
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <unordered_map>
+#include <utility>
+
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 namespace algos {
 
@@ -34,8 +35,9 @@ private:
         [[nodiscard]] Bitset const& GetInter() const;
 
         // For inner nodes
-        Node(std::size_t bit, Bitset sets_union, Bitset sets_inter, std::shared_ptr<Node> const& parent,
-             std::shared_ptr<Node> left = nullptr, std::shared_ptr<Node> right = nullptr);
+        Node(std::size_t bit, Bitset sets_union, Bitset sets_inter,
+             std::shared_ptr<Node> const& parent, std::shared_ptr<Node> left = nullptr,
+             std::shared_ptr<Node> right = nullptr);
 
         // For leaves
         Node(std::size_t bit, Bitset set, std::shared_ptr<Node> const& parent);
@@ -69,8 +71,8 @@ private:
 
     static void UpdateInterAndUnion(std::shared_ptr<Node> const& node);
 
-    [[nodiscard]] static std::pair<std::size_t, std::size_t> FindNodeAndSetBits(Bitset const& node_set,
-                                                                      Bitset const& set);
+    [[nodiscard]] static std::pair<std::size_t, std::size_t> FindNodeAndSetBits(
+            Bitset const& node_set, Bitset const& set);
 
 public:
     explicit SearchTreeEulerFD(std::size_t number_of_attributes);

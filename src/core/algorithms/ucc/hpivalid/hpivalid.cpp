@@ -1,23 +1,23 @@
 #include "core/algorithms/ucc/hpivalid/hpivalid.h"
 
 #include <deque>
-#include <utility>
-#include <vector>
 #include <list>
 #include <stdexcept>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/hycommon/preprocessor.h"
 #include "core/algorithms/ucc/hpivalid/config.h"
+#include "core/algorithms/ucc/hpivalid/enums.h"
 #include "core/algorithms/ucc/hpivalid/result_collector.h"
 #include "core/algorithms/ucc/hpivalid/tree_search.h"
-#include "core/util/logger.h"
-#include "core/algorithms/ucc/hpivalid/enums.h"
 #include "core/algorithms/ucc/raw_ucc.h"
 #include "core/algorithms/ucc/ucc.h"
 #include "core/model/table/column_index.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
 #include "core/util/primitive_collection.h"
 
 // see algorithms/ucc/hpivalid/LICENSE

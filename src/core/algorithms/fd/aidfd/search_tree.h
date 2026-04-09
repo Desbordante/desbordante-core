@@ -1,13 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+#include <utility>
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset_fwd.hpp>
-#include <unordered_map>
-#include <cstddef>
-#include <utility>
-#include <functional>
-#include <memory>
 
 class SearchTree {
 public:
@@ -32,8 +33,9 @@ private:
         [[nodiscard]] Bitset const& GetInter() const;
 
         // for inner nodes
-        Node(std::size_t bit, Bitset sets_union, Bitset sets_inter, std::shared_ptr<Node> const& parent,
-             std::shared_ptr<Node> left = nullptr, std::shared_ptr<Node> right = nullptr);
+        Node(std::size_t bit, Bitset sets_union, Bitset sets_inter,
+             std::shared_ptr<Node> const& parent, std::shared_ptr<Node> left = nullptr,
+             std::shared_ptr<Node> right = nullptr);
 
         // for leaves
         Node(std::size_t bit, Bitset set, std::shared_ptr<Node> const& parent);
@@ -64,7 +66,8 @@ private:
 
     static void UpdateInterAndUnion(std::shared_ptr<Node> const& node);
 
-    static std::pair<std::size_t, std::size_t> FindNodeAndSetBits(Bitset const& node_set, Bitset const& set);
+    static std::pair<std::size_t, std::size_t> FindNodeAndSetBits(Bitset const& node_set,
+                                                                  Bitset const& set);
 
 public:
     explicit SearchTree(std::size_t number_of_attributes);

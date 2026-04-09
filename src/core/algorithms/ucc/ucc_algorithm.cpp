@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "core/config/tabular_data/input_table/option.h"
 #include "core/config/common_option.h"
+#include "core/config/tabular_data/input_table/option.h"
 
 namespace algos {
 

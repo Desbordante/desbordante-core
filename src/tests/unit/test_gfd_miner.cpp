@@ -1,17 +1,18 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <cstdlib>
-#include <vector>
 #include <filesystem>
 #include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/gfd/gfd.h"
 #include "core/algorithms/gfd/gfd_miner/gfd_miner.h"
 #include "core/config/names.h"
 #include "tests/unit/all_gfd_paths.h"
-#include "core/algorithms/gfd/gfd.h"
 
 namespace gfd {
 void PrintTo(model::Gfd const& gfd, std::ostream* os) {

@@ -3,8 +3,8 @@
 #include <assert.h>
 #include <tuple>
 
-#include "core/algorithms/md/hymd/utility/zip.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/utility/zip.h"
 
 namespace algos::hymd {
 auto LatticeTraverser::AdjustLattice(std::vector<lattice::ValidationInfo>& validations,

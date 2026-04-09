@@ -1,11 +1,12 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset_fwd.hpp>
-#include <memory>
-#include <cstddef>
-#include <vector>
 
 #include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
 
@@ -16,7 +17,8 @@ private:
     std::unique_ptr<UCCTreeVertex> root_;
 
 public:
-    explicit UCCTree(std::size_t num_attributes) : root_(UCCTreeVertex::Create(num_attributes, false)) {
+    explicit UCCTree(std::size_t num_attributes)
+        : root_(UCCTreeVertex::Create(num_attributes, false)) {
         root_->InitChildren(true);
     }
 

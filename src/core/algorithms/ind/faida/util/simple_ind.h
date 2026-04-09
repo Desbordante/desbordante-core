@@ -1,11 +1,11 @@
 #pragma once
 
 #include <bit>
-#include <memory>
-#include <utility>
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <string_view>
+#include <utility>
 
 #include "core/algorithms/ind/faida/hashing/hashing.h"
 #include "core/algorithms/ind/faida/util/simple_cc.h"

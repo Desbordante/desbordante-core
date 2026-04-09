@@ -1,8 +1,8 @@
 #pragma once
 
 #include <assert.h>
-#include <optional>
 #include <memory>
+#include <optional>
 
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/config/equal_nulls/type.h"

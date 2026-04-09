@@ -1,7 +1,7 @@
 #include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
 #include <vector>
 
 namespace algos::hyfd::fd_tree {

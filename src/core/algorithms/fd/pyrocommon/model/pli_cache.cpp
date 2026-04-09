@@ -1,21 +1,22 @@
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 
-#include <assert.h>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
-#include <boost/optional/optional.hpp>
 #include <algorithm>
+#include <assert.h>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "core/model/table/vertical_map.h"
-#include "core/util/logger.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <boost/optional/optional.hpp>
+
 #include "core/algorithms/fd/pyrocommon/core/parameters.h"
 #include "core/model/table/column.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical_map.h"
+#include "core/util/logger.h"
 
 namespace model {
 

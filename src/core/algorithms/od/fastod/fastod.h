@@ -1,25 +1,25 @@
 #pragma once
 
+#include <cstddef>
 #include <initializer_list>
 #include <memory>
-#include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/od/fastod/model/attribute_pair.h"
 #include "core/algorithms/od/fastod/model/attribute_set.h"
 #include "core/algorithms/od/fastod/model/canonical_od.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/od/fastod/storage/data_frame.h"
 #include "core/algorithms/od/fastod/storage/partition_cache.h"
 #include "core/algorithms/od/fastod/util/timer.h"
 #include "core/config/error/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/time_limit/type.h"
-#include "core/algorithms/od/fastod/od_ordering.h"
-#include "core/algorithms/od/fastod/storage/data_frame.h"
 #include "core/model/table/column_index.h"
 
 namespace algos {

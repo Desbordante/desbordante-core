@@ -1,11 +1,8 @@
 #include "core/algorithms/statistics/data_stats.h"
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
-#include <assert.h>
-#include <set>
 #include <algorithm>
 #include <array>
+#include <assert.h>
 #include <cctype>
 #include <chrono>
 #include <cmath>
@@ -13,16 +10,20 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
 
+#include <boost/asio/post.hpp>
+#include <boost/asio/thread_pool.hpp>
+
+#include "core/config/common_option.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
-#include "core/config/common_option.h"
 #include "core/model/types/double_type.h"
 #include "core/model/types/int_type.h"
 #include "core/model/types/mixed_type.h"

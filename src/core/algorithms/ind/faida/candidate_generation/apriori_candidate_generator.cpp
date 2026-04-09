@@ -1,9 +1,9 @@
 #include "core/algorithms/ind/faida/candidate_generation/apriori_candidate_generator.h"
 
 #include <algorithm>
-#include <unordered_set>
 #include <iterator>
 #include <memory>
+#include <unordered_set>
 #include <utility>
 
 #include "core/algorithms/ind/faida/util/simple_cc.h"

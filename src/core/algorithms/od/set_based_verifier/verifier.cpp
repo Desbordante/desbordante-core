@@ -1,24 +1,24 @@
 #include "core/algorithms/od/set_based_verifier/verifier.h"
 
 #include <assert.h>
-#include <stdexcept>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 
+#include "core/algorithms/od/fastod/model/attribute_set.h"
 #include "core/algorithms/od/fastod/model/canonical_od.h"
 #include "core/config/column_index/option.h"
+#include "core/config/common_option.h"
 #include "core/config/indices/option.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
 #include "core/util/range_to_string.h"
 #include "core/util/timed_invoke.h"
-#include "core/algorithms/od/fastod/model/attribute_set.h"
-#include "core/config/common_option.h"
-#include "core/config/option.h"
 
 namespace algos::od {
 

@@ -3,18 +3,18 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
-#include <memory>
-#include <vector>
 #include <iterator>
+#include <memory>
 #include <string_view>
 #include <utility>
+#include <vector>
 
-#include "core/algorithms/nar/value_range.h"
-#include "core/config/names_and_descriptions.h"
-#include "core/config/option_using.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/nar/nar.h"
+#include "core/algorithms/nar/value_range.h"
+#include "core/config/names_and_descriptions.h"
 #include "core/config/option.h"
+#include "core/config/option_using.h"
 
 namespace algos::des {
 using model::ValueRange;

@@ -5,15 +5,16 @@
 
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
+#include <cstddef>
 #include <functional>
 #include <list>
 #include <memory>
-#include <cstddef>
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/util/bitset_utils.h"
 

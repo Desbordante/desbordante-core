@@ -1,13 +1,13 @@
 #pragma once
-#include <memory>
-#include <unordered_map>
-#include <vector>
 #include <cstddef>
+#include <memory>
 #include <optional>
 #include <string>
 #include <typeindex>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "core/model/table/column.h"
 

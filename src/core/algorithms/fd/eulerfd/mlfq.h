@@ -1,11 +1,11 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <queue>
-#include <vector>
-#include <cstddef>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/eulerfd/cluster.h"
 
@@ -13,13 +13,13 @@ namespace algos {
 
 class MLFQ {
 private:
-    using Queue = std::pair<std::queue<Cluster *>, double>;
+    using Queue = std::pair<std::queue<Cluster*>, double>;
 
     constexpr static double kLastQueueRangeBarrier = 0.001;
 
     struct LastQueueElement {
-        Cluster *cluster{};
-        bool operator<(LastQueueElement const &other) const;
+        Cluster* cluster{};
+        bool operator<(LastQueueElement const& other) const;
     };
 
     std::vector<Queue> queues_;
@@ -32,9 +32,9 @@ private:
 public:
     explicit MLFQ(std::size_t queues_number);
 
-    void Add(Cluster *cluster, double priority, bool add_if_zero = false);
-    void AddAtLast(Cluster *cluster);
-    [[nodiscard]] Cluster *Get();
+    void Add(Cluster* cluster, double priority, bool add_if_zero = false);
+    void AddAtLast(Cluster* cluster);
+    [[nodiscard]] Cluster* Get();
 
     [[nodiscard]] std::size_t GetEffectiveSize() const;
     [[nodiscard]] std::size_t GetLastQueueSize() const;

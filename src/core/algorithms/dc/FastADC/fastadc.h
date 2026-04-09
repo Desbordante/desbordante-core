@@ -1,16 +1,16 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
 #include "core/algorithms/dc/FastADC/providers/predicate_provider.h"
 #include "core/algorithms/dc/FastADC/util/denial_constraint_set.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
-#include "core/algorithms/dc/FastADC/providers/index_provider.h"
 
 namespace algos::dc {
 

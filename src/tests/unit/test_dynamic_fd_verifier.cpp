@@ -1,24 +1,25 @@
-#include <gtest/gtest.h>
-#include <boost/any.hpp>
 #include <algorithm>
-#include <memory>
 #include <cstddef>
 #include <filesystem>
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include <boost/any.hpp>
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
+#include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/exceptions.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
-#include "core/algorithms/fd/fd_verifier/highlight.h"
-#include "core/algorithms/fd/fd_verifier/stats_calculator.h"
-#include "core/parser/csv_parser/csv_parser.h"
 
 namespace {
 using namespace algos::fd_verifier;
@@ -59,9 +60,9 @@ struct DynFDVerifyingParams {
     std::size_t const num_error_rows = 0;
 
     DynFDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                         std::size_t const num_error_clusters = 0, std::size_t const num_error_rows = 0,
-                         long double const error = 0., CSVConfig const& insert_config = {},
-                         CSVConfig const& update_config = {},
+                         std::size_t const num_error_clusters = 0,
+                         std::size_t const num_error_rows = 0, long double const error = 0.,
+                         CSVConfig const& insert_config = {}, CSVConfig const& update_config = {},
                          std::unordered_set<std::size_t> delete_config = {},
                          CSVConfig const& csv_config = kTestDynamicFDInit)
         : params({{onam::kCsvConfig, csv_config},

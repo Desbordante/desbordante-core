@@ -1,29 +1,30 @@
 #include "core/model/table/agree_set_factory.h"
 
-#include <condition_variable>
-#include <thread>
-#include <unordered_set>
 #include <algorithm>
 #include <chrono>
+#include <condition_variable>
 #include <iterator>
 #include <map>
 #include <mutex>
 #include <stdexcept>
+#include <thread>
+#include <unordered_set>
 #include <utility>
 
 #define BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY
-#include <boost/thread/future.hpp>
 #include <assert.h>
+
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset_fwd.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/thread/future.hpp>
 
-#include "core/model/table/identifier_set.h"
-#include "core/util/logger.h"
-#include "core/util/parallel_for.h"
 #include "core/model/table/column_data.h"
+#include "core/model/table/identifier_set.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
+#include "core/util/parallel_for.h"
 
 namespace model {
 

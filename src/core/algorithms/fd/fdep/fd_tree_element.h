@@ -1,13 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <list>
 #include <memory>
 #include <vector>
-#include <cstddef>
 // For printing Dependencies
 #include <fstream>
-#include <string>
 #include <limits>
+#include <string>
 
 #include "core/algorithms/fd/fd.h"
 #include "core/model/table/relational_schema.h"
@@ -66,7 +66,8 @@ private:
 
     // Searching for specialization of functional dependency in cover-trees.
     bool GetSpecialization(model::Bitset<kMaxAttrNum> const& lhs, std::size_t attr_num,
-                           std::size_t current_attr, model::Bitset<kMaxAttrNum>& spec_lhs_out) const;
+                           std::size_t current_attr,
+                           model::Bitset<kMaxAttrNum>& spec_lhs_out) const;
 
     void FilterSpecializationsHelper(FDTreeElement& filtered_tree,
                                      model::Bitset<kMaxAttrNum>& active_path);

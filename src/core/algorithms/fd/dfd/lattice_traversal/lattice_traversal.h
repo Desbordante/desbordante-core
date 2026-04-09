@@ -1,8 +1,8 @@
 #pragma once
 
+#include <list>
 #include <random>
 #include <stack>
-#include <list>
 #include <unordered_set>
 #include <vector>
 
@@ -11,9 +11,9 @@
 #include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
 #include "core/algorithms/fd/dfd/pruning_maps/dependencies_map.h"
 #include "core/algorithms/fd/dfd/pruning_maps/non_dependencies_map.h"
-#include "core/model/table/vertical.h"
 #include "core/model/table/column.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical.h"
 #include "core/util/custom_hashes.h"
 
 class LatticeTraversal {

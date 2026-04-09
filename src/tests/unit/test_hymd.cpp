@@ -1,29 +1,30 @@
-#include <gtest/gtest.h>
-#include <boost/any.hpp>
+#include <algorithm>
 #include <cstddef>
+#include <initializer_list>
+#include <iterator>
+#include <list>
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
-#include <vector>
-#include <algorithm>
-#include <initializer_list>
-#include <iterator>
-#include <list>
 #include <utility>
+#include <vector>
+
+#include <boost/any.hpp>
+#include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
 #include "core/algorithms/md/hymd/utility/md_less.h"
+#include "core/algorithms/md/md.h"
 #include "core/config/names.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/index.h"
+#include "core/model/table/idataset_stream.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
-#include "core/algorithms/md/hymd/hymd.h"
-#include "core/algorithms/md/md.h"
-#include "core/model/table/idataset_stream.h"
 
 namespace {
 auto GetCardinality(std::vector<model::md::DecisionBoundary> const& lhs_bounds) {

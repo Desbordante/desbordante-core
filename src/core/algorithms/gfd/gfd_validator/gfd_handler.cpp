@@ -5,10 +5,10 @@
 #include <string_view>
 
 #include "core/config/names_and_descriptions.h"
-#include "core/config/option_using.h"
-#include "core/util/logger.h"
 #include "core/config/option.h"
+#include "core/config/option_using.h"
 #include "core/parser/graph_parser/graph_parser.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

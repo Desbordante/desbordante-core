@@ -20,8 +20,8 @@ EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, std::size_t candi
                     DifferentialOptions const& options, RNG& rng);
 
 using MutationFunction = EncodedNAR (*)(std::vector<EncodedNAR> const& population,
-                                        std::size_t candidate_index, DifferentialOptions const& options,
-                                        RNG& rng);
+                                        std::size_t candidate_index,
+                                        DifferentialOptions const& options, RNG& rng);
 
 MutationFunction EnumToMutationStrategy(DifferentialStrategy strategy);
 

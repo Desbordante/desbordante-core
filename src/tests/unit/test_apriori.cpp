@@ -1,18 +1,19 @@
-#include <gtest/gtest.h>
 #include <list>
 #include <memory>
 #include <set>
 #include <string>
 #include <utility>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/association_rules/apriori.h"
-#include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
 #include "core/algorithms/association_rules/ar.h"
 #include "core/algorithms/association_rules/ar_algorithm.h"
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
+#include "core/config/names.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

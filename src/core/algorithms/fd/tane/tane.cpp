@@ -6,9 +6,9 @@
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
 #include "core/algorithms/fd/tane/afd_measures.h"
 #include "core/algorithms/fd/tane/enums.h"
+#include "core/config/common_option.h"
 #include "core/config/error/option.h"
 #include "core/config/error_measure/option.h"
-#include "core/config/common_option.h"
 #include "core/model/table/column_layout_relation_data.h"
 
 namespace algos {

@@ -1,7 +1,8 @@
 #pragma once
-#include <boost/format.hpp>
-#include <string>
 #include <iosfwd>
+#include <string>
+
+#include <boost/format.hpp>
 
 namespace model {
 

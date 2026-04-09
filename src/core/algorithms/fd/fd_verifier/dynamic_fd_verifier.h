@@ -1,22 +1,22 @@
 #pragma once
 
 #include <cassert>
-#include <deque>
 #include <cstddef>
-#include <string>
-#include <vector>
+#include <deque>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
-#include "core/model/table/dynamic_table_data.h"
-#include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/model/table/dynamic_position_list_index.h"
+#include "core/model/table/dynamic_table_data.h"
 #include "core/model/table/idataset_stream.h"
 
 namespace algos::fd_verifier {

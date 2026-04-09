@@ -1,7 +1,7 @@
 #include "core/util/convex_hull.h"
 
-#include <cstddef>
 #include <algorithm>
+#include <cstddef>
 
 namespace util {
 

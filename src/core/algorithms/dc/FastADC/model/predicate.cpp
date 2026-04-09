@@ -1,7 +1,7 @@
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
 
 #include "core/algorithms/dc/FastADC/model/column_operand.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"

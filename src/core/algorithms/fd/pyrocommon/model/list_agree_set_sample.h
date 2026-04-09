@@ -1,11 +1,12 @@
 #pragma once
 
-#include <boost/dynamic_bitset_fwd.hpp>
 #include <map>
-#include <utility>
-#include <vector>
 #include <memory>
 #include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/algorithms/fd/pyrocommon/model/agree_set_sample.h"
 #include "core/model/table/column_layout_relation_data.h"

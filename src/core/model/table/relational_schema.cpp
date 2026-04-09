@@ -1,13 +1,14 @@
 #include "core/model/table/relational_schema.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <memory>
-#include <utility>
 #include <algorithm>
+#include <memory>
 #include <stdexcept>
+#include <utility>
 
-#include "core/model/table/vertical.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 #include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
 
 RelationalSchema::RelationalSchema(std::string name) : columns_(), name_(std::move(name)) {}
 

@@ -5,21 +5,22 @@
 
 #include "core/model/table/position_list_index.h"
 
-#include <assert.h>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
 #include <algorithm>
-#include <cstddef>
+#include <assert.h>
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <map>
 #include <memory>
 #include <utility>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+
+#include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
 #include "core/util/logger.h"
-#include "core/model/table/column_data.h"
 
 namespace model {
 

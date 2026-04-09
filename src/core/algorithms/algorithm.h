@@ -1,16 +1,17 @@
 #pragma once
 
-#include <boost/any.hpp>
 #include <assert.h>
-#include <filesystem>
-#include <string_view>
 #include <cstdint>
+#include <filesystem>
+#include <memory>
+#include <string_view>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <memory>
+
+#include <boost/any.hpp>
 
 #include "core/config/ioption.h"
 #include "core/config/option.h"

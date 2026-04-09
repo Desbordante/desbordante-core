@@ -1,22 +1,23 @@
 #pragma once
 
-#include <boost/any.hpp>
+#include <algorithm>
 #include <filesystem>
 #include <list>
-#include <mutex>
-#include <algorithm>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <boost/any.hpp>
+
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd.h"
 #include "core/config/max_lhs/type.h"
-#include "core/util/primitive_collection.h"
 #include "core/model/table/column.h"
 #include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical.h"
+#include "core/util/primitive_collection.h"
 
 namespace model {
 class AgreeSetFactory;

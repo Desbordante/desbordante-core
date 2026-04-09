@@ -1,18 +1,19 @@
-#include <gtest/gtest.h>
-#include <memory>
-#include <vector>
-#include <cstddef>
 #include <algorithm>
+#include <cstddef>
+#include <memory>
 #include <string>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/od/fastod/fastod.h"
 #include "core/algorithms/od/fastod/hashing/hashing.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
 #include "core/config/names.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
-#include "core/algorithms/od/fastod/model/canonical_od.h"
-#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 
@@ -38,7 +39,7 @@ std::size_t RunFastod(algos::StdParamsMap const& params) {
     std::size_t ods_simple_sorted_hash = algos::fastod::hashing::CombineHashes(ods_simple_sorted);
 
     std::vector<std::size_t> od_hashes = {ods_asc_sorted_hash, ods_desc_sorted_hash,
-                                     ods_simple_sorted_hash};
+                                          ods_simple_sorted_hash};
     std::size_t result_hash = algos::fastod::hashing::CombineHashes(od_hashes);
 
     return result_hash;

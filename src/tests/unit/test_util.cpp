@@ -1,13 +1,9 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <math.h>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
-#include <iostream>
 #include <chrono>
 #include <cstddef>
 #include <deque>
+#include <iostream>
 #include <iterator>
+#include <math.h>
 #include <memory>
 #include <set>
 #include <stdexcept>
@@ -15,23 +11,28 @@
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include "core/algorithms/fd/pyrocommon/model/list_agree_set_sample.h"
 #include "core/model/table/agree_set_factory.h"
+#include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/identifier_set.h"
-#include "core/util/levenshtein_distance.h"
-#include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
-#include "core/model/table/column_data.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/table/position_list_index_with_singletons.h"
 #include "core/model/table/vertical.h"
 #include "core/util/custom_hashes.h"
+#include "core/util/levenshtein_distance.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 
-using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, std::log, model::AgreeSetFactory,
-        model::MCGenMethod, model::AgreeSetsGenMethod;
+using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, std::log,
+        model::AgreeSetFactory, model::MCGenMethod, model::AgreeSetsGenMethod;
 using ::testing::ContainerEq, ::testing::Eq;
 
 namespace fs = std::filesystem;

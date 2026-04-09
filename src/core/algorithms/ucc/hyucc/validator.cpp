@@ -1,13 +1,14 @@
 #include "core/algorithms/ucc/hyucc/validator.h"
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
 #include <assert.h>
-#include <boost/core/pointer_traits.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <future>
 #include <cstddef>
 #include <deque>
+#include <future>
+
+#include <boost/asio/post.hpp>
+#include <boost/asio/thread_pool.hpp>
+#include <boost/core/pointer_traits.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/hycommon/efficiency_threshold.h"
 #include "core/algorithms/fd/hycommon/validator_helpers.h"
@@ -21,9 +22,9 @@ using model::RawUCC;
 // Check out comment for Validator::ValidateAndExtendCandidates, it's appropriate for this function
 // too
 std::size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyucc::LhsPair>& next_level,
-                                        algos::hyucc::UCCTree& ucc_tree,
-                                        std::vector<RawUCC> const& invalid_uccs,
-                                        std::size_t num_attributes) {
+                                             algos::hyucc::UCCTree& ucc_tree,
+                                             std::vector<RawUCC> const& invalid_uccs,
+                                             std::size_t num_attributes) {
     std::size_t candidates = 0;
     for (auto const& ucc : invalid_uccs) {
         for (std::size_t attr = 0; attr < num_attributes; ++attr) {

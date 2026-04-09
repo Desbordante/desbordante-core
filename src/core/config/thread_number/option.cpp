@@ -1,8 +1,8 @@
 #include "core/config/thread_number/option.h"
 
-#include <thread>
 #include <optional>
 #include <string>
+#include <thread>
 #include <variant>
 
 #include "core/config/exceptions.h"
@@ -11,7 +11,7 @@
 namespace config {
 using names::kThreads, descriptions::kDThreads;
 extern CommonOption<ThreadNumType> const kThreadNumberOpt{
-        kThreads, kDThreads, 0, [](auto &value) {
+        kThreads, kDThreads, 0, [](auto& value) {
             if (value == 0) {
                 value = std::thread::hardware_concurrency();
                 if (value == 0) {

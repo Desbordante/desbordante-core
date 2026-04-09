@@ -1,13 +1,14 @@
 #include "core/algorithms/gfd/gfd_validator/naivegfd_validator.h"
 
-#include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/properties.hpp>
-#include <boost/property_map/property_map.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <string>
 #include <unordered_map>
 #include <utility>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/graph/vf2_sub_graph_iso.hpp>
+#include <boost/property_map/property_map.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "core/algorithms/gfd/gfd.h"
 #include "core/util/logger.h"

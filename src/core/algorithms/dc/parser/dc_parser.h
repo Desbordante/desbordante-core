@@ -1,18 +1,18 @@
 #pragma once
 
-#include <stdexcept>
 #include <cstddef>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
 
+#include "core/algorithms/dc/model/column_operand.h"
 #include "core/algorithms/dc/model/dc.h"
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/typed_column_data.h"
-#include "core/algorithms/dc/model/column_operand.h"
 
 namespace algos::dc {
 

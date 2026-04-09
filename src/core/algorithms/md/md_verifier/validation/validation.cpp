@@ -1,24 +1,25 @@
 #include "core/algorithms/md/md_verifier/validation/validation.h"
 
-#include <boost/hof/first_of.hpp>
-#include <boost/core/pointer_traits.hpp>
-#include <boost/unordered/unordered_map.hpp>
-#include <ranges>
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <ranges>
 
-#include "core/algorithms/md/hymd/indexes/records_info.h"
-#include "core/algorithms/md/hymd/similarity_data.h"
-#include "core/algorithms/md/hymd/utility/index_range.h"
-#include "core/util/worker_thread_pool.h"
+#include <boost/core/pointer_traits.hpp>
+#include <boost/hof/first_of.hpp>
+#include <boost/unordered/unordered_map.hpp>
+
 #include "core/algorithms/md/hymd/column_classifier_value_id.h"
 #include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
 #include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 #include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
 #include "core/algorithms/md/hymd/indexes/pli_cluster.h"
+#include "core/algorithms/md/hymd/indexes/records_info.h"
 #include "core/algorithms/md/hymd/indexes/similarity_index.h"
 #include "core/algorithms/md/hymd/indexes/similarity_matrix.h"
+#include "core/algorithms/md/hymd/similarity_data.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::md {
 

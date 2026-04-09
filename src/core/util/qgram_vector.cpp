@@ -1,9 +1,9 @@
 #include "core/util/qgram_vector.h"
 
 #include <algorithm>
-#include <cstddef>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <numeric>
 #include <utility>
 

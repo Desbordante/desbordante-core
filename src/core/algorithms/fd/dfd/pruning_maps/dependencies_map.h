@@ -3,8 +3,8 @@
 #include <unordered_set>
 
 #include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
-#include "core/model/table/vertical.h"
 #include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 class DependenciesMap : public PruningMap {
 public:

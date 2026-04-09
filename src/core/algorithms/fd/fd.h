@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <variant>
@@ -9,9 +9,9 @@
 
 #include "core/algorithms/fd/raw_fd.h"
 #include "core/model/table/column.h"
-#include "core/model/table/vertical.h"
 #include "core/model/table/column_index.h"
 #include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 class FD {
 private:

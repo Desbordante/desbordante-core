@@ -1,14 +1,14 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <limits.h>
 #include <memory>
 #include <string>
-#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
-#include <algorithm>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/nd/nd.h"
 #include "core/algorithms/nd/nd_verifier/util/highlight.h"
@@ -34,8 +34,8 @@ private:
     model::WeightType real_weight_{0};
 
     template <typename It>
-    std::shared_ptr<std::vector<std::size_t>> CalculateFrequencies(std::size_t codes_number, It begin,
-                                                              It end) {
+    std::shared_ptr<std::vector<std::size_t>> CalculateFrequencies(std::size_t codes_number,
+                                                                   It begin, It end) {
         auto result = std::make_shared<std::vector<std::size_t>>();
         for (std::size_t code{0}; code < codes_number; ++code) {
             result->push_back(std::count(begin, end, code));

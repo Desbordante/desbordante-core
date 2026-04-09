@@ -1,16 +1,17 @@
-#include <gtest/gtest.h>
 #include <limits.h>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/nd/nd.h"
 #include "core/algorithms/nd/nd_verifier/nd_verifier.h"
-#include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
 #include "core/config/indices/type.h"
+#include "core/config/names.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;

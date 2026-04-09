@@ -4,26 +4,26 @@
  * Spider algorithm class methods definition
  */
 // IWYU pragma: keep - needed for option_using.h macro
-#include "core/config/names_and_descriptions.h"
-
 #include "core/algorithms/ind/spider/spider.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
 #include <functional>
 #include <queue>
 #include <string>
 #include <type_traits>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+
 #include "core/algorithms/ind/spider/attribute.h"
+#include "core/config/common_option.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/error/option.h"
 #include "core/config/mem_limit/option.h"
+#include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/thread_number/option.h"
-#include "core/util/timed_invoke.h"
-#include "core/config/common_option.h"
 #include "core/util/bitset_utils.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos {
 

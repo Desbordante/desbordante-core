@@ -1,23 +1,23 @@
 #include "core/algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
 
 #include <chrono>
-#include <memory>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <utility>
 
-#include "core/config/indices/option.h"
-#include "core/config/names_and_descriptions.h"
-#include "core/config/option_using.h"
-#include "core/config/tabular_data/crud_operations/operations.h"
-#include "core/config/tabular_data/input_table/option.h"
-#include "core/util/logger.h"
 #include "core/config/common_option.h"
 #include "core/config/exceptions.h"
+#include "core/config/indices/option.h"
+#include "core/config/names_and_descriptions.h"
 #include "core/config/option.h"
+#include "core/config/option_using.h"
 #include "core/config/tabular_data/crud_operations/delete/option.h"
 #include "core/config/tabular_data/crud_operations/insert/option.h"
+#include "core/config/tabular_data/crud_operations/operations.h"
 #include "core/config/tabular_data/crud_operations/update/option.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace algos::fd_verifier {
 

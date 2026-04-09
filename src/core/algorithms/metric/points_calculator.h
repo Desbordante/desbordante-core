@@ -6,12 +6,12 @@
 #include <utility>
 #include <vector>
 
+#include "core/algorithms/metric/aliases.h"
 #include "core/algorithms/metric/points.h"
 #include "core/config/indices/type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
-#include "core/util/convex_hull.h"
-#include "core/algorithms/metric/aliases.h"
 #include "core/model/table/position_list_index.h"
+#include "core/util/convex_hull.h"
 
 namespace algos::metric {
 
@@ -56,7 +56,7 @@ public:
                               config::IndicesType rhs_indices)
         : dist_from_null_is_infinity_(dist_from_null_is_infinity),
           typed_relation_(std::move(typed_relation)),
-          rhs_indices_(std::move(rhs_indices)){};
+          rhs_indices_(std::move(rhs_indices)) {};
 };
 
 }  // namespace algos::metric

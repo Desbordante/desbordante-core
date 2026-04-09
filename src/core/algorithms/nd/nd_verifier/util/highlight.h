@@ -1,12 +1,12 @@
 #pragma once
 
-#include <memory>
 #include <cstddef>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <unordered_set>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/nd/nd_verifier/util/value_combination.h"
 
@@ -45,8 +45,8 @@ public:
               std::shared_ptr<std::vector<std::size_t>> encoded_lhs,
               std::shared_ptr<std::vector<std::size_t>> encoded_rhs,
               std::shared_ptr<std::vector<std::size_t>> lhs_frequencies,
-              std::shared_ptr<std::vector<std::size_t>> rhs_frequencies, std::size_t highlight_lhs_code,
-              std::unordered_set<std::size_t>&& highlight_rhs_codes)
+              std::shared_ptr<std::vector<std::size_t>> rhs_frequencies,
+              std::size_t highlight_lhs_code, std::unordered_set<std::size_t>&& highlight_rhs_codes)
         : lhs_values_(std::move(lhs_codes)),
           rhs_values_(std::move(rhs_codes)),
           encoded_lhs_(std::move(encoded_lhs)),

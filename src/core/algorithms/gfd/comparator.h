@@ -1,7 +1,8 @@
 #pragma once
 
-#include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <vector>
+
+#include <boost/graph/vf2_sub_graph_iso.hpp>
 
 #include "core/algorithms/gfd/gfd.h"
 

@@ -1,14 +1,15 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>
-#include <vector>
-#include <algorithm>
 #include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 namespace algos::hyucc {
 
@@ -36,8 +37,8 @@ private:
 
     void InitChildren(bool is_ucc = false);
     bool AddChild(std::size_t pos, bool is_ucc = false);
-    void GetUCCAndGeneralizationsRecursiveImpl(boost::dynamic_bitset<> const& ucc, std::size_t cur_bit,
-                                               boost::dynamic_bitset<> cur_ucc,
+    void GetUCCAndGeneralizationsRecursiveImpl(boost::dynamic_bitset<> const& ucc,
+                                               std::size_t cur_bit, boost::dynamic_bitset<> cur_ucc,
                                                std::vector<boost::dynamic_bitset<>>& res);
     [[nodiscard]] std::vector<boost::dynamic_bitset<>> GetUCCAndGeneralizationsRecursive(
             boost::dynamic_bitset<> const& ucc);

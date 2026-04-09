@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <memory>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 #include "core/model/table/idataset_stream.h"

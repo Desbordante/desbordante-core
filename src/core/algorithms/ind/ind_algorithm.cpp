@@ -1,10 +1,9 @@
 #include "core/algorithms/ind/ind_algorithm.h"
 
 // IWYU pragma: keep - needed for config namespace
-#include "core/config/names_and_descriptions.h"
-
 #include <cstddef>
 
+#include "core/config/names_and_descriptions.h"
 #include "core/config/tabular_data/input_tables/option.h"
 #include "core/model/table/idataset_stream.h"
 

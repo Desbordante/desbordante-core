@@ -13,15 +13,15 @@
 #include <numeric>
 #include <set>
 #include <string>
-#include <vector>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "core/config/mem_limit/type.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/column_combination.h"
-#include "core/model/table/idataset_stream.h"
 #include "core/model/table/column_index.h"
+#include "core/model/table/idataset_stream.h"
 #include "core/model/table/table_index.h"
 
 namespace model {

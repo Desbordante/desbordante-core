@@ -1,17 +1,17 @@
 #pragma once
+#include <cstddef>
 #include <list>
+#include <memory>
 #include <set>
 #include <string>
-#include <cstddef>
 #include <utility>
 #include <vector>
-#include <memory>
 
 #include "core/algorithms/ind/ind.h"
 #include "core/algorithms/ind/ind_algorithm.h"
+#include "core/model/table/column_index.h"
 #include "core/model/table/table_index.h"
 #include "tests/common/csv_config_util.h"
-#include "core/model/table/column_index.h"
 
 namespace tests {
 

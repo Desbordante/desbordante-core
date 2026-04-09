@@ -1,10 +1,5 @@
 #include "core/algorithms/gfd/gfd_validator/egfd_validator.h"
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/iterator/iterator_facade.hpp>
-#include <boost/range/irange.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
@@ -12,6 +7,12 @@
 #include <list>
 #include <string>
 #include <unordered_map>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/range/irange.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "core/util/logger.h"
 

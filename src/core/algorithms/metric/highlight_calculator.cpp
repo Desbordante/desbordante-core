@@ -3,10 +3,10 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include "core/util/convex_hull.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/numeric_type.h"
+#include "core/util/convex_hull.h"
 
 namespace {
 

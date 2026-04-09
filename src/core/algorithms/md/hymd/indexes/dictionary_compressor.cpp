@@ -3,9 +3,9 @@
 #include <cstddef>
 #include <utility>
 
+#include "core/algorithms/md/hymd/compressed_record.h"
 #include "core/model/index.h"
 #include "core/util/desbordante_assume.h"
-#include "core/algorithms/md/hymd/compressed_record.h"
 
 namespace algos::hymd::indexes {
 

@@ -1,25 +1,26 @@
 #include "core/algorithms/ucc/hpivalid/tree_search.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <deque>
+#include <initializer_list>
 #include <limits>
 #include <random>
 #include <stack>
 #include <tuple>
 #include <utility>
-#include <vector>
-#include <cmath>
-#include <initializer_list>
 #include <variant>
+#include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 #include "core/algorithms/ucc/hpivalid/config.h"
+#include "core/algorithms/ucc/hpivalid/enums.h"
 #include "core/algorithms/ucc/hpivalid/pli_table.h"
 #include "core/algorithms/ucc/hpivalid/result_collector.h"
-#include "core/util/logger.h"
-#include "core/algorithms/ucc/hpivalid/enums.h"
 #include "core/model/table/column_index.h"
+#include "core/util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <assert.h>
+#include <cstddef>
 #include <memory>
 #include <vector>
-#include <cstddef>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/pfd_verifier/pfd_stats_calculator.h"

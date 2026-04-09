@@ -1,12 +1,12 @@
 #pragma once
+#include <algorithm>
+#include <bitset>
 #include <cstddef>
 #include <functional>
 #include <memory>
 #include <span>
 #include <stdexcept>
 #include <vector>
-#include <algorithm>
-#include <bitset>
 
 #include "core/algorithms/dc/FastADC/model/column_operand.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"

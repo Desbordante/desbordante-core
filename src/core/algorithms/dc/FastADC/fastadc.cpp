@@ -1,27 +1,27 @@
 #include "core/algorithms/dc/FastADC/fastadc.h"
 
-#include <stdexcept>
-#include <vector>
 #include <chrono>
 #include <cstddef>
+#include <stdexcept>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/approximate_evidence_inverter.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
+#include "core/config/common_option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/model/table/column_layout_typed_relation_data.h"
-#include "core/util/logger.h"
-#include "core/config/common_option.h"
 #include "core/model/table/column_index.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/builtin.h"
+#include "core/util/logger.h"
 
 namespace algos::dc {
 

@@ -1,19 +1,20 @@
 #include "core/algorithms/fd/hyfd/validator.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <cstddef>
+#include <deque>
+#include <future>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <assert.h>
 #include <boost/core/pointer_traits.hpp>
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset_fwd.hpp>
 #include <boost/unordered/unordered_map.hpp>
-#include <algorithm>
-#include <future>
-#include <utility>
-#include <vector>
-#include <cstddef>
-#include <deque>
-#include <unordered_set>
 
 #include "core/algorithms/fd/hycommon/util/pli_util.h"
 #include "core/algorithms/fd/hycommon/validator_helpers.h"

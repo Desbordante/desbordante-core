@@ -1,14 +1,15 @@
 #include "core/algorithms/fd/dfd/column_order/column_order.h"
 
 #include <assert.h>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <set>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 #include "core/algorithms/fd/dfd/column_order/ordered_partition.h"
-#include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/relational_schema.h"
 #include "core/model/table/column.h"
 #include "core/model/table/column_data.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/relational_schema.h"
 
 ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
     : order_(relation_data->GetSchema()->GetNumColumns()) {

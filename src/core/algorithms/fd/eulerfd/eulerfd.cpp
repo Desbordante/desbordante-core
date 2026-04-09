@@ -1,8 +1,8 @@
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 
-#include <ctime>
 #include <algorithm>
 #include <chrono>
+#include <ctime>
 #include <iostream>
 #include <limits>
 #include <numeric>

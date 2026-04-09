@@ -1,12 +1,13 @@
 #pragma once
 
-#include <boost/any.hpp>
 #include <list>
+#include <memory>
 #include <set>
 #include <stack>
-#include <vector>
-#include <memory>
 #include <string>
+#include <vector>
+
+#include <boost/any.hpp>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/association_rules/ar.h"

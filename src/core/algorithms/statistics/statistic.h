@@ -1,34 +1,34 @@
 #pragma once
 
-#include <unordered_map>
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
-#include "core/model/types/types.h"
 #include "core/model/types/type.h"
+#include "core/model/types/types.h"
 
 namespace algos {
 
 class Statistic {
     bool has_value_ = false;
-    std::byte const *data_ = nullptr;
+    std::byte const* data_ = nullptr;
     std::unique_ptr<model::Type> type_ = nullptr;
 
 public:
     Statistic() noexcept = default;
-    Statistic(std::byte const *, model::Type const *, bool clone_data);
-    Statistic(Statistic const &);
-    Statistic(Statistic &&);
+    Statistic(std::byte const*, model::Type const*, bool clone_data);
+    Statistic(Statistic const&);
+    Statistic(Statistic&&);
     ~Statistic();
 
-    Statistic &operator=(Statistic const &);
-    Statistic &operator=(Statistic &&);
+    Statistic& operator=(Statistic const&);
+    Statistic& operator=(Statistic&&);
 
     bool HasValue() const noexcept;
-    std::byte const *GetData() const;
-    model::Type const *GetType() const;
-    std::byte const *ReleaseData();
+    std::byte const* GetData() const;
+    model::Type const* GetType() const;
+    std::byte const* ReleaseData();
     std::string ToString() const;
 };
 

@@ -1,12 +1,12 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <memory>
-#include <cstddef>
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/config/indices/type.h"

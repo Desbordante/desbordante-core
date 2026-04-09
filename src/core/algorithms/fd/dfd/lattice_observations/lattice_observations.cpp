@@ -1,9 +1,10 @@
 #include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cstddef>
 #include <utility>
 #include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 #include "core/model/table/relational_schema.h"
 

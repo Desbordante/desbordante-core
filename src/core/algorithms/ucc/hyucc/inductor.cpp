@@ -1,8 +1,9 @@
 #include "core/algorithms/ucc/hyucc/inductor.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cstddef>
 #include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 namespace algos::hyucc {
 

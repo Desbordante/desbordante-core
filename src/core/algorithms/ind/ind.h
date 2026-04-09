@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "core/config/error/type.h"
+#include "core/model/table/arity_index.h"
 #include "core/model/table/column_combination.h"
 #include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical.h"
-#include "core/model/table/arity_index.h"
 
 namespace model {
 

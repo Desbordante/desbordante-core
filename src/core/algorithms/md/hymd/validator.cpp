@@ -1,13 +1,17 @@
 #include "core/algorithms/md/hymd/validator.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <vector>
 #include <optional>
 #include <span>
 #include <tuple>
+#include <vector>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/pli_cluster.h"
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
 #include "core/algorithms/md/hymd/table_identifiers.h"
 #include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "core/algorithms/md/hymd/utility/reserve_more.h"
@@ -17,9 +21,6 @@
 #include "core/util/bitset_utils.h"
 #include "core/util/erase_if_replace.h"
 #include "core/util/get_preallocated_vector.h"
-#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "core/algorithms/md/hymd/indexes/pli_cluster.h"
-#include "core/algorithms/md/hymd/md_lhs.h"
 
 namespace algos::hymd {
 using indexes::CompressedRecords;
@@ -177,8 +178,8 @@ public:
 
 template <typename Collection>
 auto BatchValidator::RhsValidator::LowerCCVIDAndCollectRecommendations(
-        RecordCluster const& lhs_records,
-        Collection const& matched_rhs_records) -> MdValidationStatus {
+        RecordCluster const& lhs_records, Collection const& matched_rhs_records)
+        -> MdValidationStatus {
     // Invalidated are removed (1), empty LHSMR partition "elements" should have been skipped (2,
     // 3), non-minimal are considered invalidated (4).
     DESBORDANTE_ASSUME(current_ccv_id_ != kLowestCCValueId);        // 1

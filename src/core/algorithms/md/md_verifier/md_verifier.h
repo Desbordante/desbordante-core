@@ -1,13 +1,14 @@
 #pragma once
 
-#include <optional>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/md/column_match.h"
 #include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/md.h"
 #include "core/algorithms/md/md_algorithm.h"
 #include "core/algorithms/md/md_verifier/cmptr.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -16,7 +17,6 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/relational_schema.h"
-#include "core/algorithms/md/md.h"
 
 namespace algos::md {
 

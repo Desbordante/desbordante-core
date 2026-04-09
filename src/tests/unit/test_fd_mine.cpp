@@ -1,11 +1,7 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
 #include <algorithm>
-#include <iostream>
 #include <cstddef>
 #include <filesystem>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <set>
@@ -14,21 +10,26 @@
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
-#include "core/algorithms/fd/fd_mine/fd_mine.h"
-#include "core/algorithms/fd/pyro/pyro.h"
-#include "core/config/error/type.h"
-#include "core/config/names.h"
-#include "tests/common/csv_config_util.h"
-#include "tests/unit/test_fd_util.h"
 #include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/fd_mine/fd_mine.h"
+#include "core/algorithms/fd/pyro/pyro.h"
 #include "core/algorithms/fd/pyrocommon/core/parameters.h"
 #include "core/algorithms/fd/raw_fd.h"
+#include "core/config/error/type.h"
+#include "core/config/names.h"
 #include "core/model/table/column.h"
 #include "core/model/table/vertical.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
+#include "tests/unit/test_fd_util.h"
 
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;

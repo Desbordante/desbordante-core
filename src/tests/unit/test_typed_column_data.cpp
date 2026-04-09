@@ -1,16 +1,17 @@
-#include <gtest/gtest.h>
-#include <memory>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/numeric_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 
@@ -41,43 +42,38 @@ TEST_P(TestTypeParsing, DefaultTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeSystem, TestTypeParsing,
-    ::testing::Values(
-        TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kDouble},
-                          kWdcAppearances),
-        TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kString},
-                          kWdcAge),
-        TypeParsingParams({TypeId::kString, TypeId::kDouble, TypeId::kDouble,
-                           TypeId::kDouble},
-                          kWdcKepler),
-        TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kMixed,
-                           TypeId::kMixed, TypeId::kMixed, TypeId::kString,
-                           TypeId::kString, TypeId::kString},
-                          kWdcSatellites),
-        TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kInt,
-                           TypeId::kInt, TypeId::kInt, TypeId::kInt,
-                           TypeId::kInt, TypeId::kUndefined, TypeId::kUndefined,
-                           TypeId::kUndefined, TypeId::kUndefined, TypeId::kInt,
-                           TypeId::kInt, TypeId::kInt, TypeId::kInt,
-                           TypeId::kInt, TypeId::kUndefined, TypeId::kUndefined},
-                          kCIPublicHighway700),
-        TypeParsingParams({TypeId::kInt, TypeId::kInt, TypeId::kDouble,
-                           TypeId::kInt, TypeId::kInt, TypeId::kInt,
-                           TypeId::kInt},
-                          kNeighbors10k),
-        TypeParsingParams({TypeId::kDouble, TypeId::kDouble, TypeId::kDouble,
-                           TypeId::kDouble, TypeId::kString},
-                          kIris),
-        TypeParsingParams({TypeId::kUndefined, TypeId::kUndefined, TypeId::kUndefined,
-                           TypeId::kInt, TypeId::kString, TypeId::kDouble,
-                           TypeId::kBigInt, TypeId::kDouble, TypeId::kBigInt,
-                           TypeId::kMixed, TypeId::kInt},
-                          kSimpleTypes),
-        TypeParsingParams({TypeId::kMixed, TypeId::kDate, TypeId::kDate},
-                          kACShippingDates),
-        TypeParsingParams({TypeId::kInt, TypeId::kString, TypeId::kDouble,
-                           TypeId::kMixed, TypeId::kInt, TypeId::kDate,TypeId::kMixed},
-                          kSimpleTypes1)));
+        TypeSystem, TestTypeParsing,
+        ::testing::Values(
+                TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kDouble},
+                                  kWdcAppearances),
+                TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kString}, kWdcAge),
+                TypeParsingParams({TypeId::kString, TypeId::kDouble, TypeId::kDouble,
+                                   TypeId::kDouble},
+                                  kWdcKepler),
+                TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kMixed, TypeId::kMixed,
+                                   TypeId::kMixed, TypeId::kString, TypeId::kString,
+                                   TypeId::kString},
+                                  kWdcSatellites),
+                TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kInt, TypeId::kInt,
+                                   TypeId::kInt, TypeId::kInt, TypeId::kInt, TypeId::kUndefined,
+                                   TypeId::kUndefined, TypeId::kUndefined, TypeId::kUndefined,
+                                   TypeId::kInt, TypeId::kInt, TypeId::kInt, TypeId::kInt,
+                                   TypeId::kInt, TypeId::kUndefined, TypeId::kUndefined},
+                                  kCIPublicHighway700),
+                TypeParsingParams({TypeId::kInt, TypeId::kInt, TypeId::kDouble, TypeId::kInt,
+                                   TypeId::kInt, TypeId::kInt, TypeId::kInt},
+                                  kNeighbors10k),
+                TypeParsingParams({TypeId::kDouble, TypeId::kDouble, TypeId::kDouble,
+                                   TypeId::kDouble, TypeId::kString},
+                                  kIris),
+                TypeParsingParams({TypeId::kUndefined, TypeId::kUndefined, TypeId::kUndefined,
+                                   TypeId::kInt, TypeId::kString, TypeId::kDouble, TypeId::kBigInt,
+                                   TypeId::kDouble, TypeId::kBigInt, TypeId::kMixed, TypeId::kInt},
+                                  kSimpleTypes),
+                TypeParsingParams({TypeId::kMixed, TypeId::kDate, TypeId::kDate}, kACShippingDates),
+                TypeParsingParams({TypeId::kInt, TypeId::kString, TypeId::kDouble, TypeId::kMixed,
+                                   TypeId::kInt, TypeId::kDate, TypeId::kMixed},
+                                  kSimpleTypes1)));
 
 TEST(TypeSystem, SumColumnDoubles) {
     auto input_table = MakeInputTable(kIris);

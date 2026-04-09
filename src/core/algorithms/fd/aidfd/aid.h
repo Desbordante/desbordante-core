@@ -1,13 +1,14 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
-#include <memory>
 #include <cstddef>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/algorithms/fd/aidfd/search_tree.h"
 #include "core/algorithms/fd/fd_algorithm.h"

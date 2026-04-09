@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
-#include <memory>
 #include <cstddef>
+#include <memory>
 #include <string>
+
+#include <gtest/gtest.h>
 
 #include "core/model/types/builtin.h"
 #include "core/model/types/double_type.h"

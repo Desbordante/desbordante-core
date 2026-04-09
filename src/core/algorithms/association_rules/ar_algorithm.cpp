@@ -8,12 +8,12 @@
 #include <string_view>
 #include <utility>
 
+#include "core/config/common_option.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
-#include "core/config/common_option.h"
-#include "core/config/option.h"
 
 namespace algos {
 

@@ -1,19 +1,19 @@
 #pragma once
 
-#include <memory>
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <string>
 #include <typeindex>
 
 #include "core/algorithms/od/fastod/hashing/hashing.h"
 #include "core/algorithms/od/fastod/model/attribute_pair.h"
-#include "core/algorithms/od/fastod/od_ordering.h"
-#include "core/algorithms/od/fastod/storage/partition_cache.h"
-#include "core/config/error/type.h"
 #include "core/algorithms/od/fastod/model/attribute_set.h"
 #include "core/algorithms/od/fastod/model/removal_set.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/algorithms/od/fastod/storage/partition_cache.h"
+#include "core/config/error/type.h"
 #include "core/model/table/column_index.h"
 
 namespace algos::fastod {

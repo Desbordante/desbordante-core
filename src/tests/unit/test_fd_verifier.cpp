@@ -1,19 +1,20 @@
-#include <gtest/gtest.h>
 #include <algorithm>
-#include <memory>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
-#include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace {
 using namespace algos::fd_verifier;
@@ -60,8 +61,9 @@ struct FDVerifyingParams {
     std::size_t const num_error_rows = 0;
 
     FDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                      std::size_t const num_error_clusters = 0, std::size_t const num_error_rows = 0,
-                      long double const error = 0., CSVConfig const& csv_config = kTestFD)
+                      std::size_t const num_error_clusters = 0,
+                      std::size_t const num_error_rows = 0, long double const error = 0.,
+                      CSVConfig const& csv_config = kTestFD)
         : params({{onam::kCsvConfig, csv_config},
                   {onam::kLhsIndices, std::move(lhs_indices)},
                   {onam::kRhsIndices, std::move(rhs_indices)},

@@ -1,22 +1,22 @@
 #pragma once
 
-#include <boost/regex.hpp>
-#include <boost/date_time/gregorian/parsers.hpp>
 #include <bitset>
-#include <string>
-#include <vector>
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
+
+#include <boost/date_time/gregorian/parsers.hpp>
+#include <boost/regex.hpp>
 
 #include "core/model/table/abstract_column_data.h"
+#include "core/model/table/column.h"
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/relation_data.h"
-#include "core/model/types/types.h"
-#include "core/model/table/column.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/date_type.h"
 #include "core/model/types/empty_type.h"
@@ -24,6 +24,7 @@
 #include "core/model/types/null_type.h"
 #include "core/model/types/string_type.h"
 #include "core/model/types/type.h"
+#include "core/model/types/types.h"
 
 namespace model {
 

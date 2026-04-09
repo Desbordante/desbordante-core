@@ -1,20 +1,21 @@
-#include <gtest/gtest.h>
-#include <boost/any.hpp>
-#include <limits>
-#include <memory>
-#include <utility>
-#include <vector>
 #include <algorithm>
 #include <cstdlib>
+#include <limits>
+#include <memory>
 #include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/any.hpp>
+#include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/metric/enums.h"
+#include "core/algorithms/metric/highlight.h"
 #include "core/algorithms/metric/metric_verifier.h"
 #include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
-#include "core/algorithms/metric/highlight.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;

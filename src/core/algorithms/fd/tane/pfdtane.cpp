@@ -7,10 +7,10 @@
 #include <vector>
 
 #include "core/algorithms/fd/tane/enums.h"
+#include "core/config/common_option.h"
 #include "core/config/error/option.h"
 #include "core/config/error_measure/option.h"
 #include "core/model/table/column_data.h"
-#include "core/config/common_option.h"
 
 namespace algos {
 using Cluster = model::PositionListIndex::Cluster;

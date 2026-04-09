@@ -7,10 +7,10 @@
 #include "core/algorithms/fd/hycommon/primitive_validations.h"
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/algorithms/ucc/hyucc/model/ucc_tree.h"
+#include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
 #include "core/algorithms/ucc/raw_ucc.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/position_list_index.h"
-#include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
 
 namespace algos::hyucc {
 

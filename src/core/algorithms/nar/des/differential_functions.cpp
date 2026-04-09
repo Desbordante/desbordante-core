@@ -1,7 +1,7 @@
 #include "core/algorithms/nar/des/differential_functions.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <assert.h>
 #include <set>
 #include <stdexcept>
 

@@ -1,18 +1,18 @@
 #pragma once
 
 #include <algorithm>
+#include <iterator>
 #include <set>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <iterator>
 
+#include "core/algorithms/dc/model/column_operand.h"
+#include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
 #include "core/model/table/column.h"
 #include "core/model/table/vertical.h"
-#include "core/algorithms/dc/model/column_operand.h"
-#include "core/algorithms/dc/model/operator.h"
 
 namespace algos::dc {
 

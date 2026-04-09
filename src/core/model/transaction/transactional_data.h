@@ -1,11 +1,11 @@
 #pragma once
 
-#include <memory>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "core/model/table/idataset_stream.h"
 #include "core/model/transaction/itemset.h"

@@ -1,18 +1,21 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset_fwd.hpp>
 #include <cstddef>
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 #include <utility>
+#include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
 #include "core/algorithms/md/hymd/lattice/md.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "core/algorithms/md/hymd/lattice/md_node.h"
+#include "core/algorithms/md/hymd/lattice/multi_md.h"
 #include "core/algorithms/md/hymd/lattice/node_base.h"
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lattice/single_level_func.h"
@@ -24,8 +27,6 @@
 #include "core/algorithms/md/hymd/rhss.h"
 #include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "core/model/index.h"
-#include "core/algorithms/md/hymd/column_classifier_value_id.h"
-#include "core/algorithms/md/hymd/lattice/multi_md.h"
 
 namespace algos::hymd::lattice {
 
