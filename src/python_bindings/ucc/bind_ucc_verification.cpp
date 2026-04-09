@@ -12,6 +12,7 @@
 #include "core/model/table/column.h"
 #include "python_bindings/bind_main_classes.h"
 #include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace {
 namespace py = pybind11;
@@ -27,12 +28,9 @@ void BindUccVerification(py::module_& main_module) {
             .def("validate_ucc",
                  [](UCCVerifier& verifier, model::UCC& ucc) {
                      py::dict kwargs;
-
                      std::vector<Column const*> columns = ucc.GetColumns();
-                     py::tuple indices_tuple{columns.size()};
-                     for (std::size_t i = 0; i < columns.size(); ++i) {
-                         indices_tuple[i] = columns[i]->GetIndex();
-                     }
+                     py::tuple indices_tuple = VectorToTuple(
+                             columns, [](auto const& elem) { return elem->GetIndex(); });
                      kwargs["ucc_indices"] = indices_tuple;
                      configure_algorithm::ConfigureAlgo(verifier, kwargs);
                      verifier.Execute();
