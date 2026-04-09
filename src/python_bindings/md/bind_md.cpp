@@ -88,15 +88,12 @@ py::tuple SerializeColumnMatch(MD const& md_obj) {
 }
 
 py::tuple SerializeLhs(MD const& md_obj) {
-    std::vector<py::tuple> lhs_tuples;
-    for (model::md::LhsColumnSimilarityClassifier const& csc : md_obj.GetLhs()) {
-        std::size_t match_idx = csc.GetColumnMatchIndex();
-        model::md::DecisionBoundary db = csc.GetDecisionBoundary();
-        std::optional<model::md::DecisionBoundary> maybe_max = csc.GetMaxDisprovedBound();
-        lhs_tuples.push_back(py::make_tuple(match_idx, db, maybe_max));
-    }
-    py::tuple lhs_tuple = py::cast(lhs_tuples);
-    return lhs_tuple;
+    return python_bindings::VectorToTuple(md_obj.GetLhs(), [](auto const& elem) {
+        std::size_t match_idx = elem.GetColumnMatchIndex();
+        model::md::DecisionBoundary db = elem.GetDecisionBoundary();
+        std::optional<model::md::DecisionBoundary> maybe_max = elem.GetMaxDisprovedBound();
+        return py::make_tuple(match_idx, db, maybe_max);
+    });
 }
 
 py::tuple SerializeRhs(MD const& md_obj) {
