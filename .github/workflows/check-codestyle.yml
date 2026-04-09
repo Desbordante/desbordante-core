@@ -79,15 +79,16 @@ jobs:
             -DCPM_SOURCE_CACHE=${{github.workspace}}/cmake/cpm-cache \
             -S . -B ${{github.workspace}}/build
 
-      - uses: ZedThree/clang-tidy-review@v0.19.0
+      - uses: ZedThree/clang-tidy-review@v0.23.1
         id: review
         with:
           apt_packages: libboost-dev,python3-dev
           build_dir: build
           config_file: '.clang-tidy'
+          include: "*.c,*.cc,*.cpp,*.cxx"
           split_workflow: true
 
-      - uses: ZedThree/clang-tidy-review/upload@v0.19.0
+      - uses: ZedThree/clang-tidy-review/upload@v0.23.1
 
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
