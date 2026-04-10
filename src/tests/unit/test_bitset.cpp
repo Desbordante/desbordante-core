@@ -1,22 +1,24 @@
 #include <bitset>
+#include <cstddef>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <unordered_set>
+#include <version>
 
 #include <gtest/gtest.h>
 
 #include "core/model/types/bitset.h"
+#include "core/util/logger.h"
 
 namespace tests {
 
-template <size_t S>
+template <std::size_t S>
 struct BitsetSizeParam {
     using Custom = model::bitset_impl::BitsetImpl<S>;
     using STL = std::bitset<S>;
 
-    static constexpr size_t kSize = S;
+    static constexpr std::size_t kSize = S;
 };
 
 template <typename T>
@@ -29,7 +31,7 @@ public:
 
     std::string GenerateString(char zero = '0', char one = '1') {
         std::ostringstream ss;
-        for (size_t i{0}; i < T::kSize; ++i) {
+        for (std::size_t i{0}; i < T::kSize; ++i) {
             if (i % 2 == 0) {
                 ss << one;
             } else {

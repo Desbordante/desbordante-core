@@ -1,6 +1,8 @@
 #include "core/algorithms/gfd/gfd_validator/balancer.h"
 
 #include <algorithm>
+#include <functional>
+#include <initializer_list>
 #include <map>
 #include <numeric>
 #include <vector>

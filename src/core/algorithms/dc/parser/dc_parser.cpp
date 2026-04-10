@@ -1,14 +1,25 @@
 #include "core/algorithms/dc/parser/dc_parser.h"
 
+#include <algorithm>
+#include <exception>
+#include <iterator>
+#include <memory>
+#include <optional>
 #include <ranges>
 #include <stdexcept>
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <frozen/string.h>
+#include <frozen/unordered_map.h>
 
 #include "core/algorithms/dc/model/dc.h"
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/model/tuple.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_index.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/typed_column_data.h"
 
 namespace mo = model;

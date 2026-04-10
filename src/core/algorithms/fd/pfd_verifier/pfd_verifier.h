@@ -1,5 +1,7 @@
 #pragma once
 
+#include <assert.h>
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -11,6 +13,8 @@
 #include "core/config/error_measure/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos {
 
@@ -39,12 +43,12 @@ private:
     std::shared_ptr<model::PLI const> CalculatePLI(config::IndicesType const& indices) const;
 
 public:
-    size_t GetNumViolatingClusters() const {
+    std::size_t GetNumViolatingClusters() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumViolatingClusters();
     }
 
-    size_t GetNumViolatingRows() const {
+    std::size_t GetNumViolatingRows() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumViolatingRows();
     }

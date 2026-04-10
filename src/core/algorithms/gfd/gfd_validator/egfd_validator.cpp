@@ -1,13 +1,19 @@
 #include "core/algorithms/gfd/gfd_validator/egfd_validator.h"
 
-#include <iostream>
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <iterator>
+#include <list>
+#include <string>
+#include <unordered_map>
 
-#include <boost/graph/vf2_sub_graph_iso.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/range/irange.hpp>
+#include <boost/tuple/tuple.hpp>
 
-#include "core/config/equal_nulls/option.h"
-#include "core/config/names_and_descriptions.h"
-#include "core/config/option_using.h"
-#include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
 
 namespace {

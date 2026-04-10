@@ -1,8 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <tuple>
+#include <variant>
+#include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/model/table/column_layout_relation_data.h"
@@ -20,6 +25,7 @@ namespace algos::hy {
 
 std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationData* relation);
 boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,
-                                        std::vector<ClusterId> const& og_mapping, size_t num_cols);
+                                        std::vector<ClusterId> const& og_mapping,
+                                        std::size_t num_cols);
 
 }  // namespace algos::hy

@@ -5,8 +5,10 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <typeindex>
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <boost/move/utility_core.hpp>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"

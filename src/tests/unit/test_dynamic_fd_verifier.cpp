@@ -1,15 +1,23 @@
 #include <algorithm>
+#include <cstddef>
+#include <filesystem>
 #include <memory>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
+#include <boost/any.hpp>
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
-#include "core/algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
+#include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/exceptions.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
-#include "core/model/types/builtin.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 
@@ -48,14 +56,14 @@ namespace onam = config::names;
 struct DynFDVerifyingParams {
     algos::StdParamsMap params;
     long double const error = 0.;
-    size_t const num_error_clusters = 0;
-    size_t const num_error_rows = 0;
+    std::size_t const num_error_clusters = 0;
+    std::size_t const num_error_rows = 0;
 
     DynFDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                         size_t const num_error_clusters = 0, size_t const num_error_rows = 0,
-                         long double const error = 0., CSVConfig const& insert_config = {},
-                         CSVConfig const& update_config = {},
-                         std::unordered_set<size_t> delete_config = {},
+                         std::size_t const num_error_clusters = 0,
+                         std::size_t const num_error_rows = 0, long double const error = 0.,
+                         CSVConfig const& insert_config = {}, CSVConfig const& update_config = {},
+                         std::unordered_set<std::size_t> delete_config = {},
                          CSVConfig const& csv_config = kTestDynamicFDInit)
         : params({{onam::kCsvConfig, csv_config},
                   {onam::kLhsIndices, std::move(lhs_indices)},

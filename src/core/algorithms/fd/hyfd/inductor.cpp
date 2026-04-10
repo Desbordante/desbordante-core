@@ -1,6 +1,8 @@
 #include "core/algorithms/fd/hyfd/inductor.h"
 
-#include <boost/dynamic_bitset.hpp>
+#include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 namespace algos::hyfd {
 

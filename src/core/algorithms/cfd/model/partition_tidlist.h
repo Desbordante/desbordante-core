@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 #include "core/algorithms/cfd/model/cfd_types.h"
 
 namespace algos::cfd {
@@ -11,7 +13,7 @@ struct PartitionTIdList {
 
     PartitionTIdList(SimpleTIdList tids, int nrSets) : tids(std::move(tids)), sets_number(nrSets) {}
 
-    explicit PartitionTIdList(SimpleTIdList const &tidList) {
+    explicit PartitionTIdList(SimpleTIdList const& tidList) {
         tids = tidList;
         sets_number = 1;
     }
@@ -19,13 +21,13 @@ struct PartitionTIdList {
     SimpleTIdList tids;
     unsigned sets_number;
     static int const kSep;  // = -1;
-    bool operator==(PartitionTIdList const &) const;
-    bool operator!=(PartitionTIdList const &) const;
-    bool operator<(PartitionTIdList const &) const;
+    bool operator==(PartitionTIdList const&) const;
+    bool operator!=(PartitionTIdList const&) const;
+    bool operator<(PartitionTIdList const&) const;
     SimpleTIdList Convert() const;
 
-    PartitionTIdList Intersection(PartitionTIdList const &rhs) const;
+    PartitionTIdList Intersection(PartitionTIdList const& rhs) const;
 
-    int PartitionError(PartitionTIdList const &) const;
+    int PartitionError(PartitionTIdList const&) const;
 };
 }  // namespace algos::cfd

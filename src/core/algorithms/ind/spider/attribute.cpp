@@ -5,11 +5,13 @@
  */
 #include "core/algorithms/ind/spider/attribute.h"
 
+#include <cstddef>
+
 namespace algos::spider {
 
 std::vector<AttributeIndex> AINDAttribute::GetRefIds(config::ErrorType max_error) const {
     std::vector<AttributeIndex> refs;
-    for (size_t ref_id = 0; ref_id != occurrences_.size(); ++ref_id) {
+    for (std::size_t ref_id = 0; ref_id != occurrences_.size(); ++ref_id) {
         if (id_ == ref_id) continue;
         if (GetError(ref_id) <= max_error) {
             refs.push_back(ref_id);

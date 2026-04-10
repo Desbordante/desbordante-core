@@ -1,8 +1,11 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "core/algorithms/fd/fd_verifier/highlight.h"
@@ -11,6 +14,8 @@
 #include "core/model/table/dynamic_table_data.h"
 
 namespace algos::fd_verifier {
+
+using std::size_t;
 
 class DynamicStatsCalculator {
 private:

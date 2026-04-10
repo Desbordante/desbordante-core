@@ -1,8 +1,11 @@
 #pragma once
+#include <filesystem>
 #include <vector>
 
+// IWYU pragma: keep - needed for config namespaces
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gfd/gfd.h"
+#include "core/algorithms/gfd/graph_descriptor.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/parser/graph_parser/graph_parser.h"
 

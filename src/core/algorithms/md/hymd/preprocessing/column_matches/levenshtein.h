@@ -1,9 +1,15 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
+#include "core/algorithms/md/decision_boundary.h"
 #include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "core/algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/basic_calculator.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"

@@ -1,14 +1,8 @@
 #include "core/model/table/dynamic_position_list_index.h"
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <map>
+#include <cassert>
 #include <memory>
-#include <stack>
 #include <utility>
-
-#include <boost/dynamic_bitset.hpp>
 
 namespace {
 // O(cluster)

@@ -1,8 +1,23 @@
 #include "core/algorithms/fd/fun/fun.h"
 
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+
+#include "core/model/table/column_data.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 #include "core/util/logger.h"
 
 namespace algos {
+
+using std::size_t;
 
 FunQuadruple FunQuadruple::Union(Column const& that) const {
     return FunQuadruple(candidate_.Union(that));

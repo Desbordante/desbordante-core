@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/eulerfd/search_tree.h"
 
+#include <assert.h>
+
 namespace algos {
 
 SearchTreeEulerFD::Node::Node(size_t bit, SearchTreeEulerFD::Bitset set,

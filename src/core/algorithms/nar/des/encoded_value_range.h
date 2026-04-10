@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+
 #include "core/algorithms/nar/des/rng.h"
 #include "core/algorithms/nar/value_range.h"
 
@@ -7,14 +10,14 @@ namespace algos::des {
 
 class EncodedValueRange {
 public:
-    static size_t constexpr kFieldCount = 4;
+    static std::size_t constexpr kFieldCount = 4;
     double permutation;
     double threshold;
     double bound1;
     double bound2;
 
-    double& operator[](size_t index);
-    double const& operator[](size_t index) const;
+    double& operator[](std::size_t index);
+    double const& operator[](std::size_t index) const;
 
     template <typename T, typename RangeT>
     std::shared_ptr<RangeT> DecodeTypedValueRange(

@@ -1,6 +1,8 @@
 #include "core/config/max_lhs/option.h"
 
 #include <limits>
+#include <optional>
+#include <variant>
 
 #include "core/config/names_and_descriptions.h"
 

@@ -1,4 +1,7 @@
 #pragma once
+#include <list>
+#include <string_view>
+
 #include "core/algorithms/dd/dd.h"
 
 namespace util::dd {

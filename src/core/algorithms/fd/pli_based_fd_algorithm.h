@@ -1,5 +1,7 @@
 #pragma once
 
+#include <assert.h>
+#include <memory>
 #include <optional>
 
 #include "core/algorithms/fd/fd_algorithm.h"

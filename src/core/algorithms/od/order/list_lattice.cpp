@@ -1,5 +1,9 @@
 #include "core/algorithms/od/order/list_lattice.h"
 
+#include <cstddef>
+#include <initializer_list>
+#include <utility>
+
 #include "core/algorithms/od/order/order_utility.h"
 
 namespace algos::order {
@@ -21,7 +25,7 @@ ListLattice::ListLattice(CandidateSets& candidate_sets,
 CandidatePairs ListLattice::ObtainCandidates(Node const& node) const {
     CandidatePairs res;
     res.reserve(node.size() - 1);
-    for (size_t i = 1; i < node.size(); ++i) {
+    for (std::size_t i = 1; i < node.size(); ++i) {
         AttributeList lhs(node.begin(), node.begin() + i);
         AttributeList rhs(node.begin() + i, node.end());
         res.emplace_back(lhs, rhs);

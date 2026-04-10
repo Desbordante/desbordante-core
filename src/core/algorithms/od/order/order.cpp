@@ -1,17 +1,26 @@
 #include "core/algorithms/od/order/order.h"
 
 #include <algorithm>
-#include <iostream>
+#include <chrono>
+#include <cstddef>
+#include <initializer_list>
 #include <memory>
+#include <unordered_set>
 #include <utility>
 
 #include "core/algorithms/od/order/dependency_checker.h"
 #include "core/algorithms/od/order/list_lattice.h"
 #include "core/algorithms/od/order/order_utility.h"
+#include "core/config/common_option.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/tuple_index.h"
-#include "core/model/types/types.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/create_type.h"
+#include "core/model/types/mixed_type.h"
+#include "core/model/types/type.h"
 #include "core/util/logger.h"
 
 namespace algos::order {
@@ -77,7 +86,7 @@ void Order::CreateSingleColumnSortedPartitions() {
         SortedPartition::EquivalenceClasses equivalence_classes;
         equivalence_classes.reserve(typed_relation_->GetNumRows());
         equivalence_classes.push_back({indexed_byte_data.front().index});
-        for (size_t k = 1; k < indexed_byte_data.size(); ++k) {
+        for (std::size_t k = 1; k < indexed_byte_data.size(); ++k) {
             if (equal(indexed_byte_data[k - 1], indexed_byte_data[k])) {
                 equivalence_classes.back().insert(indexed_byte_data[k].index);
             } else {
@@ -97,7 +106,7 @@ void Order::CreateSortedPartitionsFromSingletons(AttributeList const& attr_list)
         return;
     }
     SortedPartition res = sorted_partitions_.at({attr_list[0]});
-    for (size_t i = 1; i < attr_list.size(); ++i) {
+    for (std::size_t i = 1; i < attr_list.size(); ++i) {
         res.Intersect(sorted_partitions_.at({attr_list[i]}));
     }
     sorted_partitions_.emplace(attr_list, res);

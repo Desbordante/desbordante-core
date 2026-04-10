@@ -1,9 +1,21 @@
+#include <cstddef>
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/ucc.h"
 #include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/position_list_index.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {
@@ -14,15 +26,15 @@ namespace {
 class UCCVerifierSimpleParams {
 private:
     algos::StdParamsMap params_map_;
-    size_t num_clusters_violating_ucc_ = 0;
-    size_t num_rows_violating_ucc_ = 0;
+    std::size_t num_clusters_violating_ucc_ = 0;
+    std::size_t num_rows_violating_ucc_ = 0;
     double expected_error_ = 0.0;
     std::vector<model::PLI::Cluster> clusters_violating_ucc_;
 
 public:
     UCCVerifierSimpleParams(CSVConfig const& csv_config, config::IndicesType column_indices,
-                            size_t const num_clusters_violating_ucc,
-                            size_t const num_rows_violating_ucc, double const expected_error,
+                            std::size_t const num_clusters_violating_ucc,
+                            std::size_t const num_rows_violating_ucc, double const expected_error,
                             std::vector<model::PLI::Cluster> clusters_violating_ucc)
         : params_map_({{onam::kCsvConfig, csv_config}, {onam::kEqualNulls, true}}),
           num_clusters_violating_ucc_(num_clusters_violating_ucc),
@@ -41,17 +53,18 @@ public:
         return params_map_;
     }
 
-    size_t GetExpectedNumClustersViolatingUCC() const {
+    std::size_t GetExpectedNumClustersViolatingUCC() const {
         return num_clusters_violating_ucc_;
     }
 
-    size_t GetExpectedNumRowsViolatingUCC() const {
+    std::size_t GetExpectedNumRowsViolatingUCC() const {
         return num_rows_violating_ucc_;
     }
 
     double GetExpectedError() const {
         return expected_error_;
     }
+
     std::vector<model::PLI::Cluster> const& GetExpectedClustersViolatingUCC() const {
         return clusters_violating_ucc_;
     }

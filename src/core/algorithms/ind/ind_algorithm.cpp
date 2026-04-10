@@ -1,7 +1,11 @@
 #include "core/algorithms/ind/ind_algorithm.h"
 
+// IWYU pragma: keep - needed for config namespace
+#include <cstddef>
+
 #include "core/config/names_and_descriptions.h"
 #include "core/config/tabular_data/input_tables/option.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace algos {
 
@@ -14,7 +18,7 @@ void INDAlgorithm::LoadDataInternal() {
     schemas_ = std::make_shared<std::vector<std::unique_ptr<RelationalSchema>>>();
     for (auto const& input_table : input_tables_) {
         auto schema = std::make_unique<RelationalSchema>(input_table->GetRelationName());
-        for (size_t i{0}; i < input_table->GetNumberOfColumns(); ++i) {
+        for (std::size_t i{0}; i < input_table->GetNumberOfColumns(); ++i) {
             schema->AppendColumn(input_table->GetColumnName(i));
         }
         schemas_->push_back(std::move(schema));

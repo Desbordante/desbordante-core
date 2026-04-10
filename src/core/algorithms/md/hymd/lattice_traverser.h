@@ -1,11 +1,19 @@
 #pragma once
 
+#include <cstddef>
+#include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 #include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 #include "core/algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 #include "core/algorithms/md/hymd/lattice/level_getter.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/lattice/validation_info.h"
 #include "core/algorithms/md/hymd/recommendation.h"
 #include "core/algorithms/md/hymd/similarity_data.h"
+#include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "core/algorithms/md/hymd/validator.h"
 #include "core/util/worker_thread_pool.h"
 

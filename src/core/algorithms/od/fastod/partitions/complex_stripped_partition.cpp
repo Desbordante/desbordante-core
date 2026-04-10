@@ -1,6 +1,15 @@
 #include "core/algorithms/od/fastod/partitions/complex_stripped_partition.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <functional>
+#include <iterator>
+#include <limits>
 #include <sstream>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 
 namespace algos::fastod {
 

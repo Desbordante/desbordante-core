@@ -1,12 +1,15 @@
 #include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
 
-#include <stdexcept>
-#include <stdint.h>
+#include <bitset>
+#include <cstddef>
+#include <cstdint>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 
 namespace algos::fastadc {
+
+using std::size_t, std::int64_t;
 
 CrossClueSetBuilder::CrossClueSetBuilder(PliShard const& shard1, PliShard const& shard2)
     : plis1_(shard1.Plis()),

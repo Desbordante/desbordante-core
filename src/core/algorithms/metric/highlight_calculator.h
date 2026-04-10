@@ -1,5 +1,12 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include "core/algorithms/metric/aliases.h"
 #include "core/algorithms/metric/highlight.h"
 #include "core/algorithms/metric/points.h"
 #include "core/config/indices/type.h"
@@ -53,7 +60,7 @@ public:
     explicit HighlightCalculator(
             std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
             config::IndicesType rhs_indices)
-        : typed_relation_(std::move(typed_relation)), rhs_indices_(std::move(rhs_indices)){};
+        : typed_relation_(std::move(typed_relation)), rhs_indices_(std::move(rhs_indices)) {};
 };
 
 }  // namespace algos::metric

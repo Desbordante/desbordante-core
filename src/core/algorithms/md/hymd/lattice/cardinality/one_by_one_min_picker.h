@@ -1,10 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_set>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "core/algorithms/md/hymd/lattice/validation_info.h"
 #include "core/algorithms/md/hymd/md_lhs.h"

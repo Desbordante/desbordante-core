@@ -3,13 +3,15 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <numeric>
+#include <utility>
 
 namespace util {
 
 QGramVector::QGramVector(std::string_view string, unsigned q) {
     assert(string.size() >= q);
-    for (size_t i = 0; i < string.size() - q + 1; ++i) {
+    for (std::size_t i = 0; i < string.size() - q + 1; ++i) {
         q_grams_[std::string(string.substr(i, q))]++;
     }
     CalculateLength();

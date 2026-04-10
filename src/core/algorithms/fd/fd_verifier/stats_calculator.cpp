@@ -2,9 +2,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <deque>
 #include <numeric>
 #include <unordered_map>
 
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/mixed_type.h"
+#include "core/model/types/string_type.h"
+#include "core/model/types/type.h"
 #include "core/util/logger.h"
 
 namespace {

@@ -1,14 +1,27 @@
 #include "core/algorithms/algebraic_constraints/ac_algorithm.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <chrono>
 #include <cmath>
-#include <functional>
-#include <iostream>
 #include <random>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
 
+#include <boost/any.hpp>
+
+#include "core/algorithms/algebraic_constraints/ac.h"
+#include "core/algorithms/algebraic_constraints/typed_column_pair.h"
+#include "core/config/common_option.h"
 #include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/model/types/builtin.h"
 #include "core/model/types/create_type.h"
+#include "core/model/types/type.h"
 #include "core/util/logger.h"
 
 namespace algos {

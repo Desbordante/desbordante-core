@@ -1,12 +1,14 @@
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 
 #include <algorithm>
+#include <assert.h>
 
 #include "core/algorithms/dc/FastADC/model/column_operand.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"
 #include "core/algorithms/dc/FastADC/providers/predicate_provider.h"
 #include "core/model/table/column.h"
 #include "core/model/table/typed_column_data.h"
+#include "core/model/types/type.h"
 
 namespace algos::fastadc {
 

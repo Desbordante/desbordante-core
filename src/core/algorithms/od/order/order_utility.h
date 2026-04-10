@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>

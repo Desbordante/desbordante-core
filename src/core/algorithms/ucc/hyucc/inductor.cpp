@@ -1,5 +1,10 @@
 #include "core/algorithms/ucc/hyucc/inductor.h"
 
+#include <cstddef>
+#include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 namespace algos::hyucc {
 
 void Inductor::UpdateUCCTree(NonUCCList&& non_uccs) {
@@ -18,8 +23,8 @@ void Inductor::SpecializeUCCTree(model::RawUCC const& non_ucc) {
 
     for (auto& invalid_ucc : invalid_uccs) {
         tree_->Remove(invalid_ucc);
-        for (size_t attr_num = tree_->GetNumAttributes(); attr_num > 0; --attr_num) {
-            size_t attr_idx = attr_num - 1;
+        for (std::size_t attr_num = tree_->GetNumAttributes(); attr_num > 0; --attr_num) {
+            std::size_t attr_idx = attr_num - 1;
 
             if (!non_ucc.test(attr_idx)) {
                 invalid_ucc.set(attr_idx);

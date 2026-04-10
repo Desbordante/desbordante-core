@@ -1,15 +1,20 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 #include <deque>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::fd_verifier {
 
@@ -49,13 +54,13 @@ public:
     }
 
     /* Returns the number of clusters where FD is violated */
-    size_t GetNumErrorClusters() const {
+    std::size_t GetNumErrorClusters() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumErrorClusters();
     }
 
     /* Returns the number of rows that violate the FD */
-    size_t GetNumErrorRows() const {
+    std::size_t GetNumErrorRows() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumErrorRows();
     }

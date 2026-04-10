@@ -1,13 +1,9 @@
 #include "core/algorithms/gfd/comparator.h"
 
 #include <algorithm>
-#include <cstdlib>
-#include <map>
-#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
-
-#include <boost/graph/vf2_sub_graph_iso.hpp>
 
 #include "core/algorithms/gfd/gfd.h"
 

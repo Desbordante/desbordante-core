@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/nar/nar.h"
 #include "core/config/tabular_data/input_table_type.h"

@@ -1,5 +1,10 @@
 #include "core/algorithms/nar/nar.h"
 
+#include <stdexcept>
+#include <utility>
+
+#include "core/model/table/typed_column_data.h"
+
 namespace model {
 
 std::string NAR::ToString() const {

@@ -1,5 +1,9 @@
 #include "core/algorithms/dc/FastADC/util/dc_candidate_trie.h"
 
+#include <algorithm>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/util/dc_candidate.h"
 

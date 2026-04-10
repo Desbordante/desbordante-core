@@ -1,6 +1,17 @@
 #pragma once
 
+#include <cstddef>
+#include <filesystem>
+#include <iosfwd>
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "core/algorithms/ind/faida/preprocessing/abstract_column_store.h"
+#include "core/algorithms/ind/faida/preprocessing/irow_iterator.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace algos::faida {
 
@@ -11,7 +22,7 @@ private:
         int const default_block_size_ = 65536;
         std::vector<std::optional<std::ifstream>> hashed_col_streams_;
         Block curr_block_;
-        size_t curr_block_size_;
+        std::size_t curr_block_size_;
         bool has_next_;
 
     public:
@@ -26,7 +37,7 @@ private:
 
         bool HasNextBlock() override;
 
-        size_t GetBlockSize() const override {
+        std::size_t GetBlockSize() const override {
             return curr_block_size_;
         }
 
@@ -36,7 +47,7 @@ private:
     int const read_buff_size_ = 65536;
     std::vector<std::filesystem::path> column_files_;
 
-    HashedColumnStore(unsigned num_of_columns, int sample_goal, size_t null_hash)
+    HashedColumnStore(unsigned num_of_columns, int sample_goal, std::size_t null_hash)
         : AbstractColumnStore(sample_goal, null_hash), column_files_(num_of_columns) {}
 
     std::filesystem::path PrepareDirNext(std::filesystem::path dir, TableIndex table_idx) override;
@@ -52,7 +63,7 @@ public:
     static std::unique_ptr<AbstractColumnStore> CreateFrom(std::string const& dataset_name,
                                                            TableIndex table_idx,
                                                            model::IDatasetStream& data_stream,
-                                                           int sample_goal, size_t null_hash);
+                                                           int sample_goal, std::size_t null_hash);
 };
 
 }  // namespace algos::faida

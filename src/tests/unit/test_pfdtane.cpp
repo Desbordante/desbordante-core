@@ -1,9 +1,18 @@
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/fd/tane/pfdtane.h"
+#include "core/config/error/type.h"
 #include "core/config/names.h"
+#include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 
@@ -63,19 +72,31 @@ TEST_P(TestPFDTaneValidation, ErrorCalculationTest) {
 INSTANTIATE_TEST_SUITE_P(
         PFDTaneTestMiningSuite, TestPFDTaneMining,
         ::testing::Values(
-            PFDTaneMiningParams(44381, 0.3, +algos::PfdErrorMeasure::per_value, kTestFD),
-            PFDTaneMiningParams(19266, 0.1, +algos::PfdErrorMeasure::per_value, kIris),
-            PFDTaneMiningParams(10695, 0.01, +algos::PfdErrorMeasure::per_value, kIris),
-            PFDTaneMiningParams(44088, 0.1, +algos::PfdErrorMeasure::per_value, kNeighbors10k),
-            PFDTaneMiningParams(41837, 0.01, +algos::PfdErrorMeasure::per_value, kNeighbors10k)
-        ));
+                PFDTaneMiningParams(44381, 0.3, +algos::PfdErrorMeasure::per_value, kTestFD),
+                PFDTaneMiningParams(19266, 0.1, +algos::PfdErrorMeasure::per_value, kIris),
+                PFDTaneMiningParams(10695, 0.01, +algos::PfdErrorMeasure::per_value, kIris),
+                PFDTaneMiningParams(44088, 0.1, +algos::PfdErrorMeasure::per_value, kNeighbors10k),
+                PFDTaneMiningParams(41837, 0.01, +algos::PfdErrorMeasure::per_value,
+                                    kNeighbors10k)));
 
 INSTANTIATE_TEST_SUITE_P(
         PFDTaneTestValidationSuite, TestPFDTaneValidation,
-        ::testing::Values(
-                    PFDTaneValidationParams({{2, 3, 0.0625}, {4, 5, 0.333333}, {3, 2, 0.291666}, {0, 1, 0.75},
-                                             {1, 0, 0.0}, {4, 3, 0.099999}, {1, 5, 0.416666}, {5, 1, 0.0}}, +algos::PfdErrorMeasure::per_value, kTestFD),
-                    PFDTaneValidationParams({{2, 3, 0.083333}, {4, 5, 0.333333}, {3, 2, 0.5}, {0, 1, 0.75},
-                                             {1, 0, 0.0}, {4, 3, 0.083333}, {1, 5, 0.416666}, {5, 1, 0.0}}, +algos::PfdErrorMeasure::per_tuple, kTestFD)
-                ));
+        ::testing::Values(PFDTaneValidationParams({{2, 3, 0.0625},
+                                                   {4, 5, 0.333333},
+                                                   {3, 2, 0.291666},
+                                                   {0, 1, 0.75},
+                                                   {1, 0, 0.0},
+                                                   {4, 3, 0.099999},
+                                                   {1, 5, 0.416666},
+                                                   {5, 1, 0.0}},
+                                                  +algos::PfdErrorMeasure::per_value, kTestFD),
+                          PFDTaneValidationParams({{2, 3, 0.083333},
+                                                   {4, 5, 0.333333},
+                                                   {3, 2, 0.5},
+                                                   {0, 1, 0.75},
+                                                   {1, 0, 0.0},
+                                                   {4, 3, 0.083333},
+                                                   {1, 5, 0.416666},
+                                                   {5, 1, 0.0}},
+                                                  +algos::PfdErrorMeasure::per_tuple, kTestFD)));
 }  // namespace tests

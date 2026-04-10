@@ -1,11 +1,15 @@
 #pragma once
 
+#include <cstddef>
 #include <deque>
+#include <functional>
 #include <set>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+#include <boost/container_hash/hash.hpp>
 #include <boost/functional/hash.hpp>
 
 #include "core/model/table/column_layout_relation_data.h"
@@ -15,6 +19,7 @@
 namespace model {
 
 using AgreeSet = Vertical;
+using std::size_t;
 
 enum class AgreeSetsGenMethod {
     kUsingVectorOfIDSets = 0, /*< Generates agree sets using identifier sets.

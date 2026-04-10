@@ -1,8 +1,11 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <queue>
 #include <stack>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "core/algorithms/association_rules/ar_algorithm.h"

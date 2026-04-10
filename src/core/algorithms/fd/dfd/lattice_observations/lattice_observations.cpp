@@ -1,5 +1,13 @@
 #include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
 
+#include <cstddef>
+#include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
+#include "core/model/table/relational_schema.h"
+
 NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node) {
     NodeCategory new_category;
     if (node.GetArity() <= 1) {
@@ -11,7 +19,7 @@ NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node)
     auto column_indices = node.GetColumnIndicesRef();  // copy indices
     bool has_unchecked_subset = false;
 
-    for (size_t index = column_indices.find_first(); index < column_indices.size();
+    for (std::size_t index = column_indices.find_first(); index < column_indices.size();
          index = column_indices.find_next(index)) {
         column_indices[index] = false;  // remove one column
         auto const subset_node_iter = this->find(Vertical(node.GetSchema(), column_indices));
@@ -47,7 +55,7 @@ NodeCategory LatticeObservations::UpdateNonDependencyCategory(Vertical const& no
     NodeCategory new_category;
     bool has_unchecked_superset = false;
 
-    for (size_t index = column_indices.find_first(); index < column_indices.size();
+    for (std::size_t index = column_indices.find_first(); index < column_indices.size();
          index = column_indices.find_next(index)) {
         auto const superset_node_iter = this->find(node.Union(*node.GetSchema()->GetColumn(index)));
 

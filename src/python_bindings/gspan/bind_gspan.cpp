@@ -1,6 +1,7 @@
 #include "python_bindings/gspan/bind_gspan.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/fsm/gspan/gspan.h"

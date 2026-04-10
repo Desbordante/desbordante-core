@@ -12,15 +12,19 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <boost/unordered_set.hpp>
 
+#include "core/algorithms/fd/eulerfd/cluster.h"
 #include "core/algorithms/fd/eulerfd/mlfq.h"
 #include "core/algorithms/fd/eulerfd/search_tree.h"
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/config/custom_random_seed/option.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/option.h"
+#include "core/config/equal_nulls/type.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column.h"
 #include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical.h"
@@ -89,22 +93,22 @@ class EulerFD : public FDAlgorithm {
     void InitCovers();
     void BuildPartition();
 
-    double SamplingInCluster(Cluster *cluster);
+    double SamplingInCluster(Cluster* cluster);
     void Sampling();
     size_t GenerateResults();
 
     [[nodiscard]] std::vector<size_t> GetAttributesSortedByFrequency(
-            std::vector<Bitset> const &neg_cover_vector);
-    [[nodiscard]] static Bitset ChangeAttributesOrder(Bitset const &initial_bitset,
-                                                      std::vector<size_t> const &new_order);
+            std::vector<Bitset> const& neg_cover_vector);
+    [[nodiscard]] static Bitset ChangeAttributesOrder(Bitset const& initial_bitset,
+                                                      std::vector<size_t> const& new_order);
 
     [[nodiscard]] std::vector<Bitset> CreateNegativeCover(
-            size_t rhs, std::vector<Bitset> const &neg_cover_vector);
-    size_t Invert(size_t rhs, std::vector<Bitset> const &neg);
+            size_t rhs, std::vector<Bitset> const& neg_cover_vector);
+    size_t Invert(size_t rhs, std::vector<Bitset> const& neg);
 
-    static void AddInvalidAtTree(SearchTreeEulerFD &tree, Bitset const &invalid);
-    static std::unordered_set<Bitset> RemoveGeneralizations(SearchTreeEulerFD &tree,
-                                                            Bitset const &invalid);
+    static void AddInvalidAtTree(SearchTreeEulerFD& tree, Bitset const& invalid);
+    static std::unordered_set<Bitset> RemoveGeneralizations(SearchTreeEulerFD& tree,
+                                                            Bitset const& invalid);
 
     bool IsNCoverGrowthSmall() const;
     bool IsPCoverGrowthSmall() const;

@@ -5,6 +5,9 @@
  */
 #pragma once
 
+#include <cstddef>
+#include <vector>
+
 #include "core/algorithms/algorithm.h"
 #include "core/config/error/type.h"
 #include "core/config/indices/type.h"
@@ -68,7 +71,7 @@ public:
     ///
     /// Get the total number of table rows that violate the IND.
     ///
-    size_t GetViolatingRowsCount() const noexcept {
+    std::size_t GetViolatingRowsCount() const noexcept {
         return violating_rows_;
     }
 
@@ -76,7 +79,7 @@ public:
     /// Get the number of clusters where the IND is violated, that is, the number
     /// of unique rows in the specified columns that need to be removed.
     ///
-    size_t GetViolatingClustersCount() const noexcept {
+    std::size_t GetViolatingClustersCount() const noexcept {
         return GetViolatingClusters().size();
     }
 

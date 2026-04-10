@@ -1,8 +1,20 @@
 #include "core/algorithms/fd/dfd/lattice_traversal/lattice_traversal.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <memory>
 #include <random>
+#include <unordered_map>
+#include <utility>
+#include <variant>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+
+#include "core/algorithms/fd/dfd/node_category.h"
 #include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
 
 LatticeTraversal::LatticeTraversal(Column const* const rhs,
                                    ColumnLayoutRelationData const* const relation,
@@ -210,7 +222,7 @@ std::stack<Vertical> LatticeTraversal::GenerateNextSeeds(Column const* const cur
             boost::dynamic_bitset<> single_column_bitset(relation_->GetNumColumns(), 0);
             single_column_bitset.reset();
 
-            for (size_t column_index = complement_indices.find_first();
+            for (std::size_t column_index = complement_indices.find_first();
                  column_index < complement_indices.size();
                  column_index = complement_indices.find_next(column_index)) {
                 single_column_bitset[column_index] = true;
@@ -221,7 +233,7 @@ std::stack<Vertical> LatticeTraversal::GenerateNextSeeds(Column const* const cur
             for (auto const& dependency : seeds) {
                 auto new_combination = dependency.GetColumnIndicesRef();
 
-                for (size_t column_index = complement_indices.find_first();
+                for (std::size_t column_index = complement_indices.find_first();
                      column_index < complement_indices.size();
                      column_index = complement_indices.find_next(column_index)) {
                     new_combination[column_index] = true;

@@ -1,14 +1,19 @@
 #pragma once
 
-class ProfilingContext;
-
+#include <cstddef>
+#include <memory>
 #include <mutex>
+#include <variant>
 
 #include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/vertical.h"
 #include "core/util/cache_eviction_method.h"
 #include "core/util/caching_method.h"
 #include "core/util/maybe_unused_private_field.h"
+
+class ProfilingContext;
 
 namespace model {
 
@@ -67,7 +72,7 @@ public:
         maximum_entropy_ = e;
     }
 
-    size_t Size() const;
+    std::size_t Size() const;
 
     // returns ownership of single column PLIs back to ColumnLayoutRelationData
     virtual ~PLICache();
