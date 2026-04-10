@@ -1,15 +1,32 @@
 #include <pybind11/pybind11.h>
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <memory>
+#include <ranges>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/nar/mining_algorithms.h"
 #include "core/algorithms/nar/nar.h"
 #include "core/algorithms/nar/value_range.h"
 #include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace py = pybind11;
 
+namespace {
+constexpr double kRoundingValue = 1e9;
+}  // namespace
+
 namespace nar_serialization {
+using NAR = model::NAR;
 
 py::object SerializeValueRange(std::shared_ptr<model::ValueRange> const& vr) {
     switch (int type_code = vr->GetTypeId()) {
@@ -70,6 +87,14 @@ py::dict SerializeRangeMap(
     return d;
 }
 
+py::tuple SerializeNar(NAR const& nar) {
+    auto quals = nar.GetQualities();
+    py::dict ante_dict = nar_serialization::SerializeRangeMap(nar.GetAnte());
+    py::dict cons_dict = nar_serialization::SerializeRangeMap(nar.GetCons());
+    return py::make_tuple(quals.fitness, quals.support, quals.confidence,
+                          nar.IsQualitiesConsistent(), std::move(ante_dict), std::move(cons_dict));
+}
+
 std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> DeserializeRangeMap(
         py::dict const& d) {
     std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> map;
@@ -80,6 +105,89 @@ std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> DeserializeRangeM
     }
     return map;
 }
+
+NAR DeserializeNar(py::tuple t) {
+    if (t.size() != 6) {
+        throw std::runtime_error("Invalid state for NAR pickle!");
+    }
+    double fitness = t[0].cast<double>();
+    double support = t[1].cast<double>();
+    double confidence = t[2].cast<double>();
+    bool qualities_consistent = t[3].cast<bool>();
+    py::dict ante_dict = t[4].cast<py::dict>();
+    py::dict cons_dict = t[5].cast<py::dict>();
+    NAR nar;
+    std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> ante_map =
+            nar_serialization::DeserializeRangeMap(ante_dict);
+    std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> cons_map =
+            nar_serialization::DeserializeRangeMap(cons_dict);
+    for (auto const& p : ante_map) {
+        nar.InsertInAnte(p.first, p.second);
+    }
+    for (auto const& p : cons_map) {
+        nar.InsertInCons(p.first, p.second);
+    }
+    nar.SetQualitiesDirect(fitness, support, confidence);
+    nar.SetQualitiesConsistent(qualities_consistent);
+    return nar;
+}
+
+py::tuple ConvertValueRangeToImmutableTuple(std::shared_ptr<model::ValueRange> const& vr) {
+    switch (int type_code = vr->GetTypeId()) {
+        case model::TypeId::kString: {
+            auto svr = std::dynamic_pointer_cast<model::StringValueRange>(vr);
+            py::tuple domain_tuple = python_bindings::VectorToTuple(svr->domain);
+
+            return py::make_tuple(type_code, domain_tuple);
+        }
+        case model::TypeId::kDouble: {
+            auto nvr = std::dynamic_pointer_cast<model::NumericValueRange<model::Double>>(vr);
+            return py::make_tuple(type_code, py::make_tuple(nvr->lower_bound, nvr->upper_bound));
+        }
+        case model::TypeId::kInt: {
+            auto nvr = std::dynamic_pointer_cast<model::NumericValueRange<model::Int>>(vr);
+            return py::make_tuple(type_code, py::make_tuple(nvr->lower_bound, nvr->upper_bound));
+        }
+        default: {
+            throw std::runtime_error("Unsupported ValueRange type to hash.");
+        }
+    }
+}
+
+py::tuple ConvertRangeMapToImmutableTuple(
+        std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> const& map) {
+    std::vector<std::pair<size_t, std::shared_ptr<model::ValueRange>>> sorted_ranges;
+    sorted_ranges.reserve(map.size());
+    for (auto const& [key, value] : map) {
+        sorted_ranges.emplace_back(key, value);
+    }
+    std::ranges::sort(sorted_ranges, [](auto const& elem1, auto const& elem2) {
+        return elem1.first < elem2.first;
+    });
+    return python_bindings::VectorToTuple(sorted_ranges, [](auto const& elem) {
+        return py::make_tuple(elem.first, ConvertValueRangeToImmutableTuple(elem.second));
+    });
+}
+
+py::tuple ConvertNarToImmutableTuple(NAR const& nar) {
+    py::tuple ante_tuple = ConvertRangeMapToImmutableTuple(nar.GetAnte());
+    py::tuple cons_tuple = ConvertRangeMapToImmutableTuple(nar.GetCons());
+
+    bool is_consistent = nar.IsQualitiesConsistent();
+    if (!is_consistent) {
+        return py::make_tuple(std::move(ante_tuple), std::move(cons_tuple), is_consistent);
+    }
+    auto const& qualities = nar.GetQualities();
+
+    auto round_double_val = [](double d) {
+        return std::round(d * kRoundingValue) / kRoundingValue;
+    };
+
+    return py::make_tuple(std::move(ante_tuple), std::move(cons_tuple), is_consistent,
+                          round_double_val(qualities.fitness), round_double_val(qualities.support),
+                          round_double_val(qualities.confidence));
+}
+
 }  // namespace nar_serialization
 
 namespace python_bindings {
@@ -127,42 +235,28 @@ void BindNar(py::module_& main_module) {
             .def_property_readonly("fitness", [](NAR const& n) { return n.GetQualities().fitness; })
             .def_property_readonly("ante", &NAR::GetAnte)
             .def_property_readonly("cons", &NAR::GetCons)
+            .def("__eq__",
+                 [](NAR const& nar1, NAR const& nar2) {
+                     if (&nar1 == &nar2) {
+                         return true;
+                     }
+                     py::tuple nar1_state_tuple =
+                             nar_serialization::ConvertNarToImmutableTuple(nar1);
+                     py::tuple nar2_state_tuple =
+                             nar_serialization::ConvertNarToImmutableTuple(nar2);
+
+                     return nar1_state_tuple.equal(nar2_state_tuple);
+                 })
+            .def("__hash__",
+                 [](NAR const& nar) {
+                     py::tuple state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar);
+                     return py::hash(state_tuple);
+                 })
             .def(py::pickle(
                     // __getstate__
-                    [](NAR const& nar) {
-                        auto quals = nar.GetQualities();
-                        py::dict ante_dict = nar_serialization::SerializeRangeMap(nar.GetAnte());
-                        py::dict cons_dict = nar_serialization::SerializeRangeMap(nar.GetCons());
-                        return py::make_tuple(quals.fitness, quals.support, quals.confidence,
-                                              nar.IsQualitiesConsistent(), std::move(ante_dict),
-                                              std::move(cons_dict));
-                    },
+                    [](NAR const& nar) { return nar_serialization::SerializeNar(nar); },
                     // __setstate__
-                    [](py::tuple t) {
-                        if (t.size() != 6) {
-                            throw std::runtime_error("Invalid state for NAR pickle!");
-                        }
-                        double fitness = t[0].cast<double>();
-                        double support = t[1].cast<double>();
-                        double confidence = t[2].cast<double>();
-                        bool qualities_consistent = t[3].cast<bool>();
-                        py::dict ante_dict = t[4].cast<py::dict>();
-                        py::dict cons_dict = t[5].cast<py::dict>();
-                        NAR nar;
-                        std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> ante_map =
-                                nar_serialization::DeserializeRangeMap(ante_dict);
-                        std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> cons_map =
-                                nar_serialization::DeserializeRangeMap(cons_dict);
-                        for (auto const& p : ante_map) {
-                            nar.InsertInAnte(p.first, p.second);
-                        }
-                        for (auto const& p : cons_map) {
-                            nar.InsertInCons(p.first, p.second);
-                        }
-                        nar.SetQualitiesDirect(fitness, support, confidence);
-                        nar.SetQualitiesConsistent(qualities_consistent);
-                        return nar;
-                    }));
+                    [](py::tuple t) { return nar_serialization::DeserializeNar(t); }));
 
     BindPrimitive<DES>(nar_module, &NARAlgorithm::GetNARVector, "NarAlgorithm", "get_nars",
                        {"DES"});
