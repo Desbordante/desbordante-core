@@ -33,7 +33,7 @@ void FEMAlgorithm::LoadDataInternal() {
     event_sequence_ = std::make_unique<model::ComplexEventSequence>(std::move(timed_event_sets));
 }
 
-FEMAlgorithm::FEMAlgorithm() : Algorithm({}) {
+FEMAlgorithm::FEMAlgorithm() : Algorithm() {
     RegisterOption(config::Option<std::shared_ptr<model::ISequenceStream>>{
             &sequence_stream_, config::names::kSequence, "Input sequence data"});
     MakeOptionsAvailable({config::names::kSequence});

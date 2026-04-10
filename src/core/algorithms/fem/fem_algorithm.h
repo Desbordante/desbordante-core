@@ -2,8 +2,6 @@
 
 #include <memory>
 
-#include <enum.h>
-
 #include "core/algorithms/algorithm.h"
 #include "core/model/sequence/complex_event_sequence.h"
 #include "core/model/sequence/isequence_stream.h"
