@@ -6,6 +6,7 @@ set(SUBDIRS
     dc
     dd
     fd
+    fem
     fsm
     gdd
     gfd
@@ -57,6 +58,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::fd::tane
               ${DESBORDANTE_PREFIX}::fd::tane::pfd
               ${DESBORDANTE_PREFIX}::fd::verifier
+              ${DESBORDANTE_PREFIX}::fem::maxfem
               ${DESBORDANTE_PREFIX}::fsm::gspan
               ${DESBORDANTE_PREFIX}::gfd::validator
               ${DESBORDANTE_PREFIX}::ind::faida
@@ -82,5 +84,6 @@ target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::model::types
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
-            ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only Boost::headers
+            ${DESBORDANTE_PREFIX}::parser::csv ${DESBORDANTE_PREFIX}::parser::sequence
+            spdlog::spdlog_header_only better-enums Boost::headers
 )
