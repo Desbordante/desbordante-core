@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/algorithms/fem/maxfem/model/location_list.h"
-#include "core/model/sequence/complex_event_sequence.h"
 #include "core/model/sequence/parallel_episode.h"
 
 namespace algos::maxfem {

@@ -1,7 +1,6 @@
 #include "maxfem.h"
 
 #include <algorithm>
-#include <thread>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
