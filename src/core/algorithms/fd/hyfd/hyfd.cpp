@@ -20,7 +20,7 @@
 
 namespace algos::hyfd {
 
-HyFD::HyFD() : PliBasedFDAlgorithm() {
+HyFD::HyFD() : LegacyPliBasedFDAlgorithm() {
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
@@ -41,8 +41,9 @@ unsigned long long HyFD::ExecuteInternal() {
 
     auto const positive_cover_tree =
             std::make_shared<fd_tree::FDTree>(GetRelation().GetNumColumns());
-    Inductor inductor(positive_cover_tree);
-    Validator validator(positive_cover_tree, plis_shared, pli_records_shared, threads_num_);
+    Inductor inductor(positive_cover_tree, max_lhs_);
+    Validator validator(positive_cover_tree, plis_shared, pli_records_shared, threads_num_,
+                        max_lhs_);
 
     IdPairs comparison_suggestions;
 

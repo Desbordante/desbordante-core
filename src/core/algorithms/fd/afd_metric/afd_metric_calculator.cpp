@@ -40,7 +40,7 @@ void AFDMetricCalculator::MakeExecuteOptsAvailable() {
 }
 
 void AFDMetricCalculator::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: AFD metric calculation is meaningless.");

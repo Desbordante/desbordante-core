@@ -26,7 +26,7 @@ void PFDVerifier::MakeExecuteOptsAvailable() {
 }
 
 void PFDVerifier::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: pFD verifying is meaningless.");
     }

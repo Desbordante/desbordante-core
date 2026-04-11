@@ -140,7 +140,7 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Probe(
 }
 
 std::unique_ptr<PLIWithSingletons> PLIWithSingletons::ProbeAll(
-        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
+        Vertical const& probing_columns, LegacyColumnLayoutRelationData& relation_data) {
     if (this->relation_size_ != relation_data.GetNumRows())
         throw std::invalid_argument("received different number of rows");
     std::deque<std::vector<int>> new_index;

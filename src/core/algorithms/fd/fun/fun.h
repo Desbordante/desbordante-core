@@ -63,10 +63,6 @@ public:
         return candidate_ < that.candidate_;
     }
 
-    bool operator>(FunQuadruple const& that) const {
-        return candidate_ > that.candidate_;
-    }
-
     FunQuadruple Union(Column const& that) const;
 
     FunQuadruple Union(Vertical const& that) const;
@@ -76,7 +72,7 @@ public:
     bool Contains(Vertical const& that) const;
 };
 
-class FUN : public PliBasedFDAlgorithm {
+class FUN : public LegacyPliBasedFDAlgorithm {
     // Entities from the algorithm itself
 private:
     Vertical r_;

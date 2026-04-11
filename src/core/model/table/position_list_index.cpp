@@ -156,13 +156,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
 
     for (auto& positions : index_) {
         for (int position : positions) {
-            if (probing_table == nullptr) LOG_DEBUG("NULLPTR");
-            if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {
-                LOG_DEBUG("position: {} size: {}", position, probing_table->size());
-                for (size_t i = 0; i < positions.size(); ++i) {
-                    LOG_DEBUG("Position {}", positions[i]);
-                }
-            }
             int probing_table_value_id = (*probing_table)[position];
             if (probing_table_value_id == kSingletonValueId) continue;
             intersection_count_++;
@@ -190,7 +183,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
 }
 
 std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
-        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
+        Vertical const& probing_columns, LegacyColumnLayoutRelationData& relation_data) {
     assert(this->relation_size_ == relation_data.GetNumRows());
     std::deque<std::vector<int>> new_index;
     unsigned int new_size = 0;
@@ -232,7 +225,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
                                                this->relation_size_, this->relation_size_);
 }
 
-bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relation_data,
+bool PositionListIndex::TakeProbe(int position, LegacyColumnLayoutRelationData& relation_data,
                                   Vertical const& probing_columns, std::vector<int>& probe) {
     boost::dynamic_bitset<> probing_indices = probing_columns.GetColumnIndices();
     for (unsigned long index = probing_indices.find_first(); index < probing_indices.size();

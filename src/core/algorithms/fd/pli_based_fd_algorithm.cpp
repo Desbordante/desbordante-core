@@ -5,17 +5,17 @@
 
 namespace algos {
 
-PliBasedFDAlgorithm::PliBasedFDAlgorithm() : FDAlgorithm() {
+LegacyPliBasedFDAlgorithm::LegacyPliBasedFDAlgorithm() : FDAlgorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
-void PliBasedFDAlgorithm::RegisterOptions() {
+void LegacyPliBasedFDAlgorithm::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
 }
 
-void PliBasedFDAlgorithm::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+void LegacyPliBasedFDAlgorithm::LoadDataInternal() {
+    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");

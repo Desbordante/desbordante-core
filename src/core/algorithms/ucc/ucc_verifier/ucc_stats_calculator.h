@@ -10,7 +10,7 @@
 namespace algos {
 class UCCStatsCalculator {
 private:
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     size_t num_rows_;
     double aucc_error_ = 0.0;
     /* results of work */
@@ -18,7 +18,7 @@ private:
     std::vector<model::PLI::Cluster> clusters_violating_ucc_;
 
 public:
-    UCCStatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation)
+    UCCStatsCalculator(std::shared_ptr<LegacyColumnLayoutRelationData> relation)
         : num_rows_(relation->GetNumRows()) {}
 
     UCCStatsCalculator(size_t num_rows) : num_rows_(num_rows) {}
@@ -28,7 +28,7 @@ public:
         clusters_violating_ucc_.clear();
     }
 
-    void CalculateStatistics(std::deque<model::PLI::Cluster> const &clusters) {
+    void CalculateStatistics(std::deque<model::PLI::Cluster> const& clusters) {
         // size_t num_rows = relation_->GetNumRows();
 
         unsigned long long num_pairs_combinations = static_cast<unsigned long long>(num_rows_);
@@ -36,7 +36,7 @@ public:
             num_pairs_combinations *= (num_rows_ - 1);
         }
 
-        for (auto const &cluster : clusters) {
+        for (auto const& cluster : clusters) {
             num_rows_violating_ucc_ += cluster.size();
             clusters_violating_ucc_.push_back(cluster);
             aucc_error_ += static_cast<double>(cluster.size()) * (cluster.size() - 1) /
@@ -62,7 +62,7 @@ public:
 
     /* Returns clusters where the UCC is violated, that is, sets of rows where
      * each set consists of rows equal to each other in the specified columns */
-    std::vector<model::PLI::Cluster> const &GetClustersViolatingUCC() const {
+    std::vector<model::PLI::Cluster> const& GetClustersViolatingUCC() const {
         return clusters_violating_ucc_;
     }
 

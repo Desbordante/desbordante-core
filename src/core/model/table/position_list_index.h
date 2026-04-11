@@ -11,7 +11,7 @@
 
 #include "core/model/table/column.h"
 
-class ColumnLayoutRelationData;
+class LegacyColumnLayoutRelationData;
 
 namespace model {
 
@@ -30,7 +30,7 @@ protected:
     }
 
     static void SortClusters(std::deque<Cluster>& clusters);
-    static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
+    static bool TakeProbe(int position, LegacyColumnLayoutRelationData& relation_data,
                           Vertical const& probing_columns, std::vector<int>& probe);
 
 private:
@@ -148,7 +148,7 @@ public:
     std::unique_ptr<PositionListIndex> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;
     std::unique_ptr<PositionListIndex> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
+                                                LegacyColumnLayoutRelationData& relation_data);
     std::string ToString() const;
 };
 

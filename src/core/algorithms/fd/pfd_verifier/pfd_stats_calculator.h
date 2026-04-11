@@ -10,7 +10,7 @@ namespace algos {
 
 class PFDStatsCalculator {
 private:
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     config::PfdErrorMeasureType error_measure_;
 
     std::vector<model::PLI::Cluster> clusters_violating_pfd_;
@@ -18,7 +18,7 @@ private:
     config::ErrorType error_ = 0.0;
 
 public:
-    explicit PFDStatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
+    explicit PFDStatsCalculator(std::shared_ptr<LegacyColumnLayoutRelationData> relation,
                                 config::PfdErrorMeasureType measure)
         : relation_(std::move(relation)), error_measure_(measure) {}
 

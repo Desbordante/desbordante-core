@@ -1,21 +1,19 @@
 #pragma once
 
-#include <filesystem>
 #include <set>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
 
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
-#include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/position_list_index.h"
-#include "core/model/table/vertical.h"
+#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
+#include "core/algorithms/partition_only_algorithm.h"
+#include "core/config/max_lhs/type.h"
 
 namespace algos {
 
-class FdMine : public PliBasedFDAlgorithm {
+class FdMine : public PartitionOnlyAlgorithm {
 private:
-    RelationalSchema const* schema_;
+    config::MaxLhsType max_lhs_;
 
     std::set<boost::dynamic_bitset<>> candidate_set_;
     boost::unordered_map<boost::dynamic_bitset<>, std::unordered_set<boost::dynamic_bitset<>>>
@@ -28,6 +26,8 @@ private:
             plis_;
     boost::dynamic_bitset<> relation_indices_;
 
+    MultiAttrRhsFdStorage::OwningPointer fd_storage_;
+
     void ComputeNonTrivialClosure(boost::dynamic_bitset<> const& xi);
     void ObtainFDandKey(boost::dynamic_bitset<> const& xi);
     void ObtainEqSet();
@@ -36,8 +36,17 @@ private:
     void Reconstruct();
     void Display();
 
-    void ResetStateFd() final;
-    unsigned long long ExecuteInternal() override;
+    void ResetState() final;
+
+    void MakeExecuteOptsAvailable() final;
+    unsigned long long ExecuteInternal() final;
+
+public:
+    FdMine();
+
+    MultiAttrRhsFdStorage::OwningPointer GetFdStorage() {
+        return fd_storage_;
+    }
 };
 
 }  // namespace algos
