@@ -102,6 +102,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install cmake-format
+        run: |
           sudo apt-get update
           sudo apt-get install -y cmake-format
 
