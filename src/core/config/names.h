@@ -24,9 +24,11 @@ constexpr auto kWeight = "weight";
 constexpr auto kFirstColumnTId = "has_tid";
 constexpr auto kInputFormat = "input_format";
 constexpr auto kItemColumnIndex = "item_column_index";
-constexpr auto kMinimumConfidence = "minconf";
-constexpr auto kMinimumSupport = "minsup";
+constexpr auto kArMinimumConfidence = "minconf";
+constexpr auto kArMinimumSupport = "minsup";
 constexpr auto kTIdColumnIndex = "tid_column_index";
+constexpr auto kArLhsRule = "lhs_rule";
+constexpr auto kArRhsRule = "rhs_rule";
 // CFD
 constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
