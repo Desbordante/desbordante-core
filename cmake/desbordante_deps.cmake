@@ -40,32 +40,12 @@ add_library(emhash INTERFACE)
 target_include_directories(emhash SYSTEM INTERFACE ${emhash_SOURCE_DIR})
 
 CPMAddPackage(
-    NAME frozen
-    GITHUB_REPOSITORY serge-sans-paille/frozen
-    GIT_TAG 1.2.0
-    DOWNLOAD_ONLY True
-)
-add_library(frozen INTERFACE)
-target_include_directories(frozen SYSTEM INTERFACE "${frozen_SOURCE_DIR}/include")
-
-CPMAddPackage(
-    NAME better-enums
-    GITHUB_REPOSITORY aantron/better-enums
-    GIT_TAG 0.11.3
-    DOWNLOAD_ONLY True
-)
-add_library(better-enums INTERFACE)
-target_include_directories(better-enums SYSTEM INTERFACE "${better-enums_SOURCE_DIR}")
-
-CPMAddPackage(
-    NAME atomicbitvector
-    GITHUB_REPOSITORY ekg/atomicbitvector
-    GIT_TAG e295358fea9532fa4c37197630d037a4a53ddede
-    DOWNLOAD_ONLY True
-)
-add_library(atomic_bitvector INTERFACE)
-target_include_directories(
-        atomic_bitvector SYSTEM INTERFACE "${atomicbitvector_SOURCE_DIR}/include"
+    NAME magic_enum
+    GITHUB_REPOSITORY Neargye/magic_enum
+    VERSION 0.9.7
+    OPTIONS "MAGIC_ENUM_OPT_BUILD_EXAMPLES OFF" "MAGIC_ENUM_OPT_BUILD_TESTS OFF"
+            "MAGIC_ENUM_OPT_INSTALL OFF"
+    SYSTEM YES
 )
 
 if(DESBORDANTE_BUILD_TESTS)

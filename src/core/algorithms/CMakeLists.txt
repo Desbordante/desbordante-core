@@ -70,9 +70,9 @@ target_link_libraries(
 set(NAME algos)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
+target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
-            ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only better-enums
-            Boost::headers
+            ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only Boost::headers
 )

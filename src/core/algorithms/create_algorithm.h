@@ -37,7 +37,7 @@ bool IsBaseOf(AlgorithmType algorithm) {
 template <typename AlgorithmBase>
 std::vector<AlgorithmType> GetAllDerived() {
     std::vector<AlgorithmType> derived_from_base{};
-    for (AlgorithmType algo : AlgorithmType::_values()) {
+    for (AlgorithmType algo : magic_enum::enum_values<AlgorithmType>()) {
         if (IsBaseOf<AlgorithmBase>(algo)) {
             derived_from_base.push_back(algo);
         }

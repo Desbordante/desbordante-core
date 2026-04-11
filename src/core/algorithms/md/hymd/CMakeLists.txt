@@ -12,9 +12,10 @@ target_sources(
             similarity_data.cpp
             validator.cpp
 )
+target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::md::hy::preprocessing ${DESBORDANTE_PREFIX}::md
-                    spdlog::spdlog_header_only better-enums Boost::headers
+                    spdlog::spdlog_header_only Boost::headers
 )
 
 set(NAME md.hy.preprocessing)
@@ -32,6 +33,6 @@ target_sources(
             preprocessing/column_matches/smith_waterman_gotoh.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only better-enums
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only magic_enum::magic_enum
                     Boost::headers
 )

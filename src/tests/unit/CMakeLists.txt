@@ -30,7 +30,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ac
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -43,7 +43,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ar
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -60,7 +60,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::cfd::model
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -87,7 +87,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -111,7 +111,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::datastats
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -128,8 +128,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::model::table
     spdlog::spdlog_header_only
-    frozen
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -141,8 +140,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::dc::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    frozen
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -156,7 +154,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::dd::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -167,7 +165,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::dd::split
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -184,7 +182,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::algos
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -208,7 +206,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::fd
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -224,7 +222,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -253,7 +251,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::mine
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -268,7 +266,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -280,7 +278,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::algos
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -293,7 +291,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -307,7 +305,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -321,7 +319,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::algos
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -334,7 +332,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::algos
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -347,7 +345,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::gfd::miner
     ${DESBORDANTE_PREFIX}::testlib::gfd::paths
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -359,7 +357,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::gfd::validator
     ${DESBORDANTE_PREFIX}::testlib::gfd::paths
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -374,7 +372,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::algos
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -394,7 +392,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ind::mind
     ${DESBORDANTE_PREFIX}::ind::faida
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -407,7 +405,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ind::faida
     ${DESBORDANTE_PREFIX}::testlib::ind
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 desbordante_add_test(
@@ -419,7 +417,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::algos
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -428,10 +426,10 @@ desbordante_add_test(
     model.bitset SRCS test_bitset.cpp LIBS spdlog::spdlog_header_only Boost::headers
 )
 desbordante_add_test(
-    model.types.numeric_type_cast SRCS test_numerictype_cast.cpp LIBS better-enums Boost::headers
+    model.types.numeric_type_cast SRCS test_numerictype_cast.cpp LIBS magic_enum::magic_enum Boost::headers
 )
 desbordante_add_test(
-    model.types.double_compare SRCS test_double_compare.cpp LIBS better-enums Boost::headers
+    model.types.double_compare SRCS test_double_compare.cpp LIBS magic_enum::magic_enum Boost::headers
 )
 desbordante_add_test(
     model.types
@@ -441,7 +439,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::util
     ${DESBORDANTE_PREFIX}::model::types
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
@@ -454,7 +452,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::parser::csv
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -467,7 +465,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::nd::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
 )
@@ -481,7 +479,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::md::hy
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
@@ -493,7 +491,7 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::md::hy::preprocessing
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
@@ -506,7 +504,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::md::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
@@ -521,7 +519,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::metric::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
 )
@@ -535,7 +533,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::od::fast
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
 )
@@ -547,7 +545,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::od::order
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
 )
@@ -560,7 +558,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::od::fast
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
 )
@@ -580,7 +578,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ucc::pyro
     ${DESBORDANTE_PREFIX}::ucc::hpivalid
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
     ${DESBORDANTE_PREFIX}::fd::hy::model
@@ -595,7 +593,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::fd::hy::model

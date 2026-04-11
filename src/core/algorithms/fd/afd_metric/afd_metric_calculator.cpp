@@ -60,18 +60,18 @@ void AFDMetricCalculator::CalculateMetric() {
     auto rhs_pli = relation_->CalculatePLIWS(rhs_indices_);
 
     switch (metric_) {
-        case AFDMetric::g2:
+        case AFDMetric::kG2:
             result_ = CalculateG2(lhs_pli.get(), rhs_pli.get(), num_rows);
             break;
-        case AFDMetric::tau:
+        case AFDMetric::kTau:
             result_ = CalculateTau(lhs_pli.get(), rhs_pli.get(),
                                    lhs_pli->Intersect(rhs_pli.get()).get());
             break;
-        case AFDMetric::mu_plus:
+        case AFDMetric::kMuPlus:
             result_ = CalculateMuPlus(lhs_pli.get(), rhs_pli.get(),
                                       lhs_pli->Intersect(rhs_pli.get()).get());
             break;
-        case AFDMetric::fi:
+        case AFDMetric::kFi:
             result_ = CalculateFI(lhs_pli.get(), rhs_pli.get(), num_rows);
             break;
     }
