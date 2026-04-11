@@ -94,6 +94,42 @@ jobs:
         if: steps.review.outputs.total_comments > 0
         run: exit 1
 
+  cmake-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install cmake-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake-format
+
+      - name: Check CMake formatting
+        run: |
+          set +e
+
+          files=$(find . -name "CMakeLists.txt" -o -name "*.cmake" | grep -v "cmake/CPM.cmake")
+
+          if [ -z "$files" ]; then
+            echo "### No CMake files to check :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          cmake-format --check $files
+
+          if [ $? -ne 0 ]; then
+            echo ":x: CMake files are not properly formatted" >> $GITHUB_STEP_SUMMARY
+            echo "Run 'cmake-format -i' on the following files:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$files" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          echo "### CMake files are properly formatted :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
+
   typos-check:
     runs-on: ubuntu-latest
     steps:
