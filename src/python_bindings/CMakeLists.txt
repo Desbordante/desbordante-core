@@ -176,6 +176,7 @@ desbordante_add_bind(
     fem/bind_fem.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fem::maxfem
+    ${DESBORDANTE_PREFIX}::fem::tke
     ${DESBORDANTE_PREFIX}::bindlib::util
     magic_enum::magic_enum
     spdlog::spdlog_header_only

@@ -57,14 +57,14 @@ void TKE::FindFrequentEpisodes() {
         supports_vec.push_back(s);
     }
 
-    size_t sei_threshold = 1;
+    size_t events_minsup = 1;
     if (supports_vec.size() > episodes_num_) {
         auto const nth = supports_vec.end() - static_cast<std::ptrdiff_t>(episodes_num_);
         std::nth_element(supports_vec.begin(), nth, supports_vec.end());
-        sei_threshold = *nth;
+        events_minsup = *nth;
     }
 
-    RemoveInfrequentEventsAfterSei(raw_supports, sei_threshold);
+    RemoveInfrequentEvents(raw_supports, events_minsup);
 
     ParallelTopKMiner parallel_miner(events_num_, episodes_num_, BuildEventsLocationLists());
     std::vector<ParallelEpisode> parallel_episodes = parallel_miner.Mine();
@@ -90,7 +90,7 @@ std::map<model::Event, size_t> TKE::GetEventsSupports() const {
     return supports;
 }
 
-void TKE::RemoveInfrequentEventsAfterSei(std::map<model::Event, size_t> const& events_supports,
+void TKE::RemoveInfrequentEvents(std::map<model::Event, size_t> const& events_supports,
                                          size_t event_minsup) {
     model::Event new_events_num = model::kStartEvent;
     reverse_mapping_.clear();
@@ -105,7 +105,7 @@ void TKE::RemoveInfrequentEventsAfterSei(std::map<model::Event, size_t> const& e
         }
     }
     events_num_ = new_events_num;
-    LOG_DEBUG("Frequent events after SEI: {}", events_num_);
+    LOG_DEBUG("Frequent events: {}", events_num_);
 
     for (model::TimedEventSet& event_set : *event_sequence_) {
         event_set.MapEventsAndRemoveInfrequent(mapping_);
