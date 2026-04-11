@@ -112,12 +112,12 @@ jobs:
 
           files=$(find . -name "CMakeLists.txt" -o -name "*.cmake" | grep -v "cmake/CPM.cmake")
 
-          cmake-format --check $files
-
           if [ -z "$files" ]; then
             echo "### No CMake files to check :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
+
+          cmake-format --check $files
 
           if [ $? -ne 0 ]; then
             echo ":x: CMake files are not properly formatted" >> $GITHUB_STEP_SUMMARY
