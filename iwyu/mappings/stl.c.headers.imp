@@ -1,0 +1,42 @@
+[
+  # Allow the C++ wrappers around C files.  Without these mappings,
+  # if you #include <cstdio>, iwyu will tell you to replace it with
+  # <stdio.h>, which is where the symbols are actually defined.  We
+  # inhibit that behavior to keep the <cstdio> alone.  Note this is a
+  # public-to-public mapping: we don't want to *replace* <assert.h>
+  # with <cassert>, we just want to avoid suggesting changing
+  # <cassert> back to <assert.h>.  (If you *did* want to replace
+  # assert.h with cassert, you'd change it to a public->private
+  # mapping.)  Here is how I identified the files to map:
+  # $ for i in /usr/include/c++/4.4/c* ; do ls /usr/include/`basename $i | cut -b2-`.h /usr/lib/gcc/*/4.4/include/`basename $i | cut -b2-`.h 2>/dev/null ; done
+  #
+  # These headers are defined in C++14 [headers]p3.  You can get them with
+  # $ sed -n '/begin{floattable}.*{tab:cpp.c.headers}/,/end{floattable}/p' lib-intro.tex | grep tcode | perl -nle 'm/tcode{<c(.*)>}/ && print qq@  { "include": [ "<$1.h>", "public", "<c$1>", "public"] },@' | sort
+  # on https://github.com/cplusplus/draft/blob/master/source/lib-intro.tex
+  { "include": [ "<assert.h>", "private", "<cassert>", "public"] },
+  { "include": [ "<complex.h>", "private", "<ccomplex>", "public"] },
+  { "include": [ "<ctype.h>", "private", "<cctype>", "public"] },
+  { "include": [ "<errno.h>", "private", "<cerrno>", "public"] },
+  { "include": [ "<fenv.h>", "private", "<cfenv>", "public"] },
+  { "include": [ "<float.h>", "private", "<cfloat>", "public"] },
+  { "include": [ "<inttypes.h>", "private", "<cinttypes>", "public"] },
+  { "include": [ "<iso646.h>", "private", "<ciso646>", "public"] },
+  { "include": [ "<limits.h>", "private", "<climits>", "public"] },
+  { "include": [ "<locale.h>", "private", "<clocale>", "public"] },
+  { "include": [ "<math.h>", "private", "<cmath>", "public"] },
+  { "include": [ "<setjmp.h>", "private", "<csetjmp>", "public"] },
+  { "include": [ "<signal.h>", "private", "<csignal>", "public"] },
+  { "include": [ "<stdalign.h>", "private", "<cstdalign>", "public"] },
+  { "include": [ "<stdarg.h>", "private", "<cstdarg>", "public"] },
+  { "include": [ "<stdbool.h>", "private", "<cstdbool>", "public"] },
+  { "include": [ "<stddef.h>", "private", "<cstddef>", "public"] },
+  { "include": [ "<stdint.h>", "private", "<cstdint>", "public"] },
+  { "include": [ "<stdio.h>", "private", "<cstdio>", "public"] },
+  { "include": [ "<stdlib.h>", "private", "<cstdlib>", "public"] },
+  { "include": [ "<string.h>", "private", "<cstring>", "public"] },
+  { "include": [ "<tgmath.h>", "private", "<ctgmath>", "public"] },
+  { "include": [ "<time.h>", "private", "<ctime>", "public"] },
+  { "include": [ "<uchar.h>", "private", "<cuchar>", "public"] },
+  { "include": [ "<wchar.h>", "private", "<cwchar>", "public"] },
+  { "include": [ "<wctype.h>", "private", "<cwctype>", "public"] },
+]
