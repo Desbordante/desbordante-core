@@ -7,6 +7,7 @@ add_subdirectory(algorithms)
 add_subdirectory(config)
 add_subdirectory(parser/csv_parser)
 add_subdirectory(parser/graph_parser)
+add_subdirectory(parser/spmf_parser)
 add_subdirectory(util)
 
 # Configure threading support with pthread preference

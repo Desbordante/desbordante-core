@@ -18,5 +18,6 @@
 #include "core/algorithms/nar/mining_algorithms.h"
 #include "core/algorithms/od/mining_algorithms.h"
 #include "core/algorithms/statistics/algorithms.h"
+#include "core/algorithms/tks/mining_algorithms.h"
 #include "core/algorithms/ucc/mining_algorithms.h"
 #include "core/algorithms/ucc/verification_algorithms.h"
