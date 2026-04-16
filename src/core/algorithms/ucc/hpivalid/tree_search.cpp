@@ -247,10 +247,8 @@ inline bool TreeSearch::ExtendOrConfirmS(
         PullUpIntersections(intersection_stack, tointersect_queue);
 
         if (intersection_stack.top().empty()) {
-            if (!rc_.UCCFound(s)) {
-                // timeout
-                throw timeout_;
-            }
+            rc_.AddUCC(s);
+            if (rc_.TimedOut()) throw timeout_;
             return false;
         }
 

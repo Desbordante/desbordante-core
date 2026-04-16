@@ -30,12 +30,15 @@ ResultCollector::ResultCollector(double timeout)
       intersections_(0),
       intersection_cluster_size_(0) {}
 
-bool ResultCollector::UCCFound(Edge const& ucc) {
+void ResultCollector::AddUCC(Edge const& ucc) {
     ucc_count_++;
     ucc_vector_.push_back(ucc);
+}
+
+bool ResultCollector::TimedOut() {
     return std::chrono::duration_cast<std::chrono::duration<double>>(
                    clock::now() - timers_[timer::TimerName::total].begin)
-                   .count() <= timeout_;
+                   .count() > timeout_;
 }
 
 void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
