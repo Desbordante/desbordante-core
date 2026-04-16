@@ -53,9 +53,11 @@ public:
     //////////////////////////////////////////////////////////////////////////////
     // collecting information
 
-    // Report that a UCC has been found.  The return value is false if
-    // the timeout is reached.
-    bool UCCFound(Edge const& ucc);
+    // Report that a UCC has been found.
+    void AddUCC(Edge const& ucc);
+
+    // Return true if the timeout is reached.
+    bool TimedOut() const;
 
     // Report the final hypergraph of difference sets.
     void FinalHypergraph(Hypergraph const& hg);
