@@ -18,7 +18,7 @@ private:
 
     void LoadDataInternal() override;
     unsigned long long ExecuteInternal() override;
-    hpiv::PLITable Preprocess(hpiv::ResultCollector& rc);
+    hpiv::PLITable Preprocess();
     void RegisterUCCs(hpiv::ResultCollector const& rc);
     void PrintInfo(hpiv::ResultCollector const& rc) const;
 
