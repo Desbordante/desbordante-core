@@ -14,29 +14,12 @@
 
 namespace algos::hpiv {
 
-namespace timer {
-
-using clock = std::chrono::high_resolution_clock;
-
-extern std::vector<std::string> description;
-
-struct TimerInfo {
-    clock::time_point begin;
-    clock::time_point end;
-    unsigned long long elapsed;
-};
-
-}  // namespace timer
-
 class ResultCollector {
-    using clock = std::chrono::high_resolution_clock;
-
-private:
     double timeout_;
+    std::chrono::high_resolution_clock::time_point exec_start_;
+
     unsigned ucc_count_;
     unsigned diff_sets_final_;
-
-    std::vector<timer::TimerInfo> timers_;
 
     unsigned diff_sets_;
     unsigned diff_sets_initial_;
@@ -62,11 +45,8 @@ public:
     // Report the final hypergraph of difference sets.
     void FinalHypergraph(Hypergraph const& hg);
 
-    // Start a timer (one of `timer::name`).
-    void StartTimer(timer::TimerName timer);
-
-    // Stop a timer (one of `timer::name`).
-    void StopTimer(timer::TimerName timer);
+    // Set execution start time for timeout tracking.
+    void SetStartTime();
 
     // Counts the `number` of difference sets being sampled.
     void CountDiffSets(unsigned number);
@@ -95,8 +75,8 @@ public:
         return ucc_count_;
     }
 
-    // Time in seconds between starting and stopping `timer`.
-    unsigned long long Time(timer::TimerName timer) const;
+    // Time in seconds since execution started.
+    unsigned long long GetTimeSinceStart() const;
 
     // Total number of sampled difference sets.
     unsigned DiffSets() const {
