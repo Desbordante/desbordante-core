@@ -43,11 +43,12 @@ std::vector<ParallelEpisode> ParallelTopKMiner::Mine() {
         }
     }
 
-    std::vector<ParallelEpisode> result;
-    result.reserve(top_k.size());
+    std::vector<ParallelEpisode> result(top_k.size());
+    int index = top_k.size() - 1;
     while (!top_k.empty()) {
-        result.push_back(std::move(const_cast<ParallelEpisode&>(top_k.top())));
+        result[index] = std::move(const_cast<ParallelEpisode&>(top_k.top()));
         top_k.pop();
+        index--;
     }
     return result;
 }

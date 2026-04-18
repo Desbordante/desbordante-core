@@ -71,11 +71,11 @@ void TKE::FindFrequentEpisodes() {
     LOG_DEBUG("Parallel episodes after top-k mining: {}", parallel_episodes.size());
 
     size_t const parallel_minsup = (parallel_episodes.size() >= episodes_num_)
-                                           ? parallel_episodes.front().GetSupport()
+                                           ? parallel_episodes.back().GetSupport()
                                            : 1;
     LOG_DEBUG("Initial minsup for composite phase (from parallel): {}", parallel_minsup);
 
-    CompositeTopKMiner composite_miner(episodes_num_, window_length_);
+    CompositeTopKMiner composite_miner(episodes_num_, window_length_, threads_num_);
     DecodeAndStoreResults(composite_miner.Mine(std::move(parallel_episodes), parallel_minsup));
 }
 
