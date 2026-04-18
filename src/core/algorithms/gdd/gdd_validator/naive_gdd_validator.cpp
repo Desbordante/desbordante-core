@@ -1,85 +1,27 @@
 #include "naive_gdd_validator.h"
 
-#include "core/util/logger.h"
-#include "spdlog/spdlog.h"
-
 namespace algos {
 
-namespace {
-
-std::string FormatVertex(model::gdd::graph_t const& graph, model::gdd::vertex_t v) {
-    std::ostringstream out;
-    out << "{id=" << graph[v].id << ", label=\"" << graph[v].label << "\"";
-
-    if (!graph[v].attributes.empty()) {
-        out << ", attrs={";
-        bool first = true;
-        for (auto const& [key, value] : graph[v].attributes) {
-            if (!first) {
-                out << ", ";
-            }
-            first = false;
-            out << key << "=\"" << value << '"';
-        }
-        out << "}";
-    }
-
-    out << "}";
-    return out.str();
-}
-
-std::string FormatMapping(
-        model::gdd::graph_t const& pattern, model::gdd::graph_t const& graph,
-        std::unordered_map<model::gdd::vertex_t, model::gdd::vertex_t> const& map) {
-    std::vector<std::pair<std::size_t, std::string>> rows;
-    rows.reserve(map.size());
-
-    for (auto const& [pv, gv] : map) {
-        std::ostringstream out;
-        out << "pattern[id=" << pattern[pv].id << ", label=\"" << pattern[pv].label << "\"]"
-            << " -> " << FormatVertex(graph, gv);
-        rows.emplace_back(pattern[pv].id, out.str());
-    }
-
-    std::ranges::sort(rows, {}, &std::pair<std::size_t, std::string>::first);
-
-    std::ostringstream out;
-    for (std::size_t i = 0; i < rows.size(); ++i) {
-        if (i != 0) {
-            out << "; ";
-        }
-        out << rows[i].second;
-    }
-    return out.str();
-}
-
-}  // namespace
-
-bool NaiveGddValidator::Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
-                              GddCounterexample* out_counterexample) {
+std::optional<model::GddCounterexample> NaiveGddValidator::Holds(model::Gdd const& gdd,
+                                                                 model::gdd::graph_t const& graph) {
     model::gdd::graph_t const& pattern = gdd.GetPattern();
     if (domain_ = BuildDomain(pattern, graph); domain_.size() == boost::num_vertices(pattern)) {
         MappingT partial_map;
-        bool const exists_counterexample =
-                ExistsCounterexample(gdd, graph, partial_map, out_counterexample);
-        return !exists_counterexample;
+        if (GddCounterexample counterexample{};
+            ExistsCounterexample(gdd, graph, partial_map, counterexample)) {
+            return counterexample;
+        }
     }
 
-    return true;
+    return std::nullopt;
 }
 
 NaiveGddValidator::DomainT NaiveGddValidator::BuildDomain(model::gdd::graph_t const& pattern,
                                                           model::gdd::graph_t const& graph) {
-    std::unordered_map<model::gdd::vertex_t, std::vector<model::gdd::vertex_t>> dom;
+    DomainT dom;
 
-    boost::graph_traits<model::gdd::graph_t>::vertex_iterator pv;
-    boost::graph_traits<model::gdd::graph_t>::vertex_iterator pend;
-
-    for (std::tie(pv, pend) = boost::vertices(pattern); pv != pend; ++pv) {
-        boost::graph_traits<model::gdd::graph_t>::vertex_iterator gv;
-        boost::graph_traits<model::gdd::graph_t>::vertex_iterator gend;
-
-        for (std::tie(gv, gend) = boost::vertices(graph); gv != gend; ++gv) {
+    for (auto [pv, pend] = boost::vertices(pattern); pv != pend; ++pv) {
+        for (auto [gv, gend] = boost::vertices(graph); gv != gend; ++gv) {
             if (pattern[*pv].label == graph[*gv].label) {  // TODO: wildcards
                 dom[*pv].emplace_back(*gv);
             }
@@ -89,30 +31,10 @@ NaiveGddValidator::DomainT NaiveGddValidator::BuildDomain(model::gdd::graph_t co
     return dom;
 }
 
-GddCounterexample NaiveGddValidator::BuildCounterexample(model::gdd::graph_t const& pattern,
-                                                         model::gdd::graph_t const& graph,
-                                                         MappingT const& mapping) {
-    GddCounterexample ce{};
-    ce.match.reserve(mapping.size());
-
-    for (auto const& [pv, gv] : mapping) {
-        ce.match.push_back(GddCounterexampleVertex{
-                .pattern_vertex_id = pattern[pv].id,
-                .pattern_vertex_label = pattern[pv].label,
-                .graph_vertex_id = graph[gv].id,
-                .graph_vertex_label = graph[gv].label,
-                .graph_vertex_attributes = graph[gv].attributes,
-        });
-    }
-
-    std::ranges::sort(ce.match, {}, &GddCounterexampleVertex::pattern_vertex_id);
-    return ce;
-}
-
 bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                                              model::gdd::graph_t const& graph,
                                              MappingT& partial_map,
-                                             GddCounterexample* out_counterexample) {
+                                             GddCounterexample& counterexample) {
     // Naming of local variables is messy.
     // z - pattern variable from domain (like in paper)
     // gv/pv - graph/pattern vertex
@@ -122,29 +44,22 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
         bool const sat = gdd.Satisfies(graph, partial_map);
 
         if (!sat) {
-            if (out_counterexample != nullptr) {
-                *out_counterexample = BuildCounterexample(gdd.GetPattern(), graph, partial_map);
-            }
-            if (GetPrintReasonFlag()) {
-                LOG_ERROR("Found GDD counterexample: lhs_size={}, rhs_size={}, match={}",
-                          gdd.GetLhs().size(), gdd.GetRhs().size(),
-                          FormatMapping(gdd.GetPattern(), graph, partial_map));
-            }
+            counterexample = model::BuildCounterexample(gdd.GetPattern(), graph, partial_map);
         }
         return !sat;
     }
 
     auto const& pattern = gdd.GetPattern();
 
-    auto are_adjacent_in_pattern = [&pattern](vertex_t lhs, vertex_t rhs) {
+    auto are_adjacent_in_pattern = [&pattern](VertexT lhs, VertexT rhs) {
         return boost::edge(lhs, rhs, pattern).second || boost::edge(rhs, lhs, pattern).second;
     };
 
     // does pattern edge preserve in graph?
-    auto has_compatible_edge = [&pattern, &graph](vertex_t pv, vertex_t mapped_pv, vertex_t z,
-                                                  vertex_t gv) {
-        auto const matches_edge = [&pattern, &graph](vertex_t graph_src, vertex_t graph_dst,
-                                                     vertex_t pattern_src, vertex_t pattern_dst) {
+    auto has_compatible_edge = [&pattern, &graph](VertexT pv, VertexT mapped_pv, VertexT z,
+                                                  VertexT gv) {
+        auto const matches_edge = [&pattern, &graph](VertexT graph_src, VertexT graph_dst,
+                                                     VertexT pattern_src, VertexT pattern_dst) {
             auto const [ge, ge_exists] = boost::edge(graph_src, graph_dst, graph);
             if (!ge_exists) {
                 return false;
@@ -158,7 +73,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
     };
 
     // can map z to gv?
-    auto can_extend_mapping = [&](vertex_t z, vertex_t gv) {
+    auto can_extend_mapping = [&](VertexT z, VertexT gv) {
         if (partial_map.empty()) {
             return true;
         }
@@ -183,7 +98,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
             continue;
         }
 
-        for (vertex_t gv : gv_candidates) {
+        for (VertexT gv : gv_candidates) {
             if (!can_extend_mapping(z, gv)) {
                 continue;
             }
@@ -193,7 +108,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                 continue;
             }
 
-            if (ExistsCounterexample(gdd, graph, partial_map, out_counterexample)) {
+            if (ExistsCounterexample(gdd, graph, partial_map, counterexample)) {
                 return true;
             }
 

@@ -1,10 +1,11 @@
 #include "gdd.h"
 
-#include <charconv>
+#include <unordered_map>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
 #include "core/algorithms/gdd/gdd_graph_description.h"
+#include "core/util/levenshtein_distance.h"
 
 namespace model {
 
@@ -13,13 +14,13 @@ namespace gdd::detail {
 bool IsSubgraph(gdd::graph_t const& query, gdd::graph_t const& graph) {
     bool result = false;
 
-    auto vcmp = [&query, &graph](gdd::vertex_t const& u, gdd::vertex_t const& v) {
-        return query[u].label == graph[v].label &&  // TODO : handle wildcard
-               query[u].attributes == graph[v].attributes;
+    auto vcmp = [&query, &graph](gdd::vertex_t const& query_v, gdd::vertex_t const& graph_v) {
+        return query[query_v].label == graph[graph_v].label &&  // TODO : handle wildcard
+               query[query_v].attributes == graph[graph_v].attributes;
     };
 
-    auto ecmp = [&query, &graph](gdd::edge_t const& s, gdd::edge_t const& t) {
-        return query[s].label == graph[t].label;  // TODO: handle wildcard
+    auto ecmp = [&query, &graph](gdd::edge_t const& query_e, gdd::edge_t const& graph_e) {
+        return query[query_e].label == graph[graph_e].label;  // TODO: handle wildcard
     };
 
     auto callback = [&result](auto, auto) {
@@ -41,38 +42,23 @@ bool IsSubgraph(gdd::graph_t const& query, gdd::graph_t const& graph) {
 
 namespace {
 
-size_t EditDistance(std::string_view a, std::string_view b) {
-    if (a == b) return 0;
-    if (a.empty()) return b.size();
-    if (b.empty()) return a.size();
-
-    std::vector<std::size_t> prev(b.size() + 1);
-    for (size_t i = 0; i < prev.size(); ++i) {
-        prev[i] = i;
-    }
-
-    std::vector<std::size_t> cur(b.size() + 1);
-    for (std::size_t i = 1; i <= a.size(); ++i) {
-        cur[0] = i;
-        for (std::size_t j = 1; j <= b.size(); ++j) {
-            std::size_t const cost = (a[i - 1] == b[j - 1]) ? 0 : 1;
-            cur[j] = std::min({prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost});
-        }
-        std::swap(prev, cur);
-    }
-
-    return prev[b.size()];
-}
-
 bool CompareDistance(double dist, gdd::detail::CmpOp op, double threshold) {
-    constexpr double kEps = std::numeric_limits<double>::epsilon();
-    using enum gdd::detail::CmpOp;
+    constexpr double eps = std::numeric_limits<double>::epsilon();
+    using ::model::gdd::detail::CmpOp;
 
     switch (op) {
-        case kEq:
-            return std::abs(dist - threshold) <= kEps;
-        case kLe:
+        case CmpOp::kLe:
             return dist <= threshold;
+        case CmpOp::kGe:
+            return dist >= threshold;
+        case CmpOp::kLt:
+            return dist < threshold;
+        case CmpOp::kGt:
+            return dist > threshold;
+        case CmpOp::kEq:
+            return std::abs(dist - threshold) <= eps;
+        case CmpOp::kNe:
+            return std::abs(dist - threshold) > eps;
         default:
             throw std::logic_error("Unimplemented distance compare operation");
     }
@@ -87,11 +73,7 @@ double TryParseNumber(gdd::detail::ConstValue const& val) {
     }
 
     std::string const& s = std::get<std::string>(val);
-    double result;
-    if (std::from_chars(s.data(), s.data() + s.size(), result).ec != std::errc()) {
-        throw std::logic_error(std::string("Invalid number in gdd attribute: ") + s);
-    }
-    return result;
+    return std::stod(s);
 }
 
 double CalculateDistance(gdd::detail::ConstValue const& lhs, gdd::detail::ConstValue const& rhs,
@@ -107,7 +89,8 @@ double CalculateDistance(gdd::detail::ConstValue const& lhs, gdd::detail::ConstV
             if (!std::holds_alternative<std::string>(rhs)) {
                 throw std::logic_error("Expected string in RHS for edit distance metric");
             }
-            return EditDistance(std::get<std::string>(lhs), std::get<std::string>(rhs));
+            return util::LevenshteinDistance(std::get<std::string>(lhs),
+                                             std::get<std::string>(rhs));
 
         default:
             throw std::logic_error("Unimplemented distance metric type");
@@ -125,16 +108,16 @@ std::optional<gdd::vertex_t> Gdd::FindPatternVertexById(size_t id) const {
 }
 
 bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
-                              std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& map,
+                              std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
                               gdd::detail::DistanceConstraint const& constraint) const {
     using namespace gdd::detail;
 
-    auto resolve_graph_vertex = [this, &map](std::size_t pv_id) -> std::optional<gdd::vertex_t> {
+    auto resolve_graph_vertex = [this, &pg_map](std::size_t pv_id) -> std::optional<gdd::vertex_t> {
         auto const pv = FindPatternVertexById(pv_id);
         if (!pv) return std::nullopt;
 
-        auto const gv_it = map.find(*pv);
-        if (gv_it == map.end()) {
+        auto const gv_it = pg_map.find(*pv);
+        if (gv_it == pg_map.end()) {
             return std::nullopt;
         }
 
@@ -157,9 +140,9 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
     auto collect_relation_targets = [&g](gdd::vertex_t gv, std::string const& rel_label) {
         std::unordered_set<gdd::vertex_t> targets;
 
-        for (auto [eit, eend] = boost::out_edges(gv, g); eit != eend; ++eit) {
-            if (std::string const& lab = g[*eit].label; lab == rel_label) {  // TODO: wildcards
-                targets.insert(boost::target(*eit, g));
+        for (auto [edge_it, eend] = boost::out_edges(gv, g); edge_it != eend; ++edge_it) {
+            if (std::string const& lab = g[*edge_it].label; lab == rel_label) {  // TODO: wildcards
+                targets.insert(boost::target(*edge_it, g));
             }
         }
         return targets;
@@ -208,8 +191,8 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
                     collect_relation_targets(gv_rhs, rhs_relname);
 
             bool intersect = false;
-            for (auto const& t : lhs_targets) {
-                if (rhs_targets.contains(t)) {
+            for (auto const& vertex : lhs_targets) {
+                if (rhs_targets.contains(vertex)) {
                     intersect = true;
                     break;
                 }
@@ -262,4 +245,23 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
     return CompareDistance(dist, constraint.op, constraint.threshold);
 }
 
+GddCounterexample BuildCounterexample(
+        gdd::graph_t const& pattern, gdd::graph_t const& graph,
+        std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& mapping) {
+    GddCounterexample ce{};
+    ce.match.reserve(mapping.size());
+
+    for (auto const& [pv, gv] : mapping) {
+        ce.match.push_back({
+                .pattern_vertex_id = pattern[pv].id,
+                .pattern_vertex_label = pattern[pv].label,
+                .graph_vertex_id = graph[gv].id,
+                .graph_vertex_label = graph[gv].label,
+                .graph_vertex_attributes = graph[gv].attributes,
+        });
+    }
+
+    std::ranges::sort(ce.match, {}, &GddCounterexampleVertex::pattern_vertex_id);
+    return ce;
+}
 }  // namespace model

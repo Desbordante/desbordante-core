@@ -20,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",    
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -34,7 +34,7 @@ DESBORDANTE_BUILD_TESTS = "OFF"
 DESBORDANTE_UNPACK_DATASETS = "OFF"
 ASAN = "OFF"
 CMAKE_BUILD_TYPE = "Release"
-CPM_SOURCE_CACHE = {env="CPM_SOURCE_CACHE", default = "./cmake/cpm-cache"}
+CPM_SOURCE_CACHE = { env = "CPM_SOURCE_CACHE", default = "./cmake/cpm-cache" }
 
 [tool.scikit-build.sdist]
 include = ["lib/*"]
@@ -60,11 +60,10 @@ extend-exclude = [
 extend-ignore-re = [
     # C++ standard library
     "countr_zero",
-
     # These strings contain words that are often legitimate typos on their own,
     # but they are not typos in the context here, they're just used as dummy strings.
     '"(ba|helo|abd)"', # typos for "by/be", "hello", "and/bad"
-    "// Частоты: abc:2, abd:1",  # "abd" is a typo for "and/bad"
+    "// Частоты: abc:2, abd:1", # "abd" is a typo for "and/bad"
 
     # "nd" is a common typo for "and", but Numerical Dependency, abbreviated as "ND",
     # is a legitimate pattern type. These are the strings referring to it.
@@ -77,7 +76,6 @@ extend-ignore-re = [
     "ND verification",
     "Weight of ND",
     "7ND-93L",
-
     # Academic references and Proper names
     "BA thesis\\.pdf", # "BA" is Bachelor of Arts (typo for "BY" or "BE")
     "Comput\\. J\\.", # "Comput" is short for Computer (typo for "Compute")
@@ -131,3 +129,15 @@ extend-ignore-re = [
     "ser\\.iloc\\[pos\\]", # "ser" is short for pandas Series
     "flights_dd_dif_tabl", # "dif" / "tabl" are short for difference / table
 ]
+
+# For GDD, "rela" is an abbreviation for the "relation"
+[tool.typos.type.gdd]
+extend-glob = [
+    "*gdd*.cpp",
+    "*gdd*.h",
+    "*gdd*.py",
+]
+[tool.typos.type.gdd.extend-identifiers]
+rela = "rela"
+[tool.typos.type.gdd.extend-words]
+rela = "rela"

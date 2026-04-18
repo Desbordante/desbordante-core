@@ -38,7 +38,7 @@ using ConstValue = std::variant<int64_t, double, std::string>;
 using DistanceOperand = std::variant<GddToken, ConstValue>;
 
 enum class DistanceMetric : std::uint8_t { kAbsDiff, kEditDistance };
-enum class CmpOp : std::uint8_t { kEq, kLe };
+enum class CmpOp : std::uint8_t { kLe, kGe, kLt, kGt, kEq, kNe };
 
 struct DistanceConstraint {
     DistanceOperand lhs;
@@ -70,7 +70,7 @@ private:
     std::optional<gdd::vertex_t> FindPatternVertexById(size_t id) const;
 
     bool SatisfiesConstraint(gdd::graph_t const& g,
-                             std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& map,
+                             std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
                              gdd::detail::DistanceConstraint const& constraint) const;
 
     bool SatisfiesPhi(gdd::graph_t const& g,
@@ -119,5 +119,23 @@ public:
         return true;
     }
 };
+
+struct GddCounterexampleVertex {
+    std::size_t pattern_vertex_id;
+    std::string pattern_vertex_label;
+
+    std::size_t graph_vertex_id;
+    std::string graph_vertex_label;
+    std::unordered_map<std::string, std::string> graph_vertex_attributes;
+};
+
+struct GddCounterexample {
+    std::size_t gdd_index;
+    std::vector<GddCounterexampleVertex> match;
+};
+
+GddCounterexample BuildCounterexample(
+        gdd::graph_t const& pattern, gdd::graph_t const& graph,
+        std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& mapping);
 
 }  // namespace model
