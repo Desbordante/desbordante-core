@@ -2,7 +2,6 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gdd/gdd.h"
-#include "core/algorithms/gdd/gdd_graph_description.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/parser/graph_parser/graph_parser.h"
@@ -24,43 +23,32 @@ void GddValidator::RegisterOptions() {
 
     RegisterOption(Option{&graph_path_, kGraphData, kDGraphData});
     RegisterOption(Option{&gdds_, kGddData, kDGddData});
-    RegisterOption(Option{&print_reason_, kGddPrintNotHoldsReason, kDGddPrintNotHoldsReason});
-    RegisterOption(
-            Option{&print_reason_, kGddPrintNotHoldsReason, kDGddPrintNotHoldsReason, false});
+    MakeOptionsAvailable({kGraphData, kGddData});
 }
 
 GddValidator::GddValidator() : Algorithm() {
     RegisterOptions();
-    MakeOptionsAvailable({config::names::kGraphData, config::names::kGddData,
-                          config::names::kGddPrintNotHoldsReason});
 }
-
-GddValidator::GddValidator(model::gdd::graph_t const& graph, std::vector<model::Gdd> gdds)
-    : Algorithm(), graph_(graph), gdds_(std::move(gdds)) {}
 
 void GddValidator::LoadDataInternal() {
     graph_ = parser::graph_parser::gdd::ReadGraph(graph_path_);
 }
 
 void GddValidator::FilterValidGdds() {
-    result_.clear();
-    counterexamples_.clear();
+    ResetState();
 
-    for (std::size_t i = 0; i < gdds_.size(); ++i) {
-        GddCounterexample ce;
-
-        if (bool const holds = Holds(gdds_[i], graph_, &ce); holds) {
-            result_.push_back(gdds_[i]);
-            continue;
-        }
-
-        ce.gdd_index = i;
-        counterexamples_.push_back(std::move(ce));
-    }
-
-    // result_.clear();
-    // std::ranges::copy_if(gdds_, std::back_inserter(result_),
-    //                      [this](model::Gdd const& gdd) { return Holds(gdd, graph_); });
+    std::size_t gdd_index = 0;
+    std::ranges::copy_if(gdds_, std::back_inserter(result_),
+                         [this, &gdd_index](model::Gdd const& gdd) {
+                             if (auto ce = Holds(gdd, graph_); ce.has_value()) {
+                                 ce->gdd_index = gdd_index;
+                                 counterexamples_.emplace_back(std::move(*ce));
+                                 ++gdd_index;
+                                 return false;
+                             }
+                             ++gdd_index;
+                             return true;
+                         });
 }
 
 }  // namespace algos

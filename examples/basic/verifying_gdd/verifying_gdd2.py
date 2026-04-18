@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import desbordante
 from desbordante.gdd import AttrAttr, CmpOp as Op
 from desbordante.gdd import DistanceMetric as M
-from desbordante.gdd import GddFromDot
+from desbordante.gdd import GddFromDotString
 
 
 class bcolors:
@@ -69,8 +69,8 @@ Here this is not a corner case but exactly the desired behavior: if
 to map to the same Country.
 """
 
-API_INFO = r"""This example constructs the dependency with GddFromDot, that is,
-directly from a DOT string embedded in Python.
+API_INFO = r"""This example constructs the dependency with GddFromDotString,
+that is, directly from a DOT string embedded in Python.
 
 This is convenient for compact and self-contained examples. If the
 pattern is already stored in the repository as a DOT file, the same
@@ -196,7 +196,7 @@ digraph P {
 }
 """
 
-GDD_COUNTRY_AGREEMENT = GddFromDot(
+GDD_COUNTRY_AGREEMENT = GddFromDotString(
     PATTERN_DOT,
     lhs=[],
     rhs=[
@@ -302,7 +302,7 @@ def main() -> None:
     else:
         print("GDD does not hold.\n")
         print(
-            "This is likely a data inconsistency: one city is connected to "
+            "This is likely a data inconsistency: one city is connected to\n"
             "different countries through `capital_of` and `located_in`.\n"
         )
 
