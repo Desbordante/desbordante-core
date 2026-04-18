@@ -22,23 +22,107 @@ std::vector<vertex_t> FindAllWithLabel(int target_label, graph_t const& graph) {
     return graph[boost::graph_bundle].label_to_vertices.at(target_label);
 }
 
+struct FlatIsoms {
+    std::vector<vertex_t> data;
+    std::vector<size_t> offsets;
+
+    void clear() {
+        data.clear();
+        offsets.clear();
+    }
+
+    size_t size() const {
+        return offsets.size();
+    }
+
+    void swap(FlatIsoms& other) {
+        data.swap(other.data);
+        offsets.swap(other.offsets);
+    }
+
+    struct Proxy {
+        vertex_t const* ptr;
+        size_t sz;
+
+        size_t size() const {
+            return sz;
+        }
+
+        vertex_t operator[](size_t i) const {
+            return ptr[i];
+        }
+
+        vertex_t const* begin() const {
+            return ptr;
+        }
+
+        vertex_t const* end() const {
+            return ptr + sz;
+        }
+    };
+
+    void push(Proxy const& iso) {
+        offsets.push_back(data.size());
+        data.insert(data.end(), iso.begin(), iso.end());
+    }
+
+    void push_with_extra(Proxy const& iso, vertex_t extra) {
+        offsets.push_back(data.size());
+        data.insert(data.end(), iso.begin(), iso.end());
+        data.push_back(extra);
+    }
+
+    Proxy operator[](size_t i) const {
+        size_t start = offsets[i];
+        size_t end = (i + 1 < offsets.size()) ? offsets[i + 1] : data.size();
+        return {data.data() + start, end - start};
+    }
+
+    struct Iterator {
+        FlatIsoms const* list;
+        size_t idx;
+
+        Proxy operator*() const {
+            return (*list)[idx];
+        }
+
+        Iterator& operator++() {
+            ++idx;
+            return *this;
+        }
+
+        bool operator!=(Iterator const& other) const {
+            return idx != other.idx;
+        }
+    };
+
+    Iterator begin() const {
+        return {this, 0};
+    }
+
+    Iterator end() const {
+        return {this, offsets.size()};
+    }
+};
+
 // Find all isomorphisms between graph described by DFSCode and boost::graph, each
 // isomorphism is represented by a map
-std::vector<std::vector<vertex_t>> const& SubgraphIsomorphisms(DFSCode const& code,
-                                                               graph_t const& graph) {
+FlatIsoms const& SubgraphIsomorphisms(DFSCode const& code, graph_t const& graph) {
     LOG_TRACE("Finding subgraph isomorphisms: pattern size={}, target vertices={}, edges={}",
               code.Size(), boost::num_vertices(graph), boost::num_edges(graph));
-    thread_local std::vector<std::vector<vertex_t>> isoms;
-    thread_local std::vector<std::vector<vertex_t>> update_isoms;
+    thread_local FlatIsoms isoms;
+    thread_local FlatIsoms update_isoms;
     isoms.clear();
 
     // Initial isomorphisms by finding all vertices with same label as vertex 0 in code
     int start_label = code.GetExtendedEdges()[0].vertex1.label;
     auto const vertices = FindAllWithLabel(start_label, graph);
-    isoms.reserve(vertices.size());
+    isoms.offsets.reserve(vertices.size());
+    isoms.data.reserve(vertices.size());
 
     for (vertex_t vertex : vertices) {
-        isoms.push_back({vertex});
+        isoms.offsets.push_back(isoms.data.size());
+        isoms.data.push_back(vertex);
     }
     LOG_TRACE("Initial candidate mappings: {}", isoms.size());
 
@@ -54,8 +138,9 @@ std::vector<std::vector<vertex_t>> const& SubgraphIsomorphisms(DFSCode const& co
         int edge_label = ee.label;
 
         update_isoms.clear();
-        update_isoms.reserve(isoms.size());
-        for (auto& iso : isoms) {
+        update_isoms.offsets.reserve(isoms.size());
+        update_isoms.data.reserve(isoms.data.size());
+        for (auto iso : isoms) {
             auto mapped_v1 = iso[v1];
 
             // If it is a forward edge extension
@@ -72,12 +157,7 @@ std::vector<std::vector<vertex_t>> const& SubgraphIsomorphisms(DFSCode const& co
 
                     if (v2_label == graph[mapped_v2].label && (inv[mapped_v2] == -1) &&
                         (edge_label == mapped_edge.label)) {
-                        std::vector<vertex_t> temp_map;
-                        temp_map.reserve(iso.size() + 1);
-                        temp_map = iso;
-                        temp_map.push_back(mapped_v2);
-
-                        update_isoms.push_back(std::move(temp_map));
+                        update_isoms.push_with_extra(iso, mapped_v2);
                     }
                 }
             } else {
@@ -86,11 +166,11 @@ std::vector<std::vector<vertex_t>> const& SubgraphIsomorphisms(DFSCode const& co
                 auto mapped_v2 = iso[v2];
                 auto [mapped_edge, is_neighbors] = boost::edge(mapped_v1, mapped_v2, graph);
                 if (is_neighbors && edge_label == graph[mapped_edge].label) {
-                    update_isoms.push_back(std::move(iso));
+                    update_isoms.push(iso);
                 }
             }
 
-            for (int dfs_id = 0; dfs_id < iso.size(); ++dfs_id) {
+            for (size_t dfs_id = 0; dfs_id < iso.size(); ++dfs_id) {
                 inv[iso[dfs_id]] = -1;
             }
         }
@@ -417,9 +497,9 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emi
         auto n = boost::num_vertices(graph);
         std::vector<int> inverted_isom(n, -1);
         LOG_TRACE("Found {} embeddings for extension", isoms.size());
-        for (auto& isom : isoms) {
+        for (auto isom : isoms) {
             // Backward extensions from rightmost child
-            for (int dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
+            for (size_t dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
                 inverted_isom[isom[dfs_id]] = dfs_id;
             }
 
@@ -463,7 +543,7 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emi
                     }
                 }
             }
-            for (int dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
+            for (size_t dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
                 inverted_isom[isom[dfs_id]] = -1;
             }
         }
