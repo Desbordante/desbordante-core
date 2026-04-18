@@ -1,12 +1,13 @@
 #include "python_bindings/gdd/bind_gdd.h"
 
+#include <pybind11/pybind11.h>
+
 #include <filesystem>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
@@ -106,10 +107,10 @@ std::string Repr(model::gdd::detail::CmpOp op) {
 void BindGdd(pybind11::module_& main_module) {
     namespace py = pybind11;
     using algos::Algorithm;
-    using algos::GddValidator;
-    using algos::NaiveGddValidator;
     using algos::GddCounterexample;
     using algos::GddCounterexampleVertex;
+    using algos::GddValidator;
+    using algos::NaiveGddValidator;
     using model::Gdd;
     using model::gdd::graph_t;
     using model::gdd::detail::AttrTag;
@@ -455,7 +456,7 @@ void BindGdd(pybind11::module_& main_module) {
             .def("__eq__", [](Gdd const& lhs, Gdd const& rhs) { return lhs == rhs; });
 
     gdd_module.def(
-            "GddFromDot",
+            "GddFromDotString",
             [](std::string const& pattern_dot, std::vector<DistanceConstraint> lhs,
                std::vector<DistanceConstraint> rhs) {
                 std::stringstream ss(pattern_dot);
@@ -479,9 +480,8 @@ void BindGdd(pybind11::module_& main_module) {
 
     auto const gdd_algos_module = gdd_module.def_submodule("algorithms");
 
-    auto default_cls =
-            detail::RegisterAlgorithm<NaiveGddValidator, GddValidator>(
-                    gdd_algos_module, "NaiveGddValidator");
+    auto default_cls = detail::RegisterAlgorithm<NaiveGddValidator, GddValidator>(
+            gdd_algos_module, "NaiveGddValidator");
 
     gdd_algos_module.attr("Default") = default_cls;
     gdd_module.attr("Default") = gdd_algos_module.attr("Default");

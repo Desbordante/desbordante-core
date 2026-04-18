@@ -45,20 +45,17 @@ struct AttrConstCase {
     bool expect_throw = false;
 };
 
-class GddSatisfiesAttrConstTest : public ::testing::TestWithParam<AttrConstCase> {
-};
+class GddSatisfiesAttrConstTest : public ::testing::TestWithParam<AttrConstCase> {};
 
 TEST_P(GddSatisfiesAttrConstTest, WorksAsExpected) {
     AttrConstCase const& tc = GetParam();
 
     graph_t p = MakeSingleVertexPattern(1, "X");
-    DistanceConstraint const c =
-            AttrConst(1, tc.attr_name, tc.rhs, tc.metric, tc.op, tc.threshold);
+    DistanceConstraint const c = AttrConst(1, tc.attr_name, tc.rhs, tc.metric, tc.op, tc.threshold);
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
     graph_t g;
-    auto const gv = AddVertex(g, tc.graph_vertex_id, tc.graph_vertex_label,
-                              tc.graph_vertex_attrs);
+    auto const gv = AddVertex(g, tc.graph_vertex_id, tc.graph_vertex_label, tc.graph_vertex_attrs);
     auto const pv = FindPatternVertex(p, 1);
     std::unordered_map<vertex_t, vertex_t> const map{{pv, gv}};
 
@@ -271,15 +268,14 @@ struct AttrAttrCase {
     bool expected;
 };
 
-class GddSatisfiesAttrAttrTest : public ::testing::TestWithParam<AttrAttrCase> {
-};
+class GddSatisfiesAttrAttrTest : public ::testing::TestWithParam<AttrAttrCase> {};
 
 TEST_P(GddSatisfiesAttrAttrTest, WorksAsExpected) {
     AttrAttrCase const& tc = GetParam();
 
     graph_t p = MakeTwoVertexPattern(1, 2, "A", "B");
-    DistanceConstraint const c = AttrAttr(1, tc.lhs_attr_name, 2, tc.rhs_attr_name,
-                                          tc.metric, tc.op, tc.threshold);
+    DistanceConstraint const c =
+            AttrAttr(1, tc.lhs_attr_name, 2, tc.rhs_attr_name, tc.metric, tc.op, tc.threshold);
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
     graph_t g;
@@ -292,38 +288,37 @@ TEST_P(GddSatisfiesAttrAttrTest, WorksAsExpected) {
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-        AttrAttrCases, GddSatisfiesAttrAttrTest,
-        ::testing::Values(
-                AttrAttrCase{
-                        .case_name = "AbsDiffBetweenTwoMappedVertices",
-                        .lhs_graph_id = 10,
-                        .rhs_graph_id = 12,
-                        .lhs_graph_label = "A",
-                        .rhs_graph_label = "B",
-                        .lhs_attr_name = "id",
-                        .rhs_attr_name = "id",
-                        .metric = DistanceMetric::kAbsDiff,
-                        .op = CmpOp::kLe,
-                        .threshold = 2.0,
-                        .expected = true,
-                },
-                AttrAttrCase{
-                        .case_name = "AbsDiffFailsBetweenTwoMappedVertices",
-                        .lhs_graph_id = 10,
-                        .rhs_graph_id = 12,
-                        .lhs_graph_label = "A",
-                        .rhs_graph_label = "B",
-                        .lhs_attr_name = "id",
-                        .rhs_attr_name = "id",
-                        .metric = DistanceMetric::kAbsDiff,
-                        .op = CmpOp::kLe,
-                        .threshold = 1.0,
-                        .expected = false,
-                }),
-        [](testing::TestParamInfo<AttrAttrCase> const& info) {
-            return SanitizeParamName(info.param.case_name);
-        });
+INSTANTIATE_TEST_SUITE_P(AttrAttrCases, GddSatisfiesAttrAttrTest,
+                         ::testing::Values(
+                                 AttrAttrCase{
+                                         .case_name = "AbsDiffBetweenTwoMappedVertices",
+                                         .lhs_graph_id = 10,
+                                         .rhs_graph_id = 12,
+                                         .lhs_graph_label = "A",
+                                         .rhs_graph_label = "B",
+                                         .lhs_attr_name = "id",
+                                         .rhs_attr_name = "id",
+                                         .metric = DistanceMetric::kAbsDiff,
+                                         .op = CmpOp::kLe,
+                                         .threshold = 2.0,
+                                         .expected = true,
+                                 },
+                                 AttrAttrCase{
+                                         .case_name = "AbsDiffFailsBetweenTwoMappedVertices",
+                                         .lhs_graph_id = 10,
+                                         .rhs_graph_id = 12,
+                                         .lhs_graph_label = "A",
+                                         .rhs_graph_label = "B",
+                                         .lhs_attr_name = "id",
+                                         .rhs_attr_name = "id",
+                                         .metric = DistanceMetric::kAbsDiff,
+                                         .op = CmpOp::kLe,
+                                         .threshold = 1.0,
+                                         .expected = false,
+                                 }),
+                         [](testing::TestParamInfo<AttrAttrCase> const& info) {
+                             return SanitizeParamName(info.param.case_name);
+                         });
 
 struct RelConstCase {
     std::string case_name;
@@ -331,8 +326,7 @@ struct RelConstCase {
     bool expected;
 };
 
-class GddSatisfiesRelConstTest : public ::testing::TestWithParam<RelConstCase> {
-};
+class GddSatisfiesRelConstTest : public ::testing::TestWithParam<RelConstCase> {};
 
 TEST_P(GddSatisfiesRelConstTest, WorksAsExpected) {
     RelConstCase const& tc = GetParam();
@@ -352,22 +346,21 @@ TEST_P(GddSatisfiesRelConstTest, WorksAsExpected) {
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-        RelConstCases, GddSatisfiesRelConstTest,
-        ::testing::Values(
-                RelConstCase{
-                        .case_name = "SatisfiedWhenEdgeEndsAtCr",
-                        .actual_edge_label = "knows",
-                        .expected = true,
-                },
-                RelConstCase{
-                        .case_name = "FailsWhenNoSuchEdge",
-                        .actual_edge_label = "likes",
-                        .expected = false,
-                }),
-        [](testing::TestParamInfo<RelConstCase> const& info) {
-            return SanitizeParamName(info.param.case_name);
-        });
+INSTANTIATE_TEST_SUITE_P(RelConstCases, GddSatisfiesRelConstTest,
+                         ::testing::Values(
+                                 RelConstCase{
+                                         .case_name = "SatisfiedWhenEdgeEndsAtCr",
+                                         .actual_edge_label = "knows",
+                                         .expected = true,
+                                 },
+                                 RelConstCase{
+                                         .case_name = "FailsWhenNoSuchEdge",
+                                         .actual_edge_label = "likes",
+                                         .expected = false,
+                                 }),
+                         [](testing::TestParamInfo<RelConstCase> const& info) {
+                             return SanitizeParamName(info.param.case_name);
+                         });
 
 struct RelRelCase {
     std::string case_name;
@@ -379,15 +372,13 @@ struct RelRelCase {
     bool expected;
 };
 
-class GddSatisfiesRelRelTest : public ::testing::TestWithParam<RelRelCase> {
-};
+class GddSatisfiesRelRelTest : public ::testing::TestWithParam<RelRelCase> {};
 
 TEST_P(GddSatisfiesRelRelTest, WorksAsExpected) {
     RelRelCase const& tc = GetParam();
 
     graph_t p = MakeTwoVertexPattern(1, 2, "A", "C");
-    DistanceConstraint const c =
-            RelRel(1, tc.lhs_rel_name, 2, tc.rhs_rel_name);
+    DistanceConstraint const c = RelRel(1, tc.lhs_rel_name, 2, tc.rhs_rel_name);
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
     graph_t g;
@@ -412,39 +403,38 @@ TEST_P(GddSatisfiesRelRelTest, WorksAsExpected) {
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-        RelRelCases, GddSatisfiesRelRelTest,
-        ::testing::Values(
-                RelRelCase{
-                        .case_name = "SatisfiedWhenTargetsIntersect",
-                        .lhs_rel_name = "knows",
-                        .rhs_rel_name = "knows",
-                        .lhs_edge_label = "knows",
-                        .rhs_edge_label = "knows",
-                        .use_shared_target = true,
-                        .expected = true,
-                },
-                RelRelCase{
-                        .case_name = "FailsWhenTargetsDoNotIntersect",
-                        .lhs_rel_name = "knows",
-                        .rhs_rel_name = "knows",
-                        .lhs_edge_label = "knows",
-                        .rhs_edge_label = "knows",
-                        .use_shared_target = false,
-                        .expected = false,
-                },
-                RelRelCase{
-                        .case_name = "FailsWhenRelationNamesDiffer",
-                        .lhs_rel_name = "knows",
-                        .rhs_rel_name = "likes",
-                        .lhs_edge_label = "knows",
-                        .rhs_edge_label = "likes",
-                        .use_shared_target = true,
-                        .expected = false,
-                }),
-        [](testing::TestParamInfo<RelRelCase> const& info) {
-            return SanitizeParamName(info.param.case_name);
-        });
+INSTANTIATE_TEST_SUITE_P(RelRelCases, GddSatisfiesRelRelTest,
+                         ::testing::Values(
+                                 RelRelCase{
+                                         .case_name = "SatisfiedWhenTargetsIntersect",
+                                         .lhs_rel_name = "knows",
+                                         .rhs_rel_name = "knows",
+                                         .lhs_edge_label = "knows",
+                                         .rhs_edge_label = "knows",
+                                         .use_shared_target = true,
+                                         .expected = true,
+                                 },
+                                 RelRelCase{
+                                         .case_name = "FailsWhenTargetsDoNotIntersect",
+                                         .lhs_rel_name = "knows",
+                                         .rhs_rel_name = "knows",
+                                         .lhs_edge_label = "knows",
+                                         .rhs_edge_label = "knows",
+                                         .use_shared_target = false,
+                                         .expected = false,
+                                 },
+                                 RelRelCase{
+                                         .case_name = "FailsWhenRelationNamesDiffer",
+                                         .lhs_rel_name = "knows",
+                                         .rhs_rel_name = "likes",
+                                         .lhs_edge_label = "knows",
+                                         .rhs_edge_label = "likes",
+                                         .use_shared_target = true,
+                                         .expected = false,
+                                 }),
+                         [](testing::TestParamInfo<RelRelCase> const& info) {
+                             return SanitizeParamName(info.param.case_name);
+                         });
 
 TEST(GddSatisfiesConstraint, EmptyLhsRhsSatisfies) {
     graph_t p = MakeSingleVertexPattern(1, "X");

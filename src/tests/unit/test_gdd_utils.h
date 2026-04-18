@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include <boost/graph/graph_traits.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <gtest/gtest.h>
 
@@ -240,4 +239,4 @@ inline DistanceConstraint MakeAttrEditDistanceLe(std::size_t pattern_vid, std::s
     };
 }
 
-}  // namespace tests::gdd_test_utils
+}  // namespace tests

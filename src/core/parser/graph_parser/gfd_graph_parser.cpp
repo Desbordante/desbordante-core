@@ -174,6 +174,6 @@ void WriteGfd(std::filesystem::path const& path, model::Gfd const& result) {
     f.close();
 };
 
-}  // namespace graph_parser
+}  // namespace graph_parser::gfd
 
 }  // namespace parser

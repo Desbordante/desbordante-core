@@ -32,7 +32,6 @@ GddValidator::GddValidator() : Algorithm() {
 }
 
 void GddValidator::LoadDataInternal() {
-    LOG_ERROR("{}", graph_path_.string());
     graph_ = parser::graph_parser::gdd::ReadGraph(graph_path_);
 }
 

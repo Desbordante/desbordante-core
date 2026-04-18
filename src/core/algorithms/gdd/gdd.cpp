@@ -65,13 +65,13 @@ size_t EditDistance(std::string_view a, std::string_view b) {
 }
 
 bool CompareDistance(double dist, gdd::detail::CmpOp op, double threshold) {
-    constexpr double kEps = std::numeric_limits<double>::epsilon();
-    using enum gdd::detail::CmpOp;
+    constexpr double eps = std::numeric_limits<double>::epsilon();
+    using ::model::gdd::detail::CmpOp;
 
     switch (op) {
-        case kEq:
-            return std::abs(dist - threshold) <= kEps;
-        case kLe:
+        case CmpOp::kEq:
+            return std::abs(dist - threshold) <= eps;
+        case CmpOp::kLe:
             return dist <= threshold;
         default:
             throw std::logic_error("Unimplemented distance compare operation");
@@ -87,11 +87,7 @@ double TryParseNumber(gdd::detail::ConstValue const& val) {
     }
 
     std::string const& s = std::get<std::string>(val);
-    double result;
-    if (std::from_chars(s.data(), s.data() + s.size(), result).ec != std::errc()) {
-        throw std::logic_error(std::string("Invalid number in gdd attribute: ") + s);
-    }
-    return result;
+    return std::stod(s);
 }
 
 double CalculateDistance(gdd::detail::ConstValue const& lhs, gdd::detail::ConstValue const& rhs,
@@ -157,9 +153,9 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
     auto collect_relation_targets = [&g](gdd::vertex_t gv, std::string const& rel_label) {
         std::unordered_set<gdd::vertex_t> targets;
 
-        for (auto [eit, eend] = boost::out_edges(gv, g); eit != eend; ++eit) {
-            if (std::string const& lab = g[*eit].label; lab == rel_label) {  // TODO: wildcards
-                targets.insert(boost::target(*eit, g));
+        for (auto [edge_it, eend] = boost::out_edges(gv, g); edge_it != eend; ++edge_it) {
+            if (std::string const& lab = g[*edge_it].label; lab == rel_label) {  // TODO: wildcards
+                targets.insert(boost::target(*edge_it, g));
             }
         }
         return targets;

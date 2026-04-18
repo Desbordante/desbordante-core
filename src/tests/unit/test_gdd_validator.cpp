@@ -36,42 +36,42 @@ std::string SanitizeParamName(std::string name) {
     return name;
 }
 
-Gdd MakeGdd_MishaLivesInAmsterdam() {
+Gdd MakeGddMishaLivesInAmsterdam() {
     auto pattern = PatternPersonCity("lives_in");
     Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Misha")};
     Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Amsterdam")};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-Gdd MakeGdd_RigaInLatvia() {
+Gdd MakeGddRigaInLatvia() {
     auto pattern = PatternCityCountry("in_country");
     Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Riga")};
     Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Latvia")};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-Gdd MakeGdd_VacuousImplication_NonexistentPerson() {
+Gdd MakeGddVacuousImplicationNonexistentPerson() {
     auto pattern = PatternPersonCity("lives_in");
     Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Nonexistent")};
     Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Nowhere")};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-Gdd MakeGdd_CompanyHqInAmsterdam_NoCompanyInGraph() {
+Gdd MakeGddCompanyHqInAmsterdamNoCompanyInGraph() {
     auto pattern = PatternCompanyCity("hq_in");
     Gdd::Phi lhs{};
     Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Amsterdam")};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-Gdd MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint() {
+Gdd MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint() {
     auto pattern = PatternPersonCity("lives_in");
     Gdd::Phi lhs{AbsDiffLeAttrToConst(0, "age", model::gdd::detail::ConstValue{25LL}, 0.0)};
     Gdd::Phi rhs{RelToConst(0, "lives_in", 101)};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-Gdd MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity() {
+Gdd MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity() {
     auto pattern = PatternPersonCity("lives_in");
     Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Misha")};
     Gdd::Phi rhs{EditLeStrAttrToConst(1, "label", "Coty", 1.0)};
@@ -108,7 +108,7 @@ std::string LargeGraph_AllGood_Dot() {
     })";
 }
 
-std::string LargeGraph_WithViolation_MishaAlsoLivesInRiga_Dot() {
+std::string LargeGraphWithViolationMishaAlsoLivesInRigaDot() {
     return R"(digraph G {
         1 [label="Person", name="Misha", age="25", email="m@x"];
         2 [label="Person", name="Bob",   age="31"];
@@ -137,7 +137,7 @@ std::string LargeGraph_WithViolation_MishaAlsoLivesInRiga_Dot() {
     })";
 }
 
-std::string Graph_NoMatchesForCompanyCity_Dot() {
+std::string GraphNoMatchesForCompanyCityDot() {
     return R"(digraph G {
         1 [label="Person", name="Misha"];
         2 [label="Person", name="Bob"];
@@ -145,7 +145,7 @@ std::string Graph_NoMatchesForCompanyCity_Dot() {
     })";
 }
 
-std::string DblpLikeGraph_Dot() {
+std::string DblpLikeGraphDot() {
     return R"(digraph G {
         1 [label="Author", name="Jiawei Han", canonical_author_id="author:han_jiawei"];
         2 [label="Author", name="J. Han",     canonical_author_id="author:han_jiawei"];
@@ -212,7 +212,7 @@ graph_t PatternDblpWeak() {
     })");
 }
 
-Gdd MakeGdd_DblpStrongAuthorResolution() {
+Gdd MakeGddDblpStrongAuthorResolution() {
     auto pattern = PatternDblpStrong();
     Gdd::Phi lhs{
             EditLeAttrToAttr(0, "name", 1, "name", 8.0),
@@ -224,7 +224,7 @@ Gdd MakeGdd_DblpStrongAuthorResolution() {
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-Gdd MakeGdd_DblpWeakAuthorResolution() {
+Gdd MakeGddDblpWeakAuthorResolution() {
     auto pattern = PatternDblpWeak();
     Gdd::Phi lhs{
             EditLeAttrToAttr(0, "name", 1, "name", 2.0),
@@ -283,11 +283,12 @@ INSTANTIATE_TEST_SUITE_P(
         ValidatorCases, GddValidatorCasesTest,
         ::testing::Values(
                 [] {
-                    auto const g1 = MakeGdd_MishaLivesInAmsterdam();
-                    auto const g2 = MakeGdd_RigaInLatvia();
-                    auto const g3 = MakeGdd_VacuousImplication_NonexistentPerson();
-                    auto const g4 = MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint();
-                    auto const g5 = MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity();
+                    auto const g1 = MakeGddMishaLivesInAmsterdam();
+                    auto const g2 = MakeGddRigaInLatvia();
+                    auto const g3 = MakeGddVacuousImplicationNonexistentPerson();
+                    auto const g4 =
+                            MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint();
+                    auto const g5 = MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity();
 
                     return ValidatorCase{
                             .case_name = "LargeGraphAllSatisfied",
@@ -298,23 +299,24 @@ INSTANTIATE_TEST_SUITE_P(
                     };
                 }(),
                 [] {
-                    auto const gdd_bad = MakeGdd_MishaLivesInAmsterdam();
-                    auto const gdd_ok1 = MakeGdd_RigaInLatvia();
-                    auto const gdd_ok2 = MakeGdd_VacuousImplication_NonexistentPerson();
+                    auto const gdd_bad = MakeGddMishaLivesInAmsterdam();
+                    auto const gdd_ok1 = MakeGddRigaInLatvia();
+                    auto const gdd_ok2 = MakeGddVacuousImplicationNonexistentPerson();
                     auto const gdd_ok3 =
-                            MakeGdd_PersonAge25ImpliesLivesInAmsterdam_AsRelationConstraint();
-                    auto const gdd_ok4 = MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity();
+                            MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint();
+                    auto const gdd_ok4 =
+                            MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity();
 
                     return ValidatorCase{
                             .case_name = "LargeGraphDetectsViolation",
                             .temp_file_name = "gdd_large_graph_with_violation.dot",
-                            .graph_dot = LargeGraph_WithViolation_MishaAlsoLivesInRiga_Dot(),
+                            .graph_dot = LargeGraphWithViolationMishaAlsoLivesInRigaDot(),
                             .input_gdds = {gdd_bad, gdd_ok1, gdd_ok2, gdd_ok3, gdd_ok4},
                             .expected_valid_gdds = {gdd_ok1, gdd_ok2, gdd_ok3, gdd_ok4},
                     };
                 }(),
                 [] {
-                    auto const gdd = MakeGdd_LabelConstraint_PersonImpliesCityLabelCloseToCity();
+                    auto const gdd = MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity();
 
                     return ValidatorCase{
                             .case_name = "UsesCustomAttributesAndLabel",
@@ -325,24 +327,24 @@ INSTANTIATE_TEST_SUITE_P(
                     };
                 }(),
                 [] {
-                    auto const gdd = MakeGdd_CompanyHqInAmsterdam_NoCompanyInGraph();
+                    auto const gdd = MakeGddCompanyHqInAmsterdamNoCompanyInGraph();
 
                     return ValidatorCase{
                             .case_name = "EmptyMatchSetIsSatisfied",
                             .temp_file_name = "gdd_no_matches_company_city.dot",
-                            .graph_dot = Graph_NoMatchesForCompanyCity_Dot(),
+                            .graph_dot = GraphNoMatchesForCompanyCityDot(),
                             .input_gdds = {gdd},
                             .expected_valid_gdds = {gdd},
                     };
                 }(),
                 [] {
-                    auto const weak_gdd = MakeGdd_DblpWeakAuthorResolution();
-                    auto const strong_gdd = MakeGdd_DblpStrongAuthorResolution();
+                    auto const weak_gdd = MakeGddDblpWeakAuthorResolution();
+                    auto const strong_gdd = MakeGddDblpStrongAuthorResolution();
 
                     return ValidatorCase{
                             .case_name = "DblpStrongHoldsWeakFails",
                             .temp_file_name = "gdd_dblp_like_graph.dot",
-                            .graph_dot = DblpLikeGraph_Dot(),
+                            .graph_dot = DblpLikeGraphDot(),
                             .input_gdds = {weak_gdd, strong_gdd},
                             .expected_valid_gdds = {strong_gdd},
                     };
