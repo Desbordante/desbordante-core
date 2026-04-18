@@ -24,10 +24,13 @@ std::vector<vertex_t> FindAllWithLabel(int target_label, graph_t const& graph) {
 
 // Find all isomorphisms between graph described by DFSCode and boost::graph, each
 // isomorphism is represented by a map
-std::vector<std::vector<vertex_t>> SubgraphIsomorphisms(DFSCode const& code, graph_t const& graph) {
+std::vector<std::vector<vertex_t>> const& SubgraphIsomorphisms(DFSCode const& code,
+                                                               graph_t const& graph) {
     LOG_TRACE("Finding subgraph isomorphisms: pattern size={}, target vertices={}, edges={}",
               code.Size(), boost::num_vertices(graph), boost::num_edges(graph));
-    std::vector<std::vector<vertex_t>> isoms;
+    thread_local std::vector<std::vector<vertex_t>> isoms;
+    thread_local std::vector<std::vector<vertex_t>> update_isoms;
+    isoms.clear();
 
     // Initial isomorphisms by finding all vertices with same label as vertex 0 in code
     int start_label = code.GetExtendedEdges()[0].vertex1.label;
@@ -50,7 +53,7 @@ std::vector<std::vector<vertex_t>> SubgraphIsomorphisms(DFSCode const& code, gra
         int v2_label = ee.vertex2.label;
         int edge_label = ee.label;
 
-        std::vector<std::vector<vertex_t>> update_isoms;
+        update_isoms.clear();
         update_isoms.reserve(isoms.size());
         for (auto& iso : isoms) {
             auto mapped_v1 = iso[v1];
@@ -72,7 +75,7 @@ std::vector<std::vector<vertex_t>> SubgraphIsomorphisms(DFSCode const& code, gra
                         std::vector<vertex_t> temp_map;
                         temp_map.reserve(iso.size() + 1);
                         temp_map = iso;
-                        temp_map.push_back(mapped_v2);  
+                        temp_map.push_back(mapped_v2);
 
                         update_isoms.push_back(std::move(temp_map));
                     }
@@ -91,7 +94,7 @@ std::vector<std::vector<vertex_t>> SubgraphIsomorphisms(DFSCode const& code, gra
                 inv[iso[dfs_id]] = -1;
             }
         }
-        isoms = std::move(update_isoms);
+        isoms.swap(update_isoms);
     }
 
     LOG_TRACE("Found {} valid isomorphisms", isoms.size());
@@ -410,7 +413,7 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emi
     } else {
         // If we want to extend a subgraph
         auto rightmost = code.GetRightMost();
-        std::vector<std::vector<vertex_t>> isoms = SubgraphIsomorphisms(code, graph);
+        auto const& isoms = SubgraphIsomorphisms(code, graph);
         auto n = boost::num_vertices(graph);
         std::vector<int> inverted_isom(n, -1);
         LOG_TRACE("Found {} embeddings for extension", isoms.size());
