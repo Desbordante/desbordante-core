@@ -5,6 +5,7 @@
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/gdd/gdd_graph_description.h"
+#include "gdd_counterexample.h"
 
 namespace algos {
 
@@ -14,6 +15,7 @@ private:
     model::gdd::graph_t graph_;
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
+    std::vector<GddCounterexample> counterexamples_;
 
     bool print_reason_ = false;
 
@@ -22,7 +24,8 @@ private:
 
     virtual unsigned long long ExecuteInternal() final;
 
-    virtual void ResetState() final {}
+    virtual void ResetState() final;
+
     virtual void LoadDataInternal() final;
 
 protected:
@@ -38,7 +41,8 @@ protected:
         return gdds_;
     }
 
-    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) = 0;
+    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
+                       GddCounterexample* out_counterexample = nullptr) = 0;
 
 public:
     GddValidator();
@@ -47,6 +51,10 @@ public:
 
     std::vector<model::Gdd> const& GetResult() const noexcept {
         return result_;
+    }
+
+    std::vector<GddCounterexample> const& GetCounterexamples() const noexcept {
+        return counterexamples_;
     }
 
     GddValidator(GddValidator const&) = delete;

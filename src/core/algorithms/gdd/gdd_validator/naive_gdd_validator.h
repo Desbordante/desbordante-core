@@ -15,11 +15,15 @@ private:
 
     static DomainT BuildDomain(model::gdd::graph_t const& pattern,
                                model::gdd::graph_t const& graph);
+    static GddCounterexample BuildCounterexample(model::gdd::graph_t const& pattern,
+                                                 model::gdd::graph_t const& graph,
+                                                 MappingT const& mapping);
     bool ExistsCounterexample(model::Gdd const& gdd, model::gdd::graph_t const& graph,
-                              MappingT& partial_map, std::size_t depth = 0);
+                              MappingT& partial_map, GddCounterexample* counterexample);
 
 protected:
-    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) final;
+    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
+                       GddCounterexample* out_counterexample = nullptr) final;
 
 public:
     NaiveGddValidator() = default;

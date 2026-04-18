@@ -55,11 +55,14 @@ std::string FormatMapping(
 
 }  // namespace
 
-bool NaiveGddValidator::Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) {
+bool NaiveGddValidator::Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
+                              GddCounterexample* out_counterexample) {
     model::gdd::graph_t const& pattern = gdd.GetPattern();
     if (domain_ = BuildDomain(pattern, graph); domain_.size() == boost::num_vertices(pattern)) {
         MappingT partial_map;
-        return !ExistsCounterexample(gdd, graph, partial_map);
+        bool const exists_counterexample =
+                ExistsCounterexample(gdd, graph, partial_map, out_counterexample);
+        return !exists_counterexample;
     }
 
     return true;
@@ -86,9 +89,30 @@ NaiveGddValidator::DomainT NaiveGddValidator::BuildDomain(model::gdd::graph_t co
     return dom;
 }
 
+GddCounterexample NaiveGddValidator::BuildCounterexample(model::gdd::graph_t const& pattern,
+                                                         model::gdd::graph_t const& graph,
+                                                         MappingT const& mapping) {
+    GddCounterexample ce{};
+    ce.match.reserve(mapping.size());
+
+    for (auto const& [pv, gv] : mapping) {
+        ce.match.push_back(GddCounterexampleVertex{
+                .pattern_vertex_id = pattern[pv].id,
+                .pattern_vertex_label = pattern[pv].label,
+                .graph_vertex_id = graph[gv].id,
+                .graph_vertex_label = graph[gv].label,
+                .graph_vertex_attributes = graph[gv].attributes,
+        });
+    }
+
+    std::ranges::sort(ce.match, {}, &GddCounterexampleVertex::pattern_vertex_id);
+    return ce;
+}
+
 bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                                              model::gdd::graph_t const& graph,
-                                             MappingT& partial_map, std::size_t depth) {
+                                             MappingT& partial_map,
+                                             GddCounterexample* out_counterexample) {
     // Naming of local variables is messy.
     // z - pattern variable from domain (like in paper)
     // gv/pv - graph/pattern vertex
@@ -97,10 +121,15 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
     if (partial_map.size() == domain_.size()) {
         bool const sat = gdd.Satisfies(graph, partial_map);
 
-        if (!sat && GetPrintReasonFlag()) {
-            LOG_ERROR("Found GDD counterexample: lhs_size={}, rhs_size={}, match={}",
-                      gdd.GetLhs().size(), gdd.GetRhs().size(),
-                      FormatMapping(gdd.GetPattern(), graph, partial_map));
+        if (!sat) {
+            if (out_counterexample != nullptr) {
+                *out_counterexample = BuildCounterexample(gdd.GetPattern(), graph, partial_map);
+            }
+            if (GetPrintReasonFlag()) {
+                LOG_ERROR("Found GDD counterexample: lhs_size={}, rhs_size={}, match={}",
+                          gdd.GetLhs().size(), gdd.GetRhs().size(),
+                          FormatMapping(gdd.GetPattern(), graph, partial_map));
+            }
         }
         return !sat;
     }
@@ -164,7 +193,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                 continue;
             }
 
-            if (ExistsCounterexample(gdd, graph, partial_map, ++depth)) {
+            if (ExistsCounterexample(gdd, graph, partial_map, out_counterexample)) {
                 return true;
             }
 

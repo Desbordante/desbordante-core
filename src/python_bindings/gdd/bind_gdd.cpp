@@ -108,6 +108,8 @@ void BindGdd(pybind11::module_& main_module) {
     using algos::Algorithm;
     using algos::GddValidator;
     using algos::NaiveGddValidator;
+    using algos::GddCounterexample;
+    using algos::GddCounterexampleVertex;
     using model::Gdd;
     using model::gdd::graph_t;
     using model::gdd::detail::AttrTag;
@@ -313,6 +315,18 @@ void BindGdd(pybind11::module_& main_module) {
                        ", op=" + Repr(c.op) + ")";
             });
 
+    py::class_<algos::GddCounterexampleVertex>(gdd_module, "GddCounterexampleMatchEntry")
+            .def_readonly("pattern_vertex_id", &GddCounterexampleVertex::pattern_vertex_id)
+            .def_readonly("pattern_vertex_label", &GddCounterexampleVertex::pattern_vertex_label)
+            .def_readonly("graph_vertex_id", &GddCounterexampleVertex::graph_vertex_id)
+            .def_readonly("graph_vertex_label", &GddCounterexampleVertex::graph_vertex_label)
+            .def_readonly("graph_vertex_attributes",
+                          &GddCounterexampleVertex::graph_vertex_attributes);
+
+    py::class_<GddCounterexample>(gdd_module, "GddCounterexample")
+            .def_readonly("gdd_index", &GddCounterexample::gdd_index)
+            .def_readonly("match", &GddCounterexample::match);
+
     gdd_module.def(
             "AttrConst",
             [](std::size_t pid, std::string attr, int64_t c, DistanceMetric metric, CmpOp op,
@@ -459,10 +473,17 @@ void BindGdd(pybind11::module_& main_module) {
             },
             "pattern_dot_file"_a, "lhs"_a, "rhs"_a);
 
-    auto const gdd_algos_module =
-            BindPrimitive<NaiveGddValidator>(gdd_module, &GddValidator::GetResult, "GddValidator",
-                                             "get_result", {"NaiveGddValidator"});
+    py::class_<GddValidator, Algorithm>(gdd_module, "GddValidator")
+            .def("get_result", &GddValidator::GetResult)
+            .def("get_counterexamples", &GddValidator::GetCounterexamples);
 
+    auto const gdd_algos_module = gdd_module.def_submodule("algorithms");
+
+    auto default_cls =
+            detail::RegisterAlgorithm<NaiveGddValidator, GddValidator>(
+                    gdd_algos_module, "NaiveGddValidator");
+
+    gdd_algos_module.attr("Default") = default_cls;
     gdd_module.attr("Default") = gdd_algos_module.attr("Default");
 }
 

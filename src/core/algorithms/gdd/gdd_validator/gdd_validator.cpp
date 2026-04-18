@@ -14,13 +14,19 @@ unsigned long long GddValidator::ExecuteInternal() {
     return util::TimedInvoke(&GddValidator::FilterValidGdds, this);
 }
 
+void GddValidator::ResetState() {
+    result_.clear();
+    counterexamples_.clear();
+}
+
 void GddValidator::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(Option{&graph_path_, kGraphData, kDGraphData});
     RegisterOption(Option{&gdds_, kGddData, kDGddData});
     RegisterOption(Option{&print_reason_, kGddPrintNotHoldsReason, kDGddPrintNotHoldsReason});
-    RegisterOption(Option{&print_reason_, kGddPrintNotHoldsReason, kDGddPrintNotHoldsReason, false});
+    RegisterOption(
+            Option{&print_reason_, kGddPrintNotHoldsReason, kDGddPrintNotHoldsReason, false});
 }
 
 GddValidator::GddValidator() : Algorithm() {
@@ -38,8 +44,23 @@ void GddValidator::LoadDataInternal() {
 
 void GddValidator::FilterValidGdds() {
     result_.clear();
-    std::ranges::copy_if(gdds_, std::back_inserter(result_),
-                         [this](model::Gdd const& gdd) { return Holds(gdd, graph_); });
+    counterexamples_.clear();
+
+    for (std::size_t i = 0; i < gdds_.size(); ++i) {
+        GddCounterexample ce;
+
+        if (bool const holds = Holds(gdds_[i], graph_, &ce); holds) {
+            result_.push_back(gdds_[i]);
+            continue;
+        }
+
+        ce.gdd_index = i;
+        counterexamples_.push_back(std::move(ce));
+    }
+
+    // result_.clear();
+    // std::ranges::copy_if(gdds_, std::back_inserter(result_),
+    //                      [this](model::Gdd const& gdd) { return Holds(gdd, graph_); });
 }
 
 }  // namespace algos
