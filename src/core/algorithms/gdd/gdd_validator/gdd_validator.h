@@ -17,8 +17,6 @@ private:
     std::vector<model::Gdd> result_;
     std::vector<GddCounterexample> counterexamples_;
 
-    bool print_reason_ = false;
-
     void FilterValidGdds();
     void RegisterOptions();
 
@@ -29,10 +27,6 @@ private:
     virtual void LoadDataInternal() final;
 
 protected:
-    bool GetPrintReasonFlag() const noexcept {
-        return print_reason_;
-    }
-
     model::gdd::graph_t const& GetGraph() const noexcept {
         return graph_;
     }
@@ -42,12 +36,10 @@ protected:
     }
 
     virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
-                       GddCounterexample* out_counterexample = nullptr) = 0;
+                       GddCounterexample& out_counterexample) = 0;
 
 public:
     GddValidator();
-
-    GddValidator(model::gdd::graph_t const& graph, std::vector<model::Gdd> gdds);
 
     std::vector<model::Gdd> const& GetResult() const noexcept {
         return result_;

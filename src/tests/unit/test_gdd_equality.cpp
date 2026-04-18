@@ -1,73 +1,14 @@
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include <boost/graph/graph_traits.hpp>
 #include <gtest/gtest.h>
 
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/gdd/gdd_graph_description.h"
+#include "test_gdd_utils.h"
 
 namespace tests {
-
-namespace {
-
-using model::Gdd;
-using model::gdd::graph_t;
-
-using model::gdd::detail::AttrTag;
-using model::gdd::detail::CmpOp;
-using model::gdd::detail::DistanceConstraint;
-using model::gdd::detail::DistanceMetric;
-using model::gdd::detail::GddToken;
-
-model::gdd::vertex_t AddVertex(graph_t& g, int id, std::string label,
-                               std::unordered_map<std::string, std::string> attrs = {}) {
-    auto const v = boost::add_vertex(g);
-    g[v].id = id;
-    g[v].label = std::move(label);
-    g[v].attributes = std::move(attrs);
-    return v;
-}
-
-void AddEdge(graph_t& g, model::gdd::vertex_t from, model::gdd::vertex_t to, std::string label) {
-    auto [e, ok] = boost::add_edge(from, to, g);
-    ASSERT_TRUE(ok);
-    g[e].label = std::move(label);
-}
-
-graph_t MakePersonCityPattern(bool reverse_insertion_order, int id_shift,
-                              std::string edge_label = "lives_in",
-                              std::string person_name = "Misha",
-                              std::string city_name = "Amsterdam") {
-    graph_t g;
-
-    model::gdd::vertex_t v_person{};
-    model::gdd::vertex_t v_city{};
-
-    if (!reverse_insertion_order) {
-        v_person = AddVertex(g, 1 + id_shift, "Person", {{"name", person_name}});
-        v_city = AddVertex(g, 2 + id_shift, "City", {{"name", city_name}});
-    } else {
-        v_city = AddVertex(g, 2 + id_shift, "City", {{"name", city_name}});
-        v_person = AddVertex(g, 1 + id_shift, "Person", {{"name", person_name}});
-    }
-
-    AddEdge(g, v_person, v_city, std::move(edge_label));
-    return g;
-}
-
-DistanceConstraint MakeAttrEditDistanceLe(size_t pattern_vid, std::string attr_name,
-                                          std::string constant, double threshold) {
-    return DistanceConstraint{.lhs = GddToken{pattern_vid, AttrTag{std::move(attr_name)}},
-                              .rhs = model::gdd::detail::ConstValue{std::move(constant)},
-                              .threshold = threshold,
-                              .metric = DistanceMetric::kEditDistance,
-                              .op = CmpOp::kLe};
-}
-
-}  // namespace
 
 TEST(GddEquality, Reflexive) {
     graph_t const pattern = MakePersonCityPattern(false, 0);

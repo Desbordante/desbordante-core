@@ -5,19 +5,9 @@
 #include <gtest/gtest.h>
 
 #include "core/parser/graph_parser/graph_parser.h"
+#include "test_gdd_utils.h"
 
 namespace tests {
-
-namespace {
-
-model::gdd::vertex_t FindVertexById(model::gdd::graph_t const& g, int id) {
-    for (auto const v : boost::make_iterator_range(boost::vertices(g))) {
-        if (g[v].id == static_cast<size_t>(id)) return v;
-    }
-    throw std::runtime_error("vertex with requested id not found");
-}
-
-}  // namespace
 
 TEST(GddGraphParser, ParsesNumericVertexIdsLabelsAttributesAndEdgeLabels) {
     std::stringstream ss;
