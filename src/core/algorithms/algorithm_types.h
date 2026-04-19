@@ -97,9 +97,9 @@ BETTER_ENUM(AlgorithmType, char,
 /* CFD verifier algorithm */
     cfd_verifier,
     
-/* Frequent subgraph mining algorithms*/
+/* Frequent subgraph mining algorithm */
     gspan,
-/* RFD mining algorithms */
+/* RFD mining algorithm */
     garfd
 )
 
