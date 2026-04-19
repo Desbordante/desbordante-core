@@ -85,5 +85,6 @@ target_link_libraries(
     PUBLIC ${DESBORDANTE_PREFIX}::model::types
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
             ${DESBORDANTE_PREFIX}::parser::csv ${DESBORDANTE_PREFIX}::parser::sequence
+            ${DESBORDANTE_PREFIX}::model::sequence
             spdlog::spdlog_header_only better-enums Boost::headers
 )
