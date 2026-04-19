@@ -78,7 +78,7 @@ Gdd MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity() {
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
-std::string LargeGraph_AllGood_Dot() {
+std::string LargeGraphAllGoodDot() {
     return R"(digraph G {
         1 [label="Person", name="Misha", age="25", email="m@x"];
         2 [label="Person", name="Bob",   age="31"];
@@ -286,14 +286,13 @@ INSTANTIATE_TEST_SUITE_P(
                     auto const g1 = MakeGddMishaLivesInAmsterdam();
                     auto const g2 = MakeGddRigaInLatvia();
                     auto const g3 = MakeGddVacuousImplicationNonexistentPerson();
-                    auto const g4 =
-                            MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint();
+                    auto const g4 = MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint();
                     auto const g5 = MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity();
 
                     return ValidatorCase{
                             .case_name = "LargeGraphAllSatisfied",
                             .temp_file_name = "gdd_large_graph_all_good.dot",
-                            .graph_dot = LargeGraph_AllGood_Dot(),
+                            .graph_dot = LargeGraphAllGoodDot(),
                             .input_gdds = {g1, g2, g3, g4, g5},
                             .expected_valid_gdds = {g1, g2, g3, g4, g5},
                     };
@@ -304,8 +303,7 @@ INSTANTIATE_TEST_SUITE_P(
                     auto const gdd_ok2 = MakeGddVacuousImplicationNonexistentPerson();
                     auto const gdd_ok3 =
                             MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint();
-                    auto const gdd_ok4 =
-                            MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity();
+                    auto const gdd_ok4 = MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity();
 
                     return ValidatorCase{
                             .case_name = "LargeGraphDetectsViolation",
@@ -321,7 +319,7 @@ INSTANTIATE_TEST_SUITE_P(
                     return ValidatorCase{
                             .case_name = "UsesCustomAttributesAndLabel",
                             .temp_file_name = "gdd_custom_attrs_graph.dot",
-                            .graph_dot = LargeGraph_AllGood_Dot(),
+                            .graph_dot = LargeGraphAllGoodDot(),
                             .input_gdds = {gdd},
                             .expected_valid_gdds = {gdd},
                     };
