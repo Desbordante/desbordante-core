@@ -13,18 +13,17 @@ TEST(GaRfdTest, BasicDiscovery) {
     config::InputTable table = std::make_shared<CSVParser>(tests::kIris);
     algo.SetOption(config::names::kTable, table);
     
-    // Устанавливаем все параметры явно
-    algo.SetOption("similarity_thresholds", std::vector<double>{0.8, 0.8, 0.8, 0.8, 0.8});
-    algo.SetOption("min_confidence", 0.9);
-    algo.SetOption("population_size", std::size_t{20});
-    algo.SetOption("max_generations", std::size_t{5});
-    algo.SetOption("crossover_prob", 0.85);
-    algo.SetOption("mutation_prob", 0.3);
-    algo.SetOption("max_lhs_arity", std::size_t{3});
-    algo.SetOption("seed", std::uint64_t{42});
-    algo.SetOption("output_file", std::string{});
-    // Пустой вектор метрик — в LoadDataInternal подставятся Levenshtein
-    algo.SetOption("metrics", std::vector<std::shared_ptr<SimilarityMetric>>{});
+    using namespace config::names;
+    algo.SetOption(kSimilarityThresholds, std::vector<double>{0.8, 0.8, 0.8, 0.8, 0.8});
+    algo.SetOption(kMinConfidence, 0.9);
+    algo.SetOption(kPopulationSize, std::size_t{20});
+    algo.SetOption(kMaxGenerations, std::size_t{5});
+    algo.SetOption(kCrossoverProb, 0.85);
+    algo.SetOption(kMutationProb, 0.3);
+    algo.SetOption(kMaxLhsArity, std::size_t{3});
+    algo.SetOption(kSeed, std::uint64_t{42});
+    algo.SetOption(kOutputFile, std::string{});
+    algo.SetOption(kMetrics, std::vector<std::shared_ptr<SimilarityMetric>>{});
     
     algo.LoadData();
     algo.Execute();
