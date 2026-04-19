@@ -24,5 +24,6 @@ private:
 
 std::shared_ptr<SimilarityMetric> LevenshteinMetric();
 std::shared_ptr<SimilarityMetric> EqualityMetric();
+std::shared_ptr<SimilarityMetric> AbsoluteDifferenceMetric();
 
 } // namespace algos::rfd
