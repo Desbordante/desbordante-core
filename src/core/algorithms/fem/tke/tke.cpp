@@ -66,7 +66,7 @@ void TKE::FindFrequentEpisodes() {
 
     RemoveInfrequentEvents(raw_supports, events_minsup);
 
-    ParallelTopKMiner parallel_miner(events_num_, episodes_num_, BuildEventsLocationLists());
+    ParallelTopKMiner parallel_miner(events_num_, episodes_num_, BuildEventsLocationLists(), threads_num_);
     std::vector<ParallelEpisode> parallel_episodes = parallel_miner.Mine();
     LOG_DEBUG("Parallel episodes after top-k mining: {}", parallel_episodes.size());
 

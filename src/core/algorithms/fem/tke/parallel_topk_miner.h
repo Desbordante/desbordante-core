@@ -13,7 +13,8 @@ namespace algos::tke {
 class ParallelTopKMiner {
 public:
     ParallelTopKMiner(model::Event events_num, size_t k,
-                      std::vector<std::shared_ptr<LocationList>> events_loc_lists);
+                      std::vector<std::shared_ptr<LocationList>> events_loc_lists,
+                      size_t threads_num);
 
     std::vector<ParallelEpisode> Mine();
 
@@ -34,11 +35,14 @@ private:
     using Explore =
             std::priority_queue<ParallelEpisode, std::vector<ParallelEpisode>, MaxSupportCmp>;
 
-    void TryAdd(ParallelEpisode ep, TopK& top_k, Explore& explore) const;
+    bool TryAdd(ParallelEpisode ep, TopK& top_k, Explore& explore) const;
+    void ExploreSequential(TopK& top_k, Explore& explore) const;
+    void ExploreParallel(TopK& top_k, Explore& explore) const;
 
     model::Event events_num_;
     size_t k_;
     std::vector<std::shared_ptr<LocationList>> events_loc_lists_;
+    size_t threads_num_;
 };
 
 }  // namespace algos::tke
