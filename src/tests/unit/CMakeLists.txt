@@ -393,6 +393,8 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ind::spider
     ${DESBORDANTE_PREFIX}::ind::mind
     ${DESBORDANTE_PREFIX}::ind::faida
+    ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    ${DESBORDANTE_PREFIX}::rfd 
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
@@ -614,4 +616,18 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+)
+# GA-RFD
+desbordante_add_test(
+    rfd.ga
+    SRCS test_ga_rfd.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    ${DESBORDANTE_PREFIX}::rfd
+    ${DESBORDANTE_PREFIX}::algos
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::parser::csv
+    spdlog::spdlog_header_only
+    better-enums
+    Boost::headers
 )

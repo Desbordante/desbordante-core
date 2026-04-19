@@ -136,4 +136,13 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
+// GA-RFD
+constexpr auto kMetrics = "metrics";
+constexpr auto kSimilarityThresholds = "similarity_thresholds";
+constexpr auto kMinConfidence = "min_confidence";
+constexpr auto kMaxGenerations = "max_generations";
+constexpr auto kCrossoverProb = "crossover_prob";
+constexpr auto kMutationProb = "mutation_prob";
+constexpr auto kMaxLhsArity = "max_lhs_arity";
+constexpr auto kOutputFile = "output_file";
 }  // namespace config::names

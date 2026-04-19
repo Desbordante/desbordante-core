@@ -260,6 +260,17 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    rfd
+    SRCS
+    rfd/bind_ga_rfd.cpp
+    rfd/py_similarity_metric.h
+    LIBS
+    ${DESBORDANTE_PREFIX}::rfd
+    ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    Boost::headers
+)
+
+desbordante_add_bind(
     sfd
     SRCS
     sfd/bind_sfd.cpp
