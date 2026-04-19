@@ -146,6 +146,10 @@ void GaRfd::LoadDataInternal() {
         }
         num_rows_++;
     }
+    res += "] -> " + std::to_string(rhs_index) + " (conf=" + std::to_string(confidence) +
+           ", supp=" + std::to_string(support) + ")";
+    return res;
+}
 
     if (num_rows_ < 2) [[unlikely]] 
         throw std::runtime_error("Input table must contain at least 2 rows");
@@ -301,6 +305,7 @@ std::vector<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937& rng) co
 
         pop.emplace_back(Individual{lhs_mask, rhs, 0.0, 0.0});
     }
+    LOG_DEBUG("Initial population of size {} created", pop.size());
     return pop;
 }
 

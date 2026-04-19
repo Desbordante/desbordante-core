@@ -163,9 +163,4 @@ constexpr auto kCrossoverProb = "crossover_prob";
 constexpr auto kMutationProb = "mutation_prob";
 constexpr auto kMaxLhsArity = "max_lhs_arity";
 constexpr auto kOutputFile = "output_file";
-// GA-rfd
-constexpr auto kRfdMinSimilarity = "rfd_min_similarity";
-constexpr auto kRfdCrossoverProbability = "rfd_crossover_probability";
-constexpr auto kRfdMutationProbability = "rfd_mutation_probability";
-constexpr auto kRfdMaxGenerations = "rfd_max_generations";
 }  // namespace config::names
