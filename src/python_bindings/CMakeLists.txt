@@ -19,8 +19,15 @@ set(MODULE_NAME
 
 pybind11_add_module(${MODULE_NAME} bind_main_classes.cpp bindings.cpp)
 target_link_libraries(
-    ${MODULE_NAME} PRIVATE pybind11::module Desbordante::algos spdlog::spdlog_header_only
-                           Boost::headers Desbordante.bindlib.util Desbordante.bindlib.data
+    ${MODULE_NAME}
+    PRIVATE pybind11::module
+            Desbordante::algos
+            magic_enum::magic_enum
+            spdlog::spdlog_header_only
+            Boost::headers
+            Desbordante.bindlib.util
+            Desbordante.bindlib.data
+            ${DESBORDANTE_PREFIX}::rfd::ga_rfd
 )
 
 # Uncomment to debug linker issues
@@ -305,9 +312,10 @@ desbordante_add_bind(
     rfd/bind_ga_rfd.cpp
     rfd/py_similarity_metric.h
     LIBS
-    ${DESBORDANTE_PREFIX}::rfd
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    ${DESBORDANTE_PREFIX}::rfd
     Boost::headers
+    better-enums
 )
 
 desbordante_add_bind(

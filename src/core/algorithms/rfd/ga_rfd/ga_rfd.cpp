@@ -1,328 +1,498 @@
-#include "ga_rfd.h"
+#include "core/algorithms/rfd/ga_rfd/ga_rfd.h"
 
 #include <algorithm>
-#include <chrono>
-#include <fstream>
+#include <cmath>
+#include <cstdint>
+#include <ranges>
 #include <stdexcept>
+#include <unordered_set>
+#include <set>
+#include <unordered_map>
+#include <bitset>
+#include <string>
 
-#include "core/config/names_and_descriptions.h"
+#include "core/config/descriptions.h"
+#include "core/config/names.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
+#include "core/util/timed_invoke.h"
+
+namespace {
+
+template <typename T>
+[[nodiscard]] inline bool InRangeInclusive(T value, T min, T max) {
+    return min <= value && value <= max;
+}
+
+[[nodiscard]] std::string BitRepresentation(uint32_t mask, int num_bits = 31) {
+    return std::bitset<32>(mask).to_string().substr(32 - num_bits);
+}
+
+[[nodiscard]] inline int FirstSetBit(uint32_t x) {
+    return x ? static_cast<int>(__builtin_ctz(x)) : -1;
+}
+
+}  // namespace
 
 namespace algos::rfd {
 
-GaRfd::GaRfd() : Algorithm(), rng_(seed_) {
+std::string RFD::ToString() const {
+    std::string res = "[";
+    bool first = true;
+    for (uint8_t i = 0; i < 31; ++i) {
+        if (lhs_mask & (1u << i)) {
+            if (!first) res += ", ";
+            res += std::to_string(i);
+            first = false;
+        }
+    }
+    res += "] -> " + std::to_string(rhs_index) + " (conf=" + std::to_string(confidence) +
+           ", supp=" + std::to_string(support) + ")";
+    return res;
+}
+
+GaRfd::GaRfd() : Algorithm() {
     using namespace config::names;
-
-    RegisterOption(config::Option{&table_, kTable, "Input table"});
-    RegisterOption(config::Option{&metrics_, kMetrics, "List of similarity metrics"});
-    RegisterOption(config::Option{&similarity_thresholds_, kSimilarityThresholds,
-                                  "Thresholds for each attribute"});
-    RegisterOption(
-        config::Option{&min_confidence_, kMinConfidence, "Minimum confidence"});
-    RegisterOption(
-        config::Option{&population_size_, kPopulationSize, "Population size"});
-    RegisterOption(
-        config::Option{&max_generations_, kMaxGenerations, "Maximum generations"});
-    RegisterOption(
-        config::Option{&crossover_prob_, kCrossoverProb, "Crossover probability"});
-    RegisterOption(
-        config::Option{&mutation_prob_, kMutationProb, "Mutation probability"});
-    RegisterOption(config::Option{&max_lhs_arity_, kMaxLhsArity, "Max LHS arity"});
-    RegisterOption(config::Option{&seed_, kSeed, "Random seed"});
-    RegisterOption(config::Option{&output_file_, kOutputFile, "Output file path"});
-
-    MakeOptionsAvailable({kTable, kMetrics, kSimilarityThresholds, kMinConfidence,
-                          kPopulationSize, kMaxGenerations, kCrossoverProb, kMutationProb,
-                          kMaxLhsArity, kSeed, kOutputFile});
+    RegisterOptions();
+    MakeOptionsAvailable({kRfdMinSimilarity,
+                          kMinimumConfidence,
+                          kPopulationSize,
+                          kRfdMaxGenerations,
+                          kRfdCrossoverProbability,
+                          kRfdMutationProbability,
+                          kSeed,
+                          "metrics",
+                          config::kTableOpt.GetName()});
 }
 
 void GaRfd::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({
-        kMetrics,
-        kSimilarityThresholds,
-        kMinConfidence,
-        kPopulationSize,
-        kMaxGenerations,
-        kCrossoverProb,
-        kMutationProb,
-        kMaxLhsArity,
-        kSeed,
-        kOutputFile,
-    });
+    MakeOptionsAvailable({kRfdMinSimilarity,
+                          kMinimumConfidence,
+                          kPopulationSize,
+                          kRfdMaxGenerations,
+                          kRfdCrossoverProbability,
+                          kRfdMutationProbability,
+                          kSeed,
+                          "metrics"});
+}
+
+void GaRfd::RegisterOptions() {
+    DESBORDANTE_OPTION_USING;
+
+    auto check_prob_range = [](double v) { return InRangeInclusive(v, 0.0, 1.0); };
+
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(Option{&metrics_, 
+                          "metrics",
+                          "List of similarity metrics",
+                          std::vector<std::shared_ptr<SimilarityMetric>>{}});
+    RegisterOption(Option{&min_similarity_,
+                          kRfdMinSimilarity,
+                          kDRfdMinSimilarity,
+                          0.7}.SetValueCheck(check_prob_range));
+    RegisterOption(Option{&eps_,
+                          kMinimumConfidence,
+                          kDMinimumConfidence,
+                          0.75}.SetValueCheck(check_prob_range));
+    RegisterOption(Option{&population_size_,
+                          kPopulationSize,
+                          kDPopulationSize,
+                          static_cast<std::size_t>(20)}.SetValueCheck([](auto v) { return v > 0; }));
+    RegisterOption(Option{&max_generations_,
+                          kRfdMaxGenerations,
+                          kDRfdMaxGenerations,
+                          static_cast<std::size_t>(50)});
+    RegisterOption(Option{&crossover_probability_,
+                          kRfdCrossoverProbability,
+                          kDRfdCrossoverProbability,
+                          0.85}.SetValueCheck(check_prob_range));
+    RegisterOption(Option{&mutation_probability_,
+                          kRfdMutationProbability,
+                          kDRfdMutationProbability,
+                          0.3}.SetValueCheck(check_prob_range));
+    RegisterOption(Option{&seed_,
+                          kSeed,
+                          kDSeed,
+                          static_cast<std::uint64_t>(42)});
 }
 
 void GaRfd::LoadDataInternal() {
-    table_->Reset();
-    data_.clear();
-    while (table_->HasNextRow()) {
-        data_.push_back(table_->GetNextRow());
+    num_rows_ = 0;
+    column_data_.clear();
+
+    if (!input_table_->HasNextRow()) [[unlikely]]
+        throw std::runtime_error("Input table is empty");
+
+    auto first_row = input_table_->GetNextRow();
+    num_attrs_ = first_row.size();
+    if (num_attrs_ < 2) [[unlikely]]
+        throw std::runtime_error("GA-rfd requires at least 2 attributes");
+    if (num_attrs_ > 31) [[unlikely]]
+        throw std::runtime_error("Maximum 31 attributes supported");
+    column_data_.resize(num_attrs_);
+    for (size_t i = 0; i < num_attrs_; ++i) {
+        column_data_[i].push_back(std::move(first_row[i]));
+    }
+    num_rows_ = 1;
+
+    while (input_table_->HasNextRow()) {
+        auto row = input_table_->GetNextRow();
+        if (row.size() != num_attrs_)
+            throw std::runtime_error("Inconsistent number of attributes in row");
+        for (size_t i = 0; i < num_attrs_; ++i) {
+            column_data_[i].push_back(std::move(row[i]));
+        }
+        num_rows_++;
     }
 
-    num_rows_ = data_.size();
-    if (num_rows_ == 0) {
-        throw std::runtime_error("Input table is empty");
-    }
-    num_attrs_ = data_[0].size();
-    total_pairs_ = num_rows_ * num_rows_;
+    if (num_rows_ < 2) [[unlikely]] 
+        throw std::runtime_error("Input table must contain at least 2 rows");
+
+    if (num_rows_ > std::numeric_limits<std::size_t>::max() / (num_rows_ - 1) / 2)
+        throw std::runtime_error("Table too large, total pairs would overflow size_t");
+    total_pairs_ = num_rows_ * (num_rows_ - 1) / 2;
+
+    LOG_INFO("Loaded {} rows, {} attributes, {} total pairs", num_rows_, num_attrs_, total_pairs_);
 
     if (metrics_.empty()) {
-        metrics_.assign(num_attrs_, LevenshteinMetric());
+        metrics_.clear();
+        metrics_.reserve(num_attrs_);
+        for (size_t i = 0; i < num_attrs_; ++i)
+            metrics_.emplace_back(EqualityMetric());
     }
-    if (metrics_.size() != num_attrs_) {
-        throw std::invalid_argument("Number of metrics must match number of attributes");
-    }
-    if (similarity_thresholds_.size() != num_attrs_) {
-        throw std::invalid_argument(
-            "Number of similarity thresholds must match number of attributes");
-    }
-
-    LOG_INFO("GA-RFD data loaded: {} rows, {} attributes, {} total pairs",
-             num_rows_, num_attrs_, total_pairs_);
+    if (metrics_.size() != num_attrs_) [[unlikely]]
+        throw std::invalid_argument("The number of attributes and metrics do not match");
 }
-
-unsigned long long GaRfd::ExecuteInternal() {
-    auto start = std::chrono::steady_clock::now();
-
-    BuildSimilarityBitsets();
-    support_cache_.clear();
-    support_cache_.reserve(1024);
-
-    auto population = InitializePopulation();
-    EvaluatePopulation(population);
-
-    for (size_t gen = 0; gen < max_generations_; ++gen) {
-        bool all_valid = std::all_of(population.begin(), population.end(),
-            [this](const Individual& ind) {
-                return ind.fitness >= min_confidence_;
-            });
-        if (all_valid) break;
-
-        auto selected = Selection(population);
-        auto offspring = Crossover(selected);
-        offspring = Mutation(std::move(offspring));
-        EvaluatePopulation(offspring);
-
-        // Elitism
-        std::sort(population.begin(), population.end(),
-            [](const Individual& a, const Individual& b) {
-                return a.fitness > b.fitness;
-            });
-        size_t elite_count = std::max<size_t>(1, population.size() / 10);
-        std::vector<Individual> new_population;
-        new_population.insert(new_population.end(),
-                              population.begin(),
-                              population.begin() + elite_count);
-        new_population.insert(new_population.end(),
-                              offspring.begin(),
-                              offspring.end());
-
-        // Fill with random if needed
-        while (new_population.size() < population_size_) {
-            Individual rand_ind;
-            rand_ind.genes.resize(max_lhs_arity_ + 1);
-            std::uniform_int_distribution<size_t> attr_dist(0, num_attrs_ - 1);
-            for (auto& g : rand_ind.genes) g = attr_dist(rng_);
-            new_population.push_back(std::move(rand_ind));
-        }
-        new_population.resize(population_size_);
-        population = std::move(new_population);
-    }
-
-    RegisterResults(population);
-
-    if (!output_file_.empty()) {
-        SaveResults(output_file_);
-    }
-
-    auto end = std::chrono::steady_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-}
-
-void GaRfd::ResetState() {
-    support_cache_.clear();
-    attr_bitsets_.clear();
-    discovered_rfds_.clear();
-    rng_.seed(seed_);
-}
-
-std::vector<std::string> GaRfd::GetResultStrings() const {
-    std::vector<std::string> result;
-    result.reserve(discovered_rfds_.size());
-    for (const auto& ind : discovered_rfds_) {
-        std::string s = "[";
-        for (size_t i = 0; i < ind.genes.size() - 1; ++i) {
-            s += std::to_string(ind.genes[i]) + " ";
-        }
-        s += "] -> " + std::to_string(ind.genes.back()) +
-             " (conf=" + std::to_string(ind.fitness) + ")";
-        result.push_back(s);
-    }
-    return result;
-}
-
-void GaRfd::SaveResults(const std::string& filepath) const {
-    std::ofstream ofs(filepath);
-    if (!ofs.is_open()) return;
-    for (const auto& line : GetResultStrings()) {
-        ofs << line << '\n';
-    }
-}
-
-// ========== GA methods ==========
 
 void GaRfd::BuildSimilarityBitsets() {
-    attr_bitsets_.resize(num_attrs_, boost::dynamic_bitset<>(total_pairs_));
+    LOG_INFO("BuildSimilarityBitsets: total_pairs_ = {}, num_attrs_ = {}, num_rows_ = {}",
+              total_pairs_, num_attrs_, num_rows_);
+    const std::size_t num_uint64_per_attr = (total_pairs_ + 63) / 64;
+    attr_similarity_bits_.assign(num_attrs_, std::vector<uint64_t>(num_uint64_per_attr, 0));
+    if (metrics_.size() != num_attrs_)
+        throw std::runtime_error("Number of metrics must match number of attributes");
 
-    size_t pair_idx = 0;
-    for (size_t i = 0; i < num_rows_; ++i) {
-        for (size_t j = 0; j < num_rows_; ++j) {
-            for (size_t a = 0; a < num_attrs_; ++a) {
-                double sim = metrics_[a]->Compare(data_[i][a], data_[j][a]);
-                if (sim >= similarity_thresholds_[a]) {
-                    attr_bitsets_[a].set(pair_idx);
+    for (std::size_t a = 0; a < num_attrs_; a++) {
+        const auto& col = column_data_[a];
+        auto& bits = attr_similarity_bits_[a];
+        std::size_t pair_idx = 0;
+
+        for (std::size_t i = 0; i < num_rows_; i++) {
+            for (std::size_t j = i+1; j < num_rows_; j++) {
+                try {
+                    const double sim = metrics_[a]->Compare(col[i], col[j]);
+                    if (sim >= min_similarity_) {
+                        const std::size_t word_idx = pair_idx / 64;
+                        const std::size_t bit_idx = pair_idx % 64;
+                        bits[word_idx] |= (1ULL << bit_idx);
+                    }
+                } catch (const std::exception& e) {
+                    LOG_ERROR("Exception in Compare: attr={}, i={}, j={}, what={}", a, i, j, e.what());
+                    throw;
+                } catch (...) {
+                    LOG_ERROR("Unknown exception in Compare: attr={}, i={}, j={}", a, i, j);
+                    throw;
                 }
+                pair_idx++;
             }
-            ++pair_idx;
         }
+        LOG_INFO("Finished attribute {} similarity bitset", a);
     }
+    LOG_INFO("Similarity bitsets built for {} attributes", num_attrs_);
 }
 
-namespace {
-int first_bit_set(uint64_t mask) {
-    if (mask == 0) return -1;
-    return std::countr_zero(mask);
-}
-}  // namespace
-
-size_t GaRfd::ComputeSupport(uint64_t attrs_mask) const {
-    auto it = support_cache_.find(attrs_mask);
-    if (it != support_cache_.end()) return it->second;
-
+std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
+    if (auto cached = support_cache_.get(attrs_mask)) return *cached;
     if (attrs_mask == 0) {
-        support_cache_[0] = total_pairs_;
+        support_cache_.put(0, total_pairs_);
         return total_pairs_;
     }
 
-    int first = first_bit_set(attrs_mask);
-    boost::dynamic_bitset<> intersection = attr_bitsets_[first];
-    uint64_t remaining = attrs_mask ^ (1ULL << first);
-    while (remaining) {
-        int attr = first_bit_set(remaining);
-        intersection &= attr_bitsets_[attr];
-        remaining ^= (1ULL << attr);
-        if (intersection.none()) break;
+    uint32_t mm = attrs_mask;
+    int first = FirstSetBit(mm);
+    if (first < 0) { support_cache_.put(attrs_mask, 0); return 0; }
+
+    const auto &first_vec = attr_similarity_bits_[first];
+    if ((attrs_mask & (attrs_mask - 1)) == 0u) {
+        std::size_t s = 0;
+        for (uint64_t w : first_vec) s += std::popcount(w);
+        support_cache_.put(attrs_mask, s);
+        LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), s);
+        return s;
     }
-    size_t support = intersection.count();
-    support_cache_[attrs_mask] = support;
+
+    std::vector<uint64_t> buffer = first_vec;
+    mm &= mm - 1;
+    while (mm) {
+        int a = FirstSetBit(mm);
+        const auto &other = attr_similarity_bits_[a];
+        const std::size_t n = buffer.size();
+        std::size_t running = 0;
+        for (std::size_t k = 0; k < n; k++) {
+            buffer[k] &= other[k];
+            running += std::popcount(buffer[k]);
+        }
+        if (running == 0) { support_cache_.put(attrs_mask, 0); return 0; }
+        mm &= mm - 1;
+    }
+
+    std::size_t support = 0;
+    for (uint64_t w : buffer) support += std::popcount(w);
+    support_cache_.put(attrs_mask, support);
+    LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), support);
     return support;
 }
 
-double GaRfd::CalculateConfidence(uint64_t lhs_mask, size_t rhs) {
-    size_t count_lhs = ComputeSupport(lhs_mask);
-    if (count_lhs == 0) return 0.0;
-    uint64_t lhs_rhs_mask = lhs_mask | (1ULL << rhs);
-    size_t count_both = ComputeSupport(lhs_rhs_mask);
-    return static_cast<double>(count_both) / count_lhs;
+GaRfd::Individual GaRfd::Evaluate(const Individual& ind) const noexcept {
+    const uint32_t lhs_mask = ind.lhs_mask;
+    const uint8_t rhs = ind.rhs_index;
+
+    double support_lhs = static_cast<double>(ComputeSupport(lhs_mask)) / total_pairs_;
+    if (support_lhs == 0.0) [[unlikely]] {
+        return {lhs_mask, rhs, 0.0, 0.0};
+    }
+
+    const uint32_t both_mask = lhs_mask | (1u << rhs);
+    double support_both = static_cast<double>(ComputeSupport(both_mask)) / total_pairs_;
+    double confidence = support_both / support_lhs;
+    return {lhs_mask, rhs, confidence, support_both};
 }
 
-std::vector<GaRfd::Individual> GaRfd::InitializePopulation() {
-    std::vector<Individual> pop(population_size_);
-    std::uniform_int_distribution<size_t> attr_dist(0, num_attrs_ - 1);
-    for (auto& ind : pop) {
-        ind.genes.resize(max_lhs_arity_ + 1);
-        for (size_t i = 0; i < ind.genes.size(); ++i) {
-            ind.genes[i] = attr_dist(rng_);
+inline void GaRfd::EvaluatePopulation(std::vector<Individual>& pop) const noexcept {
+    for (auto& ind : pop) ind = Evaluate(ind);
+}
+
+inline bool GaRfd::AllOf(const std::vector<Individual>& pop) const noexcept {
+    if (pop.empty()) [[unlikely]] return false;
+    return std::ranges::all_of(pop, [&](Individual const& ind) { return ind.confidence >= eps_; });
+}
+
+inline double GaRfd::Fitness(double confidence) const noexcept {
+    return confidence >= eps_ ? 1.0 : confidence / eps_;
+}
+
+std::vector<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937& rng) const {
+    std::vector<Individual> pop;
+    pop.reserve(population_size_);
+    std::uniform_int_distribution<uint8_t> rhs_dist(0u, static_cast<uint8_t>(num_attrs_ - 1u));
+    std::uniform_int_distribution<uint8_t> kdist(1u, static_cast<uint8_t>(num_attrs_ - 1u));
+
+    std::vector<uint8_t> indices(num_attrs_);
+    std::iota(indices.begin(), indices.end(), 0);
+
+    while (pop.size() < population_size_) {
+        uint8_t rhs = rhs_dist(rng);
+        uint8_t k = kdist(rng);
+
+        std::vector<uint8_t> pool;
+        pool.reserve(num_attrs_-1);
+
+        for (uint8_t i = 0; i < num_attrs_; i++) {
+            if (i != rhs) pool.push_back(i);
         }
-        ind.fitness = 0.0;
+        for (uint8_t i = 0; i < k; i++) {
+            std::uniform_int_distribution<uint8_t> d(i, static_cast<uint8_t>(pool.size()) - 1u);
+            std::swap(pool[i], pool[d(rng)]);
+        }
+        uint32_t lhs_mask = 0;
+        for (std::size_t i = 0; i < k; i++) lhs_mask |= (1u << pool[i]);
+
+        pop.emplace_back(Individual{lhs_mask, rhs, 0.0, 0.0});
     }
     return pop;
 }
 
-void GaRfd::EvaluatePopulation(std::vector<Individual>& population) {
-    for (auto& ind : population) {
-        std::vector<size_t> lhs(ind.genes.begin(), ind.genes.end() - 1);
-        std::sort(lhs.begin(), lhs.end());
-        lhs.erase(std::unique(lhs.begin(), lhs.end()), lhs.end());
-        size_t rhs = ind.genes.back();
-
-        uint64_t lhs_mask = 0;
-        for (size_t a : lhs) lhs_mask |= (1ULL << a);
-        ind.fitness = CalculateConfidence(lhs_mask, rhs);
-    }
-}
-
-std::vector<GaRfd::Individual> GaRfd::Selection(const std::vector<Individual>& population) {
+std::vector<GaRfd::Individual> GaRfd::Select(std::vector<Individual> const& pop,
+                                             std::mt19937& rng) const {
     std::vector<Individual> selected;
-    std::uniform_real_distribution<double> prob_dist(0.0, 1.0);
-    for (const auto& ind : population) {
-        double p = (ind.fitness >= min_confidence_)
-                       ? 1.0
-                       : ind.fitness / min_confidence_;
-        if (prob_dist(rng_) < p) {
-            selected.push_back(ind);
-        }
-    }
-    if (selected.empty()) {
-        auto best = std::max_element(population.begin(), population.end(),
-            [](const Individual& a, const Individual& b) {
-                return a.fitness < b.fitness;
-            });
-        selected.push_back(*best);
+    selected.reserve(pop.size());
+
+    std::uniform_real_distribution<double> dist01(0.0, 1.0);
+    for (auto const& ind : pop) {
+        if (dist01(rng) < Fitness(ind.confidence)) selected.push_back(ind);
     }
     return selected;
 }
 
-std::vector<GaRfd::Individual> GaRfd::Crossover(const std::vector<Individual>& parents) {
+std::vector<GaRfd::Individual> GaRfd::Crossover(const std::vector<Individual>& selected,
+                                                std::mt19937& rng) const {
     std::vector<Individual> offspring;
-    std::uniform_real_distribution<double> prob_dist(0.0, 1.0);
-    std::uniform_int_distribution<size_t> point_dist(1, max_lhs_arity_);
-    for (size_t i = 0; i + 1 < parents.size(); i += 2) {
-        const auto& p1 = parents[i];
-        const auto& p2 = parents[i + 1];
-        if (prob_dist(rng_) < crossover_prob_) {
-            size_t cp = point_dist(rng_);
-            Individual c1, c2;
-            for (size_t j = 0; j < cp; ++j) {
-                c1.genes.push_back(p1.genes[j]);
-                c2.genes.push_back(p2.genes[j]);
+    if (selected.size() < 2) return offspring;
+
+    offspring.reserve(selected.size() * (selected.size() - 1) / 2 + 1);
+
+    std::uniform_real_distribution<double> dist01(0.0, 1.0);
+    std::bernoulli_distribution coin(0.5);
+
+    for (std::size_t i = 0; i < selected.size(); ++i) {
+        const Individual& p1 = selected[i];
+        for (std::size_t j = i + 1; j < selected.size(); ++j) {
+            if (dist01(rng) >= crossover_probability_) [[unlikely]] continue;
+
+            const Individual& p2 = selected[j];
+
+            uint32_t mask1 = p1.lhs_mask;
+            uint32_t mask2 = p2.lhs_mask;
+            uint8_t rhs1 = p1.rhs_index;
+            uint8_t rhs2 = p2.rhs_index;
+
+            uint32_t diff = mask1 ^ mask2;
+            if (diff) [[likely]] {
+                int diff_cnt = std::popcount(diff);
+                std::uniform_int_distribution<int> cnt_dist(1, diff_cnt);
+                int cnt = cnt_dist(rng);
+                while (cnt-- > 0) {
+                    uint32_t bit = diff & -diff;
+                    mask1 ^= bit;
+                    mask2 ^= bit;
+                    diff &= diff - 1;
+                }
             }
-            for (size_t j = cp; j < p1.genes.size(); ++j) {
-                c1.genes.push_back(p2.genes[j]);
-                c2.genes.push_back(p1.genes[j]);
+
+            if (coin(rng)) {
+                std::swap(rhs1, rhs2);
             }
-            offspring.push_back(std::move(c1));
-            offspring.push_back(std::move(c2));
-        } else {
-            offspring.push_back(p1);
-            offspring.push_back(p2);
+
+            if ((mask1 == 0) || (mask1 & (1u << rhs1))) [[unlikely]] continue;
+            if ((mask2 == 0) || (mask2 & (1u << rhs2))) [[unlikely]] continue;
+
+            Individual c1{mask1, rhs1, 0.0, 0.0};
+            Individual c2{mask2, rhs2, 0.0, 0.0};
+            offspring.push_back(c1);
+            offspring.push_back(c2);
         }
     }
     return offspring;
 }
 
-std::vector<GaRfd::Individual> GaRfd::Mutation(std::vector<Individual> individuals) {
-    std::uniform_real_distribution<double> prob_dist(0.0, 1.0);
-    std::uniform_int_distribution<size_t> attr_dist(0, num_attrs_ - 1);
-    std::uniform_int_distribution<size_t> gene_dist(0, max_lhs_arity_);
-    for (auto& ind : individuals) {
-        if (prob_dist(rng_) < mutation_prob_) {
-            size_t pos = gene_dist(rng_);
-            if (pos < ind.genes.size()) {
-                ind.genes[pos] = attr_dist(rng_);
+void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937& rng) const {
+    if (pop.empty()) return;
+
+    std::uniform_real_distribution<double> dist01(0.0, 1.0);
+    std::uniform_int_distribution<uint8_t> rhs_dist(0, num_attrs_ - 1);
+    std::uniform_int_distribution<uint8_t> coin(0, 2);
+
+    for (auto& ind : pop) {
+        if (dist01(rng) >= mutation_probability_) [[unlikely]] continue;
+
+        uint32_t mask = ind.lhs_mask;
+        uint8_t rhs = ind.rhs_index;
+
+        switch (coin(rng)) {
+            case 0: {
+                if (mask == 0) break;
+                int ones = std::popcount(mask);
+                std::uniform_int_distribution<int> bit_selector(0, ones - 1);
+                int skip = bit_selector(rng);
+                uint32_t bit = 1;
+                for (int i = 0; ; ++i) {
+                    while ((mask & bit) == 0) bit <<= 1;
+                    if (i == skip) break;
+                    bit <<= 1;
+                }
+                mask ^= bit;
+                break;
+            }
+            case 1: {
+                uint32_t full_mask = ((1u << num_attrs_) - 1) & ~(1u << rhs);
+                if ((mask & full_mask) == full_mask) break;
+                std::uniform_int_distribution<uint8_t> new_rhs_dist(0, num_attrs_ - 1);
+                uint32_t new_bit = 1u << new_rhs_dist(rng);
+                while ( (mask & new_bit) || (new_bit == (1u << rhs)) ) {
+                    new_bit = 1u << new_rhs_dist(rng);
+                }
+                mask |= new_bit;
+                break;
+            }
+            case 2: {
+                uint8_t new_rhs = rhs_dist(rng);
+                while (mask & (1u << new_rhs)) new_rhs = rhs_dist(rng);
+                rhs = new_rhs;
+                break;
             }
         }
+
+        if (mask == 0 || (mask & (1u << rhs))) [[unlikely]] continue;
+
+        ind.lhs_mask = mask;
+        ind.rhs_index = rhs;
+        ind.confidence = 0.0;
+        ind.support = 0.0;
     }
-    return individuals;
 }
 
-void GaRfd::RegisterResults(const std::vector<Individual>& final_population) {
-    discovered_rfds_.clear();
-    for (const auto& ind : final_population) {
-        if (ind.fitness >= min_confidence_) {
-            discovered_rfds_.push_back(ind);
+std::set<RFD> GaRfd::Finalize(const std::vector<Individual>& pop) const {
+    std::unordered_map<uint64_t, RFD> best_rfds;
+    for (auto const& ind : pop) {
+        if (ind.confidence < eps_) continue;
+
+        uint64_t key = (static_cast<uint64_t>(ind.lhs_mask) << 8) | ind.rhs_index;
+        auto it = best_rfds.find(key);
+        if (it == best_rfds.end()) {
+            RFD rfd;
+            rfd.lhs_mask = ind.lhs_mask;
+            rfd.rhs_index = ind.rhs_index;
+            rfd.support = ind.support;
+            rfd.confidence = ind.confidence;
+            best_rfds[key] = std::move(rfd);
+        } else if (ind.confidence > it->second.confidence) {
+            it->second.confidence = ind.confidence;
+            it->second.support = ind.support;
         }
     }
+
+    std::set<RFD> res;
+    for (auto& pair : best_rfds) res.insert(std::move(pair.second));
+    LOG_DEBUG("Finalized {} unique RFDs", res.size());
+    return res;
+}
+
+unsigned long long GaRfd::ExecuteInternal() {
+    return util::TimedInvoke([&]() {
+        LOG_INFO("Build similarity bitsets...");
+        BuildSimilarityBitsets();
+
+        std::mt19937 rng(seed_);
+
+        std::vector<Individual> pop = InitializePopulation(rng);
+        EvaluatePopulation(pop);
+
+        for (std::size_t gen = 0; gen < max_generations_; gen++) {
+            LOG_INFO("Generation {}/{} (pop size: {})", gen + 1, max_generations_, pop.size());
+            if (AllOf(pop)) {
+                LOG_DEBUG("All individuals satisfy confidence threshold – stopping early");
+                break;
+            }
+
+            std::vector<Individual> selected = Select(pop, rng);
+            if (selected.empty()) [[unlikely]] {
+                auto best = *std::max_element(pop.begin(), pop.end(),
+                    [](auto& a, auto& b) { return a.confidence < b.confidence; });
+                selected.push_back(best);
+            }
+            std::vector<Individual> offspring = Crossover(selected, rng);
+            Mutate(offspring, rng);
+
+            pop.clear();
+            pop.reserve(selected.size() + offspring.size());
+            pop.insert(pop.end(), std::make_move_iterator(selected.begin()),
+                      std::make_move_iterator(selected.end()));
+            pop.insert(pop.end(), std::make_move_iterator(offspring.begin()),
+                      std::make_move_iterator(offspring.end()));
+
+            if (pop.size() > 2*population_size_) {
+                std::sort(pop.begin(), pop.end(),
+                    [](auto const& a, auto const& b) { return a.confidence > b.confidence; });
+                pop.resize(2*population_size_);
+            }
+
+            EvaluatePopulation(pop);
+        }
+
+        discovered_ = Finalize(pop);
+    });
 }
 
 }  // namespace algos::rfd
