@@ -46,6 +46,7 @@
 #include "python_bindings/statistics/bind_statistics.h"
 #include "python_bindings/ucc/bind_ucc.h"
 #include "python_bindings/ucc/bind_ucc_verification.h"
+#include "python_bindings/rfd/bind_ga_rfd.h" 
 
 namespace python_bindings {
 
@@ -93,7 +94,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindAODVerification,
                            BindAfdMetricCalculation,
                            BindPAC,
-                           BindPACVerification}) {
+                           BindPACVerification,
+                           BindGaRfd}) {
         bind_func(module);
     }
 }
