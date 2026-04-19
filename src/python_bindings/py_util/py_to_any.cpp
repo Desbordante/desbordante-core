@@ -48,6 +48,9 @@
 #include "core/algorithms/rfd/similarity_metric.h"
 #include "python_bindings/rfd/py_similarity_metric.h"
 
+#include "core/algorithms/rfd/similarity_metric.h"
+#include "python_bindings/rfd/py_similarity_metric.h"
+
 namespace {
 
 namespace py = pybind11;
