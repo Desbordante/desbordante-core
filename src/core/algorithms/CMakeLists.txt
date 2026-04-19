@@ -18,6 +18,7 @@ set(SUBDIRS
     od/fastod
     od/order
     od/set_based_verifier
+    rfd
     statistics
     ucc
     sd
@@ -69,6 +70,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::nar::des
               ${DESBORDANTE_PREFIX}::od::fast
               ${DESBORDANTE_PREFIX}::od::order
+              ${DESBORDANTE_PREFIX}::rfd::ga_rfd
               ${DESBORDANTE_PREFIX}::ucc::hy
               ${DESBORDANTE_PREFIX}::ucc::pyro
               ${DESBORDANTE_PREFIX}::ucc::hpivalid
