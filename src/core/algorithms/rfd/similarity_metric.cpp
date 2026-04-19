@@ -17,10 +17,10 @@ double LevenshteinSimilarity(const std::string& a, const std::string& b) {
     if (n == 0 && m == 0) return 1.0;
     if (n == 0 || m == 0) return 0.0;
     std::vector<size_t> dp(m + 1);
-    for (size_t j = 0; j <= m; ++j) dp[j] = j;
-    for (size_t i = 1; i <= n; ++i) {
+    for (size_t j = 0; j <= m; j++) dp[j] = j;
+    for (size_t i = 1; i <= n; i++) {
         size_t prev = i;
-        for (size_t j = 1; j <= m; ++j) {
+        for (size_t j = 1; j <= m; j++) {
             size_t cost = (a[i-1] == b[j-1]) ? 0 : 1;
             size_t cur = std::min({dp[j] + 1, prev + 1, dp[j-1] + cost});
             dp[j-1] = prev;
@@ -40,6 +40,23 @@ std::shared_ptr<SimilarityMetric> LevenshteinMetric() {
 std::shared_ptr<SimilarityMetric> EqualityMetric() {
     return std::make_shared<FunctionSimilarityMetric>(
         [](const std::string& a, const std::string& b) { return a == b ? 1.0 : 0.0; });
+}
+
+std::shared_ptr<SimilarityMetric> AbsoluteDifferenceMetric() {
+    return std::make_shared<FunctionSimilarityMetric>(
+        [](const std::string& a, const std::string& b) {
+            try {
+                double x = std::stod(a);
+                double y = std::stod(b);
+                double abs_diff = std::abs(x - y);
+                double max_abs = std::max(std::abs(x), std::abs(y));
+                if (max_abs == 0.0) return 1.0;
+                double similarity = 1.0 - abs_diff / max_abs;
+                return std::max(0.0, similarity);
+            } catch (...) {
+                return 0.0;
+            }
+        });
 }
 
 } // namespace algos::rfd

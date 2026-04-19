@@ -33,7 +33,6 @@
 #include "core/util/enum_to_available_values.h"
 #include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
-
 #include "core/algorithms/rfd/similarity_metric.h"
 #include "python_bindings/rfd/py_similarity_metric.h"
 
