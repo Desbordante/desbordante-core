@@ -7,6 +7,10 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
+#include <unicode/unistr.h>
+#include <unicode/uchar.h>
+#include <unicode/normlzr.h> 
+
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
@@ -330,13 +334,11 @@ Statistic DataStats::GetZeroPercent(size_t index) const {
         return {};
 
     Statistic zeros_stat = GetNumberOfZeros(index);
-
-    mo::DoubleType double_type;
-
     mo::Int zeros = mo::Type::GetValue<mo::Int>(zeros_stat.GetData());
 
     double percent = static_cast<double>(zeros) / total;
 
+    mo::DoubleType double_type;
     std::byte* result = double_type.MakeValue(percent);
 
     return Statistic(result, &double_type, false);
@@ -347,46 +349,39 @@ Statistic DataStats::GetNumberOfNegatives(size_t index) const {
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kLess);
 }
 
-Statistic DataStats::GetTrueCount(size_t index) const {
-    if (all_stats_[index].true_count.HasValue())
-        return all_stats_[index].true_count;
-
+Statistic DataStats::CountBool(size_t index, bool expected) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kBool) return {};
+    if (col.GetTypeId() != +mo::TypeId::kBool)
+        return {};
 
     size_t count = 0;
-    auto const& data = col.GetData();
+    std::vector<std::byte const*> const& data = col.GetData();
 
     for (size_t i = 0; i < data.size(); ++i) {
-        if (col.IsNullOrEmpty(i)) continue;
+        if (col.IsNullOrEmpty(i))
+            continue;
 
         bool value = *reinterpret_cast<bool const*>(data[i]);
-        if (value) count++;
+        if (value == expected)
+            count++;
     }
 
     mo::IntType int_type;
     return Statistic(int_type.MakeValue(count), &int_type, false);
 }
 
+Statistic DataStats::GetTrueCount(size_t index) const {
+    if (all_stats_[index].true_count.HasValue())
+        return all_stats_[index].true_count;
+
+    return CountBool(index, true);
+}
+
 Statistic DataStats::GetFalseCount(size_t index) const {
     if (all_stats_[index].false_count.HasValue())
         return all_stats_[index].false_count;
 
-    mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kBool) return {};
-
-    size_t count = 0;
-    auto const& data = col.GetData();
-
-    for (size_t i = 0; i < data.size(); ++i) {
-        if (col.IsNullOrEmpty(i)) continue;
-
-        bool value = *reinterpret_cast<bool const*>(data[i]);
-        if (!value) count++;
-    }
-
-    mo::IntType int_type;
-    return Statistic(int_type.MakeValue(count), &int_type, false);
+    return CountBool(index, false);
 }
 
 Statistic DataStats::GetSumOfSquares(size_t index) const {
@@ -583,28 +578,6 @@ Statistic DataStats::GetNumberOfNonLetterChars(size_t index) const {
     auto pred = [](unsigned int symbol) { return !std::isalpha(symbol); };
 
     return CountIfInColumn(pred, index);
-}
-
-Statistic DataStats::GetDiacriticChars(size_t index) const {
-    mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
-
-    size_t count = 0;
-    mo::IntType int_type;
-
-    for (size_t i = 0; i < col.GetNumRows(); i++) {
-        if (col.IsNullOrEmpty(i)) continue;
-
-        auto const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
-
-        for (auto it = str.begin(); it != str.end(); ) {
-            uint32_t cp = utf8::next(it, str.end()); 
-            if (cp > 127) count++;                 
-        }
-    }
-
-    std::byte const* res = int_type.MakeValue(count);
-    return Statistic(res, &int_type, false);
 }
 
 Statistic DataStats::GetNumberOfDigitChars(size_t index) const {
@@ -835,6 +808,48 @@ Statistic DataStats::GetNumberOfWords(size_t index) const {
 
     return GetStringSumOf(index,
                           [](std::string const& line) { return GetNumberOfWordsInString(line); });
+}
+
+Statistic DataStats::GetNumberOfDiacriticChars(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString)
+        return {};
+
+    UErrorCode err = U_ZERO_ERROR;
+    icu::Normalizer2 const* norm =
+        icu::Normalizer2::getNFDInstance(err);
+
+    if (U_FAILURE(err) || norm == nullptr)
+        return {};
+
+    size_t count = 0;
+
+    for (size_t i = 0; i < col.GetNumRows(); ++i) {
+        if (col.IsNullOrEmpty(i))
+            continue;
+
+        std::string const& str =
+            mo::Type::GetValue<std::string>(col.GetValue(i));
+
+        icu::UnicodeString ustr =
+            icu::UnicodeString::fromUTF8(str);
+
+        icu::UnicodeString decomposed =
+            norm->normalize(ustr, err);
+
+        for (int32_t pos = 0; pos < decomposed.length();) {
+            UChar32 c = decomposed.char32At(pos);
+            pos += U16_LENGTH(c);
+
+            if (u_charType(c) == U_NON_SPACING_MARK) {
+                count++;
+            }
+        }
+    }
+
+    mo::IntType int_type;
+    std::byte const* res = int_type.MakeValue(count);
+    return Statistic(res, &int_type, false);
 }
 
 std::vector<char> DataStats::GetTopKChars(size_t index, size_t k) const {
@@ -1171,13 +1186,10 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].last_char_freq = GetLastCharFrequency(index);
             all_stats_[index].min_white_spaces = GetMinWhiteSpaces(index);
             all_stats_[index].max_white_spaces = GetMaxWhiteSpaces(index);
-            all_stats_[index].diacritic_chars = GetDiacriticChars(index);
-
-            if (type_id == +mo::TypeId::kBool) {
-                // boolean counts
-                all_stats_[index].true_count = GetTrueCount(index);
-                all_stats_[index].false_count = GetFalseCount(index);
-            }
+            all_stats_[index].num_diacritic_chars = GetNumberOfDiacriticChars(index);
+            // boolean counts
+            all_stats_[index].true_count = GetTrueCount(index);
+            all_stats_[index].false_count = GetFalseCount(index);
         }
 
         all_stats_[index].is_categorical = IsCategorical(

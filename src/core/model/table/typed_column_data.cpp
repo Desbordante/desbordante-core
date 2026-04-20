@@ -61,13 +61,11 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                 }
             }
             if (!matched) {
-                std::cerr << "  -> No match, considered string\n";//d
                 new_candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
             }
 
             candidate_types_bitset &= new_candidate_types_bitset;
             if (candidate_types_bitset.none()) {
-                 std::cerr << "  -> candidate_types_bitset is empty, returning Mixed at row " << i << "\n";//d
                 if (treat_mixed_as_string_) {
                     candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
                 } else {

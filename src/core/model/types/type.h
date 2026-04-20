@@ -137,5 +137,4 @@ public:
         return nullptr;
     }
 };
-
 }  // namespace model

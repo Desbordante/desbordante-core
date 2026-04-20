@@ -29,9 +29,6 @@ project(
     DESCRIPTION "Open-source data profiling tool"
 )
 
-# utf8cpp (header-only)
-target_include_directories(Desbordante PRIVATE ${CMAKE_SOURCE_DIR}/utfcpp/source)
-
 # ---- Build Environment Validation ----
 
 # In-source build validation
