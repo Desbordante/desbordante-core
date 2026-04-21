@@ -11,7 +11,7 @@
 namespace config {
 /// @brief An option that represents a custom metric on a set of columns, that treats values as a
 /// vector
-class MetricOption : public Option<std::shared_ptr<ICustomVectorMetric>> {
+class VectorMetricOption : public Option<std::shared_ptr<ICustomVectorMetric>> {
 private:
     using ValueType = std::shared_ptr<ICustomVectorMetric>;
 
@@ -24,9 +24,9 @@ private:
     }
 
 public:
-    MetricOption(std::shared_ptr<ICustomVectorMetric>* value_ptr,
-                 std::string_view name = names::kCustomMetric,
-                 std::string_view description = descriptions::kDCustomMetric)
+    VectorMetricOption(std::shared_ptr<ICustomVectorMetric>* value_ptr,
+                       std::string_view name = names::kCustomMetric,
+                       std::string_view description = descriptions::kDCustomMetric)
         : Option(value_ptr, name, description, ValueType{nullptr}) {
         // User can pass `nullptr` to explicitly say that they want to use default metric
         SetNormalizeFunc(&Normalize);
