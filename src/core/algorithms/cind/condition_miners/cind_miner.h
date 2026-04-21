@@ -25,6 +25,7 @@ protected:
     double min_validity_;
     double min_completeness_;
     CondType condition_type_;
+    unsigned int min_support_{2};
     util::PrimitiveCollection<CIND> cind_collection_;
 
     virtual CIND ExecuteSingle(model::IND const& aind) = 0;

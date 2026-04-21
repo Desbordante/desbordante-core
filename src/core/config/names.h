@@ -142,6 +142,7 @@ constexpr auto kValidity = "validity";
 constexpr auto kCompleteness = "completeness";
 constexpr auto kConditionType = "condition_type";
 constexpr auto kAlgoType = "algo_type";
+constexpr auto kSupport = "support";
 constexpr auto kCindCondValues = "cind_condition_values";
 
 }  // namespace config::names
