@@ -615,3 +615,22 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
 )
+
+# --- CIND ---
+desbordante_add_test(
+    cind.algos
+    SRCS
+    test_cind_algorithms.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::algos
+    ${DESBORDANTE_PREFIX}::ind
+    ${DESBORDANTE_PREFIX}::ind::spider
+    ${DESBORDANTE_PREFIX}::cind
+    ${DESBORDANTE_PREFIX}::cind::miners
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    spdlog::spdlog_header_only
+    better-enums
+    Boost::headers
+)

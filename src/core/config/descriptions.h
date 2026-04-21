@@ -256,6 +256,7 @@ constexpr auto kDCompleteness =
         "Percentage of rows/groups from IND that satisfies the pattern tuple";
 auto const kDConditionType = details::kDConditionTypeString.c_str();
 auto const kDAlgoType = details::kDAlgoTypeString.c_str();
+constexpr auto kDSupport = "Minimum support threshold (number of tuples) for cure_cind algorithm";
 constexpr auto kDCindCondValues =
         "Condition values aligned with conditional attributes order. "
         "Use '-' or '_' as wildcard. If empty => all wildcards.";
