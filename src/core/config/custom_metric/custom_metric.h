@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstddef>
 #include <functional>
-#include <memory>
+#include <optional>
 #include <sstream>
 
 #include "core/config/exceptions.h"
@@ -16,6 +16,7 @@ namespace config {
 /// a convenient user interface (especially, in Python) without extra overhead on conversions
 // NOTE: these objects are wrapped in `shared_ptr`, and this encourages user to use the same object
 // for several columns. Keep it in mind if you are planning to implement some complex internal state
+/// WARN: NULL value is represented by nullptr
 class ICustomMetric {
 public:
     virtual ~ICustomMetric() = default;
@@ -29,17 +30,24 @@ public:
 template <typename ArgType>
 class StaticCustomMetric : public ICustomMetric {
 private:
-    using Metric = std::function<double(ArgType const&, ArgType const&)>;
+    using OptArg = std::optional<ArgType>;
+    using Metric = std::function<double(OptArg const&, OptArg const&)>;
 
     Metric metric_;
+
+    static OptArg GetValue(std::byte const* value) {
+        if (!value) {
+            return std::nullopt;
+        }
+        return model::Type::GetValue<ArgType>(value);
+    }
 
 public:
     explicit StaticCustomMetric(Metric metric) : metric_(std::move(metric)) {}
 
     double Dist(model::Type const*, std::byte const* first,
                 std::byte const* second) const override {
-        return metric_(model::Type::GetValue<ArgType>(first),
-                       model::Type::GetValue<ArgType>(second));
+        return metric_(GetValue(first), GetValue(second));
     }
 };
 
