@@ -16,6 +16,7 @@ namespace config {
 /// a convenient user interface (especially, in Python) without extra overhead on conversions
 // NOTE: these objects are wrapped in `shared_ptr`, and this encourages user to use the same object
 // for several columns. Keep it in mind if you are planning to implement some complex internal state
+/// WARN: NULL value is represented by nullptr
 class ICustomVectorMetric {
 protected:
     using Types = std::vector<model::Type const*>;
