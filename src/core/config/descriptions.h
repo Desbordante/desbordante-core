@@ -44,6 +44,8 @@ std::string const kDAlgoTypeString =
 }  // namespace details
 
 // Common
+constexpr auto kDCustomMetric = "user-defined metric";
+constexpr auto kDCustomMetrics = "user-defined metrics";
 constexpr auto kDEqualNulls = "specify whether two NULLs should be considered equal";
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
 constexpr auto kDLhsIndices = "LHS column indices";
