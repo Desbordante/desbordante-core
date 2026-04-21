@@ -3,6 +3,8 @@
 namespace config::names {
 // Common
 constexpr auto kCsvConfig = "csv_config";
+constexpr auto kCustomMetric = "metric";
+constexpr auto kCustomMetrics = "metrics";
 constexpr auto kEqualNulls = "is_null_equal_null";
 constexpr auto kError = "error";
 constexpr auto kLhsIndices = "lhs_indices";
