@@ -189,7 +189,10 @@ For attribute constraints:
 Desbordante version of GDD validation implements:
 - EDIT_DISTANCE metric for strings;
 - ABS_DIFF metric for numbers;
-- LE, LT, GE, GT, EQ as the comparison operator.
+- LE, LT, GE, GT, EQ, NE as the comparison operator.
+
+Note that the original paper describes two comparison operators:
+LE and EQ.
 """
 
 SHOWCASE1_INFO = r"""Showcase 1. String equality via EDIT_DISTANCE.
@@ -226,7 +229,7 @@ constant. Therefore, assuming non-negative ages, we encode
 
 as
 
-    |0.age - 0| <= 29
+    |0.age - 0| < 30
 
 This is a convenient showcase for ABS_DIFF in this dataset.
 This dependency is expected to hold because, in this graph, every
@@ -261,10 +264,10 @@ GDD_MISHA_AMSTERDAM = GddFromDotFile(
 GDD_UNDER_30_AMSTERDAM = GddFromDotFile(
     pattern_dot_file=PATTERN_DOT_PATH,
     lhs=[
-        AttrConst(0, "age", 0, M.ABS_DIFF, Op.LE, 29.0),
+        AttrConst(0, "age", 0, M.ABS_DIFF, Op.LT, 30),
     ],
     rhs=[
-        AttrConst(1, "name", "Amsterdam", M.EDIT_DISTANCE, Op.LE, 0.0),
+        AttrConst(1, "name", "Amsterdam", M.EDIT_DISTANCE, Op.EQ, 0.0),
     ],
 )
 

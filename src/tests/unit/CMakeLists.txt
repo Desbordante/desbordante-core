@@ -344,8 +344,6 @@ desbordante_add_test(
         SRCS
         test_gdd_validator.cpp
         test_gdd_constraint_satisfaction.cpp
-        test_gdd_equality.cpp
-        test_gdd_graph_parsing.cpp
         LIBS
         ${DESBORDANTE_PREFIX}::gdd
         ${DESBORDANTE_PREFIX}::gdd::validator

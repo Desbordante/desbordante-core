@@ -9,9 +9,9 @@
 #include "core/algorithms/gdd/gdd_graph_description.h"
 #include "tests/unit/test_gdd_utils.h"
 
-namespace tests {
+// TODO: wildcard tests once they will be implemented in code.
 
-namespace {
+namespace tests {
 
 using model::Gdd;
 using model::gdd::graph_t;
@@ -21,15 +21,6 @@ using model::gdd::detail::CmpOp;
 using model::gdd::detail::ConstValue;
 using model::gdd::detail::DistanceConstraint;
 using model::gdd::detail::DistanceMetric;
-
-std::string SanitizeParamName(std::string name) {
-    for (char& ch : name) {
-        if (!std::isalnum(static_cast<unsigned char>(ch))) {
-            ch = '_';
-        }
-    }
-    return name;
-}
 
 struct AttrConstCase {
     std::string case_name;
@@ -56,7 +47,7 @@ TEST_P(GddSatisfiesAttrConstTest, WorksAsExpected) {
 
     graph_t g;
     auto const gv = AddVertex(g, tc.graph_vertex_id, tc.graph_vertex_label, tc.graph_vertex_attrs);
-    auto const pv = FindPatternVertex(p, 1);
+    auto const pv = FindVertexById(p, 1);
     std::unordered_map<vertex_t, vertex_t> const map{{pv, gv}};
 
     if (tc.expect_throw) {
@@ -281,8 +272,8 @@ TEST_P(GddSatisfiesAttrAttrTest, WorksAsExpected) {
     graph_t g;
     auto const g1 = AddVertex(g, tc.lhs_graph_id, tc.lhs_graph_label);
     auto const g2 = AddVertex(g, tc.rhs_graph_id, tc.rhs_graph_label);
-    auto const p1 = FindPatternVertex(p, 1);
-    auto const p2 = FindPatternVertex(p, 2);
+    auto const p1 = FindVertexById(p, 1);
+    auto const p2 = FindVertexById(p, 2);
 
     std::unordered_map<vertex_t, vertex_t> const map{{p1, g1}, {p2, g2}};
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
@@ -340,7 +331,7 @@ TEST_P(GddSatisfiesRelConstTest, WorksAsExpected) {
     auto const b = AddVertex(g, 42, "B");
     AddEdge(g, a, b, tc.actual_edge_label);
 
-    auto const pv = FindPatternVertex(p, 1);
+    auto const pv = FindVertexById(p, 1);
     std::unordered_map<vertex_t, vertex_t> const map{{pv, a}};
 
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
@@ -396,8 +387,8 @@ TEST_P(GddSatisfiesRelRelTest, WorksAsExpected) {
         AddEdge(g, c_v, d2, tc.rhs_edge_label);
     }
 
-    auto const p1 = FindPatternVertex(p, 1);
-    auto const p2 = FindPatternVertex(p, 2);
+    auto const p1 = FindVertexById(p, 1);
+    auto const p2 = FindVertexById(p, 2);
     std::unordered_map<vertex_t, vertex_t> const map{{p1, a}, {p2, c_v}};
 
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
@@ -442,7 +433,7 @@ TEST(GddSatisfiesConstraint, EmptyLhsRhsSatisfies) {
 
     graph_t g;
     auto const gv = AddVertex(g, 10, "X");
-    auto const pv = FindPatternVertex(p, 1);
+    auto const pv = FindVertexById(p, 1);
 
     std::unordered_map<vertex_t, vertex_t> map;
     map.emplace(pv, gv);
@@ -487,14 +478,10 @@ TEST(GddSatisfiesConstraint, RelConstNonInt64ConstValueTypesThrows) {
     auto const b = AddVertex(g, 42, "B");
     AddEdge(g, a, b, "knows");
 
-    auto const pv = FindPatternVertex(p, 1);
+    auto const pv = FindVertexById(p, 1);
     std::unordered_map<vertex_t, vertex_t> const map{{pv, a}};
 
     EXPECT_THROW(gdd.Satisfies(g, map), std::logic_error);
 }
-
-// TODO: wildcard tests once they will be implemented in code.
-
-}  // namespace
 
 }  // namespace tests

@@ -1,4 +1,4 @@
-#include "python_bindings/gdd/bind_gdd.h"
+#include "python_bindings/gdd/bind_gdd_verification.h"
 
 #include <pybind11/pybind11.h>
 
@@ -94,24 +94,65 @@ std::string Repr(model::gdd::detail::CmpOp op) {
     using model::gdd::detail::CmpOp;
 
     switch (op) {
-        case CmpOp::kEq:
-            return "CmpOp.EQ";
         case CmpOp::kLe:
             return "CmpOp.LE";
+        case CmpOp::kGe:
+            return "CmpOp.GE";
+        case CmpOp::kLt:
+            return "CmpOp.LT";
+        case CmpOp::kGt:
+            return "CmpOp.GT";
+        case CmpOp::kEq:
+            return "CmpOp.EQ";
+        case CmpOp::kNe:
+            return "CmpOp.NE";
+        default:
+            throw std::invalid_argument("Unknown CmpOp");
     }
-    return "CmpOp.<unknown>";
+}
+
+std::string Repr(std::unordered_map<std::string, std::string> const& graph_vertex_attributes) {
+    std::string res = "{";
+    std::size_t i = 0;
+    for (auto const& [k, v] : graph_vertex_attributes) {
+        res += k + ": " + v;
+        if (++i < graph_vertex_attributes.size()) {
+            res += ", ";
+        }
+    }
+    return res + "}";
+}
+
+std::string Repr(model::GddCounterexampleVertex const& v) {
+    return "GddCounterexampleVertex(graph_vertex_id=" + std::to_string(v.graph_vertex_id) +
+           ", graph_vertex_label=" + v.graph_vertex_label +
+           ", pattern_vertex_id=" + std::to_string(v.pattern_vertex_id) +
+           ", pattern_vertex_label=" + v.pattern_vertex_label +
+           ", graph_vertex_attributes=" + Repr(v.graph_vertex_attributes) + ")";
+}
+
+std::string Repr(model::GddCounterexample const& ce) {
+    std::string res = "GddCounterexample(gdd_index=" + std::to_string(ce.gdd_index) + ", match={";
+    std::size_t i = 0;
+    for (auto const& v : ce.match) {
+        res += Repr(v);
+        if (++i != ce.match.size()) {
+            res += ", ";
+        }
+    }
+    return res + "}";
 }
 
 }  // namespace
 
-void BindGdd(pybind11::module_& main_module) {
+void BindGddVerification(pybind11::module_& main_module) {
     namespace py = pybind11;
     using algos::Algorithm;
-    using algos::GddCounterexample;
-    using algos::GddCounterexampleVertex;
     using algos::GddValidator;
     using algos::NaiveGddValidator;
     using model::Gdd;
+    using model::GddCounterexample;
+    using model::GddCounterexampleVertex;
     using model::gdd::graph_t;
     using model::gdd::detail::AttrTag;
     using model::gdd::detail::CmpOp;
@@ -134,8 +175,12 @@ void BindGdd(pybind11::module_& main_module) {
                  [](DistanceMetric const& lhs, DistanceMetric const& rhs) { return lhs == rhs; });
 
     py::enum_<CmpOp>(gdd_module, "CmpOp")
-            .value("EQ", CmpOp::kEq)
             .value("LE", CmpOp::kLe)
+            .value("GE", CmpOp::kGe)
+            .value("LT", CmpOp::kLt)
+            .value("GT", CmpOp::kGt)
+            .value("EQ", CmpOp::kEq)
+            .value("NE", CmpOp::kNe)
             .export_values()
             .def("__eq__", [](CmpOp const& lhs, CmpOp const& rhs) { return lhs == rhs; });
 
@@ -316,7 +361,8 @@ void BindGdd(pybind11::module_& main_module) {
                        ", op=" + Repr(c.op) + ")";
             });
 
-    py::class_<algos::GddCounterexampleVertex>(gdd_module, "GddCounterexampleMatchEntry")
+    py::class_<GddCounterexampleVertex>(gdd_module, "GddCounterexampleMatchEntry")
+            .def("__repr__", [](GddCounterexampleVertex const& v) { return Repr(v); })
             .def_readonly("pattern_vertex_id", &GddCounterexampleVertex::pattern_vertex_id)
             .def_readonly("pattern_vertex_label", &GddCounterexampleVertex::pattern_vertex_label)
             .def_readonly("graph_vertex_id", &GddCounterexampleVertex::graph_vertex_id)
@@ -325,6 +371,7 @@ void BindGdd(pybind11::module_& main_module) {
                           &GddCounterexampleVertex::graph_vertex_attributes);
 
     py::class_<GddCounterexample>(gdd_module, "GddCounterexample")
+            .def("__repr__", [](GddCounterexample const& ce) { return Repr(ce); })
             .def_readonly("gdd_index", &GddCounterexample::gdd_index)
             .def_readonly("match", &GddCounterexample::match);
 

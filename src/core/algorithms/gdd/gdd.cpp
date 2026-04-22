@@ -1,6 +1,6 @@
 #include "gdd.h"
 
-#include <charconv>
+#include <unordered_map>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
@@ -69,10 +69,18 @@ bool CompareDistance(double dist, gdd::detail::CmpOp op, double threshold) {
     using ::model::gdd::detail::CmpOp;
 
     switch (op) {
-        case CmpOp::kEq:
-            return std::abs(dist - threshold) <= eps;
         case CmpOp::kLe:
             return dist <= threshold;
+        case CmpOp::kGe:
+            return dist >= threshold;
+        case CmpOp::kLt:
+            return dist < threshold;
+        case CmpOp::kGt:
+            return dist > threshold;
+        case CmpOp::kEq:
+            return std::abs(dist - threshold) <= eps;
+        case CmpOp::kNe:
+            return std::abs(dist - threshold) > eps;
         default:
             throw std::logic_error("Unimplemented distance compare operation");
     }
@@ -258,4 +266,23 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
     return CompareDistance(dist, constraint.op, constraint.threshold);
 }
 
+GddCounterexample BuildCounterexample(
+        gdd::graph_t const& pattern, gdd::graph_t const& graph,
+        std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& mapping) {
+    GddCounterexample ce{};
+    ce.match.reserve(mapping.size());
+
+    for (auto const& [pv, gv] : mapping) {
+        ce.match.push_back({
+                .pattern_vertex_id = pattern[pv].id,
+                .pattern_vertex_label = pattern[pv].label,
+                .graph_vertex_id = graph[gv].id,
+                .graph_vertex_label = graph[gv].label,
+                .graph_vertex_attributes = graph[gv].attributes,
+        });
+    }
+
+    std::ranges::sort(ce.match, {}, &GddCounterexampleVertex::pattern_vertex_id);
+    return ce;
+}
 }  // namespace model

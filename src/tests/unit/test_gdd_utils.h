@@ -16,6 +16,15 @@
 
 namespace tests {
 
+inline std::string SanitizeParamName(std::string name) {
+    for (char& ch : name) {
+        if (!std::isalnum(static_cast<unsigned char>(ch))) {
+            ch = '_';
+        }
+    }
+    return name;
+}
+
 using model::Gdd;
 using model::gdd::graph_t;
 using model::gdd::vertex_t;
@@ -27,6 +36,8 @@ using model::gdd::detail::DistanceConstraint;
 using model::gdd::detail::DistanceMetric;
 using model::gdd::detail::GddToken;
 using model::gdd::detail::RelTag;
+
+// Graph utility
 
 inline graph_t ReadGraphFromDot(std::string const& dot) {
     std::stringstream ss;
@@ -58,9 +69,7 @@ inline vertex_t FindVertexById(graph_t const& g, std::uint64_t id) {
     throw std::runtime_error("vertex with requested id not found");
 }
 
-inline vertex_t FindPatternVertex(graph_t const& pattern, std::uint64_t id) {
-    return FindVertexById(pattern, id);
-}
+// Pattern builders
 
 inline graph_t MakeSingleVertexPattern(std::uint64_t id, std::string label) {
     graph_t g;
@@ -76,32 +85,7 @@ inline graph_t MakeTwoVertexPattern(std::uint64_t id1, std::uint64_t id2, std::s
     return g;
 }
 
-inline graph_t MakePersonCityPattern(bool reverse_insertion_order = false, int id_shift = 0,
-                                     std::string edge_label = "lives_in",
-                                     std::string person_name = "Misha",
-                                     std::string city_name = "Amsterdam") {
-    graph_t g;
-
-    vertex_t v_person{};
-    vertex_t v_city{};
-
-    if (!reverse_insertion_order) {
-        v_person = AddVertex(g, static_cast<std::uint64_t>(1 + id_shift), "Person",
-                             {{"name", std::move(person_name)}});
-        v_city = AddVertex(g, static_cast<std::uint64_t>(2 + id_shift), "City",
-                           {{"name", std::move(city_name)}});
-    } else {
-        v_city = AddVertex(g, static_cast<std::uint64_t>(2 + id_shift), "City",
-                           {{"name", std::move(city_name)}});
-        v_person = AddVertex(g, static_cast<std::uint64_t>(1 + id_shift), "Person",
-                             {{"name", std::move(person_name)}});
-    }
-
-    AddEdge(g, v_person, v_city, std::move(edge_label));
-    return g;
-}
-
-inline graph_t PatternPersonCity(std::string const& edge_label = "lives_in") {
+inline graph_t MakePatternPersonCity(std::string const& edge_label = "lives_in") {
     return ReadGraphFromDot(std::string(R"(digraph P {
         0 [label="Person"];
         1 [label="City"];
@@ -110,7 +94,7 @@ inline graph_t PatternPersonCity(std::string const& edge_label = "lives_in") {
     })");
 }
 
-inline graph_t PatternCityCountry(std::string const& edge_label = "in_country") {
+inline graph_t MakePatternCityCountry(std::string const& edge_label = "in_country") {
     return ReadGraphFromDot(std::string(R"(digraph P {
         0 [label="City"];
         1 [label="Country"];
@@ -119,7 +103,7 @@ inline graph_t PatternCityCountry(std::string const& edge_label = "in_country") 
     })");
 }
 
-inline graph_t PatternCompanyCity(std::string const& edge_label = "hq_in") {
+inline graph_t MakePatternCompanyCity(std::string const& edge_label = "hq_in") {
     return ReadGraphFromDot(std::string(R"(digraph P {
         0 [label="Company"];
         1 [label="City"];
@@ -127,6 +111,8 @@ inline graph_t PatternCompanyCity(std::string const& edge_label = "hq_in") {
                             R"("];
     })");
 }
+
+// Distance constraint builders
 
 inline DistanceConstraint AttrConst(std::size_t pid, std::string attr_name, ConstValue value,
                                     DistanceMetric metric, CmpOp op, double threshold) {
@@ -237,6 +223,208 @@ inline DistanceConstraint MakeAttrEditDistanceLe(std::size_t pattern_vid, std::s
             .metric = DistanceMetric::kEditDistance,
             .op = CmpOp::kLe,
     };
+}
+
+// Graphs and gdds for validator testing
+
+inline Gdd MakeGddMishaLivesInAmsterdam() {
+    auto pattern = MakePatternPersonCity("lives_in");
+    Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Misha")};
+    Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Amsterdam")};
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+inline Gdd MakeGddRigaInLatvia() {
+    auto pattern = MakePatternCityCountry("in_country");
+    Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Riga")};
+    Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Latvia")};
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+inline Gdd MakeGddVacuousImplicationNonexistentPerson() {
+    auto pattern = MakePatternPersonCity("lives_in");
+    Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Nonexistent")};
+    Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Nowhere")};
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+inline Gdd MakeGddCompanyHqInAmsterdamNoCompanyInGraph() {
+    auto pattern = MakePatternCompanyCity("hq_in");
+    Gdd::Phi lhs{};
+    Gdd::Phi rhs{EqStrAttrToConst(1, "name", "Amsterdam")};
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+inline Gdd MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint() {
+    auto pattern = MakePatternPersonCity("lives_in");
+    Gdd::Phi lhs{AbsDiffLeAttrToConst(0, "age", model::gdd::detail::ConstValue{25LL}, 0.0)};
+    Gdd::Phi rhs{RelToConst(0, "lives_in", 101)};
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+inline Gdd MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity() {
+    auto pattern = MakePatternPersonCity("lives_in");
+    Gdd::Phi lhs{EqStrAttrToConst(0, "name", "Misha")};
+    Gdd::Phi rhs{EditLeStrAttrToConst(1, "label", "Coty", 1.0)};
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+inline std::string LargeGraphAllGoodDot() {
+    return R"(digraph G {
+        1 [label="Person", name="Misha", age="25", email="m@x"];
+        2 [label="Person", name="Bob",   age="31"];
+        3 [label="Person", name="Alice", age="22"];
+
+        101 [label="City", name="Amsterdam", population="821752"];
+        102 [label="City", name="Riga",      population="605273"];
+        103 [label="City", name="Paris"];
+
+        201 [label="Country", name="Netherlands"];
+        202 [label="Country", name="Latvia"];
+        203 [label="Country", name="France"];
+
+        1 -> 101 [label="lives_in"];
+        2 -> 102 [label="lives_in"];
+        3 -> 103 [label="lives_in"];
+
+        101 -> 201 [label="in_country"];
+        102 -> 202 [label="in_country"];
+        103 -> 203 [label="in_country"];
+
+        1 -> 2 [label="friend"];
+        2 -> 3 [label="friend"];
+        3 -> 1 [label="friend"];
+        101 -> 102 [label="sister_city"];
+        102 -> 103 [label="sister_city"];
+    })";
+}
+
+inline std::string LargeGraphWithViolationMishaAlsoLivesInRigaDot() {
+    return R"(digraph G {
+        1 [label="Person", name="Misha", age="25", email="m@x"];
+        2 [label="Person", name="Bob",   age="31"];
+        3 [label="Person", name="Alice", age="22"];
+
+        101 [label="City", name="Amsterdam", population="821752"];
+        102 [label="City", name="Riga",      population="605273"];
+        103 [label="City", name="Paris"];
+
+        201 [label="Country", name="Netherlands"];
+        202 [label="Country", name="Latvia"];
+        203 [label="Country", name="France"];
+
+        1 -> 101 [label="lives_in"];
+        1 -> 102 [label="lives_in"];
+        2 -> 102 [label="lives_in"];
+        3 -> 103 [label="lives_in"];
+
+        101 -> 201 [label="in_country"];
+        102 -> 202 [label="in_country"];
+        103 -> 203 [label="in_country"];
+
+        1 -> 2 [label="friend"];
+        2 -> 3 [label="friend"];
+        3 -> 1 [label="friend"];
+    })";
+}
+
+inline std::string GraphNoMatchesForCompanyCityDot() {
+    return R"(digraph G {
+        1 [label="Person", name="Misha"];
+        2 [label="Person", name="Bob"];
+        1 -> 2 [label="friend"];
+    })";
+}
+
+inline std::string DblpLikeGraphDot() {
+    return R"(digraph G {
+        1 [label="Author", name="Jiawei Han", canonical_author_id="author:han_jiawei"];
+        2 [label="Author", name="J. Han",     canonical_author_id="author:han_jiawei"];
+
+        3 [label="Author", name="Philip S. Yu", canonical_author_id="author:yu_philip"];
+
+        4 [label="Author", name="Yi Zhang", canonical_author_id="author:zhang_yi"];
+        5 [label="Author", name="Yu Zhang", canonical_author_id="author:zhang_yu"];
+
+        101 [label="Paper", title="Mining Frequent Patterns",     year="2000"];
+        102 [label="Paper", title="Mining Frequent Pattern Sets", year="2000"];
+        103 [label="Paper", title="Scalable Pattern Search",      year="2023"];
+        104 [label="Paper", title="Efficient Pattern Search",     year="2023"];
+
+        201 [label="Venue", name="SIGMOD"];
+        202 [label="Venue", name="KDD"];
+
+        1 -> 101 [label="authored"];
+        3 -> 101 [label="authored"];
+
+        2 -> 102 [label="authored"];
+        3 -> 102 [label="authored"];
+
+        4 -> 103 [label="authored"];
+        5 -> 104 [label="authored"];
+
+        101 -> 201 [label="published_in"];
+        102 -> 201 [label="published_in"];
+        103 -> 202 [label="published_in"];
+        104 -> 202 [label="published_in"];
+    })";
+}
+
+inline graph_t PatternDblpStrong() {
+    return ReadGraphFromDot(R"(digraph P {
+        0 [label="Author"];
+        1 [label="Author"];
+        2 [label="Paper"];
+        3 [label="Paper"];
+        4 [label="Author"];
+        5 [label="Venue"];
+
+        0 -> 2 [label="authored"];
+        1 -> 3 [label="authored"];
+        4 -> 2 [label="authored"];
+        4 -> 3 [label="authored"];
+        2 -> 5 [label="published_in"];
+        3 -> 5 [label="published_in"];
+    })");
+}
+
+inline graph_t PatternDblpWeak() {
+    return ReadGraphFromDot(R"(digraph P {
+        0 [label="Author"];
+        1 [label="Author"];
+        2 [label="Paper"];
+        3 [label="Paper"];
+        4 [label="Venue"];
+
+        0 -> 2 [label="authored"];
+        1 -> 3 [label="authored"];
+        2 -> 4 [label="published_in"];
+        3 -> 4 [label="published_in"];
+    })");
+}
+
+inline Gdd MakeGddDblpStrongAuthorResolution() {
+    auto pattern = PatternDblpStrong();
+    Gdd::Phi lhs{
+            EditLeAttrToAttr(0, "name", 1, "name", 8.0),
+            EditLeAttrToAttr(2, "year", 3, "year", 0.0),
+    };
+    Gdd::Phi rhs{
+            EditLeAttrToAttr(0, "canonical_author_id", 1, "canonical_author_id", 0.0),
+    };
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
+}
+
+inline Gdd MakeGddDblpWeakAuthorResolution() {
+    auto pattern = PatternDblpWeak();
+    Gdd::Phi lhs{
+            EditLeAttrToAttr(0, "name", 1, "name", 2.0),
+            EditLeAttrToAttr(2, "year", 3, "year", 0.0),
+    };
+    Gdd::Phi rhs{
+            EditLeAttrToAttr(0, "canonical_author_id", 1, "canonical_author_id", 0.0),
+    };
+    return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }
 
 }  // namespace tests

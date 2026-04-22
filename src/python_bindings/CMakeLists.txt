@@ -158,7 +158,7 @@ desbordante_add_bind(
 desbordante_add_bind(
         gdd
         SRCS
-        gdd/bind_gdd.cpp
+        gdd/bind_gdd_verification.cpp
         LIBS
         ${DESBORDANTE_PREFIX}::gdd
         ${DESBORDANTE_PREFIX}::gdd::validator

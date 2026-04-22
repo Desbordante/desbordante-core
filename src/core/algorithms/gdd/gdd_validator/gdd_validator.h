@@ -5,12 +5,13 @@
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/gdd/gdd_graph_description.h"
-#include "gdd_counterexample.h"
 
 namespace algos {
 
 class GddValidator : public Algorithm {
 private:
+    using GddCounterexample = model::GddCounterexample;
+
     std::filesystem::path graph_path_;
     model::gdd::graph_t graph_;
     std::vector<model::Gdd> gdds_;
@@ -35,8 +36,8 @@ protected:
         return gdds_;
     }
 
-    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
-                       GddCounterexample& out_counterexample) = 0;
+    virtual std::optional<GddCounterexample> Holds(model::Gdd const& gdd,
+                                                   model::gdd::graph_t const& graph) = 0;
 
 public:
     GddValidator();

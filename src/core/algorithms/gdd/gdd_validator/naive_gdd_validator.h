@@ -10,20 +10,18 @@ private:
     using EdgeT = model::gdd::edge_t;
     using DomainT = std::unordered_map<VertexT, std::vector<VertexT>>;
     using MappingT = std::unordered_map<VertexT, VertexT>;
+    using GddCounterexample = model::GddCounterexample;
 
     DomainT domain_;
 
     static DomainT BuildDomain(model::gdd::graph_t const& pattern,
                                model::gdd::graph_t const& graph);
-    static GddCounterexample BuildCounterexample(model::gdd::graph_t const& pattern,
-                                                 model::gdd::graph_t const& graph,
-                                                 MappingT const& mapping);
     bool ExistsCounterexample(model::Gdd const& gdd, model::gdd::graph_t const& graph,
                               MappingT& partial_map, GddCounterexample& counterexample);
 
 protected:
-    virtual bool Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph,
-                       GddCounterexample& out_counterexample) final;
+    virtual std::optional<GddCounterexample> Holds(model::Gdd const& gdd,
+                                                   model::gdd::graph_t const& graph) final;
 
 public:
     NaiveGddValidator() = default;

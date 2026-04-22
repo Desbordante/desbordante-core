@@ -118,7 +118,9 @@ py::tuple GetPyType(std::type_index type_index) {
                                       py::type::of<algos::md::ColumnSimilarityClassifier>());
              }},
             {typeid(std::vector<model::Gdd>),
-             []() { return MakeTypeTuple(kPyList, py::type::of<model::Gdd>()); }},
+             [] { return MakeTypeTuple(kPyList, py::type::of<model::Gdd>()); }},
+            {typeid(std::vector<model::GddCounterexample>),
+             [] { return MakeTypeTuple(kPyList, py::type::of<model::GddCounterexample>()); }},
             PyTypePair<std::filesystem::path, kPyStr>,
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,

@@ -17,7 +17,7 @@
 #include "python_bindings/dynamic/bind_dynamic_fd_verification.h"
 #include "python_bindings/fd/bind_fd.h"
 #include "python_bindings/fd/bind_fd_verification.h"
-#include "python_bindings/gdd/bind_gdd.h"
+#include "python_bindings/gdd/bind_gdd_verification.h"
 #include "python_bindings/gfd/bind_gfd.h"
 #include "python_bindings/gfd/bind_gfd_verification.h"
 #include "python_bindings/gspan/bind_gspan.h"
@@ -60,7 +60,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindInd,
                            BindIndVerification,
                            BindGfdVerification,
-                           BindGdd,
+                           BindGddVerification,
                            BindSplit,
                            BindDynamicFdVerification,
                            BindNdVerification,
