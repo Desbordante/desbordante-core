@@ -358,7 +358,35 @@ class TestDataStats(unittest.TestCase):
 
         res = self.data_stats.get_gini_coefficient(2)
         self.assertIsNone(res)
+    
+    def test_pearson_correlation(self) -> None:
+        res = self.data_stats.get_pearson_correlation(0, 1)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+        self.assertLess(res, 1.0)
+        # ... add more assertions based on expected values for the test dataset
+    
+    def test_spearman_correlation(self) -> None:
+        res = self.data_stats.get_spearman_correlation(0, 1)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+        self.assertLess(res, 1.0)
+        # ... add more assertions based on expected values for the test dataset
 
+    def test_kendall_correlation(self) -> None:
+        res = self.data_stats.get_kendall_correlation(0, 1)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+        self.assertLess(res, 1.0)
+        # ... add more assertions based on expected values for the test dataset
+    
+    def test_cramers_v_correlation(self) -> None:
+        res = self.data_stats.get_cramers_v_correlation(0, 1)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+        self.assertLess(res, 1.0)
+        # ... add more assertions based on expected values for the test dataset
+        
     def test_all_new_statistics(self) -> None:
         for i in range(self.data_stats.get_number_of_columns()):
             try:

@@ -899,4 +899,54 @@ TEST(TestDataStats, TestLastCharFrequency) {
     EXPECT_EQ(result, " :4");
 }
 
+TEST(TestDataStats, TestPearsonCorrelation) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();  // Важно: сначала выполнить
+
+    algos::Statistic pearson_stat = stats.GetPearsonCorrelation(2, 7);  // колонки 2 и 7
+    EXPECT_TRUE(pearson_stat.HasValue());
+    
+    double result = mo::Type::GetValue<mo::Double>(pearson_stat.GetData());
+    EXPECT_NEAR(result, -0.340062, 0.0001);
+}
+
+TEST(TestDataStats, TestSpearmanCorrelation) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
+
+    algos::Statistic spearman_stat = stats.GetSpearmanCorrelation(2, 7);
+    EXPECT_TRUE(spearman_stat.HasValue());
+    
+    double result = mo::Type::GetValue<mo::Double>(spearman_stat.GetData());
+    EXPECT_NEAR(result, -0.500000, 0.0001);
+}
+
+TEST(TestDataStats, TestKendallCorrelation) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
+
+    algos::Statistic kendall_stat = stats.GetKendallCorrelation(2, 7);
+    EXPECT_TRUE(kendall_stat.HasValue());
+    
+    double result = mo::Type::GetValue<mo::Double>(kendall_stat.GetData());
+    EXPECT_NEAR(result, -0.333333, 0.0001);
+}
+
+TEST(TestDataStats, TestCramersVCorrelation) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
+
+    // Для колонок 5 (abc) и 10 (aABd32e) - категориальные
+    algos::Statistic cramers_v_stat = stats.GetCramersVCorrelation(5, 10);
+    EXPECT_TRUE(cramers_v_stat.HasValue());
+    
+    double result = mo::Type::GetValue<mo::Double>(cramers_v_stat.GetData());
+    // Значение нужно посчитать отдельно для категориальных колонок
+    EXPECT_GE(result, 0.0);
+    EXPECT_LT(result, 1.0);
+}
 };  // namespace tests

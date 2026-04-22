@@ -40,6 +40,8 @@ class DataStats : public Algorithm {
     static size_t GetNumberOfWordsInString(std::string line);
     // Returns a vector of words in a string
     static std::vector<std::string> GetWordsInString(std::string line);
+    // Returns ranks of values in a numeric column
+    static std::vector<double> GetRanks(std::vector<double> const& data);
 
     // Calculates values via a certain predivate and returns the minimal of them
     template <class Pred>
@@ -196,6 +198,14 @@ public:
     Statistic GetFirstCharFrequency(size_t index) const;
     // Returns the most frequent last character.
     Statistic GetLastCharFrequency(size_t index) const;
+    // Returns the Pearson correlation coefficient between two numeric columns.
+    Statistic GetPearsonCorrelation(size_t index1, size_t index2) const;
+    // Returns the Spearman's rank correlation coefficient between two numeric columns.
+    Statistic GetSpearmanCorrelation(size_t index1, size_t index2) const;
+    // Returns the Kendall's tau correlation coefficient between two numeric columns.
+    Statistic GetKendallCorrelation(size_t index1, size_t index2) const;
+    // Returns the Cramer's V statistic between two columns.
+    Statistic GetCramersVCorrelation(size_t index1, size_t index2) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;
