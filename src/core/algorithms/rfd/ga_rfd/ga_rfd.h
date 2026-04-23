@@ -1,85 +1,140 @@
 #pragma once
 
-#include <memory>
+#include <cstddef>
+#include <cstdint>
 #include <random>
+#include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
+#include <set>
+#include <list>
+#include <optional>
+#include <memory>
+#include <iterator>
 
 #include "core/algorithms/algorithm.h"
+#include "core/algorithms/rfd/rfd.h"
 #include "core/algorithms/rfd/similarity_metric.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_index.h"
 
 namespace algos::rfd {
 
-class GaRfd : public Algorithm {
+template <typename K, typename V>
+class LRUCache {
+    struct Entry {
+        V value;
+        typename std::list<K>::iterator it;
+    };
+    std::unordered_map<K, Entry> map_;
+    std::list<K> list_;
+    std::size_t max_size_;
+
+public:
+    explicit LRUCache(std::size_t max_size) : max_size_(max_size) {}
+
+    std::optional<V> get(const K& key) {
+        auto it = map_.find(key);
+        if (it == map_.end()) return std::nullopt;
+        list_.splice(list_.end(), list_, it->second.it);
+        return it->second.value;
+    }
+
+    void put(const K& key, const V& value) {
+        auto it = map_.find(key);
+        if (it != map_.end()) {
+            it->second.value = value;
+            list_.splice(list_.end(), list_, it->second.it);
+            return;
+        }
+        if (map_.size() >= max_size_) {
+            K lru_key = list_.front();
+            list_.pop_front();
+            map_.erase(lru_key);
+        }
+        list_.push_back(key);
+        map_[key] = {value, std::prev(list_.end())};
+    }
+
+    void clear() {
+        map_.clear();
+        list_.clear();
+    }
+};
+
+class GaRfd : public algos::Algorithm {
 private:
     // Input
-    config::InputTable table_;
+    config::InputTable input_table_;
     std::vector<std::shared_ptr<SimilarityMetric>> metrics_;
 
-    // Parameters
-    std::vector<double> similarity_thresholds_;
-    double min_confidence_ = 0.9;
-    size_t population_size_ = 100;
-    size_t max_generations_ = 500;
-    double crossover_prob_ = 0.85;
-    double mutation_prob_ = 0.3;
-    size_t max_lhs_arity_ = 3;
-    uint64_t seed_ = 42;
-    std::string output_file_;
-
     // Internal state
-    std::vector<std::vector<std::string>> data_;
-    size_t num_attrs_ = 0;
-    size_t num_rows_ = 0;
-    size_t total_pairs_ = 0;
-    std::vector<boost::dynamic_bitset<>> attr_bitsets_;
-    mutable std::unordered_map<uint64_t, size_t> support_cache_;
+    std::vector<std::vector<std::string>> column_data_;
+    uint8_t num_attrs_ = 0;
+    std::size_t num_rows_ = 0;
+    std::size_t total_pairs_ = 0;
 
-    std::mt19937 rng_;
+    // separate bin column on chunk of 64 bit
+    std::vector<std::vector<uint64_t>> attr_similarity_bits_;
 
-    struct Individual {
-        std::vector<size_t> genes;
-        double fitness = 0.0;
-    };
-    std::vector<Individual> discovered_rfds_;
+    static constexpr std::size_t kCacheMaxSize = 10000;
+    mutable LRUCache<uint32_t, std::size_t> support_cache_{kCacheMaxSize};
+
+    // Parameters
+    double min_similarity_ = 0.7;           // similarity threshold for a pair of values
+    double beta_ = 0.75;                    // minimum confidence for RFD
+    std::size_t max_generations_ = 50;
+    std::size_t population_size_ = 20;
+    double crossover_probability_ = 0.85;
+    double mutation_probability_ = 0.3;
+    std::uint64_t seed_ = 0;                // random number generator seed
+
+    std::set<RFD> discovered_;
 
     // Algorithm overrides
+    void RegisterOptions();
+    void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
     unsigned long long ExecuteInternal() override;
-    void ResetState() override;
-    void MakeExecuteOptsAvailable() override;
+    void ResetState() override { discovered_.clear(); }
 
-    // GA helper methods
+    struct Individual {
+        uint32_t lhs_mask = 0;
+        uint8_t rhs_index = 0;
+        double confidence = 0.0;
+        double support = 0.0;
+    };
+
+    // helper methods
     void BuildSimilarityBitsets();
-    size_t ComputeSupport(uint64_t attrs_mask) const;
-    double CalculateConfidence(uint64_t lhs_mask, size_t rhs);
-    void EvaluatePopulation(std::vector<Individual>& population);
-    std::vector<Individual> InitializePopulation();
-    std::vector<Individual> Selection(const std::vector<Individual>& population);
-    std::vector<Individual> Crossover(const std::vector<Individual>& parents);
-    std::vector<Individual> Mutation(std::vector<Individual> individuals);
-    void RegisterResults(const std::vector<Individual>& final_population);
+    [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const;
+    // Computes conf and supp for a single individual
+    [[nodiscard]] Individual Evaluate(const Individual& ind) const;
+    // Computes conf and supp for all individuals
+    void EvaluatePopulation(std::vector<Individual>& pop) const;
+    // Checks each individual threshold satisfies conf
+    [[nodiscard]] bool AllOf(std::vector<Individual> const& pop) const;
+    // Computes fitness from conf: 1.0 if confidence >= beta, else confidence / beta.
+    [[nodiscard]] double Fitness(double confidence) const;
+
+    // GA methods
+    [[nodiscard]] std::vector<Individual> InitializePopulation(std::mt19937_64& rng) const;
+    [[nodiscard]] std::vector<Individual> Select(std::vector<Individual> const& pop,
+                                                 std::mt19937_64& rng) const;
+    [[nodiscard]] std::vector<Individual> Crossover(std::vector<Individual> const& selected,
+                                                    std::mt19937_64& rng) const;
+    void Mutate(std::vector<Individual>& pop, std::mt19937_64& rng) const;
+
+    [[nodiscard]] std::set<RFD> Finalize(std::vector<Individual> const& pop) const;
 
 public:
     GaRfd();
 
-    // Setters for Python bindings
-    void SetSimilarityThresholds(const std::vector<double>& val) { similarity_thresholds_ = val; }
-    void SetMinConfidence(double val) { min_confidence_ = val; }
-    void SetPopulationSize(size_t val) { population_size_ = val; }
-    void SetMaxGenerations(size_t val) { max_generations_ = val; }
-    void SetCrossoverProb(double val) { crossover_prob_ = val; }
-    void SetMutationProb(double val) { mutation_prob_ = val; }
-    void SetMaxLhsArity(size_t val) { max_lhs_arity_ = val; }
-    void SetSeed(uint64_t val) { seed_ = val; rng_.seed(val); }
-    void SetOutputFile(const std::string& val) { output_file_ = val; }
     void SetMetrics(std::vector<std::shared_ptr<SimilarityMetric>> metrics) { metrics_ = std::move(metrics); }
-
-    std::vector<std::string> GetResultStrings() const;
-    void SaveResults(const std::string& filepath) const;
+    [[nodiscard]] std::vector<RFD> GetRfds() const {
+        return {discovered_.begin(), discovered_.end()};
+    }
 };
 
 }  // namespace algos::rfd

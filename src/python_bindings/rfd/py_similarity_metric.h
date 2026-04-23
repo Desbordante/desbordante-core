@@ -17,4 +17,4 @@ public:
     }
 };
 
-}  // namespace python_bindings
+} // namespace python_bindings

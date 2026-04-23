@@ -77,6 +77,4 @@ target_link_libraries(
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
             ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only better-enums
             Boost::headers
-            ${DESBORDANTE_PREFIX}::rfd::ga_rfd
-            ${DESBORDANTE_PREFIX}::rfd 
 )

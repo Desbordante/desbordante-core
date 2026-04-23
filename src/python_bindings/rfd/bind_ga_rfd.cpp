@@ -1,36 +1,38 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-
 #include "core/algorithms/rfd/ga_rfd/ga_rfd.h"
 #include "core/algorithms/rfd/similarity_metric.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/rfd/py_similarity_metric.h"
 
 namespace py = pybind11;
-using namespace algos::rfd;
+using algos::rfd::GaRfd;
+using algos::rfd::RFD;
+using algos::rfd::SimilarityMetric;
 
 namespace python_bindings {
 
-void BindGaRfd(py::module_& m) {
-    py::class_<SimilarityMetric, std::shared_ptr<SimilarityMetric>>(m, "SimilarityMetric")
+void BindGaRfd(py::module_& main_module) {
+    auto rfd_module = main_module.def_submodule("rfd");
+
+    py::class_<SimilarityMetric, std::shared_ptr<SimilarityMetric>>(rfd_module, "SimilarityMetric")
         .def("__call__", &SimilarityMetric::Compare);
 
-    m.def("levenshtein_metric", &LevenshteinMetric);
-    m.def("equality_metric", &EqualityMetric);
+    rfd_module.def("levenshtein_metric", &algos::rfd::LevenshteinMetric);
+    rfd_module.def("equality_metric", &algos::rfd::EqualityMetric);
 
-    BindPrimitiveNoBase<GaRfd>(m, "GaRfd")
-        .def("set_similarity_thresholds", &GaRfd::SetSimilarityThresholds)
-        .def("set_min_confidence", &GaRfd::SetMinConfidence)
-        .def("set_population_size", &GaRfd::SetPopulationSize)
-        .def("set_max_generations", &GaRfd::SetMaxGenerations)
-        .def("set_crossover_prob", &GaRfd::SetCrossoverProb)
-        .def("set_mutation_prob", &GaRfd::SetMutationProb)
-        .def("set_max_lhs_arity", &GaRfd::SetMaxLhsArity)
-        .def("set_seed", &GaRfd::SetSeed)
-        .def("set_output_file", &GaRfd::SetOutputFile)
-        .def("set_metrics", &GaRfd::SetMetrics)
-        .def("get_rfds", &GaRfd::GetResultStrings)
-        .def("save_results", &GaRfd::SaveResults);
+    py::class_<RFD>(rfd_module, "RFD")
+        .def(py::init<>())
+        .def_property_readonly("lhs_mask", [](RFD const& r) { return r.lhs_mask; })
+        .def_property_readonly("rhs_index", [](RFD const& r) { return r.rhs_index; })
+        .def_property_readonly("support", [](RFD const& r) { return r.support; })
+        .def_property_readonly("confidence", [](RFD const& r) { return r.confidence; })
+        .def("__str__", &RFD::ToString)
+        .def("__repr__", &RFD::ToString);
+
+    auto ga_cls = BindPrimitiveNoBase<GaRfd>(rfd_module, "GaRfd");
+    ga_cls.def("set_metrics", &GaRfd::SetMetrics)
+          .def("get_rfds", &GaRfd::GetRfds);
 }
 
 }  // namespace python_bindings

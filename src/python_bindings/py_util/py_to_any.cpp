@@ -28,7 +28,6 @@
 #include "core/parser/csv_parser/csv_parser.h"
 #include "core/util/enum_to_available_values.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
-
 #include "core/algorithms/rfd/similarity_metric.h"
 #include "python_bindings/rfd/py_similarity_metric.h"
 
@@ -154,7 +153,6 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
         kNormalConvPair<std::pair<std::string, std::string>>,
-        
         {typeid(std::shared_ptr<algos::rfd::SimilarityMetric>), [](std::string_view, py::handle obj) {
             return std::shared_ptr<algos::rfd::SimilarityMetric>(
                 new python_bindings::PySimilarityMetric(py::reinterpret_borrow<py::object>(obj)));
