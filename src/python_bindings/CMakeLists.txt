@@ -34,8 +34,8 @@ target_link_libraries(
 
 set(NAME bindlib.data)
 desbordante_add_lib(NAME OBJECT)
-target_sources(${NAME} PRIVATE data/bind_data_types.cpp)
-target_link_libraries(${NAME} PRIVATE pybind11::pybind11)
+target_sources(${NAME} PRIVATE data/bind_data_types.cpp data/py_custom_metrics.cpp)
+target_link_libraries(${NAME} PRIVATE pybind11::pybind11 better-enums Boost::headers)
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
 set(NAME bindlib.util)
@@ -51,7 +51,8 @@ target_sources(
             py_util/table_serialization.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE better-enums spdlog::spdlog_header_only Boost::headers pybind11::pybind11
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::bindlib::data better-enums spdlog::spdlog_header_only
+                    Boost::headers pybind11::pybind11
 )
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
