@@ -133,9 +133,14 @@ boost::any CustomMetricToAny(std::string_view, py::handle obj) {
 boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
     auto metric_handles = CastAndReplaceCastError<std::vector<py::object>>(option_name, obj);
     std::vector<std::shared_ptr<config::ICustomMetric>> result(metric_handles.size());
-    std::ranges::transform(metric_handles, result.begin(), [](py::object obj) {
-        return std::make_shared<python_bindings::PyCustomMetric>(std::move(obj));
-    });
+    std::ranges::transform(
+            metric_handles, result.begin(),
+            [](py::object obj) -> std::shared_ptr<config::ICustomMetric> {
+                if (obj.is_none()) {
+                    return nullptr;
+                }
+                return std::make_shared<python_bindings::PyCustomMetric>(std::move(obj));
+            });
     return result;
 }
 
