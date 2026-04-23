@@ -115,6 +115,7 @@ void GaRfd::LoadDataInternal() {
     num_rows_ = temp_data.size(); // 0 < num_rows_ < sqrt(SIZE_MAX)
     if (num_rows_ == 0) throw std::runtime_error("Input table is empty");
     num_attrs_ = temp_data[0].size();
+    if (num_attrs_ < 2) throw std::runtime_error("GA-rfd requires at least 2 attributes");
     if (num_attrs_ > 31) throw std::runtime_error("Maximum 31 attributes supported");
     total_pairs_ = num_rows_ * (num_rows_ - 1) / 2;
 
@@ -259,7 +260,8 @@ std::vector<GaRfd::Individual> GaRfd::Crossover(std::vector<Individual> const& s
             uint32_t mask1 = c1.lhs_mask;
             uint32_t mask2 = c2.lhs_mask;
             uint32_t diff = mask1 ^ mask2;
-            std::uniform_int_distribution<uint8_t> until(1, std::popcount(diff)-1);
+            auto cnts_of_ones = (std::popcount(diff) > 1 ? std::popcount(diff)-1 : 2);
+            std::uniform_int_distribution<uint8_t> until(1, cnts_of_ones);
             uint8_t cnt = until(rng);
             while (diff && cnt--) {
                 uint32_t bit = diff & -diff;

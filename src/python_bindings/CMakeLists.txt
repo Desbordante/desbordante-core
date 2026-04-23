@@ -267,6 +267,7 @@ desbordante_add_bind(
     rfd/py_similarity_metric.h
     LIBS
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    ${DESBORDANTE_PREFIX}::rfd
     Boost::headers
     better-enums
 )
