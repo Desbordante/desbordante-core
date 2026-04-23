@@ -141,6 +141,9 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<double>, kPyList, kPyFloat>,
             {typeid(std::shared_ptr<pac::model::IDomain>),
              []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
+            PyTypePair<config::CustomMetricType, kPyFunc>,
+            PyTypePair<config::CustomMetricsType, kPyList, kPyFunc>,
+            PyTypePair<config::CustomVectorMetricType, kPyFunc>,
     };
 
     auto const it = type_map.find(type_index);

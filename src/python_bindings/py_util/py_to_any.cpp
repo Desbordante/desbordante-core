@@ -270,6 +270,9 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         {typeid(config::CustomMetricsType), CustomMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        {typeid(config::CustomMetricType), CustomMetricToAny},
+        {typeid(config::CustomMetricsType), CustomMetricsToAny},
+        {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
 };
 
 }  // namespace
