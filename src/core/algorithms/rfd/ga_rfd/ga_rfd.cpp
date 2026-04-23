@@ -12,6 +12,7 @@
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 #include "core/util/timed_invoke.h"
 
 namespace {
@@ -52,7 +53,15 @@ std::string RFD::ToString() const {
 GaRfd::GaRfd() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({config::kTableOpt.GetName()});
+    MakeOptionsAvailable({kRfdMinSimilarity,
+                          kMinimumConfidence,
+                          kPopulationSize,
+                          kRfdMaxGenerations,
+                          kRfdCrossoverProbability,
+                          kRfdMutationProbability,
+                          kSeed,
+                          "metrics",
+                          config::kTableOpt.GetName()});
 }
 
 void GaRfd::MakeExecuteOptsAvailable() {
@@ -119,6 +128,8 @@ void GaRfd::LoadDataInternal() {
     if (num_attrs_ > 31) throw std::runtime_error("Maximum 31 attributes supported");
     total_pairs_ = num_rows_ * (num_rows_ - 1) / 2;
 
+    LOG_DEBUG("Loaded {} rows, {} attributes, {} total pairs", num_rows_, num_attrs_, total_pairs_);
+
     column_data_.resize(num_attrs_);
     for (std::size_t i = 0; i < num_attrs_; i++) {
         column_data_[i].resize(num_rows_);
@@ -134,8 +145,12 @@ void GaRfd::LoadDataInternal() {
 }
 
 void GaRfd::BuildSimilarityBitsets() {
+    LOG_DEBUG("BuildSimilarityBitsets: total_pairs_ = {}, num_attrs_ = {}, num_rows_ = {}",
+              total_pairs_, num_attrs_, num_rows_);
     std::size_t num_uint64_per_attr = (total_pairs_ + 63) / 64;
     attr_similarity_bits_.assign(num_attrs_, std::vector<uint64_t>(num_uint64_per_attr, 0));
+    if (metrics_.size() != num_attrs_)
+        throw std::runtime_error("Number of metrics must match number of attributes");
 
     for (std::size_t a = 0; a < num_attrs_; a++) {
         const auto& col = column_data_[a];
@@ -144,16 +159,26 @@ void GaRfd::BuildSimilarityBitsets() {
 
         for (std::size_t i = 0; i < num_rows_; i++) {
             for (std::size_t j = i+1; j < num_rows_; j++) {
-                double sim = metrics_[a]->Compare(col[i], col[j]);
-                if (sim >= min_similarity_) {
-                    std::size_t word_idx = pair_idx / 64;
-                    std::size_t bit_idx = pair_idx % 64;
-                    bits[word_idx] |= (1ULL << bit_idx);
+                try {
+                    double sim = metrics_[a]->Compare(col[i], col[j]);
+                    if (sim >= min_similarity_) {
+                        std::size_t word_idx = pair_idx / 64;
+                        std::size_t bit_idx = pair_idx % 64;
+                        bits[word_idx] |= (1ULL << bit_idx);
+                    }
+                } catch (const std::exception& e) {
+                    LOG_ERROR("Exception in Compare: attr={}, i={}, j={}, what={}", a, i, j, e.what());
+                    throw;
+                } catch (...) {
+                    LOG_ERROR("Unknown exception in Compare: attr={}, i={}, j={}", a, i, j);
+                    throw;
                 }
                 pair_idx++;
             }
         }
+        LOG_DEBUG("Finished attribute {} similarity bitset", a);
     }
+    LOG_DEBUG("Similarity bitsets built for {} attributes", num_attrs_);
 }
 
 std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
@@ -184,6 +209,9 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
         support += std::popcount(word);
     }
     support_cache_.put(attrs_mask, support);
+
+    LOG_DEBUG("Support for mask {} = {}", attrs_mask, support);
+
     return support;
 }
 
@@ -228,6 +256,8 @@ std::vector<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937_64& rng)
         if ((lhs_mask & (1u << rhs)) || lhs_mask == 0u) continue;
         pop.push_back(Individual{lhs_mask, rhs, 0.0, 0.0});
     }
+    LOG_DEBUG("Initial population of size {} created", pop.size());
+
     return pop;
 }
 
@@ -346,11 +376,14 @@ std::set<RFD> GaRfd::Finalize(std::vector<Individual> const& pop) const {
 
         res.insert(rfd);
     }
+    LOG_DEBUG("Finalized {} unique RFDs", res.size());
+
     return res;
 }
 
 unsigned long long GaRfd::ExecuteInternal() {
     return util::TimedInvoke([&]() {
+        LOG_DEBUG("Build similarity bitsets...");
         BuildSimilarityBitsets();
         support_cache_.clear();
 

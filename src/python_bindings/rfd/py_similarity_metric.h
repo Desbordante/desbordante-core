@@ -6,13 +6,11 @@
 namespace python_bindings {
 
 class PySimilarityMetric : public algos::rfd::SimilarityMetric {
-private:
     pybind11::object func_;
-
 public:
     explicit PySimilarityMetric(pybind11::object func) : func_(std::move(func)) {}
-
     double Compare(const std::string& a, const std::string& b) const override {
+        pybind11::gil_scoped_acquire gil;
         return pybind11::cast<double>(func_(a, b));
     }
 };
