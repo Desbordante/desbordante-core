@@ -47,6 +47,7 @@ target_sources(
             py_util/iterable_sequence_stream.cpp
             py_util/logging.cpp
             py_util/opt_to_py.cpp
+            py_util/py_custom_metrics.cpp
             py_util/py_to_any.cpp
             py_util/table_serialization.cpp
             py_util/value_to_py.cpp
