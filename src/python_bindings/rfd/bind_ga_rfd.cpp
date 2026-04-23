@@ -12,6 +12,19 @@ using algos::rfd::SimilarityMetric;
 
 namespace python_bindings {
 
+std::vector<std::shared_ptr<SimilarityMetric>> ConvertMetrics(const std::vector<py::object>& objs) {
+    std::vector<std::shared_ptr<SimilarityMetric>> metrics;
+    metrics.reserve(objs.size());
+    for (py::object obj : objs) {
+        if (py::isinstance<py::function>(obj)) {
+            metrics.push_back(std::make_shared<PySimilarityMetric>(std::move(obj)));
+        } else {
+            metrics.push_back(obj.cast<std::shared_ptr<SimilarityMetric>>());
+        }
+    }
+    return metrics;
+}
+
 void BindGaRfd(py::module_& main_module) {
     auto rfd_module = main_module.def_submodule("rfd");
 
@@ -31,8 +44,14 @@ void BindGaRfd(py::module_& main_module) {
         .def("__repr__", &RFD::ToString);
 
     auto ga_cls = BindPrimitiveNoBase<GaRfd>(rfd_module, "GaRfd");
-    ga_cls.def("set_metrics", &GaRfd::SetMetrics)
-          .def("get_rfds", &GaRfd::GetRfds);
+
+    ga_cls.def("set_metrics", &GaRfd::SetMetrics, "Set list of SimilarityMetric objects");
+
+    ga_cls.def("set_metrics_py", [](GaRfd& self, const std::vector<py::object>& metrics) {
+        self.SetMetrics(ConvertMetrics(metrics));
+    }, "Set list of metrics (Python functions or SimilarityMetric objects)");
+
+    ga_cls.def("get_rfds", &GaRfd::GetRfds);
 }
 
-}  // namespace python_bindings
+}
