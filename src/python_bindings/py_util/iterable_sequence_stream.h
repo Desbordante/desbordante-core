@@ -1,8 +1,9 @@
 #pragma once
 
+#include <pybind11/pybind11.h>
+
 #include <optional>
 
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "core/model/sequence/isequence_stream.h"
