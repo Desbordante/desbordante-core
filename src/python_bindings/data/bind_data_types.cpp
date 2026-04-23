@@ -6,6 +6,7 @@
 
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_combination.h"
+#include "python_bindings/data/py_custom_metrics.h"
 
 namespace {
 namespace py = pybind11;
@@ -44,5 +45,7 @@ void BindDataTypes(py::module_& main_module) {
                         auto col_indices = t[1].cast<std::vector<model::ColumnIndex>>();
                         return ColumnCombination(table_index, col_indices);
                     }));
+
+    BindCustomMetrics(data_module);
 }
 }  // namespace python_bindings
