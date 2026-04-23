@@ -27,6 +27,7 @@ target_link_libraries(
             Boost::headers
             Desbordante.bindlib.util
             Desbordante.bindlib.data
+            ${DESBORDANTE_PREFIX}::rfd::ga_rfd 
 )
 
 # Uncomment to debug linker issues
@@ -265,9 +266,9 @@ desbordante_add_bind(
     rfd/bind_ga_rfd.cpp
     rfd/py_similarity_metric.h
     LIBS
-    ${DESBORDANTE_PREFIX}::rfd
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd
     Boost::headers
+    better-enums
 )
 
 desbordante_add_bind(

@@ -17,10 +17,10 @@ double LevenshteinSimilarity(const std::string& a, const std::string& b) {
     if (n == 0 && m == 0) return 1.0;
     if (n == 0 || m == 0) return 0.0;
     std::vector<size_t> dp(m + 1);
-    for (size_t j = 0; j <= m; ++j) dp[j] = j;
-    for (size_t i = 1; i <= n; ++i) {
+    for (size_t j = 0; j <= m; j++) dp[j] = j;
+    for (size_t i = 1; i <= n; i++) {
         size_t prev = i;
-        for (size_t j = 1; j <= m; ++j) {
+        for (size_t j = 1; j <= m; j++) {
             size_t cost = (a[i-1] == b[j-1]) ? 0 : 1;
             size_t cur = std::min({dp[j] + 1, prev + 1, dp[j-1] + cost});
             dp[j-1] = prev;
