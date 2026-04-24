@@ -8,6 +8,8 @@
 #include <unordered_set>
 #include <set>
 #include <unordered_map>
+#include <bitset>
+#include <string>
 
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
@@ -26,6 +28,10 @@ template <typename T>
 [[nodiscard]] inline uint8_t countr_zero(uint32_t x) {
     if (x == 0) return 32;
     return __builtin_ctz(x);
+}
+
+[[nodiscard]] std::string bit_representation(uint32_t mask, int num_bits = 31) {
+    return std::bitset<32>(mask).to_string().substr(32 - num_bits);
 }
 
 }  // namespace
@@ -227,7 +233,7 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
     }
     support_cache_.put(attrs_mask, support);
 
-    LOG_DEBUG("Support for mask {} = {}", attrs_mask, support);
+    LOG_DEBUG("Support for mask {} = {}", bit_representation(attrs_mask, num_attrs_), support);
 
     return support;
 }
@@ -441,7 +447,11 @@ unsigned long long GaRfd::ExecuteInternal() {
         EvaluatePopulation(pop);
 
         for (std::size_t gen = 0; gen < max_generations_; gen++) {
-            if (AllOf(pop)) break;
+            LOG_DEBUG("Generation {}/{} (pop size: {})", gen + 1, max_generations_, pop.size());
+            if (AllOf(pop)) {
+                LOG_DEBUG("All individuals satisfy confidence threshold – stopping early");
+                break;
+            }
 
             std::vector<Individual> selected = Select(pop, rng);
             if (selected.empty()) [[unlikely]] {
