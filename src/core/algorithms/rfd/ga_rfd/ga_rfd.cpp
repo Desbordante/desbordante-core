@@ -33,6 +33,10 @@ template <typename T>
     return x ? static_cast<int>(__builtin_ctz(x)) : -1;
 }
 
+[[nodiscard]] std::string bit_representation(uint32_t mask, int num_bits = 31) {
+    return std::bitset<32>(mask).to_string().substr(32 - num_bits);
+}
+
 }  // namespace
 
 namespace algos::rfd {
