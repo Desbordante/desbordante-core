@@ -360,28 +360,28 @@ class TestDataStats(unittest.TestCase):
         self.assertIsNone(res)
     
     def test_pearson_correlation(self) -> None:
-        res = self.data_stats.get_pearson_correlation(0, 1)
+        res = self.data_stats.get_pearson_correlation(2, 3)
         self.assertIsNotNone(res)
         self.assertGreaterEqual(res, -1.0)
         self.assertLessEqual(res, 1.0)
         # ... add more assertions based on expected values for the test dataset
     
     def test_spearman_correlation(self) -> None:
-        res = self.data_stats.get_spearman_correlation(0, 1)
+        res = self.data_stats.get_spearman_correlation(2, 3)
         self.assertIsNotNone(res)
         self.assertGreaterEqual(res, -1.0)
         self.assertLessEqual(res, 1.0)
         # ... add more assertions based on expected values for the test dataset
 
     def test_kendall_correlation(self) -> None:
-        res = self.data_stats.get_kendall_correlation(0, 1)
+        res = self.data_stats.get_kendall_correlation(2, 3)
         self.assertIsNotNone(res)
         self.assertGreaterEqual(res, -1.0)
         self.assertLessEqual(res, 1.0)
         # ... add more assertions based on expected values for the test dataset
     
     def test_cramers_v_correlation(self) -> None:
-        res = self.data_stats.get_cramers_v_correlation(0, 1)
+        res = self.data_stats.get_cramers_v_correlation(1, 6)
         self.assertIsNotNone(res)
         self.assertGreaterEqual(res, 0.0)
         self.assertLessEqual(res, 1.0)

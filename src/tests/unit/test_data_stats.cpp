@@ -902,7 +902,6 @@ TEST(TestDataStats, TestLastCharFrequency) {
 TEST(TestDataStats, TestPearsonCorrelation) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
-    stats.Execute();  // Важно: сначала выполнить
 
     algos::Statistic pearson_stat = stats.GetPearsonCorrelation(2, 7);  // колонки 2 и 7
     EXPECT_TRUE(pearson_stat.HasValue());
@@ -940,12 +939,10 @@ TEST(TestDataStats, TestCramersVCorrelation) {
     algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
-    // Для колонок 5 (abc) и 10 (aABd32e) - категориальные
     algos::Statistic cramers_v_stat = stats.GetCramersVCorrelation(5, 10);
     EXPECT_TRUE(cramers_v_stat.HasValue());
 
     double result = mo::Type::GetValue<mo::Double>(cramers_v_stat.GetData());
-    // Значение нужно посчитать отдельно для категориальных колонок
     EXPECT_NEAR(result, 1.0, 0.0001);
 }
 };  // namespace tests
