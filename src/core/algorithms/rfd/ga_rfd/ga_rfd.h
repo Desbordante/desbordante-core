@@ -12,6 +12,7 @@
 #include <optional>
 #include <memory>
 #include <iterator>
+#include <cassert> 
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/rfd/rfd.h"
@@ -32,7 +33,9 @@ class LRUCache {
     std::size_t max_size_;
 
 public:
-    explicit LRUCache(std::size_t max_size) : max_size_(max_size) {}
+    explicit LRUCache(std::size_t max_size) : max_size_(max_size) {
+        assert(max_size > 0 && "LRUCache max_size must be positive");
+    }
 
     std::optional<V> get(const K& key) {
         auto it = map_.find(key);
@@ -57,7 +60,7 @@ public:
         map_[key] = {value, std::prev(list_.end())};
     }
 
-    void clear() {
+    void clear() noexcept {
         map_.clear();
         list_.clear();
     }
@@ -94,10 +97,10 @@ private:
 
     // Algorithm overrides
     void RegisterOptions();
-    void MakeExecuteOptsAvailable() override;
-    void LoadDataInternal() override;
-    unsigned long long ExecuteInternal() override;
-    void ResetState() override { discovered_.clear(); }
+    void MakeExecuteOptsAvailable() final;
+    void LoadDataInternal() final;
+    unsigned long long ExecuteInternal() final;
+    void ResetState() final { discovered_.clear(); }
 
     struct Individual {
         uint32_t lhs_mask = 0;
@@ -114,24 +117,24 @@ private:
     // Computes conf and supp for all individuals
     void EvaluatePopulation(std::vector<Individual>& pop) const;
     // Checks each individual threshold satisfies conf
-    [[nodiscard]] bool AllOf(std::vector<Individual> const& pop) const;
+    [[nodiscard]] bool AllOf(const std::vector<Individual>& pop) const;
     // Computes fitness from conf: 1.0 if confidence >= beta, else confidence / beta.
-    [[nodiscard]] double Fitness(double confidence) const;
+    [[nodiscard]] double Fitness(double confidence) const noexcept;
 
     // GA methods
     [[nodiscard]] std::vector<Individual> InitializePopulation(std::mt19937_64& rng) const;
-    [[nodiscard]] std::vector<Individual> Select(std::vector<Individual> const& pop,
+    [[nodiscard]] std::vector<Individual> Select(const std::vector<Individual>& pop,
                                                  std::mt19937_64& rng) const;
-    [[nodiscard]] std::vector<Individual> Crossover(std::vector<Individual> const& selected,
+    [[nodiscard]] std::vector<Individual> Crossover(const std::vector<Individual>& selected,
                                                     std::mt19937_64& rng) const;
     void Mutate(std::vector<Individual>& pop, std::mt19937_64& rng) const;
 
-    [[nodiscard]] std::set<RFD> Finalize(std::vector<Individual> const& pop) const;
+    [[nodiscard]] std::set<RFD> Finalize(const std::vector<Individual>& pop) const;
 
 public:
     GaRfd();
 
-    void SetMetrics(std::vector<std::shared_ptr<SimilarityMetric>> metrics) { metrics_ = std::move(metrics); }
+    void SetMetrics(std::vector<std::shared_ptr<SimilarityMetric>> metrics) noexcept { metrics_ = std::move(metrics); }
     [[nodiscard]] std::vector<RFD> GetRfds() const {
         return {discovered_.begin(), discovered_.end()};
     }
