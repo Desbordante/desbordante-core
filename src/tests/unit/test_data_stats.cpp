@@ -906,7 +906,7 @@ TEST(TestDataStats, TestPearsonCorrelation) {
 
     algos::Statistic pearson_stat = stats.GetPearsonCorrelation(2, 7);  // колонки 2 и 7
     EXPECT_TRUE(pearson_stat.HasValue());
-    
+
     double result = mo::Type::GetValue<mo::Double>(pearson_stat.GetData());
     EXPECT_NEAR(result, -0.011769, 0.0001);
 }
@@ -918,7 +918,7 @@ TEST(TestDataStats, TestSpearmanCorrelation) {
 
     algos::Statistic spearman_stat = stats.GetSpearmanCorrelation(2, 7);
     EXPECT_TRUE(spearman_stat.HasValue());
-    
+
     double result = mo::Type::GetValue<mo::Double>(spearman_stat.GetData());
     EXPECT_NEAR(result, 0.4, 0.0001);
 }
@@ -930,7 +930,7 @@ TEST(TestDataStats, TestKendallCorrelation) {
 
     algos::Statistic kendall_stat = stats.GetKendallCorrelation(2, 7);
     EXPECT_TRUE(kendall_stat.HasValue());
-    
+
     double result = mo::Type::GetValue<mo::Double>(kendall_stat.GetData());
     EXPECT_NEAR(result, 0.333333, 0.0001);
 }
@@ -943,7 +943,7 @@ TEST(TestDataStats, TestCramersVCorrelation) {
     // Для колонок 5 (abc) и 10 (aABd32e) - категориальные
     algos::Statistic cramers_v_stat = stats.GetCramersVCorrelation(5, 10);
     EXPECT_TRUE(cramers_v_stat.HasValue());
-    
+
     double result = mo::Type::GetValue<mo::Double>(cramers_v_stat.GetData());
     // Значение нужно посчитать отдельно для категориальных колонок
     EXPECT_NEAR(result, 1.0, 0.0001);

@@ -1323,25 +1323,25 @@ Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
     }
-    
+
     size_t first = std::min(index1, index2);
     size_t second = std::max(index1, index2);
     auto key = std::make_pair(first, second);
-    
+
     auto it = pearson_cache_.find(key);
     if (it != pearson_cache_.end()) {
         return it->second;
     }
-    
+
     mo::TypedColumnData const& col1 = col_data_[index1];
     mo::TypedColumnData const& col2 = col_data_[index2];
-    
+
     if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
 
     std::vector<double> vals1, vals2;
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        
+
         double v1 = mo::Type::GetValue<double>(col1.GetValue(i));
         double v2 = mo::Type::GetValue<double>(col2.GetValue(i));
         vals1.push_back(v1);
@@ -1371,12 +1371,12 @@ Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
     if (sum_sq1 == 0.0 || sum_sq2 == 0.0) return {};
 
     double pearson = numerator / std::sqrt(sum_sq1 * sum_sq2);
-    
+
     mo::DoubleType double_type;
     Statistic result(double_type.MakeValue(pearson), &double_type, false);
-    
+
     pearson_cache_[key] = result;
-    
+
     return result;
 }
 
@@ -1384,11 +1384,10 @@ std::vector<double> DataStats::GetRanks(std::vector<double> const& data) {
     size_t n = data.size();
     std::vector<size_t> indices(n);
     for (size_t i = 0; i < n; ++i) indices[i] = i;
-    
-    std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b) {
-        return data[a] < data[b];
-    });
-    
+
+    std::sort(indices.begin(), indices.end(),
+              [&](size_t a, size_t b) { return data[a] < data[b]; });
+
     std::vector<double> ranks(n);
     size_t i = 0;
     while (i < n) {
@@ -1410,11 +1409,11 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
     }
-    
+
     size_t first = std::min(index1, index2);
     size_t second = std::max(index1, index2);
     auto key = std::make_pair(first, second);
-    
+
     auto it = spearman_cache_.find(key);
     if (it != spearman_cache_.end()) {
         return it->second;
@@ -1422,7 +1421,7 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
 
     mo::TypedColumnData const& col1 = col_data_[index1];
     mo::TypedColumnData const& col2 = col_data_[index2];
-    
+
     if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
 
     std::vector<double> x, y;
@@ -1431,13 +1430,13 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
         x.push_back(mo::Type::GetValue<double>(col1.GetValue(i)));
         y.push_back(mo::Type::GetValue<double>(col2.GetValue(i)));
     }
-    
+
     size_t n = x.size();
     if (n < 2) return {};
 
     std::vector<double> rank_x = GetRanks(x);
     std::vector<double> rank_y = GetRanks(y);
-    
+
     double sum_rank_x = 0.0, sum_rank_y = 0.0;
     for (size_t i = 0; i < n; ++i) {
         sum_rank_x += rank_x[i];
@@ -1445,7 +1444,7 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
     }
     double mean_rank_x = sum_rank_x / n;
     double mean_rank_y = sum_rank_y / n;
-    
+
     double numerator = 0.0, sum_sq_x = 0.0, sum_sq_y = 0.0;
     for (size_t i = 0; i < n; ++i) {
         double dx = rank_x[i] - mean_rank_x;
@@ -1454,16 +1453,16 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
         sum_sq_x += dx * dx;
         sum_sq_y += dy * dy;
     }
-    
+
     if (sum_sq_x == 0.0 || sum_sq_y == 0.0) return {};
-    
+
     double spearman = numerator / std::sqrt(sum_sq_x * sum_sq_y);
-    
+
     mo::DoubleType double_type;
     Statistic result(double_type.MakeValue(spearman), &double_type, false);
-    
+
     spearman_cache_[key] = result;
-    
+
     return result;
 }
 
@@ -1472,40 +1471,38 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
     }
-    
+
     size_t first = std::min(index1, index2);
     size_t second = std::max(index1, index2);
     auto key = std::make_pair(first, second);
-    
+
     auto it = kendall_cache_.find(key);
     if (it != kendall_cache_.end()) {
         return it->second;
     }
-    
+
     mo::TypedColumnData const& col1 = col_data_[index1];
     mo::TypedColumnData const& col2 = col_data_[index2];
-    
+
     if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
-    
+
     std::vector<std::pair<double, double>> pairs;
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        pairs.emplace_back(
-            mo::Type::GetValue<double>(col1.GetValue(i)),
-            mo::Type::GetValue<double>(col2.GetValue(i))
-        );
+        pairs.emplace_back(mo::Type::GetValue<double>(col1.GetValue(i)),
+                           mo::Type::GetValue<double>(col2.GetValue(i)));
     }
-    
+
     size_t n = pairs.size();
     if (n < 2) return {};
-    
+
     long long concordant = 0, discordant = 0;
-    
+
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = i + 1; j < n; ++j) {
             double dx = pairs[i].first - pairs[j].first;
             double dy = pairs[i].second - pairs[j].second;
-            
+
             if (dx * dy > 0) {
                 ++concordant;
             } else if (dx * dy < 0) {
@@ -1513,17 +1510,17 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
             }
         }
     }
-    
+
     double total = concordant + discordant;
     if (total == 0) return {};
-    
+
     double kendall = static_cast<double>(concordant - discordant) / total;
-    
+
     mo::DoubleType double_type;
     Statistic result(double_type.MakeValue(kendall), &double_type, false);
-    
+
     kendall_cache_[key] = result;
-    
+
     return result;
 }
 
@@ -1532,32 +1529,32 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
     }
-    
+
     size_t first = std::min(index1, index2);
     size_t second = std::max(index1, index2);
     auto key = std::make_pair(first, second);
-    
+
     auto it = cramers_v_cache_.find(key);
     if (it != cramers_v_cache_.end()) {
         return it->second;
     }
-    
+
     mo::TypedColumnData const& col1 = col_data_[index1];
     mo::TypedColumnData const& col2 = col_data_[index2];
-    
+
     if (col1.IsNumeric() || col2.IsNumeric()) return {};
-    
+
     std::map<std::string, size_t> categories1;
     std::map<std::string, size_t> categories2;
     std::map<std::pair<size_t, size_t>, size_t> contingency;
-    
+
     size_t n = 0;
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        
+
         std::string val1 = col1.GetDataAsString(i);
         std::string val2 = col2.GetDataAsString(i);
-        
+
         size_t cat1, cat2;
         auto it1 = categories1.find(val1);
         if (it1 == categories1.end()) {
@@ -1566,7 +1563,7 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
         } else {
             cat1 = it1->second;
         }
-        
+
         auto it2 = categories2.find(val2);
         if (it2 == categories2.end()) {
             cat2 = categories2.size();
@@ -1574,33 +1571,33 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
         } else {
             cat2 = it2->second;
         }
-        
+
         contingency[{cat1, cat2}]++;
         n++;
     }
-    
+
     if (n == 0) return {};
-    
+
     size_t r = categories1.size();
     size_t c = categories2.size();
-    
+
     if (r < 2 || c < 2) return {};
-    
+
     double chi2 = 0.0;
-    
+
     std::vector<size_t> col_sums(c, 0);
     for (size_t j = 0; j < c; ++j) {
         for (size_t i = 0; i < r; ++i) {
             col_sums[j] += contingency[{i, j}];
         }
     }
-    
+
     for (size_t i = 0; i < r; ++i) {
         size_t row_sum = 0;
         for (size_t j = 0; j < c; ++j) {
             row_sum += contingency[{i, j}];
         }
-        
+
         for (size_t j = 0; j < c; ++j) {
             double expected = static_cast<double>(row_sum * col_sums[j]) / n;
             if (expected > 0) {
@@ -1609,15 +1606,15 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
             }
         }
     }
-    
+
     size_t min_dim = std::min(r - 1, c - 1);
     double cramers_v = std::sqrt(chi2 / (n * min_dim));
-    
+
     mo::DoubleType double_type;
     Statistic result(double_type.MakeValue(cramers_v), &double_type, false);
-    
+
     cramers_v_cache_[key] = result;
-    
+
     return result;
 }
 }  // namespace algos

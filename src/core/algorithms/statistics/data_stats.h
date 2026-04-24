@@ -75,11 +75,11 @@ protected:
     config::InputTable input_table_;
 
     struct PairHash {
-        std::size_t operator()(const std::pair<size_t, size_t>& p) const {
+        std::size_t operator()(std::pair<size_t, size_t> const& p) const {
             return p.first ^ (p.second << 1);
         }
     };
-    
+
     mutable std::unordered_map<std::pair<size_t, size_t>, Statistic, PairHash> pearson_cache_;
     mutable std::unordered_map<std::pair<size_t, size_t>, Statistic, PairHash> spearman_cache_;
     mutable std::unordered_map<std::pair<size_t, size_t>, Statistic, PairHash> kendall_cache_;
