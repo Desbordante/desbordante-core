@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <unordered_set>
 #include <set>
+#include <unordered_map>
 
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
@@ -18,15 +19,11 @@
 namespace {
 
 template <typename T>
-inline bool InRangeInclusive(T value, T min, T max) {
+[[nodiscard]] inline bool InRangeInclusive(T value, T min, T max) {
     return min <= value && value <= max;
 }
 
-inline uint32_t popcount(uint32_t x) {
-    return std::popcount(x);
-}
-
-inline uint8_t countr_zero(uint32_t x) {
+[[nodiscard]] inline uint8_t countr_zero(uint32_t x) {
     if (x == 0) return 32;
     return __builtin_ctz(x);
 }
@@ -117,37 +114,57 @@ void GaRfd::RegisterOptions() {
 }
 
 void GaRfd::LoadDataInternal() {
-    std::vector<std::vector<std::string>> temp_data;
-    while (input_table_->HasNextRow())
-        temp_data.push_back(input_table_->GetNextRow());
+    num_rows_ = 0;
+    column_data_.clear();
 
-    num_rows_ = temp_data.size(); // 0 < num_rows_ < sqrt(SIZE_MAX)
-    if (num_rows_ == 0) throw std::runtime_error("Input table is empty");
-    num_attrs_ = temp_data[0].size();
-    if (num_attrs_ < 2) throw std::runtime_error("GA-rfd requires at least 2 attributes");
-    if (num_attrs_ > 31) throw std::runtime_error("Maximum 31 attributes supported");
-    total_pairs_ = num_rows_ * (num_rows_ - 1) / 2;
+    if (!input_table_->HasNextRow()) [[unlikely]]
+        throw std::runtime_error("Input table is empty");
+
+    auto first_row = input_table_->GetNextRow();
+    num_attrs_ = first_row.size();
+    if (num_attrs_ < 2) [[unlikely]]
+        throw std::runtime_error("GA-rfd requires at least 2 attributes");
+    if (num_attrs_ > 31) [[unlikely]]
+        throw std::runtime_error("Maximum 31 attributes supported");
+    column_data_.resize(num_attrs_);
+    for (size_t i = 0; i < num_attrs_; ++i) {
+        column_data_[i].push_back(std::move(first_row[i]));
+    }
+    num_rows_ = 1;
+
+    while (input_table_->HasNextRow()) {
+        auto row = input_table_->GetNextRow();
+        if (row.size() != num_attrs_)
+            throw std::runtime_error("Inconsistent number of attributes in row");
+        for (size_t i = 0; i < num_attrs_; ++i) {
+            column_data_[i].push_back(std::move(row[i]));
+        }
+        ++num_rows_;
+    }
+
+    if (num_rows_ < 2) [[unlikely]] 
+        throw std::runtime_error("Input table must contain at least 2 rows");
+
+    if (num_rows_ > std::numeric_limits<std::size_t>::max() / (num_rows_ - 1) / 2)
+        throw std::runtime_error("Table too large, total pairs would overflow size_t");
+    total_pairs_ = static_cast<std::size_t>(num_rows_) * (num_rows_ - 1) / 2;
 
     LOG_DEBUG("Loaded {} rows, {} attributes, {} total pairs", num_rows_, num_attrs_, total_pairs_);
 
-    column_data_.resize(num_attrs_);
-    for (std::size_t i = 0; i < num_attrs_; i++) {
-        column_data_[i].resize(num_rows_);
-        for (std::size_t j = 0; j < num_rows_; j++) {
-            column_data_[i][j] = std::move(temp_data[j][i]);
-        }
+    if (metrics_.empty()) {
+        metrics_.clear();
+        metrics_.reserve(num_attrs_);
+        for (size_t i = 0; i < num_attrs_; ++i)
+            metrics_.push_back(EqualityMetric());
     }
-
-    if (metrics_.empty())
-        metrics_.assign(num_attrs_, EqualityMetric());
-    if (metrics_.size() != num_attrs_)
+    if (metrics_.size() != num_attrs_) [[unlikely]]
         throw std::invalid_argument("The number of attributes and metrics do not match");
 }
 
 void GaRfd::BuildSimilarityBitsets() {
     LOG_DEBUG("BuildSimilarityBitsets: total_pairs_ = {}, num_attrs_ = {}, num_rows_ = {}",
               total_pairs_, num_attrs_, num_rows_);
-    std::size_t num_uint64_per_attr = (total_pairs_ + 63) / 64;
+    const std::size_t num_uint64_per_attr = (total_pairs_ + 63) / 64;
     attr_similarity_bits_.assign(num_attrs_, std::vector<uint64_t>(num_uint64_per_attr, 0));
     if (metrics_.size() != num_attrs_)
         throw std::runtime_error("Number of metrics must match number of attributes");
@@ -160,10 +177,10 @@ void GaRfd::BuildSimilarityBitsets() {
         for (std::size_t i = 0; i < num_rows_; i++) {
             for (std::size_t j = i+1; j < num_rows_; j++) {
                 try {
-                    double sim = metrics_[a]->Compare(col[i], col[j]);
+                    const double sim = metrics_[a]->Compare(col[i], col[j]);
                     if (sim >= min_similarity_) {
-                        std::size_t word_idx = pair_idx / 64;
-                        std::size_t bit_idx = pair_idx % 64;
+                        const std::size_t word_idx = pair_idx / 64;
+                        const std::size_t bit_idx = pair_idx % 64;
                         bits[word_idx] |= (1ULL << bit_idx);
                     }
                 } catch (const std::exception& e) {
@@ -182,7 +199,7 @@ void GaRfd::BuildSimilarityBitsets() {
 }
 
 std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
-    if (auto cached = support_cache_.get(attrs_mask)) {
+    if (auto cached = support_cache_.get(attrs_mask)) [[likely]] {
         return *cached;
     }
 
@@ -191,14 +208,14 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
         return total_pairs_;
     }
 
-    int first = countr_zero(attrs_mask);
+    const int first = countr_zero(attrs_mask);
     std::vector<uint64_t> intersection = attr_similarity_bits_[first];
     uint32_t remaining = attrs_mask & (attrs_mask - 1);
 
     while (remaining) {
-        int attr = countr_zero(remaining);
+        const int attr = countr_zero(remaining);
         const auto& other_bits = attr_similarity_bits_[attr];
-        for (std::size_t k = 0; k < intersection.size(); ++k) {
+        for (std::size_t k = 0; k < intersection.size(); k++) {
             intersection[k] &= other_bits[k];
         }
         remaining &= remaining - 1;
@@ -216,15 +233,15 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
 }
 
 GaRfd::Individual GaRfd::Evaluate(const Individual& ind) const {
-    uint32_t lhs_mask = ind.lhs_mask;
-    uint8_t rhs = ind.rhs_index;
+    const uint32_t lhs_mask = ind.lhs_mask;
+    const uint8_t rhs = ind.rhs_index;
 
     double support_lhs = static_cast<double>(ComputeSupport(lhs_mask)) / total_pairs_;
     if (support_lhs == 0.0) [[unlikely]] {
         return {lhs_mask, rhs, 0.0, 0.0};
     }
 
-    uint32_t both_mask = lhs_mask | (1u << rhs);
+    const uint32_t both_mask = lhs_mask | (1u << rhs);
     double support_both = static_cast<double>(ComputeSupport(both_mask)) / total_pairs_;
     double confidence = support_both / support_lhs;
     return {lhs_mask, rhs, confidence, support_both};
@@ -234,12 +251,12 @@ void GaRfd::EvaluatePopulation(std::vector<Individual>& pop) const {
     for (auto& ind : pop) ind = Evaluate(ind);
 }
 
-bool GaRfd::AllOf(std::vector<Individual> const& pop) const {
+bool GaRfd::AllOf(const std::vector<Individual>& pop) const {
     if (pop.empty()) [[unlikely]] return false;
     return std::ranges::all_of(pop, [&](Individual const& ind) { return ind.confidence >= beta_; });
 }
 
-double GaRfd::Fitness(double confidence) const {
+double GaRfd::Fitness(double confidence) const noexcept {
     return (confidence >= beta_) ? 1.0 : confidence / beta_;
 }
 
@@ -247,17 +264,21 @@ std::vector<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937_64& rng)
     std::vector<Individual> pop;
     pop.reserve(population_size_);
 
-    std::uniform_int_distribution<uint32_t> mask_dist(1u, (1u << num_attrs_) - 1);
-    std::uniform_int_distribution<uint8_t> rhs_dist(0, num_attrs_ - 1);
+    std::uniform_int_distribution<uint8_t> rhs_dist(0u, num_attrs_ - 1u);
 
     while (pop.size() < population_size_) {
-        uint32_t lhs_mask = mask_dist(rng);
-        uint8_t rhs = rhs_dist(rng);
-        if ((lhs_mask & (1u << rhs)) || lhs_mask == 0u) continue;
-        pop.push_back(Individual{lhs_mask, rhs, 0.0, 0.0});
+        const uint8_t rhs = rhs_dist(rng);
+        uint32_t possible_mask = ((1u << num_attrs_) - 1) & ~(1u << rhs);
+        if (possible_mask == 0) continue;
+
+        std::uniform_int_distribution<uint32_t> mask_dist(1u, possible_mask);
+        uint32_t lhs_mask = mask_dist(rng) & possible_mask;
+        while (lhs_mask == 0) [[unlikely]]
+            lhs_mask = mask_dist(rng) & possible_mask;
+
+        pop.emplace_back(Individual{lhs_mask, rhs, 0.0, 0.0});
     }
     LOG_DEBUG("Initial population of size {} created", pop.size());
-
     return pop;
 }
 
@@ -273,49 +294,54 @@ std::vector<GaRfd::Individual> GaRfd::Select(std::vector<Individual> const& pop,
     return selected;
 }
 
-std::vector<GaRfd::Individual> GaRfd::Crossover(std::vector<Individual> const& selected,
+std::vector<GaRfd::Individual> GaRfd::Crossover(const std::vector<Individual>& selected,
                                                 std::mt19937_64& rng) const {
     std::vector<Individual> offspring;
     if (selected.size() < 2) return offspring;
 
     std::uniform_real_distribution<double> dist01(0.0, 1.0);
+    std::bernoulli_distribution coin(0.5);
 
     for (std::size_t i = 0; i < selected.size(); ++i) {
         for (std::size_t j = i + 1; j < selected.size(); ++j) {
-            if (dist01(rng) >= crossover_probability_) continue;
+            if (dist01(rng) >= crossover_probability_) [[unlikely]] continue;
 
             Individual c1 = selected[i];
             Individual c2 = selected[j];
 
-            uint32_t mask1 = c1.lhs_mask;
+                        uint32_t mask1 = c1.lhs_mask;
             uint32_t mask2 = c2.lhs_mask;
             uint32_t diff = mask1 ^ mask2;
-            auto cnts_of_ones = (std::popcount(diff) > 1 ? std::popcount(diff)-1 : 2);
-            std::uniform_int_distribution<uint8_t> until(1, cnts_of_ones);
-            uint8_t cnt = until(rng);
-            while (diff && cnt--) {
-                uint32_t bit = diff & -diff;
-                mask1 ^= bit;
-                mask2 ^= bit;
+            auto diff_cnt = std::popcount(diff);
+
+            if (diff_cnt > 0) {
+                std::uniform_int_distribution<decltype(diff_cnt)> cnt_dist(1, diff_cnt);
+                uint32_t cnt = cnt_dist(rng);
+                while (cnt-- && diff) {
+                    uint32_t bit = diff & -diff;
+                    mask1 ^= bit;
+                    mask2 ^= bit;
+                    diff ^= bit;
+                }
             }
 
             c1.lhs_mask = mask1;
             c2.lhs_mask = mask2;
 
-            if (until(rng) == 1) {
+            if (coin(rng)) {
                 std::swap(c1.rhs_index, c2.rhs_index);
             }
 
-            if ((c1.lhs_mask & (1u << c1.rhs_index)) || c1.lhs_mask == 0) continue;
-            if ((c2.lhs_mask & (1u << c2.rhs_index)) || c2.lhs_mask == 0) continue;
+            if ((c1.lhs_mask & (1u << c1.rhs_index)) || c1.lhs_mask == 0) [[unlikely]] continue;
+            if ((c2.lhs_mask & (1u << c2.rhs_index)) || c2.lhs_mask == 0) [[unlikely]] continue;
 
             c1.confidence = 0.0;
             c1.support = 0.0;
             c2.confidence = 0.0;
             c2.support = 0.0;
 
-            offspring.push_back(c1);
-            offspring.push_back(c2);
+            offspring.emplace_back(std::move(c1));
+            offspring.emplace_back(std::move(c2));
         }
     }
     return offspring;
@@ -329,32 +355,46 @@ void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937_64& rng) const {
     std::uniform_int_distribution<uint8_t> coin(0, 2);
 
     for (auto& ind : pop) {
-        if (dist01(rng) >= mutation_probability_) continue;
+        if (dist01(rng) >= mutation_probability_) [[unlikely]] continue;
 
         uint32_t mask = ind.lhs_mask;
         uint8_t rhs = ind.rhs_index;
 
         switch (coin(rng)) {
-            case 0:
-                if (mask) {
-                    uint32_t bit = 1u << (countr_zero(mask));
-                    mask ^= bit;
+            case 0: {
+                if (mask == 0) break;
+                int ones = std::popcount(mask);
+                std::uniform_int_distribution<int> bit_selector(0, ones - 1);
+                int skip = bit_selector(rng);
+                uint32_t bit = 1;
+                for (int i = 0; ; ++i) {
+                    while ((mask & bit) == 0) bit <<= 1;
+                    if (i == skip) break;
+                    bit <<= 1;
                 }
+                mask ^= bit;
                 break;
-            case 1:
-                if ((mask | (1u << rhs)) != ((1u << num_attrs_) - 1)) {
-                    uint32_t new_bit = 1u << rhs_dist(rng);
-                    while (mask & new_bit) new_bit = 1u << rhs_dist(rng);
-                    mask |= new_bit;
+            }
+            case 1: {
+                uint32_t full_mask = ((1u << num_attrs_) - 1) & ~(1u << rhs);
+                if ((mask & full_mask) == full_mask) break;
+                std::uniform_int_distribution<uint8_t> new_rhs_dist(0, num_attrs_ - 1);
+                uint32_t new_bit = 1u << new_rhs_dist(rng);
+                while ( (mask & new_bit) || (new_bit == (1u << rhs)) ) {
+                    new_bit = 1u << new_rhs_dist(rng);
                 }
+                mask |= new_bit;
                 break;
-            case 2:
-                rhs = rhs_dist(rng);
-                while (mask & (1u << rhs)) rhs = rhs_dist(rng);
+            }
+            case 2: {
+                uint8_t new_rhs = rhs_dist(rng);
+                while (mask & (1u << new_rhs)) new_rhs = rhs_dist(rng);
+                rhs = new_rhs;
                 break;
+            }
         }
 
-        if (mask == 0 || (mask & (1u << rhs))) continue;
+        if (mask == 0 || (mask & (1u << rhs))) [[unlikely]] continue;
 
         ind.lhs_mask = mask;
         ind.rhs_index = rhs;
@@ -363,21 +403,29 @@ void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937_64& rng) const {
     }
 }
 
-std::set<RFD> GaRfd::Finalize(std::vector<Individual> const& pop) const {
-    std::set<RFD> res;
+std::set<RFD> GaRfd::Finalize(const std::vector<Individual>& pop) const {
+    std::unordered_map<uint64_t, RFD> best_rfds;
     for (auto const& ind : pop) {
         if (ind.confidence < beta_) continue;
 
-        RFD rfd;
-        rfd.lhs_mask = ind.lhs_mask;
-        rfd.rhs_index = ind.rhs_index;
-        rfd.support = ind.support;
-        rfd.confidence = ind.confidence;
-
-        res.insert(rfd);
+        uint64_t key = (static_cast<uint64_t>(ind.lhs_mask) << 8) | ind.rhs_index;
+        auto it = best_rfds.find(key);
+        if (it == best_rfds.end()) {
+            RFD rfd;
+            rfd.lhs_mask = ind.lhs_mask;
+            rfd.rhs_index = ind.rhs_index;
+            rfd.support = ind.support;
+            rfd.confidence = ind.confidence;
+            best_rfds[key] = std::move(rfd);
+        } else if (ind.confidence > it->second.confidence) {
+            it->second.confidence = ind.confidence;
+            it->second.support = ind.support;
+        }
     }
-    LOG_DEBUG("Finalized {} unique RFDs", res.size());
 
+    std::set<RFD> res;
+    for (auto& pair : best_rfds) res.insert(std::move(pair.second));
+    LOG_DEBUG("Finalized {} unique RFDs", res.size());
     return res;
 }
 
@@ -392,17 +440,30 @@ unsigned long long GaRfd::ExecuteInternal() {
         std::vector<Individual> pop = InitializePopulation(rng);
         EvaluatePopulation(pop);
 
-        for (std::size_t gen = 0; gen <= max_generations_; gen++) {
+        for (std::size_t gen = 0; gen < max_generations_; gen++) {
             if (AllOf(pop)) break;
 
             std::vector<Individual> selected = Select(pop, rng);
+            if (selected.empty()) [[unlikely]] {
+                auto best = *std::max_element(pop.begin(), pop.end(),
+                    [](auto& a, auto& b) { return a.confidence < b.confidence; });
+                selected.push_back(best);
+            }
             std::vector<Individual> offspring = Crossover(selected, rng);
             Mutate(offspring, rng);
 
             pop.clear();
             pop.reserve(selected.size() + offspring.size());
-            pop.insert(pop.end(), selected.begin(), selected.end());
-            pop.insert(pop.end(), offspring.begin(), offspring.end());
+            pop.insert(pop.end(), std::make_move_iterator(selected.begin()),
+                      std::make_move_iterator(selected.end()));
+            pop.insert(pop.end(), std::make_move_iterator(offspring.begin()),
+                      std::make_move_iterator(offspring.end()));
+
+            if (pop.size() > 2*population_size_) {
+                std::sort(pop.begin(), pop.end(),
+                    [](auto const& a, auto const& b) { return a.confidence > b.confidence; });
+                pop.resize(2*population_size_);
+            }
 
             EvaluatePopulation(pop);
         }

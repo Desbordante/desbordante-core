@@ -2,7 +2,7 @@ import desbordante
 import pandas
 import logging
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(name)s] %(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(name)s] %(message)s')
 
 # Чтобы запустить
 # PYTHONPATH=build/src/python_bindings python3 examples/basic/mining_ga_rfd.py
@@ -24,13 +24,14 @@ algo = desbordante.rfd.algorithms.GaRfd()
 
 lev = desbordante.rfd.levenshtein_metric()
 eq  = desbordante.rfd.equality_metric()
-algo.set_metrics([lev, lev, lev, lev, eq])
+abs_diff = desbordante.rfd.abs_diff_metric()
+algo.set_metrics([abs_diff, abs_diff, abs_diff, lev, eq])
 
 algo.load_data(table=(TABLE, ',', False))
 
 algo.set_option('rfd_min_similarity', 0.8)
 algo.set_option('minconf', 0.9)
-algo.set_option('population_size', 10)
+algo.set_option('population_size', 22)
 algo.set_option('rfd_max_generations', 10)
 algo.set_option('seed', 42)
 algo.execute()
@@ -52,7 +53,7 @@ def jaccard_sim(a: str, b: str) -> float:
 algo2 = desbordante.rfd.algorithms.GaRfd()
 algo2.load_data(table=(TABLE, ',', False))
 
-algo2.set_metrics_py([jaccard_sim, lev, lev, lev, eq])   # ← set_metrics_py!
+algo2.set_metrics_py([jaccard_sim, lev, lev, jaccard_sim, eq])   # ← set_metrics_py!
 algo2.set_option('rfd_min_similarity', 0.8)
 algo2.set_option('minconf', 0.9)
 algo2.set_option('population_size', 10)

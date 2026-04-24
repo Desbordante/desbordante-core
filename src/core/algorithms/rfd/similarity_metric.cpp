@@ -42,4 +42,21 @@ std::shared_ptr<SimilarityMetric> EqualityMetric() {
         [](const std::string& a, const std::string& b) { return a == b ? 1.0 : 0.0; });
 }
 
+std::shared_ptr<SimilarityMetric> AbsoluteDifferenceMetric() {
+    return std::make_shared<FunctionSimilarityMetric>(
+        [](const std::string& a, const std::string& b) {
+            try {
+                double x = std::stod(a);
+                double y = std::stod(b);
+                double abs_diff = std::abs(x - y);
+                double max_abs = std::max(std::abs(x), std::abs(y));
+                if (max_abs == 0.0) return 1.0;
+                double similarity = 1.0 - abs_diff / max_abs;
+                return std::max(0.0, similarity);
+            } catch (...) {
+                return 0.0;
+            }
+        });
+}
+
 } // namespace algos::rfd
