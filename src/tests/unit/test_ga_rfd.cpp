@@ -97,6 +97,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
         EXPECT_LE(rfd.confidence, 1.0);
         EXPECT_GE(rfd.support, 0.0);
         EXPECT_LE(rfd.support, 1.0);
+        std::cout << rfd.ToString() << '\n';
     }
 }
 /*
