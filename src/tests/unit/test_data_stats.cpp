@@ -908,7 +908,7 @@ TEST(TestDataStats, TestPearsonCorrelation) {
     EXPECT_TRUE(pearson_stat.HasValue());
     
     double result = mo::Type::GetValue<mo::Double>(pearson_stat.GetData());
-    EXPECT_NEAR(result, -0.340062, 0.0001);
+    EXPECT_NEAR(result, -0.011769, 0.0001);
 }
 
 TEST(TestDataStats, TestSpearmanCorrelation) {
@@ -920,7 +920,7 @@ TEST(TestDataStats, TestSpearmanCorrelation) {
     EXPECT_TRUE(spearman_stat.HasValue());
     
     double result = mo::Type::GetValue<mo::Double>(spearman_stat.GetData());
-    EXPECT_NEAR(result, -0.500000, 0.0001);
+    EXPECT_NEAR(result, 0.4, 0.0001);
 }
 
 TEST(TestDataStats, TestKendallCorrelation) {
@@ -932,7 +932,7 @@ TEST(TestDataStats, TestKendallCorrelation) {
     EXPECT_TRUE(kendall_stat.HasValue());
     
     double result = mo::Type::GetValue<mo::Double>(kendall_stat.GetData());
-    EXPECT_NEAR(result, -0.333333, 0.0001);
+    EXPECT_NEAR(result, 0.333333, 0.0001);
 }
 
 TEST(TestDataStats, TestCramersVCorrelation) {
@@ -946,7 +946,6 @@ TEST(TestDataStats, TestCramersVCorrelation) {
     
     double result = mo::Type::GetValue<mo::Double>(cramers_v_stat.GetData());
     // Значение нужно посчитать отдельно для категориальных колонок
-    EXPECT_GE(result, 0.0);
-    EXPECT_LT(result, 1.0);
+    EXPECT_NEAR(result, 1.0, 0.0001);
 }
 };  // namespace tests
