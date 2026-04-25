@@ -23,6 +23,7 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/rfd/similarity_metric.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -33,7 +34,6 @@
 #include "core/util/enum_to_available_values.h"
 #include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
-#include "core/algorithms/rfd/similarity_metric.h"
 #include "python_bindings/rfd/py_similarity_metric.h"
 
 #include "core/algorithms/rfd/similarity_metric.h"
