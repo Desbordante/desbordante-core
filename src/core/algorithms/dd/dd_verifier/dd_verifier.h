@@ -18,6 +18,7 @@ class DDVerifier : public Algorithm {
 private:
     DDs dd_;
     config::InputTable input_table_;
+    double satisfaction_threshold_;
     std::size_t num_rows_{};
     std::size_t num_columns_{};
     std::size_t num_error_rhs_{};
