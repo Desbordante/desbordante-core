@@ -111,7 +111,7 @@ TEST(GARfdPerformance, Neighbors10k_Fast) {
         std::cout << rfd.ToString() << '\n';
     }
 
-    EXPECT_LE(ms, 22'000) << "TL";
+    EXPECT_LE(ms, 12'000) << "TL";
 }
 
 TEST(GARfdPerformance, Neighbors10k_Slow) {
@@ -156,7 +156,7 @@ TEST(GARfdPerformance, Neighbors10k_Slow) {
         std::cout << rfd.ToString() << '\n';
     }
 
-    EXPECT_LE(ms, 47'000) << "TL";
+    EXPECT_LE(ms, 22'000) << "TL";
 }
 
 }

@@ -25,13 +25,12 @@ template <typename T>
     return min <= value && value <= max;
 }
 
-[[nodiscard]] inline uint8_t countr_zero(uint32_t x) {
-    if (x == 0) return 32;
-    return __builtin_ctz(x);
-}
-
 [[nodiscard]] std::string bit_representation(uint32_t mask, int num_bits = 31) {
     return std::bitset<32>(mask).to_string().substr(32 - num_bits);
+}
+
+[[nodiscard]] inline int first_set_bit(uint32_t x) {
+    return x ? static_cast<int>(__builtin_ctz(x)) : -1;
 }
 
 }  // namespace
@@ -145,7 +144,7 @@ void GaRfd::LoadDataInternal() {
         for (size_t i = 0; i < num_attrs_; ++i) {
             column_data_[i].push_back(std::move(row[i]));
         }
-        ++num_rows_;
+        num_rows_++;
     }
 
     if (num_rows_ < 2) [[unlikely]] 
@@ -153,22 +152,22 @@ void GaRfd::LoadDataInternal() {
 
     if (num_rows_ > std::numeric_limits<std::size_t>::max() / (num_rows_ - 1) / 2)
         throw std::runtime_error("Table too large, total pairs would overflow size_t");
-    total_pairs_ = static_cast<std::size_t>(num_rows_) * (num_rows_ - 1) / 2;
+    total_pairs_ = num_rows_ * (num_rows_ - 1) / 2;
 
-    LOG_DEBUG("Loaded {} rows, {} attributes, {} total pairs", num_rows_, num_attrs_, total_pairs_);
+    LOG_INFO("Loaded {} rows, {} attributes, {} total pairs", num_rows_, num_attrs_, total_pairs_);
 
     if (metrics_.empty()) {
         metrics_.clear();
         metrics_.reserve(num_attrs_);
         for (size_t i = 0; i < num_attrs_; ++i)
-            metrics_.push_back(EqualityMetric());
+            metrics_.emplace_back(EqualityMetric());
     }
     if (metrics_.size() != num_attrs_) [[unlikely]]
         throw std::invalid_argument("The number of attributes and metrics do not match");
 }
 
 void GaRfd::BuildSimilarityBitsets() {
-    LOG_DEBUG("BuildSimilarityBitsets: total_pairs_ = {}, num_attrs_ = {}, num_rows_ = {}",
+    LOG_INFO("BuildSimilarityBitsets: total_pairs_ = {}, num_attrs_ = {}, num_rows_ = {}",
               total_pairs_, num_attrs_, num_rows_);
     const std::size_t num_uint64_per_attr = (total_pairs_ + 63) / 64;
     attr_similarity_bits_.assign(num_attrs_, std::vector<uint64_t>(num_uint64_per_attr, 0));
@@ -199,42 +198,50 @@ void GaRfd::BuildSimilarityBitsets() {
                 pair_idx++;
             }
         }
-        LOG_DEBUG("Finished attribute {} similarity bitset", a);
+        LOG_INFO("Finished attribute {} similarity bitset", a);
     }
-    LOG_DEBUG("Similarity bitsets built for {} attributes", num_attrs_);
+    LOG_INFO("Similarity bitsets built for {} attributes", num_attrs_);
 }
 
 std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
-    if (auto cached = support_cache_.get(attrs_mask)) [[likely]] {
-        return *cached;
-    }
-
-    if (attrs_mask == 0) [[unlikely]] {
+    if (auto cached = support_cache_.get(attrs_mask)) return *cached;
+    if (attrs_mask == 0) {
         support_cache_.put(0, total_pairs_);
         return total_pairs_;
     }
 
-    const int first = countr_zero(attrs_mask);
-    std::vector<uint64_t> intersection = attr_similarity_bits_[first];
-    uint32_t remaining = attrs_mask & (attrs_mask - 1);
+    uint32_t mm = attrs_mask;
+    int first = first_set_bit(mm);
+    if (first < 0) { support_cache_.put(attrs_mask, 0); return 0; }
 
-    while (remaining) {
-        const int attr = countr_zero(remaining);
-        const auto& other_bits = attr_similarity_bits_[attr];
-        for (std::size_t k = 0; k < intersection.size(); k++) {
-            intersection[k] &= other_bits[k];
+    const auto &first_vec = attr_similarity_bits_[first];
+    if ((attrs_mask & (attrs_mask - 1)) == 0u) {
+        std::size_t s = 0;
+        for (uint64_t w : first_vec) s += std::popcount(w);
+        support_cache_.put(attrs_mask, s);
+        LOG_INFO("Support for mask {} = {}", bit_representation(attrs_mask, num_attrs_), s);
+        return s;
+    }
+
+    std::vector<uint64_t> buffer = first_vec;
+    mm &= mm - 1;
+    while (mm) {
+        int a = first_set_bit(mm);
+        const auto &other = attr_similarity_bits_[a];
+        const std::size_t N = buffer.size();
+        std::size_t running = 0;
+        for (std::size_t k = 0; k < N; ++k) {
+            buffer[k] &= other[k];
+            running += std::popcount(buffer[k]);
         }
-        remaining &= remaining - 1;
+        if (running == 0) { support_cache_.put(attrs_mask, 0); return 0; }
+        mm &= mm - 1;
     }
 
     std::size_t support = 0;
-    for (uint64_t word : intersection) {
-        support += std::popcount(word);
-    }
+    for (uint64_t w : buffer) support += std::popcount(w);
     support_cache_.put(attrs_mask, support);
-
-    LOG_DEBUG("Support for mask {} = {}", bit_representation(attrs_mask, num_attrs_), support);
-
+    LOG_INFO("Support for mask {} = {}", bit_representation(attrs_mask, num_attrs_), support);
     return support;
 }
 
@@ -266,30 +273,36 @@ double GaRfd::Fitness(double confidence) const noexcept {
     return (confidence >= beta_) ? 1.0 : confidence / beta_;
 }
 
-std::vector<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937_64& rng) const {
+std::vector<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937& rng) const {
     std::vector<Individual> pop;
     pop.reserve(population_size_);
+    std::uniform_int_distribution<uint8_t> rhs_dist(0u, static_cast<uint8_t>(num_attrs_ - 1u));
 
-    std::uniform_int_distribution<uint8_t> rhs_dist(0u, num_attrs_ - 1u);
+    std::vector<uint8_t> indices(num_attrs_);
+    std::iota(indices.begin(), indices.end(), 0);
 
     while (pop.size() < population_size_) {
-        const uint8_t rhs = rhs_dist(rng);
-        uint32_t possible_mask = ((1u << num_attrs_) - 1) & ~(1u << rhs);
-        if (possible_mask == 0) continue;
-
-        std::uniform_int_distribution<uint32_t> mask_dist(1u, possible_mask);
-        uint32_t lhs_mask = mask_dist(rng) & possible_mask;
-        while (lhs_mask == 0) [[unlikely]]
-            lhs_mask = mask_dist(rng) & possible_mask;
+        uint8_t rhs = rhs_dist(rng);
+        std::uniform_int_distribution<int> kdist(1, static_cast<int>(num_attrs_ - 1));
+        int k = kdist(rng);
+        std::vector<uint8_t> pool;
+        pool.reserve(num_attrs_-1);
+        for (uint8_t i = 0; i < num_attrs_; ++i) if (i != rhs) pool.push_back(i);
+        for (int i = 0; i < k; ++i) {
+            std::uniform_int_distribution<int> d(i, static_cast<int>(pool.size()) - 1);
+            int j = d(rng);
+            std::swap(pool[i], pool[j]);
+        }
+        uint32_t lhs_mask = 0;
+        for (int i = 0; i < k; ++i) lhs_mask |= (1u << pool[i]);
 
         pop.emplace_back(Individual{lhs_mask, rhs, 0.0, 0.0});
     }
-    LOG_DEBUG("Initial population of size {} created", pop.size());
     return pop;
 }
 
 std::vector<GaRfd::Individual> GaRfd::Select(std::vector<Individual> const& pop,
-                                             std::mt19937_64& rng) const {
+                                             std::mt19937& rng) const {
     std::vector<Individual> selected;
     selected.reserve(pop.size());
 
@@ -301,7 +314,7 @@ std::vector<GaRfd::Individual> GaRfd::Select(std::vector<Individual> const& pop,
 }
 
 std::vector<GaRfd::Individual> GaRfd::Crossover(const std::vector<Individual>& selected,
-                                                std::mt19937_64& rng) const {
+                                                std::mt19937& rng) const {
     std::vector<Individual> offspring;
     if (selected.size() < 2) return offspring;
 
@@ -353,7 +366,7 @@ std::vector<GaRfd::Individual> GaRfd::Crossover(const std::vector<Individual>& s
     return offspring;
 }
 
-void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937_64& rng) const {
+void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937& rng) const {
     if (pop.empty()) return;
 
     std::uniform_real_distribution<double> dist01(0.0, 1.0);
@@ -437,17 +450,16 @@ std::set<RFD> GaRfd::Finalize(const std::vector<Individual>& pop) const {
 
 unsigned long long GaRfd::ExecuteInternal() {
     return util::TimedInvoke([&]() {
-        LOG_DEBUG("Build similarity bitsets...");
+        LOG_INFO("Build similarity bitsets...");
         BuildSimilarityBitsets();
-        support_cache_.clear();
 
-        std::mt19937_64 rng(seed_);
+        std::mt19937 rng(seed_);
 
         std::vector<Individual> pop = InitializePopulation(rng);
         EvaluatePopulation(pop);
 
         for (std::size_t gen = 0; gen < max_generations_; gen++) {
-            LOG_DEBUG("Generation {}/{} (pop size: {})", gen + 1, max_generations_, pop.size());
+            LOG_INFO("Generation {}/{} (pop size: {})", gen + 1, max_generations_, pop.size());
             if (AllOf(pop)) {
                 LOG_DEBUG("All individuals satisfy confidence threshold – stopping early");
                 break;

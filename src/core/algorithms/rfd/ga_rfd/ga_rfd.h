@@ -100,7 +100,10 @@ private:
     void MakeExecuteOptsAvailable() final;
     void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
-    void ResetState() final { discovered_.clear(); }
+    void ResetState() final { 
+        discovered_.clear();
+        support_cache_.clear();
+    }
 
     struct Individual {
         uint32_t lhs_mask = 0;
@@ -122,12 +125,12 @@ private:
     [[nodiscard]] double Fitness(double confidence) const noexcept;
 
     // GA methods
-    [[nodiscard]] std::vector<Individual> InitializePopulation(std::mt19937_64& rng) const;
+    [[nodiscard]] std::vector<Individual> InitializePopulation(std::mt19937& rng) const;
     [[nodiscard]] std::vector<Individual> Select(const std::vector<Individual>& pop,
-                                                 std::mt19937_64& rng) const;
+                                                 std::mt19937& rng) const;
     [[nodiscard]] std::vector<Individual> Crossover(const std::vector<Individual>& selected,
-                                                    std::mt19937_64& rng) const;
-    void Mutate(std::vector<Individual>& pop, std::mt19937_64& rng) const;
+                                                    std::mt19937& rng) const;
+    void Mutate(std::vector<Individual>& pop, std::mt19937& rng) const;
 
     [[nodiscard]] std::set<RFD> Finalize(const std::vector<Individual>& pop) const;
 
