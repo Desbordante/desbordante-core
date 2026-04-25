@@ -4,4 +4,4 @@
 
 namespace python_bindings {
 void BindGaRfd(pybind11::module_& main_module);
-} // namespace python_bindings
+}  // namespace python_bindings
