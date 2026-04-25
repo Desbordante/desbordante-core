@@ -42,11 +42,11 @@
 #include "python_bindings/py_util/logging.h"
 #include "python_bindings/py_util/py_custom_metrics.h"
 #include "python_bindings/sd/bind_sd_verification.h"
+#include "python_bindings/rfd/bind_ga_rfd.h"
 #include "python_bindings/sfd/bind_sfd.h"
 #include "python_bindings/statistics/bind_statistics.h"
 #include "python_bindings/ucc/bind_ucc.h"
 #include "python_bindings/ucc/bind_ucc_verification.h"
-#include "python_bindings/rfd/bind_ga_rfd.h" 
 
 namespace python_bindings {
 

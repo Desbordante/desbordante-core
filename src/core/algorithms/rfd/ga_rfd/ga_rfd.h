@@ -1,18 +1,18 @@
 #pragma once
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
+#include <list>
+#include <memory>
+#include <optional>
 #include <random>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <set>
-#include <list>
-#include <optional>
-#include <memory>
-#include <iterator>
-#include <cassert> 
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/rfd/rfd.h"
@@ -28,6 +28,7 @@ class LRUCache {
         V value;
         typename std::list<K>::iterator it;
     };
+
     std::unordered_map<K, Entry> map_;
     std::list<K> list_;
     std::size_t max_size_;
@@ -37,14 +38,14 @@ public:
         assert(max_size > 0 && "LRUCache max_size must be positive");
     }
 
-    std::optional<V> get(const K& key) {
+    std::optional<V> get(K const& key) {
         auto it = map_.find(key);
         if (it == map_.end()) return std::nullopt;
         list_.splice(list_.end(), list_, it->second.it);
         return it->second.value;
     }
 
-    void put(const K& key, const V& value) {
+    void put(K const& key, V const& value) {
         auto it = map_.find(key);
         if (it != map_.end()) {
             it->second.value = value;
@@ -85,13 +86,13 @@ private:
     mutable LRUCache<uint32_t, std::size_t> support_cache_{kCacheMaxSize};
 
     // Parameters
-    double min_similarity_ = 0.7;           // similarity threshold for a pair of values
-    double eps_ = 0.75;                    // minimum confidence for RFD
+    double min_similarity_ = 0.7;  // similarity threshold for a pair of values
+    double eps_ = 0.75;            // minimum confidence for RFD
     std::size_t max_generations_ = 30;
     std::size_t population_size_ = 100;
     double crossover_probability_ = 1.0;
     double mutation_probability_ = 1.0;
-    std::uint64_t seed_ = 0;                // random number generator seed
+    std::uint64_t seed_ = 0;  // random number generator seed
 
     std::set<RFD> discovered_;
 
@@ -100,7 +101,8 @@ private:
     void MakeExecuteOptsAvailable() final;
     void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
-    void ResetState() final { 
+
+    void ResetState() final {
         discovered_.clear();
         support_cache_.clear();
     }
@@ -116,28 +118,31 @@ private:
     void BuildSimilarityBitsets();
     [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const noexcept;
     // Computes conf and supp for a single individual
-    [[nodiscard]] Individual Evaluate(const Individual& ind) const noexcept;
+    [[nodiscard]] Individual Evaluate(Individual const& ind) const noexcept;
     // Computes conf and supp for all individuals
     void EvaluatePopulation(std::vector<Individual>& pop) const noexcept;
     // Checks each individual threshold satisfies conf
-    [[nodiscard]] bool AllOf(const std::vector<Individual>& pop) const noexcept;
+    [[nodiscard]] bool AllOf(std::vector<Individual> const& pop) const noexcept;
     // Computes fitness from conf: 1.0 if confidence >= beta, else confidence / beta.
     [[nodiscard]] double Fitness(double confidence) const noexcept;
 
     // GA methods
     [[nodiscard]] std::vector<Individual> InitializePopulation(std::mt19937& rng) const;
-    [[nodiscard]] std::vector<Individual> Select(const std::vector<Individual>& pop,
+    [[nodiscard]] std::vector<Individual> Select(std::vector<Individual> const& pop,
                                                  std::mt19937& rng) const;
-    [[nodiscard]] std::vector<Individual> Crossover(const std::vector<Individual>& selected,
+    [[nodiscard]] std::vector<Individual> Crossover(std::vector<Individual> const& selected,
                                                     std::mt19937& rng) const;
     void Mutate(std::vector<Individual>& pop, std::mt19937& rng) const;
 
-    [[nodiscard]] std::set<RFD> Finalize(const std::vector<Individual>& pop) const;
+    [[nodiscard]] std::set<RFD> Finalize(std::vector<Individual> const& pop) const;
 
 public:
     GaRfd();
 
-    void SetMetrics(std::vector<std::shared_ptr<SimilarityMetric>> metrics) noexcept { metrics_ = std::move(metrics); }
+    void SetMetrics(std::vector<std::shared_ptr<SimilarityMetric>> metrics) noexcept {
+        metrics_ = std::move(metrics);
+    }
+
     [[nodiscard]] std::vector<RFD> GetRfds() const {
         return {discovered_.begin(), discovered_.end()};
     }
