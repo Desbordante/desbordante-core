@@ -32,7 +32,11 @@ bool CompositeTopKMiner::TryAdd(CompositeEpisode ep, TopK& top_k, Explore& explo
                                 size_t floor_minsup) const {
     size_t const current_minsup = (top_k.size() == k_) ? top_k.top().GetSupport() : floor_minsup;
     if (ep.GetSupport() < current_minsup) return false;
-    explore.push(ep);
+
+    if (top_k.size() < k_ || ep.GetSupport() > current_minsup) {
+        explore.push(ep);
+    }
+
     if (top_k.size() < k_) {
         top_k.push(std::move(ep));
         return top_k.size() == k_;
@@ -122,10 +126,10 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
                 explore.pop();
 
                 size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
-                if (parent_ep.GetSupport() < minsup_now) continue;
+                bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
+                                                         : parent_ep.GetSupport() < minsup_now;
+                if (stale) continue;
 
-                // parallel_episodes is descending — count valid extensions upfront so
-                // ref_count matches exactly how many tasks will be pushed.
                 size_t valid_n = 0;
                 while (valid_n < n && parallel_episodes[valid_n].GetSupport() >= minsup_now) {
                     ++valid_n;
@@ -178,7 +182,12 @@ void CompositeTopKMiner::ExploreSequential(std::vector<ParallelEpisode> const& p
         explore.pop();
 
         size_t const minsup = (top_k.size() == k_) ? top_k.top().GetSupport() : initial_minsup;
-        if (item.GetSupport() < minsup) continue;
+        bool const stale = (top_k.size() == k_) ? item.GetSupport() <= minsup
+                                                 : item.GetSupport() < minsup;
+        if (stale) {
+            explore = Explore();
+            break;
+        }
 
         for (ParallelEpisode const& ext : parallel_episodes) {
             if (ext.GetSupport() < minsup) break;

@@ -1,6 +1,7 @@
 #include "tke.h"
 
 #include <algorithm>
+#include <unordered_map>
 
 #include "core/algorithms/fem/tke/composite_topk_miner.h"
 #include "core/algorithms/fem/tke/parallel_topk_miner.h"
@@ -95,11 +96,11 @@ void TKE::RemoveInfrequentEvents(std::map<model::Event, size_t> const& events_su
     model::Event new_events_num = model::kStartEvent;
     reverse_mapping_.clear();
     reverse_mapping_.resize(new_events_num);
-    mapping_.clear();
 
+    std::unordered_map<model::Event, model::Event> mapping;
     for (auto const& [event, support] : events_supports) {
         if (support >= event_minsup) {
-            mapping_[event] = new_events_num;
+            mapping[event] = new_events_num;
             reverse_mapping_.push_back(event);
             new_events_num++;
         }
@@ -108,7 +109,7 @@ void TKE::RemoveInfrequentEvents(std::map<model::Event, size_t> const& events_su
     LOG_DEBUG("Frequent events: {}", events_num_);
 
     for (model::TimedEventSet& event_set : *event_sequence_) {
-        event_set.MapEventsAndRemoveInfrequent(mapping_);
+        event_set.MapEventsAndRemoveInfrequent(mapping);
     }
 }
 

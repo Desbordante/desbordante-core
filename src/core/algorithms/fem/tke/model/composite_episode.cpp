@@ -4,8 +4,7 @@ namespace algos::tke {
 
 CompositeEpisode::CompositeEpisode(ParallelEpisode const& seed)
     : model::CompositeEpisode({seed.GetEventSetPtr()}),
-      support_(seed.GetSupport()),
-      bound_list_(seed) {
+      bound_list_(std::make_shared<BoundList>(seed)) {
     CountDataForEventSet(*seed.GetEventSetPtr());
 }
 
@@ -13,13 +12,17 @@ std::optional<CompositeEpisode> CompositeEpisode::TryExtend(ParallelEpisode cons
                                                              size_t min_support,
                                                              size_t window_length) const {
     std::optional<BoundList> new_bound =
-            bound_list_.Extend(ext.GetLocationList(), min_support, window_length);
-    if (!new_bound) {
-        return std::nullopt;
-    }
-    CompositeEpisode child = *this;
-    child.Extend(ext, new_bound->GetSupport());
-    child.bound_list_ = std::move(*new_bound);
+            bound_list_->Extend(ext.GetLocationList(), min_support, window_length);
+    if (!new_bound) return std::nullopt;
+
+    CompositeEpisode child;
+    child.sequence_ = sequence_;
+    child.sum_of_even_items_ = sum_of_even_items_;
+    child.sum_of_odd_items_ = sum_of_odd_items_;
+    child.events_count_ = events_count_;
+    child.bound_list_ = std::make_shared<BoundList>(std::move(*new_bound));
+    child.sequence_.push_back(ext.GetEventSetPtr());
+    child.CountDataForEventSet(*child.sequence_.back());
     return child;
 }
 
@@ -33,18 +36,6 @@ void CompositeEpisode::CountDataForEventSet(model::EventSet const& event_set, bo
         }
     }
     events_count_ += sign * event_set.GetSize();
-}
-
-void CompositeEpisode::Extend(ParallelEpisode const& parallel_episode, size_t new_support) {
-    sequence_.push_back(parallel_episode.GetEventSetPtr());
-    support_ = new_support;
-    CountDataForEventSet(*sequence_.back());
-}
-
-void CompositeEpisode::Shorten(size_t new_support) {
-    CountDataForEventSet(*sequence_.back(), false);
-    support_ = new_support;
-    sequence_.pop_back();
 }
 
 bool CompositeEpisode::StrictlyContains(CompositeEpisode const& other) const {
@@ -84,9 +75,8 @@ CompositeEpisode::RawEpisode CompositeEpisode::GetRaw() const {
     for (auto const& event_set : sequence_) {
         result.first.push_back(event_set->GetEvents());
     }
-    result.second = support_;
+    result.second = bound_list_->GetSupport();
     return result;
 }
-
 
 }  // namespace algos::tke

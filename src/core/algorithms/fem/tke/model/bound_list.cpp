@@ -3,49 +3,41 @@
 namespace algos::tke {
 
 BoundList::BoundList(ParallelEpisode const& parallel_episode) {
-    starts_.reserve(parallel_episode.GetSupport());
-    ends_.reserve(parallel_episode.GetSupport());
-    for (auto timestamp : parallel_episode.GetLocationList()) {
-        starts_.push_back(timestamp);
-        ends_.push_back(timestamp);
+    auto const& locs = parallel_episode.GetLocationList();
+    bound_list_.reserve(locs.size());
+    for (auto ts : locs) {
+        bound_list_.push_back({ts, ts});
     }
 }
 
 std::optional<BoundList> BoundList::Extend(std::vector<model::Timestamp> const& loc_list,
                                            size_t min_support, size_t window_length) const {
-    size_t const max_misses = starts_.size() - min_support;
+    size_t const max_misses = bound_list_.size() - min_support;
     size_t current_misses = 0;
 
-    std::vector<model::Timestamp> new_starts;
-    std::vector<model::Timestamp> new_ends;
-    new_starts.reserve(starts_.size());
-    new_ends.reserve(starts_.size());
+    std::vector<Bound> new_bounds;
+    new_bounds.reserve(bound_list_.size());
 
     for (size_t this_ind = 0, other_ind = 0;
-         this_ind < starts_.size() && other_ind < loc_list.size();) {
-        auto this_interval_start = starts_[this_ind];
-        auto other_location = loc_list[other_ind];
+         this_ind < bound_list_.size() && other_ind < loc_list.size();) {
+        auto const [start, end] = bound_list_[this_ind];
+        auto const other_loc = loc_list[other_ind];
 
-        if (other_location <= ends_[this_ind]) {
-            other_ind++;
-        } else if (other_location - this_interval_start >= window_length) {
-            this_ind++;
-            current_misses++;
-            if (current_misses > max_misses) {
-                return std::nullopt;
-            }
+        if (other_loc <= end) {
+            ++other_ind;
+        } else if (other_loc - start >= window_length) {
+            ++this_ind;
+            if (++current_misses > max_misses) return std::nullopt;
         } else {
-            new_starts.push_back(this_interval_start);
-            new_ends.push_back(other_location);
-            this_ind++;
+            new_bounds.push_back({start, other_loc});
+            ++this_ind;
         }
     }
 
-    if (new_starts.size() < min_support) {
-        return std::nullopt;
-    }
+    if (new_bounds.size() < min_support) return std::nullopt;
 
-    return BoundList(std::move(new_starts), std::move(new_ends));
+    if (new_bounds.capacity() > 2 * new_bounds.size()) new_bounds.shrink_to_fit();
+    return BoundList(std::move(new_bounds));
 }
 
 }  // namespace algos::tke

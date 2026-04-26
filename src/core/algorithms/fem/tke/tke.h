@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <unordered_map>
 #include <vector>
 
 #include "core/algorithms/fem/fem_algorithm.h"
@@ -18,7 +17,6 @@ private:
     config::ThreadNumType threads_num_;
     model::Event events_num_ = 0;
     std::vector<CompositeEpisode::RawEpisode> top_k_frequent_episodes_;
-    std::unordered_map<model::Event, model::Event> mapping_;
     std::vector<model::Event> reverse_mapping_;
 
     void ResetState() override;

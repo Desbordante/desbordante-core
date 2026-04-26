@@ -36,9 +36,11 @@ ParallelTopKMiner::ParallelTopKMiner(model::Event events_num, size_t k,
 bool ParallelTopKMiner::TryAdd(ParallelEpisode ep, TopK& top_k, Explore& explore) const {
     size_t const minsup = (top_k.size() == k_) ? top_k.top().GetSupport() : 1;
     if (ep.GetSupport() < minsup) return false;
-    
-    explore.push(ep);
-    
+
+    if (top_k.size() < k_ || ep.GetSupport() > minsup) {
+        explore.push(ep);
+    }
+
     if (top_k.size() < k_) {
         top_k.push(std::move(ep));
         return top_k.size() == k_;
@@ -119,9 +121,10 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
                 ParallelEpisode parent_ep = std::move(const_cast<ParallelEpisode&>(explore.top()));
                 explore.pop();
 
-                if (parent_ep.GetSupport() < atomic_minsup.load(std::memory_order_relaxed)) {
-                    continue;
-                }
+                size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
+                bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
+                                                         : parent_ep.GetSupport() < minsup_now;
+                if (stale) continue;
 
                 model::Event start_event = parent_ep.GetLastEvent() + 1;
                 if (start_event >= events_num_) continue;
@@ -170,7 +173,12 @@ void ParallelTopKMiner::ExploreSequential(TopK& top_k, Explore& explore) const {
         explore.pop();
 
         size_t const minsup = (top_k.size() == k_) ? top_k.top().GetSupport() : 1;
-        if (item.GetSupport() < minsup) break;
+        bool const stale = (top_k.size() == k_) ? item.GetSupport() <= minsup
+                                                 : item.GetSupport() < minsup;
+        if (stale) {
+            explore = Explore();
+            break;
+        }
 
         for (model::Event event = item.GetLastEvent() + 1; event < events_num_; ++event) {
             TryAdd(item.ParallelExtension(event, *events_loc_lists_[event]), top_k, explore);

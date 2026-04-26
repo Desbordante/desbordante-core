@@ -10,22 +10,22 @@ namespace algos::tke {
 
 class BoundList {
 private:
-    std::vector<model::Timestamp> starts_;
-    std::vector<model::Timestamp> ends_;
+    using Bound = std::pair<model::Timestamp, model::Timestamp>;
+
+    std::vector<Bound> bound_list_;
+
+    explicit BoundList(std::vector<Bound> bound_list) : bound_list_(std::move(bound_list)) {}
 
 public:
     BoundList() = default;
 
-    BoundList(std::vector<model::Timestamp> starts, std::vector<model::Timestamp> ends)
-        : starts_(std::move(starts)), ends_(std::move(ends)) {}
-
-    BoundList(ParallelEpisode const& parallel_episode);
+    explicit BoundList(ParallelEpisode const& parallel_episode);
 
     std::optional<BoundList> Extend(std::vector<model::Timestamp> const& loc_list,
                                     size_t min_support, size_t window_length) const;
 
     size_t GetSupport() const {
-        return starts_.size();
+        return bound_list_.size();
     }
 };
 
