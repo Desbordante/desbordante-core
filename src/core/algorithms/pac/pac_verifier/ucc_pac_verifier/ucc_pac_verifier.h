@@ -38,7 +38,7 @@ class UCCPACVerifier final : public PACVerifier {
     config::IndicesType column_indices_;
     std::shared_ptr<config::ICustomVectorMetric> metric_;
 
-    pac::model::TupleType tuple_type_;
+    std::shared_ptr<pac::model::TupleType> tuple_type_;
     std::shared_ptr<std::vector<pac::model::Tuple>> tuples_;
 
     std::shared_ptr<Pairs> sorted_pairs_;

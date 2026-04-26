@@ -9,8 +9,11 @@
 #include <vector>
 
 #include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
+#include "core/algorithms/pac/ucc_pac.h"
+#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/custom_metric/custom_vector_metric_option.h"
 #include "core/config/descriptions.h"
 #include "core/config/indices/option.h"
@@ -117,15 +120,23 @@ std::vector<std::pair<double, double>> UCCPACVerifier::CalculateEmpiricalProbabi
     return result;
 }
 
+void UCCPACVerifier::ProcessPACTypeOptions() {
+    std::vector<model::Type const*> types(column_indices_.size());
+    auto const& col_data = TypedRelation().GetColumnData();
+    std::ranges::transform(column_indices_, types.begin(),
+                           [&col_data](std::size_t const idx) { return &col_data[idx].GetType(); });
+
+    tuple_type_ = std::make_shared<pac::model::TupleType>(std::move(types));
+}
+
 UCCPACVerifier::UCCPACVerifier() : PACVerifier() {
     DESBORDANTE_OPTION_USING;
     using namespace config;
 
-    RegisterOption(
-            kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices, kMetric}}}));
+    RegisterOption(kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices}}}));
 
     RegisterOption(IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
             &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
-    RegisterOption()
+    RegisterOption(VectorMetricOption{&metric_});
 }
 }  // namespace algos::pac_verifier
