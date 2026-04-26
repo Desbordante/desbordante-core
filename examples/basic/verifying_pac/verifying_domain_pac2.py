@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 """Example 2: 2D parallelepiped, leveling coefficients"""
-=======
-'''Example 2: 2D parallelepiped, leveling coefficients'''
->>>>>>> 6103e58c (Implement Domain PAC examples)
 
 from tabulate import tabulate
 from csv import reader
