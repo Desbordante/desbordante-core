@@ -9,7 +9,14 @@
 #include <vector>
 
 #include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
+#include "core/config/custom_metric/custom_vector_metric_option.h"
+#include "core/config/descriptions.h"
+#include "core/config/indices/option.h"
+#include "core/config/names.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
 
 namespace algos::pac_verifier {
@@ -108,5 +115,17 @@ std::vector<std::pair<double, double>> UCCPACVerifier::CalculateEmpiricalProbabi
     iteration(sorted_pairs_->size());
 
     return result;
+}
+
+UCCPACVerifier::UCCPACVerifier() : PACVerifier() {
+    DESBORDANTE_OPTION_USING;
+    using namespace config;
+
+    RegisterOption(
+            kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices, kMetric}}}));
+
+    RegisterOption(IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
+            &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
+    RegisterOption()
 }
 }  // namespace algos::pac_verifier

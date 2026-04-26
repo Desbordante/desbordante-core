@@ -8,10 +8,9 @@
 #include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
-#include "core/algorithms/pac/pac_verifier/util/column_metric.h"
-#include "core/algorithms/pac/pac_verifier/util/tuple_metric.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
+#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/indices/type.h"
 
 namespace algos::pac_verifier {
@@ -33,12 +32,11 @@ namespace algos::pac_verifier {
 //    Thus, Gamma = Gamma' + D + Gamma'',  sigma = sigma' + D + sigma''
 //    Therefore, empirical probability becomes
 //      Pr(eps) = (2|sigma'(eps)| + |r|) / |r|^2
-class UCCPACVerifier : public PACVerifier {
+class UCCPACVerifier final : public PACVerifier {
     using Pairs = std::vector<TuplePair>;
 
     config::IndicesType column_indices_;
-    // TODO: tuple metric
-    TupleMetric metric_;
+    std::shared_ptr<config::ICustomVectorMetric> metric_;
 
     pac::model::TupleType tuple_type_;
     std::shared_ptr<std::vector<pac::model::Tuple>> tuples_;
