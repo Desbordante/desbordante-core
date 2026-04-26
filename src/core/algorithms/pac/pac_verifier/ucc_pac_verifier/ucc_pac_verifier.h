@@ -9,10 +9,12 @@
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/pairwise_pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
 #include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/indices/type.h"
+#include "core/config/names.h"
 
 namespace algos::pac_verifier {
 /// @brief Unique Column Combination Probabilistic Approximate Constraint verifier
@@ -61,7 +63,7 @@ class UCCPACVerifier final : public PairWisePACVerifier {
 
     void MakeExecuteOptsAvailable() override {
         PACVerifier::MakeExecuteOptsAvailable();
-        MakeOptionsAvailable({config::names::kLhsDeltas});
+        MakeOptionsAvailable({config::names::kMaxDelta});
     }
 
     void ResetState() override {
@@ -78,7 +80,6 @@ public:
         return *pac_;
     }
 
-    // TODO: highlights
-    // FDPACHighlight GetHighlights(double eps_1 = 0, double eps_2 = -1) const;
+    UCCPACHighlight GetHighlights(double eps_1 = 0, double eps_2 = -1) const;
 };
 }  // namespace algos::pac_verifier

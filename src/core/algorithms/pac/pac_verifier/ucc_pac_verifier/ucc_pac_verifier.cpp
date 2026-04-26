@@ -10,6 +10,7 @@
 
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
@@ -101,5 +102,37 @@ UCCPACVerifier::UCCPACVerifier() {
     RegisterOption(IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
             &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
     RegisterOption(VectorMetricOption{&metric_});
+
+    RegisterOption(Option(&min_delta_, kMaxDelta, kDMaxDelta, -1.0)
+                           .SetValueCheck([](double x) { return x <= 1; })
+                           .SetNormalizeFunc([](double x) -> double {
+                               if (x < 0) {
+                                   return -1;
+                               }
+                               return 1 - x;
+                           }));
+}
+
+UCCPACHighlight UCCPACVerifier::GetHighlights(double eps_1, double eps_2) const {
+    if (!pac_) {
+        throw std::runtime_error("Execute must be called before calling GetHighlights");
+    }
+
+    if (eps_2 < 0) {
+        eps_2 = pac_->GetEpsilon();
+    }
+    if (eps_2 <= eps_1) {
+        return UCCPACHighlight{};
+    }
+    LOG_DEBUG("Calculating highlights from {} to {}...", eps_1, eps_2);
+
+    auto begin = std::ranges::upper_bound(*sorted_pairs_, eps_1, {},
+                                          [](TuplePair const& pair) { return pair.dist; });
+    auto end = std::ranges::upper_bound(begin, sorted_pairs_->end(), eps_2, {},
+                                        [](TuplePair const& pair) { return pair.dist; });
+
+    LOG_DEBUG("Highlighted pairs [{}, {})", std::distance(sorted_pairs_->begin(), begin),
+              std::distance(sorted_pairs_->begin(), end));
+    return UCCPACHighlight{tuples_, tuple_type_, sorted_pairs_, std::move(begin), std::move(end)};
 }
 }  // namespace algos::pac_verifier
