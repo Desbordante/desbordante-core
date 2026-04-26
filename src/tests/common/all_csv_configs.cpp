@@ -144,4 +144,7 @@ CSVConfig const kWdcSatellites = CreateCsvConfig("WDC_satellites.csv", ',', true
 CSVConfig const kWdcScience = CreateCsvConfig("WDC_science.csv", ',', true);
 CSVConfig const kWdcSymbols = CreateCsvConfig("WDC_symbols.csv", ',', true);
 CSVConfig const kMDTrivial = CreateCsvConfig("md_trivial.csv", ',', true);
+CSVConfig const kRfd32Attrs = CreateCsvConfig("rfd_32_attrs.csv", ',', true);
+CSVConfig const kRfdSingleRow = CreateCsvConfig("rfd_single_row.csv", ',', true);
+CSVConfig const kRfdTwoRows = CreateCsvConfig("rfd_two_rows.csv", ',', true);
 }  // namespace tests
