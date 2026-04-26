@@ -235,6 +235,9 @@ constexpr auto kDMaxEpsilon =
 constexpr auto kDMinEpsilon =
         "Minimal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is 0).";
+constexpr auto kDMaxDelta =
+        "Maximal value of delta, which is a probability at which values violate "
+        "the dependency (default is 1 if min_eps or max_eps is passed, 0.1 otherwise).";
 constexpr auto kDMinDelta =
         "Minimal value of delta, which is a probability at which values satisfy the dependency "
         "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";

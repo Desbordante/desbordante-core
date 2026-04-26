@@ -117,6 +117,7 @@ constexpr auto kDomain = "domain";
 constexpr auto kLhsDeltas = "lhs_deltas";
 constexpr auto kLhsMetrics = "lhs_metrics";
 constexpr auto kRhsMetrics = "rhs_metrics";
+constexpr auto kMaxDelta = "max_delta";
 constexpr auto kMinDelta = "min_delta";
 constexpr auto kMaxEpsilon = "max_epsilon";
 constexpr auto kMinEpsilon = "min_epsilon";
