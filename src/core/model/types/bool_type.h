@@ -53,7 +53,7 @@ public:
 
     size_t Hash(std::byte const* value) const override {
         bool v;
-        std::memcpy(&v, value, sizeof(bool));
+        std::memcpy(&v, value, sizeof(v));
         return std::hash<bool>{}(v);
     }
 };

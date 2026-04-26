@@ -813,9 +813,9 @@ Statistic DataStats::GetNumberOfWords(size_t index) const {
 Statistic DataStats::GetNumberOfDiacriticChars(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
     if (col.GetTypeId() != +mo::TypeId::kString)
-        return {};
+        return{};
 
-    UErrorCode err = U_ZERO_ERROR;
+    UErrorCode err = U_ZERO_ERROR; 
     icu::Normalizer2 const* norm =
         icu::Normalizer2::getNFDInstance(err);
 
@@ -841,7 +841,7 @@ Statistic DataStats::GetNumberOfDiacriticChars(size_t index) const {
             UChar32 c = decomposed.char32At(pos);
             pos += U16_LENGTH(c);
 
-            if (u_charType(c) == U_NON_SPACING_MARK) {
+            if (u_charType(c) == U_NON_SPACING_MARK) { 
                 count++;
             }
         }

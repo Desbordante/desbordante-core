@@ -394,6 +394,50 @@ class TestDataStats(unittest.TestCase):
 
             except Exception as e:
                 self.fail(f"Failed for column {i}: {e}")
+        
+    def test_get_min_white_spaces(self):
+        res = self.data_stats.get_min_white_spaces(11)
+        expected = 0
+        self.assertEqual(expected, res)
+
+    def test_get_max_white_spaces(self):
+        res = self.data_stats.get_max_white_spaces(11)
+        expected = 13
+        self.assertEqual(expected, res)
+
+    def test_get_zero_percent(self):
+        res = self.data_stats.get_zero_percent(7)
+        expected = 3.0 / 8.0
+        self.assertAlmostEqual(expected, res)
+        
+class TestDataStatsBool(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.data_stats = db.statistics.algorithms.DataStats()
+        cls.data_stats.load_data(table=("TestBool.csv", ',', False))
+        cls.data_stats.execute()
+
+    def test_get_true_count(self):
+        res = self.data_stats.get_true_count(0)
+        expected = 3
+        self.assertEqual(expected, res)
+
+    def test_get_false_count(self):
+        res = self.data_stats.get_false_count(0)
+        expected = 2
+        self.assertEqual(expected, res)
+        
+class TestDataStatsDiacritics(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.data_stats = db.statistics.algorithms.DataStats()
+        cls.data_stats.load_data(table=("TestDiacritics.csv", ',', False))
+        cls.data_stats.execute()
+
+    def test_get_number_of_diacritic_chars(self):
+        res = self.data_stats.get_number_of_diacritic_chars(1)
+        self.assertGreaterEqual(res, 6)
+
 
 if __name__ == "__main__":
     unittest.main()
