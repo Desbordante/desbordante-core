@@ -475,11 +475,11 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emi
         // If we have an empty subgraph that we want to extend,
         // find all distinct label tuples
         LOG_TRACE("Empty pattern, collecting initial edges");
-        for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
-            for (auto edge : boost::make_iterator_range(boost::out_edges(vertex, graph))) {
+            for (auto edge : boost::make_iterator_range(boost::edges(graph))) {
+                auto vertex = boost::source(edge, graph);
+                auto neighbor = boost::target(edge, graph);
+                
                 int vertex_label = graph[vertex].label;
-                auto neighbor = boost::target(edge, graph) == vertex ? boost::source(edge, graph)
-                                                                     : boost::target(edge, graph);
                 int neighbor_label = graph[neighbor].label;
                 ExtendedEdge ee =
                         (vertex_label < neighbor_label)
@@ -489,7 +489,6 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emi
                                                graph[edge].label);
                 emit(ee);
             }
-        }
     } else {
         // If we want to extend a subgraph
         auto rightmost = code.GetRightMost();
