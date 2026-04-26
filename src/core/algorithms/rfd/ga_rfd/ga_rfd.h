@@ -86,11 +86,11 @@ private:
 
     // Parameters
     double min_similarity_ = 0.7;           // similarity threshold for a pair of values
-    double beta_ = 0.75;                    // minimum confidence for RFD
-    std::size_t max_generations_ = 50;
-    std::size_t population_size_ = 20;
-    double crossover_probability_ = 0.85;
-    double mutation_probability_ = 0.3;
+    double eps_ = 0.75;                    // minimum confidence for RFD
+    std::size_t max_generations_ = 30;
+    std::size_t population_size_ = 100;
+    double crossover_probability_ = 1.0;
+    double mutation_probability_ = 1.0;
     std::uint64_t seed_ = 0;                // random number generator seed
 
     std::set<RFD> discovered_;
@@ -114,13 +114,13 @@ private:
 
     // helper methods
     void BuildSimilarityBitsets();
-    [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const;
+    [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const noexcept;
     // Computes conf and supp for a single individual
-    [[nodiscard]] Individual Evaluate(const Individual& ind) const;
+    [[nodiscard]] Individual Evaluate(const Individual& ind) const noexcept;
     // Computes conf and supp for all individuals
-    void EvaluatePopulation(std::vector<Individual>& pop) const;
+    void EvaluatePopulation(std::vector<Individual>& pop) const noexcept;
     // Checks each individual threshold satisfies conf
-    [[nodiscard]] bool AllOf(const std::vector<Individual>& pop) const;
+    [[nodiscard]] bool AllOf(const std::vector<Individual>& pop) const noexcept;
     // Computes fitness from conf: 1.0 if confidence >= beta, else confidence / beta.
     [[nodiscard]] double Fitness(double confidence) const noexcept;
 

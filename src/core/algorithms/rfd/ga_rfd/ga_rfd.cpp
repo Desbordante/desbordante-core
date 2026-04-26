@@ -92,7 +92,7 @@ void GaRfd::RegisterOptions() {
                           kRfdMinSimilarity,
                           kDRfdMinSimilarity,
                           0.7}.SetValueCheck(check_prob_range));
-    RegisterOption(Option{&beta_,
+    RegisterOption(Option{&eps_,
                           kMinimumConfidence,
                           kDMinimumConfidence,
                           0.75}.SetValueCheck(check_prob_range));
@@ -203,7 +203,7 @@ void GaRfd::BuildSimilarityBitsets() {
     LOG_INFO("Similarity bitsets built for {} attributes", num_attrs_);
 }
 
-std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
+std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
     if (auto cached = support_cache_.get(attrs_mask)) return *cached;
     if (attrs_mask == 0) {
         support_cache_.put(0, total_pairs_);
@@ -245,7 +245,7 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
     return support;
 }
 
-GaRfd::Individual GaRfd::Evaluate(const Individual& ind) const {
+GaRfd::Individual GaRfd::Evaluate(const Individual& ind) const noexcept {
     const uint32_t lhs_mask = ind.lhs_mask;
     const uint8_t rhs = ind.rhs_index;
 
@@ -260,41 +260,44 @@ GaRfd::Individual GaRfd::Evaluate(const Individual& ind) const {
     return {lhs_mask, rhs, confidence, support_both};
 }
 
-void GaRfd::EvaluatePopulation(std::vector<Individual>& pop) const {
+inline void GaRfd::EvaluatePopulation(std::vector<Individual>& pop) const noexcept {
     for (auto& ind : pop) ind = Evaluate(ind);
 }
 
-bool GaRfd::AllOf(const std::vector<Individual>& pop) const {
+inline bool GaRfd::AllOf(const std::vector<Individual>& pop) const noexcept {
     if (pop.empty()) [[unlikely]] return false;
-    return std::ranges::all_of(pop, [&](Individual const& ind) { return ind.confidence >= beta_; });
+    return std::ranges::all_of(pop, [&](Individual const& ind) { return ind.confidence >= eps_; });
 }
 
-double GaRfd::Fitness(double confidence) const noexcept {
-    return (confidence >= beta_) ? 1.0 : confidence / beta_;
+inline double GaRfd::Fitness(double confidence) const noexcept {
+    return confidence >= eps_ ? 1.0 : confidence / eps_;
 }
 
 std::vector<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937& rng) const {
     std::vector<Individual> pop;
     pop.reserve(population_size_);
     std::uniform_int_distribution<uint8_t> rhs_dist(0u, static_cast<uint8_t>(num_attrs_ - 1u));
+    std::uniform_int_distribution<uint8_t> kdist(1u, static_cast<uint8_t>(num_attrs_ - 1u));
 
     std::vector<uint8_t> indices(num_attrs_);
     std::iota(indices.begin(), indices.end(), 0);
 
     while (pop.size() < population_size_) {
         uint8_t rhs = rhs_dist(rng);
-        std::uniform_int_distribution<int> kdist(1, static_cast<int>(num_attrs_ - 1));
-        int k = kdist(rng);
+        uint8_t k = kdist(rng);
+
         std::vector<uint8_t> pool;
         pool.reserve(num_attrs_-1);
-        for (uint8_t i = 0; i < num_attrs_; ++i) if (i != rhs) pool.push_back(i);
-        for (int i = 0; i < k; ++i) {
-            std::uniform_int_distribution<int> d(i, static_cast<int>(pool.size()) - 1);
-            int j = d(rng);
-            std::swap(pool[i], pool[j]);
+
+        for (uint8_t i = 0; i < num_attrs_; i++) {
+            if (i != rhs) pool.push_back(i);
+        }
+        for (uint8_t i = 0; i < k; i++) {
+            std::uniform_int_distribution<uint8_t> d(i, static_cast<uint8_t>(pool.size()) - 1u);
+            std::swap(pool[i], pool[d(rng)]);
         }
         uint32_t lhs_mask = 0;
-        for (int i = 0; i < k; ++i) lhs_mask |= (1u << pool[i]);
+        for (std::size_t i = 0; i < k; i++) lhs_mask |= (1u << pool[i]);
 
         pop.emplace_back(Individual{lhs_mask, rhs, 0.0, 0.0});
     }
@@ -318,49 +321,47 @@ std::vector<GaRfd::Individual> GaRfd::Crossover(const std::vector<Individual>& s
     std::vector<Individual> offspring;
     if (selected.size() < 2) return offspring;
 
+    offspring.reserve(selected.size() * (selected.size() - 1) / 2 + 1);
+
     std::uniform_real_distribution<double> dist01(0.0, 1.0);
     std::bernoulli_distribution coin(0.5);
 
     for (std::size_t i = 0; i < selected.size(); ++i) {
+        const Individual& p1 = selected[i];
         for (std::size_t j = i + 1; j < selected.size(); ++j) {
             if (dist01(rng) >= crossover_probability_) [[unlikely]] continue;
 
-            Individual c1 = selected[i];
-            Individual c2 = selected[j];
+            const Individual& p2 = selected[j];
 
-                        uint32_t mask1 = c1.lhs_mask;
-            uint32_t mask2 = c2.lhs_mask;
+            uint32_t mask1 = p1.lhs_mask;
+            uint32_t mask2 = p2.lhs_mask;
+            uint8_t rhs1 = p1.rhs_index;
+            uint8_t rhs2 = p2.rhs_index;
+
             uint32_t diff = mask1 ^ mask2;
-            auto diff_cnt = std::popcount(diff);
-
-            if (diff_cnt > 0) {
-                std::uniform_int_distribution<decltype(diff_cnt)> cnt_dist(1, diff_cnt);
-                uint32_t cnt = cnt_dist(rng);
-                while (cnt-- && diff) {
+            if (diff) [[likely]] {
+                int diff_cnt = std::popcount(diff);
+                std::uniform_int_distribution<int> cnt_dist(1, diff_cnt);
+                int cnt = cnt_dist(rng);
+                while (cnt-- > 0) {
                     uint32_t bit = diff & -diff;
                     mask1 ^= bit;
                     mask2 ^= bit;
-                    diff ^= bit;
+                    diff &= diff - 1;
                 }
             }
 
-            c1.lhs_mask = mask1;
-            c2.lhs_mask = mask2;
-
             if (coin(rng)) {
-                std::swap(c1.rhs_index, c2.rhs_index);
+                std::swap(rhs1, rhs2);
             }
 
-            if ((c1.lhs_mask & (1u << c1.rhs_index)) || c1.lhs_mask == 0) [[unlikely]] continue;
-            if ((c2.lhs_mask & (1u << c2.rhs_index)) || c2.lhs_mask == 0) [[unlikely]] continue;
+            if ((mask1 == 0) || (mask1 & (1u << rhs1))) [[unlikely]] continue;
+            if ((mask2 == 0) || (mask2 & (1u << rhs2))) [[unlikely]] continue;
 
-            c1.confidence = 0.0;
-            c1.support = 0.0;
-            c2.confidence = 0.0;
-            c2.support = 0.0;
-
-            offspring.emplace_back(std::move(c1));
-            offspring.emplace_back(std::move(c2));
+            Individual c1{mask1, rhs1, 0.0, 0.0};
+            Individual c2{mask2, rhs2, 0.0, 0.0};
+            offspring.push_back(c1);
+            offspring.push_back(c2);
         }
     }
     return offspring;
@@ -425,7 +426,7 @@ void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937& rng) const {
 std::set<RFD> GaRfd::Finalize(const std::vector<Individual>& pop) const {
     std::unordered_map<uint64_t, RFD> best_rfds;
     for (auto const& ind : pop) {
-        if (ind.confidence < beta_) continue;
+        if (ind.confidence < eps_) continue;
 
         uint64_t key = (static_cast<uint64_t>(ind.lhs_mask) << 8) | ind.rhs_index;
         auto it = best_rfds.find(key);
