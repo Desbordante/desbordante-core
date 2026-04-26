@@ -54,7 +54,10 @@ class UCCPACVerifier final : public PairWisePACVerifier {
     void ProcessPACTypeOptions() override;
     void PreparePACTypeData() override;
     void PACTypeExecuteInternal() override;
-    std::pair<double, double> GetEpsilonDeltaForEpsilon(double epsilon) const override;
+
+    std::pair<double, double> GetEpsilonDeltaForEpsilon(double epsilon) const override {
+        return GetEpsilonDeltaForEpsilonImpl(epsilon, *sorted_pairs_);
+    }
 
     void MakeExecuteOptsAvailable() override {
         PACVerifier::MakeExecuteOptsAvailable();

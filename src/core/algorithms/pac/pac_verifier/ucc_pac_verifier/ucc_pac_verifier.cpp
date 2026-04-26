@@ -48,7 +48,8 @@ void UCCPACVerifier::PreparePairs() {
         for (std::size_t j = i + 1; j < total_tuples; ++j) {
             auto const& first = (*tuples_)[i];
             auto const& second = (*tuples_)[j];
-            sorted_pairs_->emplace_back(i, j, metric_->Dist(first, second));
+            sorted_pairs_->emplace_back(i, j,
+                                        metric_->Dist(tuple_type_->GetTypes(), first, second));
         }
     }
     std::ranges::sort(*sorted_pairs_, {}, [](TuplePair const& p) { return p.dist; });
@@ -89,15 +90,6 @@ void UCCPACVerifier::PACTypeExecuteInternal() {
     pac_ = model::UCCPAC{std::move(columns), epsilon, delta};
 
     LOG_INFO("Result: {}", pac_->ToLongString());
-}
-
-std::pair<double, double> UCCPACVerifier::GetEpsilonDeltaForEpsilon(double epsilon) const {
-    auto it = std::ranges::lower_bound(*sorted_pairs_, epsilon, {},
-                                       [](TuplePair const& pair) { return pair.dist; });
-    while (it != sorted_pairs_->end() && it->dist - epsilon < kDistThreshold) {
-        std::advance(it, 1);
-    }
-    return {it->dist, GetDelta(std::distance(sorted_pairs_->begin(), it))};
 }
 
 UCCPACVerifier::UCCPACVerifier() {
