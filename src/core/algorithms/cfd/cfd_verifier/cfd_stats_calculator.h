@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include <boost/container_hash/hash.hpp>
 #include <boost/functional/hash.hpp>
 
 #include "core/algorithms/cfd/cfd_verifier/highlight.h"
@@ -13,6 +15,9 @@
 #include "core/algorithms/cfd/model/cfd_types.h"
 
 namespace algos::cfd_verifier {
+
+using std::size_t;
+
 class CFDStatsCalculator {
 private:
     std::shared_ptr<cfd::CFDRelationData> relation_;

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <assert.h>
+#include <cstddef>
+#include <deque>
+#include <memory>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
@@ -8,6 +12,7 @@
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos {
 
@@ -22,7 +27,7 @@ private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::unique_ptr<UCCStatsCalculator> stats_calculator_;
     /* results of work */
-    size_t num_rows_violating_ucc_ = 0;
+    std::size_t num_rows_violating_ucc_ = 0;
     std::vector<model::PLI::Cluster> clusters_violating_ucc_;
 
     void VerifyUCC();
@@ -48,13 +53,13 @@ public:
 
     /* Returns the number of clusters where the UCC is violated, that is, the number of sets of rows
      * where each set consists of rows equal to each other in the specified columns */
-    size_t GetNumClustersViolatingUCC() const {
+    std::size_t GetNumClustersViolatingUCC() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumClustersViolatingUCC();
     }
 
     /* Returns the total number of table rows that violate the UCC */
-    size_t GetNumRowsViolatingUCC() const {
+    std::size_t GetNumRowsViolatingUCC() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumRowsViolatingUCC();
     }

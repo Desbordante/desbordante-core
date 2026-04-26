@@ -1,5 +1,8 @@
 #include "core/algorithms/ucc/hyucc/model/ucc_tree.h"
 
+#include <assert.h>
+#include <utility>
+
 namespace algos::hyucc {
 
 UCCTreeVertex* UCCTree::AddUCC(boost::dynamic_bitset<> const& ucc, bool* is_new_out) {

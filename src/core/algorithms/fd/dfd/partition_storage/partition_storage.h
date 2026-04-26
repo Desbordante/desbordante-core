@@ -1,8 +1,13 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
 #include <mutex>
+#include <variant>
 
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/vertical.h"
 #include "core/model/table/vertical_map.h"
 
 class PartitionStorage {
@@ -33,7 +38,7 @@ public:
     std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
     GetOrCreateFor(Vertical const& vertical);
 
-    size_t Size() const;
+    std::size_t Size() const;
 
     virtual ~PartitionStorage();
 };

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -13,6 +14,8 @@
 #include "core/model/table/typed_column_data.h"
 
 namespace algos::fastadc {
+
+using std::size_t, std::int64_t;
 
 class PliShard;
 

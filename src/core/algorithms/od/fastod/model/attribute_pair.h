@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
+#include <string_view>
 
 #include "core/algorithms/od/fastod/hashing/hashing.h"
 #include "core/model/table/column_index.h"

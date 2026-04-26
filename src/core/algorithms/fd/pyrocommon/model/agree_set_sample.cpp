@@ -1,10 +1,11 @@
 #include "core/algorithms/fd/pyrocommon/model/agree_set_sample.h"
 
 #include <algorithm>
-#include <exception>
+#include <cmath>
 #include <limits>
 #include <memory>
 #include <random>
+#include <stdexcept>
 #include <utility>
 
 namespace model {

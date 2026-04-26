@@ -1,5 +1,6 @@
 #include "core/model/table/typed_column_data.h"
 
+#include <assert.h>
 #include <bitset>
 #include <cstddef>
 

@@ -1,7 +1,16 @@
+#include <cmath>
+#include <cstddef>
+#include <limits>
+#include <memory>
+#include <string>
+
 #include <boost/math/special_functions/next.hpp>
+#include <boost/math/tools/precision.hpp>
 #include <gtest/gtest.h>
 
-#include "core/model/types/types.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/double_type.h"
+#include "core/model/types/numeric_type.h"
 
 namespace tests {
 

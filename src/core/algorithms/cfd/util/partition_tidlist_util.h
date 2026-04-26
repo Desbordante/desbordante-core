@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "core/algorithms/cfd/model/partition_tidlist.h"
 
 namespace algos::cfd {

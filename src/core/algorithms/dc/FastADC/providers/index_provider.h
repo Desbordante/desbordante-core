@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <concepts>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -11,6 +11,8 @@
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 
 namespace algos::fastadc {
+
+using std::size_t, std::int64_t;
 
 /**
  * @brief Manager of unique indices for a collection of objects.

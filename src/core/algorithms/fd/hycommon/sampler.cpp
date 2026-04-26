@@ -1,13 +1,15 @@
 #include "core/algorithms/fd/hycommon/sampler.h"
 
 #include <algorithm>
+#include <assert.h>
+#include <deque>
 #include <memory>
 #include <utility>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <boost/dynamic_bitset.hpp>
 #include <boost/thread/future.hpp>
+#include <boost/thread/futures/wait_for_all.hpp>
 
 #include "core/algorithms/fd/hycommon/efficiency.h"
 #include "core/algorithms/fd/hycommon/util/pli_util.h"

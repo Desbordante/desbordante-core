@@ -2,11 +2,13 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <numeric>
+#include <ranges>
 
 #include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
 #include "core/model/index.h"
-#include "core/model/types/string_type.h"
 #include "core/util/desbordante_assume.h"
 
 namespace {

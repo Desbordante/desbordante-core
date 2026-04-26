@@ -1,9 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <functional>
+#include <memory>
 #include <unordered_map>
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 namespace algos {
 
@@ -14,7 +19,7 @@ public:
 
 private:
     struct Node {
-        size_t bit_{};
+        std::size_t bit_{};
 
         Bitset set_;    // Set of attributes which corresponds this node
         Bitset union_;  // Union of children of this node
@@ -30,20 +35,21 @@ private:
         [[nodiscard]] Bitset const& GetInter() const;
 
         // For inner nodes
-        Node(size_t bit, Bitset sets_union, Bitset sets_inter, std::shared_ptr<Node> const& parent,
-             std::shared_ptr<Node> left = nullptr, std::shared_ptr<Node> right = nullptr);
+        Node(std::size_t bit, Bitset sets_union, Bitset sets_inter,
+             std::shared_ptr<Node> const& parent, std::shared_ptr<Node> left = nullptr,
+             std::shared_ptr<Node> right = nullptr);
 
         // For leaves
-        Node(size_t bit, Bitset set, std::shared_ptr<Node> const& parent);
+        Node(std::size_t bit, Bitset set, std::shared_ptr<Node> const& parent);
 
         // For both types of nodes
-        Node(size_t bit, Bitset set, Bitset sets_union, Bitset sets_inter,
+        Node(std::size_t bit, Bitset set, Bitset sets_union, Bitset sets_inter,
              std::shared_ptr<Node> const& parent, std::shared_ptr<Node> left = nullptr,
              std::shared_ptr<Node> right = nullptr);
     };
 
-    size_t cardinality_{};
-    size_t number_of_attributes_{};
+    std::size_t cardinality_{};
+    std::size_t number_of_attributes_{};
     std::shared_ptr<Node> root_{};
 
     void CreateSingleElementSets(Bitset const& set);
@@ -59,20 +65,20 @@ private:
     void CutLeaf(std::shared_ptr<Node> const& node_to_remove);
 
     static void InsertLeafIntoEnd(std::shared_ptr<Node> const& current_node, Bitset const& set,
-                                  size_t node_bit, size_t set_bit);
+                                  std::size_t node_bit, std::size_t set_bit);
     static void InsertLeafIntoMiddle(std::shared_ptr<Node> const& current_node, Bitset const& set,
-                                     size_t set_bit);
+                                     std::size_t set_bit);
 
     static void UpdateInterAndUnion(std::shared_ptr<Node> const& node);
 
-    [[nodiscard]] static std::pair<size_t, size_t> FindNodeAndSetBits(Bitset const& node_set,
-                                                                      Bitset const& set);
+    [[nodiscard]] static std::pair<std::size_t, std::size_t> FindNodeAndSetBits(
+            Bitset const& node_set, Bitset const& set);
 
 public:
-    explicit SearchTreeEulerFD(size_t number_of_attributes);
+    explicit SearchTreeEulerFD(std::size_t number_of_attributes);
     explicit SearchTreeEulerFD(Bitset const& set);
 
-    [[nodiscard]] size_t GetCardinality() const {
+    [[nodiscard]] std::size_t GetCardinality() const {
         return cardinality_;
     }
 

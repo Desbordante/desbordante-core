@@ -5,8 +5,10 @@
  */
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <optional>
+#include <string_view>
 
 #include "core/algorithms/ind/ind_algorithm.h"
 #include "core/algorithms/ind/mind/raw_ind.h"
@@ -22,9 +24,9 @@ class Mind final : public INDAlgorithm {
 public:
     /// timing information for algorithm stages
     struct StageTimings {
-        size_t load;          /**< time taken for the data loading */
-        size_t compute_uinds; /**< time taken for the unary inds computing */
-        size_t compute_ninds; /**< time taken for the n-ary inds computing */
+        std::size_t load;          /**< time taken for the data loading */
+        std::size_t compute_uinds; /**< time taken for the unary inds computing */
+        std::size_t compute_ninds; /**< time taken for the n-ary inds computing */
     };
 
 private:

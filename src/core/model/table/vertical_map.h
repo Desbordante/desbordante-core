@@ -1,16 +1,24 @@
 #pragma once
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <shared_mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 #include "core/util/custom_hashes.h"
 
 namespace model {
+
+using std::size_t;
 
 // difficulties with const methods
 

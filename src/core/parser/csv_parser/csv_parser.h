@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -57,11 +58,11 @@ public:
         return separator_;
     }
 
-    size_t GetNumberOfColumns() const override {
+    std::size_t GetNumberOfColumns() const override {
         return number_of_columns_;
     }
 
-    std::string GetColumnName(size_t index) const override {
+    std::string GetColumnName(std::size_t index) const override {
         return column_names_[index];
     }
 

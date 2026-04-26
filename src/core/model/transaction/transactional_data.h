@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "core/model/table/idataset_stream.h"
@@ -10,6 +12,8 @@
 #include "core/model/transaction/transactional_input_format.h"
 
 namespace model {
+
+using std::size_t;
 
 class TransactionalData {
 private:

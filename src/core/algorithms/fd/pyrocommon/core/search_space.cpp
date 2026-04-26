@@ -1,8 +1,23 @@
 #include "core/algorithms/fd/pyrocommon/core/search_space.h"
 
+#include <algorithm>
+#include <assert.h>
+#include <chrono>
+#include <cstddef>
+#include <iterator>
 #include <queue>
+#include <stdexcept>
 #include <variant>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+#include <boost/optional/optional.hpp>
+
+#include "core/algorithms/fd/pyrocommon/core/parameters.h"
+#include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/util/custom_hashes.h"
 #include "core/util/logger.h"
 
 // TODO: extra careful with const& -> shared_ptr conversions via make_shared-smart pointer may
@@ -659,7 +674,7 @@ std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(std::vector<Vertic
 
         for (Vertical const& invalid_member : invalid_hitting_set_members) {
             boost::dynamic_bitset<> const& column_indices = vertical.GetColumnIndices();
-            for (size_t corrective_column_index = column_indices.find_first();
+            for (std::size_t corrective_column_index = column_indices.find_first();
                  corrective_column_index != boost::dynamic_bitset<>::npos;
                  corrective_column_index = column_indices.find_next(corrective_column_index)) {
                 Column const& corrective_column = *schema->GetColumn(corrective_column_index);

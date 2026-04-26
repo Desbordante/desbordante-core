@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <utility>
@@ -7,10 +8,14 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/cfd/cfd_verifier/cfd_stats_calculator.h"
+#include "core/algorithms/cfd/cfd_verifier/highlight.h"
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
+#include "core/algorithms/cfd/model/cfd_types.h"
 #include "core/config/tabular_data/input_table_type.h"
 
 namespace algos::cfd_verifier {
 
+using std::size_t;
 using CFDAttributeValuePair = std::pair<std::string, std::string>;
 
 class CFDVerifier : public Algorithm {

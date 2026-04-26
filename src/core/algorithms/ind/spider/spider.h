@@ -4,6 +4,7 @@
  * Spider algorithm class definition
  */
 #pragma once
+#include <cstddef>
 #include <vector>
 
 #include "core/algorithms/ind/ind_algorithm.h"
@@ -27,9 +28,9 @@ class Spider final : public INDAlgorithm {
 public:
     /// timing information for algorithm stages
     struct StageTimings {
-        size_t load;    /**< time taken for the data loading */
-        size_t compute; /**< time taken for the inds computing */
-        size_t total;   /**< total time taken for all stages */
+        std::size_t load;    /**< time taken for the data loading */
+        std::size_t compute; /**< time taken for the inds computing */
+        std::size_t total;   /**< total time taken for all stages */
     };
 
 private:

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <list>
 #include <memory>
@@ -13,11 +14,11 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/util/bitset_utils.h"
 
 class Column;
-
 class Vertical;
 
 class RelationalSchema {
@@ -44,8 +45,8 @@ public:
     bool IsColumnInSchema(std::string const& col_name) const;
 
     Column const* GetColumn(std::string const& col_name) const;
-    Column const* GetColumn(size_t index) const;
-    size_t GetNumColumns() const;
+    Column const* GetColumn(std::size_t index) const;
+    std::size_t GetNumColumns() const;
     Vertical GetVertical(boost::dynamic_bitset<> indices) const;
 
     Vertical CreateEmptyVertical() const;

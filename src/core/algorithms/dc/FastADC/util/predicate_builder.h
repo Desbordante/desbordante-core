@@ -1,14 +1,18 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 
+#include "core/algorithms/dc/FastADC/model/column_operand.h"
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/providers/index_provider.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos::fastadc {
+
+using std::size_t;
 
 /**
  * @brief Constructs the predicate space for a given table and organizes predicates into categories.

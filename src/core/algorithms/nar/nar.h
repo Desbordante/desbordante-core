@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "core/algorithms/nar/value_range.h"

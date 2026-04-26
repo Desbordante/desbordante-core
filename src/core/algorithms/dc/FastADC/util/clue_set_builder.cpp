@@ -1,10 +1,16 @@
 #include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
 
+#include <bitset>
+#include <cstddef>
+#include <utility>
+
 #include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/single_clue_set_builder.h"
 #include "core/util/logger.h"
 
 namespace algos::fastadc {
+
+using std::size_t;
 
 ClueSet BuildClueSet(std::vector<PliShard> const& pliShards, PredicatePacks const& packs) {
     ClueSet clue_set;

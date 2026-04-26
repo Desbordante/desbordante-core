@@ -3,7 +3,9 @@
 #include <filesystem>
 #include <list>
 #include <map>
+#include <memory>
 #include <mutex>
+#include <string>
 #include <vector>
 
 #include <boost/any.hpp>

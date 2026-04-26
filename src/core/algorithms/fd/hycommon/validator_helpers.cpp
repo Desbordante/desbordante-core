@@ -1,5 +1,10 @@
 #include "core/algorithms/fd/hycommon/validator_helpers.h"
 
+#include <utility>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
+
 #include "core/algorithms/fd/hycommon/util/pli_util.h"
 #include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 #include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"

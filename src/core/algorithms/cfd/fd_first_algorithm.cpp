@@ -1,16 +1,23 @@
 #include "core/algorithms/cfd/fd_first_algorithm.h"
 
-#include <iterator>
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <memory>
+#include <numeric>
+#include <string>
+#include <string_view>
 
-#include <boost/unordered_map.hpp>
+#include <boost/container_hash/hash.hpp>
 
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
 #include "core/algorithms/cfd/util/partition_tidlist_util.h"
 #include "core/algorithms/cfd/util/partition_util.h"
 #include "core/algorithms/cfd/util/set_util.h"
 #include "core/algorithms/cfd/util/tidlist_util.h"
-#include "core/config/equal_nulls/option.h"
 #include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/util/logger.h"
 

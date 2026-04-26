@@ -2,11 +2,13 @@
 
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
 #include "core/algorithms/od/fastod/partitions/range_based_stripped_partition.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/model/table/column_index.h"
 
 namespace algos::fastod {
 
@@ -14,12 +16,12 @@ class RangeBasedStrippedPartition;
 
 class StrippedPartition {
 private:
-    std::vector<size_t> indexes_;
-    std::vector<size_t> begins_;
+    std::vector<std::size_t> indexes_;
+    std::vector<std::size_t> begins_;
     DataFrame const& data_;
 
-    StrippedPartition(DataFrame const& data, std::vector<size_t> const& indexes,
-                      std::vector<size_t> const& begins);
+    StrippedPartition(DataFrame const& data, std::vector<std::size_t> const& indexes,
+                      std::vector<std::size_t> const& begins);
 
     friend class RangeBasedStrippedPartition;
 

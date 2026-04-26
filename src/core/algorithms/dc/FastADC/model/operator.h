@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <string>
+#include <string_view>
 
 #include <frozen/string.h>
 #include <frozen/unordered_map.h>

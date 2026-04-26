@@ -1,18 +1,38 @@
 #include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <list>
+#include <memory>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/depminer/depminer.h"
 #include "core/algorithms/fd/dfd/dfd.h"
 #include "core/algorithms/fd/fastfds/fastfds.h"
+#include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fdep/fdep.h"
 #include "core/algorithms/fd/fun/fun.h"
 #include "core/algorithms/fd/hyfd/hyfd.h"
 #include "core/algorithms/fd/pyro/pyro.h"
+#include "core/algorithms/fd/raw_fd.h"
 #include "core/algorithms/fd/tane/pfdtane.h"
 #include "core/algorithms/fd/tane/tane.h"
-#include "core/model/table/relational_schema.h"
+#include "core/config/error/type.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/names.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 #include "tests/unit/test_fd_util.h"
 
 using std::string, std::vector;
@@ -36,7 +56,7 @@ namespace tests {
 
 std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
+    for (std::size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
         res.push_back(index);
     }

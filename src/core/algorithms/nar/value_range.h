@@ -1,6 +1,17 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
 #include "core/model/types/type.h"
 #include "core/util/better_enum_with_visibility.h"
 

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <assert.h>
+#include <cstdint>
 #include <filesystem>
+#include <memory>
 #include <string_view>
 #include <typeindex>
 #include <unordered_map>

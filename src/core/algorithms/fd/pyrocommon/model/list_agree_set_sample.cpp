@@ -1,5 +1,12 @@
 #include "core/algorithms/fd/pyrocommon/model/list_agree_set_sample.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <string>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
+#include "core/algorithms/fd/pyrocommon/model/agree_set_sample_impl.h"
 #include "core/util/logger.h"
 
 namespace model {
@@ -15,7 +22,7 @@ std::unique_ptr<std::vector<unsigned long long>> ListAgreeSetSample::BitSetToLon
         boost::dynamic_bitset<> const& bitset) {
     auto result = std::make_unique<std::vector<unsigned long long>>(
             std::vector<unsigned long long>((bitset.size() + 63) / 64, 0));
-    for (size_t i = 0; i < bitset.size(); i++) {
+    for (std::size_t i = 0; i < bitset.size(); i++) {
         // idea is: long long ~ 64 bits. shift i-th bit in the bitset i mod 64 times and set the
         // corresponding bit
         (*result)[i / 64] |= bitset[i] << i % 64;

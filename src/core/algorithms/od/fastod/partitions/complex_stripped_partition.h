@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
@@ -7,6 +8,7 @@
 #include "core/algorithms/od/fastod/model/removal_set.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/model/table/column_index.h"
 #include "core/model/table/tuple_index.h"
 
 namespace algos::fastod {
@@ -23,16 +25,16 @@ private:
             : tuple_index(tuple_index), left_value(left_value), right_value(right_value) {}
     };
 
-    std::vector<size_t> sp_indexes_;
-    std::vector<size_t> sp_begins_;
+    std::vector<std::size_t> sp_indexes_;
+    std::vector<std::size_t> sp_begins_;
     std::vector<DataFrame::Range> rb_indexes_;
-    std::vector<size_t> rb_begins_;
+    std::vector<std::size_t> rb_begins_;
     DataFrame const* data_;
     bool is_stripped_partition_;
     bool should_be_converted_to_sp_;
 
     static constexpr inline double kSmallRangesRatioToConvert = 0.5;
-    static constexpr inline size_t kMinMeaningfulRangeSize = static_cast<size_t>(40);
+    static constexpr inline std::size_t kMinMeaningfulRangeSize = static_cast<std::size_t>(40);
 
     std::string CommonToString() const;
     void CommonProduct(model::ColumnIndex attribute);
@@ -45,16 +47,16 @@ private:
     od::RemovalSetAsVec RangeBasedSplitRemovalSet(model::ColumnIndex right) const;
 
     std::vector<DataFrame::ValueIndices> IntersectWithAttribute(model::ColumnIndex attribute,
-                                                                size_t group_start,
-                                                                size_t group_end);
+                                                                std::size_t group_start,
+                                                                std::size_t group_end);
 
-    ComplexStrippedPartition(DataFrame const& data, std::vector<size_t> indexes,
-                             std::vector<size_t> begins);
+    ComplexStrippedPartition(DataFrame const& data, std::vector<std::size_t> indexes,
+                             std::vector<std::size_t> begins);
 
     ComplexStrippedPartition(DataFrame const& data, std::vector<DataFrame::Range> indexes,
-                             std::vector<size_t> begins);
+                             std::vector<std::size_t> begins);
     std::vector<Tuple> GetTuplesForColumns(model::ColumnIndex left, model::ColumnIndex right,
-                                           size_t group_ptr) const;
+                                           std::size_t group_ptr) const;
 
 public:
     enum class Type { kStripped, kRangeBased };

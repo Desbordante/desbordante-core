@@ -1,9 +1,13 @@
 #pragma once
 
+#include <functional>
+#include <string_view>
 #include <vector>
 
+#include "core/config/column_index/type.h"
 #include "core/config/common_option.h"
 #include "core/config/indices/type.h"
+#include "core/config/option.h"
 
 namespace config {
 

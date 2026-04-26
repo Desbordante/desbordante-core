@@ -5,7 +5,9 @@
 #include <vector>
 
 #include "core/algorithms/fd/hycommon/primitive_validations.h"
+#include "core/algorithms/fd/hycommon/types.h"
 #include "core/algorithms/fd/hyfd/model/fd_tree.h"
+#include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 #include "core/algorithms/fd/raw_fd.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/position_list_index.h"

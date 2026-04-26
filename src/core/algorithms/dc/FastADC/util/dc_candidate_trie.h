@@ -1,16 +1,20 @@
 #pragma once
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <optional>
-#include <stddef.h>
 #include <vector>
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/util/dc_candidate.h"
 
 namespace algos::fastadc {
+
+using std::size_t;
+
 class DCCandidateTrie {
 public:
     explicit DCCandidateTrie(size_t max_subtrees);

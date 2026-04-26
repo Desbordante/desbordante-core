@@ -1,14 +1,21 @@
 #pragma once
 
 #include <atomic_bitvector.hpp>
+#include <cstddef>
 #include <hash_set2.hpp>
 #include <hash_table8.hpp>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset_fwd.hpp>
 
 #include "core/algorithms/ind/faida/inclusion_testing/hll_data.h"
+#include "core/algorithms/ind/faida/util/simple_cc.h"
 #include "core/algorithms/ind/faida/util/simple_ind.h"
 
 namespace algos::faida {
@@ -18,7 +25,7 @@ private:
     using LockPrimitive = std::mutex;
 
     // Maps combined hash to the column combination IDs
-    emhash8::HashMap<size_t, std::pair<emhash2::HashSet<int>, std::unique_ptr<LockPrimitive>>>
+    emhash8::HashMap<std::size_t, std::pair<emhash2::HashSet<int>, std::unique_ptr<LockPrimitive>>>
             inverted_index_;
 
     emhash2::HashSet<SimpleIND> discovered_inds_;
@@ -31,9 +38,9 @@ private:
 public:
     SampledInvertedIndex() : non_covered_cc_indices_(0), max_id_(0) {}
 
-    void Init(std::vector<size_t> const& sampled_hashes, int max_id);
+    void Init(std::vector<std::size_t> const& sampled_hashes, int max_id);
 
-    bool Update(SimpleCC const& combination, size_t hash) {
+    bool Update(SimpleCC const& combination, std::size_t hash) {
         auto set_iter = inverted_index_.find(hash);
 
         if (set_iter == inverted_index_.end()) {

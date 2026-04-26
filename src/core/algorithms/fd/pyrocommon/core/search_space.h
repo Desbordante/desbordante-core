@@ -1,9 +1,14 @@
 #pragma once
 
+#include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <set>
+#include <string>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
 #include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"

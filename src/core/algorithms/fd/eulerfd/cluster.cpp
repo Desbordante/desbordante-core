@@ -1,6 +1,8 @@
 #include "core/algorithms/fd/eulerfd/cluster.h"
 
 #include <cstdint>
+#include <numeric>
+#include <utility>
 
 namespace algos {
 

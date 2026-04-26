@@ -1,16 +1,25 @@
+#include <cstddef>
+#include <list>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/sfd/cords.h"
+#include "core/algorithms/fd/sfd/correlation.h"
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/algorithms/fd/sfd/sample.h"
-#include "core/config/equal_nulls/option.h"
 #include "core/config/max_lhs/type.h"
 #include "core/config/names.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_index.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 
@@ -18,7 +27,7 @@ namespace {
 void AssertVectors(std::vector<Column> const& expected,
                    std::vector<model::ColumnIndex> const& actual) {
     ASSERT_EQ(expected.size(), actual.size());
-    for (size_t i = 0; i < expected.size(); i++) {
+    for (std::size_t i = 0; i < expected.size(); i++) {
         ASSERT_EQ(expected[i].GetIndex(), actual[i]);
     }
 }
@@ -26,7 +35,7 @@ void AssertVectors(std::vector<Column> const& expected,
 void AssertSFDList(std::list<FD> const& actual,
                    std::vector<std::pair<model::ColumnIndex, model::ColumnIndex>> expected) {
     ASSERT_EQ(actual.size(), expected.size());
-    size_t ind = 0;
+    std::size_t ind = 0;
     for (auto i : actual) {
         ASSERT_EQ(i.GetLhsIndices()[0], expected[ind].first);
         ASSERT_EQ(i.GetRhsIndex(), expected[ind++].second);
@@ -36,7 +45,7 @@ void AssertSFDList(std::list<FD> const& actual,
 void AssertCorrsList(std::list<algos::Correlation> const& actual,
                      std::vector<std::pair<model::ColumnIndex, model::ColumnIndex>> expected) {
     ASSERT_EQ(actual.size(), expected.size());
-    size_t ind = 0;
+    std::size_t ind = 0;
     for (auto i : actual) {
         ASSERT_EQ(i.GetLhsIndex(), expected[ind].first);
         ASSERT_EQ(i.GetRhsIndex(), expected[ind++].second);
@@ -47,7 +56,7 @@ void AssertCorrsList(std::list<algos::Correlation> const& actual,
 namespace tests {
 
 TEST(TestCordsUtils, FrequenciesOfIris) {
-    std::vector<std::vector<std::pair<std::string, size_t>>> expected = {
+    std::vector<std::vector<std::pair<std::string, std::size_t>>> expected = {
             {{"4.300000", 34}, {"4.500000", 33}, {"5.300000", 32}, {"7.100000", 30},
              {"5.400000", 11}, {"6.600000", 24}, {"6.100000", 8},  {"7.600000", 27},
              {"5.800000", 6},  {"4.800000", 14}, {"5.200000", 18}, {"6.400000", 5},
@@ -95,7 +104,7 @@ TEST(TestCordsUtils, FrequenciesOfIris) {
     handler.InitFrequencyHandler(data, data.size(), 70);
 
     ASSERT_EQ(handler.Size(), expected.size());
-    for (size_t i = 0; i < expected.size(); i++) {
+    for (std::size_t i = 0; i < expected.size(); i++) {
         ASSERT_EQ(handler.ColumnFrequencyMapSize(i), expected[i].size());
         for (auto const& [value, ordinal_number] : expected[i]) {
             ASSERT_EQ(handler.ContainsValAtColumn(value, i), true);
@@ -126,7 +135,7 @@ public:
         long double min_structural_zeroes_amount;
         long double max_false_positive_probability;
         long double delta;
-        size_t max_amount_of_categories;
+        std::size_t max_amount_of_categories;
         config::MaxLhsType max_lhs;
     };
 

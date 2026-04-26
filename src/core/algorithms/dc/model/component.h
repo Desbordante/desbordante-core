@@ -2,9 +2,11 @@
 
 #include <cstddef>
 #include <string>
+#include <utility>
 
 #include "core/algorithms/dc/model/operator.h"
 #include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
 #include "core/model/types/types.h"
 
 namespace algos::dc {

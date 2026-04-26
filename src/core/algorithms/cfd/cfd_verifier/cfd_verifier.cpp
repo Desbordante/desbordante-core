@@ -1,8 +1,15 @@
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 
+#include <stdexcept>
+#include <string_view>
+
 #include "core/algorithms/cfd/model/cfd_relation_data.h"
+#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/cfd/util/cfd_output_util.h"
+#include "core/config/common_option.h"
+#include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"

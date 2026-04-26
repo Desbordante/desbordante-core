@@ -1,8 +1,12 @@
 #pragma once
+#include <cstddef>
+#include <string>
 #include <vector>
 
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/algorithms/fd/sfd/sample.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos {
 class ContingencyTable {
@@ -13,21 +17,22 @@ private:
     std::vector<long double> n_i_;
     std::vector<long double> n_j_;
 
-    [[nodiscard]] static size_t Category(model::ColumnIndex col_ind, std::string const &val,
-                                         size_t domain, bool skew, FrequencyHandler const &handler);
+    [[nodiscard]] static std::size_t Category(model::ColumnIndex col_ind, std::string const& val,
+                                              std::size_t domain, bool skew,
+                                              FrequencyHandler const& handler);
     [[nodiscard]] long double CalculateChiSquared(long double sample_size,
-                                                  std::vector<size_t> const &domains) const;
+                                                  std::vector<std::size_t> const& domains) const;
 
 public:
-    bool ChiSquaredTest(Sample const &smp, std::vector<size_t> const &domains,
+    bool ChiSquaredTest(Sample const& smp, std::vector<std::size_t> const& domains,
                         long double max_false_positive_probability) const;
     ContingencyTable(model::ColumnIndex col_i, model::ColumnIndex col_k,
-                     std::vector<size_t> const &domains);
-    void FillTable(Sample const &smp, std::vector<model::TypedColumnData> const &data,
-                   FrequencyHandler const &handler, std::vector<bool> const &is_skewed_,
-                   std::vector<size_t> const &domains_);
+                     std::vector<std::size_t> const& domains);
+    void FillTable(Sample const& smp, std::vector<model::TypedColumnData> const& data,
+                   FrequencyHandler const& handler, std::vector<bool> const& is_skewed_,
+                   std::vector<std::size_t> const& domains_);
 
-    [[nodiscard]] bool TooMuchStructuralZeroes(std::vector<size_t> const &domains_,
+    [[nodiscard]] bool TooMuchStructuralZeroes(std::vector<std::size_t> const& domains_,
                                                long double min_structural_zeroes_proportion) const;
 };
 

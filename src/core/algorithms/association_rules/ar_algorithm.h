@@ -1,8 +1,10 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <set>
 #include <stack>
+#include <string>
 #include <vector>
 
 #include <boost/any.hpp>

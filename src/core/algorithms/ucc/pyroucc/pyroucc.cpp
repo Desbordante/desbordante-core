@@ -1,15 +1,28 @@
 #include "core/algorithms/ucc/pyroucc/pyroucc.h"
 
 #include <chrono>
-#include <mutex>
-#include <thread>
+#include <functional>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
+#include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"
 #include "core/algorithms/fd/pyrocommon/core/key_g1_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
+#include "core/algorithms/fd/pyrocommon/model/partial_key.h"
+#include "core/algorithms/ucc/ucc.h"
+#include "core/config/common_option.h"
 #include "core/config/error/option.h"
 #include "core/config/max_lhs/option.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
+#include "core/model/table/position_list_index.h"
 #include "core/util/logger.h"
+#include "core/util/primitive_collection.h"
 
 namespace algos {
 

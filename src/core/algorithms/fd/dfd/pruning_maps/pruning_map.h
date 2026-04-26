@@ -4,7 +4,9 @@
 #include <unordered_set>
 
 #include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical.h"
+#include "core/util/custom_hashes.h"
 
 class PruningMap : public std::unordered_map<Vertical, std::unordered_set<Vertical>> {
 public:

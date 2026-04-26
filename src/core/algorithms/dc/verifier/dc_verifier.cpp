@@ -1,31 +1,38 @@
 #include "core/algorithms/dc/verifier/dc_verifier.h"
 
 #include <algorithm>
+#include <assert.h>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
-#include <cstring>
-#include <ctime>
+#include <exception>
 #include <functional>
-#include <iostream>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/regex.hpp>
 
+#include "core/algorithms/dc/model/column_operand.h"
 #include "core/algorithms/dc/model/component.h"
+#include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/point.h"
 #include "core/algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/model/tuple.h"
 #include "core/algorithms/dc/parser/dc_parser.h"
+#include "core/config/common_option.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_index.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/typed_column_data.h"
+#include "core/model/types/type.h"
 #include "core/util/get_preallocated_vector.h"
 #include "core/util/kdtree.h"
 #include "core/util/logger.h"

@@ -1,5 +1,7 @@
 #pragma once
+#include <cstddef>
 #include <list>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -7,6 +9,7 @@
 
 #include "core/algorithms/ind/ind.h"
 #include "core/algorithms/ind/ind_algorithm.h"
+#include "core/model/table/column_index.h"
 #include "core/model/table/table_index.h"
 #include "tests/common/csv_config_util.h"
 
@@ -28,7 +31,7 @@ void CheckINDsListsEqualityTest(std::unique_ptr<algos::INDAlgorithm> ind_algo,
 
 void CheckINDsResultContainsINDsTest(std::unique_ptr<algos::INDAlgorithm> ind_algo,
                                      INDTestSet const& expected_inds_subset,
-                                     size_t expected_result_size);
+                                     std::size_t expected_result_size);
 
 struct INDEqualityTestConfig {
     CSVConfigs csv_configs;

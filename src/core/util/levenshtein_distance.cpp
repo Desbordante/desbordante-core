@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <vector>
 
 namespace util {
@@ -10,7 +11,7 @@ namespace util {
  * https://en.wikipedia.org/wiki/Levenshtein_distance
  */
 unsigned LevenshteinDistance(std::string_view l, std::string_view r) {
-    size_t r_size = r.size();
+    std::size_t r_size = r.size();
     std::vector<unsigned> v0(r_size + 1);
     std::vector<unsigned> v1(r_size + 1);
 
