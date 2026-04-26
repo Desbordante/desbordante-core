@@ -97,7 +97,7 @@ private:
 
     void MakeExecuteOptsAvailable() override {
         PACVerifier::MakeExecuteOptsAvailable();
-        MakeOptionsAvailable({config::names::kLhsDeltas});
+        MakeOptionsAvailable({config::names::kLhsDeltas, config::names::kMinDelta});
     }
 
     void ResetState() override {

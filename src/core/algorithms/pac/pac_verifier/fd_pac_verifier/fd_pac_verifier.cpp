@@ -175,6 +175,10 @@ FDPACVerifier::FDPACVerifier() {
                                value.resize(lhs_indices_.size(), value.back());
                            }));
 
+    RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0).SetValueCheck([](double x) {
+        return x <= 1;
+    }));
+
     MakeOptionsAvailable({kTableOpt.GetName()});
 }
 

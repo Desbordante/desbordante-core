@@ -84,7 +84,7 @@ void PACVerifier::LoadDataInternal() {
 void PACVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({kMinEpsilon, kMaxEpsilon, kMinDelta, kDeltaSteps, kDiagonalThreshold});
+    MakeOptionsAvailable({kMinEpsilon, kMaxEpsilon, kDeltaSteps, kDiagonalThreshold});
 }
 
 std::pair<double, double> PACVerifier::FindEpsilonDelta(

@@ -56,6 +56,11 @@ protected:
         pac_ = std::nullopt;
     }
 
+    void MakeExecuteOptsAvailable() override {
+        PACVerifier::MakeExecuteOptsAvailable();
+        MakeOptionsAvailable({config::names::kMinDelta});
+    }
+
 public:
     DomainPACVerifier() : PACVerifier() {
         DESBORDANTE_OPTION_USING;
@@ -66,6 +71,10 @@ public:
         RegisterOption(config::IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
                 &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
         RegisterOption(Option(&domain_, kDomain, kDDomain));
+
+        RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0).SetValueCheck([](double x) {
+            return x <= 1;
+        }));
 
         MakeOptionsAvailable({config::kTableOpt.GetName(), kDomain});
     }

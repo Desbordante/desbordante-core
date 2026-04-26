@@ -21,7 +21,6 @@ private:
 
     double min_epsilon_;
     double max_epsilon_;
-    double min_delta_;
     double diagonal_threshold_;
     unsigned long delta_steps_;
 
@@ -38,6 +37,9 @@ protected:
     // Input table must be registered in concrete classes to allow setting conditional options on it
     // Therefore, we need a protected data member here
     config::InputTable input_table_;
+    // Not every PAC verifier has "min delta" option (but every PAC verifier has min delta), so it
+    // cannot be registered in base class
+    double min_delta_;
 
     // Threshold for floating-point comparison of distances
     constexpr static double kDistThreshold = 1e-12;
