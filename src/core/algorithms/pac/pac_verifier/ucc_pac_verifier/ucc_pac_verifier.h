@@ -8,6 +8,7 @@
 #include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/pairwise_pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
 #include "core/config/custom_metric/custom_vector_metric.h"
@@ -32,7 +33,7 @@ namespace algos::pac_verifier {
 //    Thus, Gamma = Gamma' + D + Gamma'',  sigma = sigma' + D + sigma''
 //    Therefore, empirical probability becomes
 //      Pr(eps) = (2|sigma'(eps)| + |r|) / |r|^2
-class UCCPACVerifier final : public PACVerifier {
+class UCCPACVerifier final : public PairWisePACVerifier {
     using Pairs = std::vector<TuplePair>;
 
     config::IndicesType column_indices_;
@@ -44,16 +45,11 @@ class UCCPACVerifier final : public PACVerifier {
     std::shared_ptr<Pairs> sorted_pairs_;
     std::optional<model::UCCPAC> pac_;
 
-    double GetNumPairs(double delta) const;
-    double GetDelta(std::size_t num_pairs) const;
+    double GetNumPairs(double delta) const override;
+    double GetDelta(std::size_t num_pairs) const override;
 
     /// @brief Fill sorted_pairs_
     void PreparePairs();
-
-    /// @brief For each delta_i find the least eps_i such that PAC_{eps_i}^{delta_i} holds.
-    /// Then refine delta_i, i. e. find the greatest delta_i' such that PAC_{eps_i}^{delta_i} holds.
-    /// @return (eps_i, delta_i') pairs
-    std::vector<std::pair<double, double>> CalculateEmpiricalProbabilities() const;
 
     void ProcessPACTypeOptions() override;
     void PreparePACTypeData() override;

@@ -8,12 +8,11 @@
 #include <utility>
 #include <vector>
 
-#include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
-#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/custom_metric/custom_vector_metric_option.h"
 #include "core/config/descriptions.h"
 #include "core/config/indices/option.h"
@@ -49,75 +48,10 @@ void UCCPACVerifier::PreparePairs() {
         for (std::size_t j = i + 1; j < total_tuples; ++j) {
             auto const& first = (*tuples_)[i];
             auto const& second = (*tuples_)[j];
-            sorted_pairs_->emplace_back(i, j, metric_.Dist(first, second));
+            sorted_pairs_->emplace_back(i, j, metric_->Dist(first, second));
         }
     }
     std::ranges::sort(*sorted_pairs_, {}, [](TuplePair const& p) { return p.dist; });
-}
-
-std::vector<std::pair<double, double>> UCCPACVerifier::CalculateEmpiricalProbabilities() const {
-    std::size_t total_tuples = tuples_->size();
-    std::size_t total_pairs = total_tuples * total_tuples;
-
-    std::vector<std::pair<double, double>> result;
-
-    // Unlike FD PAC verifier, sorted pairs cannot be empty
-    std::size_t min_pairs_num = std::ceil(GetNumPairs(MinDelta()));
-    LOG_TRACE("Min pairs num: {}", min_pairs_num);
-
-    std::size_t pairs_step;
-    if (DeltaSteps() <= 1) {
-        pairs_step = total_pairs - min_pairs_num;
-    } else {
-        pairs_step =
-                std::round(static_cast<double>(total_pairs - min_pairs_num) / (DeltaSteps() - 1));
-    }
-    if (pairs_step == 0) {
-        LOG_DEBUG("Pairs step is 0. Setting to 1");
-        pairs_step = 1;
-    }
-
-    auto end = std::ranges::upper_bound(*sorted_pairs_, 0, {},
-                                        [](TuplePair const& p) { return p.dist; });
-    std::size_t curr_size = std::distance(sorted_pairs_->begin(), end);
-    result.emplace_back(0, GetDelta(curr_size));
-    LOG_DEBUG("Delta steps: {}, pairs step: {}, initial size: {} (delta: {})", DeltaSteps(),
-              pairs_step, curr_size, GetDelta(curr_size));
-
-    auto iteration = [&](std::size_t needed_pairs_num) {
-        // Find eps_i
-        auto need_to_add = needed_pairs_num - curr_size;
-        auto actually_add = std::min(
-                need_to_add, static_cast<std::size_t>(std::distance(end, sorted_pairs_->end())));
-        std::advance(end, actually_add);
-        curr_size += actually_add;
-        // end != sorted_pairs_->begin() here, because
-        //  a) sorted_pairs_ is not empty
-        //  b) we've checked that needed_pairs_num > curr_size (which is at least 0)
-        assert(end != sorted_pairs_->begin());
-        auto eps_i = std::prev(end)->dist;
-        LOG_TRACE("Eps for {} pairs: {}", needed_pairs_num, eps_i);
-
-        // Refine delta_i
-        while (end != sorted_pairs_->end() && end->dist - eps_i < kDistThreshold) {
-            std::advance(end, 1);
-            ++curr_size;
-        }
-        assert(curr_size == static_cast<std::size_t>(std::distance(sorted_pairs_->begin(), end)));
-        LOG_TRACE("Refined size: {}", curr_size);
-        result.emplace_back(eps_i, GetDelta(curr_size));
-    };
-    for (auto needed_pairs_num = min_pairs_num; needed_pairs_num < sorted_pairs_->size();
-         needed_pairs_num += pairs_step) {
-        if (needed_pairs_num <= curr_size) {
-            continue;
-        }
-        iteration(needed_pairs_num);
-    }
-    // Ensure that (??, 1) is always in empirical_probabilities
-    iteration(sorted_pairs_->size());
-
-    return result;
 }
 
 void UCCPACVerifier::ProcessPACTypeOptions() {
@@ -129,7 +63,44 @@ void UCCPACVerifier::ProcessPACTypeOptions() {
     tuple_type_ = std::make_shared<pac::model::TupleType>(std::move(types));
 }
 
-UCCPACVerifier::UCCPACVerifier() : PACVerifier() {
+void UCCPACVerifier::PreparePACTypeData() {
+    tuples_ = pac::util::MakeTuples(TypedRelation().GetColumnData(), column_indices_);
+}
+
+void UCCPACVerifier::PACTypeExecuteInternal() {
+    std::ostringstream oss;
+    oss << '{';
+    for (auto it = column_indices_.begin(); it != column_indices_.end(); ++it) {
+        if (it != column_indices_.begin()) {
+            oss << ", ";
+        }
+        oss << *it;
+    }
+    oss << '}';
+    LOG_INFO("Verifying UCC PAC on columns {}", oss.str());
+
+    PreparePairs();
+
+    auto emp_probabilities = CalculateEmpiricalProbabilities(*sorted_pairs_);
+    auto [epsilon, delta] = FindEpsilonDelta(std::move(emp_probabilities));
+
+    Vertical columns = TypedRelation().GetSchema()->GetVertical(
+            util::IndicesToBitset(column_indices_, TypedRelation().GetNumColumns()));
+    pac_ = model::UCCPAC{std::move(columns), epsilon, delta};
+
+    LOG_INFO("Result: {}", pac_->ToLongString());
+}
+
+std::pair<double, double> UCCPACVerifier::GetEpsilonDeltaForEpsilon(double epsilon) const {
+    auto it = std::ranges::lower_bound(*sorted_pairs_, epsilon, {},
+                                       [](TuplePair const& pair) { return pair.dist; });
+    while (it != sorted_pairs_->end() && it->dist - epsilon < kDistThreshold) {
+        std::advance(it, 1);
+    }
+    return {it->dist, GetDelta(std::distance(sorted_pairs_->begin(), it))};
+}
+
+UCCPACVerifier::UCCPACVerifier() {
     DESBORDANTE_OPTION_USING;
     using namespace config;
 

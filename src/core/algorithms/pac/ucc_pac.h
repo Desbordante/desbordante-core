@@ -15,7 +15,7 @@ private:
     double delta_;
     Vertical columns_;
 
-	std::string StringStem(std::string_view const arg) const;
+    std::string StringStem(std::string_view const arg) const;
 
 public:
     UCCPAC() = default;
