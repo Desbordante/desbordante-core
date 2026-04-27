@@ -5,10 +5,6 @@ set(NAME cind)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE cind_algorithm.cpp)
 target_link_libraries(
-    ${NAME}
-    PRIVATE ${DESBORDANTE_PREFIX}::cind::miners
-            ${DESBORDANTE_PREFIX}::ind::spider
-            better-enums
-            spdlog::spdlog_header_only
-            Boost::headers
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::cind::miners ${DESBORDANTE_PREFIX}::ind::spider
+                    better-enums spdlog::spdlog_header_only Boost::headers
 )
