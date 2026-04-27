@@ -2,6 +2,11 @@
 
 #include <pybind11/pybind11.h>
 
+#include <memory>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/fd/fd.h"
@@ -11,23 +16,14 @@
 #include "core/util/bitset_utils.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace {
 namespace py = pybind11;
 
-template <typename ElementType>
-py::tuple VectorToTuple(std::vector<ElementType> vec) {
-    std::size_t const size = vec.size();
-    py::tuple tuple(size);
-    for (std::size_t i = 0; i < size; ++i) {
-        tuple[i] = std::move(vec[i]);
-    }
-    return tuple;
-}
-
 py::tuple MakeFdNameTuple(FD const& fd) {
     auto [lhs, rhs] = fd.ToNameTuple();
-    return py::make_tuple(VectorToTuple(std::move(lhs)), std::move(rhs));
+    return py::make_tuple(python_bindings::VectorToTuple(lhs), std::move(rhs));
 }
 }  // namespace
 
@@ -42,8 +38,7 @@ void BindFd(py::module_& main_module) {
             .def("to_short_string", &FD::ToShortString)
             .def("to_index_tuple",
                  [](FD const& fd) {
-                     return py::make_tuple(VectorToTuple(fd.GetLhsIndices()),
-                                           std::move(fd.GetRhsIndex()));
+                     return py::make_tuple(VectorToTuple(fd.GetLhsIndices()), fd.GetRhsIndex());
                  })
             .def("to_name_tuple", MakeFdNameTuple)
             // TODO: implement proper equality check for FD
