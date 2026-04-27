@@ -29,12 +29,9 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
         if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
             is_undefined = false;
 
-            std::string value = unparsed_[i];
-            std::replace(value.begin(), value.end(), ',', '.');
-
             if (first_type_id != +TypeId::kUndefined) {
                 auto& type_check = kTypeIdToChecker.at(first_type_id);
-                if (type_check(value)) {
+                if (type_check(unparsed_[i])) {
                     // undelimited and delimited dates have different bitsets
                     if (first_type_id == +TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) {
                         candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
@@ -46,7 +43,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
             std::bitset<6> new_candidate_types_bitset("000000");
             bool matched = false;
             for (auto const& [type_id, type_check] : kTypeIdToChecker) {
-                if (type_check(value)) {
+                if (type_check(unparsed_[i])) {
                     if (first_type_id == +TypeId::kUndefined && !matched) {
                         first_type_id = type_id;
                     }
