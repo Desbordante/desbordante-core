@@ -281,6 +281,17 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    tks
+    SRCS
+    tks/bind_tks.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::tks
+    ${DESBORDANTE_PREFIX}::parser::spmf
+    better-enums
+    Boost::headers
+)
+
+desbordante_add_bind(
     ucc
     SRCS
     ucc/bind_ucc.cpp

@@ -16,6 +16,7 @@ set(SUBDIRS
     od/order
     od/set_based_verifier
     statistics
+    tks
     ucc
 )
 
@@ -61,6 +62,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::nar::des
               ${DESBORDANTE_PREFIX}::od::fast
               ${DESBORDANTE_PREFIX}::od::order
+              ${DESBORDANTE_PREFIX}::tks
               ${DESBORDANTE_PREFIX}::ucc::hy
               ${DESBORDANTE_PREFIX}::ucc::pyro
               ${DESBORDANTE_PREFIX}::ucc::hpivalid

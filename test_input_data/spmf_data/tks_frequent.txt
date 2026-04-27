@@ -1,0 +1,9 @@
+# Test dataset with frequent patterns
+# Patterns like <{1,2} {3}> should be frequent
+1 2 -1 3 -2
+1 2 -1 3 -2
+1 2 -1 3 -2
+1 2 -1 3 4 -2
+1 2 -1 4 -2
+2 3 -1 4 -2
+1 -1 3 -2

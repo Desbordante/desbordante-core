@@ -601,6 +601,21 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::hy::model
 )
 
+# --- TKS ---
+desbordante_add_test(
+    tks
+    SRCS
+    test_tks.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::tks
+    ${DESBORDANTE_PREFIX}::parser::spmf
+    ${DESBORDANTE_PREFIX}::testlib::common
+    spdlog::spdlog_header_only
+    better-enums
+    gmock
+    Boost::headers
+)
+
 # --- Util ---
 desbordante_add_test(
     util

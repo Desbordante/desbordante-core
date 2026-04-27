@@ -136,4 +136,9 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
+// TKS
+constexpr auto kK = "k";
+constexpr auto kMinPatternLength = "min_pattern_length";
+constexpr auto kMaxPatternLength = "max_pattern_length";
+constexpr auto kMaxGap = "max_gap";
 }  // namespace config::names

@@ -34,6 +34,7 @@
 #include "python_bindings/py_util/logging.h"
 #include "python_bindings/sfd/bind_sfd.h"
 #include "python_bindings/statistics/bind_statistics.h"
+#include "python_bindings/tks/bind_tks.h"
 #include "python_bindings/ucc/bind_ucc.h"
 #include "python_bindings/ucc/bind_ucc_verification.h"
 
@@ -56,6 +57,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindNar,
                            BindUccVerification,
                            BindStatistics,
+                           BindTKS,
                            BindInd,
                            BindIndVerification,
                            BindGfdVerification,
