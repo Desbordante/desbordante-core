@@ -25,11 +25,11 @@ template <typename T>
     return min <= value && value <= max;
 }
 
-[[nodiscard]] std::string bit_representation(uint32_t mask, int num_bits = 31) {
+[[nodiscard]] std::string BitRepresentation(uint32_t mask, int num_bits = 31) {
     return std::bitset<32>(mask).to_string().substr(32 - num_bits);
 }
 
-[[nodiscard]] inline int first_set_bit(uint32_t x) {
+[[nodiscard]] inline int FirstSetBit(uint32_t x) {
     return x ? static_cast<int>(__builtin_ctz(x)) : -1;
 }
 
@@ -211,7 +211,7 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
     }
 
     uint32_t mm = attrs_mask;
-    int first = first_set_bit(mm);
+    int first = FirstSetBit(mm);
     if (first < 0) { support_cache_.put(attrs_mask, 0); return 0; }
 
     const auto &first_vec = attr_similarity_bits_[first];
@@ -219,18 +219,18 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
         std::size_t s = 0;
         for (uint64_t w : first_vec) s += std::popcount(w);
         support_cache_.put(attrs_mask, s);
-        LOG_INFO("Support for mask {} = {}", bit_representation(attrs_mask, num_attrs_), s);
+        LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), s);
         return s;
     }
 
     std::vector<uint64_t> buffer = first_vec;
     mm &= mm - 1;
     while (mm) {
-        int a = first_set_bit(mm);
+        int a = FirstSetBit(mm);
         const auto &other = attr_similarity_bits_[a];
-        const std::size_t N = buffer.size();
+        const std::size_t n = buffer.size();
         std::size_t running = 0;
-        for (std::size_t k = 0; k < N; ++k) {
+        for (std::size_t k = 0; k < n; k++) {
             buffer[k] &= other[k];
             running += std::popcount(buffer[k]);
         }
@@ -241,7 +241,7 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
     std::size_t support = 0;
     for (uint64_t w : buffer) support += std::popcount(w);
     support_cache_.put(attrs_mask, support);
-    LOG_INFO("Support for mask {} = {}", bit_representation(attrs_mask, num_attrs_), support);
+    LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), support);
     return support;
 }
 
