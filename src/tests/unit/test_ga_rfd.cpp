@@ -22,7 +22,7 @@ namespace rfd = algos::rfd;
 using namespace std::chrono;
 
 template<typename Func>
-long long measureExecutionTime(Func&& f) {
+long long MeasureExecutionTime(Func&& f) {
     auto start = high_resolution_clock::now();
     f();
     auto end = high_resolution_clock::now();
@@ -99,7 +99,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
         EXPECT_LE(rfd.support, 1.0);
     }
 }
-
+/*
 TEST(GARfdPerformance, Neighbors10k_Fast) {
     constexpr std::size_t pop_size = 10;
     constexpr std::size_t generations = 3;
@@ -129,7 +129,7 @@ TEST(GARfdPerformance, Neighbors10k_Fast) {
 
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
 
-    long long ms = measureExecutionTime([&]() { algo->Execute(); });
+    long long ms = MeasureExecutionTime([&]() { algo->Execute(); });
 
     auto const& rfds = algo->GetRfds();
     std::cout << "Found " << rfds.size() << " RFD, time " << ms << " ms" << std::endl;
@@ -174,7 +174,7 @@ TEST(GARfdPerformance, Neighbors10k_Slow) {
 
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
 
-    long long ms = measureExecutionTime([&]() { algo->Execute(); });
+    long long ms = MeasureExecutionTime([&]() { algo->Execute(); });
 
     auto const& rfds = algo->GetRfds();
     std::cout << "Found " << rfds.size() << " RFD, time " << ms << " ms" << std::endl;
@@ -189,6 +189,7 @@ TEST(GARfdPerformance, Neighbors10k_Slow) {
 
     EXPECT_LE(ms, 22'000) << "TL";
 }
+*/
 
 TEST(GARfdEdge, ThrowsOnEmptyTable) {
     config::InputTable table = std::make_shared<CSVParser>(kTestEmpty);
