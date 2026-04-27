@@ -24,7 +24,7 @@ namespace py = pybind11;
 
 namespace {
 py::object DateToPyObject(Date const& date) {
-    static auto py_date = py::module_::import("datetime").attr("date");
+    auto py_date = py::module_::import("datetime").attr("date");
 
     auto ymd = date.year_month_day();
     // Unlike the Python API, pybind cannot cast types here
