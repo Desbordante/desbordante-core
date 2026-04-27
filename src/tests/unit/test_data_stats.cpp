@@ -897,7 +897,7 @@ TEST(TestDataStats, TestLastCharFrequency) {
     algos::Statistic last_char_stat = stats.GetLastCharFrequency(11);
     std::string result = mo::Type::GetValue<mo::String>(last_char_stat.GetData());
     EXPECT_EQ(result, " :4");
-=======
+
 TEST(TestDataStats, TestGetMinWhiteSpaces) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
