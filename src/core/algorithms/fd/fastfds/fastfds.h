@@ -70,7 +70,6 @@ private:
     RelationalSchema const* schema_;
     std::vector<DiffSet> diff_sets_;
     config::ThreadNumType threads_num_;
-    double percent_per_col_;
 };
 
 }  // namespace algos

@@ -1,6 +1,7 @@
 #include "python_bindings/ac/bind_ac.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/algebraic_constraints/ac.h"
@@ -31,6 +32,7 @@ void BindAc(py::module_& main_module) {
                     [](ACException const& exc) {
                         return py::make_tuple(exc.row_i, exc.column_pairs);
                     },
+                    // __setstate__
                     [](py::tuple t) {
                         if (t.size() != 2) {
                             throw std::runtime_error("Invalid state for ACException pickle!");

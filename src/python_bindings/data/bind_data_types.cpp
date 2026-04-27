@@ -1,6 +1,7 @@
 #include "python_bindings/data/bind_data_types.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/config/tabular_data/input_table_type.h"

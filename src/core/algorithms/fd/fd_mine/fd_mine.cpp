@@ -11,8 +11,6 @@ namespace algos {
 
 using boost::dynamic_bitset;
 
-FdMine::FdMine() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
-
 void FdMine::ResetStateFd() {
     candidate_set_.clear();
     eq_set_.clear();

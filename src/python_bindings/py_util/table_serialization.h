@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
-
 #include <pybind11/pybind11.h>
+
+#include <memory>
 
 #include "core/model/table/column.h"
 #include "core/model/table/column_combination.h"
@@ -16,6 +16,8 @@ namespace table_serialization {
 py::tuple SerializeRelationalSchema(RelationalSchema const* schema);
 
 std::shared_ptr<RelationalSchema const> DeserializeRelationalSchema(py::tuple t);
+
+py::tuple ConvertSchemaToImmutableTuple(RelationalSchema const* schema);
 
 py::tuple SerializeVertical(Vertical const& v);
 

@@ -4,6 +4,8 @@
 
 #include <pybind11/stl.h>
 
+#include "python_bindings/py_util/vector_to_tuple.h"
+
 namespace py = pybind11;
 
 namespace table_serialization {
@@ -30,6 +32,15 @@ std::shared_ptr<RelationalSchema const> DeserializeRelationalSchema(py::tuple t)
         schema->AppendColumn(std::move(c));
     }
     return schema;
+}
+
+// relational schema conversion suitable for py::hash
+py::tuple ConvertSchemaToImmutableTuple(RelationalSchema const* schema) {
+    std::vector<std::unique_ptr<Column>> const& columns = schema->GetColumns();
+    py::tuple col_tuple = python_bindings::VectorToTuple(columns, [](auto const& elem) {
+        return py::make_tuple(elem->GetName(), elem->GetIndex());
+    });
+    return py::make_tuple(schema->GetName(), std::move(col_tuple));
 }
 
 py::tuple SerializeVertical(Vertical const& v) {

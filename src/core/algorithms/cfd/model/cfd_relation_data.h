@@ -19,7 +19,7 @@ namespace algos::cfd {
 class CFDRelationData : public AbstractRelationData<CFDColumnData> {
 private:
     using ItemDictionary = boost::unordered_map<std::pair<int, std::string>, int, PairHash>;
-    using ColumnesValuesDict = std::unordered_map<AttributeIndex, std::vector<int>>;
+    using ColumnsValuesDict = std::unordered_map<AttributeIndex, std::vector<int>>;
 
     // ItemInfo contains info about one elem in the table.
     struct ItemInfo {
@@ -39,41 +39,40 @@ private:
     boost::unordered_map<std::pair<int, std::string>, int, PairHash> item_dictionary_;
     std::vector<ItemInfo> items_;
 
-    static void AddNewItemsInFullTable(ItemDictionary &, ColumnesValuesDict &,
-                                       std::vector<ItemInfo> &, std::vector<std::string> const &,
-                                       std::vector<int> &, std::vector<Transaction> &, int &,
-                                       unsigned);
+    static void AddNewItemsInFullTable(ItemDictionary&, ColumnsValuesDict&, std::vector<ItemInfo>&,
+                                       std::vector<std::string> const&, std::vector<int>&,
+                                       std::vector<Transaction>&, int&, unsigned);
 
-    static void AddNewItemsInPartialTable(ItemDictionary &, ColumnesValuesDict &,
-                                          std::vector<ItemInfo> &, std::vector<std::string> const &,
-                                          std::vector<int> const &, std::vector<Transaction> &,
-                                          int &, int);
+    static void AddNewItemsInPartialTable(ItemDictionary&, ColumnsValuesDict&,
+                                          std::vector<ItemInfo>&, std::vector<std::string> const&,
+                                          std::vector<int> const&, std::vector<Transaction>&, int&,
+                                          int);
 
 public:
     unsigned Size() const;
     unsigned GetAttrsNumber() const;
     unsigned GetItemsNumber() const;
     size_t GetNumRows() const override;
-    Transaction const &GetRow(unsigned) const;
+    Transaction const& GetRow(unsigned) const;
     std::string GetStringFormat(char delim = ' ') const;
-    std::string GetStringFormat(SimpleTIdList const &subset, char delim = ' ') const;
+    std::string GetStringFormat(SimpleTIdList const& subset, char delim = ' ') const;
     void Sort();
-    void ToFront(SimpleTIdList const &);
-    void SetRow(int row_index, Transaction const &row);
+    void ToFront(SimpleTIdList const&);
+    void SetRow(int row_index, Transaction const& row);
     AttributeIndex GetAttrIndex(int item_index) const;
     unsigned Frequency(int i) const;
-    std::string const &GetValue(int i) const;
-    std::vector<int> const &GetDomainOfItem(int) const;
-    std::vector<int> const &GetDomain(unsigned attr) const;
-    std::vector<int> GetAttrVector(Itemset const &) const;
-    std::vector<int> GetAttrVectorItems(Itemset const &) const;
+    std::string const& GetValue(int i) const;
+    std::vector<int> const& GetDomainOfItem(int) const;
+    std::vector<int> const& GetDomain(unsigned attr) const;
+    std::vector<int> GetAttrVector(Itemset const&) const;
+    std::vector<int> GetAttrVectorItems(Itemset const&) const;
     std::string GetAttrName(int index) const;
-    int GetAttr(std::string const &) const;
-    int GetItem(int, std::string const &) const;
+    int GetAttr(std::string const&) const;
+    int GetItem(int, std::string const&) const;
 
-    static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream &file_input,
+    static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream& file_input,
                                                        double c_sample = 1, double r_sample = 1);
-    static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream &file_input,
+    static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream& file_input,
                                                        unsigned columns_number,
                                                        unsigned tuples_number, double c_sample = 1,
                                                        double r_sample = 1);

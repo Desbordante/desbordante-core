@@ -12,7 +12,7 @@
 
 namespace algos::fd_verifier {
 
-FDVerifier::FDVerifier() : Algorithm({}) {
+FDVerifier::FDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
@@ -35,7 +35,7 @@ void FDVerifier::MakeExecuteOptsAvailable() {
 }
 
 void FDVerifier::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
     input_table_->Reset();
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD verifying is meaningless.");

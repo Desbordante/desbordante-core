@@ -18,7 +18,7 @@
 
 namespace algos::metric {
 
-MetricVerifier::MetricVerifier() : Algorithm({}) {
+MetricVerifier::MetricVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
@@ -126,7 +126,7 @@ void MetricVerifier::MakeExecuteOptsAvailable() {
 }
 
 void MetricVerifier::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
     input_table_->Reset();
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: metric FD verifying is meaningless.");

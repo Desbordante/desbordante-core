@@ -217,8 +217,8 @@ Validator::FDValidations Validator::ProcessHigherLevel(LhsPair const& lhs_pair) 
                                                       *compressed_records_, lhs, rhs, first_attr);
     lhs.set(first_attr);
 
-    rhs &= ~valid_rhss;
-    vertex->SetFds(valid_rhss);
+    rhs -= valid_rhss;
+    vertex->SetFds(std::move(valid_rhss));
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {

@@ -36,9 +36,6 @@ void Algorithm::ExecutePrepare() {
     MakeExecuteOptsAvailable();
 }
 
-Algorithm::Algorithm(std::vector<std::string_view> phase_names)
-    : progress_(std::move(phase_names)) {}
-
 void Algorithm::ExcludeOptions(std::string_view parent_option) noexcept {
     auto it = opt_parents_.find(parent_option);
     if (it == opt_parents_.end()) return;
@@ -89,7 +86,6 @@ unsigned long long Algorithm::Execute() {
     }
     if (!AllRequiredOptionsAreSet())
         throw std::logic_error("All options need to be set before execution.");
-    progress_.ResetProgress();
     ResetState();
     auto time_ms = ExecuteInternal();
     for (auto const& opt_name : available_options_) {

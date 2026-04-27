@@ -20,14 +20,11 @@
 
 namespace model {
 PLIWithSingletons::PLIWithSingletons(std::deque<std::vector<int>> index,
-                                     std::deque<std::vector<int>> singletons,
-                                     std::vector<int> null_cluster, unsigned int size,
+                                     std::deque<std::vector<int>> singletons, unsigned int size,
                                      double entropy, unsigned long long nep,
-                                     unsigned int relation_size,
-                                     unsigned int original_relation_size, double inverted_entropy,
+                                     unsigned int relation_size, double inverted_entropy,
                                      double gini_impurity)
-    : PositionListIndex(index, null_cluster, size, entropy, nep, relation_size,
-                        original_relation_size, inverted_entropy, gini_impurity),
+    : PositionListIndex(index, size, entropy, nep, relation_size, inverted_entropy, gini_impurity),
       singletons_(std::move(singletons)) {}
 
 PLIWithSingletons::PLIWithSingletons(std::unique_ptr<PositionListIndex> positional_list_index)
@@ -44,20 +41,11 @@ PLIWithSingletons::PLIWithSingletons(std::unique_ptr<PositionListIndex> position
     singletons_.push_back(std::move(sngt));
 }
 
-std::unique_ptr<PLIWithSingletons> PLIWithSingletons::CreateFor(std::vector<int>& data,
-                                                                bool is_null_eq_null) {
+std::unique_ptr<PLIWithSingletons> PLIWithSingletons::CreateFor(std::vector<int>& data) {
     std::unordered_map<int, std::vector<int>> index;
     for (unsigned long position = 0; position < data.size(); ++position) {
         int value_id = data[position];
         index[value_id].push_back(position);
-    }
-
-    std::vector<int> null_cluster;
-    if (index.count(ColumnLayoutRelationData::kNullValueId) != 0) {
-        null_cluster = index[ColumnLayoutRelationData::kNullValueId];
-    }
-    if (!is_null_eq_null) {
-        index.erase(ColumnLayoutRelationData::kNullValueId);  // move?
     }
 
     double key_gap = 0.0;
@@ -92,12 +80,10 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::CreateFor(std::vector<int>
 
     SortClusters(singletons);
     SortClusters(clusters);
-    return std::make_unique<PLIWithSingletons>(std::move(clusters), std::move(singletons),
-                                               std::move(null_cluster), size, entropy, nep,
-                                               data.size(), data.size(), inv_ent, gini_impurity);
+    return std::make_unique<PLIWithSingletons>(std::move(clusters), std::move(singletons), size,
+                                               entropy, nep, data.size(), inv_ent, gini_impurity);
 }
 
-// TODO: null_cluster_ некорректен
 std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Probe(
         std::shared_ptr<std::vector<int> const> probing_table) const {
     if (this->relation_size_ != probing_table->size())
@@ -107,7 +93,6 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Probe(
     unsigned int new_size = 0;
     double new_key_gap = 0.0;
     unsigned long long new_nep = 0;
-    std::vector<int> null_cluster;
 
     std::unordered_map<int, std::vector<int>> partial_index;
 
@@ -150,11 +135,10 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Probe(
     SortClusters(new_index);
 
     return std::make_unique<PLIWithSingletons>(std::move(new_index), std::move(singletons),
-                                               std::move(null_cluster), new_size, new_entropy,
-                                               new_nep, relation_size_, relation_size_);
+                                               new_size, new_entropy, new_nep, relation_size_,
+                                               relation_size_);
 }
 
-// TODO: null_cluster_ не поддерживается
 std::unique_ptr<PLIWithSingletons> PLIWithSingletons::ProbeAll(
         Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
     if (this->relation_size_ != relation_data.GetNumRows())
@@ -166,7 +150,6 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::ProbeAll(
     unsigned long long new_nep = 0;
 
     std::map<std::vector<int>, std::vector<int>> partial_index;
-    std::vector<int> null_cluster;
     std::vector<int> probe;
 
     for (auto& cluster : this->index_) {
@@ -202,8 +185,8 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::ProbeAll(
     SortClusters(new_index);
 
     return std::make_unique<PLIWithSingletons>(std::move(new_index), std::move(singletons),
-                                               std::move(null_cluster), new_size, new_entropy,
-                                               new_nep, this->relation_size_, this->relation_size_);
+                                               new_size, new_entropy, new_nep, this->relation_size_,
+                                               this->relation_size_);
 }
 
 std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Intersect(

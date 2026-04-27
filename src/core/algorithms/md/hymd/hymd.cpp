@@ -62,7 +62,7 @@ lattice::SingleLevelFunc GetLevelDefinitionFunc(LevelDefinition definition_enum)
 
 namespace algos::hymd {
 
-HyMD::HyMD() : MdAlgorithm({}) {
+HyMD::HyMD() : MdAlgorithm() {
     using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kLeftTable, kRightTable});

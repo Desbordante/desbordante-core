@@ -28,15 +28,15 @@ public:
     using Iterator = model::ColumnDomainIterator;
 
 protected:
-    AttributeIndex id_;         /* attribute unique identificator */
-    AttributeIndex attr_count_; /* attribute unique identificator */
+    AttributeIndex id_;         /* attribute unique identifier */
+    AttributeIndex attr_count_; /* attribute unique identifier */
     Iterator it_;               /* domain iterator */
 
 public:
     Attribute(AttributeIndex attr_id, AttributeIndex attr_count, model::ColumnDomain const& domain)
         : id_(attr_id), attr_count_(attr_count), it_(domain) {}
 
-    /// get unqiue attribute id
+    /// get unique attribute id
     AttributeIndex GetId() const noexcept {
         return id_;
     }

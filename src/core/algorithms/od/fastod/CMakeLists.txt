@@ -12,7 +12,6 @@ target_sources(
             storage/data_frame.cpp
             util/timer.cpp
             util/type_util.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only

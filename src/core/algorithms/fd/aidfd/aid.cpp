@@ -4,7 +4,7 @@
 
 namespace algos {
 
-Aid::Aid() : FDAlgorithm({kDefaultPhaseName}) {
+Aid::Aid() : FDAlgorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }

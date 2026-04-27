@@ -11,9 +11,8 @@ using AlgorithmTypes =
                    fd_verifier::FDVerifier, HyUCC, PyroUCC, HPIValid, cfd::FDFirstAlgorithm,
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, Fastod, GfdValidator,
                    EGfdValidator, NaiveGfdValidator, order::Order, dd::Split, Cords, hymd::HyMD,
-                   PFDVerifier, cfd_verifier::CFDVerifier>;
+                   PFDVerifier, cfd_verifier::CFDVerifier, GSpan>;
 
-// clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
  * algorithm please add its corresponding value to this enum and to the type
  * tuple above.
@@ -96,9 +95,11 @@ BETTER_ENUM(AlgorithmType, char,
     pfd_verifier,
 
 /* CFD verifier algorithm */
-    cfd_verifier
+    cfd_verifier,
+    
+/* Frequent subgraph mining algorithms*/
+    gspan
 )
-// clang-format on
 
 static_assert(std::tuple_size_v<AlgorithmTypes> == AlgorithmType::_size(),
               "The AlgorithmTypes tuple and the AlgorithmType enum sizes must be the same. Did you "

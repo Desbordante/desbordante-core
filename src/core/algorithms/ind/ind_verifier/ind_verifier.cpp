@@ -1,7 +1,7 @@
 /** \file
  * \brief INDVerifier algorithm
  *
- * Algorithm for veryfing AIND implementation.
+ * Algorithm for verifying AIND implementation.
  */
 #include "core/algorithms/ind/ind_verifier/ind_verifier.h"
 
@@ -22,7 +22,7 @@
 
 namespace algos {
 
-INDVerifier::INDVerifier() : Algorithm({}) {
+INDVerifier::INDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTablesOpt.GetName()});
 }

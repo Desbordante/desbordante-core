@@ -38,7 +38,17 @@ function(desbordante_fetch_datasets)
     set(local_hashfile "${arg_DOWNLOAD_DIR}/${hashfile_name}")
     set(hashfile_url "${BASE_URL}/${hashfile_name}")
 
-    file(DOWNLOAD ${hashfile_url} ${local_hashfile} STATUS download_status LOG download_log)
+    set(local_hash "NO_LOCAL_HASHFILE")
+    if(EXISTS "${local_hashfile}")
+        file(READ "${local_hashfile}" local_hash)
+        string(STRIP "${local_hash}" local_hash)
+    endif()
+
+    file(
+        DOWNLOAD ${hashfile_url} ${local_hashfile}
+        STATUS download_status
+        LOG download_log
+    )
     list(GET download_status 0 status_code)
     if(NOT status_code EQUAL 0)
         list(GET download_status 1 str_val)
@@ -57,8 +67,16 @@ function(desbordante_fetch_datasets)
     file(READ "${local_hashfile}" remote_hash)
     string(STRIP "${remote_hash}" remote_hash)
 
+    if("${local_hash}" STREQUAL "${remote_hash}" AND EXISTS "${file_path}")
+        message(
+            STATUS "-> ${filename} already up to date (delete ${local_hashfile} to force fetch)"
+        )
+        return()
+    endif()
+
     message(STATUS "-> Fetching ${filename}")
-	# TODO(p-senichenkov): Use automatic hash check when download error gets caught
+
+    # TODO(p-senichenkov): Use automatic hash check when download error gets caught
     file(
         DOWNLOAD "${BASE_URL}/${filename}" "${file_path}"
         # EXPECTED_HASH SHA256=${remote_hash}
@@ -69,14 +87,14 @@ function(desbordante_fetch_datasets)
     list(GET download_status 0 status_code)
     if(NOT status_code EQUAL 0)
         list(GET download_status 1 str_val)
-        message(NOTICE "Donwload log:\n${download_log}")
+        message(NOTICE "Download log:\n${download_log}")
         message(FATAL_ERROR "Failed to download ${filename}: [${status_code}] ${str_val}.")
     endif()
 
-	file(SHA256 ${file_path} actual_hash)
-	if (NOT ${actual_hash} STREQUAL ${remote_hash})
-		message(FATAL_ERROR "Incorrect hash for file ${filename}")
-	endif()
+    file(SHA256 ${file_path} actual_hash)
+    if(NOT ${actual_hash} STREQUAL ${remote_hash})
+        message(FATAL_ERROR "Incorrect hash for file ${filename}")
+    endif()
 endfunction()
 
 #[=[

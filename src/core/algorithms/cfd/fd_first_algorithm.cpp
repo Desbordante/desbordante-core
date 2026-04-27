@@ -18,7 +18,7 @@
 
 namespace algos::cfd {
 
-FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
+FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery() {
     RegisterOptions();
 }
 
@@ -80,7 +80,7 @@ void FDFirstAlgorithm::CheckForIncorrectInput() const {
     if (tuples_number_ != 0 && columns_number_ == 0) {
         throw config::ConfigurationError(
                 "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " +
-                std::to_string(tuples_number_) + " while columnes_number is 0");
+                std::to_string(tuples_number_) + " while columns_number is 0");
     }
 
     if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
@@ -316,8 +316,9 @@ void FDFirstAlgorithm::AddCFDToCFDList(std::vector<int> const& sub, int out,
 
     if (rules_.find(out) != rules_.end()) {
         for (auto const& sub_rule : rules_[out]) {
-            if (out < 0 && !std::any_of(sub_rule.begin(), sub_rule.end(),
-                                        [](int si) -> bool { return si < 0; }))
+            if (out < 0 &&
+                !std::any_of(
+                        sub_rule.begin(), sub_rule.end(), [](int si) -> bool { return si < 0; }))
                 continue;
             if (Precedes(sub_rule, sub)) {
                 lhs_gen = false;

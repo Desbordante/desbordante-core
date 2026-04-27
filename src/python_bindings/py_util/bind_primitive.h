@@ -1,12 +1,12 @@
 #pragma once
 
+#include <pybind11/pybind11.h>
+
 #include <array>
 #include <cstddef>
 #include <sstream>
 #include <string>
 #include <type_traits>
-
-#include <pybind11/pybind11.h>
 
 #include "core/algorithms/algorithm.h"
 #include "core/util/mem_ptr_deduce.h"
@@ -54,20 +54,14 @@ using MemberPointerClass = typename MemberPointerClassHelper<MemberPointer>::typ
 template <typename Default, typename... Others>
 auto BindPrimitive(pybind11::module_& module, auto result_method, char const* base_name,
                    char const* base_result_method_name,
-                   std::array<char const*, sizeof...(Others) + 1> algo_names,
-                   // UB if incorrect. If your algorithm base method is a simple
-                   // util::PrimitiveCollection<...>::AsList() call, the default should work,
-                   // otherwise consult pybind11's docs.
-                   pybind11::return_value_policy result_rv_policy =
-                           pybind11::return_value_policy::reference_internal) {
+                   std::array<char const*, sizeof...(Others) + 1> algo_names) {
     namespace py = pybind11;
     using algos::Algorithm;
 
     using ResultMethodType = std::decay_t<decltype(result_method)>;
     static_assert(std::is_member_pointer_v<ResultMethodType>);
     using Base = util::MemPtrDeduce<ResultMethodType>::Class;
-    py::class_<Base, Algorithm>(module, base_name)
-            .def(base_result_method_name, result_method, result_rv_policy);
+    py::class_<Base, Algorithm>(module, base_name).def(base_result_method_name, result_method);
     auto algos_module = module.def_submodule("algorithms");
     auto arr_iter = algo_names.begin();
     auto default_module = detail::RegisterAlgorithm<Default, Base>(algos_module, *arr_iter++);

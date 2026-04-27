@@ -11,7 +11,6 @@ namespace algos {
 
 class PliBasedFDAlgorithm : public FDAlgorithm {
     config::InputTable input_table_;
-    config::EqNullsType is_null_equal_null_;
 
     void RegisterOptions();
     void LoadDataInternal() final;
@@ -27,7 +26,7 @@ protected:
     }
 
 public:
-    PliBasedFDAlgorithm(std::vector<std::string_view> phase_names);
+    PliBasedFDAlgorithm();
 };
 
 }  // namespace algos

@@ -14,7 +14,7 @@
 
 namespace algos::fd_verifier {
 
-DynamicFDVerifier::DynamicFDVerifier() : Algorithm({}) {
+DynamicFDVerifier::DynamicFDVerifier() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kLhsIndicesOpt.GetName(),
                           config::kRhsIndicesOpt.GetName()});

@@ -37,7 +37,7 @@ namespace mo = model;
 using Point = dc::Point<dc::Component>;
 using Tree = util::KDTree<Point>;
 
-DCVerifier::DCVerifier() : Algorithm({}) {
+DCVerifier::DCVerifier() : Algorithm() {
     using namespace config::names;
 
     RegisterOptions();
@@ -61,7 +61,7 @@ void DCVerifier::MakeExecuteOptsAvailable() {
 void DCVerifier::LoadDataInternal() {
     data_ = model::CreateTypedColumnData(*input_table_, true);
     input_table_->Reset();
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, true);
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
 }
 
 unsigned long long int DCVerifier::ExecuteInternal() {

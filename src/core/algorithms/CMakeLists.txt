@@ -5,6 +5,7 @@ set(SUBDIRS
     dc
     dd
     fd
+    fsm
     gfd
     ind
     md
@@ -25,15 +26,7 @@ endforeach()
 set(NAME create_algo)
 desbordante_add_lib(NAME INTERFACE)
 target_sources(
-    ${NAME}
-    PUBLIC FILE_SET
-           HEADERS
-           FILES
-           algorithms.h
-           algorithm_types.h
-           create_algorithm.h
-           BASE_DIRS
-           "${PROJECT_SOURCE_DIR}/src"
+    ${NAME} INTERFACE FILE_SET HEADERS FILES algorithms.h algorithm_types.h create_algorithm.h
 )
 target_link_libraries(
     ${NAME}
@@ -58,6 +51,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::fd::tane
               ${DESBORDANTE_PREFIX}::fd::tane::pfd
               ${DESBORDANTE_PREFIX}::fd::verifier
+              ${DESBORDANTE_PREFIX}::fsm::gspan
               ${DESBORDANTE_PREFIX}::gfd::validator
               ${DESBORDANTE_PREFIX}::ind::faida
               ${DESBORDANTE_PREFIX}::ind::spider
@@ -75,11 +69,7 @@ target_link_libraries(
 
 set(NAME algos)
 desbordante_add_lib(NAME)
-target_sources(
-    ${NAME}
-    PRIVATE algo_factory.cpp algorithm.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config

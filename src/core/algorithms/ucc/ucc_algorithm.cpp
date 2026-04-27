@@ -5,15 +5,13 @@
 
 namespace algos {
 
-UCCAlgorithm::UCCAlgorithm(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+UCCAlgorithm::UCCAlgorithm() : Algorithm() {
     RegisterOptions();
-    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
 void UCCAlgorithm::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
 }
 
 }  // namespace algos

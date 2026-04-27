@@ -1,5 +1,7 @@
 #include "python_bindings/py_util/logging.h"
 
+#include <pybind11/pybind11.h>
+
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
@@ -7,7 +9,6 @@
 #include <unordered_map>
 
 #include <pybind11/detail/common.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #ifdef PYBIND11_HAS_SUBINTERPRETER_SUPPORT
@@ -131,7 +132,7 @@ void SetupLoggingBridge() {
         auto python_sink = GetGlobalPythonSink();
         python_sink->RegisterLogger(std::move(py_logger));
 
-        ::util::logging::EnsureInitialized("desbordante", {std::move(python_sink)});
+        ::util::logging::Initialize({std::move(python_sink)});
     } catch (py::error_already_set const& e) {
         py::print("ERROR: Error during Python logging setup:", e.what(),
                   py::arg("file") = py::module_::import("sys").attr("stderr"));

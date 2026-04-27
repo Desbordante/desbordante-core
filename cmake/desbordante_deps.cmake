@@ -28,8 +28,8 @@ CPMAddPackage(
 
 # Set log level based on user input or build type
 target_compile_definitions(
-        spdlog_header_only
-        INTERFACE
+    spdlog_header_only
+    INTERFACE
         $<$<BOOL:${DESBORDANTE_LOG_LEVEL}>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${DESBORDANTE_LOG_LEVEL}>
         $<$<AND:$<NOT:$<BOOL:${DESBORDANTE_LOG_LEVEL}>>,$<CONFIG:Debug>>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG>
         $<$<AND:$<NOT:$<BOOL:${DESBORDANTE_LOG_LEVEL}>>,$<NOT:$<CONFIG:Debug>>>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO>
@@ -65,7 +65,7 @@ CPMAddPackage(
 )
 add_library(atomic_bitvector INTERFACE)
 target_include_directories(
-        atomic_bitvector SYSTEM INTERFACE "${atomicbitvector_SOURCE_DIR}/include"
+    atomic_bitvector SYSTEM INTERFACE "${atomicbitvector_SOURCE_DIR}/include"
 )
 
 if(DESBORDANTE_BUILD_TESTS)
@@ -78,10 +78,13 @@ if(DESBORDANTE_BUILD_TESTS)
     # Workaround for googletest bug with char conversions, being recognized by Clang 21+
     # See https://github.com/google/googletest/issues/4762
     # TODO(senichenkov): remove when googletest gets updated
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL
+                                                  "21"
+    )
         message(WARNING "Googletest has a bug recognized by Clang 21+. "
-                "Supressing character-conversion warning. "
-                "Consider using an older version of Clang.")
+                        "Suppressing character-conversion warning. "
+                        "Consider using an older version of Clang."
+        )
         target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
     endif()
 endif()

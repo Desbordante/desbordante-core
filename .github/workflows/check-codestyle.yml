@@ -28,22 +28,30 @@ jobs:
           fetch-depth: 0
       - name: Pull clang-format
         run: |
-          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main'
+          sudo add-apt-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main'
           wget https://apt.llvm.org/llvm-snapshot.gpg.key
           sudo apt-key add llvm-snapshot.gpg.key
           sudo apt-get update
-          sudo apt-get install -y clang-format-18
+          sudo apt-get install -y clang-format-22
       - name: Check formatting
         run: |
           set +e
-          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-18 -p 1)
+          files=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD \
+            -- ':(exclude)*.ipynb' ':(exclude)*.json' ':(exclude)*.md' || true)
+
+          if [ -z "$files" ]; then
+            echo '### No files to check for formatting :heavy_check_mark:' >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD -- $files | clang-format-diff-22 -p 1)
 
           if [ "$formatterOutput" != "" ]
           then
-            echo ":x: :x: :x:" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`c++" >> $GITHUB_STEP_SUMMARY
+            echo ':x: :x: :x:' >> $GITHUB_STEP_SUMMARY
+            echo '\`\`\`c++' >> $GITHUB_STEP_SUMMARY
             echo "$formatterOutput" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo '\`\`\`' >> $GITHUB_STEP_SUMMARY
             echo "$formatterOutput"
             exit 1
           fi
@@ -55,32 +63,69 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Install dependencies
-        uses: ./.github/composite-actions/install-dependencies
-        with:
-          os: ubuntu
-          toolset: gcc
-          download-pybind: true
-      - name: Generate compile_commands.json
-        run: |
-          cmake -DCMAKE_CXX_COMPILER=g++-10 \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -Dgtest_disable_pthreads=OFF \
-            -DDESBORDANTE_BINDINGS=BUILD \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DCPM_SOURCE_CACHE=${{github.workspace}}/cmake/cpm-cache \
-            -S . -B ${{github.workspace}}/build
-
-      - uses: ZedThree/clang-tidy-review@v0.19.0
+      - uses: ZedThree/clang-tidy-review@v0.23.1
         id: review
         with:
-          apt_packages: libboost-dev,python3-dev
+          apt_packages: python3-dev,libboost1.88-all-dev
+          cmake_command: cmake . -B build -DCMAKE_BUILD_TYPE=Debug -Dgtest_disable_pthreads=OFF -DDESBORDANTE_BINDINGS=BUILD -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCPM_SOURCE_CACHE=cmake/cpm-cache
           build_dir: build
           config_file: '.clang-tidy'
+          include: "*.c,*.cc,*.cpp,*.cxx"
           split_workflow: true
 
-      - uses: ZedThree/clang-tidy-review/upload@v0.19.0
+      - uses: ZedThree/clang-tidy-review/upload@v0.23.1
 
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
         run: exit 1
+
+  cmake-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install cmake-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake-format
+
+      - name: Check CMake formatting
+        run: |
+          set +e
+
+          # Find CMake files
+          files=$(find . -name 'CMakeLists.txt' -o -name '*.cmake')
+
+          if [ -z "$files" ]; then
+            echo '### No CMake files to check :heavy_check_mark:' >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          bad_diffs=''
+          while IFS= read -r file; do
+              cmake-format --check "$file"
+              if [ $? -ne 0 ]; then
+                  diff_output=$(cmake-format "$file" | diff -u "$file" - || true)
+                  if [ -n "$diff_output" ]; then
+                      bad_diffs="$bad_diffs\n\n:x: $file\n\`\`\`diff\n$diff_output\n\`\`\`"
+                  fi
+              fi
+          done <<< "$files"
+
+          if [ -n "$bad_diffs" ]; then
+            echo ':x: CMake files are not properly formatted, run "cmake-format -i" on the files specified:' >> $GITHUB_STEP_SUMMARY
+            echo -e "$bad_diffs" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+          echo '### CMake files are properly formatted :heavy_check_mark:' >> $GITHUB_STEP_SUMMARY
+
+  typos-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check spelling with typos
+        uses: crate-ci/typos@v1.43.5

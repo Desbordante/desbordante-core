@@ -4,37 +4,21 @@ include(GoogleTest)
 # --- Libs for tests ---
 set(NAME testlib.main)
 desbordante_add_lib(NAME OBJECT)
-target_sources(
-    ${NAME}
-    PRIVATE main.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE main.cpp)
 target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only gtest)
 
 set(NAME testlib.gfd.paths)
 desbordante_add_lib(NAME OBJECT)
-target_sources(
-    ${NAME}
-    PRIVATE all_gfd_paths.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE all_gfd_paths.cpp)
 target_link_libraries(${NAME} PRIVATE Boost::headers)
 
 set(NAME testlib.hash)
 desbordante_add_lib(NAME OBJECT)
-target_sources(
-    ${NAME}
-    PRIVATE test_hash_util.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE test_hash_util.cpp)
 
 set(NAME testlib.ind)
 desbordante_add_lib(NAME OBJECT)
-target_sources(
-    ${NAME}
-    PRIVATE test_ind_util.cpp
-    PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
-)
+target_sources(${NAME} PRIVATE test_ind_util.cpp)
 target_link_libraries(${NAME} PRIVATE ${DESBORDANTE_PREFIX}::ind gtest Boost::headers)
 
 # --- AC ---
@@ -374,6 +358,21 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::gfd::validator
     ${DESBORDANTE_PREFIX}::testlib::gfd::paths
+    spdlog::spdlog_header_only
+    better-enums
+    gmock
+    Boost::headers
+)
+
+# --- FSM ---
+desbordante_add_test(
+    fsm.gspan
+    SRCS
+    test_gspan.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fsm::gspan
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::algos
     spdlog::spdlog_header_only
     better-enums
     gmock

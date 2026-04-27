@@ -25,37 +25,24 @@ int const PositionListIndex::kSingletonValueId = 0;
 unsigned long long PositionListIndex::micros_ = 0;
 int PositionListIndex::intersection_count_ = 0;
 
-PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index,
-                                     std::vector<int> null_cluster, unsigned int size,
+PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigned int size,
                                      double entropy, unsigned long long nep,
-                                     unsigned int relation_size,
-                                     unsigned int original_relation_size, double inverted_entropy,
+                                     unsigned int relation_size, double inverted_entropy,
                                      double gini_impurity)
     : index_(std::move(index)),
       relation_size_(relation_size),
       size_(size),
-      null_cluster_(std::move(null_cluster)),
       entropy_(entropy),
       inverted_entropy_(inverted_entropy),
       gini_impurity_(gini_impurity),
       nep_(nep),
-      original_relation_size_(original_relation_size),
       probing_table_cache_() {}
 
-std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>& data,
-                                                                bool is_null_eq_null) {
+std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>& data) {
     std::unordered_map<int, std::vector<int>> index;
     for (unsigned long position = 0; position < data.size(); ++position) {
         int value_id = data[position];
         index[value_id].push_back(position);
-    }
-
-    std::vector<int> null_cluster;
-    if (index.count(ColumnLayoutRelationData::kNullValueId) != 0) {
-        null_cluster = index[ColumnLayoutRelationData::kNullValueId];
-    }
-    if (!is_null_eq_null) {
-        index.erase(ColumnLayoutRelationData::kNullValueId);  // move?
     }
 
     double key_gap = 0.0;
@@ -87,9 +74,8 @@ std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>
     }
 
     SortClusters(clusters);
-    return std::make_unique<PositionListIndex>(std::move(clusters), std::move(null_cluster), size,
-                                               entropy, nep, data.size(), data.size(), inv_ent,
-                                               gini_impurity);
+    return std::make_unique<PositionListIndex>(std::move(clusters), size, entropy, nep, data.size(),
+                                               inv_ent, gini_impurity);
 }
 
 std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
@@ -119,7 +105,7 @@ void PositionListIndex::SortClusters(std::deque<std::vector<int>>& clusters) {
 std::shared_ptr<std::vector<int> const> PositionListIndex::CalculateAndGetProbingTable() const {
     if (probing_table_cache_ != nullptr) return probing_table_cache_;
 
-    std::vector<int> probing_table = std::vector<int>(original_relation_size_, kSingletonValueId);
+    std::vector<int> probing_table = std::vector<int>(relation_size_, kSingletonValueId);
     int next_cluster_id = kSingletonValueId + 1;
     for (auto& cluster : index_) {
         int value_id = next_cluster_id++;
@@ -158,7 +144,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Intersect(
     }
 }
 
-// TODO: null_cluster_ некорректен
 std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
         std::shared_ptr<std::vector<int> const> probing_table) const {
     assert(this->relation_size_ == probing_table->size());
@@ -166,7 +151,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
     unsigned int new_size = 0;
     double new_key_gap = 0.0;
     unsigned long long new_nep = 0;
-    std::vector<int> null_cluster;
 
     std::unordered_map<int, std::vector<int>> partial_index;
 
@@ -201,12 +185,10 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
     double new_entropy = log(relation_size_) - new_key_gap / relation_size_;
     SortClusters(new_index);
 
-    return std::make_unique<PositionListIndex>(std::move(new_index), std::move(null_cluster),
-                                               new_size, new_entropy, new_nep, relation_size_,
-                                               relation_size_);
+    return std::make_unique<PositionListIndex>(std::move(new_index), new_size, new_entropy, new_nep,
+                                               relation_size_, relation_size_);
 }
 
-// TODO: null_cluster_ не поддерживается
 std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
         Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
     assert(this->relation_size_ == relation_data.GetNumRows());
@@ -216,7 +198,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
     unsigned long long new_nep = 0;
 
     std::map<std::vector<int>, std::vector<int>> partial_index;
-    std::vector<int> null_cluster;
     std::vector<int> probe;
 
     for (auto& cluster : this->index_) {
@@ -247,9 +228,8 @@ std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
 
     SortClusters(new_index);
 
-    return std::make_unique<PositionListIndex>(std::move(new_index), std::move(null_cluster),
-                                               new_size, new_entropy, new_nep, this->relation_size_,
-                                               this->relation_size_);
+    return std::make_unique<PositionListIndex>(std::move(new_index), new_size, new_entropy, new_nep,
+                                               this->relation_size_, this->relation_size_);
 }
 
 bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relation_data,

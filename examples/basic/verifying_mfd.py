@@ -70,7 +70,7 @@ def mfd_coordinates():
           "approximately the same place with a degree of accuracy "
           "that is sufficient for us to consider them basically the same. "
           f"For example, in {BLUE_CODE}Cluster 3{DEFAULT_COLOR_CODE}, "
-          "the appartments differ by 0.000229 in longitude and by 0.00004 "
+          "the apartments differ by 0.000229 in longitude and by 0.00004 "
           "in latitude, with the 2 points being merely "
           "around 0.01979 km (or 0.012298 miles) apart, "
           "which is considered to be the same place with "
