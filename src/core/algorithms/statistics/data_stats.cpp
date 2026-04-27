@@ -1,19 +1,18 @@
 #include "core/algorithms/statistics/data_stats.h"
 
 #include <set>
-#include "utf8/utf8.h"
+#include <unicode/normlzr.h>
+#include <unicode/uchar.h>
+#include <unicode/unistr.h>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
-#include <unicode/unistr.h>
-#include <unicode/uchar.h>
-#include <unicode/normlzr.h> 
-
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
+#include "utf8/utf8.h"
 
 namespace algos {
 
@@ -326,12 +325,10 @@ Statistic DataStats::GetNumberOfZeros(size_t index) const {
 Statistic DataStats::GetZeroPercent(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
 
-    if (!col.IsNumeric())
-        return {};
+    if (!col.IsNumeric()) return {};
 
     size_t total = NumberOfValues(index) - GetNumNulls(index);
-    if (total == 0)
-        return {};
+    if (total == 0) return {};
 
     Statistic zeros_stat = GetNumberOfZeros(index);
     mo::Int zeros = mo::Type::GetValue<mo::Int>(zeros_stat.GetData());
@@ -351,19 +348,16 @@ Statistic DataStats::GetNumberOfNegatives(size_t index) const {
 
 Statistic DataStats::CountBool(size_t index, bool expected) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kBool)
-        return {};
+    if (col.GetTypeId() != +mo::TypeId::kBool) return {};
 
     size_t count = 0;
     std::vector<std::byte const*> const& data = col.GetData();
 
     for (size_t i = 0; i < data.size(); ++i) {
-        if (col.IsNullOrEmpty(i))
-            continue;
+        if (col.IsNullOrEmpty(i)) continue;
 
         bool value = *reinterpret_cast<bool const*>(data[i]);
-        if (value == expected)
-            count++;
+        if (value == expected) count++;
     }
 
     mo::IntType int_type;
@@ -371,15 +365,13 @@ Statistic DataStats::CountBool(size_t index, bool expected) const {
 }
 
 Statistic DataStats::GetTrueCount(size_t index) const {
-    if (all_stats_[index].true_count.HasValue())
-        return all_stats_[index].true_count;
+    if (all_stats_[index].true_count.HasValue()) return all_stats_[index].true_count;
 
     return CountBool(index, true);
 }
 
 Statistic DataStats::GetFalseCount(size_t index) const {
-    if (all_stats_[index].false_count.HasValue())
-        return all_stats_[index].false_count;
+    if (all_stats_[index].false_count.HasValue()) return all_stats_[index].false_count;
 
     return CountBool(index, false);
 }
@@ -812,36 +804,29 @@ Statistic DataStats::GetNumberOfWords(size_t index) const {
 
 Statistic DataStats::GetNumberOfDiacriticChars(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString)
-        return{};
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
 
-    UErrorCode err = U_ZERO_ERROR; 
-    icu::Normalizer2 const* norm =
-        icu::Normalizer2::getNFDInstance(err);
+    UErrorCode err = U_ZERO_ERROR;
+    icu::Normalizer2 const* norm = icu::Normalizer2::getNFDInstance(err);
 
-    if (U_FAILURE(err) || norm == nullptr)
-        return {};
+    if (U_FAILURE(err) || norm == nullptr) return {};
 
     size_t count = 0;
 
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
-        if (col.IsNullOrEmpty(i))
-            continue;
+        if (col.IsNullOrEmpty(i)) continue;
 
-        std::string const& str =
-            mo::Type::GetValue<std::string>(col.GetValue(i));
+        std::string const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
 
-        icu::UnicodeString ustr =
-            icu::UnicodeString::fromUTF8(str);
+        icu::UnicodeString ustr = icu::UnicodeString::fromUTF8(str);
 
-        icu::UnicodeString decomposed =
-            norm->normalize(ustr, err);
+        icu::UnicodeString decomposed = norm->normalize(ustr, err);
 
         for (int32_t pos = 0; pos < decomposed.length();) {
             UChar32 c = decomposed.char32At(pos);
             pos += U16_LENGTH(c);
 
-            if (u_charType(c) == U_NON_SPACING_MARK) { 
+            if (u_charType(c) == U_NON_SPACING_MARK) {
                 count++;
             }
         }

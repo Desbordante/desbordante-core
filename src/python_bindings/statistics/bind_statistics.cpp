@@ -47,10 +47,10 @@ public:
                 auto const& str = Type::GetValue<String>(data);
                 return PyUnicode_FromStringAndSize(str.data(), str.size());
             }
-            case TypeId::kBool: {                          
-               bool v;
-               std::memcpy(&v, stat.GetData(), sizeof(bool));
-               return PyBool_FromLong(static_cast<long>(v));
+            case TypeId::kBool: {
+                bool v;
+                std::memcpy(&v, stat.GetData(), sizeof(bool));
+                return PyBool_FromLong(static_cast<long>(v));
             }
             default:
                 assert(false);
@@ -167,9 +167,11 @@ void BindStatistics(pybind11::module_& main_module) {
                  "Returns the maximal amount of words in a column.", py::arg("index"))
             .def("get_number_of_words", &DataStats::GetNumberOfWords,
                  "Returns the total amount of words in a column", py::arg("index"))
-            .def("get_number_of_entirely_lowercase_words", &DataStats::GetNumberOfEntirelyLowercaseWords,
+            .def("get_number_of_entirely_lowercase_words",
+                 &DataStats::GetNumberOfEntirelyLowercaseWords,
                  "Returns the amount of entirely lowercase words in a column.", py::arg("index"))
-            .def("get_number_of_entirely_uppercase_words", &DataStats::GetNumberOfEntirelyUppercaseWords,
+            .def("get_number_of_entirely_uppercase_words",
+                 &DataStats::GetNumberOfEntirelyUppercaseWords,
                  "Returns the amount of entirely uppercase words in a column.", py::arg("index"))
             .def("get_interquartile_range", &DataStats::GetInterquartileRange,
                  "Returns interquartile range (IQR) for numeric column.", py::arg("index"))

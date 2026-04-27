@@ -1,8 +1,9 @@
 #pragma once
 
-#include "core/model/types/type.h"
 #include <algorithm>
 #include <cstring>
+
+#include "core/model/types/type.h"
 
 namespace model {
 
@@ -40,7 +41,7 @@ public:
         }
 
         std::memcpy(dst, &value, sizeof(bool));
-}
+    }
 
     CompareResult Compare(std::byte const* l, std::byte const* r) const override {
         bool lv, rv;
@@ -58,6 +59,4 @@ public:
     }
 };
 
-} // namespace model
-
-
+}  // namespace model

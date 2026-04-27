@@ -920,9 +920,9 @@ TEST(TestDataStats, TestGetTrueCount) {
     auto stats_ptr = MakeStatAlgorithm(kTestBool);
     algos::DataStats &stats = *stats_ptr;
 
-    stats.Execute(); 
+    stats.Execute();
 
-    auto stat = stats.GetTrueCount(0); 
+    auto stat = stats.GetTrueCount(0);
     ASSERT_TRUE(stat.HasValue());
     size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
     EXPECT_EQ(value, 3);
@@ -950,7 +950,7 @@ TEST(TestDataStats, TestGetZeroPercent) {
 }
 
 TEST(TestDataStats, TestGetNumberOfDiacriticChars) {
-    auto stats_ptr = MakeStatAlgorithm(kTestDiacritics); 
+    auto stats_ptr = MakeStatAlgorithm(kTestDiacritics);
     algos::DataStats &stats = *stats_ptr;
 
     stats.Execute();

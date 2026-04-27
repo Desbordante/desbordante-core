@@ -28,7 +28,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
     for (std::size_t i = 0; i != unparsed_.size(); ++i) {
         if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
             is_undefined = false;
-            
+
             std::string value = unparsed_[i];
             std::replace(value.begin(), value.end(), ',', '.');
 

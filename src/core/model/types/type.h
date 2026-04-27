@@ -43,10 +43,8 @@ public:
     }
 
     [[nodiscard]] bool IsMetrizable() const noexcept {
-        return IsNumeric() ||
-           type_id_ == +TypeId::kString ||
-           IsDate() ||
-           type_id_ == +TypeId::kBool;
+        return IsNumeric() || type_id_ == +TypeId::kString || IsDate() ||
+               type_id_ == +TypeId::kBool;
     }
 
     [[nodiscard]] std::string ToString() const {
