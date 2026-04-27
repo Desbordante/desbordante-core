@@ -45,6 +45,7 @@ target_sources(
     PRIVATE py_util/create_dataframe_reader.cpp
             py_util/dataframe_reader.cpp
             py_util/get_py_type.cpp
+            py_util/iterable_sequence_stream.cpp
             py_util/logging.cpp
             py_util/opt_to_py.cpp
             py_util/py_to_any.cpp
@@ -150,6 +151,18 @@ desbordante_add_bind(
     dynamic/bind_dynamic_fd_verification.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd::verifier::dynamic
+    better-enums
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+
+desbordante_add_bind(
+    fem
+    SRCS
+    fem/bind_fem.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fem::maxfem
+    ${DESBORDANTE_PREFIX}::bindlib::util
     better-enums
     spdlog::spdlog_header_only
     Boost::headers

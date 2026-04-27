@@ -5,6 +5,7 @@ set(SUBDIRS
     dc
     dd
     fd
+    fem
     fsm
     gfd
     ind
@@ -51,6 +52,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::fd::tane
               ${DESBORDANTE_PREFIX}::fd::tane::pfd
               ${DESBORDANTE_PREFIX}::fd::verifier
+              ${DESBORDANTE_PREFIX}::fem::maxfem
               ${DESBORDANTE_PREFIX}::fsm::gspan
               ${DESBORDANTE_PREFIX}::gfd::validator
               ${DESBORDANTE_PREFIX}::ind::faida
@@ -73,6 +75,7 @@ target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
-            ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only better-enums
-            Boost::headers
+            ${DESBORDANTE_PREFIX}::parser::csv ${DESBORDANTE_PREFIX}::parser::sequence
+            ${DESBORDANTE_PREFIX}::model::sequence
+            spdlog::spdlog_header_only better-enums Boost::headers
 )

@@ -338,6 +338,23 @@ desbordante_add_test(
     Boost::headers
 )
 
+# --- FEM ---
+desbordante_add_test(
+    fem.maxfem
+    SRCS
+    test_maxfem_algorithm.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fem::maxfem
+    ${DESBORDANTE_PREFIX}::model::sequence
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::algos
+    ${DESBORDANTE_PREFIX}::parser::sequence
+    spdlog::spdlog_header_only
+    better-enums
+    gmock
+    Boost::headers
+)
+
 # --- GFD ---
 desbordante_add_test(
     gfd.miner
