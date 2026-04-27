@@ -12,7 +12,6 @@
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
-#include "utf8/utf8.h"
 
 namespace algos {
 
