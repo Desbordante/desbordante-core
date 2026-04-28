@@ -214,7 +214,8 @@ private:
                 }
                 return is_simple_date;
             };
-    inline static std::unordered_map<TypeId, std::function<bool(std::string const&)>> const
+    inline static std::vector<
+            std::pair<TypeId, std::function<bool(std::string const&)>>> const
             kTypeIdToChecker = {
                     {TypeId::kDouble,
                      [](std::string const& val) {
