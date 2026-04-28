@@ -1319,6 +1319,11 @@ Statistic DataStats::GetGiniCoefficient(size_t index) const {
 }
 
 Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
+    mo::TypedColumnData const& col1 = col_data_[index1];
+    mo::TypedColumnData const& col2 = col_data_[index2];
+
+    if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
+
     if (index1 == index2) {
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
@@ -1333,20 +1338,23 @@ Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
         return it->second;
     }
 
-    mo::TypedColumnData const& col1 = col_data_[index1];
-    mo::TypedColumnData const& col2 = col_data_[index2];
-
-    if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
-
     std::vector<double> vals1, vals2;
+    mo::DoubleType double_type;
+    std::byte* temp1 = double_type.Allocate();
+    std::byte* temp2 = double_type.Allocate();
+
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-
-        double v1 = mo::Type::GetValue<double>(col1.GetValue(i));
-        double v2 = mo::Type::GetValue<double>(col2.GetValue(i));
-        vals1.push_back(v1);
-        vals2.push_back(v2);
+        
+        mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
+        mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
+        
+        vals1.push_back(mo::Type::GetValue<double>(temp1));
+        vals2.push_back(mo::Type::GetValue<double>(temp2));
     }
+
+    double_type.Free(temp1);
+    double_type.Free(temp2);
 
     size_t n = vals1.size();
     if (n < 2) return {};
@@ -1405,6 +1413,11 @@ std::vector<double> DataStats::GetRanks(std::vector<double> const& data) {
 }
 
 Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const {
+    mo::TypedColumnData const& col1 = col_data_[index1];
+    mo::TypedColumnData const& col2 = col_data_[index2];
+
+    if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
+
     if (index1 == index2) {
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
@@ -1419,17 +1432,23 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
         return it->second;
     }
 
-    mo::TypedColumnData const& col1 = col_data_[index1];
-    mo::TypedColumnData const& col2 = col_data_[index2];
-
-    if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
-
     std::vector<double> x, y;
+    mo::DoubleType double_type;
+    std::byte* temp1 = double_type.Allocate();
+    std::byte* temp2 = double_type.Allocate();
+
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        x.push_back(mo::Type::GetValue<double>(col1.GetValue(i)));
-        y.push_back(mo::Type::GetValue<double>(col2.GetValue(i)));
+        
+        mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
+        mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
+        
+        x.push_back(mo::Type::GetValue<double>(temp1));
+        y.push_back(mo::Type::GetValue<double>(temp2));
     }
+
+    double_type.Free(temp1);
+    double_type.Free(temp2);
 
     size_t n = x.size();
     if (n < 2) return {};
@@ -1467,6 +1486,11 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
 }
 
 Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
+    mo::TypedColumnData const& col1 = col_data_[index1];
+    mo::TypedColumnData const& col2 = col_data_[index2];
+
+    if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
+
     if (index1 == index2) {
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
@@ -1481,17 +1505,24 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
         return it->second;
     }
 
-    mo::TypedColumnData const& col1 = col_data_[index1];
-    mo::TypedColumnData const& col2 = col_data_[index2];
-
-    if (!col1.IsNumeric() || !col2.IsNumeric()) return {};
-
     std::vector<std::pair<double, double>> pairs;
+    mo::DoubleType double_type;
+    std::byte* temp1 = double_type.Allocate();
+    std::byte* temp2 = double_type.Allocate();
+
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        pairs.emplace_back(mo::Type::GetValue<double>(col1.GetValue(i)),
-                           mo::Type::GetValue<double>(col2.GetValue(i)));
+        
+        mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
+        mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
+        
+        double v1 = mo::Type::GetValue<double>(temp1);
+        double v2 = mo::Type::GetValue<double>(temp2);
+        pairs.emplace_back(v1, v2);
     }
+
+    double_type.Free(temp1);
+    double_type.Free(temp2);
 
     size_t n = pairs.size();
     if (n < 2) return {};
@@ -1525,6 +1556,11 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
 }
 
 Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const {
+    mo::TypedColumnData const& col1 = col_data_[index1];
+    mo::TypedColumnData const& col2 = col_data_[index2];
+
+    if (col1.IsNumeric() || col2.IsNumeric()) return {};
+
     if (index1 == index2) {
         mo::DoubleType double_type;
         return Statistic(double_type.MakeValue(1.0), &double_type, false);
@@ -1538,11 +1574,6 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
     if (it != cramers_v_cache_.end()) {
         return it->second;
     }
-
-    mo::TypedColumnData const& col1 = col_data_[index1];
-    mo::TypedColumnData const& col2 = col_data_[index2];
-
-    if (col1.IsNumeric() || col2.IsNumeric()) return {};
 
     std::map<std::string, size_t> categories1;
     std::map<std::string, size_t> categories2;

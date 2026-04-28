@@ -910,6 +910,32 @@ TEST(TestDataStats, TestPearsonCorrelation) {
     EXPECT_NEAR(result, -0.011769, 0.0001);
 }
 
+TEST(TestDataStats, Pearson_Symmetry) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetPearsonCorrelation(2, 7);
+    auto b = stats.GetPearsonCorrelation(7, 2);
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
+}
+
+TEST(TestDataStats, Pearson_CacheConsistency) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetPearsonCorrelation(2, 7);
+    auto b = stats.GetPearsonCorrelation(2, 7);  // из кэша
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
+}
+
 TEST(TestDataStats, TestSpearmanCorrelation) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
@@ -920,6 +946,32 @@ TEST(TestDataStats, TestSpearmanCorrelation) {
 
     double result = mo::Type::GetValue<mo::Double>(spearman_stat.GetData());
     EXPECT_NEAR(result, 0.4, 0.0001);
+}
+
+TEST(TestDataStats, Spearman_Symmetry) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetSpearmanCorrelation(2, 7);
+    auto b = stats.GetSpearmanCorrelation(7, 2);
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
+}
+
+TEST(TestDataStats, Spearman_CacheConsistency) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetSpearmanCorrelation(2, 7);
+    auto b = stats.GetSpearmanCorrelation(2, 7);
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
 }
 
 TEST(TestDataStats, TestKendallCorrelation) {
@@ -934,6 +986,32 @@ TEST(TestDataStats, TestKendallCorrelation) {
     EXPECT_NEAR(result, 0.333333, 0.0001);
 }
 
+TEST(TestDataStats, Kendall_Symmetry) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetKendallCorrelation(2, 7);
+    auto b = stats.GetKendallCorrelation(7, 2);
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
+}
+
+TEST(TestDataStats, Kendall_CacheConsistency) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetKendallCorrelation(2, 7);
+    auto b = stats.GetKendallCorrelation(2, 7);
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
+}
+
 TEST(TestDataStats, TestCramersVCorrelation) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
@@ -944,5 +1022,31 @@ TEST(TestDataStats, TestCramersVCorrelation) {
 
     double result = mo::Type::GetValue<mo::Double>(cramers_v_stat.GetData());
     EXPECT_NEAR(result, 1.0, 0.0001);
+}
+
+TEST(TestDataStats, CramersV_Symmetry) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetCramersVCorrelation(5, 10);
+    auto b = stats.GetCramersVCorrelation(10, 5);
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
+}
+
+TEST(TestDataStats, CramersV_CacheConsistency) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+
+    auto a = stats.GetCramersVCorrelation(5, 10);
+    auto b = stats.GetCramersVCorrelation(5, 10);
+    ASSERT_TRUE(a.HasValue());
+    ASSERT_TRUE(b.HasValue());
+    EXPECT_NEAR(mo::Type::GetValue<mo::Double>(a.GetData()),
+                mo::Type::GetValue<mo::Double>(b.GetData()), 1e-12);
 }
 };  // namespace tests
