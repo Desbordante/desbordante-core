@@ -27,7 +27,7 @@ target_link_libraries(
             Boost::headers
             Desbordante.bindlib.util
             Desbordante.bindlib.data
-            ${DESBORDANTE_PREFIX}::rfd::ga_rfd 
+            ${DESBORDANTE_PREFIX}::rfd::ga_rfd
 )
 
 # Uncomment to debug linker issues

@@ -309,6 +309,8 @@ std::vector<GaRfd::Individual> GaRfd::Crossover(std::vector<Individual> const& s
     std::uniform_real_distribution<double> dist01(0.0, 1.0);
     std::bernoulli_distribution coin(0.5);
 
+    // MAYBE swap rand indexes of 2 rand LHS
+    // [selected.size()*(selected.size()+1)/2 * crossover_probability_] times
     for (std::size_t i = 0; i < selected.size(); i++) {
         Individual const& p1 = selected[i];
         for (std::size_t j = i + 1; j < selected.size(); j++) {
@@ -374,7 +376,7 @@ void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937& rng) const {
                 mask ^= (m & -m);
                 break;
             }
-            case 1: {  // swap rand 1 to 0
+            case 1: {  // swap rand 1 to 0 in LHS
                 uint32_t avail = ((1u << num_attrs_) - 1) & ~mask & ~(1u << rhs);
                 if (avail == 0) break;
                 int ones = std::popcount(avail);
@@ -384,7 +386,7 @@ void GaRfd::Mutate(std::vector<Individual>& pop, std::mt19937& rng) const {
                 mask |= (m & -m);
                 break;
             }
-            case 2: {  // change rhs
+            case 2: {  // change RHS
                 uint32_t avail = ((1u << num_attrs_) - 1) & ~mask;
                 if (avail == 0) break;
                 int ones = std::popcount(avail);

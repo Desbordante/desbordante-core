@@ -394,7 +394,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ind::mind
     ${DESBORDANTE_PREFIX}::ind::faida
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd
-    ${DESBORDANTE_PREFIX}::rfd 
+    ${DESBORDANTE_PREFIX}::rfd
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
@@ -620,7 +620,7 @@ desbordante_add_test(
 # GA-RFD
 desbordante_add_test(
     rfd.ga
-    SRCS 
+    SRCS
     test_ga_rfd.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd
