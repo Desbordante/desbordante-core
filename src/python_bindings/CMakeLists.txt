@@ -74,8 +74,11 @@ desbordante_add_bind(
     ar
     SRCS
     ar/bind_ar.cpp
+    ar/bind_ar_verification.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::ar
+    ${DESBORDANTE_PREFIX}::ar::apriori
+    ${DESBORDANTE_PREFIX}::ar::verifier
     better-enums
     Boost::headers
 )
