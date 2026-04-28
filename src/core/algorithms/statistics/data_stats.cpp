@@ -1345,10 +1345,10 @@ Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
 
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        
+
         mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
         mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
-        
+
         vals1.push_back(mo::Type::GetValue<double>(temp1));
         vals2.push_back(mo::Type::GetValue<double>(temp2));
     }
@@ -1439,10 +1439,10 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
 
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        
+
         mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
         mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
-        
+
         x.push_back(mo::Type::GetValue<double>(temp1));
         y.push_back(mo::Type::GetValue<double>(temp2));
     }
@@ -1512,10 +1512,10 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
 
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        
+
         mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
         mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
-        
+
         double v1 = mo::Type::GetValue<double>(temp1);
         double v2 = mo::Type::GetValue<double>(temp2);
         pairs.emplace_back(v1, v2);

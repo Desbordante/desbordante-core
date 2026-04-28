@@ -912,7 +912,7 @@ TEST(TestDataStats, TestPearsonCorrelation) {
 
 TEST(TestDataStats, Pearson_Symmetry) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetPearsonCorrelation(2, 7);
@@ -925,7 +925,7 @@ TEST(TestDataStats, Pearson_Symmetry) {
 
 TEST(TestDataStats, Pearson_CacheConsistency) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetPearsonCorrelation(2, 7);
@@ -950,7 +950,7 @@ TEST(TestDataStats, TestSpearmanCorrelation) {
 
 TEST(TestDataStats, Spearman_Symmetry) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetSpearmanCorrelation(2, 7);
@@ -963,7 +963,7 @@ TEST(TestDataStats, Spearman_Symmetry) {
 
 TEST(TestDataStats, Spearman_CacheConsistency) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetSpearmanCorrelation(2, 7);
@@ -988,7 +988,7 @@ TEST(TestDataStats, TestKendallCorrelation) {
 
 TEST(TestDataStats, Kendall_Symmetry) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetKendallCorrelation(2, 7);
@@ -1001,7 +1001,7 @@ TEST(TestDataStats, Kendall_Symmetry) {
 
 TEST(TestDataStats, Kendall_CacheConsistency) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetKendallCorrelation(2, 7);
@@ -1026,7 +1026,7 @@ TEST(TestDataStats, TestCramersVCorrelation) {
 
 TEST(TestDataStats, CramersV_Symmetry) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetCramersVCorrelation(5, 10);
@@ -1039,7 +1039,7 @@ TEST(TestDataStats, CramersV_Symmetry) {
 
 TEST(TestDataStats, CramersV_CacheConsistency) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::DataStats& stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
 
     auto a = stats.GetCramersVCorrelation(5, 10);
