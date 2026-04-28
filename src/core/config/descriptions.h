@@ -244,7 +244,8 @@ auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
 constexpr auto kDOFDContext = "Context of the OFD to verify";
 constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
 // GA-rfd
-constexpr auto kDRfdMinSimilarity = "minimum similarity in [0, 1] for two values to be considered similar";
+constexpr auto kDRfdMinSimilarity =
+        "minimum similarity in [0, 1] for two values to be considered similar";
 constexpr auto kDRfdCrossoverProbability = "probability of applying crossover between individuals";
 constexpr auto kDRfdMutationProbability = "probability of mutating an individual";
 constexpr auto kDRfdMaxGenerations = "maximum number of genetic algorithm generations";

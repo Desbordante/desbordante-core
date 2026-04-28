@@ -1,11 +1,11 @@
-#include <gtest/gtest.h>
-
 #include <cstdint>
 #include <fstream>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/rfd/ga_rfd/ga_rfd.h"
@@ -21,7 +21,7 @@ namespace rfd = algos::rfd;
 
 using namespace std::chrono;
 
-template<typename Func>
+template <typename Func>
 long long MeasureExecutionTime(Func&& f) {
     auto start = high_resolution_clock::now();
     f();
@@ -29,22 +29,17 @@ long long MeasureExecutionTime(Func&& f) {
     return duration_cast<milliseconds>(end - start).count();
 }
 
-static algos::StdParamsMap MakeParams(const config::InputTable& table,
-                                      double min_sim,
-                                      double beta,
-                                      std::size_t pop_size,
-                                      std::size_t max_gen,
-                                      std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics = {}) {
-    algos::StdParamsMap params{
-        {config_names::kTable, table},
-        {config_names::kRfdMinSimilarity, min_sim},
-        {config_names::kMinimumConfidence, beta},
-        {config_names::kPopulationSize, pop_size},
-        {config_names::kRfdMaxGenerations, max_gen},
-        {config_names::kRfdCrossoverProbability, 0.85},
-        {config_names::kRfdMutationProbability, 0.3},
-        {config_names::kSeed, std::uint64_t{42}}
-    };
+static algos::StdParamsMap MakeParams(
+        config::InputTable const& table, double min_sim, double beta, std::size_t pop_size,
+        std::size_t max_gen, std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics = {}) {
+    algos::StdParamsMap params{{config_names::kTable, table},
+                               {config_names::kRfdMinSimilarity, min_sim},
+                               {config_names::kMinimumConfidence, beta},
+                               {config_names::kPopulationSize, pop_size},
+                               {config_names::kRfdMaxGenerations, max_gen},
+                               {config_names::kRfdCrossoverProbability, 0.85},
+                               {config_names::kRfdMutationProbability, 0.3},
+                               {config_names::kSeed, std::uint64_t{42}}};
     if (!metrics.empty()) {
         params["metrics"] = metrics;
     }
@@ -64,20 +59,18 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
     config::InputTable table = std::make_unique<CSVParser>(kIris);
 
     std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics;
-    for (int i = 0; i < 4; ++i)
-        metrics.push_back(rfd::AbsoluteDifferenceMetric());
+    for (int i = 0; i < 4; ++i) metrics.push_back(rfd::AbsoluteDifferenceMetric());
     metrics.push_back(rfd::EqualityMetric());
 
-    algos::StdParamsMap params{
-            {config_names::kTable, table},
-            { "metrics", metrics},
-            {config_names::kRfdMinSimilarity, min_similarity},
-            {config_names::kMinimumConfidence, min_confidence},
-            {config_names::kPopulationSize, pop_size},
-            {config_names::kRfdMaxGenerations, generations},
-            {config_names::kRfdCrossoverProbability, 0.85},
-            {config_names::kRfdMutationProbability, 0.3},
-            {config_names::kSeed, static_cast<std::uint64_t>(123)}};
+    algos::StdParamsMap params{{config_names::kTable, table},
+                               {"metrics", metrics},
+                               {config_names::kRfdMinSimilarity, min_similarity},
+                               {config_names::kMinimumConfidence, min_confidence},
+                               {config_names::kPopulationSize, pop_size},
+                               {config_names::kRfdMaxGenerations, generations},
+                               {config_names::kRfdCrossoverProbability, 0.85},
+                               {config_names::kRfdMutationProbability, 0.3},
+                               {config_names::kSeed, static_cast<std::uint64_t>(123)}};
 
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     auto time_ms = algo->Execute();
@@ -99,6 +92,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
         EXPECT_LE(rfd.support, 1.0);
     }
 }
+
 /*
 TEST(GARfdPerformance, Neighbors10k_Fast) {
     constexpr std::size_t pop_size = 10;
@@ -232,7 +226,7 @@ struct RFDTestParams {
 class GaRfdDatasetTest : public ::testing::TestWithParam<RFDTestParams> {};
 
 TEST_P(GaRfdDatasetTest, DiscoversRFDs) {
-    const auto& p = GetParam();
+    auto const& p = GetParam();
     config::InputTable table = std::make_shared<CSVParser>(p.csv_config);
     auto dataset = std::make_unique<CSVParser>(p.csv_config);
     std::size_t ncols = dataset->GetNumberOfColumns();
@@ -243,8 +237,9 @@ TEST_P(GaRfdDatasetTest, DiscoversRFDs) {
     if (p.expect_success) {
         algo->Execute();
         auto rfds = algo->GetRfds();
-        EXPECT_GE(rfds.size(), p.min_rfd_count) << "Expected at least " << p.min_rfd_count << " RFDs";
-        for (const auto& rfd : rfds) {
+        EXPECT_GE(rfds.size(), p.min_rfd_count)
+                << "Expected at least " << p.min_rfd_count << " RFDs";
+        for (auto const& rfd : rfds) {
             EXPECT_NE(rfd.lhs_mask, 0u) << "LHS must not be empty";
             EXPECT_FALSE(rfd.lhs_mask & (1u << rfd.rhs_index)) << "RHS must not be in LHS";
             EXPECT_GE(rfd.confidence, p.beta) << "Confidence should be ≥ beta";
@@ -256,22 +251,17 @@ TEST_P(GaRfdDatasetTest, DiscoversRFDs) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    VariousDatasets,
-    GaRfdDatasetTest,
-    ::testing::Values(
-        RFDTestParams{kIris, 1.0, 0.9, 40, 5, true, 1},
-        RFDTestParams{kBreastCancer, 1.0, 0.9, 100, 10, true, 0},
-        RFDTestParams{kNeighbors10k, 0.8, 0.9, 10, 3, true, 1},
-        RFDTestParams{kTestFD, 1.0, 0.9, 40, 5, true, 1},
-        RFDTestParams{kTestLong, 1.0, 0.9, 30, 5, true, 1},
-        RFDTestParams{kTestWide, 1.0, 0.9, 30, 5, true, 0},
-        RFDTestParams{kRfdTwoRows, 1.0, 0.9, 10, 1, true, 0}
-    ),
-    [](const testing::TestParamInfo<RFDTestParams>& info) {
-        return std::to_string(info.index);
-    }
-);
+INSTANTIATE_TEST_SUITE_P(VariousDatasets, GaRfdDatasetTest,
+                         ::testing::Values(RFDTestParams{kIris, 1.0, 0.9, 40, 5, true, 1},
+                                           RFDTestParams{kBreastCancer, 1.0, 0.9, 100, 10, true, 0},
+                                           RFDTestParams{kNeighbors10k, 0.8, 0.9, 10, 3, true, 1},
+                                           RFDTestParams{kTestFD, 1.0, 0.9, 40, 5, true, 1},
+                                           RFDTestParams{kTestLong, 1.0, 0.9, 30, 5, true, 1},
+                                           RFDTestParams{kTestWide, 1.0, 0.9, 30, 5, true, 0},
+                                           RFDTestParams{kRfdTwoRows, 1.0, 0.9, 10, 1, true, 0}),
+                         [](testing::TestParamInfo<RFDTestParams> const& info) {
+                             return std::to_string(info.index);
+                         });
 
 TEST(GARfdFunctional, IrisAllSimilarYieldsNonEmpty) {
     config::InputTable table = std::make_shared<CSVParser>(kIris);
@@ -286,25 +276,22 @@ TEST(GARfdFunctional, IrisAllSimilarYieldsNonEmpty) {
 TEST(GARfdMetric, LevenshteinMetricOnIris) {
     config::InputTable table = std::make_shared<CSVParser>(kIris);
     auto metrics = std::vector<std::shared_ptr<rfd::SimilarityMetric>>{
-        rfd::LevenshteinMetric(), rfd::LevenshteinMetric(),
-        rfd::LevenshteinMetric(), rfd::LevenshteinMetric(),
-        rfd::EqualityMetric()
-    };
+            rfd::LevenshteinMetric(), rfd::LevenshteinMetric(), rfd::LevenshteinMetric(),
+            rfd::LevenshteinMetric(), rfd::EqualityMetric()};
     auto params = MakeParams(table, 0.8, 0.9, 30, 5, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();
     auto rfds = algo->GetRfds();
     std::cout << "Iris with Levenshtein found " << rfds.size() << " RFDs\n";
-    for (const auto& r : rfds) std::cout << "  " << r.ToString() << '\n';
+    for (auto const& r : rfds) std::cout << "  " << r.ToString() << '\n';
     EXPECT_GE(rfds.size(), 1);
 }
 
 TEST(GARfdMetric, OdNormIrisWithLevenshtein) {
     config::InputTable table = std::make_shared<CSVParser>(kOdTestNormIris);
     auto metrics = std::vector<std::shared_ptr<rfd::SimilarityMetric>>{
-        rfd::LevenshteinMetric(), rfd::LevenshteinMetric(),
-        rfd::LevenshteinMetric(), rfd::LevenshteinMetric()
-    };
+            rfd::LevenshteinMetric(), rfd::LevenshteinMetric(), rfd::LevenshteinMetric(),
+            rfd::LevenshteinMetric()};
     auto params = MakeParams(table, 0.2, 0.5, 200, 20, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();
