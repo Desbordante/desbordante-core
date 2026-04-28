@@ -156,4 +156,9 @@ constexpr auto kCrossoverProb = "crossover_prob";
 constexpr auto kMutationProb = "mutation_prob";
 constexpr auto kMaxLhsArity = "max_lhs_arity";
 constexpr auto kOutputFile = "output_file";
+constexpr auto kRfdMinSimilarity = "min_similarity";
+constexpr auto kRfdCrossoverProbability = "crossover_probability";
+constexpr auto kRfdMutationProbability = "mutation_probability";
+constexpr auto kRfdMaxGenerations = "max_generations";
+constexpr auto kCacheMaxSize = "cache_size";
 }  // namespace config::names
