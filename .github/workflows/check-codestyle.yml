@@ -129,3 +129,12 @@ jobs:
 
       - name: Check spelling with typos
         uses: crate-ci/typos@v1.43.5
+
+  ruff-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Ruff
+        uses: astral-sh/ruff-action@v3
+        with :
+          args: "check --output-format=github"

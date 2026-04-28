@@ -2,8 +2,8 @@ import desbordante
 
 ERROR_1 = 0.02777777778 # threshold of the Y->X dependency (PerValue metric)
 ERROR_2 = 0.09090909091 # threshold of the Y->X dependency (PerTuple metric)
-ERROR_3 = 0.273  # threshold of the X->Y dependency (PerTuple metric)  
-ERROR_4 = 0.375  # threshold of the X->Y dependency (PerValue metric) 
+ERROR_3 = 0.273  # threshold of the X->Y dependency (PerTuple metric)
+ERROR_4 = 0.375  # threshold of the X->Y dependency (PerValue metric)
 
 algo = desbordante.pfd.algorithms.PFDTane()
 algo.load_data(table=('examples/datasets/pfd.csv', ',', True))

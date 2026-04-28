@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 
 ANIMALS_BEVERAGES = 'examples/datasets/animals_beverages.csv'
 CARRIER_MERGER = 'examples/datasets/carrier_merger.csv'
@@ -31,7 +31,7 @@ def symbol_jaccard(str1, str2):
 
 def animals_beverages():
     print('First, the animals_beverages dataset will be inspected.')
-    table = pandas.read_csv(ANIMALS_BEVERAGES)
+    table = pd.read_csv(ANIMALS_BEVERAGES)
     print(table)
     print()
 
@@ -53,7 +53,7 @@ def animals_beverages():
 def carrier_merger():
     print("Let's now look at the carrier_merger dataset, obtained as a result "
           "of merger of data from two aircraft carriers (ac1 and ac2).")
-    df = pandas.read_csv(CARRIER_MERGER)
+    df = pd.read_csv(CARRIER_MERGER)
     print(df.to_string(index=False))
     print()
 

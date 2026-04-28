@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 from tabulate import tabulate
 
 TABLE = 'examples/datasets/position_distribution.csv'
@@ -33,12 +33,12 @@ def print_data_frame(data_frame, title = None):
 def print_table(table, headers = None, title = None):
     if title is not None:
         print(title)
-    
+
     print(tabulate(table, headers=headers, tablefmt='psql'))
 
 def print_attribute_symbols(table):
     print('Attribute symbols:')
-    
+
     counter = 1
 
     for column in table:
@@ -127,7 +127,7 @@ def print_simple_ods_with_comments(simple_ods, table):
     print('of one year and one position the constancy of percents is observed.')
     print('That is, in those tuples in which the year and position are the same,')
     print('the same percent value is observed.')
-    
+
     print()
     print('The following table shows these observations.')
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     desc_ods = algo.get_desc_ods()
     simple_ods = algo.get_simple_ods()
 
-    table = pandas.read_csv(TABLE)
+    table = pd.read_csv(TABLE)
 
     print_data_frame(table)
     print()

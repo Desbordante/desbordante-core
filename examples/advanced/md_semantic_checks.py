@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 
 CARRIER_MERGER = 'examples/datasets/carrier_merger.csv'
 CARRIER3 = 'examples/datasets/carrier3.csv'
@@ -32,7 +32,7 @@ def main():
     print('In this example we find a meaningful MD and try to use it to enforce'
           ' data integrity.')
     print('We are going to use a dataset of flights between cities.')
-    df = pandas.read_csv(CARRIER_MERGER)
+    df = pd.read_csv(CARRIER_MERGER)
     print(df.to_string(index=False))
     print()
 
@@ -73,8 +73,8 @@ def main():
 
     print("Let's test this assumption by adding another carrier's flights and "
           "checking whether the MD still holds.")
-    df3 = pandas.read_csv(CARRIER3)
-    df = pandas.concat([df, df3], ignore_index=True)
+    df3 = pd.read_csv(CARRIER3)
+    df = pd.concat([df, df3], ignore_index=True)
     print(df.to_string(index=False))
     print()
 
@@ -113,8 +113,8 @@ def main():
           'before.')
 
     print("Let's add more data from another carrier.")
-    df4 = pandas.read_csv(CARRIER4)
-    df = pandas.concat([df, df4], ignore_index=True)
+    df4 = pd.read_csv(CARRIER4)
+    df = pd.concat([df, df4], ignore_index=True)
     print(df.to_string(index=False))
     print()
 
