@@ -43,7 +43,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
             std::bitset<6> new_candidate_types_bitset("000000");
             bool matched = false;
             for (auto const& [type_id, type_check] : kTypeIdToChecker) {
-                if (type_check(unparsed_[i])) {
+                if (type_id != first_type_id && type_check(unparsed_[i])) {
                     if (first_type_id == +TypeId::kUndefined && !matched) {
                         first_type_id = type_id;
                     }
