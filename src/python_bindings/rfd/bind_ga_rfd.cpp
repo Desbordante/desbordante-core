@@ -48,14 +48,12 @@ void BindGaRfd(py::module_& main_module) {
 
     auto ga_cls = BindPrimitiveNoBase<GaRfd>(rfd_module, "GaRfd");
 
-    ga_cls.def("set_metrics", &GaRfd::SetMetrics, "Set list of SimilarityMetric objects");
-
     ga_cls.def(
-            "set_metrics_py",
+            "set_metrics",
             [](GaRfd& self, std::vector<py::object> const& metrics) {
                 self.SetMetrics(ConvertMetrics(metrics));
             },
-            "Set list of metrics (Python functions or SimilarityMetric objects)");
+            "Set list of similarity metrics (built-in metric objects or Python callables)");
 
     ga_cls.def("get_rfds", &GaRfd::GetRfds);
 }
