@@ -96,7 +96,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
 /*
 TEST(GARfdPerformance, Neighbors10k_Fast) {
     constexpr std::size_t pop_size = 10;
-    constexpr std::size_t generations = 3;
+    constexpr std::size_t generations = 16;
     constexpr double min_similarity = 0.95;
     constexpr double min_confidence = 0.8;
 
@@ -140,8 +140,8 @@ TEST(GARfdPerformance, Neighbors10k_Fast) {
 }
 
 TEST(GARfdPerformance, Neighbors10k_Slow) {
-    constexpr std::size_t pop_size = 1000;
-    constexpr std::size_t generations = 23;
+    constexpr std::size_t pop_size = 1024;
+    constexpr std::size_t generations = 32;
     constexpr double min_similarity = 0.95;
     constexpr double min_confidence = 0.8;
 
@@ -163,7 +163,7 @@ TEST(GARfdPerformance, Neighbors10k_Slow) {
         {config_names::kRfdMaxGenerations, generations},
         {config_names::kRfdCrossoverProbability, 0.85},
         {config_names::kRfdMutationProbability, 0.3},
-        {config_names::kSeed, static_cast<std::uint64_t>(2024)}
+        {config_names::kSeed, static_cast<std::uint64_t>(52)}
     };
 
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);

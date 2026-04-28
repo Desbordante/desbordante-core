@@ -57,14 +57,14 @@ GaRfd::GaRfd() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({kRfdMinSimilarity, kMinimumConfidence, kPopulationSize,
                           kRfdMaxGenerations, kRfdCrossoverProbability, kRfdMutationProbability,
-                          kSeed, "metrics", config::kTableOpt.GetName()});
+                          kSeed, "metrics", config::kTableOpt.GetName(), kCacheMaxSize});
 }
 
 void GaRfd::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({kRfdMinSimilarity, kMinimumConfidence, kPopulationSize,
                           kRfdMaxGenerations, kRfdCrossoverProbability, kRfdMutationProbability,
-                          kSeed, "metrics"});
+                          kSeed, "metrics", kCacheMaxSize});
 }
 
 void GaRfd::RegisterOptions() {
@@ -76,22 +76,24 @@ void GaRfd::RegisterOptions() {
     RegisterOption(Option{&metrics_, "metrics", "List of similarity metrics",
                           std::vector<std::shared_ptr<SimilarityMetric>>{}});
     RegisterOption(
-            Option{&min_similarity_, kRfdMinSimilarity, kDRfdMinSimilarity, 0.7}.SetValueCheck(
+            Option{&min_similarity_, kRfdMinSimilarity, kDRfdMinSimilarity, 1.0}.SetValueCheck(
                     check_prob_range));
-    RegisterOption(Option{&eps_, kMinimumConfidence, kDMinimumConfidence, 0.75}.SetValueCheck(
+    RegisterOption(Option{&eps_, kMinimumConfidence, kDMinimumConfidence, 1.0}.SetValueCheck(
             check_prob_range));
     RegisterOption(Option{&population_size_, kPopulationSize, kDPopulationSize,
-                          static_cast<std::size_t>(20)}
+                          static_cast<std::size_t>(1024)}
                            .SetValueCheck([](auto v) { return v > 0; }));
     RegisterOption(Option{&max_generations_, kRfdMaxGenerations, kDRfdMaxGenerations,
-                          static_cast<std::size_t>(50)});
+                          static_cast<std::size_t>(32)});
     RegisterOption(Option{&crossover_probability_, kRfdCrossoverProbability,
-                          kDRfdCrossoverProbability, 0.85}
+                          kDRfdCrossoverProbability, 1.0}
                            .SetValueCheck(check_prob_range));
     RegisterOption(
-            Option{&mutation_probability_, kRfdMutationProbability, kDRfdMutationProbability, 0.3}
+            Option{&mutation_probability_, kRfdMutationProbability, kDRfdMutationProbability, 1.0}
                     .SetValueCheck(check_prob_range));
     RegisterOption(Option{&seed_, kSeed, kDSeed, static_cast<std::uint64_t>(42)});
+    RegisterOption(Option{&cache_max_size_, kCacheMaxSize, kDCacheMaxSize,
+                          static_cast<std::size_t>(10000)});
 }
 
 void GaRfd::LoadDataInternal() {

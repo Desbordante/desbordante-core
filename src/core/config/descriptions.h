@@ -249,4 +249,5 @@ constexpr auto kDRfdMinSimilarity =
 constexpr auto kDRfdCrossoverProbability = "probability of applying crossover between individuals";
 constexpr auto kDRfdMutationProbability = "probability of mutating an individual";
 constexpr auto kDRfdMaxGenerations = "maximum number of genetic algorithm generations";
+constexpr auto kDCacheMaxSize = "Maximum size of the support cache";
 }  // namespace config::descriptions

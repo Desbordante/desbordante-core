@@ -136,9 +136,10 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
-// GA-rfd
-constexpr auto kRfdMinSimilarity = "rfd_min_similarity";
-constexpr auto kRfdCrossoverProbability = "rfd_crossover_probability";
-constexpr auto kRfdMutationProbability = "rfd_mutation_probability";
-constexpr auto kRfdMaxGenerations = "rfd_max_generations";
+// GA-RFD
+constexpr auto kRfdMinSimilarity = "min_similarity";
+constexpr auto kRfdCrossoverProbability = "crossover_probability";
+constexpr auto kRfdMutationProbability = "mutation_probability";
+constexpr auto kRfdMaxGenerations = "max_generations";
+constexpr auto kCacheMaxSize = "cache_size";
 }  // namespace config::names

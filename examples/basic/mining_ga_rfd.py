@@ -1,11 +1,17 @@
 """
-Example: Mining Relaxed Functional Dependencies (RFDs) with GaRfd.
+Example: Mining Functional and Relaxed Functional Dependencies with GaRfd.
 
-Uses a genetic algorithm to discover approximate functional dependencies that
-allow for fuzzy comparison of values using domain‑specific similarity metrics.
+GaRfd is a genetic algorithm that discovers dependencies between columns.
+By adjusting its parameters, the same algorithm can search for:
+- Exact functional dependencies (FDs)
+- Approximate functional dependencies (AFDs)
+- Matching dependencies (MDs) -- dependencies with similarity on the left side
+- Relaxed functional dependencies (RFDs) -- dependencies with similarity on both sides
+  and relaxed extent (confidence < 1.0)
 
-The iris.csv file is assumed to have NO header row (standard UCI format).
-If your file *does* have a header, remove `header=None` and `names=...`.
+The example uses the Iris dataset (iris.csv), which is assumed to have
+NO header row (standard UCI format). If your file *does* have a header,
+remove `header=None` and `names=...`.
 """
 
 import desbordante
@@ -17,10 +23,9 @@ import pandas
 TABLE_PATH = 'examples/datasets/iris.csv'
 
 print("=" * 70)
-print("Mining Relaxed Functional Dependencies (RFDs) with GaRfd")
+print("Mining dependencies with GaRfd")
 print("=" * 70)
 
-# Load the data WITHOUT a header, and assign meaningful column names
 COLUMN_NAMES = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'species']
 df = pandas.read_csv(TABLE_PATH, header=None, names=COLUMN_NAMES)
 
@@ -30,112 +35,177 @@ print(f"\nShape: {df.shape[0]} rows × {df.shape[1]} columns")
 print("Columns:", list(df.columns))
 
 # ------------------------------------------------------------
-# GaRfd basics
+# Built‑in metrics
 # ------------------------------------------------------------
+lev = desbordante.rfd.levenshtein_metric()    # Levenstain distance
+abs_diff = desbordante.rfd.abs_diff_metric()  # 1 – normalized absolute diff
+eq = desbordante.rfd.equality_metric()        # exact equality (return 1 or 0)
+
+# ============================================================
+# 1. DEFAULT PARAMETERS -> EXACT FUNCTIONAL DEPENDENCIES (FDs)
+# ============================================================
 print("\n" + "─" * 70)
-print("GaRfd is a genetic algorithm that searches for RFDs of the form:")
-print("    X (with similarity constraints) → Y (with similarity constraints)")
-print("where X and Y are sets of columns and the constraints define")
-print("how similar values must be in order for the dependency to hold.")
-print("It optimizes both the left‑hand side (LHS) and the similarity thresholds.")
+print("1. EXACT FUNCTIONAL DEPENDENCIES (default behaviour)")
+print("   No need to set any options – GaRfd uses equality metrics")
+print("   and min_similarity = 1.0, minconf = 1.0 by default.")
+print("   This discovers exact FDs.")
 print("─" * 70)
 
-# ------------------------------------------------------------
-# First run: built‑in metrics
-# ------------------------------------------------------------
-print("\n>>> FIRST RUN: using built‑in metrics")
+algo_fd = desbordante.rfd.algorithms.GaRfd()
+algo_fd.load_data(table=(TABLE_PATH, ',', False))
+# All options are already set to "exact FD mode"
+algo_fd.execute()
+fds = algo_fd.get_rfds()
+print(f"Found {len(fds)} exact FD(s):")
+for i, rfd in enumerate(fds, 1):
+    print(f"  {i}.\t{rfd}")
 
-# Instantiate the algorithm
-algo = desbordante.rfd.algorithms.GaRfd()
-# The third parameter 'False' means "no header" – consistent with pandas reading
-algo.load_data(table=(TABLE_PATH, ',', False))
-
-# Define similarity metrics for each column (the order matches COLUMN_NAMES!)
-# Column 0: sepal length      → absolute difference (numeric)
-# Column 1: sepal width        → absolute difference
-# Column 2: petal length       → absolute difference
-# Column 3: petal width        → absolute difference
-# Column 4: species            → exact equality (string)
-abs_diff = desbordante.rfd.abs_diff_metric()
-eq      = desbordante.rfd.equality_metric()
-metrics = [abs_diff, abs_diff, abs_diff, abs_diff, eq]
-algo.set_metrics(metrics)
-
-# Set algorithm parameters
-algo.set_option('rfd_min_similarity', 0.8)   # minimum allowed similarity between 0 and 1
-algo.set_option('minconf', 0.9)              # minimum confidence for a dependency
-algo.set_option('population_size', 22)       # genetic algorithm population size
-algo.set_option('rfd_max_generations', 10)   # maximum generations to evolve
-algo.set_option('seed', 42)                  # random seed for reproducibility
-
-# Execute the search
-algo.execute()
-
-# Retrieve and display found RFDs
-rfds = algo.get_rfds()
-print(f"\nFound {len(rfds)} RFD(s):")
-for i, rfd in enumerate(rfds, 1):
-    print(f"  {i}. {rfd}")
-
-# Explain what the output means
-print("\nInterpretation:")
-print("  For example, if an RFD says:")
-print("    (petal_length ≥ 0.9) & (petal_width ≥ 0.9) → species = 1.0")
-print("  it means: if two rows have petal_length with similarity >= 0.9 AND")
-print("  petal_width with similarity >= 0.9, then the species values must")
-print("  be exactly equal (similarity = 1.0) with confidence 0.9.")
-print("  'Similarity' is defined by the chosen metric (here abs_diff gives")
-print("  similarity = 1 - normalized difference).")
-
-# ------------------------------------------------------------
-# Second run: custom Python metric
-# ------------------------------------------------------------
+# ============================================================
+# 2. APPROXIMATE FUNCTIONAL DEPENDENCIES (AFDs)
+#    Lower the confidence threshold (minconf) to allow
+#    exceptions
+# ============================================================
 print("\n" + "─" * 70)
-print(">>> SECOND RUN: injecting a custom Python metric")
+print("2. APPROXIMATE FUNCTIONAL DEPENDENCIES (AFDs)")
+print("   Lower minconf to, say, 0.8. The algorithm will now")
+print("   accept dependencies that hold in at least 80% of the cases.")
+print("   Keep min_similarity = 1.0 for exact value matches.")
+print("─" * 70)
 
-# Define a custom similarity function (Jaccard for strings)
+algo_afd = desbordante.rfd.algorithms.GaRfd()
+algo_afd.load_data(table=(TABLE_PATH, ',', False))
+algo_afd.set_option('minconf', 0.8)  # allow 20% violations
+algo_afd.execute()
+afds = algo_afd.get_rfds()
+print(f"Found {len(afds)} AFD(s) with minconf=0.8:")
+for i, rfd in enumerate(afds, 1):
+    print(f"  {i}.\t{rfd}")
+
+# ============================================================
+# 3. MATCHING DEPENDENCIES (MDs) / RELAXED FDs
+#    Lower min_similarity to allow fuzzy value comparisons
+# ============================================================
+print("\n" + "─" * 70)
+print("3. RELAXED / MATCHING DEPENDENCIES (RFDs / MDs)")
+print("   Lower min_similarity to, say, 0.8 and use a metric")
+print("   that measures closeness (e.g. absolute difference).")
+print("   This finds dependencies that hold when values are")
+print("   'similar enough', not just exactly equal.")
+print("─" * 70)
+
+algo_rfd = desbordante.rfd.algorithms.GaRfd()
+algo_rfd.load_data(table=(TABLE_PATH, ',', False))
+algo_rfd.set_metrics([abs_diff, abs_diff, abs_diff, abs_diff, eq])
+algo_rfd.set_option('min_similarity', 0.8)
+algo_rfd.set_option('population_size', 128)
+algo_rfd.set_option('max_generations', 10)
+algo_rfd.execute()
+rfds = algo_rfd.get_rfds()
+print(f"Found {len(rfds)} RFD(s) with min_similarity=0.8:")
+for i, rfd in enumerate(rfds, 1):
+    print(f"  {i}.\t{rfd}")
+
+print("\nAdditional possibilities:")
+print("  - To search for matching dependencies (MDs) where only the LHS")
+print("    comparison is relaxed, you can set the RHS metric to equality")
+print("    and min_similarity < 1.0 only for the LHS columns.")
+print("  - To discover relaxed FDs with fuzzy RHS, use a similarity metric")
+print("    on the RHS as well.")
+
+
+# ============================================================
+# 4. EXPLICIT PARAMETER SETUP FOR RFDs
+# ============================================================
+print("\n" + "─" * 70)
+print("3. EXPLICIT RFD PARAMETER SETUP")
+print("   Here we explicitly set every parameter that GaRfd provides.")
+print("─" * 70)
+
+algo_explicit = desbordante.rfd.algorithms.GaRfd()
+algo_explicit.load_data(table=(TABLE_PATH, ',', False))
+
+# Metrics (default: equality for every column)
+algo_explicit.set_metrics([abs_diff, abs_diff, abs_diff, abs_diff, eq])
+
+# Similarity threshold – values are considered similar if similarity >= this
+algo_explicit.set_option('min_similarity', 0.8)         # default 1.0
+
+# Minimum confidence for a dependency to be kept (beta)
+algo_explicit.set_option('minconf', 0.9)                    # default 1.0s
+
+# Population size – how many individuals per generation
+algo_explicit.set_option('population_size', 250)            # default 1024
+
+# Maximum number of generations to evolve
+algo_explicit.set_option('max_generations', 10)         # default 32
+
+# Probability of crossing over two parents (0.0 .. 1.0)
+algo_explicit.set_option('crossover_probability', 0.49) # default 1.0
+
+# Probability of mutating an individual (0.0 .. 1.0)
+algo_explicit.set_option('mutation_probability', 0.85)  # default 1.0
+
+# Random seed – guarantees reproducible results
+algo_explicit.set_option('seed', 52)                        # default 42
+
+# Cache size – larger values speed up repeated support queries
+algo_explicit.set_option('cache_size', 1000)            # default 10000
+
+algo_explicit.execute()
+rfds_explicit = algo_explicit.get_rfds()
+print(f"Found {len(rfds_explicit)} RFD(s) with explicit parameters:")
+for i, rfd in enumerate(rfds_explicit, 1):
+    print(f"  {i}.\t{rfd}")
+
+# ============================================================
+# 5. USING A CUSTOM PYTHON METRIC
+# ============================================================
+print("\n" + "─" * 70)
+print("4. CUSTOM METRIC (Python function)")
+print("   You can pass any Python callable to set_metrics().")
+print("   Here we use the Jaccard coefficient for strings.")
+print("─" * 70)
+
 def jaccard_sim(a: str, b: str) -> float:
-    """Jaccard coefficient on the sets of characters."""
     set_a = set(a)
     set_b = set(b)
     if not set_a and not set_b:
         return 1.0
     return len(set_a & set_b) / len(set_a | set_b)
 
-# Create a new algorithm instance
-algo2 = desbordante.rfd.algorithms.GaRfd()
-algo2.load_data(table=(TABLE_PATH, ',', False))
-
-# Use set_metrics_py to include the Python function.
-# Keep abs_diff for the numeric columns and use our Jaccard function for the species column.
-algo2.set_metrics_py([abs_diff, abs_diff, abs_diff, abs_diff, jaccard_sim])
-
-# Use slightly different parameters for variety
-algo2.set_option('rfd_min_similarity', 0.8)
-algo2.set_option('minconf', 0.9)
-algo2.set_option('population_size', 15)
-algo2.set_option('rfd_max_generations', 10)
-algo2.set_option('seed', 123)
-algo2.execute()
-
-rfds2 = algo2.get_rfds()
-print(f"\nFound {len(rfds2)} RFD(s) with custom metric:")
-for i, rfd in enumerate(rfds2, 1):
-    print(f"  {i}. {rfd}")
-
-print("\nNote:")
-print("  Using Jaccard on the 'species' column allows similar strings")
-print("  (e.g. 'setosa' vs 'setosd') to be considered partly similar,")
-print("  whereas the equality metric would treat them as completely different.")
-print("  This can lead to more (or different) dependencies if the data contains")
-print("  slight variations.")
+algo_custom = desbordante.rfd.algorithms.GaRfd()
+algo_custom.load_data(table=(TABLE_PATH, ',', False))
+algo_custom.set_metrics([abs_diff, abs_diff, abs_diff, abs_diff, jaccard_sim])
+algo_custom.set_option('min_similarity', 0.8)
+algo_custom.set_option('minconf', 0.9)
+algo_custom.set_option('population_size', 15)
+algo_custom.execute()
+custom_rfds = algo_custom.get_rfds()
+print(f"Found {len(custom_rfds)} RFD(s) with custom metric:")
+for i, rfd in enumerate(custom_rfds, 1):
+    print(f"  {i}.\t{rfd}")
 
 # ------------------------------------------------------------
-# Additional hints
+# About reproducibility
+# ------------------------------------------------------------
+print("\n" + "─" * 70)
+print("A note on reproducibility")
+print("   GaRfd is a non-deterministic algorithm because it uses random")
+print("   operations (initialization, crossover, mutation).")
+print("   To obtain the same results on every run, always set the 'seed'")
+print("   option to a fixed value (e.g., 42).")
+print("   Without a fixed seed the algorithm may find different (or even")
+print("   fewer) dependencies on different runs.")
+print("─" * 70)
+
+# ------------------------------------------------------------
+# Final note
 # ------------------------------------------------------------
 print("\n" + "=" * 70)
-print("Experiment tip:")
-print("  - Try lowering 'rfd_min_similarity' to 0.6 or 'minconf' to 0.8")
-print("    to see weaker dependencies.")
-print("  - Increase 'rfd_max_generations' if the search does not converge.")
+print("Summary:")
+print("  - Default settings -> exact FDs")
+print("  - Lower minconf -> AFDs")
+print("  - Lower min_similarity + appropriate metrics -> RFDs / MDs")
+print("  - Pass Python functions to set_metrics() for custom similarity")
+print("  - Adjust cache_size to balance speed/memory")
 print("=" * 70)
