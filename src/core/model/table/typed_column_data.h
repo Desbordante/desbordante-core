@@ -174,11 +174,13 @@ private:
     bool treat_mixed_as_string_;
 
     inline static std::vector<TypeId> const kAllCandidateTypes = {
-            +TypeId::kDate, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
+            +TypeId::kDate, +TypeId::kBool, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
     inline static std::unordered_map<TypeId, boost::regex> const kTypeIdToRegex = {
             {TypeId::kDate,
              boost::regex(
                      R"(^(\d{4})([-.\/]?)(1[0-2]|0[1-9]|[1-9])\2(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
+            {TypeId::kBool,
+             boost::regex(R"(^\s*(true|false)\s*$)", boost::regex_constants::icase)},
             {TypeId::kDouble,
              boost::regex(
                      R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
