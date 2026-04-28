@@ -243,12 +243,12 @@ private:
     };
     // each 1 represents a possible type from kAllCandidateTypes
     inline static std::unordered_map<TypeId, std::bitset<6>> const kTypeIdToBitset = {
-            {+TypeId::kDate, std::bitset<6>("000001")},  // bitset for delimited dates
-            {+TypeId::kBool, std::bitset<6>("000010")},
-            {+TypeId::kInt, std::bitset<6>("000100")},
-            {+TypeId::kBigInt, std::bitset<6>("001000")},
-            {+TypeId::kDouble, std::bitset<6>("010000")},
-            {+TypeId::kString, std::bitset<6>("100000")}};
+        {+TypeId::kDate, std::bitset<6>("000001")},  // bitset for delimited dates
+        {+TypeId::kBool, std::bitset<6>("000010")},
+        {+TypeId::kInt, std::bitset<6>("011100")},
+        {+TypeId::kBigInt, std::bitset<6>("011000")},
+        {+TypeId::kDouble, std::bitset<6>("010000")},
+        {+TypeId::kString, std::bitset<6>("100000")}};
 
     size_t CalculateMixedBufSize(std::vector<TypeId> const& types_layout,
                                  TypeIdToType const& type_id_to_type) const noexcept;
