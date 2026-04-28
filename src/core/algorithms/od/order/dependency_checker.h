@@ -1,11 +1,12 @@
 #pragma once
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "core/algorithms/od/order/sorted_partitions.h"
-#include "core/util/better_enum_with_visibility.h"
 
 namespace algos::order {
 
-BETTER_ENUM(ValidityType, char, valid = 0, merge, swap);
+enum class ValidityType : char { kValid = 0, kMerge, kSwap };
 
 ValidityType CheckForSwap(SortedPartition const& l, SortedPartition const& r);
 

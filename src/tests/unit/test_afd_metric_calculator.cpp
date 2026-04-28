@@ -40,14 +40,14 @@ TEST_P(TestAFDMetrics, DefaultTest) {
 INSTANTIATE_TEST_SUITE_P(
         AFDMetricCalculatorTestSuite, TestAFDMetrics,
         ::testing::Values(
-            AFDMetricCalculatorParams({4}, {3}, AFDMetric::tau, 78.L/90),
-            AFDMetricCalculatorParams({4}, {3}, AFDMetric::g2, 1.L/6),
-            AFDMetricCalculatorParams({4}, {3}, AFDMetric::fi, 1 - std::log(4) / std::log(746496)),
-            AFDMetricCalculatorParams({4}, {3}, AFDMetric::mu_plus, 498.L/630),
-            AFDMetricCalculatorParams({3}, {4}, AFDMetric::tau, 54.L/114),
-            AFDMetricCalculatorParams({3}, {4}, AFDMetric::g2, 5.L/6),
-            AFDMetricCalculatorParams({3}, {4}, AFDMetric::fi, std::log(432) / std::log(13824)),
-            AFDMetricCalculatorParams({3}, {4}, AFDMetric::mu_plus, 252.L/912)
+            AFDMetricCalculatorParams({4}, {3}, AFDMetric::kTau, 78.L/90),
+            AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG2, 1.L/6),
+            AFDMetricCalculatorParams({4}, {3}, AFDMetric::kFi, 1 - std::log(4) / std::log(746496)),
+            AFDMetricCalculatorParams({4}, {3}, AFDMetric::kMuPlus, 498.L/630),
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kTau, 54.L/114),
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG2, 5.L/6),
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kFi, std::log(432) / std::log(13824)),
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kMuPlus, 252.L/912)
             ));
 // clang-format on
 
