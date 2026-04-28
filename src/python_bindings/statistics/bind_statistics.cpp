@@ -47,6 +47,11 @@ public:
                 auto const& str = Type::GetValue<String>(data);
                 return PyUnicode_FromStringAndSize(str.data(), str.size());
             }
+            case TypeId::kBool: {
+                bool v;
+                std::memcpy(&v, stat.GetData(), sizeof(bool));
+                return PyBool_FromLong(static_cast<long>(v));
+            }
             default:
                 assert(false);
                 __builtin_unreachable();
@@ -199,6 +204,18 @@ void BindStatistics(pybind11::module_& main_module) {
                  py::arg("index"))
             .def("get_last_char_frequency", &DataStats::GetLastCharFrequency,
                  "Returns the most frequent last character and its count as a string in format.",
-                 py::arg("index"));
+                 py::arg("index"))
+            .def("get_min_white_spaces", &DataStats::GetMinWhiteSpaces,
+                 "Returns minimum number of whitespaces in a string column.", py::arg("index"))
+            .def("get_max_white_spaces", &DataStats::GetMaxWhiteSpaces,
+                 "Returns maximum number of whitespaces in a string column.", py::arg("index"))
+            .def("get_true_count", &DataStats::GetTrueCount,
+                 "Returns number of true values in a boolean column.", py::arg("index"))
+            .def("get_false_count", &DataStats::GetFalseCount,
+                 "Returns number of false values in a boolean column.", py::arg("index"))
+            .def("get_zero_percent", &DataStats::GetZeroPercent,
+                 "Returns fraction of zero values in a numeric column.", py::arg("index"))
+            .def("get_number_of_diacritic_chars", &DataStats::GetNumberOfDiacriticChars,
+                 "Returns number of diacritic characters in a string column.", py::arg("index"));
 }
 }  // namespace python_bindings

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/model/types/big_int_type.h"
+#include "core/model/types/bool_type.h"
 #include "core/model/types/create_type.h"
 #include "core/model/types/date_type.h"
 #include "core/model/types/double_type.h"
