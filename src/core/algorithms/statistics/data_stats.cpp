@@ -1380,7 +1380,6 @@ Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
 
     double pearson = numerator / std::sqrt(sum_sq1 * sum_sq2);
 
-    mo::DoubleType double_type;
     Statistic result(double_type.MakeValue(pearson), &double_type, false);
 
     pearson_cache_[key] = result;
@@ -1477,7 +1476,6 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
 
     double spearman = numerator / std::sqrt(sum_sq_x * sum_sq_y);
 
-    mo::DoubleType double_type;
     Statistic result(double_type.MakeValue(spearman), &double_type, false);
 
     spearman_cache_[key] = result;
@@ -1547,7 +1545,6 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
 
     double kendall = static_cast<double>(concordant - discordant) / total;
 
-    mo::DoubleType double_type;
     Statistic result(double_type.MakeValue(kendall), &double_type, false);
 
     kendall_cache_[key] = result;
