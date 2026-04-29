@@ -11,9 +11,9 @@
 #include "core/algorithms/rfd/ga_rfd/ga_rfd.h"
 #include "core/algorithms/rfd/similarity_metric.h"
 #include "core/config/names.h"
+#include "core/config/tabular_data/input_table_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
 
 namespace tests {
 namespace config_names = config::names;
@@ -34,8 +34,9 @@ long long MeasureExecutionTime(Func&& f) {
 }
 
 static algos::StdParamsMap MakeParams(
-        config::InputTable const& table, double min_sim, double beta, std::size_t pop_size,
+        CSVConfig const& csv_config, double min_sim, double beta, std::size_t pop_size,
         std::size_t max_gen, std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics = {}) {
+    config::InputTable table = std::make_shared<CSVParser>(csv_config);
     algos::StdParamsMap params{{config_names::kTable, table},
                                {config_names::kRfdMinSimilarity, min_sim},
                                {config_names::kMinimumConfidence, beta},
@@ -60,7 +61,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
     constexpr double min_similarity = 0.95;
     constexpr double min_confidence = 0.8;
 
-    config::InputTable table = std::make_unique<CSVParser>(kIris);
+    config::InputTable table = std::make_shared<CSVParser>(kIris);
 
     std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics;
     for (int i = 0; i < 4; ++i) metrics.push_back(abs_diff);
@@ -96,117 +97,27 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
     }
 }
 
-/*
-TEST(GARfdPerformance, Neighbors10k_Fast) {
-    constexpr std::size_t pop_size = 10;
-    constexpr std::size_t generations = 16;
-    constexpr double min_similarity = 0.95;
-    constexpr double min_confidence = 0.8;
-
-    config::InputTable table = std::make_unique<CSVParser>(kNeighbors10k);
-
-    std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics(7);
-    metrics[0] = eq;
-    metrics[1] = eq;
-    metrics[2] = abs_diff;
-    for (int i = 3; i < 7; ++i) metrics[i] = eq;
-
-    algos::StdParamsMap params{{config_names::kTable, table},
-                               {"metrics", metrics},
-                               {config_names::kRfdMinSimilarity, min_similarity},
-                               {config_names::kMinimumConfidence, min_confidence},
-                               {config_names::kPopulationSize, pop_size},
-                               {config_names::kRfdMaxGenerations, generations},
-                               {config_names::kRfdCrossoverProbability, 0.85},
-                               {config_names::kRfdMutationProbability, 0.3},
-                               {config_names::kSeed, static_cast<std::uint64_t>(2024)}};
-
-    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
-
-    long long ms = MeasureExecutionTime([&]() { algo->Execute(); });
-
-    auto const& rfds = algo->GetRfds();
-    std::cout << "Found " << rfds.size() << " RFD, time " << ms << " ms" << std::endl;
-
-    for (auto const& rfd : rfds) {
-        EXPECT_GE(rfd.confidence, min_confidence);
-        EXPECT_LE(rfd.confidence, 1.0);
-        EXPECT_GE(rfd.support, 0.0);
-        EXPECT_LE(rfd.support, 1.0);
-        std::cout << rfd.ToString() << '\n';
-    }
-
-    EXPECT_LE(ms, 12'000) << "TL";
-}
-
-TEST(GARfdPerformance, Neighbors10k_Slow) {
-    constexpr std::size_t pop_size = 1024;
-    constexpr std::size_t generations = 64;
-    constexpr double min_similarity = 0.95;
-    constexpr double min_confidence = 0.8;
-
-    config::InputTable table = std::make_unique<CSVParser>(kNeighbors10k);
-
-    std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics(7);
-    metrics[0] = eq;
-    metrics[1] = eq;
-    metrics[2] = abs_diff;
-    for (int i = 3; i < 7; ++i) metrics[i] = eq;
-
-    algos::StdParamsMap params{{config_names::kTable, table},
-                               {"metrics", metrics},
-                               {config_names::kRfdMinSimilarity, min_similarity},
-                               {config_names::kMinimumConfidence, min_confidence},
-                               {config_names::kPopulationSize, pop_size},
-                               {config_names::kRfdMaxGenerations, generations},
-                               {config_names::kRfdCrossoverProbability, 0.85},
-                               {config_names::kRfdMutationProbability, 0.3},
-                               {config_names::kSeed, static_cast<std::uint64_t>(52)}};
-
-    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
-
-    long long ms = MeasureExecutionTime([&]() { algo->Execute(); });
-
-    auto const& rfds = algo->GetRfds();
-    std::cout << "Found " << rfds.size() << " RFD, time " << ms << " ms" << std::endl;
-
-    for (auto const& rfd : rfds) {
-        EXPECT_GE(rfd.confidence, min_confidence);
-        EXPECT_LE(rfd.confidence, 1.0);
-        EXPECT_GE(rfd.support, 0.0);
-        EXPECT_LE(rfd.support, 1.0);
-        std::cout << rfd.ToString() << '\n';
-    }
-
-    EXPECT_LE(ms, 22'000) << "TL";
-}
-*/
-
 TEST(GARfdEdge, ThrowsOnEmptyTable) {
-    config::InputTable table = std::make_shared<CSVParser>(kTestEmpty);
     auto metrics = EqualityMetrics(1);
-    auto params = MakeParams(table, 0.5, 0.5, 10, 1, metrics);
+    auto params = MakeParams(kTestEmpty, 0.5, 0.5, 10, 1, metrics);
     EXPECT_THROW(algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params), std::runtime_error);
 }
 
 TEST(GARfdEdge, ThrowsOnSingleAttribute) {
-    config::InputTable table = std::make_shared<CSVParser>(kTestSingleColumn);
     auto metrics = EqualityMetrics(1);
-    auto params = MakeParams(table, 0.5, 0.5, 10, 1, metrics);
+    auto params = MakeParams(kTestSingleColumn, 0.5, 0.5, 10, 1, metrics);
     EXPECT_THROW(algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params), std::runtime_error);
 }
 
 TEST(GARfdEdge, ThrowsOnTooManyAttributes) {
-    config::InputTable table = std::make_shared<CSVParser>(kRfd32Attrs);
     auto metrics = EqualityMetrics(32);
-    auto params = MakeParams(table, 0.5, 0.5, 10, 1, metrics);
+    auto params = MakeParams(kRfd32Attrs, 0.5, 0.5, 10, 1, metrics);
     EXPECT_THROW(algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params), std::runtime_error);
 }
 
 TEST(GARfdEdge, ThrowsOnSingleRow) {
-    config::InputTable table = std::make_shared<CSVParser>(kRfdSingleRow);
     auto metrics = EqualityMetrics(2);
-    auto params = MakeParams(table, 0.5, 0.5, 10, 1, metrics);
+    auto params = MakeParams(kRfdSingleRow, 0.5, 0.5, 10, 1, metrics);
     EXPECT_THROW(algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params), std::runtime_error);
 }
 
@@ -224,11 +135,8 @@ class GaRfdDatasetTest : public ::testing::TestWithParam<RFDTestParams> {};
 
 TEST_P(GaRfdDatasetTest, DiscoversRFDs) {
     auto const& p = GetParam();
-    config::InputTable table = std::make_shared<CSVParser>(p.csv_config);
-    auto dataset = std::make_unique<CSVParser>(p.csv_config);
-    std::size_t ncols = dataset->GetNumberOfColumns();
-    auto metrics = EqualityMetrics(ncols);
-    auto params = MakeParams(table, p.min_sim, p.beta, p.pop_size, p.max_gen, metrics);
+    auto metrics = EqualityMetrics(0);
+    auto params = MakeParams(p.csv_config, p.min_sim, p.beta, p.pop_size, p.max_gen, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
 
     if (p.expect_success) {
@@ -261,9 +169,8 @@ INSTANTIATE_TEST_SUITE_P(VariousDatasets, GaRfdDatasetTest,
                          });
 
 TEST(GARfdFunctional, IrisAllSimilarYieldsNonEmpty) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
     auto metrics = EqualityMetrics(5);
-    auto params = MakeParams(table, 0.0, 0.5, 20, 2, metrics);
+    auto params = MakeParams(kIris, 0.0, 0.5, 20, 2, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();
     auto rfds = algo->GetRfds();
@@ -271,9 +178,8 @@ TEST(GARfdFunctional, IrisAllSimilarYieldsNonEmpty) {
 }
 
 TEST(GARfdMetric, LevenshteinMetricOnIris) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
     auto metrics = std::vector<std::shared_ptr<rfd::SimilarityMetric>>{lev, lev, lev, lev, eq};
-    auto params = MakeParams(table, 0.8, 0.9, 30, 5, metrics);
+    auto params = MakeParams(kIris, 0.8, 0.9, 30, 5, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();
     auto rfds = algo->GetRfds();
@@ -283,13 +189,11 @@ TEST(GARfdMetric, LevenshteinMetricOnIris) {
 }
 
 TEST(GARfdDeterminism, SameSeedSameResult) {
-    config::InputTable table1 = std::make_shared<CSVParser>(kIris);
-    config::InputTable table2 = std::make_shared<CSVParser>(kIris);
     auto metrics = EqualityMetrics(5);
-    auto params = MakeParams(table1, 0.0, 0.5, 20, 1, metrics);
-    auto algo1 = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
-    params[config_names::kTable] = table2;
-    auto algo2 = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    auto params1 = MakeParams(kIris, 0.0, 0.5, 20, 1, metrics);
+    auto params2 = MakeParams(kIris, 0.0, 0.5, 20, 1, metrics);
+    auto algo1 = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params1);
+    auto algo2 = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params2);
     algo1->Execute();
     algo2->Execute();
     auto r1 = algo1->GetRfds();
@@ -304,9 +208,8 @@ TEST(GARfdDeterminism, SameSeedSameResult) {
 }
 
 TEST(GARfdCache, CacheSizeOptionWorks) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
     auto metrics = EqualityMetrics(5);
-    auto params = MakeParams(table, 0.8, 0.9, 20, 2, metrics);
+    auto params = MakeParams(kIris, 0.8, 0.9, 20, 2, metrics);
     params[config_names::kCacheMaxSize] = static_cast<std::size_t>(1);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();
@@ -315,10 +218,8 @@ TEST(GARfdCache, CacheSizeOptionWorks) {
 }
 
 TEST(GARfdEvolution, EarlyStopWhenAllSatisfy) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
     auto metrics = EqualityMetrics(5);
-    auto params = MakeParams(table, 0.0 /* any pair is similar */,
-                             0.0 /* eps – any confidence suit */, 20, 100, metrics);
+    auto params = MakeParams(kIris, 0.0, 0.0, 20, 100, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();
     auto rfds = algo->GetRfds();
@@ -326,16 +227,14 @@ TEST(GARfdEvolution, EarlyStopWhenAllSatisfy) {
 }
 
 TEST(GARfdEdge, MismatchedMetricsCountThrows) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
     auto metrics = EqualityMetrics(3);
-    auto params = MakeParams(table, 0.5, 0.5, 10, 1, metrics);
+    auto params = MakeParams(kIris, 0.5, 0.5, 10, 1, metrics);
     EXPECT_THROW(algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params), std::invalid_argument);
 }
 
 TEST(GARfdOperators, ZeroCrossoverAndMutation) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
     auto metrics = EqualityMetrics(5);
-    auto params = MakeParams(table, 0.5, 0.8, 30, 3, metrics);
+    auto params = MakeParams(kIris, 0.5, 0.8, 30, 3, metrics);
     params[config_names::kRfdCrossoverProbability] = 0.0;
     params[config_names::kRfdMutationProbability] = 0.0;
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
