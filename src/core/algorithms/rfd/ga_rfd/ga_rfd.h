@@ -20,6 +20,10 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_index.h"
 
+namespace tests {
+class GaRfdTester;
+}
+
 namespace algos::rfd {
 
 template <typename K, typename V>
@@ -67,7 +71,7 @@ public:
     }
 };
 
-class GaRfd : public algos::Algorithm {
+class GaRfd final : public algos::Algorithm {
 private:
     // Input
     config::InputTable input_table_;
@@ -83,7 +87,7 @@ private:
     std::vector<std::vector<uint64_t>> attr_similarity_bits_;
 
     std::size_t cache_max_size_ = 10000;
-    mutable LRUCache<uint32_t, std::size_t> support_cache_{cache_max_size_};
+    mutable std::optional<LRUCache<uint32_t, std::size_t>> support_cache_;
 
     // Parameters
     double min_similarity_ = 1.0;  // similarity threshold for a pair of values
@@ -104,7 +108,7 @@ private:
 
     void ResetState() final {
         discovered_.clear();
-        support_cache_.clear();
+        support_cache_->clear();
     }
 
     struct Individual {
@@ -135,6 +139,8 @@ private:
     void Mutate(std::vector<Individual>& pop, std::mt19937& rng) const;
 
     [[nodiscard]] std::set<RFD> Finalize(std::vector<Individual> const& pop) const;
+
+    friend class tests::GaRfdTester;
 
 public:
     GaRfd();

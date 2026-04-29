@@ -15,6 +15,7 @@
 #include "tests/benchmark/benchmark_runner.h"
 #include "tests/benchmark/dd_benchmark.h"
 #include "tests/benchmark/fd_benchmark.h"
+#include "tests/benchmark/ga_rfd_benchmark.h"
 #include "tests/benchmark/ind_benchmark.h"
 #include "tests/benchmark/md_benchmark.h"
 #include "tests/benchmark/nar_benchmark.h"
@@ -28,8 +29,9 @@ int main(int argc, char* argv[]) {
 
     BenchmarkRunner bm_runner;
     BenchmarkComparer bm_comparer;
-    for (auto test_register_func :
-         {ADCBenchmark, DDBenchmark, INDBenchmark, FDBenchmark, MDBenchmark, NARBenchmark}) {
+    for (auto test_register_func : {/* ADCBenchmark, DDBenchmark, INDBenchmark, FDBenchmark,
+                                    MDBenchmark, NARBenchmark, */
+                                    GaRfdBenchmark}) {
         test_register_func(bm_runner, bm_comparer);
     }
     bm_runner.ExecuteAll();
