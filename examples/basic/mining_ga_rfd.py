@@ -117,7 +117,7 @@ print("    on the RHS as well.")
 # 4. EXPLICIT PARAMETER SETUP FOR RFDs
 # ============================================================
 print("\n" + "─" * 70)
-print("3. EXPLICIT RFD PARAMETER SETUP")
+print("4. EXPLICIT RFD PARAMETER SETUP")
 print("   Here we explicitly set every parameter that GaRfd provides.")
 print("─" * 70)
 
@@ -161,7 +161,7 @@ for i, rfd in enumerate(rfds_explicit, 1):
 # 5. USING A CUSTOM PYTHON METRIC
 # ============================================================
 print("\n" + "─" * 70)
-print("4. CUSTOM METRIC (Python function)")
+print("5. CUSTOM METRIC (Python function)")
 print("   You can pass any Python callable to set_metrics().")
 print("   Here we use the Jaccard coefficient for strings.")
 print("─" * 70)
