@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
-#include "core/config/names.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 
@@ -20,7 +19,6 @@ private:
     // 1e-5 is one extra value on a table containing 10^5 rows
     constexpr static double kDefaultDiagonalThreshold = 1e-5;
 
-    bool distance_from_null_is_infinity_;
     double min_epsilon_;
     double max_epsilon_;
     double min_delta_;
@@ -43,10 +41,6 @@ protected:
 
     // Threshold for floating-point comparison of distances
     constexpr static double kDistThreshold = 1e-12;
-
-    bool DistFromNullIsInfty() const {
-        return distance_from_null_is_infinity_;
-    }
 
     double MinDelta() const {
         return min_delta_;
@@ -85,7 +79,6 @@ protected:
 public:
     PACVerifier() : Algorithm() {
         RegisterOptions();
-        MakeOptionsAvailable({config::names::kDistFromNullIsInfinity});
     }
 
     virtual ~PACVerifier() = default;

@@ -108,7 +108,6 @@ constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
-// Metric verifier, PAC
 constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
 // PAC
 constexpr auto kColumnIndices = "column_indices";

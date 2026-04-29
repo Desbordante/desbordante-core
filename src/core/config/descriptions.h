@@ -204,7 +204,6 @@ constexpr auto kDRhsIndex = "RHS column index";
 constexpr auto kDParameter = "metric FD parameter";
 auto const kDMetricAlgorithm = details::kDMetricAlgorithmString.c_str();
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
-// Metric verifier, PAC
 constexpr auto kDDistFromNullIsInfinity =
         "specify whether distance from NULL value is infinity "
         "(if not, it is 0)";

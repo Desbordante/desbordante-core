@@ -28,7 +28,7 @@ protected:
 
     /// @brief Distance between two std::byte pointers of type metrizable_types[type_num].
     /// Consider using this function instead of direct calls to metrizable_types[i]->Dist,
-    /// because it takes into account @c dist_from_null_is_infiniy and @c leveling_coefficients.
+    /// because it takes into account @c leveling_coefficients and correctly handles NULLs
     double DistBetweenBytes(std::size_t type_num, std::byte const* x, std::byte const* y) const;
 
     virtual double DistFromDomainInternal(Tuple const& value) const = 0;
