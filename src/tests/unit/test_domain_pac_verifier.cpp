@@ -36,7 +36,6 @@ struct DomainPACVerifyingParams {
                              std::shared_ptr<pac::model::IDomain>&& domain, double expected_epsilon,
                              double expected_delta, double min_delta = -1, double min_eps = -1,
                              double max_eps = -1, unsigned long delta_steps = 0,
-                             bool dist_from_null_is_infinity = false,
                              double diagonal_threshold = 1e-5)
         : params({{kCsvConfig, csv_config},
                   {kColumnIndices, std::move(col_indices)},
@@ -45,7 +44,6 @@ struct DomainPACVerifyingParams {
                   {kMinEpsilon, min_eps},
                   {kMaxEpsilon, max_eps},
                   {kDeltaSteps, delta_steps},
-                  {kDistFromNullIsInfinity, dist_from_null_is_infinity},
                   {kDiagonalThreshold, diagonal_threshold}}),
           exp_epsilon(expected_epsilon),
           exp_delta(expected_delta) {}
@@ -179,12 +177,12 @@ struct DomainPACHighlightParams {
 
     DomainPACHighlightParams(CSVConfig const& csv_config, config::IndicesType&& col_indices,
                              std::shared_ptr<pac::model::IDomain>&& domain,
-                             std::map<Epsilons, HighlightValues>&& expected_highlights,
-                             bool dist_from_null_is_infinity = false)
-        : params({{kCsvConfig, csv_config},
+                             std::map<Epsilons, HighlightValues>&& expected_highlights)
+        : params({
+                  {kCsvConfig, csv_config},
                   {kColumnIndices, std::move(col_indices)},
                   {kDomain, std::move(domain)},
-                  {kDistFromNullIsInfinity, dist_from_null_is_infinity}}),
+          }),
           expected_highlights(std::move(expected_highlights)) {}
 };
 
@@ -209,8 +207,7 @@ INSTANTIATE_TEST_SUITE_P(
                 DomainPACHighlightParams(kTest1, {0}, std::make_shared<Parallelepiped>("4", "6"),
                                          {{{0.1, 1.1}, {"3", "7"}},
                                           {{1.1, 2.1}, {"2", "2", "2", "8"}},
-                                          {{2.1, 3.1}, {"1", "1", "1", "1", "9"}}},
-                                         true),
+                                          {{2.1, 3.1}, {"1", "1", "1", "1", "9"}}}),
                 // No values fall into domain, highlighted values on both sides of domain
                 DomainPACHighlightParams(kSimpleTypos, {2},
                                          std::make_shared<Ball>(Strings{"17"}, 4),

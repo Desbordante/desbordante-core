@@ -18,7 +18,6 @@ namespace pac::model {
 class DESBORDANTE_EXPORT IDomain {
 protected:
     std::shared_ptr<TupleType> tuple_type_;
-    bool dist_from_null_is_infty_ = false;
 
     // Validate types if needed, and do all other types-related business
     virtual void ValidateTypes(std::vector<::model::Type const*> const&) {}
@@ -39,11 +38,6 @@ public:
         ValidateTypes(types);
         tuple_type_ = std::make_shared<TupleType>(std::move(types));
         AfterSetTypes();
-    }
-
-    // Dist_from_null is algorithm parameter, so it cannot be set in constructor.
-    void SetDistFromNullIsInfinity(bool value) {
-        dist_from_null_is_infty_ = value;
     }
 
     std::shared_ptr<TupleType> GetTupleTypePtr() const {

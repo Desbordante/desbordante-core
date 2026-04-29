@@ -21,9 +21,6 @@ namespace algos::pac_verifier {
 void PACVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(Option<bool>(&distance_from_null_is_infinity_, kDistFromNullIsInfinity,
-                                kDDistFromNullIsInfinity, false));
-
     RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, -1.0));
     RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, -1.0));
     RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0).SetValueCheck([](double x) {

@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <functional>
 #include <iterator>
-#include <limits>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -42,7 +41,7 @@ void MetricBasedDomain::ValidateTypes(std::vector<Type const*> const& types) {
 double MetricBasedDomain::DistBetweenBytes(std::size_t type_num, std::byte const* x,
                                            std::byte const* y) const {
     if (x == nullptr || y == nullptr) {
-        return dist_from_null_is_infty_ ? std::numeric_limits<double>::infinity() : 0;
+        return 0;
     }
     return metrizable_types_[type_num]->Dist(x, y) * leveling_coeffs_[type_num];
 }

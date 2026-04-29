@@ -25,7 +25,6 @@ void DomainPACVerifier::ProcessPACTypeOptions() {
     });
 
     domain_->SetTypes(std::move(types));
-    domain_->SetDistFromNullIsInfinity(DistFromNullIsInfty());
     tuple_type_ = domain_->GetTupleTypePtr();
 }
 
