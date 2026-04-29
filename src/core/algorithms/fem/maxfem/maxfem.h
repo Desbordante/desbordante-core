@@ -2,7 +2,6 @@
 
 #include <map>
 #include <memory>
-#include <unordered_map>
 
 #include "core/algorithms/fem/fem_algorithm.h"
 #include "core/algorithms/fem/maxfem/model/location_list.h"
@@ -21,7 +20,6 @@ private:
 
     model::Event events_num_ = 0;
     std::vector<CompositeEpisode::RawEpisode> max_frequent_episodes_;
-    std::unordered_map<model::Event, model::Event> mapping_;
     std::vector<model::Event> reverse_mapping_;
 
     MaxEpisodesCollection max_episodes_collection_;

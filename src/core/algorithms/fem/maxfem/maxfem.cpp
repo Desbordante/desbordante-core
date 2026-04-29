@@ -1,6 +1,7 @@
 #include "maxfem.h"
 
 #include <algorithm>
+#include <unordered_map>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -67,9 +68,10 @@ void MaxFEM::RemoveInfrequentEvents() {
     model::Event new_events_num = model::kStartEvent;
     reverse_mapping_.resize(new_events_num);
 
+    std::unordered_map<model::Event, model::Event> mapping;
     for (auto const& [event, support] : events_supports) {
         if (support >= min_support_) {
-            mapping_[event] = new_events_num;
+            mapping[event] = new_events_num;
             reverse_mapping_.push_back(event);
             new_events_num++;
         }
@@ -78,7 +80,7 @@ void MaxFEM::RemoveInfrequentEvents() {
     LOG_DEBUG("Frequent events number: {}", events_num_);
 
     for (auto& event_set : *event_sequence_) {
-        event_set.MapEventsAndRemoveInfrequent(mapping_);
+        event_set.MapEventsAndRemoveInfrequent(mapping);
     }
 }
 
