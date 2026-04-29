@@ -398,6 +398,22 @@ desbordante_add_test(
 )
 
 desbordante_add_test(
+    fem.afem
+    SRCS
+    test_afem_algorithm.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fem::afem
+    ${DESBORDANTE_PREFIX}::model::sequence
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::algos
+    ${DESBORDANTE_PREFIX}::parser::sequence
+    spdlog::spdlog_header_only
+    better-enums
+    gmock
+    Boost::headers
+)
+
+desbordante_add_test(
     fem.tke
     SRCS
     test_tke_algorithm.cpp
