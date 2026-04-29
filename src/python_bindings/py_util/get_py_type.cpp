@@ -2,6 +2,7 @@
 
 #include <Python.h>
 
+#include <cstddef>
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -10,6 +11,9 @@
 #include <vector>
 
 #include <boost/core/demangle.hpp>
+#include <pybind11/functional.h>
+#include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -20,6 +24,9 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/config/custom_metric/custom_metric.h"
+#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -37,6 +44,7 @@ constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
 constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 constexpr PyTypeObject* const kPySet = &PySet_Type;
+constexpr PyTypeObject* const kPyFunc = &PyFunction_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -120,6 +128,13 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
+            PyTypePair<std::vector<std::string>, kPyList, kPyStr>,
+            PyTypePair<std::vector<double>, kPyList, kPyFloat>,
+            {typeid(std::shared_ptr<pac::model::IDomain>),
+             []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
+            PyTypePair<std::shared_ptr<config::ICustomMetric>, kPyFunc>,
+            PyTypePair<std::vector<std::shared_ptr<config::ICustomMetric>>, kPyList, kPyFunc>,
+            PyTypePair<std::shared_ptr<config::ICustomVectorMetric>, kPyFunc>,
     };
 
     auto const it = type_map.find(type_index);

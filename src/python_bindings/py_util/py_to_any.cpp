@@ -1,14 +1,24 @@
 #include <pybind11/pybind11.h>
 
+#include <algorithm>
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
+#include <typeindex>
 #include <unordered_map>
+#include <vector>
 
 #include <boost/any.hpp>
 #include <boost/core/demangle.hpp>
+#include <pybind11/cast.h>
+#include <pybind11/functional.h>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
+#include <pybind11/typing.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -20,6 +30,9 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/config/custom_metric/custom_metric.h"
+#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -27,6 +40,7 @@
 #include "core/config/tabular_data/input_tables_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "core/util/enum_to_available_values.h"
+#include "python_bindings/data/py_custom_metrics.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
 
 namespace {
@@ -119,6 +133,30 @@ boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     return parsers;
 }
 
+boost::any CustomMetricToAny(std::string_view, py::handle obj) {
+    return std::shared_ptr<config::ICustomMetric>(
+            new python_bindings::PyCustomMetric(py::reinterpret_borrow<py::object>(obj)));
+}
+
+boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
+    auto metric_handles = CastAndReplaceCastError<std::vector<py::object>>(option_name, obj);
+    std::vector<std::shared_ptr<config::ICustomMetric>> result(metric_handles.size());
+    std::ranges::transform(
+            metric_handles, result.begin(),
+            [](py::object obj) -> std::shared_ptr<config::ICustomMetric> {
+                if (obj.is_none()) {
+                    return nullptr;
+                }
+                return std::make_shared<python_bindings::PyCustomMetric>(std::move(obj));
+            });
+    return result;
+}
+
+boost::any CustomVectorMetricToAny(std::string_view, py::handle obj) {
+    return std::shared_ptr<config::ICustomVectorMetric>(
+            new python_bindings::PyCustomVectorMetric(py::reinterpret_borrow<py::object>(obj)));
+}
+
 std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<double>,
@@ -150,7 +188,17 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<model::DDString>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
-        kNormalConvPair<std::pair<std::string, std::string>>};
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        {typeid(std::shared_ptr<config::ICustomMetric>), CustomMetricToAny},
+        {typeid(std::vector<std::shared_ptr<config::ICustomMetric>>), CustomMetricsToAny},
+        {typeid(std::shared_ptr<config::ICustomVectorMetric>), CustomVectorMetricToAny},
+        kNormalConvPair<std::vector<std::string>>,
+        kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        kNormalConvPair<std::vector<double>>,
+        {typeid(std::shared_ptr<config::ICustomMetric>), CustomMetricToAny},
+        {typeid(std::vector<std::shared_ptr<config::ICustomMetric>>), CustomMetricsToAny},
+        {typeid(std::shared_ptr<config::ICustomVectorMetric>), CustomVectorMetricToAny},
+};
 
 }  // namespace
 
