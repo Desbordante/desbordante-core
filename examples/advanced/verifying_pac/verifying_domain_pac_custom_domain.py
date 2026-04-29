@@ -127,7 +127,6 @@ You now know how to use Domain PACs with built-in domains as well as custom ones
 Try applying them to your own data and see what insights you can uncover.'''
       )
 
-# C++ note: Custom domain is called "Untyped domain" in C++ code, because it erases type
-# information, converting all values to strings. If you use C++ library, it's recommended to
-# implement IDomain interface or derive from MetricBasedDomain (if your domain is based on
-# coordinate-wise metrics). See Parallelepiped and Ball implementations as examples.
+# Note: In C++ it's recommended to implement IDomain interface or derive from MetricBasedDomain
+# (if your domain is based on coordinate-wise metrics). See Parallelepiped and Ball implementations
+# as examples.
