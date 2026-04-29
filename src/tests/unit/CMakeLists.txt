@@ -621,6 +621,7 @@ desbordante_add_test(
 desbordante_add_test(
     rfd.ga
     SRCS
+    test_ga_rfd_support.cpp
     test_ga_rfd.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd

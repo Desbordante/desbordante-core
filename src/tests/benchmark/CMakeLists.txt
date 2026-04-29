@@ -17,6 +17,8 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::md::hy
             ${DESBORDANTE_PREFIX}::md::hy::preprocessing
             ${DESBORDANTE_PREFIX}::nar::des
+            ${DESBORDANTE_PREFIX}::rfd
+            ${DESBORDANTE_PREFIX}::rfd::ga_rfd
             Boost::program_options
             better-enums
             frozen

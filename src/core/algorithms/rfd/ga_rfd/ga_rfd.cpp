@@ -40,7 +40,7 @@ namespace algos::rfd {
 std::string RFD::ToString() const {
     std::string res = "[";
     bool first = true;
-    for (uint8_t i = 0; i < 31; i++) {
+    for (uint8_t i = 0; i < kMaxAttributes; i++) {
         if (lhs_mask & (1u << i)) {
             if (!first) res += ", ";
             res += std::to_string(i);
@@ -107,7 +107,7 @@ void GaRfd::LoadDataInternal() {
     num_attrs_ = first_row.size();
     if (num_attrs_ < 2) [[unlikely]]
         throw std::runtime_error("GA-rfd requires at least 2 attributes");
-    if (num_attrs_ > 31) [[unlikely]]
+    if (num_attrs_ > kMaxAttributes) [[unlikely]]
         throw std::runtime_error("Maximum 31 attributes supported");
     column_data_.resize(num_attrs_);
     for (size_t i = 0; i < num_attrs_; i++) {
@@ -141,6 +141,8 @@ void GaRfd::LoadDataInternal() {
     }
     if (metrics_.size() != num_attrs_) [[unlikely]]
         throw std::invalid_argument("The number of attributes and metrics do not match");
+
+    support_cache_.emplace(cache_max_size_);
 }
 
 void GaRfd::BuildSimilarityBitsets() {
@@ -182,16 +184,16 @@ void GaRfd::BuildSimilarityBitsets() {
 }
 
 std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
-    if (auto cached = support_cache_.get(attrs_mask)) return *cached;
+    if (auto cached = support_cache_->get(attrs_mask)) return *cached;
     if (attrs_mask == 0) {
-        support_cache_.put(0, total_pairs_);
+        support_cache_->put(0, total_pairs_);
         return total_pairs_;
     }
 
     uint32_t mm = attrs_mask;
     int first = FirstSetBit(mm);
     if (first < 0) {
-        support_cache_.put(attrs_mask, 0);
+        support_cache_->put(attrs_mask, 0);
         return 0;
     }
 
@@ -199,12 +201,14 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
     if ((attrs_mask & (attrs_mask - 1)) == 0u) {
         std::size_t s = 0;
         for (uint64_t w : first_vec) s += std::popcount(w);
-        support_cache_.put(attrs_mask, s);
-        LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), s);
+        support_cache_->put(attrs_mask, s);
+        LOG_DEBUG("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), s);
         return s;
     }
 
-    std::vector<uint64_t> buffer = first_vec;
+    static thread_local std::vector<uint64_t> buffer;
+    buffer = first_vec;
+
     mm &= mm - 1;
     while (mm) {
         int a = FirstSetBit(mm);
@@ -216,7 +220,7 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
             running += std::popcount(buffer[k]);
         }
         if (running == 0) {
-            support_cache_.put(attrs_mask, 0);
+            support_cache_->put(attrs_mask, 0);
             return 0;
         }
         mm &= mm - 1;
@@ -224,8 +228,8 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const noexcept {
 
     std::size_t support = 0;
     for (uint64_t w : buffer) support += std::popcount(w);
-    support_cache_.put(attrs_mask, support);
-    LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), support);
+    support_cache_->put(attrs_mask, support);
+    LOG_DEBUG("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), support);
     return support;
 }
 
@@ -342,6 +346,7 @@ std::vector<GaRfd::Individual> GaRfd::Crossover(std::vector<Individual> const& s
                 std::swap(rhs1, rhs2);
             }
 
+            // Discard offspring where LHS becomes empty or contains RHS (invalid)
             if ((mask1 == 0) || (mask1 & (1u << rhs1))) [[unlikely]]
                 continue;
             if ((mask2 == 0) || (mask2 & (1u << rhs2))) [[unlikely]]
