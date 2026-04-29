@@ -5,6 +5,9 @@
 
 namespace algos::rfd {
 
+// Masks use uint32_t -> max 31 attributes (31 bits + RHS can't overlap)
+static constexpr std::size_t kMaxAttributes = 31;
+
 struct RFD {
     uint32_t lhs_mask = 0;
     uint8_t rhs_index = 0;
