@@ -1,0 +1,62 @@
+#include "core/algorithms/rfd/similarity_metric.h"
+
+#include <algorithm>
+#include <vector>
+
+namespace algos::rfd {
+
+FunctionSimilarityMetric::FunctionSimilarityMetric(Func func) : func_(std::move(func)) {}
+
+double FunctionSimilarityMetric::Compare(std::string const& a, std::string const& b) const {
+    return func_(a, b);
+}
+
+namespace {
+double LevenshteinSimilarity(std::string const& a, std::string const& b) {
+    size_t n = a.size(), m = b.size();
+    if (n == 0 && m == 0) return 1.0;
+    if (n == 0 || m == 0) return 0.0;
+    std::vector<size_t> dp(m + 1);
+    for (size_t j = 0; j <= m; j++) dp[j] = j;
+    for (size_t i = 1; i <= n; i++) {
+        size_t prev = i;
+        for (size_t j = 1; j <= m; j++) {
+            size_t cost = (a[i - 1] == b[j - 1]) ? 0 : 1;
+            size_t cur = std::min({dp[j] + 1, prev + 1, dp[j - 1] + cost});
+            dp[j - 1] = prev;
+            prev = cur;
+        }
+        dp[m] = prev;
+    }
+    double max_len = std::max(n, m);
+    return 1.0 - static_cast<double>(dp[m]) / max_len;
+}
+}  // namespace
+
+std::shared_ptr<SimilarityMetric> LevenshteinMetric() {
+    return std::make_shared<FunctionSimilarityMetric>(&LevenshteinSimilarity);
+}
+
+std::shared_ptr<SimilarityMetric> EqualityMetric() {
+    return std::make_shared<FunctionSimilarityMetric>(
+            [](std::string const& a, std::string const& b) { return a == b ? 1.0 : 0.0; });
+}
+
+std::shared_ptr<SimilarityMetric> AbsoluteDifferenceMetric() {
+    return std::make_shared<FunctionSimilarityMetric>(
+            [](std::string const& a, std::string const& b) {
+                try {
+                    double x = std::stod(a);
+                    double y = std::stod(b);
+                    double abs_diff = std::abs(x - y);
+                    double max_abs = std::max(std::abs(x), std::abs(y));
+                    if (max_abs == 0.0) return 1.0;
+                    double similarity = 1.0 - abs_diff / max_abs;
+                    return std::max(0.0, similarity);
+                } catch (...) {
+                    return 0.0;
+                }
+            });
+}
+
+}  // namespace algos::rfd

@@ -123,4 +123,7 @@ extern CSVConfig const kWdcSatellites;
 extern CSVConfig const kWdcScience;
 extern CSVConfig const kWdcSymbols;
 extern CSVConfig const kMDTrivial;
+extern CSVConfig const kRfd32Attrs;
+extern CSVConfig const kRfdSingleRow;
+extern CSVConfig const kRfdTwoRows;
 }  // namespace tests
