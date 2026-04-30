@@ -1,6 +1,5 @@
 #include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 
-#include <chrono>
 #include <numeric>
 #include <stdexcept>
 

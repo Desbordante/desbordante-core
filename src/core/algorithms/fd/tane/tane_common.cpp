@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/tane/tane_common.h"
 
-#include <chrono>
 #include <iomanip>
 #include <list>
 #include <memory>

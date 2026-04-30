@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/pyro/pyro.h"
 
-#include <chrono>
 #include <mutex>
 #include <thread>
 

@@ -1,6 +1,5 @@
 #include "afd_metric_calculator.h"
 
-#include <chrono>
 #include <cmath>
 #include <iterator>
 

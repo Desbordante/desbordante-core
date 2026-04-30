@@ -1,7 +1,5 @@
 #include "core/algorithms/ucc/hyucc/hyucc.h"
 
-#include <chrono>
-
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/algorithms/ucc/hyucc/inductor.h"
 #include "core/algorithms/ucc/hyucc/preprocessor.h"

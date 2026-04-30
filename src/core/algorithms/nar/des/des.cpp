@@ -1,7 +1,6 @@
 #include "core/algorithms/nar/des/des.h"
 
 #include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <vector>

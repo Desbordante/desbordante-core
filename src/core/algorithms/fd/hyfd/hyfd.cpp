@@ -1,7 +1,6 @@
 #include "core/algorithms/fd/hyfd/hyfd.h"
 
 #include <algorithm>
-#include <chrono>
 #include <memory>
 #include <tuple>
 #include <utility>

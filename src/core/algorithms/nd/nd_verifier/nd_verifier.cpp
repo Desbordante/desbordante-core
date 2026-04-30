@@ -1,6 +1,5 @@
 #include "core/algorithms/nd/nd_verifier/nd_verifier.h"
 
-#include <chrono>
 #include <cstddef>
 #include <sstream>
 #include <stdexcept>

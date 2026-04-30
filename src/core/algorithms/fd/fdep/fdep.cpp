@@ -1,7 +1,5 @@
 #include "core/algorithms/fd/fdep/fdep.h"
 
-#include <chrono>
-
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_relation_data.h"

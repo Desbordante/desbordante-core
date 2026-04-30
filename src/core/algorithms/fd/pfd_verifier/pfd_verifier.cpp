@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
 
-#include <chrono>
 #include <memory>
 
 #include "core/algorithms/algorithm.h"

@@ -1,7 +1,6 @@
 #include "core/algorithms/dc/verifier/dc_verifier.h"
 
 #include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <cstring>
 #include <ctime>

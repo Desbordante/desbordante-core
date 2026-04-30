@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
 
-#include <chrono>
 #include <memory>
 #include <stdexcept>
 

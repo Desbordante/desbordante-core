@@ -1,6 +1,5 @@
 #include "core/algorithms/ucc/pyroucc/pyroucc.h"
 
-#include <chrono>
 #include <mutex>
 #include <thread>
 
