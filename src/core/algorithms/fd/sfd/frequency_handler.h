@@ -15,7 +15,7 @@ private:
     std::vector<std::unordered_map<std::string, size_t>> frequency_maps_;
 
 public:
-    void InitFrequencyHandler(std::vector<model::TypedColumnData> const &data,
+    void InitFrequencyHandler(std::vector<model::TypedColumnData> const& data,
                               model::ColumnIndex columns, size_t max_amount_of_categories);
 
     [[nodiscard]] size_t GetColumnFrequencySum(model::ColumnIndex col_ind) const {
@@ -26,12 +26,12 @@ public:
         return cardinality_[col_ind];
     }
 
-    [[nodiscard]] size_t GetValueOrdinalNumberAtColumn(std::string const &val,
+    [[nodiscard]] size_t GetValueOrdinalNumberAtColumn(std::string const& val,
                                                        model::ColumnIndex col_ind) const {
         return frequency_maps_[col_ind].at(val);
     }
 
-    [[nodiscard]] bool ContainsValAtColumn(std::string const &val,
+    [[nodiscard]] bool ContainsValAtColumn(std::string const& val,
                                            model::ColumnIndex col_ind) const {
         return frequency_maps_[col_ind].find(val) != frequency_maps_[col_ind].end();
     }

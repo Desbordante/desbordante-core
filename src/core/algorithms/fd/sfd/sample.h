@@ -26,9 +26,9 @@ private:
 
 public:
     Sample(bool fixed_sample, unsigned long long sample_size, size_t rows, model::ColumnIndex lhs,
-           model::ColumnIndex rhs, std::vector<model::TypedColumnData> const &data,
-           RelationalSchema const *rel_schema_);
-    void Filter(FrequencyHandler const &handler, std::vector<model::TypedColumnData> const &data,
+           model::ColumnIndex rhs, std::vector<model::TypedColumnData> const& data,
+           RelationalSchema const* rel_schema_);
+    void Filter(FrequencyHandler const& handler, std::vector<model::TypedColumnData> const& data,
                 model::ColumnIndex col_ind);
 
     /* Formulae (2) from "CORDS: Automatic Discovery of Correlations and Soft Functional
@@ -37,7 +37,7 @@ public:
                                                   long double max_false_positive_probability,
                                                   long double delta);
 
-    [[nodiscard]] std::vector<size_t> const &GetRowIndices() const {
+    [[nodiscard]] std::vector<size_t> const& GetRowIndices() const {
         return row_indices_;
     }
 
