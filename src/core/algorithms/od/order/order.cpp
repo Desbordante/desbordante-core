@@ -365,7 +365,6 @@ void Order::ExecuteInternal() {
         lattice_->GenerateNextLevel(candidate_sets_);
     }
     PrintValidOD();
-    LOG_DEBUG("ms: {}\n", elapsed_milliseconds.count());
 }
 
 }  // namespace algos::order
