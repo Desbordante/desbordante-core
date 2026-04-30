@@ -59,7 +59,7 @@ bool Mind::ExternalOptionIsRequired(std::string_view option_name) const {
 }
 
 void Mind::LoadINDAlgorithmDataInternal() {
-    timings_.load = util::TimedInvoke(&Algorithm::LoadData, auind_algo_);
+    auind_algo_->LoadData();
 }
 
 void Mind::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
@@ -271,14 +271,11 @@ void Mind::MineNaryINDs() {
 }
 
 void Mind::ExecuteInternal() {
-    timings_.compute_uinds = util::TimedInvoke(&Mind::MineUnaryINDs, this);
-    timings_.compute_ninds = util::TimedInvoke(&Mind::MineNaryINDs, this);
-    return timings_.compute_uinds + timings_.compute_ninds;
+    MineUnaryINDs();
+    MineNaryINDs();
 }
 
 void Mind::ResetINDAlgorithmState() {
-    timings_.compute_uinds = 0;
-    timings_.compute_ninds = 0;
 }
 
 }  // namespace algos
