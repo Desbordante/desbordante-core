@@ -139,7 +139,8 @@ desbordante_add_test(
     SRCS
     test_dc_structures.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::dc::fastadc::structs
+    ${DESBORDANTE_PREFIX}::dc::fastadc
+    ${DESBORDANTE_PREFIX}::dc::hybriddc
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::parser::csv
     ${DESBORDANTE_PREFIX}::model::types

@@ -78,6 +78,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindPfdVerification,
                            BindARVerification,
                            BindFastADC,
+                           BindHybridDC,
                            BindGfd,
                            BindGSpan,
                            BindCFDVerification,

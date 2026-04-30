@@ -4,6 +4,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "core/algorithms/dc/FastADC/fastadc.h"
+#include "core/algorithms/dc/HybridDC/hybrid_dc.h"
 #include "core/algorithms/dc/FastADC/misc/misc.h"
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"
@@ -14,6 +16,8 @@
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_organizer.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/create_type.h"
 #include "core/model/types/int_type.h"
@@ -572,6 +576,170 @@ TEST_F(FastADC, DenialConstraints) {
         std::string dc = std::next(ordered_result.begin(), i)->ToString();
         EXPECT_EQ(dc, expected_denial_constraints[i]) << "Unexpected denial constraint: " << dc;
     }
+}
+
+namespace {
+
+CSVConfig CreateFastAdcDatasetConfig(std::string_view filename) {
+    static std::filesystem::path const kFastAdcDatasetDir{"/home/imorozko/maga/FastADC/dataset"};
+    return {kFastAdcDatasetDir / filename, ',', true};
+}
+
+unsigned GetThreadsFromEnv(unsigned fallback) {
+    char const* env = std::getenv("THREADS");
+    if (!env || *env == '\0') {
+        return fallback;
+    }
+
+    try {
+        unsigned long v = std::stoul(env);
+        if (v == 0) {
+            return fallback;
+        }
+        return static_cast<unsigned>(v);
+    } catch (...) {
+        return fallback;
+    }
+}
+
+void RunFastAdcOnDataset(std::string_view filename) {
+    unsigned threads = GetThreadsFromEnv(20U);
+
+    auto const cfg = CreateFastAdcDatasetConfig(filename);
+    auto table_stream = std::make_shared<CSVParser>(cfg);
+
+    algos::dc::FastADC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold);
+    algo.SetOption(kThreads, threads);
+
+    auto total_ms = algo.Execute();
+
+    auto const& dcs = algo.GetDCs();
+
+    std::cout << "[Desbordante] Total computing time: " << total_ms << " ms" << std::endl;
+    std::cout << "\nGathered " << dcs.size() << " denial constraints" << std::endl;
+}
+
+}  // namespace
+
+TEST(FastADCTest, Airport) {
+    RunFastAdcOnDataset("Airport.csv");
+}
+
+TEST(FastADCTest, Atom) {
+    RunFastAdcOnDataset("Atom.csv");
+}
+
+TEST(FastADCTest, Food) {
+    RunFastAdcOnDataset("Food.csv");
+}
+
+TEST(FastADCTest, SPStock) {
+    RunFastAdcOnDataset("SPStock.csv");
+}
+
+TEST(FastADCTest, Neighbors) {
+    RunFastAdcOnDataset("Neighbors.csv");
+}
+
+TEST(FastADCTest, TestDCCSVPredicateBuilding) {
+    static std::filesystem::path const kTestDCPath{"/home/imorozko/maga/FastADC/TestDC.csv"};
+    CSVConfig cfg{kTestDCPath, ',', true};
+    CSVParser parser{cfg};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
+
+    std::cout << "\n========================================\n";
+    std::cout << "=== TestDC.csv Column Summary\n";
+    std::cout << "========================================\n";
+    for (size_t i = 0; i < col_data.size(); ++i) {
+        auto const& col = col_data[i];
+        std::cout << "  Col[" << i << "]: name=" << col.GetColumn()->ToString()
+                  << "  typeId=" << col.GetTypeId()._to_string()
+                  << "  isNumeric=" << (col.IsNumeric() ? "yes" : "no")
+                  << "  rows=" << col.GetNumRows() << "\n";
+    }
+
+    auto pred_index_provider = std::make_shared<PredicateIndexProvider>();
+    PredicateProvider pred_provider;
+    PredicateBuilder builder(&pred_provider, pred_index_provider, /*allow_cross_columns=*/true);
+
+    std::cout << "\n========================================\n";
+    std::cout << "=== Building Predicate Space (thresholds: min_shared=0.3, avg_ratio=0.1)\n";
+    std::cout << "========================================\n";
+    builder.BuildPredicateSpace(col_data);
+
+    std::cout << "\n========================================\n";
+    std::cout << "=== Predicate Results\n";
+    std::cout << "========================================\n";
+    std::cout << "Total predicates: " << builder.GetPredicates().size() << "\n";
+
+    auto print_group = [](std::string const& label, PredicatesVector const& preds) {
+        std::cout << "\n--- " << label << " (" << preds.size() << ") ---\n";
+        for (auto const& p : preds) {
+            std::cout << "  " << p->ToString() << "\n";
+        }
+    };
+
+    print_group("Numeric single-column predicates", builder.GetNumSingleColumnPredicates());
+    print_group("Numeric cross-column predicates", builder.GetNumCrossColumnPredicates());
+    print_group("String single-column predicates", builder.GetStrSingleColumnPredicates());
+    print_group("String cross-column predicates", builder.GetStrCrossColumnPredicates());
+
+    std::cout << "\n--- All predicates ---\n";
+    for (auto const& p : builder.GetPredicates()) {
+        std::cout << "  " << p->ToString() << "\n";
+    }
+
+    EXPECT_GT(builder.GetPredicates().size(), 0u) << "Expected at least one predicate to be built";
+}
+
+TEST(HybridDCTest, AdultSuperTrimmed) {
+    CSVConfig cfg{"/home/imorozko/maga/fdcd/data/adult_super_trimmed.csv", ',', true};
+    auto table_stream = std::make_shared<CSVParser>(cfg);
+
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kThreads, GetThreadsFromEnv(4U));
+    algo.Execute();
+
+    std::cout << "HybridDC found " << algo.GetDCs().size() << " denial constraints\n";
+}
+
+TEST(FastADCTest, AdultSuperTrimmedExact) {
+    CSVConfig cfg{"/home/imorozko/maga/fdcd/data/adult_super_trimmed.csv", ',', true};
+    auto table_stream = std::make_shared<CSVParser>(cfg);
+
+    algos::dc::FastADC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.0);
+    algo.SetOption(kThreads, GetThreadsFromEnv(4U));
+    algo.Execute();
+
+    std::cout << "FastADC(threshold=0) found " << algo.GetDCs().size() << " denial constraints\n";
 }
 
 }  // namespace tests
