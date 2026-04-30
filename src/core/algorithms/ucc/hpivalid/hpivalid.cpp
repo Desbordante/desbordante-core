@@ -44,7 +44,6 @@ void HPIValid::ExecuteInternal() {
     hpiv::Config cfg;
     hpiv::ResultCollector rc(3600);
 
-    rc.SetStartTime();
     hpiv::PLITable tab = Preprocess();
 
     hpiv::TreeSearch tree_search(tab, cfg, rc);
@@ -53,8 +52,6 @@ void HPIValid::ExecuteInternal() {
     RegisterUCCs(rc);
 
     PrintInfo(rc);
-
-    return rc.GetTimeSinceStart();
 }
 
 void HPIValid::RegisterUCCs(hpiv::ResultCollector const& rc) {

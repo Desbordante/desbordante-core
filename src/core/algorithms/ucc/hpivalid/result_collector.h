@@ -74,9 +74,6 @@ public:
         return ucc_count_;
     }
 
-    // Time in milliseconds since execution started.
-    unsigned long long GetTimeSinceStart() const;
-
     // Total number of sampled difference sets.
     unsigned DiffSets() const {
         return diff_sets_;
