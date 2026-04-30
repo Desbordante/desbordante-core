@@ -38,7 +38,7 @@ PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigne
       nep_(nep),
       probing_table_cache_() {}
 
-std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>& data) {
+std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int> const& data) {
     std::unordered_map<int, std::vector<int>> index;
     for (unsigned long position = 0; position < data.size(); ++position) {
         int value_id = data[position];

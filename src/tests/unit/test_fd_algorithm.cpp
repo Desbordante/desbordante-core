@@ -157,7 +157,7 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             MaxLHSOptionWork);
 
 using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
-                                    algos::Depminer, algos::FUN, algos::hyfd::HyFD, algos::PFDTane>;
+                                    algos::Depminer, algos::FUN, algos::PFDTane>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
@@ -171,7 +171,7 @@ TYPED_TEST_P(FdDiscoveryTest, ThrowsOnEmpty) {
 TYPED_TEST_P(FdDiscoveryTest, ReturnsEmptyOnSingleNonKey) {
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestSingleColumn);
     algorithm->Execute();
-    ASSERT_TRUE(NoFDsFound(*algorithm->GetFdStorage()));
+    ASSERT_TRUE(NoFDsFound(*algorithm->GetFds()));
 }
 
 TYPED_TEST_P(FdDiscoveryTest, WorksOnLongDataset) {
@@ -179,7 +179,7 @@ TYPED_TEST_P(FdDiscoveryTest, WorksOnLongDataset) {
 
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestLong);
     algorithm->Execute();
-    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFdStorage()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFds()));
 }
 
 TYPED_TEST_P(FdDiscoveryTest, WorksOnWideDataset) {
@@ -188,7 +188,7 @@ TYPED_TEST_P(FdDiscoveryTest, WorksOnWideDataset) {
 
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestWide);
     algorithm->Execute();
-    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFdStorage()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFds()));
 }
 
 TYPED_TEST_P(FdDiscoveryTest, LightDatasetsConsistentHash) {
@@ -202,16 +202,16 @@ TYPED_TEST_P(FdDiscoveryTest, HeavyDatasetsConsistentHash) {
 TYPED_TEST_P(FdDiscoveryTest, ConsistentRepeatedExecution) {
     auto algorithm = TestFixture::CreateAlgorithmInstance(kWdcAstronomical);
     algorithm->Execute();
-    auto first_res = FDsToSet(*algorithm->GetFdStorage());
+    auto first_res = FDsToSet(*algorithm->GetFds());
     for (int i = 0; i < 3; ++i) {
         algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kWdcAstronomical));
         algorithm->Execute();
-        ASSERT_TRUE(CheckFdCollectionEquality(first_res, *algorithm->GetFdStorage()));
+        ASSERT_TRUE(CheckFdCollectionEquality(first_res, *algorithm->GetFds()));
     }
 }
 
 namespace {
-void MaxLhsTestFun(CSVConfig config, algos::MultiAttrRhsFdStorage const& fd_storage,
+void MaxLhsTestFun(CSVConfig config, algos::fd::TableMaskPairFdView const& fd_storage,
                    config::MaxLhsType max_lhs) {
     using namespace config::names;
     algos::StdParamsMap verify_params = {
@@ -223,7 +223,7 @@ void MaxLhsTestFun(CSVConfig config, algos::MultiAttrRhsFdStorage const& fd_stor
     verify_algo->Execute();
     auto verify_list = FDsToSet(verify_algo->FdList());
     ASSERT_TRUE(CheckFdCollectionEquality(verify_list, fd_storage));
-    for (algos::MultiAttrRhsStrippedFd const& fd : fd_storage.GetStripped()) {
+    for (algos::fd::TableMaskPair const& fd : fd_storage.GetTableMaskPairs()) {
         ASSERT_TRUE(fd.lhs.count() <= max_lhs);
     }
 }
@@ -234,11 +234,11 @@ TYPED_TEST_P(FdDiscoveryTest, MaxLHSOptionWork) {
 
     auto algo = TestFixture::CreateAlgorithmInstance(kTestFD, max_lhs);
     algo->Execute();
-    MaxLhsTestFun(kTestFD, *algo->GetFdStorage(), max_lhs);
+    MaxLhsTestFun(kTestFD, *algo->GetFds(), max_lhs);
 
     auto algo_large = TestFixture::CreateAlgorithmInstance(kCIPublicHighway700, max_lhs);
     algo_large->Execute();
-    MaxLhsTestFun(kCIPublicHighway700, *algo_large->GetFdStorage(), max_lhs);
+    MaxLhsTestFun(kCIPublicHighway700, *algo_large->GetFds(), max_lhs);
 }
 
 REGISTER_TYPED_TEST_SUITE_P(FdDiscoveryTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNonKey,
@@ -246,7 +246,7 @@ REGISTER_TYPED_TEST_SUITE_P(FdDiscoveryTest, ThrowsOnEmpty, ReturnsEmptyOnSingle
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using AlgorithmsNew = ::testing::Types<algos::FDep>;
+using AlgorithmsNew = ::testing::Types<algos::fd::FDep, algos::fd::hyfd::HyFD>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(FdDiscoveryTest, FdDiscoveryTest, AlgorithmsNew);
 

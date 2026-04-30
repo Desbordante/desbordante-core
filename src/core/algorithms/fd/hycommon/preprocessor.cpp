@@ -4,6 +4,10 @@
 #include <vector>
 
 #include "core/algorithms/fd/hycommon/util/pli_util.h"
+#include "core/model/index.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/create_stripped_partitions.h"
+#include "core/util/logger.h"
 
 namespace algos::hy::util {
 
@@ -14,7 +18,7 @@ std::vector<ClusterId> SortAndGetMapping(PLIs& plis) {
                    [&id](auto& pli) { return std::make_pair(std::move(pli), id++); });
 
     auto const cluster_quantity_descending = [](auto const& pli1, auto const& pli2) {
-        return pli1.first->GetNumCluster() > pli2.first->GetNumCluster();
+        return pli1.first.GetNumCluster() > pli2.first.GetNumCluster();
     };
     std::sort(plis_sort_ids.begin(), plis_sort_ids.end(), cluster_quantity_descending);
 
@@ -32,8 +36,8 @@ Columns BuildInvertedPlis(PLIs const& plis) {
 
     for (auto const& pli : plis) {
         ClusterId cluster_id = 0;
-        std::vector<ClusterId> current(pli->GetRelationSize(), PLIUtil::kSingletonClusterId);
-        for (auto const& cluster : pli->GetIndex()) {
+        std::vector<ClusterId> current(pli.GetRelationSize(), PLIUtil::kSingletonClusterId);
+        for (auto const& cluster : pli.GetIndex()) {
             for (int value : cluster) {
                 current[value] = cluster_id;
             }
@@ -59,11 +63,32 @@ Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_plis) {
     return pli_records;
 }
 
-PLIs BuildPLIs(LegacyColumnLayoutRelationData* relation) {
+PLIs BuildPLIs(model::IDatasetStream& data_stream) {
     PLIs plis;
-    std::transform(relation->GetColumnData().begin(), relation->GetColumnData().end(),
-                   std::back_inserter(plis),
-                   [](auto& column_data) { return column_data.GetPositionListIndex(); });
+
+    std::unordered_map<std::string, std::size_t> value_id_map;
+    std::size_t const num_columns = data_stream.GetNumberOfColumns();
+    auto value_id_mapped_table = std::vector<std::vector<int>>(num_columns);
+    std::vector<std::string> row;
+    int next_value_id = 0;
+
+    while (data_stream.HasNextRow()) {
+        row = data_stream.GetNextRow();
+
+        if (row.size() != num_columns) {
+            LOG_WARN("Unexpected number of columns for a row, skipping (expected {}, got {})",
+                     num_columns, row.size());
+            continue;
+        }
+
+        for (model::Index column_index = 0; column_index != num_columns; ++column_index) {
+            std::string const& attribute_value = row[column_index];
+            auto [it, is_new] = value_id_map.try_emplace(attribute_value, next_value_id);
+            if (is_new) ++next_value_id;
+            value_id_mapped_table[column_index].push_back(it->second);
+        }
+    }
+
     return plis;
 }
 
@@ -72,11 +97,9 @@ PLIs BuildPLIs(LegacyColumnLayoutRelationData* relation) {
 namespace algos::hy {
 using namespace util;
 
-std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(
-        LegacyColumnLayoutRelationData* relation) {
-    // There is absolutely no benefit to using the already created PLIs, we should build everything
-    // at the same time from scratch.
-    PLIs plis = BuildPLIs(relation);
+std::tuple<std::shared_ptr<PLIs>, std::shared_ptr<Rows>, std::vector<ClusterId>> Preprocess(
+        model::IDatasetStream& data_stream) {
+    PLIs plis = ::util::CreateStrippedPartitions(data_stream);
 
     auto og_mapping = SortAndGetMapping(plis);
 
@@ -84,7 +107,8 @@ std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(
 
     auto pli_records = BuildRecordRepresentation(inverted_plis);
 
-    return std::make_tuple(std::move(plis), std::move(pli_records), std::move(og_mapping));
+    return std::make_tuple(std::make_shared<PLIs>(std::move(plis)),
+                           std::make_shared<Rows>(std::move(pli_records)), std::move(og_mapping));
 }
 
 boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,

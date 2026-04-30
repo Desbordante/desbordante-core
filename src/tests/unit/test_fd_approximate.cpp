@@ -21,7 +21,7 @@ TYPED_TEST_P(ApproximateFDTest, ThrowsOnEmpty) {
 TYPED_TEST_P(ApproximateFDTest, ReturnsEmptyOnSingleNonKey) {
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestSingleColumn);
     algorithm->Execute();
-    ASSERT_TRUE(NoFDsFound(*algorithm->GetFdStorage()));
+    ASSERT_TRUE(NoFDsFound(*algorithm->GetFds()));
 }
 
 TYPED_TEST_P(ApproximateFDTest, WorksOnLongDataset) {
@@ -29,7 +29,7 @@ TYPED_TEST_P(ApproximateFDTest, WorksOnLongDataset) {
 
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestLong);
     algorithm->Execute();
-    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFdStorage()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFds()));
 }
 
 TYPED_TEST_P(ApproximateFDTest, WorksOnWideDataset) {
@@ -37,7 +37,7 @@ TYPED_TEST_P(ApproximateFDTest, WorksOnWideDataset) {
     // so answer of eulerfd will be 0
     auto algorithm = TestFixture::CreateAlgorithmInstance(kTestWide);
     algorithm->Execute();
-    ASSERT_TRUE(NoFDsFound(*algorithm->GetFdStorage()));
+    ASSERT_TRUE(NoFDsFound(*algorithm->GetFds()));
 }
 
 TYPED_TEST_P(ApproximateFDTest, LightDatasetsConsistentHash) {
@@ -53,11 +53,11 @@ TYPED_TEST_P(ApproximateFDTest, HeavyDatasetsConsistentHash) {
 TYPED_TEST_P(ApproximateFDTest, ConsistentRepeatedExecution) {
     auto algorithm = TestFixture::CreateAlgorithmInstance(kNeighbors10k);
     algorithm->Execute();
-    auto first_res = FDsToSet(*algorithm->GetFdStorage());
+    auto first_res = FDsToSet(*algorithm->GetFds());
     for (int i = 0; i < 3; ++i) {
         algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kNeighbors10k));
         algorithm->Execute();
-        ASSERT_TRUE(CheckFdCollectionEquality(first_res, *algorithm->GetFdStorage()));
+        ASSERT_TRUE(CheckFdCollectionEquality(first_res, *algorithm->GetFds()));
     }
 }
 
@@ -65,6 +65,6 @@ REGISTER_TYPED_TEST_SUITE_P(ApproximateFDTest, ThrowsOnEmpty, ReturnsEmptyOnSing
                             WorksOnLongDataset, WorksOnWideDataset, LightDatasetsConsistentHash,
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution);
 
-using Algorithms = ::testing::Types<algos::EulerFD>;
+using Algorithms = ::testing::Types<algos::fd::EulerFD>;
 INSTANTIATE_TYPED_TEST_SUITE_P(ApproximateFDTest, ApproximateFDTest, Algorithms);
 }  // namespace tests

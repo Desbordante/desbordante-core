@@ -9,6 +9,7 @@
 #include "core/algorithms/ucc/hpivalid/config.h"
 #include "core/algorithms/ucc/hpivalid/result_collector.h"
 #include "core/algorithms/ucc/hpivalid/tree_search.h"
+#include "core/model/table/create_stripped_partitions.h"
 #include "core/util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
@@ -16,28 +17,22 @@
 namespace algos {
 
 void HPIValid::LoadDataInternal() {
-    relation_ = LegacyColumnLayoutRelationData::CreateFrom(*input_table_);
-
-    if (relation_->GetColumnData().empty()) {
-        throw std::runtime_error("Got an empty dataset: UCC mining is meaningless.");
+    auto schema = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
+    for (std::size_t i = 0; i != tab_.nr_cols; ++i) {
+        auto column = Column(schema.get(), input_table_->GetColumnName(i), i);
+        schema->AppendColumn(std::move(column));
     }
-}
+    schema_ = std::move(schema);
 
-hpiv::PLITable HPIValid::Preprocess() {
-    hpiv::PLITable tab;
-
-    tab.nr_rows = relation_->GetNumRows();
-    tab.nr_cols = relation_->GetNumColumns();
-
-    model::ColumnIndex const num_columns = relation_->GetNumColumns();
-    auto plis = hy::util::BuildPLIs(relation_.get());
-    for (model::ColumnIndex column_index = 0; column_index < num_columns; column_index++) {
-        std::deque<model::PLI::Cluster> const& index = plis[column_index]->GetIndex();
-        tab.plis.push_back(index);
+    auto column_value_id_maps = util::CreateValueIdMap(*input_table_);
+    tab_.nr_rows = column_value_id_maps.front().size();
+    auto plis = util::CreateStrippedPartitions(column_value_id_maps);
+    tab_.nr_cols = plis.size();
+    for (model::PositionListIndex const& pli : plis) {
+        std::deque<model::PLI::Cluster> const& index = pli.GetIndex();
+        tab_.plis.push_back(index);
     }
-    tab.inverse_mapping = hy::util::BuildInvertedPlis(plis);
-
-    return tab;
+    tab_.inverse_mapping = hy::util::BuildInvertedPlis(plis);
 }
 
 unsigned long long HPIValid::ExecuteInternal() {
@@ -45,9 +40,8 @@ unsigned long long HPIValid::ExecuteInternal() {
     hpiv::ResultCollector rc(3600);
 
     rc.SetStartTime();
-    hpiv::PLITable tab = Preprocess();
 
-    hpiv::TreeSearch tree_search(tab, cfg, rc);
+    hpiv::TreeSearch tree_search(tab_, cfg, rc);
     tree_search.Run();
 
     RegisterUCCs(rc);
@@ -59,9 +53,8 @@ unsigned long long HPIValid::ExecuteInternal() {
 
 void HPIValid::RegisterUCCs(hpiv::ResultCollector const& rc) {
     std::vector<model::RawUCC> ucc_vector = rc.GetUCCs();
-    std::shared_ptr<RelationalSchema const> const& schema = relation_->GetSharedPtrSchema();
     for (auto&& ucc : ucc_vector) {
-        ucc_collection_.Register(schema, std::move(ucc));
+        ucc_collection_.Register(schema_, std::move(ucc));
     }
 }
 

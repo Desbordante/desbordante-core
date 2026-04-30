@@ -14,8 +14,8 @@
 #include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/mining_algorithms.h"
-#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
-#include "core/algorithms/fd/multi_attr_rhs_stripped_fd.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
+#include "core/algorithms/fd/table_mask_pair.h"
 #include "core/config/indices/type.h"
 #include "core/util/bitset_utils.h"
 #include "python_bindings/py_util/bind_primitive.h"
@@ -32,8 +32,8 @@ using PyLhsLists = py::typing::Iterable<py::typing::Iterable<py::int_>>;
 
 #define FD_CLASS_NAME "FunctionalDependency"
 #define ATTRIBUTE_CLASS_NAME "Attribute"
-#define MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME "MultiAttrRhsFdStorage"
-#define SINGLE_ATTR_RHS_FD_STORAGE_CLASS_NAME "SingleAttrRhsFdStorage"
+#define MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME "TableMaskPairFdView"
+#define SINGLE_ATTR_RHS_FD_STORAGE_CLASS_NAME "LhsMaskFdView"
 
 py::tuple MakeFdNameTuple(FD const& fd) {
     auto [lhs, rhs] = fd.ToNameTuple();
@@ -114,10 +114,10 @@ ssize_t FdHash(model::FunctionalDependency const& fd) {
     return py::hash(py::make_tuple(fd.table_name, VectorToTuple(fd.lhs), VectorToTuple(fd.rhs)));
 }
 
-FdList FdsToList(algos::MultiAttrRhsFdStorage const& storage) {
+FdList FdsToList(algos::fd::TableMaskPairFdView const& storage) {
     // The container would be allocated twice if we created it on
     // core's side: once there, and the other time for the copy.
-    FdList fd_list{storage.GetStripped().size()};
+    FdList fd_list{storage.GetTableMaskPairs().size()};
     Py_ssize_t i = 0;
     for (model::FunctionalDependency fd : storage) {
         // If not released, the refcount of the new object will reach 0 after
@@ -128,18 +128,18 @@ FdList FdsToList(algos::MultiAttrRhsFdStorage const& storage) {
     return fd_list;
 }
 
-FdList FdsToList(algos::SingleAttrRhsFdStorage const& storage) {
+FdList FdsToList(algos::fd::LhsMaskFdView const& storage) {
     // The container would be allocated twice if we created it on
     // core's side: once there, and the other time for the copy.
     std::size_t fds_total = 0;
-    for (std::deque<algos::SingleAttrRhsStrippedFd> attr_fds : storage.GetStripped()) {
+    for (std::deque<algos::fd::LhsTableMask> attr_fds : storage.GetLhsMasks()) {
         fds_total += attr_fds.size();
     }
     FdList fd_list{fds_total};
     Py_ssize_t fd_index = 0;
     model::Index rhs_index = 0;
-    for (std::deque<algos::SingleAttrRhsStrippedFd> const& attr_fds : storage.GetStripped()) {
-        for (algos::SingleAttrRhsStrippedFd const& stripped_fd : attr_fds) {
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
             py::object py_fd = py::cast(stripped_fd.ToFd(storage.GetTableHeader(), rhs_index));
             // If not released, the refcount of the object will reach 0 after exiting the scope,
             // triggering UB on access.
@@ -151,9 +151,9 @@ FdList FdsToList(algos::SingleAttrRhsFdStorage const& storage) {
     return fd_list;
 }
 
-std::deque<algos::MultiAttrRhsStrippedFd> StrippedFdsFromIntPairs(PySelectionPairs int_pairs,
+std::deque<algos::fd::TableMaskPair> StrippedFdsFromIntPairs(PySelectionPairs int_pairs,
                                                                   std::size_t col_number) {
-    std::deque<algos::MultiAttrRhsStrippedFd> stripped_fds;
+    std::deque<algos::fd::TableMaskPair> stripped_fds;
     for (py::handle pair : int_pairs) {
         if (!py::isinstance<py::tuple>(pair)) {
             throw std::runtime_error("FD in storage must be a tuple!");
@@ -176,14 +176,14 @@ std::deque<algos::MultiAttrRhsStrippedFd> StrippedFdsFromIntPairs(PySelectionPai
     return stripped_fds;
 }
 
-std::vector<std::deque<algos::SingleAttrRhsStrippedFd>> StrippedFdsFromLhsLists(
+std::vector<std::deque<algos::fd::LhsTableMask>> StrippedFdsFromLhsLists(
         PyLhsLists lhs_lists, std::size_t col_number) {
-    std::vector<std::deque<algos::SingleAttrRhsStrippedFd>> stripped_fds(col_number);
+    std::vector<std::deque<algos::fd::LhsTableMask>> stripped_fds(col_number);
     // We can't really trust what is passed to us from Python, so better rely on C++ structures as
     // much as possible and never call the same Python method twice.
     // And if that's what we're doing, might as well relax the type requirement to just Iterable.
     auto it = lhs_lists.begin();
-    for (std::deque<algos::SingleAttrRhsStrippedFd>& attr_stripped_fds : stripped_fds) {
+    for (std::deque<algos::fd::LhsTableMask>& attr_stripped_fds : stripped_fds) {
         if (it == lhs_lists.end()) throw std::runtime_error("FD List has too few elements!");
         for (py::handle lhs : *it) {
             if (!py::isinstance<py::int_>(lhs))
@@ -200,14 +200,15 @@ std::vector<std::deque<algos::SingleAttrRhsStrippedFd>> StrippedFdsFromLhsLists(
 template <typename Algo>
 void BindFdAlgorithm(py::module const& fd_algos_module, char const* name) {
     python_bindings::detail::RegisterAlgorithm<Algo, algos::Algorithm>(fd_algos_module, name)
-            .def("get_fd_storage", &Algo::GetFdStorage)
-            .def("get_fds", [](Algo& algo) { return FdsToList(*algo.GetFdStorage()); });
+            .def("get_fd_storage", &Algo::GetFds)
+            .def("get_fds", [](Algo& algo) { return FdsToList(*algo.GetFds()); });
 }
 }  // namespace
 
 namespace python_bindings {
 void BindFd(py::module_& main_module) {
     using namespace algos;
+    using namespace algos::fd;
     using namespace pybind11::literals;
 
     auto fd_module = main_module.def_submodule("fd");
@@ -316,23 +317,23 @@ void BindFd(py::module_& main_module) {
             .def(py::init<std::string, std::vector<model::Attribute>,
                           std::vector<model::Attribute>>(),
                  "table_name"_a, "lhs"_a, "rhs"_a);
-    py::class_<MultiAttrRhsFdStorage, MultiAttrRhsFdStorage::OwningPointer>(
+    py::class_<TableMaskPairFdView, TableMaskPairFdView::OwningPointer>(
             fd_module, MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME)
-            .def("to_fds", static_cast<FdList (*)(MultiAttrRhsFdStorage const&)>(FdsToList))
+            .def("to_fds", static_cast<FdList (*)(TableMaskPairFdView const&)>(FdsToList))
             .def(
                     "__iter__",
-                    [](MultiAttrRhsFdStorage const& storage) {
+                    [](TableMaskPairFdView const& storage) {
                         return py::make_iterator(storage.begin(), storage.end());
                     },
                     py::keep_alive<0, 1>())
             .def(py::pickle(
                     // __getstate__
-                    [](MultiAttrRhsFdStorage const& storage) {
-                        auto const& stripped_fds = storage.GetStripped();
+                    [](TableMaskPairFdView const& storage) {
+                        auto const& stripped_fds = storage.GetTableMaskPairs();
                         model::TableHeader const& header = storage.GetTableHeader();
                         py::list py_stripped_fds{stripped_fds.size()};
                         Py_ssize_t i = 0;
-                        for (MultiAttrRhsStrippedFd const& stripped_fd : stripped_fds) {
+                        for (TableMaskPair const& stripped_fd : stripped_fds) {
                             // If not released, the refcount of the new object will reach 0 after
                             // this line, triggering UB on access.
                             PyList_SET_ITEM(py_stripped_fds.ptr(), i,
@@ -365,39 +366,39 @@ void BindFd(py::module_& main_module) {
                         auto column_names = header_tuple[1].cast<std::vector<std::string>>();
                         std::size_t const col_number = column_names.size();
                         py::object fds_list = t[1];
-                        return MultiAttrRhsFdStorage{
+                        return TableMaskPairFdView{
                                 {std::move(table_name), std::move(column_names)},
                                 StrippedFdsFromIntPairs(std::move(fds_list), col_number)};
                     }))
             .def(py::init([](std::string table_name, std::vector<std::string> column_names,
                              PySelectionPairs selection_pairs) {
                      std::size_t const col_number = column_names.size();
-                     return MultiAttrRhsFdStorage{
+                     return TableMaskPairFdView{
                              {std::move(table_name), std::move(column_names)},
                              StrippedFdsFromIntPairs(selection_pairs, col_number)};
                  }),
                  "table_name"_a, "column_names"_a, "selection_pairs"_a);
-    py::class_<SingleAttrRhsFdStorage, SingleAttrRhsFdStorage::OwningPointer>(
+    py::class_<LhsMaskFdView, LhsMaskFdView::OwningPointer>(
             fd_module, SINGLE_ATTR_RHS_FD_STORAGE_CLASS_NAME)
-            .def("to_fds", static_cast<FdList (*)(SingleAttrRhsFdStorage const&)>(FdsToList))
+            .def("to_fds", static_cast<FdList (*)(LhsMaskFdView const&)>(FdsToList))
             .def(
                     "__iter__",
-                    [](SingleAttrRhsFdStorage const& storage) {
+                    [](LhsMaskFdView const& storage) {
                         return py::make_iterator(storage.begin(), storage.end());
                     },
                     py::keep_alive<0, 1>())
             .def(py::pickle(
                     // __getstate__
-                    [](SingleAttrRhsFdStorage const& storage) {
-                        auto const& stripped_fds = storage.GetStripped();
+                    [](LhsMaskFdView const& storage) {
+                        auto const& stripped_fds = storage.GetLhsMasks();
                         model::TableHeader const& header = storage.GetTableHeader();
                         py::list py_stripped_fds{stripped_fds.size()};
                         Py_ssize_t rhs_index = 0;
-                        for (std::deque<SingleAttrRhsStrippedFd> const& stripped_fds_attr :
+                        for (std::deque<LhsTableMask> const& stripped_fds_attr :
                              stripped_fds) {
                             py::list py_stripped_fds_attr{stripped_fds_attr.size()};
                             Py_ssize_t i = 0;
-                            for (SingleAttrRhsStrippedFd const& stripped_fd : stripped_fds_attr) {
+                            for (LhsTableMask const& stripped_fd : stripped_fds_attr) {
                                 PyList_SET_ITEM(py_stripped_fds_attr.ptr(), i,
                                                 BitsetToInt(stripped_fd.lhs).release().ptr());
                                 ++i;
@@ -429,14 +430,14 @@ void BindFd(py::module_& main_module) {
                         auto column_names = header_tuple[1].cast<std::vector<std::string>>();
                         py::object fds_list = t[1];
                         std::size_t const col_number = column_names.size();
-                        return SingleAttrRhsFdStorage{
+                        return LhsMaskFdView{
                                 {std::move(table_name), std::move(column_names)},
                                 StrippedFdsFromLhsLists(std::move(fds_list), col_number)};
                     }))
             .def(py::init([](std::string table_name, std::vector<std::string> column_names,
                              PyLhsLists lhs_lists) {
                      std::size_t const col_number = column_names.size();
-                     return SingleAttrRhsFdStorage{{std::move(table_name), std::move(column_names)},
+                     return LhsMaskFdView{{std::move(table_name), std::move(column_names)},
                                                    StrippedFdsFromLhsLists(lhs_lists, col_number)};
                  }),
                  "table_name"_a, "column_names"_a, "lhs_lists"_a);
@@ -445,14 +446,15 @@ void BindFd(py::module_& main_module) {
     static constexpr auto kTaneName = "Tane";
     static constexpr auto kPFDTaneName = "PFDTane";
     auto fd_algos_module =
-            BindPrimitive<hyfd::HyFD, Depminer, DFD, FastFDs, FUN, Pyro, Tane, PFDTane>(
+            BindPrimitive<Depminer, DFD, FastFDs, FUN, Pyro, Tane, PFDTane>(
                     fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
-                    {"HyFD", "Depminer", "DFD", "FastFDs", "FUN", kPyroName, kTaneName,
+                    {"Depminer", "DFD", "FastFDs", "FUN", kPyroName, kTaneName,
                      kPFDTaneName});
     BindFdAlgorithm<FDep>(fd_algos_module, "FDep");
     BindFdAlgorithm<Aid>(fd_algos_module, "Aid");
     BindFdAlgorithm<EulerFD>(fd_algos_module, "EulerFD");
     BindFdAlgorithm<FdMine>(fd_algos_module, "FdMine");
+    BindFdAlgorithm<hyfd::HyFD>(fd_algos_module, "HyFD");
 
     auto define_submodule = [&fd_algos_module, &main_module](char const* name,
                                                              std::vector<char const*> algorithms) {
@@ -467,3 +469,5 @@ void BindFd(py::module_& main_module) {
     define_submodule("pfd", {kPFDTaneName});
 }
 }  // namespace python_bindings
+
+

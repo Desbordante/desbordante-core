@@ -13,8 +13,7 @@ class StrippedPartitions {
     std::vector<PositionListIndex> stripped_partitions_;
 
 public:
-    // TODO: with the way PLIs are built, probing table should be created at the point of their
-    // creation, we are going over data twice needlessly here.
+    // TODO: the current PLIs are woefully overengineered. This should not require a method call.
     StrippedPartitions(std::vector<PositionListIndex> stripped_partitions)
         : stripped_partitions_(std::move(stripped_partitions)) {
         for (PositionListIndex& stripped_partition : stripped_partitions_) {

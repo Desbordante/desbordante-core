@@ -1,6 +1,7 @@
 #include "core/algorithms/partition_only_algorithm.h"
 
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/create_stripped_partitions.h"
 
 namespace algos {
 PartitionOnlyAlgorithm::PartitionOnlyAlgorithm() : Algorithm() {
@@ -14,9 +15,18 @@ void PartitionOnlyAlgorithm::RegisterOptions() {
 
 void PartitionOnlyAlgorithm::LoadDataInternal() {
     table_header_ = model::TableHeader::FromDatasetStream(*input_table_);
-    stripped_partitions_ = model::StrippedPartitions::CreateFrom(*input_table_);
-    if (stripped_partitions_->GetNumRows() == 0)
-        throw std::runtime_error("Dataset \"" + input_table_->GetRelationName() +
-                                 "\" is empty, mining dependencies on empty is not supported.");
+    stripped_partitions_ = util::CreateStrippedPartitions(*input_table_);
+    if (stripped_partitions_.empty()) {
+        throw std::runtime_error(
+                "Dataset \"" + table_header_.table_name +
+                "\" is empty, mining dependencies on empty datasets is not supported.");
+    }
+    for (model::PositionListIndex& pli : stripped_partitions_) {
+        pli.ForceCacheProbingTable();
+        if (pli.GetCachedProbingTable()->empty())
+            throw std::runtime_error(
+                    "Dataset \"" + table_header_.table_name +
+                    "\" is empty, mining dependencies on empty datasets is not supported.");
+    }
 }
 }  // namespace algos

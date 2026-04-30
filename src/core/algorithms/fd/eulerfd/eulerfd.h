@@ -16,7 +16,7 @@
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/eulerfd/mlfq.h"
 #include "core/algorithms/fd/eulerfd/search_tree.h"
-#include "core/algorithms/fd/single_attr_rhs_fd_storage.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
 #include "core/config/custom_random_seed/option.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/option.h"
@@ -25,7 +25,7 @@
 #include "core/model/table/table_header.h"
 #include "core/util/custom_random.h"
 
-namespace algos {
+namespace algos::fd {
 
 class EulerFD : public Algorithm {
     using Bitset = boost::dynamic_bitset<>;
@@ -45,7 +45,7 @@ class EulerFD : public Algorithm {
     model::TableHeader table_header_;
     std::vector<std::vector<size_t>> tuples_;
 
-    SingleAttrRhsFdStorage::OwningPointer fd_storage_;
+    LhsMaskFdView::OwningPointer fd_view_;
 
     config::EqNullsType is_null_equal_null_{};
 
@@ -116,8 +116,8 @@ class EulerFD : public Algorithm {
 public:
     EulerFD();
 
-    SingleAttrRhsFdStorage::OwningPointer GetFdStorage() {
-        return fd_storage_;
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
     }
 };
-}  // namespace algos
+}  // namespace algos::fd

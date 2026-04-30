@@ -5,7 +5,7 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fdep/fd_tree_element.h"
-#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/max_lhs/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -14,20 +14,20 @@
 #include "core/model/table/table_header.h"
 #include "core/model/types/bitset.h"
 
-namespace algos {
+namespace algos::fd {
 
-class FDep : public Algorithm {
+class FDep final : public Algorithm {
 public:
     FDep();
 
-    ~FDep() override = default;
+    ~FDep() final = default;
 
-    MultiAttrRhsFdStorage::OwningPointer GetFdStorage() {
-        return fd_storage_;
+    TableMaskPairFdView::OwningPointer GetFds() {
+        return fd_view_;
     }
 
 private:
-    MultiAttrRhsFdStorage::OwningPointer fd_storage_;
+    TableMaskPairFdView::OwningPointer fd_view_;
 
     config::InputTable input_table_;
     config::MaxLhsType max_lhs_;
@@ -64,4 +64,4 @@ private:
                                  size_t const& a);
 };
 
-}  // namespace algos
+}  // namespace algos::fd

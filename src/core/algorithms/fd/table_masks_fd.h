@@ -1,17 +1,13 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-
+#include "core/algorithms/fd/bitset_pair_fd.h"
 #include "core/algorithms/fd/fd.h"
 #include "core/model/index.h"
 #include "core/model/table/attribute.h"
 #include "core/model/table/table_header.h"
 
 namespace algos {
-struct MultiAttrRhsStrippedFd {
-    boost::dynamic_bitset<> lhs;
-    boost::dynamic_bitset<> rhs;
-
+struct TableMasksFd : public BitsetPairFd {
     model::FunctionalDependency ToFd(model::TableHeader const& table_header_) const {
         std::vector<model::Attribute> lhs_attrs;
         lhs_attrs.reserve(lhs.count());

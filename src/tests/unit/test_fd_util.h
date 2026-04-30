@@ -6,7 +6,7 @@
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
 #include "core/config/error/type.h"
 #include "core/config/names.h"
 #include "core/util/bitset_utils.h"
@@ -14,12 +14,12 @@
 #include "tests/common/csv_config_util.h"
 
 namespace tests {
-inline bool NoFDsFound(algos::MultiAttrRhsFdStorage const& storage) {
-    return storage.GetStripped().empty();
+inline bool NoFDsFound(algos::fd::TableMaskPairFdView const& storage) {
+    return storage.GetTableMaskPairs().empty();
 }
 
-inline bool NoFDsFound(algos::SingleAttrRhsFdStorage const& storage) {
-    return std::ranges::all_of(storage.GetStripped(),
+inline bool NoFDsFound(algos::fd::LhsMaskFdView const& storage) {
+    return std::ranges::all_of(storage.GetLhsMasks(),
                                [](auto& attr_fds) { return attr_fds.empty(); });
 }
 
@@ -52,7 +52,7 @@ inline static std::string ToIndicesString(boost::dynamic_bitset<> const& lhs) {
     return result;
 }
 
-inline std::vector<std::string> FDToJsonStrings(algos::MultiAttrRhsStrippedFd const& fd) {
+inline std::vector<std::string> FDToJsonStrings(algos::fd::TableMaskPair const& fd) {
     std::vector<std::string> strings;
     strings.reserve(fd.rhs.count());
     auto pre_rhs_portion = "{\"lhs\": " + ToIndicesString(fd.lhs) + ", \"rhs\": ";
@@ -62,16 +62,16 @@ inline std::vector<std::string> FDToJsonStrings(algos::MultiAttrRhsStrippedFd co
     return strings;
 }
 
-inline std::string FDToJsonString(algos::SingleAttrRhsStrippedFd const& fd,
+inline std::string FDToJsonString(algos::fd::LhsTableMask const& fd,
                                   model::Index rhs_index) {
     return "{\"lhs\": " + ToIndicesString(fd.lhs) + ", \"rhs\": " + std::to_string(rhs_index) + '}';
 }
 
-inline std::string FDsToJson(algos::MultiAttrRhsFdStorage const& fd_storage) {
+inline std::string FDsToJson(algos::fd::TableMaskPairFdView const& fd_storage) {
     std::string result = "{\"fds\": [";
     std::vector<std::string> discovered_fd_strings;
     // FDs used to always have one attribute, this is for consistency with the old hashes.
-    for (algos::MultiAttrRhsStrippedFd const& fd : fd_storage.GetStripped()) {
+    for (algos::fd::TableMaskPair const& fd : fd_storage.GetTableMaskPairs()) {
         for (std::string const& single_rhs_fd_string : FDToJsonStrings(fd)) {
             discovered_fd_strings.push_back(single_rhs_fd_string);
         }
@@ -87,11 +87,11 @@ inline std::string FDsToJson(algos::MultiAttrRhsFdStorage const& fd_storage) {
     return result;
 }
 
-inline std::string FDsToJson(algos::SingleAttrRhsFdStorage const& fd_storage) {
+inline std::string FDsToJson(algos::fd::LhsMaskFdView const& fd_storage) {
     std::vector<std::string> discovered_fd_strings;
     model::Index rhs_index = 0;
-    for (std::deque<algos::SingleAttrRhsStrippedFd> const& attr_fds : fd_storage.GetStripped()) {
-        for (algos::SingleAttrRhsStrippedFd const& stripped_fd : attr_fds) {
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : fd_storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
             discovered_fd_strings.push_back(FDToJsonString(stripped_fd, rhs_index));
         }
         ++rhs_index;
@@ -110,8 +110,8 @@ inline std::string FDsToJson(algos::SingleAttrRhsFdStorage const& fd_storage) {
 
 testing::AssertionResult CheckFdCollectionEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> expected,
-        algos::MultiAttrRhsFdStorage const& actual) {
-    for (algos::MultiAttrRhsStrippedFd const& fd : actual.GetStripped()) {
+        algos::fd::TableMaskPairFdView const& actual) {
+    for (algos::fd::TableMaskPair const& fd : actual.GetTableMaskPairs()) {
         std::vector<unsigned int> lhs_indices = util::BitsetToIndices<unsigned int>(fd.lhs);
 
         for (auto index = fd.rhs.find_first(); index != boost::dynamic_bitset<>::npos;
@@ -130,10 +130,10 @@ testing::AssertionResult CheckFdCollectionEquality(
 
 inline testing::AssertionResult CheckFdCollectionEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> expected,
-        algos::SingleAttrRhsFdStorage const& actual) {
+        algos::fd::LhsMaskFdView const& actual) {
     model::Index rhs_index = 0;
-    for (std::deque<algos::SingleAttrRhsStrippedFd> const& attr_fds : actual.GetStripped()) {
-        for (algos::SingleAttrRhsStrippedFd const& stripped_fd : attr_fds) {
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : actual.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
             std::vector<unsigned int> lhs_indices =
                     util::BitsetToIndices<unsigned int>(stripped_fd.lhs);
             if (auto it = expected.find(std::make_pair(lhs_indices, rhs_index));
@@ -152,9 +152,9 @@ inline testing::AssertionResult CheckFdCollectionEquality(
 }
 
 std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
-        algos::MultiAttrRhsFdStorage const& storage) {
+        algos::fd::TableMaskPairFdView const& storage) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
-    for (auto const& fd : storage.GetStripped()) {
+    for (auto const& fd : storage.GetTableMaskPairs()) {
         util::ForEachIndex(fd.rhs, [&](model::Index i) {
             set.emplace(util::BitsetToIndices<unsigned int>(fd.lhs), i);
         });
@@ -163,11 +163,11 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
 }
 
 std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
-        algos::SingleAttrRhsFdStorage const& storage) {
+        algos::fd::LhsMaskFdView const& storage) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
     model::Index rhs_index = 0;
-    for (std::deque<algos::SingleAttrRhsStrippedFd> const& attr_fds : storage.GetStripped()) {
-        for (algos::SingleAttrRhsStrippedFd const& stripped_fd : attr_fds) {
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
             set.emplace(util::BitsetToIndices<unsigned int>(stripped_fd.lhs), rhs_index);
         }
         ++rhs_index;
@@ -273,7 +273,7 @@ protected:
             for (auto const& [csv_config, hash] : config_hashes) {
                 auto algorithm = CreateAlgorithmInstance(csv_config);
                 algorithm->Execute();
-                std::string fds_string = FDsToJson(*algorithm->GetFdStorage());
+                std::string fds_string = FDsToJson(*algorithm->GetFds());
                 EXPECT_EQ(Fletcher16(fds_string), hash)
                         << "FD collection hash changed for " << csv_config.path.filename();
             }
@@ -341,7 +341,7 @@ protected:
             for (auto const& [csv_config, hash] : config_hashes) {
                 auto algorithm = CreateAlgorithmInstance(csv_config);
                 algorithm->Execute();
-                std::string fds_string = FDsToJson(*algorithm->GetFdStorage());
+                std::string fds_string = FDsToJson(*algorithm->GetFds());
                 EXPECT_EQ(Fletcher16(fds_string), hash)
                         << "FD collection hash changed for " << csv_config.path.filename();
             }
@@ -367,7 +367,7 @@ struct ApproximateDatasets {
 
 // specialization fd for EulerFD
 template <>
-struct ApproximateDatasets<algos::EulerFD> {
+struct ApproximateDatasets<algos::fd::EulerFD> {
     inline static std::vector<CSVConfigHash> const kLightDatasets = {{
             {tests::kCIPublicHighway10k, 33398},
             {tests::kNeighbors10k, 43368},

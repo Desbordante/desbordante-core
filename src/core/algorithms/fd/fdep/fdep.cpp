@@ -2,13 +2,14 @@
 
 #include <chrono>
 
+#include "core/algorithms/fd/make_plain_table_mask_pair_adder.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/max_lhs/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/types/bitset.h"
 
-namespace algos {
+namespace algos::fd {
 
 FDep::FDep() : Algorithm() {
     RegisterOptions();
@@ -44,7 +45,7 @@ void FDep::LoadDataInternal() {
 }
 
 void FDep::ResetState() {
-    fd_storage_ = nullptr;
+    fd_view_ = nullptr;
     // Consider creating them here instead.
     neg_cover_tree_.reset();
     pos_cover_tree_.reset();
@@ -53,7 +54,7 @@ void FDep::ResetState() {
 unsigned long long FDep::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
-    MultiAttrRhsFdStorage::LhsLimBuilder storage_builder{max_lhs_};
+    TableMaskPairFdView::Storage storage;
 
     BuildNegativeCover();
 
@@ -65,9 +66,10 @@ unsigned long long FDep::ExecuteInternal() {
     model::Bitset<FDTreeElement::kMaxAttrNum> active_path;
     CalculatePositiveCover(*this->neg_cover_tree_, active_path);
 
-    pos_cover_tree_->CreateAnswer(table_header_.column_names.size(), storage_builder, max_lhs_);
+    pos_cover_tree_->CreateAnswer(table_header_.column_names.size(),
+                                  MakePlainTableMaskPairAdder(storage), max_lhs_);
 
-    fd_storage_ = storage_builder.Build(table_header_);
+    fd_view_ = std::make_shared<TableMaskPairFdView>(table_header_, std::move(storage));
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
@@ -140,4 +142,4 @@ void FDep::SpecializePositiveCover(model::Bitset<FDTreeElement::kMaxAttrNum> con
     }
 }
 
-}  // namespace algos
+}  // namespace algos::fd

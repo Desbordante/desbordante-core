@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "core/model/index.h"
+#include "core/model/table/create_stripped_partitions.h"
 #include "core/util/logger.h"
 
 std::vector<int> LegacyColumnLayoutRelationData::GetTuple(int tuple_index) const {
@@ -47,38 +48,9 @@ std::shared_ptr<model::PLIWS const> LegacyColumnLayoutRelationData::CalculatePLI
 
 std::unique_ptr<LegacyColumnLayoutRelationData> LegacyColumnLayoutRelationData::CreateFrom(
         model::IDatasetStream& data_stream) {
-    auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
-    std::unordered_map<std::string, int> value_dictionary;
-    int next_value_id = 0;
     size_t const num_columns = data_stream.GetNumberOfColumns();
-    std::vector<std::vector<int>> column_vectors = std::vector<std::vector<int>>(num_columns);
-    std::vector<std::string> row;
-
-    while (data_stream.HasNextRow()) {
-        row = data_stream.GetNextRow();
-
-        if (row.size() != num_columns) {
-            LOG_WARN(
-                    "Unexpected number of columns for a row, "
-                    "skipping (expected {}, got {})",
-                    num_columns, row.size());
-            continue;
-        }
-
-        for (size_t index = 0; index < row.size(); ++index) {
-            std::string const& field = row[index];
-            auto location = value_dictionary.find(field);
-            int value_id;
-            if (location == value_dictionary.end()) {
-                value_dictionary[field] = next_value_id;
-                value_id = next_value_id;
-                next_value_id++;
-            } else {
-                value_id = location->second;
-            }
-            column_vectors[index].push_back(value_id);
-        }
-    }
+    std::vector<std::vector<int>> column_vectors = util::CreateValueIdMap(data_stream);
+    auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
 
     std::vector<ColumnData> column_data;
     for (size_t i = 0; i < num_columns; ++i) {

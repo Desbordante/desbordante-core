@@ -5,11 +5,11 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
 
-#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
 #include "core/algorithms/partition_only_algorithm.h"
 #include "core/config/max_lhs/type.h"
 
-namespace algos {
+namespace algos::fd {
 
 class FdMine : public PartitionOnlyAlgorithm {
 private:
@@ -26,7 +26,7 @@ private:
             plis_;
     boost::dynamic_bitset<> relation_indices_;
 
-    MultiAttrRhsFdStorage::OwningPointer fd_storage_;
+    TableMaskPairFdView::OwningPointer fd_view_;
 
     void ComputeNonTrivialClosure(boost::dynamic_bitset<> const& xi);
     void ObtainFDandKey(boost::dynamic_bitset<> const& xi);
@@ -44,9 +44,9 @@ private:
 public:
     FdMine();
 
-    MultiAttrRhsFdStorage::OwningPointer GetFdStorage() {
-        return fd_storage_;
+    TableMaskPairFdView::OwningPointer GetFds() {
+        return fd_view_;
     }
 };
 
-}  // namespace algos
+}  // namespace algos::fd

@@ -50,7 +50,7 @@ public:
                       unsigned long long nep, unsigned int relation_size,
                       double inverted_entropy = 0, double gini_impurity = 0);
 
-    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data);
+    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int> const& data);
 
     static std::unordered_map<int, unsigned> CreateFrequencies(
             Cluster const& cluster, std::vector<int> const& probing_table);

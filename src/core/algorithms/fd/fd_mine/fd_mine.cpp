@@ -5,10 +5,11 @@
 
 #include <boost/unordered_map.hpp>
 
+#include "core/algorithms/fd/make_plain_table_mask_pair_adder.h"
 #include "core/config/max_lhs/option.h"
 #include "core/util/logger.h"
 
-namespace algos {
+namespace algos::fd {
 
 using boost::dynamic_bitset;
 
@@ -21,7 +22,7 @@ void FdMine::MakeExecuteOptsAvailable() {
 }
 
 void FdMine::ResetState() {
-    fd_storage_ = nullptr;
+    fd_view_ = nullptr;
     candidate_set_.clear();
     eq_set_.clear();
     fd_set_.clear();
@@ -83,9 +84,9 @@ void FdMine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
 
             if (xi.count() == 1) {
                 model::PositionListIndex const& candidate_x_pli =
-                        stripped_partitions_->GetStrippedPartition(xi.find_first());
+                        stripped_partitions_[xi.find_first()];
                 model::PositionListIndex const& candidate_y_pli =
-                        stripped_partitions_->GetStrippedPartition(column_index);
+                        stripped_partitions_[column_index];
 
                 plis_[candidate_xy] = candidate_x_pli.Intersect(&candidate_y_pli);
 
@@ -98,7 +99,7 @@ void FdMine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
 
             if (!plis_.count(candidate_xy)) {
                 model::PositionListIndex const& candidate_y_pli =
-                        stripped_partitions_->GetStrippedPartition(candidate_y.find_first());
+                        stripped_partitions_[candidate_y.find_first()];
                 plis_[candidate_xy] = plis_[xi]->Intersect(&candidate_y_pli);
             }
 
@@ -192,11 +193,9 @@ void FdMine::GenerateNextLevelCandidates() {
                     !(candidate_i).is_subset_of(fd_set_[candidate_j])) {
                     if (candidate_i.count() == 1) {
                         model::PositionListIndex const& candidate_i_pli =
-                                stripped_partitions_->GetStrippedPartition(
-                                        candidate_i.find_first());
+                                stripped_partitions_[candidate_i.find_first()];
                         model::PositionListIndex const& candidate_j_pli =
-                                stripped_partitions_->GetStrippedPartition(
-                                        candidate_j.find_first());
+                                stripped_partitions_[candidate_j.find_first()];
                         plis_[candidate_ij] = candidate_i_pli.Intersect(&candidate_j_pli);
                     } else {
                         plis_[candidate_ij] =
@@ -280,7 +279,8 @@ void FdMine::Reconstruct() {
 }
 
 void FdMine::Display() {
-    MultiAttrRhsFdStorage::PlainBuilder storage_builder{};
+    TableMaskPairFdView::Storage storage;
+    auto report_fd = MakePlainTableMaskPairAdder(storage);
 
     for (auto it = final_fd_set_.begin(); it != final_fd_set_.end();) {
         auto node = final_fd_set_.extract(it++);
@@ -288,10 +288,10 @@ void FdMine::Display() {
         boost::dynamic_bitset<> rhs = std::move(node.mapped());
         rhs -= lhs;
         if (rhs.none()) continue;
-        storage_builder.AddFd({std::move(lhs), std::move(rhs)});
+        report_fd(std::move(lhs), std::move(rhs));
     }
 
-    fd_storage_ = storage_builder.Build(table_header_);
+    fd_view_ = std::make_shared<TableMaskPairFdView>(table_header_, std::move(storage));
 }
 
-}  // namespace algos
+}  // namespace algos::fd

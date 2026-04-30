@@ -6,9 +6,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "core/algorithms/fd/fd.h"
-#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
-#include "core/model/table/relational_schema.h"
+#include "core/algorithms/fd/bitset_pair_result_reporter.h"
 #include "core/model/types/bitset.h"
 
 class FDTreeElement {
@@ -40,7 +38,7 @@ public:
     [[nodiscard]] bool ContainsGeneralization(model::Bitset<kMaxAttrNum> const& lhs,
                                               size_t attr_num, size_t current_attr) const;
 
-    void CreateAnswer(std::size_t attr_num, algos::MultiAttrRhsFdStorage::LhsLimBuilder& builder,
+    void CreateAnswer(std::size_t attr_num, algos::fd::BitsetPairResultReporter const& report_fd,
                       unsigned int max_lhs = std::numeric_limits<unsigned int>::max()) const;
 
 private:
@@ -67,6 +65,6 @@ private:
                                      model::Bitset<kMaxAttrNum>& active_path);
 
     void TransformTreeFdCollection(
-            boost::dynamic_bitset<>& lhs, algos::MultiAttrRhsFdStorage::LhsLimBuilder& builder,
+            boost::dynamic_bitset<>& lhs, algos::fd::BitsetPairResultReporter const& report_fd,
             unsigned int max_lhs = std::numeric_limits<unsigned int>::max()) const;
 };

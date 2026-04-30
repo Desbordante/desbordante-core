@@ -4,7 +4,7 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/config/tabular_data/input_table_type.h"
-#include "core/model/table/stripped_partitions.h"
+#include "core/model/table/position_list_index.h"
 #include "core/model/table/table_header.h"
 
 namespace algos {
@@ -18,7 +18,7 @@ class PartitionOnlyAlgorithm : public Algorithm {
 
 protected:
     model::TableHeader table_header_;
-    std::unique_ptr<model::StrippedPartitions> stripped_partitions_;
+    std::vector<model::PositionListIndex> stripped_partitions_;
 
     PartitionOnlyAlgorithm();
 };

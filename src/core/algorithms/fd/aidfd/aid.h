@@ -8,12 +8,12 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/aidfd/search_tree.h"
-#include "core/algorithms/fd/single_attr_rhs_fd_storage.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
 #include "core/config/max_lhs/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/table_header.h"
 
-namespace algos {
+namespace algos::fd {
 
 class Aid : public Algorithm {
 private:
@@ -22,7 +22,7 @@ private:
     config::InputTable input_table_;
     config::MaxLhsType max_lhs_;
 
-    SingleAttrRhsFdStorage::OwningPointer fd_storage_;
+    LhsMaskFdView::OwningPointer fd_view_;
 
     model::TableHeader table_header_;
     std::vector<std::vector<size_t>> tuples_;
@@ -62,8 +62,6 @@ private:
     size_t GenerateSecondClusterIndex(size_t index_in_cluster, size_t iteration_num) const;
     bool IsNegativeCoverGrowthSmall(size_t iteration_num, double curr_ratio);
 
-    static boost::dynamic_bitset<> ChangeAttributesOrder(
-            boost::dynamic_bitset<> const& initial_bitset, std::vector<size_t> const& new_order);
     std::vector<size_t> GetAttributesSortedByFrequency(
             std::vector<boost::dynamic_bitset<>> const& neg_cover_vector) const;
 
@@ -72,9 +70,9 @@ private:
 public:
     Aid();
 
-    SingleAttrRhsFdStorage::OwningPointer GetFdStorage() {
-        return fd_storage_;
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
     }
 };
 
-}  // namespace algos
+}  // namespace algos::fd

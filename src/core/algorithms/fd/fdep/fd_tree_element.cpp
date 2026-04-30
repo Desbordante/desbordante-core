@@ -207,24 +207,23 @@ void FDTreeElement::FilterSpecializationsHelper(
     }
 }
 
-void FDTreeElement::CreateAnswer(std::size_t attr_num,
-                                 algos::MultiAttrRhsFdStorage::LhsLimBuilder& builder,
+void FDTreeElement::CreateAnswer(std::size_t attr_num, algos::fd::BitsetPairResultReporter const& report_fd,
                                  unsigned int max_lhs) const {
     boost::dynamic_bitset<> lhs(attr_num);
-    this->TransformTreeFdCollection(lhs, builder, max_lhs);
+    this->TransformTreeFdCollection(lhs, report_fd, max_lhs);
 }
 
 void FDTreeElement::TransformTreeFdCollection(boost::dynamic_bitset<>& lhs,
-                                              algos::MultiAttrRhsFdStorage::LhsLimBuilder& builder,
+                                              algos::fd::BitsetPairResultReporter const& report_fd,
                                               unsigned int max_lhs) const {
     if (lhs.count() > max_lhs) return;
 
-    if (is_fd_.any()) builder.AddFd({lhs, BitsetToDynamicBitset(is_fd_, lhs.size())});
+    if (is_fd_.any()) report_fd(lhs, BitsetToDynamicBitset(is_fd_, lhs.size()));
 
     for (size_t attr = 0; attr != lhs.size(); ++attr) {
         if (this->children_[attr]) {
             lhs.set(attr);
-            this->children_[attr]->TransformTreeFdCollection(lhs, builder, max_lhs);
+            this->children_[attr]->TransformTreeFdCollection(lhs, report_fd, max_lhs);
             lhs.reset(attr);
         }
     }

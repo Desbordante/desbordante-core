@@ -12,7 +12,7 @@
 #include "core/model/table/position_list_index.h"
 #include "core/model/types/types.h"
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
 using LhsPair = fd_tree::LhsPair;
 
@@ -57,4 +57,4 @@ public:
     hy::IdPairs ValidateAndExtendCandidates();
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd

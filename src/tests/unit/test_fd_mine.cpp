@@ -18,7 +18,7 @@
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;
 
-using algos::Algorithm, algos::FdMine, algos::StdParamsMap;
+using algos::Algorithm, algos::fd::FdMine, algos::StdParamsMap;
 
 namespace onam = config::names;
 
@@ -86,7 +86,7 @@ TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
     auto algorithm = CreateFdMineAlgorithmInstance(tests::kTestSingleColumn);
     algorithm->Execute();
-    ASSERT_TRUE(NoFDsFound(*algorithm->GetFdStorage()));
+    ASSERT_TRUE(NoFDsFound(*algorithm->GetFds()));
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
@@ -94,7 +94,7 @@ TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
 
     auto algorithm = CreateFdMineAlgorithmInstance(tests::kTestLong);
     algorithm->Execute();
-    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFdStorage()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFds()));
 }
 
 std::string GetJsonFDs(std::list<FD>& fd_collection) {
@@ -115,10 +115,10 @@ std::string GetJsonFDs(std::list<FD>& fd_collection) {
     return result;
 }
 
-void MinimizeFDs(algos::MultiAttrRhsFdStorage::Storage& fd_collection) {
-    algos::MultiAttrRhsFdStorage::Storage::iterator it1 = fd_collection.begin();
+void MinimizeFDs(algos::fd::TableMaskPairFdView::Storage& fd_collection) {
+    algos::fd::TableMaskPairFdView::Storage::iterator it1 = fd_collection.begin();
     while (it1 != fd_collection.end()) {
-        algos::MultiAttrRhsFdStorage::Storage::iterator it2 = fd_collection.begin();
+        algos::fd::TableMaskPairFdView::Storage::iterator it2 = fd_collection.begin();
         while (it2 != fd_collection.end()) {
             if (it1 == it2) {
                 it2++;
@@ -155,8 +155,8 @@ TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             auto& pyro = *pyro_ptr;
 
             algorithm->Execute();
-            algos::MultiAttrRhsFdStorage const& fd_storage = *algorithm->GetFdStorage();
-            algos::MultiAttrRhsFdStorage::Storage fds = algorithm->GetFdStorage()->GetStripped();
+            algos::fd::TableMaskPairFdView const& fd_storage = *algorithm->GetFds();
+            algos::fd::TableMaskPairFdView::Storage fds = algorithm->GetFds()->GetTableMaskPairs();
             pyro.Execute();
 
             for (auto& fd : pyro.FdList()) {

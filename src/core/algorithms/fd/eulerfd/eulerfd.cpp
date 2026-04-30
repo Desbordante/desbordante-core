@@ -1,9 +1,10 @@
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 
+#include "core/algorithms/fd/make_lhslim_lhs_mask_adder.h"
 #include "core/config/max_lhs/option.h"
 #include "core/util/logger.h"
 
-namespace algos {
+namespace algos::fd {
 
 EulerFD::EulerFD() : Algorithm(), mlfq_(kQueuesNumber) {
     last_ncover_ratios_.fill(1);
@@ -59,7 +60,7 @@ void EulerFD::LoadDataInternal() {
 }
 
 void EulerFD::ResetState() {
-    fd_storage_ = nullptr;
+    fd_view_ = nullptr;
 
     // Data from sampling module
     clusters_.clear();
@@ -87,11 +88,13 @@ void EulerFD::ResetState() {
 }
 
 void EulerFD::SaveAnswer() {
-    SingleAttrRhsFdStorage::LhsLimBuilder storage_builder{number_of_attributes_, max_lhs_};
+    // Cut LHS and reorder here.
+    LhsMaskFdView::Storage storage{number_of_attributes_};
+    auto report_fd = MakeLhsLimLhsMaskAdder(storage, max_lhs_);
 
     if (attribute_indexes_.empty()) {
         LOG_INFO("attribute_indexes_ size is 0");
-        fd_storage_ = storage_builder.Build(table_header_);
+        fd_view_ = std::make_shared<LhsMaskFdView>(table_header_, std::move(storage));
         return;
     }
 
@@ -105,11 +108,11 @@ void EulerFD::SaveAnswer() {
         size_t inv_rhs_attr = inv_indexes[rhs_attr];
         auto& tree = positive_cover_[inv_rhs_attr];
         tree.ForEach([&](Bitset const& lhs_attr) {
-            storage_builder.AddFd(rhs_attr, {ChangeAttributesOrder(lhs_attr, attribute_indexes_)});
+            report_fd(ChangeAttributesOrder(lhs_attr, attribute_indexes_), rhs_attr);
         });
     }
 
-    fd_storage_ = storage_builder.Build(table_header_);
+    fd_view_ = std::make_shared<LhsMaskFdView>(table_header_, std::move(storage));
 }
 
 void EulerFD::InitCovers() {
@@ -377,8 +380,8 @@ size_t EulerFD::GenerateResults() {
 
 unsigned long long EulerFD::ExecuteInternal() {
     if (number_of_attributes_ == 1) {
-        fd_storage_ = SingleAttrRhsFdStorage::LhsLimBuilder{number_of_attributes_, max_lhs_}.Build(
-                table_header_);
+        fd_view_ = std::make_shared<LhsMaskFdView>(table_header_,
+                                                   LhsMaskFdView::Storage(number_of_attributes_));
         return 0;
     }
 
@@ -397,8 +400,8 @@ unsigned long long EulerFD::ExecuteInternal() {
     if (clusters_.empty()) {
         // In small datasets sometimes after clusters stripping there are no clusters for sampling
         LOG_INFO("number of clusters is 0*");
-        fd_storage_ = SingleAttrRhsFdStorage::LhsLimBuilder{number_of_attributes_, max_lhs_}.Build(
-                table_header_);
+        fd_view_ = std::make_shared<LhsMaskFdView>(table_header_,
+                                                   LhsMaskFdView::Storage(number_of_attributes_));
         return 0;
     }
 
@@ -432,4 +435,4 @@ unsigned long long EulerFD::ExecuteInternal() {
             std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
 }
-}  // namespace algos
+}  // namespace algos::fd
