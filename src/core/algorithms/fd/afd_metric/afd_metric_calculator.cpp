@@ -48,12 +48,6 @@ void AFDMetricCalculator::LoadDataInternal() {
 }
 
 void AFDMetricCalculator::ExecuteInternal() {
-    size_t const elapsed_milliseconds =
-            util::TimedInvoke(&AFDMetricCalculator::CalculateMetric, this);
-
-}
-
-void AFDMetricCalculator::CalculateMetric() {
     auto num_rows = relation_->GetNumRows();
     auto lhs_pli = relation_->CalculatePLIWS(lhs_indices_);
     auto rhs_pli = relation_->CalculatePLIWS(rhs_indices_);

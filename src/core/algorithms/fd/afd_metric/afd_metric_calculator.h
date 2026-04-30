@@ -27,8 +27,6 @@ private:
 
     long double result_ = 0.L;
 
-    void CalculateMetric();
-
     void RegisterOptions();
 
     void ResetState() final {
