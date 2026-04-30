@@ -45,8 +45,6 @@ void FastFDs::ExecuteInternal() {
     LOG_INFO("TIME TO DIFF SETS GENERATION: {}", elapsed_mills_to_gen_diff_sets.count());
 
     if (diff_sets_.size() == 1 && diff_sets_.back().IsEmpty()) {
-        auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now() - start_time);
         return elapsed_milliseconds.count();
     }
     Vertical empty_vertical = schema_->CreateEmptyVertical();

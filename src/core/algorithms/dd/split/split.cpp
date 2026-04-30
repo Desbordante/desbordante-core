@@ -181,8 +181,6 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         search_size += search.size() * (dfs_y.size() - 1);
         LOG_DEBUG("Calculated search spaces for column {}",
                   input_table_->GetColumnName(non_empty_cols_[index]));
-        auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now() - start_time);
         LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
         LOG_DEBUG("Lhs and rhs search space sizes: {} {}", search.size(), dfs_y.size());
         LOG_DEBUG("Number of verifications for each df in rhs:");
@@ -207,8 +205,6 @@ unsigned Split::ReduceDDs(auto const& start_time) {
             }
             LOG_DEBUG("{}", cnt);
         }
-        elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now() - start_time);
         LOG_INFO("Reduced dependencies with their rhs on column {}",
                  input_table_->GetColumnName(non_empty_cols_[index]));
         LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
