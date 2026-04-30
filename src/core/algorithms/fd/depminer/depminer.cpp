@@ -36,7 +36,6 @@ void Depminer::ExecuteInternal() {
             std::chrono::system_clock::now() - lhs_time);
     LOG_INFO("> LHS FIND TIME: {}", lhs_elapsed_milliseconds.count());
     LOG_INFO("> FD COUNT: {}", this->fd_collection_.Size());
-    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
 }
 
 std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets) {
@@ -87,7 +86,6 @@ std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> con
         c_max_cets.push_back(result);
     }
 
-    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
     LOG_INFO("> CMAX GENERATION TIME: {}", elapsed_milliseconds.count());
     LOG_INFO("> CMAX SETS COUNT: {}", c_max_cets.size());
 

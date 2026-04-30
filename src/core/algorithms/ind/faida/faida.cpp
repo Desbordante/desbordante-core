@@ -134,7 +134,6 @@ void Faida::ExecuteInternal() {
         LOG_DEBUG("Found {} INDs on level {}", last_result.size(), level_num);
     }
 
-    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
     unsigned long long const millis = elapsed_milliseconds.count();
 
     LOG_DEBUG("\nCertain checks:\t{}", inclusion_tester_->GetNumCertainChecks());
