@@ -5,6 +5,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dc/FastADC/fastadc.h"
+#include "core/algorithms/dc/HybridDC/hybrid_dc.h"
 #include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"
@@ -137,5 +138,13 @@ void BindFastADC(py::module_& main_module) {
 
     BindPrimitiveNoBase<dc::FastADC>(dc_module, "FastADC")
             .def("get_dcs", &dc::FastADC::GetDCs, py::return_value_policy::copy);
+}
+
+void BindHybridDC(py::module_& main_module) {
+    using namespace algos;
+
+    auto dc_module = main_module.def_submodule("dc");
+    BindPrimitiveNoBase<dc::HybridDC>(dc_module, "HybridDC")
+            .def("get_dcs", &dc::HybridDC::GetDCs, py::return_value_policy::copy);
 }
 }  // namespace python_bindings
