@@ -159,7 +159,7 @@ void Split::ExecuteInternal() {
     PrintResults();
 }
 
-unsigned Split::ReduceDDs(auto const& start_time) {
+unsigned Split::ReduceDDs() {
     unsigned search_size = 0;
     std::vector<DF> search, dfs_y;
     std::list<DD> reduced;
@@ -181,7 +181,6 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         search_size += search.size() * (dfs_y.size() - 1);
         LOG_DEBUG("Calculated search spaces for column {}",
                   input_table_->GetColumnName(non_empty_cols_[index]));
-        LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
         LOG_DEBUG("Lhs and rhs search space sizes: {} {}", search.size(), dfs_y.size());
         LOG_DEBUG("Number of verifications for each df in rhs:");
 
@@ -207,7 +206,6 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         }
         LOG_INFO("Reduced dependencies with their rhs on column {}",
                  input_table_->GetColumnName(non_empty_cols_[index]));
-        LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
     }
     return search_size;
 }
