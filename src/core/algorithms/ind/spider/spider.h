@@ -24,14 +24,6 @@ namespace algos {
 /// \note modification(2): algorithm mines AINDs (unary)
 ///
 class Spider final : public INDAlgorithm {
-public:
-    /// timing information for algorithm stages
-    struct StageTimings {
-        size_t load;    /**< time taken for the data loading */
-        size_t compute; /**< time taken for the inds computing */
-        size_t total;   /**< total time taken for all stages */
-    };
-
 private:
     /* configuration stage fields */
     config::EqNullsType is_null_equal_null_;
@@ -41,7 +33,6 @@ private:
 
     /* execution stage fields */
     std::vector<model::ColumnDomain> domains_; /*< loaded data */
-    StageTimings timings_;                     /*< timings info */
 
     void MakeLoadOptsAvailable();
     void LoadINDAlgorithmDataInternal() final;
