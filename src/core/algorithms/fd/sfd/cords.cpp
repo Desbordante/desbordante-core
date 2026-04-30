@@ -209,7 +209,5 @@ void Cords::ExecuteInternal() {
         }
     }
 
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-    return elapsed_time.count();
 }
 }  // namespace algos

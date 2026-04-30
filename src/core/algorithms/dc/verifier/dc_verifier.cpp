@@ -64,7 +64,7 @@ void DCVerifier::LoadDataInternal() {
     relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
 }
 
-void int DCVerifier::ExecuteInternal() {
+void DCVerifier::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
     dc::DC dc;
     try {
@@ -80,11 +80,6 @@ void int DCVerifier::ExecuteInternal() {
     bool has_header = !boost::regex_match(col_name, re);
     index_offset_ = 1 + static_cast<size_t>(has_header);
     result_ = Verify(dc);
-
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start);
-
-    return elapsed_time.count();
 }
 
 bool DCVerifier::Verify(dc::DC dc) {
