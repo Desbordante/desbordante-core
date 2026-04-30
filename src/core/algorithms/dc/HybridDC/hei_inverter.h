@@ -511,27 +511,66 @@ public:
             for (auto& th : worker_threads) th.join();
         }
 
-        // Final dedup of partial DCs across all outer iterations. Order doesn't
-        // matter for the subsequent non-minimal filter loop, so use the fast
-        // raw compare. ~1.45M items on Adult — this sort was ~14% of total CPU.
+        // Dedup, then sort by cardinality ASC. Process one cardinality level at a time:
+        // trie holds only smaller DCs, so same-level checks are read-only and parallel
+        // (two equal-size DCs can't be subsets of each other).
         std::sort(all_covers_raw.begin(), all_covers_raw.end(), BsLessRaw);
         all_covers_raw.erase(std::unique(all_covers_raw.begin(), all_covers_raw.end()),
                              all_covers_raw.end());
+        std::sort(all_covers_raw.begin(), all_covers_raw.end(),
+                  [](DBitset const& a, DBitset const& b) {
+                      size_t ca = a.count(), cb = b.count();
+                      if (ca != cb) return ca < cb;
+                      return BsLessRaw(a, b);
+                  });
 
         HEIBitSetTrie nt;
-        for (DBitset const& dc : all_covers_raw) nt.Insert(dc);
-
         std::vector<DenialConstraint> result;
         result.reserve(all_covers_raw.size());
         size_t non_minimal_count = 0;
-        for (DBitset const& dc : all_covers_raw) {
-            nt.Remove(dc);
-            if (!nt.ContainsSubset(dc)) {
-                result.emplace_back(ToBoostBitset(dc), pred_index_provider_, schema_);
+
+        size_t const total = all_covers_raw.size();
+        size_t idx = 0;
+        std::vector<uint8_t> is_minimal;  // reused across levels
+        while (idx < total) {
+            size_t card = all_covers_raw[idx].count();
+            size_t end = idx;
+            while (end < total && all_covers_raw[end].count() == card) ++end;
+            size_t batch = end - idx;
+            is_minimal.assign(batch, 0);
+
+            // Threshold: parallelism overhead dominates for very small batches.
+            if (threads_ > 1 && batch >= 64 && !log) {
+                std::atomic<size_t> next{idx};
+                std::vector<std::thread> workers;
+                workers.reserve(threads_);
+                for (unsigned t = 0; t < threads_; ++t) {
+                    workers.emplace_back([&]() {
+                        while (true) {
+                            size_t i = next.fetch_add(1, std::memory_order_relaxed);
+                            if (i >= end) break;
+                            is_minimal[i - idx] = !nt.ContainsSubset(all_covers_raw[i]);
+                        }
+                    });
+                }
+                for (auto& w : workers) w.join();
             } else {
-                ++non_minimal_count;
+                for (size_t i = idx; i < end; ++i) {
+                    is_minimal[i - idx] = !nt.ContainsSubset(all_covers_raw[i]);
+                }
             }
-            nt.Insert(dc);
+
+            // Serial: trie writes can't race with the next level's reads.
+            for (size_t i = idx; i < end; ++i) {
+                if (is_minimal[i - idx]) {
+                    nt.Insert(all_covers_raw[i]);
+                    result.emplace_back(ToBoostBitset(all_covers_raw[i]),
+                                        pred_index_provider_, schema_);
+                } else {
+                    ++non_minimal_count;
+                }
+            }
+            idx = end;
         }
 
         if (log) {
