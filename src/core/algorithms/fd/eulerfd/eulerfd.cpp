@@ -374,7 +374,7 @@ size_t EulerFD::GenerateResults() {
 
 void EulerFD::ExecuteInternal() {
     if (number_of_attributes_ == 1) {
-        return 0;
+        return;
     }
 
     // Choose random strategy (it is necessary for stable unit tests)
@@ -391,7 +391,7 @@ void EulerFD::ExecuteInternal() {
     if (clusters_.empty()) {
         // In small datasets sometimes after clusters stripping there are no clusters for sampling
         std::cout << "number of clusters is 0*\n";
-        return 0;
+        return;
     }
 
     InitCovers();
@@ -419,6 +419,5 @@ void EulerFD::ExecuteInternal() {
 
     // Convert answer from pcover trees to list of fd
     SaveAnswer();
-
 }
 }  // namespace algos
