@@ -4,8 +4,8 @@
 
 #include <pybind11/stl.h>
 
-#include "algorithms/cind/cind_verifier/cind_verifier.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/cind/cind_verifier/cind_verifier.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
 

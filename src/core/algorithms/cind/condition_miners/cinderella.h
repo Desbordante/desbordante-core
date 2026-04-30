@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "basket.h"
-#include "cind/cind.h"
-#include "cind/condition_miners/cind_miner.h"
+#include "core/algorithms/cind/cind.h"
+#include "core/algorithms/cind/condition_miners/cind_miner.h"
 #include "itemset.h"
 
 namespace algos::cind {
