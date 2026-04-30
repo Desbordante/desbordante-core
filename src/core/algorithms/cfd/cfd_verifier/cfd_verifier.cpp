@@ -6,7 +6,6 @@
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::cfd_verifier {
 
@@ -92,13 +91,9 @@ void CFDVerifier::ExecuteInternal() {
     LOG_DEBUG("Starting CFD verification...");
     LOG_DEBUG("\tRule to verify: {}", cfd::Output::CFDToString(cfd_, relation_));
 
-    auto verification_time = ::util::TimedInvoke(&CFDVerifier::VerifyCFD, this);
-    LOG_DEBUG("CFD verification took {} ms", verification_time);
+    VerifyCFD();
 
-    auto stats_calculation_time = ::util::TimedInvoke(&CFDVerifier::CalculateStatistics, this);
-    LOG_DEBUG("Statistics calculation took {} ms ", stats_calculation_time);
-
-    return verification_time + stats_calculation_time;
+    CalculateStatistics();
 }
 
 void CFDVerifier::VerifyCFD() {
