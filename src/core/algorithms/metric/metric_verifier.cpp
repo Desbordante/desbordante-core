@@ -140,7 +140,6 @@ void MetricVerifier::ResetState() {
 }
 
 void MetricVerifier::ExecuteInternal() {
-
     points_calculator_ = std::make_unique<PointsCalculator>(dist_from_null_is_infinity_,
                                                             typed_relation_, rhs_indices_);
     highlight_calculator_ = std::make_unique<HighlightCalculator>(typed_relation_, rhs_indices_);
@@ -157,7 +156,6 @@ void MetricVerifier::ExecuteInternal() {
     SortHighlightsByDistanceDescending();
 
     VisualizeHighlights();
-
 }
 
 std::string MetricVerifier::GetStringValue(config::IndicesType const& index_vec,
