@@ -110,7 +110,6 @@ void HybridDC::CheckTypes() {
 }
 
 unsigned long long HybridDC::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
     LOG_DEBUG("Start");
 
     SetLimits();
@@ -119,6 +118,8 @@ unsigned long long HybridDC::ExecuteInternal() {
     PredicateBuilder predicate_builder(&pred_provider_, pred_index_provider_, allow_cross_columns_,
                                        minimum_shared_value_, comparable_threshold_);
     predicate_builder.BuildPredicateSpace(typed_relation_->GetColumnData());
+
+    auto const evi_start = std::chrono::system_clock::now();
 
     PliShardBuilder pli_shard_builder(&int_prov_, &double_prov_, &string_prov_, shard_length_);
     pli_shard_builder.BuildPliShards(typed_relation_->GetColumnData());
@@ -133,9 +134,9 @@ unsigned long long HybridDC::ExecuteInternal() {
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Built evidence set, time: {}", elapsed_milliseconds.count());
+    auto const evi_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - evi_start).count();
+    fprintf(stderr, "[HybridDC] Evidence time: %ldms\n", evi_ms);
 
     if (const char* dump = std::getenv("PREDICATE_DUMP")) {
         FILE* f = fopen(dump, "w");
@@ -168,16 +169,17 @@ unsigned long long HybridDC::ExecuteInternal() {
     size_t n_predicates = predicate_builder.PredicateCount();
     auto mutex_map = predicate_builder.TakeMutexMap();
 
+    auto const inv_start = std::chrono::system_clock::now();
+
     HEIInverter hei_inverter(n_predicates, mutex_map, pred_index_provider_,
                               typed_relation_->GetSharedPtrSchema(), threads_);
     dcs_ = hei_inverter.Run(evidence_set_builder.evidence_set);
 
-    LOG_DEBUG("Total minimal DCs found: {}", dcs_.size());
-
-    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Algorithm time: {}", elapsed_milliseconds.count());
-    return elapsed_milliseconds.count();
+    auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - inv_start).count();
+    fprintf(stderr, "[HybridDC] Inversion time: %ldms\n", inv_ms);
+    fprintf(stderr, "[HybridDC] Total computing time: %ldms\n", evi_ms + inv_ms);
+    return evi_ms + inv_ms;
 }
 
 }  // namespace algos::dc
