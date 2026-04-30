@@ -65,14 +65,13 @@ void DCVerifier::LoadDataInternal() {
 }
 
 void DCVerifier::ExecuteInternal() {
-    auto start = std::chrono::system_clock::now();
     dc::DC dc;
     try {
         dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
         dc = parser.Parse();
     } catch (std::exception const& e) {
         LOG_INFO("{}", e.what());
-        return 0;
+        return;
     }
 
     std::string col_name = relation_->GetSchema()->GetColumns().front().get()->GetName();
