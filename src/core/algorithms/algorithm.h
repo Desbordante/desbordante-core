@@ -77,7 +77,7 @@ public:
 
     void LoadData();
 
-    unsigned long long Execute();
+    void Execute();
 
     void SetOption(std::string_view option_name, boost::any const& value = {});
     bool OptionIsRequired(std::string_view option_name) const;
