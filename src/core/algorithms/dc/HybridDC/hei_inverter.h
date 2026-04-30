@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -31,7 +33,9 @@ using DBitset = PredicateBitset;
 // _Find_first()/_Find_next() return 128 (size()) when no more bits exist.
 static constexpr size_t kNpos = 128;
 
-// Strict weak ordering on DBitset: lexicographic by set-bit positions ascending.
+// Lex order by set-bit positions ascending. Must match Java's IBitSet.compareTo —
+// changing it shifts which DCs get pruned and how large pos_cover grows.
+// Don't replace with integer compare.
 static bool BsLess(DBitset const& a, DBitset const& b) noexcept {
     size_t ai = a._Find_first(), bi = b._Find_first();
     while (ai < kNpos && bi < kNpos) {
@@ -42,58 +46,143 @@ static bool BsLess(DBitset const& a, DBitset const& b) noexcept {
     return ai >= kNpos && bi < kNpos;  // a exhausted first, so a is "less"
 }
 
-// Prefix trie for DBitset supporting subset queries and get-and-remove.
-// Mirrors the Java NTreeSearch logic used in HEI-P.
-// Children stored as a sorted vector for cache-friendly lookup (no hash overhead).
+// Fast total order for dedup — only consistency matters, not which specific order.
+// libstdc++ bitset<128> stores bits 0..63 in word 0 and 64..127 in word 1, so
+// memcpy into __int128 gives a valid integer compare. Two compares vs bit-scan.
+static bool BsLessRaw(DBitset const& a, DBitset const& b) noexcept {
+    unsigned __int128 av, bv;
+    std::memcpy(&av, &a, sizeof(av));
+    std::memcpy(&bv, &b, sizeof(bv));
+    return av < bv;
+}
+
+// Prefix trie over DBitset. Supports subset queries and get-and-remove-subsets.
+// Based on Java NTreeSearch from HEI-P.
+//
+// Nodes stored in a flat arena vector, referenced by index. unique_ptr layout
+// caused one cache miss per step; on Adult that was ~34% of CPU. Arena keeps
+// nodes contiguous so traversal is cache-friendly.
+//
+// Children are sorted by bit for binary search and merge iteration against the
+// query. Pruned nodes stay in the arena (trie is short-lived, no freelist).
 class HEIBitSetTrie {
+    static constexpr uint32_t kRoot = 0;
+
     struct Node {
-        std::vector<std::pair<uint8_t, std::unique_ptr<Node>>> children;
+        std::vector<std::pair<uint8_t, uint32_t>> children;
         std::optional<DBitset> stored;
     };
 
-    Node root_;
+    std::vector<Node> nodes_;
 
-    static Node& GetOrCreateChild(Node& node, size_t bit) {
-        auto it = std::lower_bound(node.children.begin(), node.children.end(), uint8_t(bit),
-                                   [](auto const& p, uint8_t b) { return p.first < b; });
-        if (it != node.children.end() && it->first == uint8_t(bit)) return *it->second;
-        return *node.children.emplace(it, uint8_t(bit), std::make_unique<Node>())->second;
+    uint32_t NewNode() {
+        nodes_.emplace_back();
+        return static_cast<uint32_t>(nodes_.size() - 1);
     }
 
-    static void DoInsert(Node& node, DBitset const& bs, size_t from) {
+    // Get or create child for `bit` under `parent_idx`. NewNode() may reallocate
+    // `nodes_`, so save insertion position before allocating, then re-acquire.
+    uint32_t GetOrCreateChild(uint32_t parent_idx, size_t bit) {
+        {
+            auto& children = nodes_[parent_idx].children;
+            auto it = std::lower_bound(children.begin(), children.end(), uint8_t(bit),
+                                       [](auto const& p, uint8_t b) { return p.first < b; });
+            if (it != children.end() && it->first == uint8_t(bit)) return it->second;
+        }
+        auto& children0 = nodes_[parent_idx].children;
+        auto it = std::lower_bound(children0.begin(), children0.end(), uint8_t(bit),
+                                   [](auto const& p, uint8_t b) { return p.first < b; });
+        size_t pos = static_cast<size_t>(it - children0.begin());
+        uint32_t new_idx = NewNode();
+        auto& children = nodes_[parent_idx].children;
+        children.insert(children.begin() + pos, {uint8_t(bit), new_idx});
+        return new_idx;
+    }
+
+    void DoInsert(uint32_t node_idx, DBitset const& bs, size_t from) {
         size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
         if (bit >= kNpos) {
-            node.stored = bs;
+            nodes_[node_idx].stored = bs;
             return;
         }
-        DoInsert(GetOrCreateChild(node, bit), bs, bit + 1);
+        uint32_t child_idx = GetOrCreateChild(node_idx, bit);
+        DoInsert(child_idx, bs, bit + 1);
     }
 
-    static bool DoRemove(Node& node, DBitset const& bs, size_t from) {
+    bool DoRemove(uint32_t node_idx, DBitset const& bs, size_t from) {
         size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
         if (bit >= kNpos) {
-            node.stored.reset();
-            return node.children.empty();
+            nodes_[node_idx].stored.reset();
+            return nodes_[node_idx].children.empty();
         }
-        auto it = std::lower_bound(node.children.begin(), node.children.end(), uint8_t(bit),
+        auto& children = nodes_[node_idx].children;
+        auto it = std::lower_bound(children.begin(), children.end(), uint8_t(bit),
                                    [](auto const& p, uint8_t b) { return p.first < b; });
-        if (it == node.children.end() || it->first != uint8_t(bit)) return false;
-        if (DoRemove(*it->second, bs, bit + 1)) node.children.erase(it);
-        return !node.stored.has_value() && node.children.empty();
+        if (it == children.end() || it->first != uint8_t(bit)) return false;
+        size_t pos = static_cast<size_t>(it - children.begin());
+        uint32_t child_idx = it->second;
+        bool collapse = DoRemove(child_idx, bs, bit + 1);
+        if (collapse) {
+            auto& children2 = nodes_[node_idx].children;
+            children2.erase(children2.begin() + pos);
+        }
+        Node const& n = nodes_[node_idx];
+        return !n.stored.has_value() && n.children.empty();
     }
 
-    // Merge-iterate query bits and sorted children: only recurse into children
-    // whose bit is actually set in the query (avoids scanning non-matching children).
-    static bool DoContainsSubset(Node const& node, DBitset const& query, size_t from) {
+    bool DoSubtreeHasAnyStored(uint32_t node_idx) const {
+        Node const& node = nodes_[node_idx];
+        if (node.stored.has_value()) return true;
+        for (auto const& [bit, child_idx] : node.children) {
+            (void)bit;
+            if (DoSubtreeHasAnyStored(child_idx)) return true;
+        }
+        return false;
+    }
+
+    // Find a stored bitset that is a superset of q_bits[q_idx..q_count).
+    // Children are sorted, so stop when child bit exceeds the next query bit.
+    bool DoContainsSuperset(uint32_t node_idx, std::array<uint8_t, kNpos> const& q_bits,
+                            size_t q_idx, size_t q_count) const {
+        Node const& node = nodes_[node_idx];
+
+        if (q_idx == q_count) {
+            // All query bits consumed — any stored node is a superset.
+            if (node.stored.has_value()) return true;
+            for (auto const& [bit, child_idx] : node.children) {
+                (void)bit;
+                if (DoSubtreeHasAnyStored(child_idx)) return true;
+            }
+            return false;
+        }
+
+        uint8_t next_q = q_bits[q_idx];
+        for (auto const& [bit, child_idx] : node.children) {
+            if (bit < next_q) {
+                // Extra bit — keep looking for next_q deeper.
+                if (DoContainsSuperset(child_idx, q_bits, q_idx, q_count)) return true;
+            } else if (bit == next_q) {
+                if (DoContainsSuperset(child_idx, q_bits, q_idx + 1, q_count)) return true;
+            } else {
+                // Children are sorted, so no later child can match next_q.
+                break;
+            }
+        }
+        return false;
+    }
+
+    bool DoContainsSubset(uint32_t node_idx, DBitset const& query, size_t from) const {
+        Node const& node = nodes_[node_idx];
         if (node.stored.has_value()) return true;
 
         size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
         size_t ci = 0, n = node.children.size();
+        auto const* children = node.children.data();
 
         while (qbit < kNpos && ci < n) {
-            size_t cbit = node.children[ci].first;
+            size_t cbit = children[ci].first;
             if (qbit == cbit) {
-                if (DoContainsSubset(*node.children[ci].second, query, qbit + 1)) return true;
+                if (DoContainsSubset(children[ci].second, query, qbit + 1)) return true;
                 qbit = query._Find_next(qbit);
                 ++ci;
             } else if (qbit < cbit) {
@@ -105,21 +194,26 @@ class HEIBitSetTrie {
         return false;
     }
 
-    static bool DoGetAndRemoveSubsets(Node& node, DBitset const& query, size_t from,
-                                      std::vector<DBitset>& result) {
-        if (node.stored.has_value()) {
-            result.push_back(std::move(*node.stored));
-            node.stored.reset();
+    bool DoGetAndRemoveSubsets(uint32_t node_idx, DBitset const& query, size_t from,
+                               std::vector<DBitset>& result) {
+        {
+            auto& stored = nodes_[node_idx].stored;
+            if (stored.has_value()) {
+                result.push_back(std::move(*stored));
+                stored.reset();
+            }
         }
 
         size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
         size_t ci = 0;
 
-        while (qbit < kNpos && ci < node.children.size()) {
-            size_t cbit = node.children[ci].first;
+        while (qbit < kNpos && ci < nodes_[node_idx].children.size()) {
+            size_t cbit = nodes_[node_idx].children[ci].first;
             if (qbit == cbit) {
-                if (DoGetAndRemoveSubsets(*node.children[ci].second, query, qbit + 1, result)) {
-                    node.children.erase(node.children.begin() + ci);
+                uint32_t child_idx = nodes_[node_idx].children[ci].second;
+                if (DoGetAndRemoveSubsets(child_idx, query, qbit + 1, result)) {
+                    auto& children = nodes_[node_idx].children;
+                    children.erase(children.begin() + ci);
                 } else {
                     ++ci;
                 }
@@ -130,32 +224,48 @@ class HEIBitSetTrie {
                 ++ci;
             }
         }
-        return !node.stored.has_value() && node.children.empty();
+        Node const& n = nodes_[node_idx];
+        return !n.stored.has_value() && n.children.empty();
     }
 
-    static void DoForEach(Node const& node,
-                          std::function<void(DBitset const&)> const& fn) {
+    void DoForEach(uint32_t node_idx, std::function<void(DBitset const&)> const& fn) const {
+        Node const& node = nodes_[node_idx];
         if (node.stored.has_value()) fn(*node.stored);
-        for (auto const& [bit, child] : node.children) DoForEach(*child, fn);
+        for (auto const& [bit, child_idx] : node.children) {
+            (void)bit;
+            DoForEach(child_idx, fn);
+        }
     }
 
 public:
-    void Insert(DBitset const& bs) { DoInsert(root_, bs, 0); }
+    HEIBitSetTrie() { nodes_.emplace_back(); }  // root at index kRoot
+
+    void Insert(DBitset const& bs) { DoInsert(kRoot, bs, 0); }
 
     bool ContainsSubset(DBitset const& query) const {
-        return DoContainsSubset(root_, query, 0);
+        return DoContainsSubset(kRoot, query, 0);
+    }
+
+    // True iff some stored bitset is a (non-strict) superset of `query`.
+    bool ContainsSuperset(DBitset const& query) const {
+        std::array<uint8_t, kNpos> q_bits;
+        size_t q_count = 0;
+        for (size_t b = query._Find_first(); b < kNpos; b = query._Find_next(b)) {
+            q_bits[q_count++] = static_cast<uint8_t>(b);
+        }
+        return DoContainsSuperset(kRoot, q_bits, 0, q_count);
     }
 
     std::vector<DBitset> GetAndRemoveSubsets(DBitset const& query) {
         std::vector<DBitset> result;
-        DoGetAndRemoveSubsets(root_, query, 0, result);
+        DoGetAndRemoveSubsets(kRoot, query, 0, result);
         return result;
     }
 
-    void Remove(DBitset const& bs) { DoRemove(root_, bs, 0); }
+    void Remove(DBitset const& bs) { DoRemove(kRoot, bs, 0); }
 
     void ForEach(std::function<void(DBitset const&)> const& fn) const {
-        DoForEach(root_, fn);
+        DoForEach(kRoot, fn);
     }
 };
 
@@ -183,24 +293,22 @@ class HEIInverter {
         return bdb;
     }
 
-    // Keep only maximal evidences (supersets dominate — subsets are redundant).
+    // Keep only maximal evidences; subsets are dominated and redundant.
+    // Brute-force O(N^2) was ~15% of CPU on Adult. Trie reduces to O(N * depth).
     static std::vector<DBitset> Minimize(std::vector<DBitset> evs) {
         std::sort(evs.begin(), evs.end(), [](DBitset const& a, DBitset const& b) {
             if (a.count() != b.count()) return a.count() > b.count();
-            return BsLess(b, a);
+            return BsLessRaw(a, b);  // any total order works here, not the lex one
         });
 
+        HEIBitSetTrie kept_trie;
         std::vector<DBitset> result;
         result.reserve(evs.size());
         for (DBitset& ev : evs) {
-            bool dominated = false;
-            for (DBitset const& kept : result) {
-                if ((ev & ~kept).none()) {
-                    dominated = true;
-                    break;
-                }
-            }
-            if (!dominated) result.push_back(std::move(ev));
+            // After sort, all kept items have cardinality >= ev, so a superset dominates.
+            if (kept_trie.ContainsSuperset(ev)) continue;
+            kept_trie.Insert(ev);
+            result.push_back(std::move(ev));
         }
         return result;
     }
@@ -328,16 +436,21 @@ public:
             DBitset pid_group = ToDBitset(mutex_map_[pid], n_predicates_);
             DBitset preds_to_remove = pid_group;
             for (size_t j = 0; j < i; ++j) preds_to_remove.set(sorted_preds[j]);
+            // Compiler can't prove ~preds_to_remove is loop-invariant (std::bitset<128>),
+            // so hoist it. Was ~5% of CPU on Adult from repeated _M_do_flip calls.
+            DBitset const keep_mask = ~preds_to_remove;
 
             std::vector<DBitset> modulo_evs;
             modulo_evs.reserve(pred2evi[pid].size());
             for (size_t eid : pred2evi[pid]) {
                 DBitset ev = all_evs[eid];
-                ev &= ~preds_to_remove;
+                ev &= keep_mask;
                 modulo_evs.push_back(std::move(ev));
             }
 
-            std::sort(modulo_evs.begin(), modulo_evs.end(), BsLess);
+            // Dedup needs only a total order. InnerSearch re-sorts before use,
+            // so use the fast __int128 compare.
+            std::sort(modulo_evs.begin(), modulo_evs.end(), BsLessRaw);
             modulo_evs.erase(std::unique(modulo_evs.begin(), modulo_evs.end()), modulo_evs.end());
 
             std::vector<DBitset> inner_groups;
@@ -386,7 +499,10 @@ public:
             for (auto& th : worker_threads) th.join();
         }
 
-        std::sort(all_covers_raw.begin(), all_covers_raw.end(), BsLess);
+        // Final dedup of partial DCs across all outer iterations. Order doesn't
+        // matter for the subsequent non-minimal filter loop, so use the fast
+        // raw compare. ~1.45M items on Adult — this sort was ~14% of total CPU.
+        std::sort(all_covers_raw.begin(), all_covers_raw.end(), BsLessRaw);
         all_covers_raw.erase(std::unique(all_covers_raw.begin(), all_covers_raw.end()),
                              all_covers_raw.end());
 
