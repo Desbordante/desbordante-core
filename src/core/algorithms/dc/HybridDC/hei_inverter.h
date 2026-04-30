@@ -10,10 +10,7 @@
 #include <numeric>
 #include <optional>
 #include <thread>
-#include <unordered_map>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
 #include "core/algorithms/dc/FastADC/model/evidence_set.h"
@@ -28,78 +25,110 @@ using fastadc::EvidenceSet;
 using fastadc::PredicateBitset;
 using fastadc::PredicateIndexProvider;
 
-using DBitset = boost::dynamic_bitset<>;
+// Indices guaranteed < 128 (BuildMask throws otherwise), so PredicateBitset fits.
+using DBitset = PredicateBitset;
+
+// _Find_first()/_Find_next() return 128 (size()) when no more bits exist.
+static constexpr size_t kNpos = 128;
+
+// Strict weak ordering on DBitset: lexicographic by set-bit positions ascending.
+static bool BsLess(DBitset const& a, DBitset const& b) noexcept {
+    size_t ai = a._Find_first(), bi = b._Find_first();
+    while (ai < kNpos && bi < kNpos) {
+        if (ai != bi) return ai < bi;
+        ai = a._Find_next(ai);
+        bi = b._Find_next(bi);
+    }
+    return ai >= kNpos && bi < kNpos;  // a exhausted first, so a is "less"
+}
 
 // Prefix trie for DBitset supporting subset queries and get-and-remove.
 // Mirrors the Java NTreeSearch logic used in HEI-P.
+// Children stored as a sorted vector for cache-friendly lookup (no hash overhead).
 class HEIBitSetTrie {
     struct Node {
-        std::unordered_map<size_t, std::unique_ptr<Node>> children;
+        std::vector<std::pair<uint8_t, std::unique_ptr<Node>>> children;
         std::optional<DBitset> stored;
     };
 
     Node root_;
 
-    // Insert bs into trie following set bits >= 'from'
+    static Node& GetOrCreateChild(Node& node, size_t bit) {
+        auto it = std::lower_bound(node.children.begin(), node.children.end(), uint8_t(bit),
+                                   [](auto const& p, uint8_t b) { return p.first < b; });
+        if (it != node.children.end() && it->first == uint8_t(bit)) return *it->second;
+        return *node.children.emplace(it, uint8_t(bit), std::make_unique<Node>())->second;
+    }
+
     static void DoInsert(Node& node, DBitset const& bs, size_t from) {
-        size_t bit = (from == 0) ? bs.find_first() : bs.find_next(from - 1);
-        if (bit == DBitset::npos) {
+        size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
+        if (bit >= kNpos) {
             node.stored = bs;
             return;
         }
-        auto& child = node.children[bit];
-        if (!child) child = std::make_unique<Node>();
-        DoInsert(*child, bs, bit + 1);
+        DoInsert(GetOrCreateChild(node, bit), bs, bit + 1);
     }
 
-    // Returns true if this subtree is now empty
     static bool DoRemove(Node& node, DBitset const& bs, size_t from) {
-        size_t bit = (from == 0) ? bs.find_first() : bs.find_next(from - 1);
-        if (bit == DBitset::npos) {
+        size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
+        if (bit >= kNpos) {
             node.stored.reset();
             return node.children.empty();
         }
-        auto it = node.children.find(bit);
-        if (it == node.children.end()) return false;
-        if (DoRemove(*it->second, bs, bit + 1)) {
-            node.children.erase(it);
-        }
+        auto it = std::lower_bound(node.children.begin(), node.children.end(), uint8_t(bit),
+                                   [](auto const& p, uint8_t b) { return p.first < b; });
+        if (it == node.children.end() || it->first != uint8_t(bit)) return false;
+        if (DoRemove(*it->second, bs, bit + 1)) node.children.erase(it);
         return !node.stored.has_value() && node.children.empty();
     }
 
-    // Find any stored bitset that is a subset of 'query'
-    // Follows only children whose key is a set bit of 'query'
+    // Merge-iterate query bits and sorted children: only recurse into children
+    // whose bit is actually set in the query (avoids scanning non-matching children).
     static bool DoContainsSubset(Node const& node, DBitset const& query, size_t from) {
         if (node.stored.has_value()) return true;
-        // Iterate set bits of query >= from
-        size_t bit = (from == 0) ? query.find_first() : query.find_next(from - 1);
-        while (bit != DBitset::npos) {
-            auto it = node.children.find(bit);
-            if (it != node.children.end()) {
-                if (DoContainsSubset(*it->second, query, bit + 1)) return true;
+
+        size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
+        size_t ci = 0, n = node.children.size();
+
+        while (qbit < kNpos && ci < n) {
+            size_t cbit = node.children[ci].first;
+            if (qbit == cbit) {
+                if (DoContainsSubset(*node.children[ci].second, query, qbit + 1)) return true;
+                qbit = query._Find_next(qbit);
+                ++ci;
+            } else if (qbit < cbit) {
+                qbit = query._Find_next(cbit - 1);
+            } else {
+                ++ci;
             }
-            bit = query.find_next(bit);
         }
         return false;
     }
 
-    // Get and remove all stored bitsets that are subsets of 'query'
-    // Returns true if this subtree became empty
     static bool DoGetAndRemoveSubsets(Node& node, DBitset const& query, size_t from,
                                       std::vector<DBitset>& result) {
         if (node.stored.has_value()) {
             result.push_back(std::move(*node.stored));
             node.stored.reset();
         }
-        size_t bit = (from == 0) ? query.find_first() : query.find_next(from - 1);
-        while (bit != DBitset::npos) {
-            auto it = node.children.find(bit);
-            if (it != node.children.end()) {
-                if (DoGetAndRemoveSubsets(*it->second, query, bit + 1, result)) {
-                    node.children.erase(it);
+
+        size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
+        size_t ci = 0;
+
+        while (qbit < kNpos && ci < node.children.size()) {
+            size_t cbit = node.children[ci].first;
+            if (qbit == cbit) {
+                if (DoGetAndRemoveSubsets(*node.children[ci].second, query, qbit + 1, result)) {
+                    node.children.erase(node.children.begin() + ci);
+                } else {
+                    ++ci;
                 }
+                qbit = query._Find_next(qbit);
+            } else if (qbit < cbit) {
+                qbit = query._Find_next(cbit - 1);
+            } else {
+                ++ci;
             }
-            bit = query.find_next(bit);
         }
         return !node.stored.has_value() && node.children.empty();
     }
@@ -107,15 +136,11 @@ class HEIBitSetTrie {
     static void DoForEach(Node const& node,
                           std::function<void(DBitset const&)> const& fn) {
         if (node.stored.has_value()) fn(*node.stored);
-        for (auto const& [bit, child] : node.children) {
-            DoForEach(*child, fn);
-        }
+        for (auto const& [bit, child] : node.children) DoForEach(*child, fn);
     }
 
 public:
-    void Insert(DBitset const& bs) {
-        DoInsert(root_, bs, 0);
-    }
+    void Insert(DBitset const& bs) { DoInsert(root_, bs, 0); }
 
     bool ContainsSubset(DBitset const& query) const {
         return DoContainsSubset(root_, query, 0);
@@ -127,9 +152,7 @@ public:
         return result;
     }
 
-    void Remove(DBitset const& bs) {
-        DoRemove(root_, bs, 0);
-    }
+    void Remove(DBitset const& bs) { DoRemove(root_, bs, 0); }
 
     void ForEach(std::function<void(DBitset const&)> const& fn) const {
         DoForEach(root_, fn);
@@ -145,20 +168,26 @@ class HEIInverter {
     std::shared_ptr<RelationalSchema const> schema_;
     unsigned threads_;
 
-    // Convert PredicateBitset (std::bitset<128>) to DBitset
     static DBitset ToDBitset(PredicateBitset const& pb, size_t n) {
-        DBitset db(n);
+        DBitset db;
         for (size_t i = pb._Find_first(); i < pb.size() && i < n; i = pb._Find_next(i)) {
             db.set(i);
         }
         return db;
     }
 
+    // Convert to boost::dynamic_bitset for DenialConstraint construction (not in hot path).
+    static boost::dynamic_bitset<> ToBoostBitset(DBitset const& bs) {
+        boost::dynamic_bitset<> bdb(bs.size());
+        for (size_t i = bs._Find_first(); i < kNpos; i = bs._Find_next(i)) bdb.set(i);
+        return bdb;
+    }
+
     // Keep only maximal evidences (supersets dominate — subsets are redundant).
     static std::vector<DBitset> Minimize(std::vector<DBitset> evs) {
         std::sort(evs.begin(), evs.end(), [](DBitset const& a, DBitset const& b) {
             if (a.count() != b.count()) return a.count() > b.count();
-            return a > b;
+            return BsLess(b, a);
         });
 
         std::vector<DBitset> result;
@@ -166,7 +195,7 @@ class HEIInverter {
         for (DBitset& ev : evs) {
             bool dominated = false;
             for (DBitset const& kept : result) {
-                if (ev.is_subset_of(kept)) {
+                if ((ev & ~kept).none()) {
                     dominated = true;
                     break;
                 }
@@ -176,20 +205,16 @@ class HEIInverter {
         return result;
     }
 
-    // Handle one invalid evidence: expand the pos_cover using predicate groups.
-    // Mirrors TranslatingTreeSearch::handleInvalid from FDCD Java.
     static void HandleInvalid(HEIBitSetTrie& pos_cover, DBitset const& invalid_ev,
                                std::vector<DBitset> const& groups) {
         std::vector<DBitset> removed = pos_cover.GetAndRemoveSubsets(invalid_ev);
 
         for (DBitset const& removed_dc : removed) {
             for (DBitset const& group : groups) {
-                // If removed_dc has no predicate from this group yet, extend it
                 if ((removed_dc & group).none()) {
-                    // Candidates: group members not already in invalid_ev
                     DBitset candidates = group & ~invalid_ev;
-                    for (size_t i = candidates.find_first(); i != DBitset::npos;
-                         i = candidates.find_next(i)) {
+                    for (size_t i = candidates._Find_first(); i < kNpos;
+                         i = candidates._Find_next(i)) {
                         DBitset candidate_dc = removed_dc;
                         candidate_dc.set(i);
                         if (!pos_cover.ContainsSubset(candidate_dc)) {
@@ -201,25 +226,18 @@ class HEIInverter {
         }
     }
 
-    // Inner Evidence Inversion (EI) search: find all minimal DCs that hit all evs,
-    // constrained to pick at most one predicate per group.
-    // Implements the EI algorithm from HyDRA (the inner step of HEI-P).
     static std::vector<DBitset> InnerSearch(std::vector<DBitset> const& evs,
-                                            std::vector<DBitset> const& groups, size_t n) {
-        if (evs.empty()) {
-            // Nothing to hit — empty DC covers everything (trivially valid)
-            return {DBitset(n)};
-        }
+                                            std::vector<DBitset> const& groups) {
+        if (evs.empty()) return {DBitset{}};
 
-        // Sort evidences: largest cardinality first (as in Java)
         std::vector<DBitset> sorted_evs = evs;
         std::sort(sorted_evs.begin(), sorted_evs.end(), [](DBitset const& a, DBitset const& b) {
             if (a.count() != b.count()) return a.count() > b.count();
-            return a > b;
+            return BsLess(b, a);
         });
 
         HEIBitSetTrie pos_cover;
-        pos_cover.Insert(DBitset(n));
+        pos_cover.Insert(DBitset{});
 
         for (DBitset const& ev : sorted_evs) {
             HandleInvalid(pos_cover, ev, groups);
@@ -246,7 +264,6 @@ public:
             log = fopen(path, "w");
         }
 
-        // Step 1: Convert evidence set to dynamic bitsets and minimize
         std::vector<DBitset> all_evs;
         all_evs.reserve(evidence_set.Size());
         for (size_t i = 0; i < evidence_set.Size(); ++i) {
@@ -254,33 +271,29 @@ public:
         }
         all_evs = Minimize(all_evs);
 
-        // Step 2: Build pred2evi — for each predicate, IDs of evidences containing it
         size_t n_evs = all_evs.size();
-        std::vector<DBitset> pred2evi(n_predicates_, DBitset(n_evs));
+        // List, not bitset — evidence IDs are not bounded by 128.
+        std::vector<std::vector<size_t>> pred2evi(n_predicates_);
         for (size_t eid = 0; eid < n_evs; ++eid) {
-            for (size_t pid = all_evs[eid].find_first(); pid != DBitset::npos;
-                 pid = all_evs[eid].find_next(pid)) {
-                pred2evi[pid].set(eid);
+            for (size_t pid = all_evs[eid]._Find_first(); pid < kNpos;
+                 pid = all_evs[eid]._Find_next(pid)) {
+                pred2evi[pid].push_back(eid);
             }
         }
 
-        // Step 3: Deduplicate predicate groups from mutex_map_
         std::vector<DBitset> unique_groups;
         std::vector<bool> seen(n_predicates_, false);
         for (size_t pid = 0; pid < n_predicates_; ++pid) {
             if (seen[pid]) continue;
             DBitset grp = ToDBitset(mutex_map_[pid], n_predicates_);
-            for (size_t p = grp.find_first(); p != DBitset::npos; p = grp.find_next(p)) {
-                seen[p] = true;
-            }
+            for (size_t p = grp._Find_first(); p < kNpos; p = grp._Find_next(p)) seen[p] = true;
             unique_groups.push_back(std::move(grp));
         }
 
-        // Step 4: Sort predicates by ascending evidence frequency
         std::vector<size_t> sorted_preds(n_predicates_);
         std::iota(sorted_preds.begin(), sorted_preds.end(), 0);
         std::sort(sorted_preds.begin(), sorted_preds.end(), [&](size_t a, size_t b) {
-            return pred2evi[a].count() < pred2evi[b].count();
+            return pred2evi[a].size() < pred2evi[b].size();
         });
 
         if (log) {
@@ -290,7 +303,6 @@ public:
             fprintf(log, "\n");
         }
 
-        // Step 5: Outer loop (single-threaded when logging, parallel otherwise)
         std::vector<DBitset> all_covers_raw;
         std::mutex covers_mutex;
 
@@ -298,8 +310,8 @@ public:
         auto process_one = [&](size_t i) {
             size_t pid = sorted_preds[i];
 
-            if (pred2evi[pid].none()) {
-                DBitset dc(n_predicates_);
+            if (pred2evi[pid].empty()) {
+                DBitset dc;
                 dc.set(pid);
                 std::lock_guard<std::mutex> lock(covers_mutex);
                 if (log) fprintf(log, "ITER %zu pid=%zu evi=0 modulo=0 inner_grps=0 partial=1\n", i, pid);
@@ -309,20 +321,17 @@ public:
 
             DBitset pid_group = ToDBitset(mutex_map_[pid], n_predicates_);
             DBitset preds_to_remove = pid_group;
-            for (size_t j = 0; j < i; ++j) {
-                preds_to_remove.set(sorted_preds[j]);
-            }
+            for (size_t j = 0; j < i; ++j) preds_to_remove.set(sorted_preds[j]);
 
             std::vector<DBitset> modulo_evs;
-            modulo_evs.reserve(pred2evi[pid].count());
-            for (size_t eid = pred2evi[pid].find_first(); eid != DBitset::npos;
-                 eid = pred2evi[pid].find_next(eid)) {
+            modulo_evs.reserve(pred2evi[pid].size());
+            for (size_t eid : pred2evi[pid]) {
                 DBitset ev = all_evs[eid];
                 ev &= ~preds_to_remove;
                 modulo_evs.push_back(std::move(ev));
             }
 
-            std::sort(modulo_evs.begin(), modulo_evs.end());
+            std::sort(modulo_evs.begin(), modulo_evs.end(), BsLess);
             modulo_evs.erase(std::unique(modulo_evs.begin(), modulo_evs.end()), modulo_evs.end());
 
             std::vector<DBitset> inner_groups;
@@ -336,28 +345,25 @@ public:
                 if (inner_grp.any()) inner_groups.push_back(std::move(inner_grp));
             }
 
-            std::vector<DBitset> partial_dcs = InnerSearch(modulo_evs, inner_groups, n_predicates_);
+            std::vector<DBitset> partial_dcs = InnerSearch(modulo_evs, inner_groups);
 
             std::lock_guard<std::mutex> lock(covers_mutex);
             if (log) {
                 fprintf(log, "ITER %zu pid=%zu evi=%zu modulo=%zu inner_grps=%zu partial=%zu\n",
                         i, pid,
-                        pred2evi[pid].count(),
+                        pred2evi[pid].size(),
                         modulo_evs.size(),
                         inner_groups.size(),
                         partial_dcs.size());
             }
             for (DBitset& dc : partial_dcs) {
-                dc.resize(n_predicates_);
                 dc.set(pid);
                 all_covers_raw.push_back(std::move(dc));
             }
         };
 
         if (log || threads_ <= 1) {
-            for (size_t i = 0; i < n_predicates_; ++i) {
-                process_one(i);
-            }
+            for (size_t i = 0; i < n_predicates_; ++i) process_one(i);
         } else {
             std::atomic<size_t> next_idx{0};
             std::vector<std::thread> worker_threads;
@@ -374,15 +380,12 @@ public:
             for (auto& th : worker_threads) th.join();
         }
 
-        std::sort(all_covers_raw.begin(), all_covers_raw.end());
+        std::sort(all_covers_raw.begin(), all_covers_raw.end(), BsLess);
         all_covers_raw.erase(std::unique(all_covers_raw.begin(), all_covers_raw.end()),
                              all_covers_raw.end());
 
-        // Step 6: Minimality check
         HEIBitSetTrie nt;
-        for (DBitset const& dc : all_covers_raw) {
-            nt.Insert(dc);
-        }
+        for (DBitset const& dc : all_covers_raw) nt.Insert(dc);
 
         std::vector<DenialConstraint> result;
         result.reserve(all_covers_raw.size());
@@ -390,7 +393,7 @@ public:
         for (DBitset const& dc : all_covers_raw) {
             nt.Remove(dc);
             if (!nt.ContainsSubset(dc)) {
-                result.emplace_back(dc, pred_index_provider_, schema_);
+                result.emplace_back(ToBoostBitset(dc), pred_index_provider_, schema_);
             } else {
                 ++non_minimal_count;
             }
