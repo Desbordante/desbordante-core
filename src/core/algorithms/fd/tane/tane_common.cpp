@@ -128,7 +128,6 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
 }
 
 void TaneCommon::ExecuteInternal() {
-    long apriori_millis = 0;
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
 
@@ -231,12 +230,7 @@ void TaneCommon::ExecuteInternal() {
         // TODO: printProfilingData
     }
 
-    std::chrono::milliseconds elapsed_milliseconds =
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                                  start_time);
-    apriori_millis += elapsed_milliseconds.count();
 
-    LOG_DEBUG("Time: {} milliseconds", apriori_millis);
     LOG_DEBUG("Intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());

@@ -71,11 +71,7 @@ void Pyro::ExecuteInternal() {
         search_spaces_.push_back(std::make_unique<SearchSpace>(next_id++, std::move(strategy),
                                                                schema, launch_pad_order));
     }
-    unsigned long long init_time_millis = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                                  std::chrono::system_clock::now() - start_time)
-                                                  .count();
 
-    start_time = std::chrono::system_clock::now();
     unsigned int total_error_calc_count = 0;
     unsigned long long total_ascension = 0;
     unsigned long long total_trickle = 0;
@@ -112,8 +108,6 @@ void Pyro::ExecuteInternal() {
 
 
     LOG_INFO("FdG1 error calculation: {} ms", (FdG1Strategy::nanos_ / 1000000));
-    LOG_INFO("Init time: {} ms", init_time_millis);
-    LOG_INFO("Time: {} milliseconds", elapsed_milliseconds.count());
     LOG_INFO("Error calculation count: {}", total_error_calc_count);
     LOG_INFO("Total ascension time: {} ms", total_ascension);
     LOG_INFO("Total trickle time: {} ms", total_trickle);

@@ -267,9 +267,6 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenPliMaxRepresentation() const {
         }
     }
 
-    auto elapsed_mills_to_gen_max_representation =
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                                  start_time);
     LOG_INFO("TIME TO GENERATE MAX REPRESENTATION WITH METHOD {}: {}", method_str,
              elapsed_mills_to_gen_max_representation.count());
 
