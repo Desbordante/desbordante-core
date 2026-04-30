@@ -48,7 +48,7 @@ public:
                               config::IndicesType rhs_indices)
         : dist_from_null_is_infinity_(dist_from_null_is_infinity),
           typed_relation_(std::move(typed_relation)),
-          rhs_indices_(std::move(rhs_indices)){};
+          rhs_indices_(std::move(rhs_indices)) {};
 };
 
 }  // namespace algos::metric
