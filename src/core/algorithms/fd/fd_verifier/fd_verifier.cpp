@@ -45,7 +45,6 @@ void FDVerifier::LoadDataInternal() {
 }
 
 void FDVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
 
     stats_calculator_ = std::make_unique<StatsCalculator>(relation_, typed_relation_, lhs_indices_,
                                                           rhs_indices_);
@@ -54,9 +53,6 @@ void FDVerifier::ExecuteInternal() {
     SortHighlightsByProportionDescending();
     stats_calculator_->PrintStatistics();
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void FDVerifier::VerifyFD() const {

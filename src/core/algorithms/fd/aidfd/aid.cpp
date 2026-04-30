@@ -50,7 +50,6 @@ void Aid::ResetStateFd() {
 }
 
 void Aid::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
 
     BuildClusters();
 
@@ -58,10 +57,7 @@ void Aid::ExecuteInternal() {
 
     InvertNegativeCover();
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
 
-    return elapsed_milliseconds.count();
 }
 
 void Aid::BuildClusters() {

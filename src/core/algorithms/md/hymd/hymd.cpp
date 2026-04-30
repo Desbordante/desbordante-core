@@ -181,7 +181,6 @@ void HyMD::LoadDataInternal() {
 }
 
 void HyMD::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
 
     auto pool_holder = threads_ > 1 ? PoolHolder{threads_} : PoolHolder{};
 

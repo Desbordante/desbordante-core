@@ -119,7 +119,6 @@ void Split::ParseDifferenceTable() {
 }
 
 void Split::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
     LOG_DEBUG("Start");
 
     SetLimits();
@@ -130,18 +129,12 @@ void Split::ExecuteInternal() {
     CalculateIndexSearchSpaces();
 
     LOG_INFO("Calculated distances");
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
 
     if (reduce_method_ == +Reduce::IEHybrid) {
         CalculateTuplePairs();
     }
 
     LOG_INFO("Calculated tuple pairs");
-    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
     LOG_INFO("Minimum and maximum distances for each column with non-empty search space:");
 
     for (model::ColumnIndex index = 0; index < num_columns_; index++)
@@ -164,11 +157,6 @@ void Split::ExecuteInternal() {
     LOG_INFO("Search space size: {}", search_size);
 
     PrintResults();
-
-    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_INFO("Algorithm time: {}", elapsed_milliseconds.count());
-    return elapsed_milliseconds.count();
 }
 
 unsigned Split::ReduceDDs(auto const& start_time) {

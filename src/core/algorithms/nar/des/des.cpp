@@ -72,7 +72,6 @@ EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, siz
 
 void DES::ExecuteInternal() {
     rng_.SetSeed(seed_);
-    auto const start_time = std::chrono::system_clock::now();
 
     FeatureDomains feature_domains = FindFeatureDomains(typed_relation_.get());
     std::vector<EncodedNAR> population = GetRandomPopulationInDomains(feature_domains, rng_);
@@ -96,9 +95,6 @@ void DES::ExecuteInternal() {
     };
     std::ranges::sort(nar_collection_, compare_by_fitness);
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos::des

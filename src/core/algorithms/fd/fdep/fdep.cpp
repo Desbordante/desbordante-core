@@ -54,7 +54,6 @@ void FDep::ResetStateFd() {
 }
 
 void FDep::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
 
     BuildNegativeCover();
 
@@ -68,14 +67,11 @@ void FDep::ExecuteInternal() {
 
     pos_cover_tree_->FillFdCollection(this->schema_, FdList(), max_lhs_);
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
 
 #ifdef PRINT_FDS
     pos_cover_tree_->printDep("recent_call_result.txt", this->column_names_);
 #endif
 
-    return elapsed_milliseconds.count();
 }
 
 void FDep::BuildNegativeCover() {

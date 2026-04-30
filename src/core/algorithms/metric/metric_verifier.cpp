@@ -140,7 +140,6 @@ void MetricVerifier::ResetState() {
 }
 
 void MetricVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
 
     points_calculator_ = std::make_unique<PointsCalculator>(dist_from_null_is_infinity_,
                                                             typed_relation_, rhs_indices_);
@@ -159,9 +158,6 @@ void MetricVerifier::ExecuteInternal() {
 
     VisualizeHighlights();
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 std::string MetricVerifier::GetStringValue(config::IndicesType const& index_vec,

@@ -44,10 +44,7 @@ void FDFirstAlgorithm::ResetStateCFD() {
 void FDFirstAlgorithm::ExecuteInternal() {
     max_cfd_size_ = max_lhs_ + 1;
     CheckForIncorrectInput();
-    auto start_time = std::chrono::system_clock::now();
     FdsFirstDFS();
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
     unsigned long long apriori_millis = elapsed_milliseconds.count();
     LOG_INFO("> CFD COUNT: {}", cfd_list_.size());
 

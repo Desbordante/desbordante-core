@@ -386,7 +386,6 @@ void EulerFD::ExecuteInternal() {
         rand_function_ = std::rand;
     }
 
-    auto start_time = std::chrono::system_clock::now();
 
     BuildPartition();
     if (clusters_.empty()) {
@@ -421,8 +420,5 @@ void EulerFD::ExecuteInternal() {
     // Convert answer from pcover trees to list of fd
     SaveAnswer();
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 }  // namespace algos

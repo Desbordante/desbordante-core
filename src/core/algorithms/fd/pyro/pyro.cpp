@@ -43,7 +43,6 @@ void Pyro::ResetStateFd() {
 }
 
 void Pyro::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
 
     auto schema = relation_->GetSchema();
 
@@ -111,8 +110,6 @@ void Pyro::ExecuteInternal() {
         threads[i].join();
     }
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
 
     LOG_INFO("FdG1 error calculation: {} ms", (FdG1Strategy::nanos_ / 1000000));
     LOG_INFO("Init time: {} ms", init_time_millis);
@@ -122,7 +119,6 @@ void Pyro::ExecuteInternal() {
     LOG_INFO("Total trickle time: {} ms", total_trickle);
     LOG_INFO("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     LOG_INFO("HASH: {}", PliBasedFDAlgorithm::Fletcher16());
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos

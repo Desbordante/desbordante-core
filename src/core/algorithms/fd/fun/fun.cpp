@@ -148,7 +148,6 @@ std::list<FunQuadruple> FUN::GenerateCandidate(Level const& l_k) const {
 }
 
 void FUN::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
     schema_ = relation_->GetSchema();
     Vertical empty_vertical = schema_->CreateEmptyVertical();
 
@@ -187,13 +186,10 @@ void FUN::ExecuteInternal() {
         }
     }
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
 
     LOG_INFO("Total FD count: {}", total_fds);
     LOG_INFO("HASH: {}", Fletcher16());
 
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos

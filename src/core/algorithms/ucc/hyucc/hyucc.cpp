@@ -22,7 +22,6 @@ void HyUCC::LoadDataInternal() {
 void HyUCC::ExecuteInternal() {
     using namespace hy;
     using namespace hyucc;
-    auto const start_time = std::chrono::system_clock::now();
 
     auto [plis, pli_records, og_mapping] = Preprocess(relation_.get());
     auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
@@ -59,9 +58,6 @@ void HyUCC::ExecuteInternal() {
         LOG_DEBUG("{}", ucc.ToString());
     }
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void HyUCC::RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,

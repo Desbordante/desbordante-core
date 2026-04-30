@@ -143,7 +143,6 @@ void TaneCommon::ExecuteInternal() {
         LOG_DEBUG("*{}: every tuple has {:2} partners on average.", column->ToString(),
                   avg_partners);
     }
-    auto start_time = std::chrono::system_clock::now();
 
     // Initialize level 0
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;

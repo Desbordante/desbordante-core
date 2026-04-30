@@ -45,11 +45,7 @@ void UCCVerifier::LoadDataInternal() {
 }
 
 void UCCVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
     VerifyUCC();
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 std::shared_ptr<model::PLI const> UCCVerifier::CalculatePLI() {

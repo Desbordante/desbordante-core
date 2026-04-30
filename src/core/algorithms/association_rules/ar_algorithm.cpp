@@ -61,11 +61,10 @@ void ARAlgorithm::LoadDataInternal() {
 }
 
 void ARAlgorithm::ExecuteInternal() {
-    auto time = FindFrequent();
-    time += GenerateAllRules();
+    FindFrequent();
+    GenerateAllRules();
 
     LOG_INFO("> Count of association rules: {}", ar_collection_.size());
-    return time;
 }
 
 void ARAlgorithm::UpdatePath(std::stack<RuleNode*>& path, std::list<RuleNode>& vertices) {

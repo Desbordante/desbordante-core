@@ -1011,7 +1011,6 @@ void DataStats::ExecuteInternal() {
         return 0;
     }
 
-    auto start_time = std::chrono::system_clock::now();
     auto task = [this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
 
@@ -1078,9 +1077,6 @@ void DataStats::ExecuteInternal() {
         for (size_t i = 0; i < all_stats_.size(); ++i) task(i);
     }
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 size_t DataStats::GetNumNulls(size_t index) const {
