@@ -34,8 +34,8 @@ private:
     static void UpdatePath(std::stack<Node const*>& path, std::vector<Node> const& vertices);
 
     double GetSupport(std::vector<unsigned> const& frequent_itemset) const override;
-    unsigned long long GenerateAllRules() override;
-    unsigned long long FindFrequent() override;
+    void GenerateAllRules() override;
+    void FindFrequent() override;
 
     void ResetStateAr() final;
 
