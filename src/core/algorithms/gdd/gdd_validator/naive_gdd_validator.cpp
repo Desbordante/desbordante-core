@@ -18,16 +18,10 @@ std::optional<model::GddCounterexample> NaiveGddValidator::Holds(model::Gdd cons
 
 NaiveGddValidator::DomainT NaiveGddValidator::BuildDomain(model::gdd::graph_t const& pattern,
                                                           model::gdd::graph_t const& graph) {
-    std::unordered_map<model::gdd::vertex_t, std::vector<model::gdd::vertex_t>> dom;
+    DomainT dom;
 
-    boost::graph_traits<model::gdd::graph_t>::vertex_iterator pv;
-    boost::graph_traits<model::gdd::graph_t>::vertex_iterator pend;
-
-    for (std::tie(pv, pend) = boost::vertices(pattern); pv != pend; ++pv) {
-        boost::graph_traits<model::gdd::graph_t>::vertex_iterator gv;
-        boost::graph_traits<model::gdd::graph_t>::vertex_iterator gend;
-
-        for (std::tie(gv, gend) = boost::vertices(graph); gv != gend; ++gv) {
+    for (auto [pv, pend] = boost::vertices(pattern); pv != pend; ++pv) {
+        for (auto [gv, gend] = boost::vertices(graph); gv != gend; ++gv) {
             if (pattern[*pv].label == graph[*gv].label) {  // TODO: wildcards
                 dom[*pv].emplace_back(*gv);
             }

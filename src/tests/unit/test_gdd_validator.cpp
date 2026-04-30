@@ -15,6 +15,16 @@
 #include "core/config/names.h"
 #include "tests/unit/test_gdd_utils.h"
 
+using model::Gdd;
+using model::gdd::graph_t;
+using model::gdd::vertex_t;
+
+using model::gdd::detail::CmpOp;
+using model::gdd::detail::ConstValue;
+using model::gdd::detail::DistanceConstraint;
+using model::gdd::detail::DistanceMetric;
+
+using namespace tests::gdd::utils;
 namespace tests {
 
 struct ValidatorCase {

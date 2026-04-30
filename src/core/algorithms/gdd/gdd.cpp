@@ -5,6 +5,7 @@
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
 #include "core/algorithms/gdd/gdd_graph_description.h"
+#include "core/util/levenshtein_distance.h"
 
 namespace model {
 
@@ -13,13 +14,13 @@ namespace gdd::detail {
 bool IsSubgraph(gdd::graph_t const& query, gdd::graph_t const& graph) {
     bool result = false;
 
-    auto vcmp = [&query, &graph](gdd::vertex_t const& u, gdd::vertex_t const& v) {
-        return query[u].label == graph[v].label &&  // TODO : handle wildcard
-               query[u].attributes == graph[v].attributes;
+    auto vcmp = [&query, &graph](gdd::vertex_t const& query_v, gdd::vertex_t const& graph_v) {
+        return query[query_v].label == graph[graph_v].label &&  // TODO : handle wildcard
+               query[query_v].attributes == graph[graph_v].attributes;
     };
 
-    auto ecmp = [&query, &graph](gdd::edge_t const& s, gdd::edge_t const& t) {
-        return query[s].label == graph[t].label;  // TODO: handle wildcard
+    auto ecmp = [&query, &graph](gdd::edge_t const& query_e, gdd::edge_t const& graph_e) {
+        return query[query_e].label == graph[graph_e].label;  // TODO: handle wildcard
     };
 
     auto callback = [&result](auto, auto) {
@@ -40,29 +41,6 @@ bool IsSubgraph(gdd::graph_t const& query, gdd::graph_t const& graph) {
 }  // namespace gdd::detail
 
 namespace {
-
-size_t EditDistance(std::string_view a, std::string_view b) {
-    if (a == b) return 0;
-    if (a.empty()) return b.size();
-    if (b.empty()) return a.size();
-
-    std::vector<std::size_t> prev(b.size() + 1);
-    for (size_t i = 0; i < prev.size(); ++i) {
-        prev[i] = i;
-    }
-
-    std::vector<std::size_t> cur(b.size() + 1);
-    for (std::size_t i = 1; i <= a.size(); ++i) {
-        cur[0] = i;
-        for (std::size_t j = 1; j <= b.size(); ++j) {
-            std::size_t const cost = (a[i - 1] == b[j - 1]) ? 0 : 1;
-            cur[j] = std::min({prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost});
-        }
-        std::swap(prev, cur);
-    }
-
-    return prev[b.size()];
-}
 
 bool CompareDistance(double dist, gdd::detail::CmpOp op, double threshold) {
     constexpr double eps = std::numeric_limits<double>::epsilon();
@@ -111,7 +89,8 @@ double CalculateDistance(gdd::detail::ConstValue const& lhs, gdd::detail::ConstV
             if (!std::holds_alternative<std::string>(rhs)) {
                 throw std::logic_error("Expected string in RHS for edit distance metric");
             }
-            return EditDistance(std::get<std::string>(lhs), std::get<std::string>(rhs));
+            return util::LevenshteinDistance(std::get<std::string>(lhs),
+                                             std::get<std::string>(rhs));
 
         default:
             throw std::logic_error("Unimplemented distance metric type");
@@ -129,16 +108,16 @@ std::optional<gdd::vertex_t> Gdd::FindPatternVertexById(size_t id) const {
 }
 
 bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
-                              std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& map,
+                              std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
                               gdd::detail::DistanceConstraint const& constraint) const {
     using namespace gdd::detail;
 
-    auto resolve_graph_vertex = [this, &map](std::size_t pv_id) -> std::optional<gdd::vertex_t> {
+    auto resolve_graph_vertex = [this, &pg_map](std::size_t pv_id) -> std::optional<gdd::vertex_t> {
         auto const pv = FindPatternVertexById(pv_id);
         if (!pv) return std::nullopt;
 
-        auto const gv_it = map.find(*pv);
-        if (gv_it == map.end()) {
+        auto const gv_it = pg_map.find(*pv);
+        if (gv_it == pg_map.end()) {
             return std::nullopt;
         }
 
@@ -212,8 +191,8 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
                     collect_relation_targets(gv_rhs, rhs_relname);
 
             bool intersect = false;
-            for (auto const& t : lhs_targets) {
-                if (rhs_targets.contains(t)) {
+            for (auto const& vertex : lhs_targets) {
+                if (rhs_targets.contains(vertex)) {
                     intersect = true;
                     break;
                 }

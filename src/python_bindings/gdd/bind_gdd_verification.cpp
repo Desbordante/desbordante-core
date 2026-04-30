@@ -57,11 +57,7 @@ std::string Repr(model::gdd::detail::ConstValue const& value) {
 
     return std::visit(Overloaded{
                               [](int64_t v) { return "ConstValue(" + std::to_string(v) + ")"; },
-                              [](double v) {
-                                  std::ostringstream out;
-                                  out << "ConstValue(" << v << ")";
-                                  return out.str();
-                              },
+                              [](double v) { return "ConstValue(" + std::to_string(v) + ")"; },
                               [](std::string const& v) { return "ConstValue('" + v + "')"; },
                       },
                       value);

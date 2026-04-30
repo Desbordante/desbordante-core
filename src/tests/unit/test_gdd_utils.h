@@ -14,7 +14,7 @@
 #include "core/algorithms/gdd/gdd_graph_description.h"
 #include "core/parser/graph_parser/graph_parser.h"
 
-namespace tests {
+namespace tests::gdd::utils {
 
 inline std::string SanitizeParamName(std::string name) {
     for (char& ch : name) {

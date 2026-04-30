@@ -70,7 +70,7 @@ private:
     std::optional<gdd::vertex_t> FindPatternVertexById(size_t id) const;
 
     bool SatisfiesConstraint(gdd::graph_t const& g,
-                             std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& map,
+                             std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
                              gdd::detail::DistanceConstraint const& constraint) const;
 
     bool SatisfiesPhi(gdd::graph_t const& g,
