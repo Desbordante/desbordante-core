@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cstdio>
+#include <cstdlib>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -239,6 +241,11 @@ public:
           threads_(threads) {}
 
     std::vector<DenialConstraint> Run(EvidenceSet const& evidence_set) {
+        FILE* log = nullptr;
+        if (const char* path = std::getenv("ITER_LOG")) {
+            log = fopen(path, "w");
+        }
+
         // Step 1: Convert evidence set to dynamic bitsets and minimize
         std::vector<DBitset> all_evs;
         all_evs.reserve(evidence_set.Size());
@@ -246,7 +253,6 @@ public:
             all_evs.push_back(ToDBitset(evidence_set[i].evidence, n_predicates_));
         }
         all_evs = Minimize(all_evs);
-        fprintf(stderr, "[HEI-P] Evidences after minimize: %zu\n", all_evs.size());
 
         // Step 2: Build pred2evi — for each predicate, IDs of evidences containing it
         size_t n_evs = all_evs.size();
@@ -277,30 +283,36 @@ public:
             return pred2evi[a].count() < pred2evi[b].count();
         });
 
-        // Step 5: Parallel outer loop
+        if (log) {
+            fprintf(log, "SORTED_PREDS:");
+            for (size_t i = 0; i < n_predicates_; ++i)
+                fprintf(log, " %zu", sorted_preds[i]);
+            fprintf(log, "\n");
+        }
+
+        // Step 5: Outer loop (single-threaded when logging, parallel otherwise)
         std::vector<DBitset> all_covers_raw;
         std::mutex covers_mutex;
 
+        auto const& pred_objects = pred_index_provider_->GetObjects();
         auto process_one = [&](size_t i) {
             size_t pid = sorted_preds[i];
 
             if (pred2evi[pid].none()) {
-                // pid appears in no evidence → {pid} alone is a valid DC
                 DBitset dc(n_predicates_);
                 dc.set(pid);
                 std::lock_guard<std::mutex> lock(covers_mutex);
+                if (log) fprintf(log, "ITER %zu pid=%zu evi=0 modulo=0 inner_grps=0 partial=1\n", i, pid);
                 all_covers_raw.push_back(std::move(dc));
                 return;
             }
 
-            // preds_to_remove = pid's group + all predicates earlier in sorted order
             DBitset pid_group = ToDBitset(mutex_map_[pid], n_predicates_);
             DBitset preds_to_remove = pid_group;
             for (size_t j = 0; j < i; ++j) {
                 preds_to_remove.set(sorted_preds[j]);
             }
 
-            // Modulo evidences: for each evidence containing pid, clear preds_to_remove
             std::vector<DBitset> modulo_evs;
             modulo_evs.reserve(pred2evi[pid].count());
             for (size_t eid = pred2evi[pid].find_first(); eid != DBitset::npos;
@@ -310,15 +322,16 @@ public:
                 modulo_evs.push_back(std::move(ev));
             }
 
-            // Deduplicate
             std::sort(modulo_evs.begin(), modulo_evs.end());
             modulo_evs.erase(std::unique(modulo_evs.begin(), modulo_evs.end()), modulo_evs.end());
 
-            // Inner groups: unique_groups excluding pid's group, with preds_to_remove cleared
             std::vector<DBitset> inner_groups;
             inner_groups.reserve(unique_groups.size());
             for (DBitset const& grp : unique_groups) {
                 if ((grp & pid_group).any()) continue;
+                // Inner EI uses only single-column groups (matches Java fdcd behavior).
+                size_t first = grp.find_first();
+                if (first != DBitset::npos && pred_objects[first]->IsCrossColumn()) continue;
                 DBitset inner_grp = grp & ~preds_to_remove;
                 if (inner_grp.any()) inner_groups.push_back(std::move(inner_grp));
             }
@@ -326,6 +339,14 @@ public:
             std::vector<DBitset> partial_dcs = InnerSearch(modulo_evs, inner_groups, n_predicates_);
 
             std::lock_guard<std::mutex> lock(covers_mutex);
+            if (log) {
+                fprintf(log, "ITER %zu pid=%zu evi=%zu modulo=%zu inner_grps=%zu partial=%zu\n",
+                        i, pid,
+                        pred2evi[pid].count(),
+                        modulo_evs.size(),
+                        inner_groups.size(),
+                        partial_dcs.size());
+            }
             for (DBitset& dc : partial_dcs) {
                 dc.resize(n_predicates_);
                 dc.set(pid);
@@ -333,7 +354,7 @@ public:
             }
         };
 
-        if (threads_ <= 1) {
+        if (log || threads_ <= 1) {
             for (size_t i = 0; i < n_predicates_; ++i) {
                 process_one(i);
             }
@@ -353,15 +374,11 @@ public:
             for (auto& th : worker_threads) th.join();
         }
 
-        // Deduplicate: different pid iterations can produce the same DC
-        // (Java uses ConcurrentHashMap.newKeySet() for this purpose)
         std::sort(all_covers_raw.begin(), all_covers_raw.end());
         all_covers_raw.erase(std::unique(all_covers_raw.begin(), all_covers_raw.end()),
                              all_covers_raw.end());
 
-        fprintf(stderr, "[HEI-P] Raw covers after dedup: %zu\n", all_covers_raw.size());
-
-        // Step 6: Minimality check — remove non-minimal covers
+        // Step 6: Minimality check
         HEIBitSetTrie nt;
         for (DBitset const& dc : all_covers_raw) {
             nt.Insert(dc);
@@ -380,48 +397,11 @@ public:
             nt.Insert(dc);
         }
 
-        fprintf(stderr, "[HEI-P] Non-minimal removed: %zu, Final: %zu\n",
-                non_minimal_count, result.size());
-
-        // Validity check: every DC must not be a subset of any evidence
-        size_t invalid_count = 0;
-        for (DenialConstraint const& dc_obj : result) {
-            DBitset const& dc_bs = dc_obj.GetPredicateSet().GetBitset();
-            for (DBitset const& ev : all_evs) {
-                // dc is invalid if dc ⊆ ev (DC would be violated by this tuple pair)
-                if (dc_bs.is_subset_of(ev)) {
-                    ++invalid_count;
-                    break;
-                }
-            }
+        if (log) {
+            fprintf(log, "FINAL raw=%zu non_minimal=%zu result=%zu\n",
+                    all_covers_raw.size(), non_minimal_count, result.size());
+            fclose(log);
         }
-        fprintf(stderr, "[HEI-P] Invalid DCs (subsets of some evidence): %zu\n", invalid_count);
-
-        // Brute-force check on result: are any result DCs truly non-minimal?
-        // Collect result as DBitsets for comparison
-        std::vector<DBitset> result_bs;
-        result_bs.reserve(result.size());
-        for (DenialConstraint const& dc_obj : result) {
-            result_bs.push_back(dc_obj.GetPredicateSet().GetBitset());
-        }
-        size_t brute_non_minimal = 0;
-        size_t check_limit = std::min(result_bs.size(), size_t(1000));
-        for (size_t x = 0; x < check_limit; ++x) {
-            for (size_t y = 0; y < result_bs.size(); ++y) {
-                if (x == y) continue;
-                if (result_bs[y].is_subset_of(result_bs[x]) && result_bs[y] != result_bs[x]) {
-                    ++brute_non_minimal;
-                    if (brute_non_minimal <= 3) {
-                        fprintf(stderr, "[HEI-P] Non-minimal in result: res[%zu] (bits=%zu) has subset res[%zu] (bits=%zu)\n",
-                                x, result_bs[x].count(), y, result_bs[y].count());
-                    }
-                    break;
-                }
-            }
-            if (brute_non_minimal >= 5) break;
-        }
-        fprintf(stderr, "[HEI-P] Brute-force non-minimal in result (checked first %zu): %zu\n",
-                check_limit, brute_non_minimal);
 
         return result;
     }
