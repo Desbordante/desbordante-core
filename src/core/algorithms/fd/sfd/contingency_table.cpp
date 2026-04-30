@@ -7,26 +7,26 @@
 
 namespace algos {
 ContingencyTable::ContingencyTable(model::ColumnIndex col_i, model::ColumnIndex col_k,
-                                   std::vector<size_t> const &domains_)
+                                   std::vector<size_t> const& domains_)
     : col_i_(col_i),
       col_k_(col_k),
       n_i_j_(domains_[col_i], std::vector<long double>(domains_[col_k], 0)),
       n_i_(domains_[col_i], 0),
       n_j_(domains_[col_k], 0) {}
 
-[[nodiscard]] size_t ContingencyTable::Category(model::ColumnIndex col_ind, std::string const &val,
+[[nodiscard]] size_t ContingencyTable::Category(model::ColumnIndex col_ind, std::string const& val,
                                                 size_t domain, bool skew,
-                                                FrequencyHandler const &handler) {
+                                                FrequencyHandler const& handler) {
     if (skew) {
         return handler.GetValueOrdinalNumberAtColumn(val, col_ind);
     }
     return std::hash<std::string>{}(val) % domain;
 }
 
-void ContingencyTable::FillTable(Sample const &smp, std::vector<model::TypedColumnData> const &data,
-                                 FrequencyHandler const &handler,
-                                 std::vector<bool> const &is_skewed_,
-                                 std::vector<size_t> const &domains_) {
+void ContingencyTable::FillTable(Sample const& smp, std::vector<model::TypedColumnData> const& data,
+                                 FrequencyHandler const& handler,
+                                 std::vector<bool> const& is_skewed_,
+                                 std::vector<size_t> const& domains_) {
     for (model::TupleIndex row_ind : smp.GetRowIndices()) {
         size_t i = Category(col_i_, data[col_i_].GetDataAsString(row_ind), domains_[col_i_],
                             is_skewed_[col_i_], handler);
@@ -43,7 +43,7 @@ void ContingencyTable::FillTable(Sample const &smp, std::vector<model::TypedColu
    incorrect. */
 
 long double ContingencyTable::CalculateChiSquared(long double sample_size,
-                                                  std::vector<size_t> const &domains) const {
+                                                  std::vector<size_t> const& domains) const {
     long double chi_squared = 0;
     for (size_t i = 0; i < domains[col_i_]; i++) {
         for (size_t j = 0; j < domains[col_k_]; j++) {
@@ -56,7 +56,7 @@ long double ContingencyTable::CalculateChiSquared(long double sample_size,
     return chi_squared;
 }
 
-bool ContingencyTable::ChiSquaredTest(Sample const &smp, std::vector<size_t> const &domains,
+bool ContingencyTable::ChiSquaredTest(Sample const& smp, std::vector<size_t> const& domains,
                                       long double max_false_positive_probability) const {
     long double chi_squared = CalculateChiSquared(smp.GetRowIndices().size(), domains);
 
@@ -68,7 +68,7 @@ bool ContingencyTable::ChiSquaredTest(Sample const &smp, std::vector<size_t> con
     return chi_squared > t;
 }
 
-bool ContingencyTable::TooMuchStructuralZeroes(std::vector<size_t> const &domains,
+bool ContingencyTable::TooMuchStructuralZeroes(std::vector<size_t> const& domains,
                                                long double min_structural_zeroes_proportion) const {
     long double zeros_sum = 0;
     for (size_t i = 0; i < domains[col_i_]; i++) {

@@ -4,7 +4,7 @@
 
 namespace algos {
 
-bool MLFQ::LastQueueElement::operator<(LastQueueElement const &other) const {
+bool MLFQ::LastQueueElement::operator<(LastQueueElement const& other) const {
     return cluster->GetAverage() < other.cluster->GetAverage();
 }
 
@@ -17,7 +17,7 @@ MLFQ::MLFQ(size_t queues_number) {
     }
 }
 
-void MLFQ::Add(Cluster *cluster, double priority, bool add_if_zero) {
+void MLFQ::Add(Cluster* cluster, double priority, bool add_if_zero) {
     if (priority == 0 && !add_if_zero) {
         return;
     }
@@ -33,15 +33,15 @@ void MLFQ::Add(Cluster *cluster, double priority, bool add_if_zero) {
     }
 }
 
-void MLFQ::AddAtLast(Cluster *cluster) {
+void MLFQ::AddAtLast(Cluster* cluster) {
     if (cluster->GetAverage() > 0) {
         last_queue_.push({cluster});
     }
 }
 
-Cluster *MLFQ::Get() {
+Cluster* MLFQ::Get() {
     if (actual_queue_ >= 0) {
-        Cluster *save = queues_[actual_queue_].first.front();
+        Cluster* save = queues_[actual_queue_].first.front();
         queues_[actual_queue_].first.pop();
         effective_size_--;
         while (actual_queue_ >= 0 && queues_[actual_queue_].first.empty()) {
@@ -49,7 +49,7 @@ Cluster *MLFQ::Get() {
         }
         return save;
     }
-    Cluster *cluster = last_queue_.top().cluster;
+    Cluster* cluster = last_queue_.top().cluster;
     last_queue_.pop();
     return cluster;
 }
@@ -68,7 +68,7 @@ double MLFQ::MaxEffectInLastQueue() const {
 
 void MLFQ::Clear() {
     last_queue_ = {};
-    for (auto &q : queues_) {
+    for (auto& q : queues_) {
         q.first = {};
     }
 }

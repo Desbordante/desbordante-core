@@ -43,7 +43,7 @@ public:
     DC() = default;
 
     template <class Iter>
-    DC(Iter first, Iter last) : predicates_(first, last){};
+    DC(Iter first, Iter last) : predicates_(first, last) {};
 
     // returns unique columns indices from each Predicate which satisfy the given predicate
     template <class Pred>
