@@ -47,11 +47,6 @@ private:
 
 public:
     explicit Spider();
-
-    /// get information about stage timings
-    StageTimings const& GetStageTimings() const noexcept {
-        return timings_;
-    }
 };
 
 }  // namespace algos
