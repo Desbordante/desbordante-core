@@ -241,7 +241,6 @@ void TaneCommon::ExecuteInternal() {
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
-    return apriori_millis;
 }
 
 }  // namespace tane

@@ -73,12 +73,10 @@ void DFD::ExecuteInternal() {
 
     search_space_pool.join();
 
-    long long apriori_millis = elapsed_milliseconds.count();
 
     LOG_INFO("> FD COUNT: {}", fd_collection_.Size());
     LOG_INFO("> HASH: {}", PliBasedFDAlgorithm::Fletcher16());
 
-    return apriori_millis;
 }
 
 }  // namespace algos
