@@ -34,9 +34,6 @@ void Faida::LoadINDAlgorithmDataInternal() {
 
     data_ = faida::Preprocessor::CreateHashedStores("Faida", input_tables_, sample_size_);
 
-    auto const prep_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-    prepr_time_ = prep_milliseconds.count();
-    LOG_DEBUG("Preprocessing time: {}", prepr_time_);
 }
 
 void Faida::ResetINDAlgorithmState() {
@@ -134,17 +131,11 @@ void Faida::ExecuteInternal() {
         LOG_DEBUG("Found {} INDs on level {}", last_result.size(), level_num);
     }
 
-    unsigned long long const millis = elapsed_milliseconds.count();
-
     LOG_DEBUG("\nCertain checks:\t{}", inclusion_tester_->GetNumCertainChecks());
     LOG_DEBUG("Uncertain checks:\t{}", inclusion_tester_->GetNumUncertainChecks());
-    LOG_DEBUG("\nOverall time\t{}", millis + prepr_time_);
-    LOG_DEBUG("Time (without preprocessing):\t{}", millis);
     LOG_DEBUG("\tInserting:\t{}", insert_time_);
     LOG_DEBUG("\tChecking:\t{}", check_time_);
     LOG_DEBUG("\nIND count:\t{}", INDList().size());
-
-    return millis;
 }
 
 void Faida::InsertRows(faida::IInclusionTester::ActiveColumns const& active_columns,
@@ -176,9 +167,6 @@ void Faida::InsertRows(faida::IInclusionTester::ActiveColumns const& active_colu
     }
 
     inclusion_tester_->FinalizeInsertion();
-    size_t const millis = elapsed_milliseconds.count();
-    insert_time_ += millis;
-    LOG_DEBUG("Insert rows time:\t{}", millis);
 }
 
 std::vector<faida::SimpleIND> Faida::TestCandidates(std::vector<SimpleIND> const& candidates) {
@@ -190,9 +178,6 @@ std::vector<faida::SimpleIND> Faida::TestCandidates(std::vector<SimpleIND> const
         }
     }
 
-    size_t const millis = elapsed_milliseconds.count();
-    check_time_ += millis;
-    LOG_DEBUG("Candidates check time:\t{}", millis);
     return result;
 }
 
