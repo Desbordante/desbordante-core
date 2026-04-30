@@ -20,7 +20,19 @@ using model::gdd::detail::ConstValue;
 using model::gdd::detail::DistanceConstraint;
 using model::gdd::detail::DistanceMetric;
 
-using namespace tests::gdd::utils;
+using tests::gdd::utils::SanitizeParamName;
+
+using tests::gdd::utils::MakeSingleVertexPattern;
+using tests::gdd::utils::MakeTwoVertexPattern;
+
+using tests::gdd::utils::AttrAttr;
+using tests::gdd::utils::AttrConst;
+using tests::gdd::utils::RelConst;
+using tests::gdd::utils::RelRel;
+
+using tests::gdd::utils::AddEdge;
+using tests::gdd::utils::AddVertex;
+using tests::gdd::utils::FindVertexById;
 
 namespace tests {
 

@@ -24,7 +24,22 @@ using model::gdd::detail::ConstValue;
 using model::gdd::detail::DistanceConstraint;
 using model::gdd::detail::DistanceMetric;
 
-using namespace tests::gdd::utils;
+using tests::gdd::utils::SanitizeParamName;
+
+using tests::gdd::utils::MakeGddMishaLivesInAmsterdam;
+using tests::gdd::utils::MakeGddRigaInLatvia;
+using tests::gdd::utils::MakeGddVacuousImplicationNonexistentPerson;
+using tests::gdd::utils::MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint;
+using tests::gdd::utils::MakeGddLabelConstraintPersonImpliesCityLabelCloseToCity;
+using tests::gdd::utils::MakeGddCompanyHqInAmsterdamNoCompanyInGraph;
+using tests::gdd::utils::MakeGddDblpWeakAuthorResolution;
+using tests::gdd::utils::MakeGddDblpStrongAuthorResolution;
+
+using tests::gdd::utils::LargeGraphAllGoodDot;
+using tests::gdd::utils::LargeGraphWithViolationMishaAlsoLivesInRigaDot;
+using tests::gdd::utils::GraphNoMatchesForCompanyCityDot;
+using tests::gdd::utils::DblpLikeGraphDot;
+
 namespace tests {
 
 struct ValidatorCase {
