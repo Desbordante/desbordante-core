@@ -5,7 +5,7 @@
 
 #include "core/model/table/column.h"
 
-class ColumnLayoutRelationData;
+class LegacyColumnLayoutRelationData;
 
 template <>
 struct std::hash<std::vector<int>> {

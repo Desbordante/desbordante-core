@@ -8,8 +8,8 @@
 
 #include "core/algorithms/fd/hycommon/column_combination_list.h"
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
 using NonFDList = hy::ColumnCombinationList;
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd

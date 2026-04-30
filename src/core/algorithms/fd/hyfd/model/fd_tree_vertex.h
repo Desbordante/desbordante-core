@@ -6,9 +6,10 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "core/algorithms/fd/bitset_pair_result_reporter.h"
 #include "core/algorithms/fd/raw_fd.h"
 
-namespace algos::hyfd::fd_tree {
+namespace algos::fd::hyfd::fd_tree {
 
 class FDTreeVertex;
 
@@ -106,7 +107,7 @@ private:
 
     bool IsLastNodeOf(size_t rhs) const noexcept;
 
-    void FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs) const;
+    void FillFDs(BitsetPairResultReporter const& report_fd, boost::dynamic_bitset<>& lhs) const;
 
 public:
     explicit FDTreeVertex(size_t numAttributes) noexcept
@@ -155,4 +156,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace algos::fd::hyfd::fd_tree

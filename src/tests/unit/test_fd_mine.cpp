@@ -18,7 +18,7 @@
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;
 
-using algos::FDAlgorithm, algos::FdMine, algos::StdParamsMap;
+using algos::Algorithm, algos::fd::FdMine, algos::StdParamsMap;
 
 namespace onam = config::names;
 
@@ -26,13 +26,13 @@ StdParamsMap FdMineGetParamMap(CSVConfig const& csv_config) {
     return {{config::names::kTable, MakeInputTable(csv_config)}};
 }
 
-std::unique_ptr<FDAlgorithm> ConfToLoadFdMine(CSVConfig const& csv_config) {
-    std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<FdMine>();
+std::unique_ptr<Algorithm> ConfToLoadFdMine(CSVConfig const& csv_config) {
+    std::unique_ptr<Algorithm> algorithm = std::make_unique<FdMine>();
     algos::ConfigureFromMap(*algorithm, FdMineGetParamMap(csv_config));
     return algorithm;
 }
 
-std::unique_ptr<FDAlgorithm> CreateFdMineAlgorithmInstance(CSVConfig const& csv_config) {
+std::unique_ptr<FdMine> CreateFdMineAlgorithmInstance(CSVConfig const& csv_config) {
     return algos::CreateAndLoadAlgorithm<FdMine>(FdMineGetParamMap(csv_config));
 }
 
@@ -86,7 +86,7 @@ TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
     auto algorithm = CreateFdMineAlgorithmInstance(tests::kTestSingleColumn);
     algorithm->Execute();
-    ASSERT_TRUE(algorithm->FdList().empty());
+    ASSERT_TRUE(NoFDsFound(*algorithm->GetFds()));
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
@@ -94,7 +94,7 @@ TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
 
     auto algorithm = CreateFdMineAlgorithmInstance(tests::kTestLong);
     algorithm->Execute();
-    ASSERT_TRUE(FdMineCheckFdListEquality(true_fd_collection, algorithm->FdList()));
+    ASSERT_TRUE(CheckFdCollectionEquality(true_fd_collection, *algorithm->GetFds()));
 }
 
 std::string GetJsonFDs(std::list<FD>& fd_collection) {
@@ -115,19 +115,18 @@ std::string GetJsonFDs(std::list<FD>& fd_collection) {
     return result;
 }
 
-void MinimizeFDs(std::list<FD>& fd_collection) {
-    std::list<FD>::iterator it1 = fd_collection.begin();
+void MinimizeFDs(algos::fd::TableMaskPairFdView::Storage& fd_collection) {
+    algos::fd::TableMaskPairFdView::Storage::iterator it1 = fd_collection.begin();
     while (it1 != fd_collection.end()) {
-        std::list<FD>::iterator it2 = fd_collection.begin();
+        algos::fd::TableMaskPairFdView::Storage::iterator it2 = fd_collection.begin();
         while (it2 != fd_collection.end()) {
             if (it1 == it2) {
                 it2++;
                 continue;
             }
-            if (it1->GetRhs().GetIndex() == it2->GetRhs().GetIndex()) {
-                auto lhs1 = it1->GetLhs();
-                auto lhs2 = it2->GetLhs();
-                if (lhs2.Contains(lhs1)) {
+            if (it1->lhs.is_subset_of(it2->lhs)) {
+                it2->rhs -= it1->rhs;
+                if (it2->rhs.none()) {
                     it2 = fd_collection.erase(it2);
                     continue;
                 }
@@ -156,25 +155,31 @@ TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             auto& pyro = *pyro_ptr;
 
             algorithm->Execute();
-            std::list<FD> fds = algorithm->FdList();
+            algos::fd::TableMaskPairFdView const& fd_storage = *algorithm->GetFds();
+            algos::fd::TableMaskPairFdView::Storage fds = algorithm->GetFds()->GetTableMaskPairs();
             pyro.Execute();
 
             for (auto& fd : pyro.FdList()) {
                 if (fd.GetLhs().GetArity() == 0) {
-                    std::list<FD>::iterator it = fds.begin();
+                    auto it = fds.begin();
                     while (it != fds.end()) {
-                        if (it->GetRhs().GetIndex() == fd.GetRhs().GetIndex()) {
-                            it = fds.erase(it);
-                            continue;
+                        if (it->rhs.test(fd.GetRhs().GetIndex())) {
+                            it->rhs.reset(fd.GetRhs().GetIndex());
+                            if (it->rhs.none()) {
+                                it = fds.erase(it);
+                                continue;
+                            }
                         }
                         it++;
                     }
-                    fds.push_back(fd);
+                    boost::dynamic_bitset<> rhs(fd_storage.GetTableHeader().column_names.size());
+                    rhs.set(fd.GetRhs().GetIndex());
+                    fds.emplace_back(fd.GetLhs().GetColumnIndices(), std::move(rhs));
                 }
             }
 
             MinimizeFDs(fds);
-            std::string algorithm_results = GetJsonFDs(fds);
+            std::string algorithm_results = FDsToJson({fd_storage.GetTableHeader(), fds});
             std::string results_pyro = pyro.FDAlgorithm::GetJsonFDs();
 
             EXPECT_EQ(results_pyro, algorithm_results)

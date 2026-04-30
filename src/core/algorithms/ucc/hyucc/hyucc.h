@@ -13,8 +13,12 @@ namespace algos {
 
 class HyUCC : public UCCAlgorithm {
 private:
-    std::unique_ptr<ColumnLayoutRelationData> relation_;
+    std::unique_ptr<LegacyColumnLayoutRelationData> relation_;
     config::ThreadNumType threads_num_ = 1;
+
+    std::shared_ptr<hy::PLIs> plis_;
+    std::shared_ptr<hy::Rows> pli_records_;
+    std::vector<hy::ClusterId> og_mapping_;
 
     void LoadDataInternal() override;
     unsigned long long ExecuteInternal() override;

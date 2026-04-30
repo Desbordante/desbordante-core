@@ -10,4 +10,5 @@ target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::fd::hy::common ${DESBORDANTE_PREFIX}::fd::hy::model
             ${DESBORDANTE_PREFIX}::fd::pli spdlog::spdlog_header_only better-enums Boost::headers
+    PUBLIC ${DESBORDANTE_PREFIX}::algos::partition_only_algorithm
 )

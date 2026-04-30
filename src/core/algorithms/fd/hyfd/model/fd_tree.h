@@ -5,10 +5,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "core/algorithms/fd/bitset_pair_result_reporter.h"
 #include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 #include "core/algorithms/fd/raw_fd.h"
 
-namespace algos::hyfd::fd_tree {
+namespace algos::fd::hyfd::fd_tree {
 
 /**
  * FD prefix tree.
@@ -71,15 +72,10 @@ public:
      */
     std::vector<LhsPair> GetLevel(unsigned target_level);
 
-    /**
-     * @return vector of all FDs
-     */
-    [[nodiscard]] std::vector<RawFD> FillFDs() const {
-        std::vector<RawFD> result;
+    void FillFDs(BitsetPairResultReporter const& report_fd) const {
         boost::dynamic_bitset<> lhs_for_traverse(GetRoot().GetNumAttributes());
-        GetRoot().FillFDs(result, lhs_for_traverse);
-        return result;
+        GetRoot().FillFDs(report_fd, lhs_for_traverse);
     }
 };
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace algos::fd::hyfd::fd_tree

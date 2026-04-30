@@ -19,12 +19,12 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon() : PliBasedFDAlgorithm() {
+TaneCommon::TaneCommon() : LegacyPliBasedFDAlgorithm() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
 double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
-                                     ColumnLayoutRelationData const* relation_data) {
+                                     LegacyColumnLayoutRelationData const* relation_data) {
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 

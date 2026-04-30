@@ -72,7 +72,14 @@ desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
 target_link_libraries(
     ${NAME}
+    PUBLIC Boost::headers
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
             ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only better-enums
-            Boost::headers
+)
+
+set(NAME algos.partition_only_algorithm)
+desbordante_add_lib(NAME)
+target_sources(${NAME} PRIVATE partition_only_algorithm.cpp)
+target_link_libraries(
+    ${NAME} PUBLIC ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
 )

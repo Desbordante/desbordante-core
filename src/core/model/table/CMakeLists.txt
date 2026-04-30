@@ -10,11 +10,13 @@ target_sources(
             column_domain_iterator.cpp
             column_layout_relation_data.cpp
             column_layout_typed_relation_data.cpp
+            create_stripped_partitions.cpp
             dynamic_position_list_index.cpp
             identifier_set.cpp
             position_list_index.cpp
             position_list_index_with_singletons.cpp
             relational_schema.cpp
+            stripped_partitions.cpp
             typed_column_data.cpp
             vertical.cpp
             vertical_map.cpp

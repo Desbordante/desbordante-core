@@ -1,6 +1,7 @@
 #include "core/algorithms/fd/hyfd/validator.h"
 
 #include <algorithm>
+#include <cassert>
 #include <future>
 #include <utility>
 #include <vector>
@@ -82,7 +83,7 @@ boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
     auto const lhs_column_ids = util::BitsetToIndices<algos::hy::ClusterId>(lhs);
     auto const [rhs_column_ids, rhs_ranks] = BuildRhsMappings(rhs, compressed_records);
 
-    for (auto const& cluster : plis[firstAttr]->GetIndex()) {
+    for (auto const& cluster : plis[firstAttr].GetIndex()) {
         auto lhs_rhs_map = algos::hy::MakeClusterIdentifierToTMap<RhsRowId>(cluster.size());
 
         for (size_t row : cluster) {
@@ -107,8 +108,8 @@ boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
     return util::IndicesToBitset(valid_rhs_ids, rhs.size());
 }
 
-size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_level,
-                                        algos::hyfd::fd_tree::FDTree& fds_tree,
+size_t AddExtendedCandidatesFromInvalid(std::vector<algos::fd::hyfd::LhsPair>& next_level,
+                                        algos::fd::hyfd::fd_tree::FDTree& fds_tree,
                                         std::vector<RawFD> const& invalid_fds,
                                         size_t num_attributes) {
     size_t candidates = 0;
@@ -140,7 +141,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_
 
 }  // namespace
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
 Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
     FDValidations result;
@@ -155,7 +156,7 @@ Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
-        if (!(*plis_)[attr]->IsConstant()) {
+        if (!(*plis_)[attr].IsConstant()) {
             vertex->RemoveFd(attr);
             result.InvalidInstances().emplace_back(lhs, attr);
         }
@@ -181,7 +182,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
-        for (auto const& cluster : (*plis_)[lhs_attr]->GetIndex()) {
+        for (auto const& cluster : (*plis_)[lhs_attr].GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
                 std::any_of(cluster.cbegin(), cluster.cend(), [this, attr, cluster_id](int id) {
@@ -283,6 +284,7 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
                                         boost::dynamic_bitset<>(num_attributes));
     }
 
+    auto const max_lhs = std::min<std::size_t>(max_lhs_, fds_->GetNumAttributes());
     size_t previous_num_invalid_fds = 0;
     algos::hy::IdPairs comparison_suggestions;
     while (!cur_level_vertices.empty()) {
@@ -296,9 +298,10 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
         comparison_suggestions.insert(comparison_suggestions.end(),
                                       result.ComparisonSuggestions().begin(),
                                       result.ComparisonSuggestions().end());
-        if (current_level_number_ >= fds_->GetNumAttributes()) {
+        if (current_level_number_ == max_lhs) {
             break;
         }
+        assert(current_level_number_ < max_lhs);
 
         std::vector<LhsPair> next_level =
                 algos::hy::CollectCurrentChildren(cur_level_vertices, num_attributes);
@@ -321,4 +324,4 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
     return {};
 }
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd

@@ -1,15 +1,180 @@
 #pragma once
 
+#include <algorithm>
+
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
 #include "core/config/error/type.h"
 #include "core/config/names.h"
+#include "core/util/bitset_utils.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 
 namespace tests {
+inline bool NoFDsFound(algos::fd::TableMaskPairFdView const& storage) {
+    return storage.GetTableMaskPairs().empty();
+}
+
+inline bool NoFDsFound(algos::fd::LhsMaskFdView const& storage) {
+    return std::ranges::all_of(storage.GetLhsMasks(),
+                               [](auto& attr_fds) { return attr_fds.empty(); });
+}
+
+inline unsigned int Fletcher16(std::string str) {
+    unsigned int sum1 = 0, sum2 = 0, modulus = 255;
+    for (auto ch : str) {
+        sum1 = (sum1 + ch) % modulus;
+        sum2 = (sum2 + sum1) % modulus;
+    }
+    return (sum2 << 8) | sum1;
+}
+
+inline static std::string ToIndicesString(boost::dynamic_bitset<> const& lhs) {
+    std::string result = "[";
+
+    if (lhs.find_first() == boost::dynamic_bitset<>::npos) {
+        return "[]";
+    }
+
+    for (size_t index = lhs.find_first(); index != boost::dynamic_bitset<>::npos;
+         index = lhs.find_next(index)) {
+        result += std::to_string(index);
+        if (lhs.find_next(index) != boost::dynamic_bitset<>::npos) {
+            result += ',';
+        }
+    }
+
+    result += ']';
+
+    return result;
+}
+
+inline std::vector<std::string> FDToJsonStrings(algos::fd::TableMaskPair const& fd) {
+    std::vector<std::string> strings;
+    strings.reserve(fd.rhs.count());
+    auto pre_rhs_portion = "{\"lhs\": " + ToIndicesString(fd.lhs) + ", \"rhs\": ";
+    util::ForEachIndex(fd.rhs, [&](model::Index i) {
+        strings.push_back(pre_rhs_portion + std::to_string(i) + '}');
+    });
+    return strings;
+}
+
+inline std::string FDToJsonString(algos::fd::LhsTableMask const& fd,
+                                  model::Index rhs_index) {
+    return "{\"lhs\": " + ToIndicesString(fd.lhs) + ", \"rhs\": " + std::to_string(rhs_index) + '}';
+}
+
+inline std::string FDsToJson(algos::fd::TableMaskPairFdView const& fd_storage) {
+    std::string result = "{\"fds\": [";
+    std::vector<std::string> discovered_fd_strings;
+    // FDs used to always have one attribute, this is for consistency with the old hashes.
+    for (algos::fd::TableMaskPair const& fd : fd_storage.GetTableMaskPairs()) {
+        for (std::string const& single_rhs_fd_string : FDToJsonStrings(fd)) {
+            discovered_fd_strings.push_back(single_rhs_fd_string);
+        }
+    }
+    std::sort(discovered_fd_strings.begin(), discovered_fd_strings.end());
+    for (std::string const& fd : discovered_fd_strings) {
+        result += fd + ",";
+    }
+    if (result.back() == ',') {
+        result.erase(result.size() - 1);
+    }
+    result += "]}";
+    return result;
+}
+
+inline std::string FDsToJson(algos::fd::LhsMaskFdView const& fd_storage) {
+    std::vector<std::string> discovered_fd_strings;
+    model::Index rhs_index = 0;
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : fd_storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
+            discovered_fd_strings.push_back(FDToJsonString(stripped_fd, rhs_index));
+        }
+        ++rhs_index;
+    }
+    std::sort(discovered_fd_strings.begin(), discovered_fd_strings.end());
+    std::string result = "{\"fds\": [";
+    for (std::string const& fd : discovered_fd_strings) {
+        result += fd + ",";
+    }
+    if (result.back() == ',') {
+        result.erase(result.size() - 1);
+    }
+    result += "]}";
+    return result;
+}
+
+testing::AssertionResult CheckFdCollectionEquality(
+        std::set<std::pair<std::vector<unsigned int>, unsigned int>> expected,
+        algos::fd::TableMaskPairFdView const& actual) {
+    for (algos::fd::TableMaskPair const& fd : actual.GetTableMaskPairs()) {
+        std::vector<unsigned int> lhs_indices = util::BitsetToIndices<unsigned int>(fd.lhs);
+
+        for (auto index = fd.rhs.find_first(); index != boost::dynamic_bitset<>::npos;
+             index = fd.rhs.find_next(index)) {
+            if (auto it = expected.find(std::make_pair(lhs_indices, index)); it == expected.end()) {
+                return testing::AssertionFailure()
+                       << "discovered a false FD: " << ToIndicesString(fd.lhs) << "->" << index;
+            } else {
+                expected.erase(it);
+            }
+        }
+    }
+    return expected.empty() ? testing::AssertionSuccess()
+                            : testing::AssertionFailure() << "some FDs remain undiscovered";
+}
+
+inline testing::AssertionResult CheckFdCollectionEquality(
+        std::set<std::pair<std::vector<unsigned int>, unsigned int>> expected,
+        algos::fd::LhsMaskFdView const& actual) {
+    model::Index rhs_index = 0;
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : actual.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
+            std::vector<unsigned int> lhs_indices =
+                    util::BitsetToIndices<unsigned int>(stripped_fd.lhs);
+            if (auto it = expected.find(std::make_pair(lhs_indices, rhs_index));
+                it == expected.end()) {
+                return testing::AssertionFailure()
+                       << "discovered a false FD: " << ToIndicesString(stripped_fd.lhs) << "->"
+                       << rhs_index;
+            } else {
+                expected.erase(it);
+            }
+        }
+        ++rhs_index;
+    }
+    return expected.empty() ? testing::AssertionSuccess()
+                            : testing::AssertionFailure() << "some FDs remain undiscovered";
+}
+
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
+        algos::fd::TableMaskPairFdView const& storage) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    for (auto const& fd : storage.GetTableMaskPairs()) {
+        util::ForEachIndex(fd.rhs, [&](model::Index i) {
+            set.emplace(util::BitsetToIndices<unsigned int>(fd.lhs), i);
+        });
+    }
+    return set;
+}
+
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
+        algos::fd::LhsMaskFdView const& storage) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    model::Index rhs_index = 0;
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& stripped_fd : attr_fds) {
+            set.emplace(util::BitsetToIndices<unsigned int>(stripped_fd.lhs), rhs_index);
+        }
+        ++rhs_index;
+    }
+    return set;
+}
+
 template <typename T>
 class AlgorithmTest : public ::testing::Test {
 protected:
@@ -79,16 +244,86 @@ public:
 };
 
 template <typename T>
+class FdDiscoveryTest : public ::testing::Test {
+protected:
+    static std::unique_ptr<algos::Algorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
+        using namespace config::names;
+        using algos::ConfigureFromMap, algos::StdParamsMap;
+
+        std::unique_ptr<algos::Algorithm> algorithm = std::make_unique<T>();
+        ConfigureFromMap(*algorithm, StdParamsMap{{kTable, MakeInputTable(csv_config)}});
+        return algorithm;
+    }
+
+    static algos::StdParamsMap GetParamMap(
+            CSVConfig const& csv_config,
+            unsigned int max_lhs_ = std::numeric_limits<unsigned int>::max()) {
+        using namespace config::names;
+        return {
+                {kCsvConfig, csv_config},
+                {kError, config::ErrorType{0.0}},
+                {kSeed, decltype(algos::pyro::Parameters::seed){0}},
+                {kMaximumLhs, max_lhs_},
+        };
+    }
+
+    static void PerformConsistentHashTestOn(std::vector<CSVConfigHash> const& config_hashes) {
+        using namespace algos;
+        try {
+            for (auto const& [csv_config, hash] : config_hashes) {
+                auto algorithm = CreateAlgorithmInstance(csv_config);
+                algorithm->Execute();
+                std::string fds_string = FDsToJson(*algorithm->GetFds());
+                EXPECT_EQ(Fletcher16(fds_string), hash)
+                        << "FD collection hash changed for " << csv_config.path.filename();
+            }
+        } catch (std::runtime_error& e) {
+            std::cout << "Exception raised in test: " << e.what() << std::endl;
+            FAIL();
+        }
+        SUCCEED();
+    }
+
+public:
+    static auto CreateAlgorithmInstance(
+            CSVConfig const& config,
+            unsigned int max_lhs = std::numeric_limits<unsigned int>::max()) {
+        return algos::CreateAndLoadAlgorithm<T>(GetParamMap(config, max_lhs));
+    }
+
+    inline static std::vector<CSVConfigHash> const kLightDatasets = {
+            {{tests::kCIPublicHighway10k, 33398},
+             {tests::kNeighbors10k, 43368},
+             {tests::kWdcAstronomical, 22281},
+             {tests::kWdcAge, 19620},
+             {tests::kWdcAppearances, 25827},
+             {tests::kWdcAstrology, 40815},
+             {tests::kWdcGame, 6418},
+             {tests::kWdcScience, 19620},
+             {tests::kWdcSymbols, 28289},
+             {tests::kBreastCancer, 15121},
+             {tests::kWdcKepler, 63730}}};
+
+    inline static std::vector<CSVConfigHash> const kHeavyDatasets = {
+            {{tests::kAdult, 23075},
+             {tests::kCIPublicHighway, 13035},
+             {tests::kEpicMeds, 50218},
+             {tests::kEpicVitals, 2083},
+             {tests::kIowa1kk, 28573},
+             {tests::kLegacyPayors, 43612}}};
+};
+
+template <typename T>
 class ApproximateFDTest : public ::testing::Test {
 protected:
     // alias for choosing datasets' hashes specialization
     using AlgorithmType = T;
 
-    static std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
+    static std::unique_ptr<T> CreateAndConfToLoad(CSVConfig const& csv_config) {
         using namespace config::names;
         using algos::ConfigureFromMap, algos::StdParamsMap;
 
-        std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
+        std::unique_ptr<T> algorithm = std::make_unique<T>();
         ConfigureFromMap(*algorithm, StdParamsMap{{kTable, MakeInputTable(csv_config)}});
         return algorithm;
     }
@@ -106,7 +341,8 @@ protected:
             for (auto const& [csv_config, hash] : config_hashes) {
                 auto algorithm = CreateAlgorithmInstance(csv_config);
                 algorithm->Execute();
-                EXPECT_EQ(algorithm->Fletcher16(), hash)
+                std::string fds_string = FDsToJson(*algorithm->GetFds());
+                EXPECT_EQ(Fletcher16(fds_string), hash)
                         << "FD collection hash changed for " << csv_config.path.filename();
             }
         } catch (std::runtime_error& e) {
@@ -117,7 +353,7 @@ protected:
     }
 
 public:
-    static std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(CSVConfig const& config) {
+    static std::unique_ptr<T> CreateAlgorithmInstance(CSVConfig const& config) {
         return algos::CreateAndLoadAlgorithm<T>(GetParamMap(config));
     }
 };
@@ -131,7 +367,7 @@ struct ApproximateDatasets {
 
 // specialization fd for EulerFD
 template <>
-struct ApproximateDatasets<algos::EulerFD> {
+struct ApproximateDatasets<algos::fd::EulerFD> {
     inline static std::vector<CSVConfigHash> const kLightDatasets = {{
             {tests::kCIPublicHighway10k, 33398},
             {tests::kNeighbors10k, 43368},

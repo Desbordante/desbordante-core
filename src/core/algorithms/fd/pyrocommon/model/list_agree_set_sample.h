@@ -26,11 +26,11 @@ public:
             boost::dynamic_bitset<> const& bitset);
 
     static std::unique_ptr<ListAgreeSetSample> CreateFocusedFor(
-            ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
+            LegacyColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
             PositionListIndex const* restriction_p_li, unsigned int sample_size,
             CustomRandom& random);
 
-    ListAgreeSetSample(ColumnLayoutRelationData const* relation, Vertical const& focus,
+    ListAgreeSetSample(LegacyColumnLayoutRelationData const* relation, Vertical const& focus,
                        unsigned int sample_size, unsigned long long population_size,
                        std::unordered_map<boost::dynamic_bitset<>, int> const& agree_set_counters);
 

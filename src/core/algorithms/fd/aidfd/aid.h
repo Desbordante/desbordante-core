@@ -6,22 +6,25 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/aidfd/search_tree.h"
-#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
+#include "core/config/max_lhs/type.h"
 #include "core/config/tabular_data/input_table_type.h"
-#include "core/model/table/column.h"
-#include "core/model/table/relational_schema.h"
-#include "core/model/table/vertical.h"
+#include "core/model/table/table_header.h"
 
-namespace algos {
+namespace algos::fd {
 
-class Aid : public FDAlgorithm {
+class Aid : public Algorithm {
 private:
     using Cluster = std::vector<size_t>;
 
     config::InputTable input_table_;
+    config::MaxLhsType max_lhs_;
 
-    std::shared_ptr<RelationalSchema> schema_{};
+    LhsMaskFdView::OwningPointer fd_view_;
+
+    model::TableHeader table_header_;
     std::vector<std::vector<size_t>> tuples_;
 
     size_t number_of_attributes_{};
@@ -42,8 +45,9 @@ private:
     boost::dynamic_bitset<> constant_columns_;
 
     void RegisterOptions();
+    void MakeExecuteOptsAvailable() final;
 
-    void ResetStateFd() final;
+    void ResetState() final;
 
     void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
@@ -58,11 +62,6 @@ private:
     size_t GenerateSecondClusterIndex(size_t index_in_cluster, size_t iteration_num) const;
     bool IsNegativeCoverGrowthSmall(size_t iteration_num, double curr_ratio);
 
-    void HandleConstantColumns(boost::dynamic_bitset<>& attributes);
-    void RegisterFDs(size_t rhs, std::vector<boost::dynamic_bitset<>> const& list_of_lhs);
-
-    static boost::dynamic_bitset<> ChangeAttributesOrder(
-            boost::dynamic_bitset<> const& initial_bitset, std::vector<size_t> const& new_order);
     std::vector<size_t> GetAttributesSortedByFrequency(
             std::vector<boost::dynamic_bitset<>> const& neg_cover_vector) const;
 
@@ -70,6 +69,10 @@ private:
 
 public:
     Aid();
+
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
+    }
 };
 
-}  // namespace algos
+}  // namespace algos::fd

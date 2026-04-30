@@ -5,13 +5,19 @@
 #include <utility>
 #include <vector>
 
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/hycommon/types.h"
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/algorithms/fd/raw_fd.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/tabular_data/input_table_type.h"
 #include "core/config/thread_number/type.h"
-#include "core/model/table/position_list_index.h"
+#include "core/model/table/table_header.h"
 
-namespace algos::hyfd {
+// (DELETE WHEN PUTTING UP FOR REVIEW)
+// In PR message: Moved FD algorithms to FD namespace because the precise names of FD stuff (like
+// the reporting function types) got too long, the ::fd context allows to use shorter names.
+namespace algos::fd::hyfd {
 
 /**
  * HyFD is a hybrid functional dependency discovery algorithm, employing both row-efficient
@@ -36,20 +42,34 @@ namespace algos::hyfd {
  * '16). Association for Computing Machinery, New York, NY, USA, 821–833.
  * https://doi.org/10.1145/2882903.2915203
  */
-class HyFD : public PliBasedFDAlgorithm {
+class HyFD : public Algorithm {
 private:
-    void ResetStateFd() final {}
+    config::InputTable input_table_;
+    config::MaxLhsType max_lhs_;
 
-    unsigned long long ExecuteInternal() override;
+    model::TableHeader table_header_;
+    TableMaskPairFdView::OwningPointer fd_view_;
 
-    void RegisterFDs(std::vector<RawFD>&& fds, std::vector<algos::hy::ClusterId> const& og_mapping);
+    std::shared_ptr<hy::PLIs> plis_;
+    std::shared_ptr<hy::Rows> pli_records_;
+    std::vector<hy::ClusterId> og_mapping_;
 
-    void MakeExecuteOptsAvailableFDInternal() override;
+    void LoadDataInternal() final;
+
+    void ResetState() final;
+
+    unsigned long long ExecuteInternal() final;
+
+    void MakeExecuteOptsAvailable() final;
 
     config::ThreadNumType threads_num_ = 1;
 
 public:
     HyFD();
+
+    TableMaskPairFdView::OwningPointer GetFds() {
+        return fd_view_;
+    }
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd
