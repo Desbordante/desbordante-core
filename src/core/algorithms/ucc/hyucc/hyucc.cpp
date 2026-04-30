@@ -57,7 +57,6 @@ void HyUCC::ExecuteInternal() {
     for (model::UCC const& ucc : UCCList()) {
         LOG_DEBUG("{}", ucc.ToString());
     }
-
 }
 
 void HyUCC::RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,

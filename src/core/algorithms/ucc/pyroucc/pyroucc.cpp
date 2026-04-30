@@ -48,7 +48,6 @@ void PyroUCC::ResetUCCAlgorithmState() {
 }
 
 void PyroUCC::ExecuteInternal() {
-
     auto schema = relation_->GetSchema();
 
     auto profiling_context = std::make_unique<ProfilingContext>(
@@ -73,13 +72,10 @@ void PyroUCC::ExecuteInternal() {
     }
     search_space_ = std::make_unique<SearchSpace>(0, std::move(strategy), schema, launch_pad_order);
 
-
     search_space_->SetContext(profiling_context.get());
     search_space_->EnsureInitialized();
     search_space_->Discover();
 
-
-    LOG_INFO("Time: {}  milliseconds", elapsed_milliseconds.count());
     LOG_INFO("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
 }
 
