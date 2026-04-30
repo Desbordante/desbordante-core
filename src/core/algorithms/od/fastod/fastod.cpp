@@ -68,7 +68,7 @@ void Fastod::ResetState() {
 }
 
 void Fastod::ExecuteInternal() {
-    size_t const elapsed_milliseconds = util::TimedInvoke(&Fastod::Discover, this);
+    Discover();
 
     for (auto const& od : result_asc_) {
         LOG_DEBUG("{}", od.ToString());
