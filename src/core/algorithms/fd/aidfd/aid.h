@@ -46,7 +46,7 @@ private:
     void ResetStateFd() final;
 
     void LoadDataInternal() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     void BuildClusters();
     void CreateNegativeCover();

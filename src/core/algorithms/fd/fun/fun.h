@@ -85,7 +85,7 @@ private:
     using Level = std::list<FunQuadruple>;
 
     void ResetStateFd() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     Level GenerateCandidate(Level const& l_k) const;
 

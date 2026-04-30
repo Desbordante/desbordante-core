@@ -23,7 +23,6 @@ namespace model {
 using std::set, std::vector, std::unordered_set;
 
 AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
-    auto start_time = std::chrono::system_clock::now();
     std::string method_str;
     SetOfAgreeSets agree_sets;
 
@@ -52,11 +51,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
 
     agree_sets.insert(relation_->GetSchema()->CreateEmptyVertical());
 
-    auto elapsed_mills_to_gen_agree_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_INFO("TIME TO GENERATE AGREE SETS WITH METHOD {}: {}", method_str,
-             elapsed_mills_to_gen_agree_sets.count());
-
     return agree_sets;
 }
 
@@ -64,8 +58,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
     SetOfAgreeSets agree_sets;
     vector<IdentifierSet> identifier_sets;
     SetOfVectors const max_representation = GenPliMaxRepresentation();
-
-    auto start_time = std::chrono::system_clock::now();
 
     // compute identifier sets
     // identifier_sets is vector
@@ -78,10 +70,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
             identifier_sets.emplace_back(relation_, *p);
         }
     }
-
-    auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_INFO("TIME TO IDENTIFIER SETS GENERATION: {}", elapsed_mills_to_gen_id_sets.count());
 
     LOG_DEBUG("Identifier sets:");
     for (auto const& id_set : identifier_sets) {
@@ -107,17 +95,11 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
     std::unordered_map<int, IdentifierSet> identifier_sets;
     SetOfVectors const max_representation = GenPliMaxRepresentation();
 
-    auto start_time = std::chrono::system_clock::now();
-
     for (auto const& cluster : max_representation) {
         for (auto p = cluster.begin(); p != cluster.end(); ++p) {
             identifier_sets.try_emplace(*p, relation_, *p);
         }
     }
-
-    auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_INFO("TIME TO IDENTIFIER SETS GENERATION: {}", elapsed_mills_to_gen_id_sets.count());
 
     LOG_DEBUG("Identifier sets:");
     for (auto const& [index, id_set] : identifier_sets) {
@@ -249,7 +231,6 @@ AgreeSet AgreeSetFactory::GetAgreeSet(int const tuple1_index, int const tuple2_i
 AgreeSetFactory::SetOfVectors AgreeSetFactory::GenPliMaxRepresentation() const {
     SetOfVectors max_representation;
     std::string method_str;
-    auto start_time = std::chrono::system_clock::now();
 
     switch (config_.mc_gen_method) {
         case MCGenMethod::kUsingCalculateSupersets: {
@@ -273,12 +254,6 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenPliMaxRepresentation() const {
             break;
         }
     }
-
-    auto elapsed_mills_to_gen_max_representation =
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                                  start_time);
-    LOG_INFO("TIME TO GENERATE MAX REPRESENTATION WITH METHOD {}: {}", method_str,
-             elapsed_mills_to_gen_max_representation.count());
 
     return max_representation;
 }

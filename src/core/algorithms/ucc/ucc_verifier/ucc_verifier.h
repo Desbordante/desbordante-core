@@ -30,7 +30,7 @@ private:
     void RegisterOptions();
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
     std::shared_ptr<model::PLI const> CalculatePLI();
 
     void ResetState() override {

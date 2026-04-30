@@ -78,7 +78,7 @@ private:
 
     void MakeExecuteOptsAvailable() final;
     void ResetStateMd() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     class RegisterHelper;
     void RegisterResults(SimilarityData const& similarity_data,

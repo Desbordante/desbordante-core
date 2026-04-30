@@ -93,7 +93,7 @@ private:
     std::list<DD> InstanceExclusionReduce(std::vector<std::size_t> const& tuple_pair_indices,
                                           std::vector<DF> const& search, DF const& rhs,
                                           unsigned& cnt);
-    unsigned ReduceDDs(auto const& start_time);
+    unsigned ReduceDDs();
     unsigned RemoveRedundantDDs();
     unsigned RemoveTransitiveDDs();
     model::DDString DDToDDString(DD const& dd) const;
@@ -102,7 +102,7 @@ private:
 protected:
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     Split();

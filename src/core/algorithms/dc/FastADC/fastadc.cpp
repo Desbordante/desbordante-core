@@ -100,8 +100,7 @@ void FastADC::PrintResults() {
     LOG_DEBUG("{}", dcs_.ToString());
 }
 
-unsigned long long FastADC::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
+void FastADC::ExecuteInternal() {
     LOG_DEBUG("Start");
 
     SetLimits();
@@ -123,9 +122,6 @@ unsigned long long FastADC::ExecuteInternal() {
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
     LOG_DEBUG("Built evidence set");
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
 
     ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
                                      std::move(evidence_set_builder.evidence_set),
@@ -134,11 +130,6 @@ unsigned long long FastADC::ExecuteInternal() {
     dcs_ = dcbuilder.BuildDenialConstraints();
 
     PrintResults();
-
-    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Algorithm time: {}", elapsed_milliseconds.count());
-    return elapsed_milliseconds.count();
 }
 
 // TODO: mb make this a list?

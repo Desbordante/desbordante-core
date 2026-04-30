@@ -34,7 +34,7 @@ private:
     void RegisterOptions();
     void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
     void VerifyPFD() const;
     std::shared_ptr<model::PLI const> CalculatePLI(config::IndicesType const& indices) const;
 

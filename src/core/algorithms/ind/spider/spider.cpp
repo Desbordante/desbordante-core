@@ -17,7 +17,6 @@
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/thread_number/option.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos {
 
@@ -46,7 +45,7 @@ void Spider::LoadINDAlgorithmDataInternal() {
     auto const create_domains = [&] {
         domains_ = model::ColumnDomain::CreateFrom(input_tables_, mem_limit_mb_, threads_num_);
     };
-    timings_.load = util::TimedInvoke(create_domains);
+    create_domains();
 }
 
 namespace {
@@ -121,16 +120,11 @@ void Spider::MineAINDs() {
     }
 }
 
-unsigned long long Spider::ExecuteInternal() {
+void Spider::ExecuteInternal() {
     auto const mining_func = (max_ind_error_ == 0) ? &Spider::MineINDs : &Spider::MineAINDs;
-    timings_.compute = util::TimedInvoke(mining_func, this);
-    timings_.total = timings_.load + timings_.compute;
-    return timings_.total;
+    (this->*mining_func)();
 }
 
-void Spider::ResetINDAlgorithmState() {
-    timings_.compute = 0;
-    timings_.total = 0;
-}
+void Spider::ResetINDAlgorithmState() {}
 
 }  // namespace algos

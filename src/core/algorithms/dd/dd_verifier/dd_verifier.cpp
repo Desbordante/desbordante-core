@@ -12,7 +12,6 @@
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/vertical.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::dd {
 DDVerifier::DDVerifier() : Algorithm() {
@@ -118,10 +117,9 @@ void DDVerifier::CheckCorrectnessDd() const {
     std::ranges::for_each(dd_.right, check_constraint);
 }
 
-unsigned long long DDVerifier::ExecuteInternal() {
-    auto elapsed_milliseconds = util::TimedInvoke(&DDVerifier::VerifyDD, this);
+void DDVerifier::ExecuteInternal() {
+    VerifyDD();
     PrintStatistics();
-    return elapsed_milliseconds;
 }
 
 void DDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs) {

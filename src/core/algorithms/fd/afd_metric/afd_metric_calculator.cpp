@@ -1,6 +1,5 @@
 #include "afd_metric_calculator.h"
 
-#include <chrono>
 #include <cmath>
 #include <iterator>
 
@@ -10,7 +9,6 @@
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::afd_metric_calculator {
 
@@ -47,14 +45,7 @@ void AFDMetricCalculator::LoadDataInternal() {
     }
 }
 
-unsigned long long AFDMetricCalculator::ExecuteInternal() {
-    size_t const elapsed_milliseconds =
-            util::TimedInvoke(&AFDMetricCalculator::CalculateMetric, this);
-
-    return elapsed_milliseconds;
-}
-
-void AFDMetricCalculator::CalculateMetric() {
+void AFDMetricCalculator::ExecuteInternal() {
     auto num_rows = relation_->GetNumRows();
     auto lhs_pli = relation_->CalculatePLIWS(lhs_indices_);
     auto rhs_pli = relation_->CalculatePLIWS(rhs_indices_);

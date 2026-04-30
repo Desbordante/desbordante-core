@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/sfd/cords.h"
 
-#include <chrono>
 #include <utility>
 #include <vector>
 
@@ -155,15 +154,13 @@ bool Cords::IsSoftOrTrivial(model::ColumnIndex col_ind, size_t row_count) {
     return false;
 }
 
-unsigned long long Cords::ExecuteInternal() {
+void Cords::ExecuteInternal() {
     std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
 
     size_t row_count = data.front().GetNumRows();
     model::ColumnIndex column_count = data.size();
 
     Init(column_count, data);
-
-    auto start_time = std::chrono::system_clock::now();
 
     std::vector<bool> is_soft_or_trivial(column_count);
     for (model::ColumnIndex col_ind = 0; col_ind != column_count; ++col_ind)
@@ -209,9 +206,5 @@ unsigned long long Cords::ExecuteInternal() {
             }
         }
     }
-
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_time.count();
 }
 }  // namespace algos

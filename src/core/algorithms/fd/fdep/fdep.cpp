@@ -1,7 +1,5 @@
 #include "core/algorithms/fd/fdep/fdep.h"
 
-#include <chrono>
-
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_relation_data.h"
@@ -53,9 +51,7 @@ void FDep::ResetStateFd() {
     pos_cover_tree_.reset();
 }
 
-unsigned long long FDep::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
+void FDep::ExecuteInternal() {
     BuildNegativeCover();
 
     this->tuples_.shrink_to_fit();
@@ -68,14 +64,9 @@ unsigned long long FDep::ExecuteInternal() {
 
     pos_cover_tree_->FillFdCollection(this->schema_, FdList(), max_lhs_);
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-
 #ifdef PRINT_FDS
     pos_cover_tree_->printDep("recent_call_result.txt", this->column_names_);
 #endif
-
-    return elapsed_milliseconds.count();
 }
 
 void FDep::BuildNegativeCover() {

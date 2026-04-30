@@ -19,14 +19,6 @@ namespace algos {
 /// \brief in-memory nary approximate inclusion dependency mining algorithm
 ///
 class Mind final : public INDAlgorithm {
-public:
-    /// timing information for algorithm stages
-    struct StageTimings {
-        size_t load;          /**< time taken for the data loading */
-        size_t compute_uinds; /**< time taken for the unary inds computing */
-        size_t compute_ninds; /**< time taken for the n-ary inds computing */
-    };
-
 private:
     using RawIND = mind::RawIND;
 
@@ -36,7 +28,6 @@ private:
 
     /* execution stage fields */
     std::unique_ptr<INDAlgorithm> auind_algo_; /*< algorithm for mining unary approximate INDs*/
-    StageTimings timings_{};                   /*< timings info */
 
     void MakeLoadOptsAvailable();
     void MakeExecuteOptsAvailable() override;
@@ -58,16 +49,11 @@ private:
 
     void MineUnaryINDs();
     void MineNaryINDs();
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
     void ResetINDAlgorithmState() override;
 
 public:
     explicit Mind();
-
-    /// get information about stage timings
-    StageTimings const& GetStageTimings() const noexcept {
-        return timings_;
-    }
 };
 
 }  // namespace algos

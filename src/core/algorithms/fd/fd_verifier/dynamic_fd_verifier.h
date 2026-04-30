@@ -53,7 +53,7 @@ private:
 protected:
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     /* Returns true if FD holds */

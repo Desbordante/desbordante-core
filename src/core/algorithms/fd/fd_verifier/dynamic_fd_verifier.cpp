@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
 
-#include <chrono>
 #include <memory>
 #include <stdexcept>
 
@@ -111,8 +110,7 @@ void DynamicFDVerifier::LoadDataInternal() {
     SortHighlightsByProportionDescending();
 }
 
-unsigned long long DynamicFDVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
+void DynamicFDVerifier::ExecuteInternal() {
     std::vector<std::pair<std::optional<size_t>, std::vector<int>>> lhs_inserts{}, rhs_inserts{};
     std::unordered_set<size_t> deletes_and_updates_indices{delete_statement_indices_};
     if (insert_statements_table_ != nullptr) {
@@ -152,10 +150,6 @@ unsigned long long DynamicFDVerifier::ExecuteInternal() {
 
     VerifyFD();
     SortHighlightsByProportionDescending();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void DynamicFDVerifier::VerifyFD() const {

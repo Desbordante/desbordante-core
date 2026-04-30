@@ -9,7 +9,6 @@
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
 #include "core/util/range_to_string.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::od {
 
@@ -58,14 +57,11 @@ void SetBasedAodVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kOcContext, kOFDContext});
 }
 
-unsigned long long SetBasedAodVerifier::ExecuteInternal() {
-    unsigned long long const elapsed_milliseconds =
-            util::TimedInvoke(&SetBasedAodVerifier::Verify, this);
+void SetBasedAodVerifier::ExecuteInternal() {
+    Verify();
 
     LOG_DEBUG("AOD holds with error {}", GetError());
     LOG_DEBUG("Removal set: {}", util::RangeToString(removal_set_));
-
-    return elapsed_milliseconds;
 }
 
 template <typename OD>

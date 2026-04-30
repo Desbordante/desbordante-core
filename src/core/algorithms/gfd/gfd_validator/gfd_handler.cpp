@@ -47,15 +47,10 @@ void GfdHandler::LoadDataInternal() {
 
 void GfdHandler::ResetState() {}
 
-unsigned long long GfdHandler::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
+void GfdHandler::ExecuteInternal() {
     result_ = GenerateSatisfiedGfds(graph_, gfds_);
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
     LOG_DEBUG("Satisfied GFDs: {}/{}", result_.size(), gfds_.size());
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos

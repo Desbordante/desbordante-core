@@ -1031,8 +1031,6 @@ bool Check(CPI& cpi, model::graph_t const& graph, model::Gfd const& gfd,
 }
 
 bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
-    auto start_time = std::chrono::system_clock::now();
-
     model::graph_t pat = gfd.GetPattern();
     std::set<std::string> graph_labels = {};
     std::set<std::string> pat_labels = {};
@@ -1064,10 +1062,7 @@ bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
     CPI cpi;
     TopDownConstruct(cpi, graph, pat, levels, parent, candidates, snte);
     BottomUpRefinement(cpi, graph, pat, levels, parent, candidates);
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
 
-    LOG_DEBUG("CPI constructed in {}. Matching...", elapsed_milliseconds.count());
     return Check(cpi, graph, gfd, core, forest, parent, nte);
 }
 

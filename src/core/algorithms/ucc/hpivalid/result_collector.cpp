@@ -11,18 +11,10 @@
 
 namespace algos::hpiv {
 
-namespace timer {
-std::vector<std::string> description = {"Total Execution Time", "Cluster-Structures Construction",
-                                        "Total Enumeration Algo Time"
-                                        "Difference Set Sampling (all)",
-                                        "Cluster Intersection (validation)"};
-}  // namespace timer
-
 ResultCollector::ResultCollector(double timeout)
     : timeout_(timeout),
       ucc_count_(0),
       diff_sets_final_(0),
-      timers_(timer::TimerName::num_of_timers),
       diff_sets_(0),
       diff_sets_initial_(0),
       tree_complexity_(0),
@@ -30,12 +22,15 @@ ResultCollector::ResultCollector(double timeout)
       intersections_(0),
       intersection_cluster_size_(0) {}
 
-bool ResultCollector::UCCFound(Edge const& ucc) {
+void ResultCollector::AddUCC(Edge const& ucc) {
     ucc_count_++;
     ucc_vector_.push_back(ucc);
+}
+
+bool ResultCollector::TimedOut() const {
     return std::chrono::duration_cast<std::chrono::duration<double>>(
-                   clock::now() - timers_[timer::TimerName::total].begin)
-                   .count() <= timeout_;
+                   std::chrono::high_resolution_clock::now() - exec_start_)
+                   .count() > timeout_;
 }
 
 void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
@@ -54,19 +49,8 @@ void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
     diff_sets_final_ = hg.NumEdges();
 }
 
-void ResultCollector::StartTimer(timer::TimerName timer) {
-    timers_[timer].begin = clock::now();
-}
-
-void ResultCollector::StopTimer(timer::TimerName timer) {
-    timers_[timer].end = clock::now();
-    timers_[timer].elapsed += std::chrono::duration_cast<std::chrono::milliseconds>(
-                                      timers_[timer].end - timers_[timer].begin)
-                                      .count();
-}
-
-unsigned long long ResultCollector::Time(timer::TimerName timer) const {
-    return timers_[timer].elapsed;
+void ResultCollector::SetStartTime() {
+    exec_start_ = std::chrono::high_resolution_clock::now();
 }
 
 void ResultCollector::CountDiffSets(unsigned number) {

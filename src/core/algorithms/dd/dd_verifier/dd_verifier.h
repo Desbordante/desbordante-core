@@ -36,9 +36,9 @@ private:
     std::vector<std::pair<std::size_t, std::size_t>> GetRowsWhereLhsHolds() const;
 
     double CalculateDistance(model::ColumnIndex column_index,
-                             std::pair<std::size_t, std::size_t> const &tuple_pair) const;
+                             std::pair<std::size_t, std::size_t> const& tuple_pair) const;
 
-    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs);
+    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs);
 
     void VerifyDD();
 
@@ -59,7 +59,7 @@ protected:
 
     void MakeExecuteOptsAvailable() override;
 
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     DDVerifier();
@@ -70,6 +70,6 @@ public:
 
     bool DDHolds() const;
 
-    std::vector<Highlight> const &GetHighlights() const;
+    std::vector<Highlight> const& GetHighlights() const;
 };
 }  // namespace algos::dd

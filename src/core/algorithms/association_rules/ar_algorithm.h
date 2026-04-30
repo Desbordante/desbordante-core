@@ -55,11 +55,11 @@ protected:
     void GenerateRulesFrom(std::vector<unsigned> const& frequent_itemset, double support);
 
     virtual double GetSupport(std::vector<unsigned> const& frequent_itemset) const = 0;
-    virtual unsigned long long GenerateAllRules() = 0;
-    virtual unsigned long long FindFrequent() = 0;
+    virtual void GenerateAllRules() = 0;
+    virtual void FindFrequent() = 0;
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     ARAlgorithm();

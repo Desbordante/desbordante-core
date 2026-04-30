@@ -8,7 +8,6 @@
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/time_limit/option.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos {
 
@@ -67,8 +66,8 @@ void Fastod::ResetState() {
     partition_cache_.Clear();
 }
 
-unsigned long long Fastod::ExecuteInternal() {
-    size_t const elapsed_milliseconds = util::TimedInvoke(&Fastod::Discover, this);
+void Fastod::ExecuteInternal() {
+    Discover();
 
     for (auto const& od : result_asc_) {
         LOG_DEBUG("{}", od.ToString());
@@ -81,8 +80,6 @@ unsigned long long Fastod::ExecuteInternal() {
     for (auto const& od : result_simple_) {
         LOG_DEBUG("{}", od.ToString());
     }
-
-    return elapsed_milliseconds;
 }
 
 void Fastod::PrintStatistics() const {

@@ -42,7 +42,7 @@ private:
     void ResetState() final;
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     void Verify();
     template <od::Ordering Ordering>

@@ -19,7 +19,7 @@ private:
 
     void Prune(model::LatticeLevel* level);
     void ComputeDependencies(model::LatticeLevel* level);
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     virtual config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) = 0;
     virtual config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli,
                                                [[maybe_unused]] model::PLIWS const* rhs_pli,

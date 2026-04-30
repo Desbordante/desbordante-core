@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/tane/tane_common.h"
 
-#include <chrono>
 #include <iomanip>
 #include <list>
 #include <memory>
@@ -127,8 +126,7 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
     }
 }
 
-unsigned long long TaneCommon::ExecuteInternal() {
-    long apriori_millis = 0;
+void TaneCommon::ExecuteInternal() {
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
 
@@ -143,7 +141,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
         LOG_DEBUG("*{}: every tuple has {:2} partners on average.", column->ToString(),
                   avg_partners);
     }
-    auto start_time = std::chrono::system_clock::now();
 
     // Initialize level 0
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
@@ -232,17 +229,10 @@ unsigned long long TaneCommon::ExecuteInternal() {
         // TODO: printProfilingData
     }
 
-    std::chrono::milliseconds elapsed_milliseconds =
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                                  start_time);
-    apriori_millis += elapsed_milliseconds.count();
-
-    LOG_DEBUG("Time: {} milliseconds", apriori_millis);
     LOG_DEBUG("Intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
-    return apriori_millis;
 }
 
 }  // namespace tane

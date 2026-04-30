@@ -315,12 +315,11 @@ RangesCollection ACAlgorithm::ReconstructRangesByColumns(size_t lhs_i, size_t rh
                             std::move(ranges), lhs_i, rhs_i};
 }
 
-unsigned long long ACAlgorithm::ExecuteInternal() {
+void ACAlgorithm::ExecuteInternal() {
     std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
     if (data.empty()) {
         throw std::runtime_error("Empty table was given.");
     }
-    auto start_time = std::chrono::system_clock::now();
 
     for (size_t col_i = 0; col_i < data.size() - 1; ++col_i) {
         if (!data.at(col_i).GetType().IsNumeric()) continue;
@@ -345,10 +344,7 @@ unsigned long long ACAlgorithm::ExecuteInternal() {
         }
     }
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
     PrintRanges(data);
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos

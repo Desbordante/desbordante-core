@@ -48,7 +48,7 @@ private:
         dcs_.Clear();
     }
 
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     void RegisterOptions();
 

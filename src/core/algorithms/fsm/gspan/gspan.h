@@ -47,7 +47,7 @@ protected:
 
     bool IsCanonical(gspan::DFSCode const& code);
 
-    unsigned long long ExecuteInternal();
+    void ExecuteInternal();
 
     void ResetState();
     void LoadDataInternal();
