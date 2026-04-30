@@ -82,7 +82,6 @@ void Fastod::ExecuteInternal() {
         LOG_DEBUG("{}", od.ToString());
     }
 
-    return elapsed_milliseconds;
 }
 
 void Fastod::PrintStatistics() const {

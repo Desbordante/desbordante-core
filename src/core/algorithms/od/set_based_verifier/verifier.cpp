@@ -65,7 +65,6 @@ void SetBasedAodVerifier::ExecuteInternal() {
     LOG_DEBUG("AOD holds with error {}", GetError());
     LOG_DEBUG("Removal set: {}", util::RangeToString(removal_set_));
 
-    return elapsed_milliseconds;
 }
 
 template <typename OD>

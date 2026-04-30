@@ -121,7 +121,6 @@ void DDVerifier::CheckCorrectnessDd() const {
 void DDVerifier::ExecuteInternal() {
     auto elapsed_milliseconds = util::TimedInvoke(&DDVerifier::VerifyDD, this);
     PrintStatistics();
-    return elapsed_milliseconds;
 }
 
 void DDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs) {

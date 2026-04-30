@@ -51,7 +51,6 @@ void AFDMetricCalculator::ExecuteInternal() {
     size_t const elapsed_milliseconds =
             util::TimedInvoke(&AFDMetricCalculator::CalculateMetric, this);
 
-    return elapsed_milliseconds;
 }
 
 void AFDMetricCalculator::CalculateMetric() {
