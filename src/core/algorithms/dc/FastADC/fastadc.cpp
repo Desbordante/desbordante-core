@@ -130,8 +130,6 @@ void FastADC::ExecuteInternal() {
     dcs_ = dcbuilder.BuildDenialConstraints();
 
     PrintResults();
-
-    LOG_DEBUG("Algorithm time: {}", elapsed_milliseconds.count());
 }
 
 // TODO: mb make this a list?
