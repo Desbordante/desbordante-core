@@ -444,25 +444,6 @@ TEST(TestDataStats, CorrectExecutionEmpty) {
     EXPECT_EQ(stats.GetAllStats().size(), 0);
 }
 
-// To measure performance of mining statistics in multiple threads.
-#if 0
-TEST(TestCsvStats, TestDiffThreadNum) {
-    for(unsigned thread_num = 1; thread_num < 9; ++thread_num) {
-        LOG_INFO("thread num = {}", thread_num);
-        auto start_time = std::chrono::system_clock::now();
-        algos::CsvStats stats(MakeConfig(kEpicMeds, true, thread_num));
-        auto elapsed_milliseconds =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now() - start_time
-            );
-        LOG_INFO("Reading time = {}", elapsed_milliseconds.count());
-        unsigned time = stats.Execute();
-        LOG_INFO("Executing time = {}", time);
-        //LOG_INFO() stats.toString();
-    }
-}
-#endif
-
 TEST(TestDataStats, MultipleExecutionConsistentResults) {
     auto stats_ptr = MakeStatAlgorithm(kBernoulliRelation);
     stats_ptr->Execute();
