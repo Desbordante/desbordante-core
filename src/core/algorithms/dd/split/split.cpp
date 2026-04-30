@@ -141,7 +141,7 @@ void Split::ExecuteInternal() {
         LOG_INFO("{}: {}, {}", input_table_->GetColumnName(non_empty_cols_[index]),
                  min_max_dif_[index].lower_bound, min_max_dif_[index].upper_bound);
 
-    unsigned const search_size = ReduceDDs(start_time);
+    unsigned const search_size = ReduceDDs();
 
     LOG_DEBUG("Reduced dependencies");
 
