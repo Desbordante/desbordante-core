@@ -1008,7 +1008,7 @@ Statistic DataStats::GetLastCharFrequency(size_t index) const {
 void DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
-        return 0;
+        return;
     }
 
     auto task = [this](size_t index) {
@@ -1076,7 +1076,6 @@ void DataStats::ExecuteInternal() {
     } else {
         for (size_t i = 0; i < all_stats_.size(); ++i) task(i);
     }
-
 }
 
 size_t DataStats::GetNumNulls(size_t index) const {
