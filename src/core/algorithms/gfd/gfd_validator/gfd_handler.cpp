@@ -47,7 +47,7 @@ void GfdHandler::LoadDataInternal() {
 
 void GfdHandler::ResetState() {}
 
-unsigned long long GfdHandler::ExecuteInternal() {
+void GfdHandler::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     result_ = GenerateSatisfiedGfds(graph_, gfds_);

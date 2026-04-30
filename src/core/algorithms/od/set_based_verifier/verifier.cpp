@@ -58,7 +58,7 @@ void SetBasedAodVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kOcContext, kOFDContext});
 }
 
-unsigned long long SetBasedAodVerifier::ExecuteInternal() {
+void SetBasedAodVerifier::ExecuteInternal() {
     unsigned long long const elapsed_milliseconds =
             util::TimedInvoke(&SetBasedAodVerifier::Verify, this);
 

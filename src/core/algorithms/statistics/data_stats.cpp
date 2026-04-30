@@ -1005,7 +1005,7 @@ Statistic DataStats::GetLastCharFrequency(size_t index) const {
     return GetCharFrequency(index, CharPosition::kLast);
 }
 
-unsigned long long DataStats::ExecuteInternal() {
+void DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
         return 0;

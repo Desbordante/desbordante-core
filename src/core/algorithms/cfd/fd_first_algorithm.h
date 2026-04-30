@@ -64,7 +64,7 @@ private:
 protected:
     void RegisterOptions();
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     FDFirstAlgorithm();

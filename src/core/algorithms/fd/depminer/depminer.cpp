@@ -13,7 +13,7 @@ namespace algos {
 using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::vector, std::list,
         std::dynamic_pointer_cast;
 
-unsigned long long Depminer::ExecuteInternal() {
+void Depminer::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
 
     schema_ = relation_->GetSchema();

@@ -270,7 +270,7 @@ void Mind::MineNaryINDs() {
     };
 }
 
-unsigned long long Mind::ExecuteInternal() {
+void Mind::ExecuteInternal() {
     timings_.compute_uinds = util::TimedInvoke(&Mind::MineUnaryINDs, this);
     timings_.compute_ninds = util::TimedInvoke(&Mind::MineNaryINDs, this);
     return timings_.compute_uinds + timings_.compute_ninds;

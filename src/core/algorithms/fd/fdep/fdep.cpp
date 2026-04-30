@@ -53,7 +53,7 @@ void FDep::ResetStateFd() {
     pos_cover_tree_.reset();
 }
 
-unsigned long long FDep::ExecuteInternal() {
+void FDep::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     BuildNegativeCover();

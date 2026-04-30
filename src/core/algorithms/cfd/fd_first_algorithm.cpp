@@ -41,7 +41,7 @@ void FDFirstAlgorithm::ResetStateCFD() {
     rules_.clear();
 }
 
-unsigned long long FDFirstAlgorithm::ExecuteInternal() {
+void FDFirstAlgorithm::ExecuteInternal() {
     max_cfd_size_ = max_lhs_ + 1;
     CheckForIncorrectInput();
     auto start_time = std::chrono::system_clock::now();

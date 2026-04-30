@@ -60,7 +60,7 @@ void ARAlgorithm::LoadDataInternal() {
     }
 }
 
-unsigned long long ARAlgorithm::ExecuteInternal() {
+void ARAlgorithm::ExecuteInternal() {
     auto time = FindFrequent();
     time += GenerateAllRules();
 

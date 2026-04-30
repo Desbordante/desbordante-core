@@ -67,7 +67,7 @@ void CFDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kCFDRuleLeft, kCFDRuleRight, kMinimumSupport, kMinimumConfidence});
 }
 
-unsigned long long CFDVerifier::ExecuteInternal() {
+void CFDVerifier::ExecuteInternal() {
     auto build_item_ids =
             [this](std::vector<CFDAttributeValuePair> const& rule_part) -> cfd::Itemset {
         cfd::Itemset item_ids;

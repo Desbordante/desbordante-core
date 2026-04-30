@@ -64,7 +64,7 @@ void DCVerifier::LoadDataInternal() {
     relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
 }
 
-unsigned long long int DCVerifier::ExecuteInternal() {
+void int DCVerifier::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
     dc::DC dc;
     try {

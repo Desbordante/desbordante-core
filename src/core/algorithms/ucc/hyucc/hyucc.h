@@ -17,7 +17,7 @@ private:
     config::ThreadNumType threads_num_ = 1;
 
     void LoadDataInternal() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
     void ResetUCCAlgorithmState() override {}
 

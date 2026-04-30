@@ -121,7 +121,7 @@ void Spider::MineAINDs() {
     }
 }
 
-unsigned long long Spider::ExecuteInternal() {
+void Spider::ExecuteInternal() {
     auto const mining_func = (max_ind_error_ == 0) ? &Spider::MineINDs : &Spider::MineAINDs;
     timings_.compute = util::TimedInvoke(mining_func, this);
     timings_.total = timings_.load + timings_.compute;

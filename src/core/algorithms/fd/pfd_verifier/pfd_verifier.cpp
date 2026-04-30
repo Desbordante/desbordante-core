@@ -32,7 +32,7 @@ void PFDVerifier::LoadDataInternal() {
     }
 }
 
-unsigned long long PFDVerifier::ExecuteInternal() {
+void PFDVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     stats_calculator_ = std::make_unique<PFDStatsCalculator>(relation_, error_measure_);
     VerifyPFD();

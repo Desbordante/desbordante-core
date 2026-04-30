@@ -99,7 +99,7 @@ std::vector<std::shared_ptr<faida::SimpleCC>> Faida::ExtractCCs(
     return {combinations.begin(), combinations.end()};
 }
 
-unsigned long long Faida::ExecuteInternal() {
+void Faida::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     size_t level_num = 0;
 

@@ -57,7 +57,7 @@ void NDVerifier::MakeExecuteOptsAvailable() {
                           config::names::kWeight});
 }
 
-unsigned long long NDVerifier::ExecuteInternal() {
+void NDVerifier::ExecuteInternal() {
     LOG_INFO("Parameters of NDVerifier:");
     LOG_INFO("\tInput table: {}", input_table_->GetRelationName());
     LOG_INFO("\tNull equals null: {}", is_null_equal_null_);

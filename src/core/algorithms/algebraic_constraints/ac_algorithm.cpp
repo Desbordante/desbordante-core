@@ -315,7 +315,7 @@ RangesCollection ACAlgorithm::ReconstructRangesByColumns(size_t lhs_i, size_t rh
                             std::move(ranges), lhs_i, rhs_i};
 }
 
-unsigned long long ACAlgorithm::ExecuteInternal() {
+void ACAlgorithm::ExecuteInternal() {
     std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
     if (data.empty()) {
         throw std::runtime_error("Empty table was given.");

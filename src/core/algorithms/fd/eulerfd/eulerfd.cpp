@@ -372,7 +372,7 @@ size_t EulerFD::GenerateResults() {
     return fd_num;
 }
 
-unsigned long long EulerFD::ExecuteInternal() {
+void EulerFD::ExecuteInternal() {
     if (number_of_attributes_ == 1) {
         return 0;
     }

@@ -44,7 +44,7 @@ void FDVerifier::LoadDataInternal() {
             model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 }
 
-unsigned long long FDVerifier::ExecuteInternal() {
+void FDVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     stats_calculator_ = std::make_unique<StatsCalculator>(relation_, typed_relation_, lhs_indices_,

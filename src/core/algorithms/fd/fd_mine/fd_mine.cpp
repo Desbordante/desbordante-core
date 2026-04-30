@@ -21,7 +21,7 @@ void FdMine::ResetStateFd() {
     plis_.clear();
 }
 
-unsigned long long FdMine::ExecuteInternal() {
+void FdMine::ExecuteInternal() {
     // 1
     schema_ = relation_->GetSchema();
     auto start_time = std::chrono::system_clock::now();

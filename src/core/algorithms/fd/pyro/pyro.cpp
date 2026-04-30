@@ -42,7 +42,7 @@ void Pyro::ResetStateFd() {
     search_spaces_.clear();
 }
 
-unsigned long long Pyro::ExecuteInternal() {
+void Pyro::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     auto schema = relation_->GetSchema();

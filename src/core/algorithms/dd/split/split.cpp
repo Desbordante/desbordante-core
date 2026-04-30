@@ -118,7 +118,7 @@ void Split::ParseDifferenceTable() {
     }
 }
 
-unsigned long long Split::ExecuteInternal() {
+void Split::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
     LOG_DEBUG("Start");
 

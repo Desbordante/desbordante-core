@@ -19,7 +19,7 @@ void HyUCC::LoadDataInternal() {
     }
 }
 
-unsigned long long HyUCC::ExecuteInternal() {
+void HyUCC::ExecuteInternal() {
     using namespace hy;
     using namespace hyucc;
     auto const start_time = std::chrono::system_clock::now();

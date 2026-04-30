@@ -155,7 +155,7 @@ bool Cords::IsSoftOrTrivial(model::ColumnIndex col_ind, size_t row_count) {
     return false;
 }
 
-unsigned long long Cords::ExecuteInternal() {
+void Cords::ExecuteInternal() {
     std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
 
     size_t row_count = data.front().GetNumRows();

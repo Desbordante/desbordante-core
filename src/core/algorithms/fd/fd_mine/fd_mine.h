@@ -37,7 +37,7 @@ private:
     void Display();
 
     void ResetStateFd() final;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 };
 
 }  // namespace algos

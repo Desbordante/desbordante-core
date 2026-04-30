@@ -28,7 +28,7 @@ void HyFD::MakeExecuteOptsAvailableFDInternal() {
     MakeOptionsAvailable({config::names::kThreads});
 }
 
-unsigned long long HyFD::ExecuteInternal() {
+void HyFD::ExecuteInternal() {
     using namespace hy;
     LOG_TRACE("Executing");
     auto const start_time = std::chrono::system_clock::now();

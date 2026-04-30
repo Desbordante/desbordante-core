@@ -136,7 +136,7 @@ void INDVerifier::VerifyIND() {
     error_ = static_cast<Error>(GetViolatingClustersCount()) / lhs_cardinality;
 }
 
-unsigned long long INDVerifier::ExecuteInternal() {
+void INDVerifier::ExecuteInternal() {
     return util::TimedInvoke(&INDVerifier::VerifyIND, this);
 }
 

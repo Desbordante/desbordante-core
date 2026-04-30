@@ -139,7 +139,7 @@ void MetricVerifier::ResetState() {
     metric_fd_holds_ = false;
 }
 
-unsigned long long MetricVerifier::ExecuteInternal() {
+void MetricVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     points_calculator_ = std::make_unique<PointsCalculator>(dist_from_null_is_infinity_,

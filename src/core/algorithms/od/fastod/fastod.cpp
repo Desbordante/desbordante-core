@@ -67,7 +67,7 @@ void Fastod::ResetState() {
     partition_cache_.Clear();
 }
 
-unsigned long long Fastod::ExecuteInternal() {
+void Fastod::ExecuteInternal() {
     size_t const elapsed_milliseconds = util::TimedInvoke(&Fastod::Discover, this);
 
     for (auto const& od : result_asc_) {

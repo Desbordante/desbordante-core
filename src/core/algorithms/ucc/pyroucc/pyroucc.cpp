@@ -47,7 +47,7 @@ void PyroUCC::ResetUCCAlgorithmState() {
     search_space_.reset(nullptr);
 }
 
-unsigned long long PyroUCC::ExecuteInternal() {
+void PyroUCC::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     auto schema = relation_->GetSchema();

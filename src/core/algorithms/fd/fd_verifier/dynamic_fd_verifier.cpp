@@ -111,7 +111,7 @@ void DynamicFDVerifier::LoadDataInternal() {
     SortHighlightsByProportionDescending();
 }
 
-unsigned long long DynamicFDVerifier::ExecuteInternal() {
+void DynamicFDVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     std::vector<std::pair<std::optional<size_t>, std::vector<int>>> lhs_inserts{}, rhs_inserts{};
     std::unordered_set<size_t> deletes_and_updates_indices{delete_statement_indices_};

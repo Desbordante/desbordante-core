@@ -118,7 +118,7 @@ void DDVerifier::CheckCorrectnessDd() const {
     std::ranges::for_each(dd_.right, check_constraint);
 }
 
-unsigned long long DDVerifier::ExecuteInternal() {
+void DDVerifier::ExecuteInternal() {
     auto elapsed_milliseconds = util::TimedInvoke(&DDVerifier::VerifyDD, this);
     PrintStatistics();
     return elapsed_milliseconds;

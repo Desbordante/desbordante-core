@@ -402,7 +402,7 @@ void GfdMiner::LoadDataInternal() {
 
 void GfdMiner::ResetState() {}
 
-unsigned long long GfdMiner::ExecuteInternal() {
+void GfdMiner::ExecuteInternal() {
     std::size_t elapsed_time = util::TimedInvoke(&GfdMiner::MineGfds, this);
     LOG_DEBUG("Mined GFDs: {}", gfds_.size());
     return elapsed_time;

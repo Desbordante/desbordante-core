@@ -147,7 +147,7 @@ std::list<FunQuadruple> FUN::GenerateCandidate(Level const& l_k) const {
     return {l_k_plus_1.begin(), l_k_plus_1.end()};
 }
 
-unsigned long long FUN::ExecuteInternal() {
+void FUN::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     schema_ = relation_->GetSchema();
     Vertical empty_vertical = schema_->CreateEmptyVertical();

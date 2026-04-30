@@ -38,7 +38,7 @@ private:
 protected:
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     static std::pair<long double, long double> CalculateP1P2(

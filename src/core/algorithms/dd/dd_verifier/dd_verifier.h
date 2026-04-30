@@ -59,7 +59,7 @@ protected:
 
     void MakeExecuteOptsAvailable() override;
 
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     DDVerifier();

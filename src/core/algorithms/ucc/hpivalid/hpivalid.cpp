@@ -40,7 +40,7 @@ hpiv::PLITable HPIValid::Preprocess() {
     return tab;
 }
 
-unsigned long long HPIValid::ExecuteInternal() {
+void HPIValid::ExecuteInternal() {
     hpiv::Config cfg;
     hpiv::ResultCollector rc(3600);
 

@@ -202,7 +202,7 @@ void GSpan::ResetState() {
     empty_graphs_removed_ = 0;
 }
 
-unsigned long long GSpan::ExecuteInternal() {
+void GSpan::ExecuteInternal() {
     min_sup_ = static_cast<int>(std::ceil(min_frequency_ * graph_database_.size()));
 
     std::size_t elapsed_time = util::TimedInvoke(&GSpan::MineSubgraphs, this);

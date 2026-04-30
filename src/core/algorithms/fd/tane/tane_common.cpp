@@ -127,7 +127,7 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
     }
 }
 
-unsigned long long TaneCommon::ExecuteInternal() {
+void TaneCommon::ExecuteInternal() {
     long apriori_millis = 0;
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();

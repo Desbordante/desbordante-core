@@ -70,7 +70,7 @@ EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, siz
     return (*diff_func)(population, at, differential_options_, rng);
 }
 
-unsigned long long DES::ExecuteInternal() {
+void DES::ExecuteInternal() {
     rng_.SetSeed(seed_);
     auto const start_time = std::chrono::system_clock::now();
 

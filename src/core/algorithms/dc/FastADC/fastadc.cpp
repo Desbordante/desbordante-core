@@ -100,7 +100,7 @@ void FastADC::PrintResults() {
     LOG_DEBUG("{}", dcs_.ToString());
 }
 
-unsigned long long FastADC::ExecuteInternal() {
+void FastADC::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
     LOG_DEBUG("Start");
 

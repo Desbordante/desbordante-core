@@ -44,7 +44,7 @@ void UCCVerifier::LoadDataInternal() {
     }
 }
 
-unsigned long long UCCVerifier::ExecuteInternal() {
+void UCCVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     VerifyUCC();
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(

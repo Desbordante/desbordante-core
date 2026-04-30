@@ -28,7 +28,7 @@ void DFD::ResetStateFd() {
     unique_columns_.clear();
 }
 
-unsigned long long DFD::ExecuteInternal() {
+void DFD::ExecuteInternal() {
     auto partition_storage = std::make_unique<PartitionStorage>(relation_.get());
     RelationalSchema const* const schema = relation_->GetSchema();
 

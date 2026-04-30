@@ -356,7 +356,7 @@ void Order::PrintValidOD() {
     LOG_DEBUG("\n\n");
 }
 
-unsigned long long Order::ExecuteInternal() {
+void Order::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     CreateSingleColumnSortedPartitions();
     lattice_ = std::make_unique<ListLattice>(candidate_sets_, single_attributes_);

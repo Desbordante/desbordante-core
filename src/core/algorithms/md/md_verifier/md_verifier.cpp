@@ -97,7 +97,7 @@ void MDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kRightTable, kLeftTable, kMDLHS, kMDRHS, kThreads});
 }
 
-unsigned long long MDVerifier::ExecuteInternal() {
+void MDVerifier::ExecuteInternal() {
     return util::TimedInvoke(&MDVerifier::VerifyMD, this);
 }
 

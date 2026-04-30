@@ -49,7 +49,7 @@ void Aid::ResetStateFd() {
     sum_ = double{kWindowSize};
 }
 
-unsigned long long Aid::ExecuteInternal() {
+void Aid::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     BuildClusters();

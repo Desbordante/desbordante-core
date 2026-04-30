@@ -20,7 +20,7 @@ private:
 
     void ResetStateFd() final {}
 
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 };
 
 }  // namespace algos

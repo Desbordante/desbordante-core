@@ -35,7 +35,7 @@ void FastFDs::ResetStateFd() {
     diff_sets_.clear();
 }
 
-unsigned long long FastFDs::ExecuteInternal() {
+void FastFDs::ExecuteInternal() {
     schema_ = relation_->GetSchema();
 
     auto start_time = std::chrono::system_clock::now();
