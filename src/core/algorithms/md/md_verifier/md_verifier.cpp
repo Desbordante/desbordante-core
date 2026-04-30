@@ -15,7 +15,6 @@
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
-#include "core/util/timed_invoke.h"
 #include "core/util/worker_thread_pool.h"
 
 namespace {
@@ -98,7 +97,7 @@ void MDVerifier::MakeExecuteOptsAvailable() {
 }
 
 void MDVerifier::ExecuteInternal() {
-    return util::TimedInvoke(&MDVerifier::VerifyMD, this);
+    VerifyMD();
 }
 
 model::MD MDVerifier::BuildMD(std::vector<ColumnSimilarityClassifier> const& lhs,
