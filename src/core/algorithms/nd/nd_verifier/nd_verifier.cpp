@@ -22,7 +22,6 @@
 #include "core/model/types/type.h"
 #include "core/util/logger.h"
 #include "core/util/range_to_string.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::nd_verifier {
 
@@ -65,15 +64,8 @@ void NDVerifier::ExecuteInternal() {
     LOG_INFO("\tRhs indices: {}", ::util::RangeToString(rhs_indices_));
     LOG_INFO("\tWeight: {}", weight_);
 
-    auto verification_time = ::util::TimedInvoke(&NDVerifier::VerifyND, this);
-
-    LOG_DEBUG("ND verification took {} ms", std::to_string(verification_time));
-
-    auto stats_calculation_time = ::util::TimedInvoke(&NDVerifier::CalculateStats, this);
-
-    LOG_DEBUG("Statistics calculation took {} ms", std::to_string(stats_calculation_time));
-
-    return verification_time + stats_calculation_time;
+    VerifyND();
+    CalculateStats();
 }
 
 bool NDVerifier::NDHolds() const {
@@ -138,16 +130,9 @@ NDVerifier::CombinedValuesType NDVerifier::CombineValues(
 }
 
 void NDVerifier::VerifyND() {
-    auto local_start_time = std::chrono::system_clock::now();
     auto [lhs_values, combined_lhs] = CombineValues(lhs_indices_);
     auto [rhs_values, combined_rhs] = CombineValues(rhs_indices_);
 
-    LOG_DEBUG("Values combination took {} ms",
-              std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                     std::chrono::system_clock::now() - local_start_time)
-                                     .count()));
-
-    local_start_time = std::chrono::system_clock::now();
     std::unordered_map<size_t, std::unordered_set<size_t>> value_deps{};
 
     for (size_t i{0}; i < combined_lhs->size(); ++i) {
@@ -160,10 +145,6 @@ void NDVerifier::VerifyND() {
             value_deps[lhs_code].insert(rhs_code);
         }
     }
-    LOG_DEBUG("Value deps calculation took {} ms",
-              std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                     std::chrono::system_clock::now() - local_start_time)
-                                     .count()));
 
     stats_calculator_ = util::StatsCalculator(std::move(value_deps), std::move(lhs_values),
                                               std::move(rhs_values), std::move(combined_lhs),
