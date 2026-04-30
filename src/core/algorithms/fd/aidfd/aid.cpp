@@ -50,14 +50,11 @@ void Aid::ResetStateFd() {
 }
 
 void Aid::ExecuteInternal() {
-
     BuildClusters();
 
     CreateNegativeCover();
 
     InvertNegativeCover();
-
-
 }
 
 void Aid::BuildClusters() {
