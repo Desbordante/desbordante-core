@@ -51,10 +51,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
 
     agree_sets.insert(relation_->GetSchema()->CreateEmptyVertical());
 
-    auto elapsed_mills_to_gen_agree_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-    LOG_INFO("TIME TO GENERATE AGREE SETS WITH METHOD {}: {}", method_str,
-             elapsed_mills_to_gen_agree_sets.count());
-
     return agree_sets;
 }
 
@@ -75,9 +71,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
             identifier_sets.emplace_back(relation_, *p);
         }
     }
-
-    auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-    LOG_INFO("TIME TO IDENTIFIER SETS GENERATION: {}", elapsed_mills_to_gen_id_sets.count());
 
     LOG_DEBUG("Identifier sets:");
     for (auto const& id_set : identifier_sets) {
@@ -109,9 +102,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
             identifier_sets.try_emplace(*p, relation_, *p);
         }
     }
-
-    auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-    LOG_INFO("TIME TO IDENTIFIER SETS GENERATION: {}", elapsed_mills_to_gen_id_sets.count());
 
     LOG_DEBUG("Identifier sets:");
     for (auto const& [index, id_set] : identifier_sets) {
@@ -266,9 +256,6 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenPliMaxRepresentation() const {
             break;
         }
     }
-
-    LOG_INFO("TIME TO GENERATE MAX REPRESENTATION WITH METHOD {}: {}", method_str,
-             elapsed_mills_to_gen_max_representation.count());
 
     return max_representation;
 }
