@@ -5,7 +5,6 @@
 #include "position_list_index_with_singletons.h"
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <deque>
 #include <map>
