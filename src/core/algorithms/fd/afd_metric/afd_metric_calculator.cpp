@@ -10,7 +10,6 @@
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::afd_metric_calculator {
 
