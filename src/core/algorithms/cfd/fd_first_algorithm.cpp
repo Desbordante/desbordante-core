@@ -45,10 +45,7 @@ void FDFirstAlgorithm::ExecuteInternal() {
     max_cfd_size_ = max_lhs_ + 1;
     CheckForIncorrectInput();
     FdsFirstDFS();
-    unsigned long long apriori_millis = elapsed_milliseconds.count();
     LOG_INFO("> CFD COUNT: {}", cfd_list_.size());
-
-    return apriori_millis;
 }
 
 void FDFirstAlgorithm::CheckForIncorrectInput() const {
