@@ -8,7 +8,6 @@
 
 #include "core/config/option_using.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 #include "graph_parser.h"
 #include "sparse_triangular_matrix.h"
 using namespace gspan;
@@ -205,7 +204,7 @@ void GSpan::ResetState() {
 void GSpan::ExecuteInternal() {
     min_sup_ = static_cast<int>(std::ceil(min_frequency_ * graph_database_.size()));
 
-    std::size_t elapsed_time = util::TimedInvoke(&GSpan::MineSubgraphs, this);
+    MineSubgraphs();
     LOG_DEBUG("Mining complete: {} frequent subgraphs found", frequent_subgraphs_.size());
 
     if (!output_path_.empty()) {
@@ -213,8 +212,6 @@ void GSpan::ExecuteInternal() {
         LOG_INFO("Wrote {} frequent subgraphs to {}", frequent_subgraphs_.size(),
                  output_path_.string());
     }
-
-    return elapsed_time;
 }
 
 void GSpan::MineSubgraphs() {
