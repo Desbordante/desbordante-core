@@ -386,7 +386,6 @@ void EulerFD::ExecuteInternal() {
         rand_function_ = std::rand;
     }
 
-
     BuildPartition();
     if (clusters_.empty()) {
         // In small datasets sometimes after clusters stripping there are no clusters for sampling

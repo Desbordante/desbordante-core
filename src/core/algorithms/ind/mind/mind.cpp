@@ -275,7 +275,6 @@ void Mind::ExecuteInternal() {
     MineNaryINDs();
 }
 
-void Mind::ResetINDAlgorithmState() {
-}
+void Mind::ResetINDAlgorithmState() {}
 
 }  // namespace algos

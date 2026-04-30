@@ -14,7 +14,6 @@ using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::
         std::dynamic_pointer_cast;
 
 void Depminer::ExecuteInternal() {
-
     schema_ = relation_->GetSchema();
 
     // Agree sets

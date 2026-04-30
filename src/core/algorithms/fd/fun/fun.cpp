@@ -186,10 +186,8 @@ void FUN::ExecuteInternal() {
         }
     }
 
-
     LOG_INFO("Total FD count: {}", total_fds);
     LOG_INFO("HASH: {}", Fletcher16());
-
 }
 
 }  // namespace algos

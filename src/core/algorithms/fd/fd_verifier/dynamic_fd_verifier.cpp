@@ -151,7 +151,6 @@ void DynamicFDVerifier::ExecuteInternal() {
 
     VerifyFD();
     SortHighlightsByProportionDescending();
-
 }
 
 void DynamicFDVerifier::VerifyFD() const {

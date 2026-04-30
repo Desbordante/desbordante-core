@@ -31,9 +31,7 @@ void Faida::MakeExecuteOptsAvailable() {
 }
 
 void Faida::LoadINDAlgorithmDataInternal() {
-
     data_ = faida::Preprocessor::CreateHashedStores("Faida", input_tables_, sample_size_);
-
 }
 
 void Faida::ResetINDAlgorithmState() {

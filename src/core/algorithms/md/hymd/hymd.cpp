@@ -181,7 +181,6 @@ void HyMD::LoadDataInternal() {
 }
 
 void HyMD::ExecuteInternal() {
-
     auto pool_holder = threads_ > 1 ? PoolHolder{threads_} : PoolHolder{};
 
     auto [similarity_data, short_sampling_enable] = SimilarityData::CreateFrom(

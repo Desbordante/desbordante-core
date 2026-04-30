@@ -59,7 +59,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
     vector<IdentifierSet> identifier_sets;
     SetOfVectors const max_representation = GenPliMaxRepresentation();
 
-
     // compute identifier sets
     // identifier_sets is vector
     std::unordered_set<int> cache;
@@ -95,7 +94,6 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
     SetOfAgreeSets agree_sets;
     std::unordered_map<int, IdentifierSet> identifier_sets;
     SetOfVectors const max_representation = GenPliMaxRepresentation();
-
 
     for (auto const& cluster : max_representation) {
         for (auto p = cluster.begin(); p != cluster.end(); ++p) {

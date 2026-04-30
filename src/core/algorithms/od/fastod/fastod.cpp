@@ -81,7 +81,6 @@ void Fastod::ExecuteInternal() {
     for (auto const& od : result_simple_) {
         LOG_DEBUG("{}", od.ToString());
     }
-
 }
 
 void Fastod::PrintStatistics() const {

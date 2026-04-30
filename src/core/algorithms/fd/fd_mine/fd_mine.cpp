@@ -52,7 +52,6 @@ void FdMine::ExecuteInternal() {
     // 3
     Reconstruct();
     Display();
-
 }
 
 void FdMine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {

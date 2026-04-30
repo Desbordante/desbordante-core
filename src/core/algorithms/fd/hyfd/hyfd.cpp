@@ -61,7 +61,6 @@ void HyFD::ExecuteInternal() {
 
     auto fds = positive_cover_tree->FillFDs();
     RegisterFDs(std::move(fds), og_mapping);
-
 }
 
 void HyFD::RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> const& og_mapping) {

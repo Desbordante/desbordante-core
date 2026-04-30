@@ -230,7 +230,6 @@ void TaneCommon::ExecuteInternal() {
         // TODO: printProfilingData
     }
 
-
     LOG_DEBUG("Intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());

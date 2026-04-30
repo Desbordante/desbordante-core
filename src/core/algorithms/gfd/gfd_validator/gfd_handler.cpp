@@ -48,7 +48,6 @@ void GfdHandler::LoadDataInternal() {
 void GfdHandler::ResetState() {}
 
 void GfdHandler::ExecuteInternal() {
-
     result_ = GenerateSatisfiedGfds(graph_, gfds_);
 
     LOG_DEBUG("Satisfied GFDs: {}/{}", result_.size(), gfds_.size());

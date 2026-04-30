@@ -54,7 +54,6 @@ void FDep::ResetStateFd() {
 }
 
 void FDep::ExecuteInternal() {
-
     BuildNegativeCover();
 
     this->tuples_.shrink_to_fit();
@@ -67,11 +66,9 @@ void FDep::ExecuteInternal() {
 
     pos_cover_tree_->FillFdCollection(this->schema_, FdList(), max_lhs_);
 
-
 #ifdef PRINT_FDS
     pos_cover_tree_->printDep("recent_call_result.txt", this->column_names_);
 #endif
-
 }
 
 void FDep::BuildNegativeCover() {

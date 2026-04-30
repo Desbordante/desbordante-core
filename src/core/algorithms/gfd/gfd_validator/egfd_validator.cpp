@@ -1031,7 +1031,6 @@ bool Check(CPI& cpi, model::graph_t const& graph, model::Gfd const& gfd,
 }
 
 bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
-
     model::graph_t pat = gfd.GetPattern();
     std::set<std::string> graph_labels = {};
     std::set<std::string> pat_labels = {};

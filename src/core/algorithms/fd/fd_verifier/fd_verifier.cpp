@@ -45,14 +45,12 @@ void FDVerifier::LoadDataInternal() {
 }
 
 void FDVerifier::ExecuteInternal() {
-
     stats_calculator_ = std::make_unique<StatsCalculator>(relation_, typed_relation_, lhs_indices_,
                                                           rhs_indices_);
 
     VerifyFD();
     SortHighlightsByProportionDescending();
     stats_calculator_->PrintStatistics();
-
 }
 
 void FDVerifier::VerifyFD() const {

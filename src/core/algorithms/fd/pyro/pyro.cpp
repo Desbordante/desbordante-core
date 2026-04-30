@@ -43,7 +43,6 @@ void Pyro::ResetStateFd() {
 }
 
 void Pyro::ExecuteInternal() {
-
     auto schema = relation_->GetSchema();
 
     auto profiling_context = std::make_unique<ProfilingContext>(
@@ -105,7 +104,6 @@ void Pyro::ExecuteInternal() {
     for (int i = 0; i < parameters_.parallelism; i++) {
         threads[i].join();
     }
-
 
     LOG_INFO("FdG1 error calculation: {} ms", (FdG1Strategy::nanos_ / 1000000));
     LOG_INFO("Error calculation count: {}", total_error_calc_count);

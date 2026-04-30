@@ -163,7 +163,6 @@ void Cords::ExecuteInternal() {
 
     Init(column_count, data);
 
-
     std::vector<bool> is_soft_or_trivial(column_count);
     for (model::ColumnIndex col_ind = 0; col_ind != column_count; ++col_ind)
         is_soft_or_trivial[col_ind] = IsSoftOrTrivial(col_ind, row_count);
@@ -208,6 +207,5 @@ void Cords::ExecuteInternal() {
             }
         }
     }
-
 }
 }  // namespace algos

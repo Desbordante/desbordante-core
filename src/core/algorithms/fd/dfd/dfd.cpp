@@ -32,7 +32,6 @@ void DFD::ExecuteInternal() {
     auto partition_storage = std::make_unique<PartitionStorage>(relation_.get());
     RelationalSchema const* const schema = relation_->GetSchema();
 
-
     // search for unique columns
     for (auto const& column : schema->GetColumns()) {
         ColumnData& column_data = relation_->GetColumnData(column->GetIndex());
@@ -73,10 +72,8 @@ void DFD::ExecuteInternal() {
 
     search_space_pool.join();
 
-
     LOG_INFO("> FD COUNT: {}", fd_collection_.Size());
     LOG_INFO("> HASH: {}", PliBasedFDAlgorithm::Fletcher16());
-
 }
 
 }  // namespace algos
