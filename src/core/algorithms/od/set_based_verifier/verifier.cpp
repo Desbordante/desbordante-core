@@ -59,12 +59,10 @@ void SetBasedAodVerifier::MakeExecuteOptsAvailable() {
 }
 
 void SetBasedAodVerifier::ExecuteInternal() {
-    unsigned long long const elapsed_milliseconds =
-            util::TimedInvoke(&SetBasedAodVerifier::Verify, this);
+    Verify();
 
     LOG_DEBUG("AOD holds with error {}", GetError());
     LOG_DEBUG("Removal set: {}", util::RangeToString(removal_set_));
-
 }
 
 template <typename OD>
