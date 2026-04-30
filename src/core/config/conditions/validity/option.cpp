@@ -1,7 +1,7 @@
-#include "config/conditions/validity/option.h"
+#include "core/config/conditions/validity/option.h"
 
-#include "config/exceptions.h"
-#include "config/names_and_descriptions.h"
+#include "core/config/exceptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 using names::kValidity, descriptions::kDValidity;
