@@ -38,14 +38,10 @@ void FastFDs::ResetStateFd() {
 void FastFDs::ExecuteInternal() {
     schema_ = relation_->GetSchema();
 
-
     GenDiffSets();
 
-    auto elapsed_mills_to_gen_diff_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-    LOG_INFO("TIME TO DIFF SETS GENERATION: {}", elapsed_mills_to_gen_diff_sets.count());
-
     if (diff_sets_.size() == 1 && diff_sets_.back().IsEmpty()) {
-        return elapsed_milliseconds.count();
+        return;
     }
     Vertical empty_vertical = schema_->CreateEmptyVertical();
 
@@ -77,8 +73,6 @@ void FastFDs::ExecuteInternal() {
             task(column);
         }
     }
-
-
 }
 
 bool FastFDs::ColumnContainsOnlyEqualValues(Column const& column) const {
