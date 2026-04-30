@@ -78,11 +78,6 @@ private:
 
 public:
     unsigned long long nanos_smart_constructing_ = 0;
-    unsigned long long polling_launch_pads_ = 0;
-    unsigned long long ascending_ = 0;
-    unsigned long long trickling_down_ = 0;
-    unsigned long long trickling_down_part_ = 0;
-    unsigned long long trickling_down_from_ = 0;
     unsigned long long returning_launch_pad_ = 0;
 
     bool is_initialized_ = false;

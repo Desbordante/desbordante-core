@@ -11,7 +11,6 @@
 void SearchSpace::Discover() {
     LOG_TRACE("Discovering in: {}", static_cast<std::string>(*strategy_));
     while (true) {  // на второй итерации дропается
-        auto now = std::chrono::system_clock::now();
         std::optional<DependencyCandidate> launch_pad = PollLaunchPad();
         if (!launch_pad.has_value()) break;
 
@@ -21,9 +20,6 @@ void SearchSpace::Discover() {
         }
 
         bool is_dependency_found = Ascend(*launch_pad);
-        polling_launch_pads_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                        std::chrono::system_clock::now() - now)
-                                        .count();
         ReturnLaunchPad(*launch_pad, !is_dependency_found);
     }
 }
@@ -154,8 +150,6 @@ void SearchSpace::ReturnLaunchPad(DependencyCandidate const& launch_pad, bool is
 }
 
 bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
-    auto now = std::chrono::system_clock::now();
-
     LOG_DEBUG("===== Ascending from {} ======", strategy_->Format(launch_pad.vertical_));
 
     if (strategy_->ShouldResample(launch_pad.vertical_, sample_boost_)) {
@@ -259,9 +253,6 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
         [[maybe_unused]] double error_diff = *error - traversal_candidate.error_.GetMean();
         LOG_TRACE("Checking candidate... actual error: {}", *error);
     }
-    ascending_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                          std::chrono::system_clock::now() - now)
-                          .count();
 
     if (*error <= strategy_->max_dependency_error_) {
         LOG_TRACE("Key peak in climbing phase e({})={} -> Need to minimize.",
@@ -313,8 +304,6 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
     peaks.emplace_back(main_peak, model::ConfidenceInterval(main_peak_error), true);
     std::push_heap(peaks.begin(), peaks.end(), peaks_comparator);
     std::unordered_set<Vertical> alleged_non_deps;
-
-    auto now = std::chrono::system_clock::now();
 
     while (!peaks.empty()) {
         auto peak = peaks.front();
@@ -434,9 +423,6 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
             std::push_heap(peaks.begin(), peaks.end(), peaks_comparator);
         }
     }
-    // trickling_down_part_ +=
-    // std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() -
-    // now).count();
 
     if (peaks.empty()) {
         for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
@@ -450,9 +436,6 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
                 strategy_->RegisterDependency(alleged_min_dep, info->error_, *context_);
             }
         }
-        trickling_down_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                   std::chrono::system_clock::now() - now)
-                                   .count();
     } else {
         LOG_DEBUG("* {} new peaks (UNIMPLEMENTED)", peaks.size());
         auto new_scope = std::make_unique<model::VerticalMap<Vertical>>(context_->GetSchema());
@@ -485,18 +468,11 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
             nested_search_space->AddLaunchPad(
                     strategy_->CreateDependencyCandidate(static_cast<Vertical>(scope_column)));
         }
-        auto prev = std::chrono::system_clock::now();
         num_nested_++;
         // std::cout << static_cast<std::string>(*strategy_) << ' ';
         // std::cout << numNested << std::endl;
-        trickling_down_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                   std::chrono::system_clock::now() - now)
-                                   .count();
         nested_search_space->MoveInLocalVisitees(std::move(local_visitees_));
         nested_search_space->Discover();
-        trickling_down_part_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                        std::chrono::system_clock::now() - prev)
-                                        .count();
         global_visitees_ = nested_search_space->MoveOutGlobalVisitees();
         local_visitees_ = nested_search_space->MoveOutLocalVisitees();
 
@@ -519,7 +495,6 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
         model::VerticalMap<VerticalInfo>* alleged_min_deps,
         std::unordered_set<Vertical>& alleged_non_deps,
         model::VerticalMap<VerticalInfo>* global_visitees, double boost_factor) {
-    auto now = std::chrono::system_clock::now();
     if (min_dep_candidate.error_.GetMin() > strategy->max_dependency_error_) {
         throw std::runtime_error(
                 "Error in trickleDownFrom: minDepCandidate's error should be <= maxError");
@@ -567,15 +542,9 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
                 break;
             }
 
-            trickling_down_from_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                            std::chrono::system_clock::now() - now)
-                                            .count();
-
             auto alleged_min_dep =
                     TrickleDownFrom(std::move(parent_candidate), strategy, alleged_min_deps,
                                     alleged_non_deps, global_visitees, boost_factor);
-
-            now = std::chrono::system_clock::now();
 
             if (alleged_min_dep.has_value()) {
                 return alleged_min_dep;
@@ -606,9 +575,6 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
         if (are_all_parents_known_non_deps && context_->GetParameters().is_check_estimates) {
             RequireMinimalDependency(strategy, min_dep_candidate.vertical_);
         }
-        trickling_down_from_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                        std::chrono::system_clock::now() - now)
-                                        .count();
         return min_dep_candidate.vertical_;
     } else {
         LOG_TRACE("* Guessed incorrect {}-ary minimum dependency candidate.",
@@ -619,9 +585,6 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
         if (strategy->ShouldResample(min_dep_candidate.vertical_, boost_factor)) {
             context_->CreateFocusedSample(min_dep_candidate.vertical_, boost_factor);
         }
-        trickling_down_from_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                        std::chrono::system_clock::now() - now)
-                                        .count();
         return std::optional<Vertical>();
     }
 }
@@ -734,12 +697,7 @@ bool SearchSpace::IsKnownNonDependency(Vertical const& vertical,
 }
 
 void SearchSpace::PrintStats() const {
-    LOG_INFO("Trickling down from: {}", trickling_down_from_ / 1000000);
-    LOG_INFO("Trickling down: {}", trickling_down_ / 1000000 - trickling_down_from_ / 1000000);
-    LOG_INFO("Trickling down nested: {}", trickling_down_part_ / 1000000);
     LOG_INFO("Num nested: {}", num_nested_ / 1000000);
-    LOG_INFO("Ascending: {}", ascending_ / 1000000);
-    LOG_INFO("Polling: {}", polling_launch_pads_ / 1000000);
     LOG_INFO("Returning launch pad: {}", returning_launch_pad_ / 1000000);
 }
 
