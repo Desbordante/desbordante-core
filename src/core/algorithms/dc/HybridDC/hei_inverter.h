@@ -10,7 +10,6 @@
 #include <memory>
 #include <mutex>
 #include <numeric>
-#include <optional>
 #include <thread>
 #include <vector>
 
@@ -76,15 +75,19 @@ class HEIBitSetTrie {
     using ChildrenT = boost::container::small_vector<std::pair<uint8_t, uint32_t>,
                                                      kInlineChildren>;
 
+    // Node fits in one 64-byte cache line. small_vector<4> is 56 bytes plus the
+    // 1-byte flag = 64 bytes. DBitset lives in a parallel vector (cold path only).
     struct Node {
+        bool has_stored;
         ChildrenT children;
-        std::optional<DBitset> stored;
     };
 
     std::vector<Node> nodes_;
+    std::vector<DBitset> stored_values_;  // parallel to nodes_; valid where has_stored
 
     uint32_t NewNode() {
         nodes_.emplace_back();
+        stored_values_.emplace_back();
         return static_cast<uint32_t>(nodes_.size() - 1);
     }
 
@@ -110,7 +113,8 @@ class HEIBitSetTrie {
     void DoInsert(uint32_t node_idx, DBitset const& bs, size_t from) {
         size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
         if (bit >= kNpos) {
-            nodes_[node_idx].stored = bs;
+            nodes_[node_idx].has_stored = true;
+            stored_values_[node_idx] = bs;
             return;
         }
         uint32_t child_idx = GetOrCreateChild(node_idx, bit);
@@ -120,7 +124,7 @@ class HEIBitSetTrie {
     bool DoRemove(uint32_t node_idx, DBitset const& bs, size_t from) {
         size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
         if (bit >= kNpos) {
-            nodes_[node_idx].stored.reset();
+            nodes_[node_idx].has_stored = false;
             return nodes_[node_idx].children.empty();
         }
         auto& children = nodes_[node_idx].children;
@@ -135,12 +139,12 @@ class HEIBitSetTrie {
             children2.erase(children2.begin() + pos);
         }
         Node const& n = nodes_[node_idx];
-        return !n.stored.has_value() && n.children.empty();
+        return !n.has_stored && n.children.empty();
     }
 
     bool DoSubtreeHasAnyStored(uint32_t node_idx) const {
         Node const& node = nodes_[node_idx];
-        if (node.stored.has_value()) return true;
+        if (node.has_stored) return true;
         for (auto const& [bit, child_idx] : node.children) {
             (void)bit;
             if (DoSubtreeHasAnyStored(child_idx)) return true;
@@ -181,7 +185,7 @@ class HEIBitSetTrie {
 
     bool DoContainsSubset(uint32_t node_idx, DBitset const& query, size_t from) const {
         Node const& node = nodes_[node_idx];
-        if (node.stored.has_value()) return true;
+        if (node.has_stored) return true;
 
         size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
         size_t ci = 0, n = node.children.size();
@@ -204,12 +208,9 @@ class HEIBitSetTrie {
 
     bool DoGetAndRemoveSubsets(uint32_t node_idx, DBitset const& query, size_t from,
                                std::vector<DBitset>& result) {
-        {
-            auto& stored = nodes_[node_idx].stored;
-            if (stored.has_value()) {
-                result.push_back(std::move(*stored));
-                stored.reset();
-            }
+        if (nodes_[node_idx].has_stored) {
+            result.push_back(std::move(stored_values_[node_idx]));
+            nodes_[node_idx].has_stored = false;
         }
 
         size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
@@ -233,12 +234,12 @@ class HEIBitSetTrie {
             }
         }
         Node const& n = nodes_[node_idx];
-        return !n.stored.has_value() && n.children.empty();
+        return !n.has_stored && n.children.empty();
     }
 
     void DoForEach(uint32_t node_idx, std::function<void(DBitset const&)> const& fn) const {
         Node const& node = nodes_[node_idx];
-        if (node.stored.has_value()) fn(*node.stored);
+        if (node.has_stored) fn(stored_values_[node_idx]);
         for (auto const& [bit, child_idx] : node.children) {
             (void)bit;
             DoForEach(child_idx, fn);
@@ -246,7 +247,10 @@ class HEIBitSetTrie {
     }
 
 public:
-    HEIBitSetTrie() { nodes_.emplace_back(); }  // root at index kRoot
+    HEIBitSetTrie() {
+        nodes_.emplace_back();
+        stored_values_.emplace_back();
+    }
 
     void Insert(DBitset const& bs) { DoInsert(kRoot, bs, 0); }
 
