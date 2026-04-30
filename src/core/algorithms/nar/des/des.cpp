@@ -94,7 +94,6 @@ void DES::ExecuteInternal() {
         return a.GetQualities().fitness > b.GetQualities().fitness;
     };
     std::ranges::sort(nar_collection_, compare_by_fitness);
-
 }
 
 }  // namespace algos::des
