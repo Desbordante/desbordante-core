@@ -1064,7 +1064,6 @@ bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
     TopDownConstruct(cpi, graph, pat, levels, parent, candidates, snte);
     BottomUpRefinement(cpi, graph, pat, levels, parent, candidates);
 
-    LOG_DEBUG("CPI constructed in {}. Matching...", elapsed_milliseconds.count());
     return Check(cpi, graph, gfd, core, forest, parent, nte);
 }
 
