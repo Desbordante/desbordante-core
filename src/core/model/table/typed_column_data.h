@@ -238,7 +238,7 @@ private:
                      [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble));
                      }},
-                     }}};
+                     };
     // each 1 represents a possible type from kAllCandidateTypes
     inline static std::unordered_map<TypeId, std::bitset<6>> const kTypeIdToBitset = {
             {+TypeId::kDate, std::bitset<6>("000001")},  // bitset for delimited dates
