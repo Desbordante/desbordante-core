@@ -1,4 +1,4 @@
-#include "cure_cind.h"
+#include "core/algorithms/cind/condition_miners/cure_cind.h"
 
 #include <unordered_map>
 #include <unordered_set>

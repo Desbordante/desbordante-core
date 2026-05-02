@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cind_miner.h"
+#include "core/algorithms/cind/condition_miners/cind_miner.h"
 
 namespace algos::cind {
 
