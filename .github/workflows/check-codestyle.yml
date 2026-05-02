@@ -67,7 +67,7 @@ jobs:
         id: review
         with:
           apt_packages: python3-dev,libboost1.88-all-dev
-          cmake_command: cmake . -B build -DCMAKE_BUILD_TYPE=Debug -Dgtest_disable_pthreads=OFF -DDESBORDANTE_BINDINGS=BUILD -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCPM_SOURCE_CACHE=cmake/cpm-cache
+          cmake_command: cmake . -B build -DCMAKE_BUILD_TYPE=Debug -Dgtest_disable_pthreads=OFF -DDESBORDANTE_BINDINGS=BUILD -DDESBORDANTE_BUILD_BENCHMARKS=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCPM_SOURCE_CACHE=cmake/cpm-cache
           build_dir: build
           config_file: '.clang-tidy'
           include: "*.c,*.cc,*.cpp,*.cxx"
