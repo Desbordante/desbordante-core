@@ -44,12 +44,26 @@ def fmt_attrs(attrs):
     return ", ".join(cleaned)
 
 
+def fmt_ind(ind_string):
+    import re
+    m = re.match(
+        r"\(([^,]+),\s*\[([^\]]*)\]\)\s*->\s*\(([^,]+),\s*\[([^\]]*)\]\)",
+        ind_string,
+    )
+    if not m:
+        return ind_string
+    lhs_t, lhs_c, rhs_t, rhs_c = m.groups()
+    lhs_t = lhs_t.replace("cind_test_", "").replace(".csv", "")
+    rhs_t = rhs_t.replace("cind_test_", "").replace(".csv", "")
+    return f"{lhs_t}.[{lhs_c}] subseteq {rhs_t}.[{rhs_c}]"
+
+
 def mine(error, validity, completeness, condition_type, algo_type="pli_cind"):
     algo = desbordante.cind.algorithms.Default()
     algo.load_data(tables=TABLES)
     algo.execute(error=error, validity=validity, completeness=completeness,
                  condition_type=condition_type, algo_type=algo_type)
-    return algo.get_cinds()
+    return algo, algo.get_cinds()
 
 
 banner("Discovering Conditional Inclusion Dependencies (CINDs)")
@@ -183,10 +197,10 @@ printlns(
     "Scenario 3 uses stricter values for comparison."
 )
 
-cinds = mine(error=0.5, validity=0.75, completeness=0.25, condition_type="row")
+algo1, cinds = mine(error=0.5, validity=0.75, completeness=0.25, condition_type="row")
 print(f"  found {len(cinds)} CIND(s):")
 for i, c in enumerate(cinds, start=1):
-    print(f"    #{i:<2}  {fmt_attrs(c.get_condition_attributes()):<48} "
+    print(f"    #{i:<2}  {fmt_ind(c.get_ind_string()):<48} "
           f"{c.conditions_number():>3} cond.")
 print()
 
@@ -197,18 +211,19 @@ if not cinds:
     )
 else:
     printlns(
-        "Each line shows the LHS table, the columns used as conditional "
-        "attributes (in brackets), and the number of distinct patterns "
-        "found over those columns. The implicit inclusion key is the LHS "
-        "column NOT listed in brackets - for #1 it is pid, for #2 it is "
-        "cent, and so on."
+        "Each line shows the underlying inclusion dependency the CIND "
+        "refines (LHS table and columns subseteq RHS table and columns) "
+        "and the number of concrete patterns the algorithm found over the "
+        "remaining LHS columns - the conditional attributes."
     )
 
     sample = cinds[0]
     sample_conds = sample.get_conditions()
     sample_attrs = fmt_attrs(sample.get_condition_attributes())
     if sample_conds:
-        print(f"First few conditions of CIND #1 ({sample_attrs}):")
+        print(f"First few conditions of CIND #1 ({fmt_ind(sample.get_ind_string())}):")
+        print(f"  conditional attributes (in column order): {sample_attrs}")
+        print()
         for j, cond in enumerate(sample_conds[:3], start=1):
             print(f"  {j}. data = {cond.data()},  validity = {cond.validity():.3f},"
                   f"  completeness = {cond.completeness():.3f}")
@@ -233,6 +248,7 @@ printlns(
 
 if cinds:
     cind = cinds[0]
+    print(f"  IND:                   {fmt_ind(cind.get_ind_string())}")
     print(f"  condition_attributes:  {fmt_attrs(cind.get_condition_attributes())}")
     print(f"  conditions_number:     {cind.conditions_number()}")
     print()
@@ -264,11 +280,11 @@ printlns(
     "but no concrete pattern passed validity >= 0.95 and completeness >= 0.5."
 )
 
-cinds_strict = mine(error=0.3, validity=0.95, completeness=0.5,
-                    condition_type="group")
+algo2, cinds_strict = mine(error=0.3, validity=0.95, completeness=0.5,
+                           condition_type="group")
 print(f"  found {len(cinds_strict)} CIND(s):")
 for i, c in enumerate(cinds_strict, start=1):
-    print(f"    #{i:<2}  {fmt_attrs(c.get_condition_attributes()):<48} "
+    print(f"    #{i:<2}  {fmt_ind(c.get_ind_string()):<48} "
           f"{c.conditions_number():>3} cond.")
 print()
 
