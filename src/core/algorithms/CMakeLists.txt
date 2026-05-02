@@ -7,6 +7,7 @@ set(SUBDIRS
     dd
     fd
     fsm
+    gdd
     gfd
     ind
     md

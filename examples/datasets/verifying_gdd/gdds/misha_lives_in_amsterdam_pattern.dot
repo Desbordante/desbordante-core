@@ -1,0 +1,5 @@
+digraph P {
+    0 [label="Person"];
+    1 [label="City"];
+    0 -> 1 [label="lives_in"];
+}

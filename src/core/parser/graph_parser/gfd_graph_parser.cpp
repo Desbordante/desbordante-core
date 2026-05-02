@@ -1,10 +1,10 @@
-#include "core/parser/graph_parser/graph_parser.h"
-
 #include <boost/algorithm/string.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/property_map/function_property_map.hpp>
+
+#include "core/parser/graph_parser/graph_parser.h"
 
 namespace parser {
 
@@ -72,7 +72,7 @@ void WriteLiterals(std::ostream& stream, std::vector<model::Gfd::Literal> const&
 
 }  // namespace
 
-namespace graph_parser {
+namespace graph_parser::gfd {
 
 using AMap =
         boost::property_map<model::graph_t,
@@ -174,6 +174,6 @@ void WriteGfd(std::filesystem::path const& path, model::Gfd const& result) {
     f.close();
 };
 
-}  // namespace graph_parser
+}  // namespace graph_parser::gfd
 
 }  // namespace parser

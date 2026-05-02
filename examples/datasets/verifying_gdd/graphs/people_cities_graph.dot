@@ -1,0 +1,14 @@
+digraph G {
+    graph [forcelabels=true];
+
+    1 [label="Person", name="Misha", age="25"];
+    2 [label="Person", name="Misha", age="31"];
+    3 [label="Person", name="Bob",   age="25"];
+
+    101 [label="City", name="Amsterdam"];
+    102 [label="City", name="Riga"];
+
+    1 -> 101 [label="lives_in"];
+    2 -> 102 [label="lives_in"];
+    3 -> 101 [label="lives_in"];
+}

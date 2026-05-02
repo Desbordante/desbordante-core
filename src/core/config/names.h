@@ -90,6 +90,8 @@ constexpr auto kGSpanOutputPath = "output_path";
 constexpr auto kDoCollectViolations = "do_collect_violations";
 constexpr auto kGfdK = "gfd_k";
 constexpr auto kGfdSigma = "gfd_sigma";
+// GDD
+constexpr auto kGddData = "gdd";
 // HyMD
 constexpr auto kColumnMatches = "column_matches";
 constexpr auto kLeftTable = "left_table";
