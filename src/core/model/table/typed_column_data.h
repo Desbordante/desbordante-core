@@ -179,6 +179,7 @@ private:
             {TypeId::kDate,
              boost::regex(
                      R"(^(\d{4})([-.\/]?)(1[0-2]|0[1-9]|[1-9])\2(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
+            {TypeId::kBool, boost::regex(R"(^\s*(true|false)\s*$)", boost::regex_constants::icase)},
             {TypeId::kDouble,
              boost::regex(
                      R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
@@ -214,31 +215,38 @@ private:
                 }
                 return is_simple_date;
             };
-    inline static std::unordered_map<TypeId, std::function<bool(std::string const&)>> const
+    inline static std::vector<std::pair<TypeId, std::function<bool(std::string const&)>>> const
             kTypeIdToChecker = {
-                    {TypeId::kDouble,
+                    {TypeId::kDate,
                      [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble));
+                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
+                                (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
                      }},
-                    {TypeId::kBigInt,
+                    {TypeId::kBool,
                      [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBigInt));
+                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBool));
                      }},
                     {TypeId::kInt,
                      [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
                      }},
-                    {TypeId::kDate, [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
-                                (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
-                     }}};
+                    {TypeId::kBigInt,
+                     [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBigInt));
+                     }},
+                    {TypeId::kDouble,
+                     [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble));
+                     }},
+                     };
     // each 1 represents a possible type from kAllCandidateTypes
-    inline static std::unordered_map<TypeId, std::bitset<5>> const kTypeIdToBitset = {
-            {+TypeId::kDate, std::bitset<5>("00001")},  // bitset for delimited dates
-            {+TypeId::kInt, std::bitset<5>("01110")},
-            {+TypeId::kBigInt, std::bitset<5>("01100")},
-            {+TypeId::kDouble, std::bitset<5>("01000")},
-            {+TypeId::kString, std::bitset<5>("10000")}};
+    inline static std::unordered_map<TypeId, std::bitset<6>> const kTypeIdToBitset = {
+            {+TypeId::kDate, std::bitset<6>("000001")},  // bitset for delimited dates
+            {+TypeId::kBool, std::bitset<6>("000010")},
+            {+TypeId::kInt, std::bitset<6>("011100")},
+            {+TypeId::kBigInt, std::bitset<6>("011000")},
+            {+TypeId::kDouble, std::bitset<6>("010000")},
+            {+TypeId::kString, std::bitset<6>("100000")}};
 
     size_t CalculateMixedBufSize(std::vector<TypeId> const& types_layout,
                                  TypeIdToType const& type_id_to_type) const noexcept;

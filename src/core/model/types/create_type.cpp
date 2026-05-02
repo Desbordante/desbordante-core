@@ -3,6 +3,7 @@
 #include "core/model/types/big_int_type.h"
 #include "core/model/types/date_type.h"
 #include "core/model/types/double_type.h"
+#include "core/model/types/bool_type.h"
 #include "core/model/types/empty_type.h"
 #include "core/model/types/int_type.h"
 #include "core/model/types/mixed_type.h"
@@ -25,6 +26,8 @@ std::unique_ptr<Type> CreateType(TypeId const type_id, bool const is_null_eq_nul
             return std::make_unique<BigIntType>();
         case TypeId::kDate:
             return std::make_unique<DateType>();
+        case TypeId::kBool:
+            return std::make_unique<BoolType>();
         case TypeId::kNull:
             return std::make_unique<NullType>(is_null_eq_null);
         case TypeId::kEmpty:
