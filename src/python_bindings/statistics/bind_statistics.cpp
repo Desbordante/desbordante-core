@@ -199,6 +199,18 @@ void BindStatistics(pybind11::module_& main_module) {
                  py::arg("index"))
             .def("get_last_char_frequency", &DataStats::GetLastCharFrequency,
                  "Returns the most frequent last character and its count as a string in format.",
-                 py::arg("index"));
+                 py::arg("index"))
+            .def("get_pearson_correlation", &DataStats::GetPearsonCorrelation,
+                 "Returns the Pearson correlation coefficient between two numeric columns.",
+                 py::arg("index1"), py::arg("index2"))
+            .def("get_spearman_correlation", &DataStats::GetSpearmanCorrelation,
+                 "Returns the Spearman's rank correlation coefficient between two numeric columns.",
+                 py::arg("index1"), py::arg("index2"))
+            .def("get_kendall_correlation", &DataStats::GetKendallCorrelation,
+                 "Returns the Kendall's tau correlation coefficient between two numeric columns.",
+                 py::arg("index1"), py::arg("index2"))
+            .def("get_cramers_v_correlation", &DataStats::GetCramersVCorrelation,
+                 "Returns the Cramer's V statistic between two columns.", py::arg("index1"),
+                 py::arg("index2"));
 }
 }  // namespace python_bindings
