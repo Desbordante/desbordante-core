@@ -1,5 +1,6 @@
 add_subdirectory(domain_pac_verifier)
 add_subdirectory(fd_pac_verifier)
+add_subdirectory(ucc_pac_verifier)
 
 set(NAME pac.verifier)
 desbordante_add_lib(NAME OBJECT)
