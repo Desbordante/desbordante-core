@@ -38,6 +38,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::cind::verifier
               ${DESBORDANTE_PREFIX}::datastats
               ${DESBORDANTE_PREFIX}::dd::split
+              ${DESBORDANTE_PREFIX}::afd::metric_calc
               ${DESBORDANTE_PREFIX}::fd::aid
               ${DESBORDANTE_PREFIX}::fd::depminer
               ${DESBORDANTE_PREFIX}::fd::dfd

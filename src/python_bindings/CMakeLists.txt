@@ -157,6 +157,20 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    afd
+    SRCS
+    fd/bind_afd.cpp
+    LIBS
+    Desbordante::fd::tane
+    Desbordante::fd::tane::pfd
+    Desbordante.bindlib.util
+    better-enums
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+
+
+desbordante_add_bind(
     fd.verifier.dynamic
     SRCS
     dynamic/bind_dynamic_fd_verification.cpp
