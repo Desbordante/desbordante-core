@@ -624,10 +624,12 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::algos
+    ${DESBORDANTE_PREFIX}::create_algo
     ${DESBORDANTE_PREFIX}::ind
     ${DESBORDANTE_PREFIX}::ind::spider
     ${DESBORDANTE_PREFIX}::cind
     ${DESBORDANTE_PREFIX}::cind::miners
+    ${DESBORDANTE_PREFIX}::ind::mind
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
