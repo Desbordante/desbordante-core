@@ -59,6 +59,7 @@ BETTER_ENUM(TypeId, char,
                  * (string value, sequence of characters) */
     kDate,      /* Column contains only valid dates in the range 1400-Jan-01 to 9999-Dec-31
                  * (class date from boost::gregorian)  */
+    kBool,      /* Column contains only boolean values (true/false) */
     kNull,      /* Column contains only nulls ("NULL" value) */
     kEmpty,     /* Column contains only empties ("" value) */
     kUndefined, /* Column contains only nulls and empties */
