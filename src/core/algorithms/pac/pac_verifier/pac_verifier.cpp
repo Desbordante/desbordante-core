@@ -150,11 +150,12 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
     if (max_epsilon_ >= 0) {
         // Special case: max_eps and min_delta cannot be both satisfied.
         // Return (??, min_delta) so that user can see that parameters are contradictory.
-        // NOTE: This should be checked before min_epsilon, because (??, min_epsilon) will always
-        // have its first <= max_epsilon
+        // NOTE: This should be checked before min_epsilon, because (??, min_epsilon) will
+        // always have its first <= max_epsilon
         if (begin->first > max_epsilon_) {
             LOG_DEBUG(
-                    "Max eps and min delta cannot be both satisfied. Taking pair with min delta.");
+                    "Max eps and min delta cannot be both satisfied. Taking pair with min "
+                    "delta.");
             return *begin;
         }
 
@@ -166,12 +167,13 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         assert(begin != end);
     }
     if (min_epsilon_ >= 0) {
-        // Take all values that have eps > min_eps, and add (min_eps, delta_{j - 1}) to beginning
-        // (where j is the index of the first "good" element)
+        // Take all values that have eps > min_eps, and add (min_eps, delta_{j - 1}) to
+        // beginning (where j is the index of the first "good" element)
         begin = std::ranges::upper_bound(
                 begin, end, min_epsilon_, {},
                 [](std::pair<double, double> const& pair) { return pair.first; });
-        // Don't add (min_eps, delta_{j - 1}) if j == 0, because delta_{-1} is less than min_delta
+        // Don't add (min_eps, delta_{j - 1}) if j == 0, because delta_{-1} is less than
+        // min_delta
         if (begin != empirical_probabilities.begin()) {
             std::advance(begin, -1);
             *begin = GetEpsilonDeltaForEpsilon(min_epsilon_);

@@ -11,6 +11,7 @@
 
 #include "core/algorithms/pac/fd_pac.h"
 #include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/config/custom_metric/custom_metrics_option.h"
