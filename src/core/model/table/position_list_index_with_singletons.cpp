@@ -110,7 +110,6 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Probe(
                 partial_index[kSingletonValueId].push_back(position);
                 continue;
             }
-            intersection_count_++;
             partial_index[probing_table_value_id].push_back(position);
         }
 
