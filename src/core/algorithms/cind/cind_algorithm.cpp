@@ -67,8 +67,7 @@ void CindAlgorithm::RegisterCindMinerOptions() {
 
 void CindAlgorithm::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::kValidityOpt.GetName(), config::kCompletenessOpt.GetName(),
-                          config::kConditionTypeOpt.GetName(),
-                          config::kSupportOpt.GetName()});
+                          config::kConditionTypeOpt.GetName(), config::kSupportOpt.GetName()});
 }
 
 bool CindAlgorithm::SetExternalOption(std::string_view option_name, boost::any const& value) {

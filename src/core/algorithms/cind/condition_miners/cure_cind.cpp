@@ -114,8 +114,7 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
 
             for (auto const& [pair, count] : pair_counts) {
                 if (count >= min_support_) {
-                    patterns.push_back(
-                            {li, pair.first, ri, pair.second, count});
+                    patterns.push_back({li, pair.first, ri, pair.second, count});
                 }
             }
         }
