@@ -282,6 +282,7 @@ printlns(
 banner("See also")
 
 print("Related primitives in Desbordante:")
+print("  * CIND mining (Cure)    -  examples/basic/mining_cind_cure.py")
 print("  * CIND verification     -  examples/basic/verifying_cind.py")
 print("  * IND mining            -  examples/basic/mining_ind.py")
 print("  * AIND mining           -  examples/basic/mining_aind.py")

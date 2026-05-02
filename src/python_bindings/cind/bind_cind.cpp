@@ -76,7 +76,8 @@ void BindCind(py::module_& main_module) {
                      return result;
                  })
             .def("get_condition_attributes",
-                 [](CIND const& cind) { return VectorToTuple(cind.conditional_attributes); });
+                 [](CIND const& cind) { return VectorToTuple(cind.conditional_attributes); })
+            .def("get_ind_string", [](CIND const& cind) { return cind.ind.ToLongString(); });
 
     BindPrimitiveNoBase<CindAlgorithm>(cind_module, "Cinderella")
             .def("get_cinds", &CindAlgorithm::CINDList);
