@@ -15,7 +15,7 @@ using DFs = model::DFStringConstraint;
 using DDs = model::DDString;
 
 class DDVerifier : public Algorithm {
-private:
+protected:
     DDs dd_;
     config::InputTable input_table_;
     std::size_t num_rows_{};
@@ -26,7 +26,6 @@ private:
     double error_ = 0.;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::vector<Highlight> highlights_;
-
     void RegisterOptions();
 
     void VisualizeHighlights() const;
@@ -38,13 +37,13 @@ private:
     double CalculateDistance(model::ColumnIndex column_index,
                              std::pair<std::size_t, std::size_t> const &tuple_pair) const;
 
-    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs);
+    virtual void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs);
 
     void VerifyDD();
 
     bool IsColumnMetrizable(model::ColumnIndex const column_index) const;
 
-    void CheckCorrectnessDd() const;
+    virtual void CheckCorrectnessDd() const;
 
     void ResetState() final {
         error_ = 0.;
@@ -54,7 +53,6 @@ private:
         rhs_column_indices_.clear();
     }
 
-protected:
     void LoadDataInternal() override;
 
     void MakeExecuteOptsAvailable() override;
@@ -68,7 +66,7 @@ public:
 
     std::size_t GetNumErrorRhs() const;
 
-    bool DDHolds() const;
+    virtual bool DDHolds() const;
 
     std::vector<Highlight> const &GetHighlights() const;
 };
