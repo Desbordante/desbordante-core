@@ -4,12 +4,14 @@
 #include <memory>
 
 #include "condition_miners/cinderella.h"
+#include "condition_miners/cure_cind.h"
 #include "condition_miners/pli_cind.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/create_algorithm.h"
 #include "core/config/conditions/algo_type/option.h"
 #include "core/config/conditions/completeness/option.h"
 #include "core/config/conditions/condition_type/option.h"
+#include "core/config/conditions/support/option.h"
 #include "core/config/conditions/validity/option.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/error/option.h"
@@ -48,6 +50,8 @@ void CindAlgorithm::LoadDataInternal() {
 void CindAlgorithm::CreateCindMinerAlgo() {
     if (algo_type_._value == AlgoType::cinderella) {
         cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
+    } else if (algo_type_._value == AlgoType::cure_cind) {
+        cind_miner_ = std::make_unique<CureCind>(spider_algo_->input_tables_);
     } else {
         cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
     }
@@ -58,11 +62,12 @@ void CindAlgorithm::RegisterCindMinerOptions() {
     RegisterOption(config::kValidityOpt(&cind_miner_->min_validity_));
     RegisterOption(config::kCompletenessOpt(&cind_miner_->min_completeness_));
     RegisterOption(config::kConditionTypeOpt(&cind_miner_->condition_type_));
+    RegisterOption(config::kSupportOpt(&cind_miner_->min_support_));
 }
 
 void CindAlgorithm::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::kValidityOpt.GetName(), config::kCompletenessOpt.GetName(),
-                          config::kConditionTypeOpt.GetName()});
+                          config::kConditionTypeOpt.GetName(), config::kSupportOpt.GetName()});
 }
 
 bool CindAlgorithm::SetExternalOption(std::string_view option_name, boost::any const& value) {

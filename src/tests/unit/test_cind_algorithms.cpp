@@ -106,4 +106,46 @@ INSTANTIATE_TEST_SUITE_P(
     ));
 // clang-format on
 
+// --- CureCind tests ---
+
+namespace {
+algos::StdParamsMap MakeCureParams(unsigned int support,
+                                   CSVConfigs const& csv_configs = {kTestCINDDe, kTestCINDEn}) {
+    algos::cind::AlgoType const cure = algos::cind::AlgoType::cure_cind;
+    return {{config::names::kCsvConfigs, csv_configs},
+            {config::names::kAlgoType, cure},
+            {config::names::kError, config::ErrorType{0.5}},
+            {config::names::kSupport, support}};
+}
+
+struct CureCindParams final {
+    unsigned int support;
+    size_t expected_total_conditions;
+};
+}  // namespace
+
+class TestCureCind : public ::testing::TestWithParam<CureCindParams> {};
+
+TEST_P(TestCureCind, TotalConditions) {
+    auto const& p = GetParam();
+    auto mp = MakeCureParams(p.support);
+    auto cind_algo = algos::CreateAndLoadAlgorithm<algos::cind::CindAlgorithm>(mp);
+    cind_algo->Execute();
+    ASSERT_FALSE(cind_algo->CINDList().empty());
+    size_t total_conditions = 0;
+    for (auto const& cind : cind_algo->CINDList()) {
+        total_conditions += cind.ConditionsNumber();
+    }
+    ASSERT_EQ(total_conditions, p.expected_total_conditions);
+}
+
+// clang-format off
+INSTANTIATE_TEST_SUITE_P(
+    CINDTestSuite, TestCureCind, ::testing::Values(
+        CureCindParams{1, 86},
+        CureCindParams{2, 51},
+        CureCindParams{3, 32}
+    ));
+// clang-format on
+
 }  // namespace tests
