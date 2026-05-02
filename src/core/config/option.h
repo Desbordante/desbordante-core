@@ -23,24 +23,24 @@ template <typename T>
 class Option : public IOption {
 public:
     using DefaultFunc = std::function<T()>;
-    using ValueCheckFunc = std::function<void(T const &)>;
+    using ValueCheckFunc = std::function<void(T const&)>;
     using IsRequiredFunc = std::function<bool()>;
-    using CondCheckFunc = std::function<bool(T const &val)>;
+    using CondCheckFunc = std::function<bool(T const& val)>;
     using OptCondVector = std::vector<std::pair<CondCheckFunc, std::vector<std::string_view>>>;
-    using NormalizeFunc = std::function<void(T &)>;
+    using NormalizeFunc = std::function<void(T&)>;
 
-    Option(T *value_ptr, std::string_view name, std::string_view description,
+    Option(T* value_ptr, std::string_view name, std::string_view description,
            DefaultFunc default_func = nullptr)
         : value_ptr_(value_ptr),
           name_(name),
           description_(description),
           default_func_(std::move(default_func)) {}
 
-    Option(T *value_ptr, std::string_view name, std::string_view description, T default_value)
+    Option(T* value_ptr, std::string_view name, std::string_view description, T default_value)
         : Option(value_ptr, name, description,
                  [default_value = std::move(default_value)]() { return default_value; }) {}
 
-    std::vector<std::string_view> Set(boost::any const &value) override;
+    std::vector<std::string_view> Set(boost::any const& value) override;
 
     void Unset() override {
         is_set_ = false;
@@ -62,7 +62,7 @@ public:
         return is_set_;
     }
 
-    Option &SetValueCheck(ValueCheckFunc value_check) {
+    Option& SetValueCheck(ValueCheckFunc value_check) {
         assert(!value_check_);
         value_check_ = std::move(value_check);
         return *this;
@@ -78,20 +78,20 @@ public:
     // only the names of the first pair where the predicate holds. An empty
     // predicate is equivalent to an always-true predicate, and thus must
     // always be last.
-    Option &SetConditionalOpts(OptCondVector opt_cond) {
+    Option& SetConditionalOpts(OptCondVector opt_cond) {
         assert(opt_cond_.empty());
         assert(!opt_cond.empty());
         opt_cond_ = std::move(opt_cond);
         return *this;
     }
 
-    Option &SetNormalizeFunc(NormalizeFunc normalize_func) {
+    Option& SetNormalizeFunc(NormalizeFunc normalize_func) {
         assert(!normalize_func_);
         normalize_func_ = std::move(normalize_func);
         return *this;
     }
 
-    Option &SetIsRequiredFunc(IsRequiredFunc is_required) {
+    Option& SetIsRequiredFunc(IsRequiredFunc is_required) {
         assert(!is_required_);
         is_required_ = std::move(is_required);
         return *this;
@@ -106,10 +106,10 @@ public:
     }
 
 private:
-    T ConvertValue(boost::any const &value) const;
+    T ConvertValue(boost::any const& value) const;
 
     bool is_set_ = false;
-    T *value_ptr_;
+    T* value_ptr_;
     std::string_view name_;
     std::string_view description_;
     DefaultFunc default_func_;
@@ -120,7 +120,7 @@ private:
 };
 
 template <typename T>
-std::vector<std::string_view> Option<T>::Set(boost::any const &value) {
+std::vector<std::string_view> Option<T>::Set(boost::any const& value) {
     assert(!is_set_);
     T converted_value = ConvertValue(value);
     if (normalize_func_) normalize_func_(converted_value);
@@ -129,7 +129,7 @@ std::vector<std::string_view> Option<T>::Set(boost::any const &value) {
     assert(value_ptr_ != nullptr);
     is_set_ = true;
     std::vector<std::string_view> new_options{};
-    for (auto const &[cond, opts] : opt_cond_) {
+    for (auto const& [cond, opts] : opt_cond_) {
         if (!cond || cond(converted_value)) {
             new_options = opts;
             break;
@@ -140,7 +140,7 @@ std::vector<std::string_view> Option<T>::Set(boost::any const &value) {
 }
 
 template <typename T>
-T Option<T>::ConvertValue(boost::any const &value) const {
+T Option<T>::ConvertValue(boost::any const& value) const {
     std::string const no_value_no_default =
             std::string("No value was provided to an option without a default value (") +
             GetName().data() + ")";

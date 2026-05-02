@@ -53,7 +53,7 @@ public:
     explicit HighlightCalculator(
             std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
             config::IndicesType rhs_indices)
-        : typed_relation_(std::move(typed_relation)), rhs_indices_(std::move(rhs_indices)){};
+        : typed_relation_(std::move(typed_relation)), rhs_indices_(std::move(rhs_indices)) {};
 };
 
 }  // namespace algos::metric

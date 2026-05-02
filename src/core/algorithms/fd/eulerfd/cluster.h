@@ -22,18 +22,18 @@ private:
     size_t new_tuples_pairs_ = 0;
     size_t new_non_fds_ = 0;
 
-    void ShuffleData(RandomStrategy const &custom_rand);
+    void ShuffleData(RandomStrategy const& custom_rand);
 
 public:
-    Cluster(std::vector<size_t> &&cluster_data, RandomStrategy const &custom_rand);
+    Cluster(std::vector<size_t>&& cluster_data, RandomStrategy const& custom_rand);
 
-    Cluster(Cluster &other) = delete;
-    Cluster &operator=(Cluster &other) = delete;
+    Cluster(Cluster& other) = delete;
+    Cluster& operator=(Cluster& other) = delete;
 
-    Cluster(Cluster &&other) = default;
-    Cluster &operator=(Cluster &&other) = default;
+    Cluster(Cluster&& other) = default;
+    Cluster& operator=(Cluster&& other) = default;
 
-    double Sample(RegisterTuplesFunction const &handle_tuples);
+    double Sample(RegisterTuplesFunction const& handle_tuples);
     double GetAverage() const;
 };
 }  // namespace algos
