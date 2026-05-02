@@ -5,11 +5,10 @@
 
 namespace config {
 using names::kSupport, descriptions::kDSupport;
-extern CommonOption<unsigned int> const kSupportOpt{kSupport, kDSupport, 2u, {},
-                                                    [](unsigned int support) {
-                                                        if (support < 1) {
-                                                            throw ConfigurationError(
-                                                                    "ERROR: support must be >= 1.");
-                                                        }
-                                                    }};
+extern CommonOption<unsigned int> const kSupportOpt{
+        kSupport, kDSupport, 2u, {}, [](unsigned int support) {
+            if (support < 1) {
+                throw ConfigurationError("ERROR: support must be >= 1.");
+            }
+        }};
 }  // namespace config
