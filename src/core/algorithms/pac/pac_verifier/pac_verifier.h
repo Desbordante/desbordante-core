@@ -13,6 +13,7 @@ namespace algos::pac_verifier {
 class PACVerifier : public Algorithm {
 private:
     constexpr static double kDefaultMinDelta = 0.9;
+    constexpr static double kDefaultMaxDelta = 0.2;
     // Diagonal threshold is the maximum slope coefficient of a segment on the ECDF, that is still
     // considered horizontal during verifying PAC via elbow method
     // See https://colab.research.google.com/drive/1t2i-BgzRaL3VSzL0Q0izR1RbgE1i0Ohu?usp=sharing
@@ -21,7 +22,6 @@ private:
 
     double min_epsilon_;
     double max_epsilon_;
-    double min_delta_;
     double diagonal_threshold_;
     unsigned long delta_steps_;
 
@@ -42,9 +42,20 @@ protected:
     // Threshold for floating-point comparison of distances
     constexpr static double kDistThreshold = 1e-12;
 
-    double MinDelta() const {
-        return min_delta_;
+    // For some kinds of PAC only min delta is sensible, while others need max delta
+    // If algorithm implements Set* methods, these bounds will be set to kDefaultMinDelta and
+    // kDefaultMaxDelta, otherwise they will be 0 and 1
+    virtual double MinDelta() const {
+        return 0;
     }
+
+    virtual void SetMinDelta(double) {}
+
+    virtual double MaxDelta() const {
+        return 1;
+    }
+
+    virtual void SetMaxDelta(double) {}
 
     std::size_t DeltaSteps() const {
         return delta_steps_;

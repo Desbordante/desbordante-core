@@ -21,13 +21,14 @@
 
 namespace algos::pac_verifier {
 /// @brief Domain Probabilistic Approximate Constraint verifier.
-class DomainPACVerifier : public PACVerifier {
+class DomainPACVerifier final : public PACVerifier {
 private:
     using Tuples = std::vector<pac::model::Tuple>;
     using TuplesIter = Tuples::iterator;
     using TuplesIteratorsIter = std::vector<TuplesIter>::const_iterator;
 
     config::IndicesType column_indices_;
+    double min_delta_;
 
     std::shared_ptr<Tuples> original_value_tuples_;
     // Distances from domain to each value, sorted by distance
@@ -35,6 +36,7 @@ private:
     std::shared_ptr<pac::model::TupleType> tuple_type_;
     // Iterator to after-last value that falls into domain itself (with eps = 0)
     std::vector<std::pair<TuplesIter, double>>::const_iterator domain_end_;
+    std::shared_ptr<pac::model::IDomain> domain_;
 
     std::optional<model::DomainPAC> pac_;
 
@@ -45,7 +47,13 @@ private:
     std::vector<std::pair<double, double>> FindEpsilons() const;
 
 protected:
-    std::shared_ptr<pac::model::IDomain> domain_;
+    double MinDelta() const override {
+        return min_delta_;
+    }
+
+    void SetMinDelta(double val) override {
+        min_delta_ = val;
+    }
 
     virtual void ProcessPACTypeOptions() override;
     virtual void PreparePACTypeData() override;
@@ -54,6 +62,11 @@ protected:
 
     void ResetState() override {
         pac_ = std::nullopt;
+    }
+
+    void MakeExecuteOptsAvailable() override {
+        PACVerifier::MakeExecuteOptsAvailable();
+        MakeOptionsAvailable({config::names::kMinDelta});
     }
 
 public:
@@ -66,6 +79,10 @@ public:
         RegisterOption(config::IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
                 &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
         RegisterOption(Option(&domain_, kDomain, kDDomain));
+
+        RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0).SetValueCheck([](double x) {
+            return x <= 1;
+        }));
 
         MakeOptionsAvailable({config::kTableOpt.GetName(), kDomain});
     }

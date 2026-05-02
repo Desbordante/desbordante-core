@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -23,39 +24,48 @@ void PACVerifier::RegisterOptions() {
 
     RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, -1.0));
     RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, -1.0));
-    RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0).SetValueCheck([](double x) {
-        return x <= 1;
-    }));
     RegisterOption(Option(&delta_steps_, kDeltaSteps, kDDeltaSteps, 0ul));
     RegisterOption(Option(&diagonal_threshold_, kDiagonalThreshold, kDDiagonalThreshold,
                           kDefaultDiagonalThreshold));
 }
 
 void PACVerifier::ProcessCommonExecuteOpts() {
-    if (min_delta_ < 0) {
+    // "Auto" values for min delta and max delta
+    if (MinDelta() < 0) {
         if (min_epsilon_ >= 0 || max_epsilon_ >= 0) {
-            min_delta_ = 0;
+            SetMinDelta(0);
         } else {
-            min_delta_ = kDefaultMinDelta;
+            SetMinDelta(kDefaultMinDelta);
+        }
+    }
+    if (MaxDelta() < 0) {
+        if (min_epsilon_ >= 0 || max_epsilon_ >= 0) {
+            SetMaxDelta(1);
+        } else {
+            SetMaxDelta(kDefaultMaxDelta);
         }
     }
 
-    if (delta_steps_ == 0) {
-        delta_steps_ = std::round((1 - min_delta_) * 1000);
+    if (MaxDelta() < MinDelta()) {
+        throw config::ConfigurationError("Max delta must be greater or equal to min delta");
     }
 
-    // Ignore min_delta if min_eps == max_eps ("validation")
-    if (min_epsilon_ >= 0 && min_epsilon_ == max_epsilon_) {
-        min_delta_ = 0;
+    if (delta_steps_ == 0) {
+        delta_steps_ = std::round((MaxDelta() - MinDelta()) * 1000);
+    }
+
+    // Ignore delta bounds if min_eps == max_eps ("validation")
+    if (min_epsilon_ >= 0 && std::abs(min_epsilon_ - max_epsilon_) < kDistThreshold) {
+        SetMinDelta(0);
+        SetMaxDelta(1);
     }
 
     if (max_epsilon_ > 0 && max_epsilon_ < min_epsilon_) {
         throw config::ConfigurationError("Min epsilon must be less or equal to max epsilon");
     }
 
-    LOG_DEBUG(
-            "Common PAC verifier options: min delta: {}, min eps: {}, max eps: {}, delta steps: {}",
-            min_delta_, min_epsilon_, max_epsilon_, delta_steps_);
+    LOG_DEBUG("Common PAC verifier options: epsilons: [{}, {}], deltas: [{}, {}], delta steps: {}",
+              min_epsilon_, max_epsilon_, MinDelta(), MaxDelta(), delta_steps_);
 }
 
 unsigned long long PACVerifier::ExecuteInternal() {
@@ -84,29 +94,26 @@ void PACVerifier::LoadDataInternal() {
 void PACVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({kMinEpsilon, kMaxEpsilon, kMinDelta, kDeltaSteps, kDiagonalThreshold});
+    MakeOptionsAvailable({kMinEpsilon, kMaxEpsilon, kDeltaSteps, kDiagonalThreshold});
 }
 
 std::pair<double, double> PACVerifier::FindEpsilonDelta(
         std::vector<std::pair<double, double>>&& empirical_probabilities) const {
-    assert(!empirical_probabilities.empty());
+    // At least two pairs *must* always be in empirical_probabilities: (0, ??) and (1, ??)
+    assert(empirical_probabilities.size() >= 2);
 
     LOG_TRACE("Empirical probabilities:");
     for ([[maybe_unused]] auto const& [eps, delta] : empirical_probabilities) {
         LOG_TRACE("\t{}, {}", eps, delta);
     }
 
-    if (empirical_probabilities.size() == 1) {
-        return empirical_probabilities.front();
-    }
-
     auto begin = empirical_probabilities.begin();
     auto end = empirical_probabilities.end();
 
-    // First pair is always (0, ??), others have their delta >= min_delta...
-    if (begin->first < kDistThreshold && std::next(begin)->second > min_delta_ - kDistThreshold) {
+    // First pair is always (0, ??), others have their delta >= min delta...
+    if (begin->first < kDistThreshold && std::next(begin)->second > MinDelta() - kDistThreshold) {
         // ...but there is a corner case: ?? >= min_delta
-        if (begin->second < min_delta_ - kDistThreshold) {
+        if (begin->second < MinDelta() - kDistThreshold) {
             std::advance(begin, 1);
         }
     } else {
@@ -114,22 +121,42 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         LOG_WARN(
                 "First two empirical probability pairs must be (0, xx) and (xx, {}), got ({}, {}) "
                 "and ({}, {})",
-                min_delta_, begin->first, begin->second, std::next(begin)->first,
+                MinDelta(), begin->first, begin->second, std::next(begin)->first,
                 std::next(begin)->second);
-        begin = std::ranges::lower_bound(begin, end, min_delta_, {},
+        begin = std::ranges::lower_bound(begin, end, MinDelta(), {},
                                          [](auto const& p) { return p.second; });
         // Empirical probabilities must always contain (??, 1)
         assert(begin != end);
+    }
+    // And the last pair is always (??, 1), others have their delta <= max_delta
+    auto const& back = *std::prev(end);
+    auto const& pre_back = *std::prev(end, 2);
+    if (std::abs(back.second - 1) < kDistThreshold &&
+        pre_back.second < MaxDelta() + kDistThreshold) {
+        // Again, we have a corner case: max delta >= 1
+        if (MaxDelta() < 1) {
+            std::advance(end, -1);
+        }
+    } else {
+        // TODO: this thing shoots in UCC PAC
+        LOG_WARN(
+                "Last two empirical probability pairs must be (xx, {}) and (xx, 1), got ({}, "
+                "{}) "
+                "and ({}, {})",
+                MaxDelta(), pre_back.first, pre_back.second, back.first, back.second);
+        end = std::ranges::upper_bound(begin, end, MaxDelta(), {},
+                                       [](auto const& p) { return p.second; });
     }
 
     if (max_epsilon_ >= 0) {
         // Special case: max_eps and min_delta cannot be both satisfied.
         // Return (??, min_delta) so that user can see that parameters are contradictory.
-        // NOTE: This should be checked before min_epsilon, because (??, min_epsilon) will always
-        // have its first <= max_epsilon
+        // NOTE: This should be checked before min_epsilon, because (??, min_epsilon) will
+        // always have its first <= max_epsilon
         if (begin->first > max_epsilon_) {
             LOG_DEBUG(
-                    "Max eps and min delta cannot be both satisfied. Taking pair with min delta.");
+                    "Max eps and min delta cannot be both satisfied. Taking pair with min "
+                    "delta.");
             return *begin;
         }
 
@@ -141,12 +168,13 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         assert(begin != end);
     }
     if (min_epsilon_ >= 0) {
-        // Take all values that have eps > min_eps, and add (min_eps, delta_{j - 1}) to beginning
-        // (where j is the index of the first "good" element)
+        // Take all values that have eps > min_eps, and add (min_eps, delta_{j - 1}) to
+        // beginning (where j is the index of the first "good" element)
         begin = std::ranges::upper_bound(
                 begin, end, min_epsilon_, {},
                 [](std::pair<double, double> const& pair) { return pair.first; });
-        // Don't add (min_eps, delta_{j - 1}) if j == 0, because delta_{-1} is less than min_delta
+        // Don't add (min_eps, delta_{j - 1}) if j == 0, because delta_{-1} is less than
+        // min_delta
         if (begin != empirical_probabilities.begin()) {
             std::advance(begin, -1);
             *begin = GetEpsilonDeltaForEpsilon(min_epsilon_);
