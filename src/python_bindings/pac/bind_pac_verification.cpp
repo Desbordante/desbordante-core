@@ -16,6 +16,8 @@
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/fd_pac_verifier/fd_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/fd_pac_verifier/fd_pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_highlight.h"
+#include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_verifier.h"
 #include "core/config/names.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
@@ -29,6 +31,7 @@ void BindPACVerification(py::module_& main_module) {
 
     BindDomainPACVerification(pac_verification_module);
     BindFDPACVerification(pac_verification_module, algos_module);
+    BindUCCPACVerification(pac_verification_module, algos_module);
 }
 
 void BindDomainPACVerification(py::module_& pac_verification_module) {
@@ -104,5 +107,21 @@ void BindFDPACVerification(py::module_& pac_verification_module, py::module_& al
                         verifier.Execute();
                     },
                     "Verify PAC with given epsilon or delta", "epsilon"_a = -1, "delta"_a = -1);
+}
+
+void BindUCCPACVerification(pybind11::module_& pac_verification_module,
+                            pybind11::module_& algorithms_module) {
+    using namespace py::literals;
+
+    py::class_<UCCPACHighlight>(pac_verification_module, "UCCPACHighlight")
+            .def_property_readonly("row_indices", &UCCPACHighlight::RowIndices)
+            .def_property_readonly("num_pairs", &UCCPACHighlight::NumPairs)
+            .def_property_readonly("string_data", &UCCPACHighlight::StringData)
+            .def("__str__", &UCCPACHighlight::ToString)
+            .doc() = "A set of tuple pairs that violate UCC PAC.";
+
+    detail::RegisterAlgorithm<UCCPACVerifier, algos::Algorithm>(algorithms_module, "UCCPACVerifier")
+            .def("get_pac", &UCCPACVerifier::GetPAC)
+            .def("get_highlights", &UCCPACVerifier::GetHighlights, "eps_1"_a = 0, "eps_2"_a = -1);
 }
 }  // namespace python_bindings
