@@ -2,6 +2,7 @@
 
 #include <pybind11/pybind11.h>
 
+#include <cstddef>
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
@@ -16,6 +17,7 @@
 
 #include "core/algorithms/pac/domain_pac.h"
 #include "core/algorithms/pac/fd_pac.h"
+#include "core/algorithms/pac/ucc_pac.h"
 #include "core/config/column_index/type.h"
 #include "core/config/indices/type.h"
 #include "python_bindings/pac/bind_domains.h"
@@ -60,6 +62,16 @@ py::tuple FDPACToTuple(model::FDPAC const& fd_pac) {
     add_to_tuple(result, lhs_col_indices, shift);
     add_to_tuple(result, rhs_col_indices, shift);
 
+    return result;
+}
+
+/// @brief Convert UCC PAC to a Python tuple of column indices
+py::tuple UCCPACToTuple(model::UCCPAC const& ucc_pac) {
+    auto const column_indices = ucc_pac.GetColumnIndices();
+    py::tuple result(column_indices.size());
+    for (std::size_t i = 0; i < column_indices.size(); ++i) {
+        result[i] = column_indices[i];
+    }
     return result;
 }
 }  // namespace
@@ -136,6 +148,33 @@ void BindPAC(py::module& main_module) {
                         return FDPAC(std::move(lhs_indices), std::move(lhs_column_names),
                                      std::move(rhs_indices), std::move(rhs_column_names),
                                      std::move(lhs_deltas), std::move(epsilons), delta);
+                    }));
+
+    py::class_<UCCPAC>(pac_module, "UCCPAC")
+            .def_property_readonly("epsilon", &UCCPAC::GetEpsilon)
+            .def_property_readonly("delta", &UCCPAC::GetDelta)
+            .def_property_readonly("column_indices", &UCCPAC::GetColumnIndices)
+            .def_property_readonly("column_names", &UCCPAC::GetColumnNames)
+            .def("to_short_string", &UCCPAC::ToShortString)
+            .def("to_long_string", &UCCPAC::ToLongString)
+            .def("__str__", &UCCPAC::ToLongString)
+            .def(py::self == py::self)
+            .def("__hash__", [](UCCPAC const& pac) { return py::hash(UCCPACToTuple(pac)); })
+            .def(py::pickle(
+                    [](UCCPAC const& ucc_pac) {
+                        return py::make_tuple(ucc_pac.GetColumnIndices(), ucc_pac.GetColumnNames(),
+                                              ucc_pac.GetEpsilon(), ucc_pac.GetDelta());
+                    },
+                    [](py::tuple t) {
+                        if (t.size() != 4) {
+                            throw std::runtime_error("Invalid state for UCC PAC pickle");
+                        }
+                        auto column_indices = t[0].cast<config::IndicesType>();
+                        auto column_names = t[1].cast<std::vector<std::string>>();
+                        auto epsilon = t[2].cast<double>();
+                        auto delta = t[3].cast<double>();
+                        return UCCPAC(std::move(column_indices), std::move(column_names), epsilon,
+                                      delta);
                     }));
 
     BindDomains(pac_module);
