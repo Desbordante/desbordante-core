@@ -45,7 +45,7 @@ inline graph_t ReadGraphFromDot(std::string const& dot) {
     return parser::graph_parser::gdd::ReadGraph(ss);
 }
 
-inline vertex_t AddVertex(graph_t& g, std::uint64_t id, std::string label,
+inline vertex_t AddVertex(graph_t& g, std::size_t id, std::string label,
                           std::unordered_map<std::string, std::string> attrs = {}) {
     auto const v = boost::add_vertex(g);
     g[v].id = id;
@@ -71,13 +71,13 @@ inline vertex_t FindVertexById(graph_t const& g, std::uint64_t id) {
 
 // Pattern builders
 
-inline graph_t MakeSingleVertexPattern(std::uint64_t id, std::string label) {
+inline graph_t MakeSingleVertexPattern(std::size_t id, std::string label) {
     graph_t g;
     AddVertex(g, id, std::move(label));
     return g;
 }
 
-inline graph_t MakeTwoVertexPattern(std::uint64_t id1, std::uint64_t id2, std::string label1,
+inline graph_t MakeTwoVertexPattern(std::size_t id1, std::size_t id2, std::string label1,
                                     std::string label2) {
     graph_t g;
     AddVertex(g, id1, std::move(label1));
@@ -85,31 +85,25 @@ inline graph_t MakeTwoVertexPattern(std::uint64_t id1, std::uint64_t id2, std::s
     return g;
 }
 
+inline graph_t MakeArrowPattern(std::size_t src_id, std::string src_label, std::size_t dst_id,
+                                std::string dst_label, std::string edge_label) {
+    graph_t g;
+    auto const src = AddVertex(g, src_id, std::move(src_label));
+    auto const dst = AddVertex(g, dst_id, std::move(dst_label));
+    AddEdge(g, src, dst, std::move(edge_label));
+    return g;
+}
+
 inline graph_t MakePatternPersonCity(std::string const& edge_label = "lives_in") {
-    return ReadGraphFromDot(std::string(R"(digraph P {
-        0 [label="Person"];
-        1 [label="City"];
-        0 -> 1 [label=")") + edge_label +
-                            R"("];
-    })");
+    return MakeArrowPattern(0, "Person", 1, "City", edge_label);
 }
 
 inline graph_t MakePatternCityCountry(std::string const& edge_label = "in_country") {
-    return ReadGraphFromDot(std::string(R"(digraph P {
-        0 [label="City"];
-        1 [label="Country"];
-        0 -> 1 [label=")") + edge_label +
-                            R"("];
-    })");
+    return MakeArrowPattern(0, "City", 1, "Country", edge_label);
 }
 
 inline graph_t MakePatternCompanyCity(std::string const& edge_label = "hq_in") {
-    return ReadGraphFromDot(std::string(R"(digraph P {
-        0 [label="Company"];
-        1 [label="City"];
-        0 -> 1 [label=")") + edge_label +
-                            R"("];
-    })");
+    return MakeArrowPattern(0, "Company", 1, "City", edge_label);
 }
 
 // Distance constraint builders
@@ -325,14 +319,6 @@ inline std::string LargeGraphWithViolationMishaAlsoLivesInRigaDot() {
         1 -> 2 [label="friend"];
         2 -> 3 [label="friend"];
         3 -> 1 [label="friend"];
-    })";
-}
-
-inline std::string GraphNoMatchesForCompanyCityDot() {
-    return R"(digraph G {
-        1 [label="Person", name="Misha"];
-        2 [label="Person", name="Bob"];
-        1 -> 2 [label="friend"];
     })";
 }
 

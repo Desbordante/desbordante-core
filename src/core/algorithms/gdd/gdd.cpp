@@ -264,4 +264,5 @@ GddCounterexample BuildCounterexample(
     std::ranges::sort(ce.match, {}, &GddCounterexampleVertex::pattern_vertex_id);
     return ce;
 }
+
 }  // namespace model
