@@ -284,6 +284,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::pac::verifier::domain_pac_verifier
     ${DESBORDANTE_PREFIX}::pac::verifier::fd_pac_verifier
+    ${DESBORDANTE_PREFIX}::pac::verifier::ucc_pac_verifier
     ${DESBORDANTE_PREFIX}::pac::verifier
     magic_enum::magic_enum
     spdlog::spdlog_header_only
