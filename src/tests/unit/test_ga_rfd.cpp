@@ -44,7 +44,7 @@ static algos::StdParamsMap MakeParams(
                                {config_names::kRfdMaxGenerations, max_gen},
                                {config_names::kRfdCrossoverProbability, 0.85},
                                {config_names::kRfdMutationProbability, 0.3},
-                               {config_names::kSeed, std::uint64_t{42}}};
+                               {config_names::kSeed, std::uint32_t{42}}};
     if (!metrics.empty()) {
         params["metrics"] = metrics;
     }
@@ -75,7 +75,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
                                {config_names::kRfdMaxGenerations, generations},
                                {config_names::kRfdCrossoverProbability, 0.85},
                                {config_names::kRfdMutationProbability, 0.3},
-                               {config_names::kSeed, static_cast<std::uint64_t>(123)}};
+                               {config_names::kSeed, static_cast<std::uint32_t>(123)}};
 
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();

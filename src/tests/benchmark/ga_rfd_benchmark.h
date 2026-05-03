@@ -32,7 +32,7 @@ inline void GaRfdBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkCo
                                    {kRfdMaxGenerations, std::size_t{64}},
                                    {kRfdCrossoverProbability, 0.85},
                                    {kRfdMutationProbability, 0.3},
-                                   {kSeed, std::uint64_t{123}},
+                                   {kSeed, std::uint32_t{123}},
                                    {"metrics", metrics}};
 
         auto algo = algos::CreateAndLoadAlgorithm<algos::rfd::GaRfd>(params);
