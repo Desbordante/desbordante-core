@@ -31,15 +31,57 @@ NaiveGddValidator::DomainT NaiveGddValidator::BuildDomain(model::gdd::graph_t co
     return dom;
 }
 
+bool NaiveGddValidator::GraphHasCompatibleEdge(VertexT graph_src, VertexT graph_dst,
+                                               std::string const& pattern_edge_label) const {
+    auto const& graph = GetGraph();
+
+    for (auto const graph_edge : boost::make_iterator_range(boost::out_edges(graph_src, graph))) {
+        if (boost::target(graph_edge, graph) != graph_dst) {
+            continue;
+        }
+
+        if (LabelsMatch(pattern_edge_label, graph[graph_edge].label)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool NaiveGddValidator::AllPatternEdgesArePreserved(model::gdd::graph_t const& pattern,
+                                                    VertexT pattern_src, VertexT pattern_dst,
+                                                    VertexT graph_src, VertexT graph_dst) const {
+    for (auto const pattern_edge :
+         boost::make_iterator_range(boost::out_edges(pattern_src, pattern))) {
+        if (boost::target(pattern_edge, pattern) != pattern_dst) {
+            continue;
+        }
+
+        if (!GraphHasCompatibleEdge(graph_src, graph_dst, pattern[pattern_edge].label)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool NaiveGddValidator::CanExtendMapping(MappingT const& partial_map,
+                                         model::gdd::graph_t const& pattern, VertexT pattern_var,
+                                         VertexT graph_vertex) const {
+    return std::ranges::all_of(partial_map, [&](auto const& mapped_pair) {
+        auto const& [mapped_pattern_var, mapped_graph_vertex] = mapped_pair;
+
+        return AllPatternEdgesArePreserved(pattern, mapped_pattern_var, pattern_var,
+                                           mapped_graph_vertex, graph_vertex) &&
+               AllPatternEdgesArePreserved(pattern, pattern_var, mapped_pattern_var, graph_vertex,
+                                           mapped_graph_vertex);
+    });
+}
+
 bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                                              model::gdd::graph_t const& graph,
                                              MappingT& partial_map,
                                              GddCounterexample& counterexample) {
-    // Naming of local variables is messy.
-    // z - pattern variable from domain (like in paper)
-    // gv/pv - graph/pattern vertex
-    // ge/pe - graph/pattern edge
-
     if (partial_map.size() == domain_.size()) {
         bool const sat = gdd.Satisfies(graph, partial_map);
 
@@ -50,60 +92,17 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
     }
 
     auto const& pattern = gdd.GetPattern();
-
-    auto are_adjacent_in_pattern = [&pattern](VertexT lhs, VertexT rhs) {
-        return boost::edge(lhs, rhs, pattern).second || boost::edge(rhs, lhs, pattern).second;
-    };
-
-    // does pattern edge preserve in graph?
-    auto has_compatible_edge = [&pattern, &graph](VertexT pv, VertexT mapped_pv, VertexT z,
-                                                  VertexT gv) {
-        auto const matches_edge = [&pattern, &graph](VertexT graph_src, VertexT graph_dst,
-                                                     VertexT pattern_src, VertexT pattern_dst) {
-            auto const [ge, ge_exists] = boost::edge(graph_src, graph_dst, graph);
-            if (!ge_exists) {
-                return false;
-            }
-
-            auto const [pe, pe_exists] = boost::edge(pattern_src, pattern_dst, pattern);
-            return pe_exists && graph[ge].label == pattern[pe].label;  // TODO: wildcards
-        };
-
-        return matches_edge(mapped_pv, gv, pv, z) || matches_edge(gv, mapped_pv, z, pv);
-    };
-
-    // can map z to gv?
-    auto can_extend_mapping = [&](VertexT z, VertexT gv) {
-        if (partial_map.empty()) {
-            return true;
-        }
-
-        bool const has_mapped_adjacent =
-                std::ranges::any_of(partial_map, [&](auto const& mapped_pair) {
-                    return are_adjacent_in_pattern(mapped_pair.first, z);
-                });
-
-        if (!has_mapped_adjacent) {
-            return false;
-        }
-
-        return std::ranges::all_of(partial_map, [&](auto const& mapped_pair) {
-            auto const& [pv, mapped_pv] = mapped_pair;
-            return !are_adjacent_in_pattern(pv, z) || has_compatible_edge(pv, mapped_pv, z, gv);
-        });
-    };
-
-    for (auto const& [z, gv_candidates] : domain_) {
-        if (partial_map.contains(z)) {
+    for (auto const& [pattern_var, graph_vertex_candidates] : domain_) {
+        if (partial_map.contains(pattern_var)) {
             continue;
         }
 
-        for (VertexT gv : gv_candidates) {
-            if (!can_extend_mapping(z, gv)) {
+        for (VertexT graph_vertex : graph_vertex_candidates) {
+            if (!CanExtendMapping(partial_map, pattern, pattern_var, graph_vertex)) {
                 continue;
             }
 
-            auto const [it, inserted] = partial_map.emplace(z, gv);
+            auto const [it, inserted] = partial_map.emplace(pattern_var, graph_vertex);
             if (!inserted) {
                 continue;
             }
@@ -114,6 +113,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
 
             partial_map.erase(it);
         }
+        break;  // other pattern variables are assigned on the next recursion levels
     }
 
     return false;
