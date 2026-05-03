@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <vector>
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
 
 #include "core/algorithms/algorithm.h"
 #include "core/config/names_and_descriptions.h"
@@ -38,12 +40,12 @@ protected:
     void FindAllOnlyOneVertex();
     void RemoveInfrequentLabel(gspan::graph_t& graph, int label);
     void RemoveInfrequentVertexPairs();
-    void GSpanDFS(gspan::DFSCode const& code, std::unordered_set<int> graph_ids);
+    void GSpanDFS(gspan::DFSCode const& code, boost::unordered_flat_set<int> graph_ids);
 
-    std::unordered_map<gspan::ExtendedEdge, std::unordered_set<int>, gspan::ExtendedEdge::Hash>
-    RightMostPathExtensions(gspan::DFSCode const& code, std::unordered_set<int> graph_ids);
+    boost::unordered_flat_map<gspan::ExtendedEdge, boost::unordered_flat_set<int>, gspan::ExtendedEdge::Hash>
+    RightMostPathExtensions(gspan::DFSCode const& code, boost::unordered_flat_set<int> graph_ids);
 
-    std::unordered_set<gspan::ExtendedEdge, gspan::ExtendedEdge::Hash>
+    boost::unordered_flat_set<gspan::ExtendedEdge, gspan::ExtendedEdge::Hash>
     RightMostPathExtensionsFromSingle(gspan::DFSCode const& code, gspan::graph_t const& graph);
 
     bool IsCanonical(gspan::DFSCode const& code);

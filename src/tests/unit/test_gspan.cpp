@@ -4,6 +4,7 @@
 #include <sstream>
 #include <unordered_set>
 
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -240,7 +241,7 @@ TEST_F(FrequentSubgraphTest, Construction) {
     gspan::DFSCode code;
     code.Add(gspan::ExtendedEdge(gspan::Vertex{0, 1}, gspan::Vertex{1, 2}, 1));
 
-    std::unordered_set<int> graph_ids{0, 1, 2};
+    boost::unordered_flat_set<int> graph_ids{0, 1, 2};
     gspan::FrequentSubgraph subgraph(0, code, graph_ids, 3);
 
     EXPECT_EQ(subgraph.support, 3);
