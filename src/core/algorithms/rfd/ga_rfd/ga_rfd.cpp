@@ -257,7 +257,7 @@ GaRfd::Individual GaRfd::Evaluate(Individual const& ind) const noexcept {
     return {lhs_mask, rhs, confidence, support_both};
 }
 
-void GaRfd::EvaluatePopulation(std::set<Individual>& pop) const noexcept {
+void GaRfd::EvaluatePopulation(std::unordered_set<Individual, IndividualHash>& pop) const noexcept {
     std::vector<Individual> updated;
     updated.reserve(pop.size());
     for (auto const& ind : pop) {
@@ -267,7 +267,7 @@ void GaRfd::EvaluatePopulation(std::set<Individual>& pop) const noexcept {
     pop.insert(updated.begin(), updated.end());
 }
 
-bool GaRfd::AllOf(std::set<Individual> const& pop) const noexcept {
+bool GaRfd::AllOf(std::unordered_set<Individual, IndividualHash> const& pop) const noexcept {
     return !pop.empty() && std::ranges::all_of(pop, [this](Individual const& ind) {
         return ind.confidence >= eps_;
     });
@@ -277,8 +277,9 @@ double GaRfd::Fitness(double confidence) const noexcept {
     return confidence >= eps_ ? 1.0 : confidence / eps_;
 }
 
-std::set<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937& rng) const {
-    std::set<Individual> pop;
+std::unordered_set<GaRfd::Individual, GaRfd::IndividualHash> GaRfd::InitializePopulation(
+        std::mt19937& rng) const {
+    std::unordered_set<Individual, IndividualHash> pop;
     std::uniform_int_distribution<uint8_t> rhs_dist(0u, num_attrs_ - 1u);
     std::uniform_int_distribution<uint8_t> kdist(1u, num_attrs_ - 1u);
 
@@ -307,9 +308,9 @@ std::set<GaRfd::Individual> GaRfd::InitializePopulation(std::mt19937& rng) const
     return pop;
 }
 
-std::set<GaRfd::Individual> GaRfd::Select(std::set<Individual> const& pop,
-                                          std::mt19937& rng) const {
-    std::set<Individual> selected;
+std::unordered_set<GaRfd::Individual, GaRfd::IndividualHash> GaRfd::Select(
+        std::unordered_set<Individual, IndividualHash> const& pop, std::mt19937& rng) const {
+    std::unordered_set<Individual, IndividualHash> selected;
     std::uniform_real_distribution<double> dist01(0.0, 1.0);
     for (auto const& ind : pop) {
         if (dist01(rng) < Fitness(ind.confidence)) {
@@ -325,9 +326,9 @@ std::set<GaRfd::Individual> GaRfd::Select(std::set<Individual> const& pop,
     return selected;
 }
 
-std::set<GaRfd::Individual> GaRfd::Crossover(std::set<Individual> const& selected,
-                                             std::mt19937& rng) const {
-    std::set<Individual> offspring;
+std::unordered_set<GaRfd::Individual, GaRfd::IndividualHash> GaRfd::Crossover(
+        std::unordered_set<Individual, IndividualHash> const& selected, std::mt19937& rng) const {
+    std::unordered_set<Individual, IndividualHash> offspring;
     if (selected.size() < 2) {
         return offspring;
     }
@@ -376,9 +377,9 @@ std::set<GaRfd::Individual> GaRfd::Crossover(std::set<Individual> const& selecte
     return offspring;
 }
 
-std::set<GaRfd::Individual> GaRfd::Mutate(std::set<Individual> const& pop,
-                                          std::mt19937& rng) const {
-    std::set<Individual> mutated;
+std::unordered_set<GaRfd::Individual, GaRfd::IndividualHash> GaRfd::Mutate(
+        std::unordered_set<Individual, IndividualHash> const& pop, std::mt19937& rng) const {
+    std::unordered_set<Individual, IndividualHash> mutated;
     std::uniform_real_distribution<double> dist01(0.0, 1.0);
     std::uniform_int_distribution<uint8_t> coin(0, 2);
 
@@ -434,8 +435,9 @@ std::set<GaRfd::Individual> GaRfd::Mutate(std::set<Individual> const& pop,
     return mutated;
 }
 
-std::set<RFD> GaRfd::Finalize(std::set<Individual> const& pop) const {
-    std::set<RFD> res;
+std::unordered_set<RFD, RFDHash> GaRfd::Finalize(
+        std::unordered_set<Individual, IndividualHash> const& pop) const {
+    std::unordered_set<RFD, RFDHash> res;
     for (auto const& ind : pop) {
         if (ind.confidence < eps_) continue;
         res.insert(RFD{ind.lhs_mask, ind.rhs_index, ind.support, ind.confidence});
@@ -483,9 +485,9 @@ unsigned long long GaRfd::ExecuteInternal() {
             if (pop.size() > population_size_ + 100) {
                 std::vector<Individual> sorted(pop.begin(), pop.end());
                 std::sort(sorted.begin(), sorted.end(),
-                        [](auto const& a, auto const& b) { return a.confidence > b.confidence; });
+                          [](auto const& a, auto const& b) { return a.confidence > b.confidence; });
                 sorted.resize(population_size_ + 100);
-                pop = std::set<Individual>(sorted.begin(), sorted.end());
+                pop = std::unordered_set<Individual, IndividualHash>(sorted.begin(), sorted.end());
             }
 
             EvaluatePopulation(pop);
