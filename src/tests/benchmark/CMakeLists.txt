@@ -28,3 +28,17 @@ add_dependencies(
     ${NAME} Desbordante.zip.datasets Desbordante.zip.highway-neighbors
     Desbordante.zip.performance-tests
 )
+
+add_executable(Desbordante.ga_rfd_tuner ga_rfd_tuner.cpp)
+target_include_directories(Desbordante.ga_rfd_tuner PRIVATE ${DESBORDANTE_COMMON_INCLUDE_DIRS})
+target_link_libraries(
+    Desbordante.ga_rfd_tuner
+    PRIVATE ${DESBORDANTE_PREFIX}::testlib::common
+            ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+            ${DESBORDANTE_PREFIX}::rfd
+            ${DESBORDANTE_PREFIX}::model::table
+            ${DESBORDANTE_PREFIX}::model::types
+            Boost::headers
+            spdlog::spdlog_header_only
+            better-enums
+)

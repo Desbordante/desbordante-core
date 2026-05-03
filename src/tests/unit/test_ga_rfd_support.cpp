@@ -34,7 +34,7 @@ static algos::StdParamsMap MakeParams(
                                {config::names::kRfdMaxGenerations, max_gen},
                                {config::names::kRfdCrossoverProbability, 0.85},
                                {config::names::kRfdMutationProbability, 0.3},
-                               {config::names::kSeed, std::uint64_t{42}}};
+                               {config::names::kSeed, std::uint32_t{42}}};
     if (!metrics.empty()) {
         params["metrics"] = metrics;
     }

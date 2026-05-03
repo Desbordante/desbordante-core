@@ -14,9 +14,13 @@ struct RFD {
     double support = 0.0;
     double confidence = 0.0;
 
-    inline bool operator<(const RFD& other) const {
-        if (lhs_mask != other.lhs_mask) return lhs_mask < other.lhs_mask;
-        return rhs_index < other.rhs_index;
+    bool operator==(const RFD& other) const {
+        return lhs_mask == other.lhs_mask && rhs_index == other.rhs_index;
+    }
+
+    auto operator<=>(const RFD& other) const {
+        if (auto cmp = lhs_mask <=> other.lhs_mask; cmp != 0) return cmp;
+        return rhs_index <=> other.rhs_index;
     }
 
     [[nodiscard]] std::string ToString() const;
