@@ -6,15 +6,11 @@
 
 #include <boost/container_hash/hash.hpp>
 
+#include "core/algorithms/cind/utils.h"
+
 namespace algos::cind {
 
 namespace {
-struct VecIntHash {
-    std::size_t operator()(std::vector<int> const& vec) const noexcept {
-        return boost::hash_value(vec);
-    }
-};
-
 struct PairIntHash {
     std::size_t operator()(std::pair<int, int> const& p) const noexcept {
         std::size_t seed = 0;
@@ -23,15 +19,6 @@ struct PairIntHash {
         return seed;
     }
 };
-
-std::vector<int> MakeKey(std::size_t row, AttrsType const& cols) {
-    std::vector<int> key;
-    key.reserve(cols.size());
-    for (auto const* c : cols) {
-        key.push_back(c->GetValue(row));
-    }
-    return key;
-}
 }  // namespace
 
 CureCind::CureCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
@@ -82,11 +69,11 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
         return {};
     }
 
-    std::unordered_map<std::vector<int>, std::vector<std::size_t>, VecIntHash> rhs_index;
+    std::unordered_map<std::vector<int>, std::vector<std::size_t>, utils::VecIntHash> rhs_index;
     std::size_t const rhs_rows = attrs.rhs_inclusion.front()->GetNumRows();
     rhs_index.reserve(rhs_rows);
     for (std::size_t r = 0; r < rhs_rows; ++r) {
-        rhs_index[MakeKey(r, attrs.rhs_inclusion)].push_back(r);
+        rhs_index[utils::MakeKey(r, attrs.rhs_inclusion)].push_back(r);
     }
 
     std::size_t const lhs_rows = attrs.lhs_inclusion.front()->GetNumRows();
@@ -101,14 +88,13 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
             std::unordered_map<std::pair<int, int>, std::size_t, PairIntHash> pair_counts;
 
             for (std::size_t lhs_row = 0; lhs_row < lhs_rows; ++lhs_row) {
-                auto key = MakeKey(lhs_row, attrs.lhs_inclusion);
-                auto it = rhs_index.find(key);
+                auto it = rhs_index.find(utils::MakeKey(lhs_row, attrs.lhs_inclusion));
                 if (it == rhs_index.end()) continue;
 
                 int const lv = lhs_attr->GetValue(lhs_row);
                 for (std::size_t rhs_row : it->second) {
                     int const rv = rhs_attr->GetValue(rhs_row);
-                    pair_counts[{lv, rv}]++;
+                    ++pair_counts[{lv, rv}];
                 }
             }
 
@@ -124,8 +110,7 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
 }
 
 std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& patterns,
-                                              CureAttributes const& attrs,
-                                              std::size_t total_joined) {
+                                              CureAttributes const& attrs) {
     std::size_t const lhs_cond_size = attrs.lhs_conditional.size();
     std::size_t const rhs_cond_size = attrs.rhs_conditional.size();
     std::size_t const total_attrs = lhs_cond_size + rhs_cond_size;
@@ -137,6 +122,11 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
 
     using CoverKey = std::pair<std::size_t, int>;
     std::unordered_map<CoverKey, CoverEntry, PairIntHash> cover;
+
+    std::size_t total_joined = 0;
+    for (auto const& p : patterns) {
+        total_joined += p.support;
+    }
 
     for (auto const& p : patterns) {
         CoverKey key{p.lhs_attr_idx, p.lhs_value};
@@ -150,7 +140,7 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
             entry.values[lhs_cond_size + p.rhs_attr_idx] =
                     attrs.rhs_conditional[p.rhs_attr_idx]->DecodeValue(p.rhs_value);
             entry.support = p.support;
-            cover.emplace(key, std::move(entry));
+            cover.emplace(std::move(key), std::move(entry));
         } else {
             auto& entry = it->second;
             std::size_t const rhs_pos = lhs_cond_size + p.rhs_attr_idx;
@@ -170,7 +160,7 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
     std::vector<Condition> conditions;
     conditions.reserve(cover.size());
 
-    for (auto& [key, entry] : cover) {
+    for (auto& [_, entry] : cover) {
         double const validity =
                 (total_joined > 0) ? static_cast<double>(entry.support) / total_joined : 0.0;
         double const completeness =
@@ -183,16 +173,8 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
 
 CIND CureCind::ExecuteSingle(model::IND const& aind) {
     auto attrs = ClassifyCureAttributes(aind);
-
     auto patterns = DiscoverPatterns(attrs);
-
-    // Total joined tuples used as denominator for validity/completeness.
-    std::size_t total_joined = 0;
-    for (auto const& p : patterns) {
-        total_joined += p.support;
-    }
-
-    auto conditions = MinimalCover(patterns, attrs, total_joined);
+    auto conditions = MinimalCover(patterns, attrs);
 
     AttrsType all_cond;
     all_cond.reserve(attrs.lhs_conditional.size() + attrs.rhs_conditional.size());
