@@ -2,33 +2,19 @@
 
 namespace algos {
 
-std::optional<model::GddCounterexample> NaiveGddValidator::Holds(model::Gdd const& gdd,
-                                                                 model::gdd::graph_t const& graph) {
+GddValidator::GddHoldsResult NaiveGddValidator::Holds(model::Gdd const& gdd,
+                                                      model::gdd::graph_t const& graph) {
     model::gdd::graph_t const& pattern = gdd.GetPattern();
     if (domain_ = BuildDomain(pattern, graph); domain_.size() == boost::num_vertices(pattern)) {
         MappingT partial_map;
+        partial_map.reserve(boost::num_vertices(pattern));
         if (GddCounterexample counterexample{};
             ExistsCounterexample(gdd, graph, partial_map, counterexample)) {
-            return counterexample;
+            return {counterexample, match_count_};
         }
     }
 
-    return std::nullopt;
-}
-
-NaiveGddValidator::DomainT NaiveGddValidator::BuildDomain(model::gdd::graph_t const& pattern,
-                                                          model::gdd::graph_t const& graph) {
-    DomainT dom;
-
-    for (auto [pv, pend] = boost::vertices(pattern); pv != pend; ++pv) {
-        for (auto [gv, gend] = boost::vertices(graph); gv != gend; ++gv) {
-            if (model::Gdd::LabelsMatch(pattern[*pv].label, graph[*gv].label)) {
-                dom[*pv].emplace_back(*gv);
-            }
-        }
-    }
-
-    return dom;
+    return {std::nullopt, match_count_};
 }
 
 bool NaiveGddValidator::GraphHasCompatibleEdge(VertexT graph_src, VertexT graph_dst,
@@ -83,6 +69,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                                              MappingT& partial_map,
                                              GddCounterexample& counterexample) {
     if (partial_map.size() == domain_.size()) {
+        ++match_count_;
         bool const sat = gdd.Satisfies(graph, partial_map);
 
         if (!sat) {
@@ -102,7 +89,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                 continue;
             }
 
-            auto const [it, inserted] = partial_map.emplace(pattern_var, graph_vertex);
+            auto const [_, inserted] = partial_map.emplace(pattern_var, graph_vertex);
             if (!inserted) {
                 continue;
             }
@@ -111,7 +98,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                 return true;
             }
 
-            partial_map.erase(it);
+            partial_map.erase(pattern_var);
         }
         break;  // other pattern variables are assigned on the next recursion levels
     }

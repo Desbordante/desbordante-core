@@ -11,6 +11,8 @@ namespace algos {
 void GddValidator::ResetState() {
     result_.clear();
     counterexamples_.clear();
+    matches_count_.clear();
+    matches_count_.reserve(gdds_.size());
 }
 
 void GddValidator::RegisterOptions() {
@@ -35,7 +37,9 @@ void GddValidator::ExecuteInternal() {
     std::size_t gdd_index = 0;
     std::ranges::copy_if(gdds_, std::back_inserter(result_),
                          [this, &gdd_index](model::Gdd const& gdd) {
-                             if (auto ce = Holds(gdd, graph_); ce.has_value()) {
+                             auto [ce, match_count] = Holds(gdd, graph_);
+                             matches_count_.push_back(match_count);
+                             if (ce.has_value()) {
                                  ce->gdd_index = gdd_index;
                                  counterexamples_.emplace_back(std::move(*ce));
                                  ++gdd_index;
@@ -44,6 +48,21 @@ void GddValidator::ExecuteInternal() {
                              ++gdd_index;
                              return true;
                          });
+}
+
+GddValidator::DomainT GddValidator::BuildDomain(model::gdd::graph_t const& pattern,
+                                                model::gdd::graph_t const& graph) {
+    DomainT dom;
+
+    for (auto [pv, pend] = boost::vertices(pattern); pv != pend; ++pv) {
+        for (auto [gv, gend] = boost::vertices(graph); gv != gend; ++gv) {
+            if (LabelsMatch(pattern[*pv].label, graph[*gv].label)) {
+                dom[*pv].emplace_back(*gv);
+            }
+        }
+    }
+
+    return dom;
 }
 
 }  // namespace algos

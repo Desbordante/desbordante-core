@@ -193,6 +193,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::gdd
     ${DESBORDANTE_PREFIX}::gdd::validator
     Boost::headers
+    spdlog::spdlog_header_only
 )
 
 desbordante_add_bind(

@@ -10,12 +10,16 @@ namespace algos {
 
 class GddValidator : public Algorithm {
 private:
-    using GddCounterexample = model::GddCounterexample;
-
     std::filesystem::path graph_path_;
     model::gdd::graph_t graph_;
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
+    std::vector<std::size_t> matches_count_;
+
+protected:
+    using GddCounterexample = model::GddCounterexample;
+
+private:
     std::vector<GddCounterexample> counterexamples_;
 
     void RegisterOptions();
@@ -27,6 +31,18 @@ private:
     virtual void LoadDataInternal() final;
 
 protected:
+    using VertexT = model::gdd::detail::VertexT;
+    using EdgeT = model::gdd::detail::EdgeT;
+    using DomainT = model::gdd::detail::DomainT;
+    using MappingT = model::gdd::detail::MappingT;
+
+    static DomainT BuildDomain(model::gdd::graph_t const& pattern,
+                               model::gdd::graph_t const& graph);
+
+    static bool LabelsMatch(std::string const& lhs, std::string const& rhs) noexcept {
+        return lhs == rhs;  // TODO: wildcards
+    }
+
     model::gdd::graph_t const& GetGraph() const noexcept {
         return graph_;
     }
@@ -35,8 +51,12 @@ protected:
         return gdds_;
     }
 
-    virtual std::optional<GddCounterexample> Holds(model::Gdd const& gdd,
-                                                   model::gdd::graph_t const& graph) = 0;
+    struct GddHoldsResult {
+        std::optional<GddCounterexample> ce;
+        std::size_t match_count;
+    };
+
+    virtual GddHoldsResult Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) = 0;
 
 public:
     GddValidator();
@@ -47,6 +67,10 @@ public:
 
     std::vector<GddCounterexample> const& GetCounterexamples() const noexcept {
         return counterexamples_;
+    }
+
+    std::vector<std::size_t> GetMatchesCount() const {
+        return matches_count_;
     }
 
     GddValidator(GddValidator const&) = delete;
