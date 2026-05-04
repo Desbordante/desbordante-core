@@ -78,8 +78,9 @@ private:
         return std::vector<Bitset>(negative_search.begin(), negative_search.end());
     }
 
-    std::vector<DifferentialDependency> Minimize(std::vector<Bitset> covers, std::size_t rhs_column,
-                                                 std::size_t rhs_offset) {
+    std::vector<std::vector<DifferentialFunction>> Minimize(std::vector<Bitset> covers,
+                                                            std::size_t rhs_column,
+                                                            std::size_t rhs_offset) {
         std::shared_ptr<TranslatingMinimizeTree> minimize_tree;
         std::size_t const minimize_tree_key =
                 dif_func_info_
@@ -94,8 +95,8 @@ private:
 
         std::vector<Bitset> minimized_bitsets = minimize_tree->Minimize<Bitset>(std::move(covers));
 
-        std::vector<DifferentialDependency> minimized_dds;
-        minimized_dds.reserve(minimized_bitsets.size());
+        std::vector<std::vector<DifferentialFunction>> minimized_lhs;
+        minimized_lhs.reserve(minimized_bitsets.size());
         for (auto const& bitset : minimized_bitsets) {
             // check if LHS is not trivial
             if (std::ranges::any_of(match_dfs_, [&bitset](auto const& match_df) {
@@ -111,53 +112,92 @@ private:
                     lhs.push_back(dif_funcs_[column_index][df_offset]);
                 }
 
-                DifferentialFunction rhs = dif_funcs_[rhs_column][rhs_offset];
-                minimized_dds.emplace_back(std::move(lhs), std::move(rhs));
-                LOG_TRACE("{}", minimized_dds[minimized_dds.size() - 1].ToString());
+                minimized_lhs.push_back(std::move(lhs));
             }
         }
 
-        return minimized_dds;
+        return minimized_lhs;
     }
 
+    // TODO: extend the method so that it can remove longer transitive paths (something like
+    // transitive reduction in graph theory). However it is unclear, whether removing all transitive
+    // DDs is necessary (it is not done in other primitives).
     std::vector<DifferentialDependency> RemoveTransitive(
-            std::vector<DifferentialDependency> dds) const {
-        unsigned num_cycles = 0;
-        std::vector<DifferentialDependency> results_copy;
-
+            std::vector<std::vector<std::vector<DifferentialFunction>>> dds) const {
         auto subsume = [](std::vector<DifferentialFunction> const& lhs,
                           DifferentialFunction const& rhs) {
             return lhs.size() == 1 && rhs.GetColumn() == lhs.front().GetColumn() &&
                    rhs.GetConstraint().IsSubsumedBy(lhs.front().GetConstraint());
         };
 
-        while (true) {
-            ++num_cycles;
-            results_copy.clear();
-            bool is_removable = false;
-            for (auto const& dd3 : dds) {
-                bool remove = false;
-                for (auto const& dd1 : dds) {
-                    for (auto const& dd2 : dds) {
-                        if (subsume(dd2.GetLhs(), dd1.GetRhs()) && dd1.GetLhs() == dd3.GetLhs() &&
-                            dd2.GetRhs() == dd3.GetRhs()) {
-                            if (!is_removable) remove = true;
-                            is_removable = true;
-                            break;
+        std::vector<DifferentialDependency> result;
+        std::size_t index = 0;
+        for (std::size_t rhs_column = 0; rhs_column != dif_funcs_.size(); ++rhs_column) {
+            for (std::size_t rhs_offset = dif_funcs_[rhs_column].size(); rhs_offset != 0;
+                 --rhs_offset) {
+                while (true) {
+                    bool is_removable = false;
+                    std::vector<std::vector<DifferentialFunction>> size_one_lhs;
+                    for (auto const& lhs : dds[index]) {
+                        if (lhs.size() == 1) {
+                            size_one_lhs.push_back(lhs);
                         }
                     }
-                    if (is_removable) break;
+                    std::vector<std::vector<DifferentialFunction>> new_dds_index;
+                    new_dds_index.reserve(dds[index].size());
+
+                    for (auto const& first_lhs : dds[index]) {
+                        bool remove = false;
+                        if (!is_removable) {
+                            for (auto const& second_lhs : size_one_lhs) {
+                                std::size_t second_index = 0;
+                                for (std::size_t second_rhs_column = 0;
+                                     second_rhs_column != dif_funcs_.size(); ++second_rhs_column) {
+                                    for (std::size_t second_rhs_offset =
+                                                 dif_funcs_[second_rhs_column].size();
+                                         second_rhs_offset != 0; --second_rhs_offset) {
+                                        if (subsume(second_lhs,
+                                                    dif_funcs_[second_rhs_column]
+                                                              [second_rhs_offset - 1])) {
+                                            if (std::ranges::find(dds[second_index], first_lhs) !=
+                                                dds[second_index].end()) {
+                                                if (!is_removable) remove = true;
+                                                is_removable = true;
+                                                break;
+                                            }
+                                        }
+                                        ++second_index;
+                                    }
+                                    if (remove) {
+                                        break;
+                                    }
+                                }
+                                if (remove) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (!remove) {
+                            new_dds_index.push_back(first_lhs);
+                        }
+                    }
+
+                    if (!is_removable) {
+                        break;
+                    }
+
+                    dds[index] = std::move(new_dds_index);
                 }
-                if (!remove) results_copy.push_back(dd3);
+
+                DifferentialFunction rhs = dif_funcs_[rhs_column][rhs_offset - 1];
+                for (auto const& lhs : dds[index]) {
+                    result.emplace_back(lhs, rhs);
+                }
+                ++index;
             }
-            if (results_copy.size() == dds.size()) break;
-            dds = results_copy;
         }
 
-        LOG_DEBUG("Removed transitive DDs");
-        LOG_DEBUG("Number of cycles: {}", num_cycles);
-
-        return dds;
+        return result;
     }
 
 public:
@@ -229,7 +269,9 @@ public:
         BuildClueIndices();
         LOG_DEBUG("Built clue indices");
 
-        std::vector<DifferentialDependency> result;
+        std::vector<std::vector<std::vector<DifferentialFunction>>> cur_result;
+        cur_result.reserve(dif_func_info_->dif_func_num_);
+        std::size_t cur_result_size = 0;
 
         for (std::size_t i = 0; i != dif_funcs_.size(); ++i) {
             for (std::size_t j = dif_funcs_[i].size(); j != 0; --j) {
@@ -268,15 +310,17 @@ public:
                 }
                 LOG_DEBUG("Got covers: {}", covers.size());
 
-                std::vector<DifferentialDependency> minimized_covers =
+                std::vector<std::vector<DifferentialFunction>> minimized_covers =
                         Minimize(std::move(covers), i, j - 1);
                 LOG_DEBUG("Minimized covers: {}", minimized_covers.size());
-                std::move(minimized_covers.begin(), minimized_covers.end(),
-                          std::back_inserter(result));
+                cur_result_size += minimized_covers.size();
+                cur_result.push_back(std::move(minimized_covers));
             }
         }
+        LOG_INFO("Built and minimized covers: {}", cur_result_size);
 
-        result = RemoveTransitive(std::move(result));
+        std::vector<DifferentialDependency> result = RemoveTransitive(std::move(cur_result));
+        LOG_INFO("Removed transitive DDs");
 
         return result;
     }
