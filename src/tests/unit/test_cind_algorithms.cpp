@@ -115,13 +115,34 @@ algos::StdParamsMap MakeCureParams(unsigned int support,
     return {{config::names::kCsvConfigs, csv_configs},
             {config::names::kAlgoType, cure},
             {config::names::kError, config::ErrorType{0.5}},
-            {config::names::kSupport, support}};
+            {config::names::kCindMinSupport, support}};
 }
 
 struct CureCindParams final {
     unsigned int support;
     size_t expected_total_conditions;
 };
+
+struct ExpectedCondition {
+    std::vector<std::string> data;
+    double validity;
+    double completeness;
+};
+
+void CheckCondition(std::list<algos::cind::CIND> const& cinds, ExpectedCondition const& expected) {
+    for (auto const& cind : cinds) {
+        for (auto const& cond : cind.conditions) {
+            if (cond.condition_attrs_values == expected.data) {
+                EXPECT_NEAR(cond.validity, expected.validity, 1e-3)
+                        << "validity mismatch for data = " << cond.ToString();
+                EXPECT_NEAR(cond.completeness, expected.completeness, 1e-3)
+                        << "completeness mismatch for data = " << cond.ToString();
+                return;
+            }
+        }
+    }
+    ADD_FAILURE() << "expected condition not found in mined CINDs";
+}
 }  // namespace
 
 class TestCureCind : public ::testing::TestWithParam<CureCindParams> {};
@@ -147,5 +168,21 @@ INSTANTIATE_TEST_SUITE_P(
         CureCindParams{3, 32}
     ));
 // clang-format on
+
+TEST(TestCureCindConditions, KnownConditionsAtSupport2) {
+    auto mp = MakeCureParams(2);
+    auto cind_algo = algos::CreateAndLoadAlgorithm<algos::cind::CindAlgorithm>(mp);
+    cind_algo->Execute();
+    auto const& cinds = cind_algo->CINDList();
+    ASSERT_FALSE(cinds.empty());
+
+    CheckCondition(cinds,
+                   {{"-", "-", "-", "Schauspieler", "18", "SA", "USA", "Actor"}, 0.2449, 0.2449});
+    CheckCondition(cinds,
+                   {{"-", "-", "-", "Actor", "18", "Sud, Kap", "USA, Cal, LA", "Schauspieler"},
+                    0.2449,
+                    0.2449});
+    CheckCondition(cinds, {{"-", "18", "-", "Mel Sheppard", "18", "Athlette"}, 1.0, 1.0});
+}
 
 }  // namespace tests

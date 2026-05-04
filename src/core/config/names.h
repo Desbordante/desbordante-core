@@ -159,7 +159,7 @@ constexpr auto kValidity = "validity";
 constexpr auto kCompleteness = "completeness";
 constexpr auto kConditionType = "condition_type";
 constexpr auto kAlgoType = "algo_type";
-constexpr auto kSupport = "support";
+constexpr auto kCindMinSupport = "support";
 constexpr auto kCindCondValues = "cind_condition_values";
 // SD verifier
 constexpr auto kSdG1 = "g1";
