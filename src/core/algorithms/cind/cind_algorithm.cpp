@@ -62,12 +62,13 @@ void CindAlgorithm::RegisterCindMinerOptions() {
     RegisterOption(config::kValidityOpt(&cind_miner_->min_validity_));
     RegisterOption(config::kCompletenessOpt(&cind_miner_->min_completeness_));
     RegisterOption(config::kConditionTypeOpt(&cind_miner_->condition_type_));
-    RegisterOption(config::kSupportOpt(&cind_miner_->min_support_));
+    RegisterOption(config::kCindMinSupportOpt(&cind_miner_->min_support_));
 }
 
 void CindAlgorithm::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::kValidityOpt.GetName(), config::kCompletenessOpt.GetName(),
-                          config::kConditionTypeOpt.GetName(), config::kSupportOpt.GetName()});
+                          config::kConditionTypeOpt.GetName(),
+                          config::kCindMinSupportOpt.GetName()});
 }
 
 bool CindAlgorithm::SetExternalOption(std::string_view option_name, boost::any const& value) {

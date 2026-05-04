@@ -5,9 +5,6 @@
 namespace algos::cind {
 
 class CureCind final : public CindMiner {
-public:
-    explicit CureCind(config::InputTables& input_tables);
-
 private:
     struct CureAttributes {
         AttrsType lhs_inclusion, rhs_inclusion, lhs_conditional, rhs_conditional;
@@ -28,7 +25,10 @@ private:
     std::vector<PatternPair> DiscoverPatterns(CureAttributes const& attrs);
 
     std::vector<Condition> MinimalCover(std::vector<PatternPair> const& patterns,
-                                        CureAttributes const& attrs, std::size_t total_joined);
+                                        CureAttributes const& attrs);
+
+public:
+    explicit CureCind(config::InputTables& input_tables);
 };
 
 }  // namespace algos::cind
