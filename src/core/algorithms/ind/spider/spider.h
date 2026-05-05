@@ -14,6 +14,9 @@
 #include "core/model/table/column_domain.h"
 
 namespace algos {
+namespace cind {
+class CindAlgorithm;
+}  // namespace cind
 
 ///
 /// \brief disk-backed unary inclusion dependency mining algorithm
@@ -61,6 +64,9 @@ public:
     StageTimings const& GetStageTimings() const noexcept {
         return timings_;
     }
+
+private:
+    friend class cind::CindAlgorithm;
 };
 
 }  // namespace algos

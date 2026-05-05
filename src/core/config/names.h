@@ -142,4 +142,11 @@ constexpr auto kRfdCrossoverProbability = "crossover_probability";
 constexpr auto kRfdMutationProbability = "mutation_probability";
 constexpr auto kRfdMaxGenerations = "max_generations";
 constexpr auto kCacheMaxSize = "cache_size";
+// CIND
+constexpr auto kValidity = "validity";
+constexpr auto kCompleteness = "completeness";
+constexpr auto kConditionType = "condition_type";
+constexpr auto kAlgoType = "algo_type";
+constexpr auto kCindCondValues = "cind_condition_values";
+
 }  // namespace config::names

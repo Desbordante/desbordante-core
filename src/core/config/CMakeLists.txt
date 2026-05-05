@@ -1,8 +1,11 @@
+file(GLOB_RECURSE CONDITIONS_SRCS conditions/*.cpp)
+
 set(NAME config)
 desbordante_add_lib(NAME OBJECT)
 target_sources(
     ${NAME}
-    PRIVATE column_index/option.cpp
+    PRIVATE ${CONDITIONS_SRCS}
+            column_index/option.cpp
             column_index/validate_index.cpp
             custom_random_seed/option.cpp
             equal_nulls/option.cpp

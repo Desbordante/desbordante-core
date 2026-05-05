@@ -6,6 +6,7 @@ target_sources(
             block_data.cpp
             column_combination.cpp
             column.cpp
+            column_encoded_relation_data.cpp
             column_domain.cpp
             column_domain_iterator.cpp
             column_layout_relation_data.cpp
