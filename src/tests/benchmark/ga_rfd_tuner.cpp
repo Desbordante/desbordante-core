@@ -64,29 +64,41 @@ std::vector<std::shared_ptr<rfd::SimilarityMetric>> make_metrics(std::string con
 
 BenchmarkResult run_benchmark(CSVConfig const& csv, double min_sim, double beta, size_t pop_size,
                               size_t gens, double crossover_prob, double mutation_prob,
-                              std::string const& metric_type) {
+                              std::string const& metric_type, int runs = 3) {
     auto tmp_parser = std::make_shared<CSVParser>(csv);
     size_t num_attrs = tmp_parser->GetNumberOfColumns();
     auto metrics = make_metrics(metric_type, num_attrs);
 
-    algos::StdParamsMap params = {{kCsvConfig, csv},
-                                  {kRfdMinSimilarity, min_sim},
-                                  {kMinimumConfidence, beta},
-                                  {kPopulationSize, pop_size},
-                                  {kRfdMaxGenerations, gens},
-                                  {kRfdCrossoverProbability, crossover_prob},
-                                  {kRfdMutationProbability, mutation_prob},
-                                  {kSeed, std::uint32_t{42}},
-                                  {"metrics", metrics}};
+    std::vector<long long> times;
+    std::vector<long> memories;
+    std::vector<long> rfd_count_arr;
 
-    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    for (int run = 0; run < runs; ++run) {
+        algos::StdParamsMap params = {{kCsvConfig, csv},
+                                      {kRfdMinSimilarity, min_sim},
+                                      {kMinimumConfidence, beta},
+                                      {kPopulationSize, pop_size},
+                                      {kRfdMaxGenerations, gens},
+                                      {kRfdCrossoverProbability, crossover_prob},
+                                      {kRfdMutationProbability, mutation_prob},
+                                      {kSeed, static_cast<uint32_t>(42 + run)},
+                                      {"metrics", metrics}};
 
-    auto start = std::chrono::steady_clock::now();
-    algo->Execute();
-    auto end = std::chrono::steady_clock::now();
-    long long time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
 
-    long memory_kb = get_peak_rss_kb();
+        auto start = std::chrono::steady_clock::now();
+        algo->Execute();
+        auto end = std::chrono::steady_clock::now();
+        long long time_ms =
+                std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+        long memory_kb = get_peak_rss_kb();
+        size_t rfd_count = algo->GetRfds().size();
+
+        times.push_back(time_ms);
+        memories.push_back(memory_kb);
+        rfd_count_arr.push_back(rfd_count);
+    }
 
     BenchmarkResult res;
     res.dataset = csv.path.stem().string();
@@ -97,9 +109,9 @@ BenchmarkResult run_benchmark(CSVConfig const& csv, double min_sim, double beta,
     res.crossover_prob = crossover_prob;
     res.mutation_prob = mutation_prob;
     res.metric_type = metric_type;
-    res.time_ms = time_ms;
-    res.memory_kb = memory_kb;
-    res.rfd_count = algo->GetRfds().size();
+    res.time_ms = std::accumulate(times.begin(), times.end(), 0LL) / runs;
+    res.memory_kb = std::accumulate(memories.begin(), memories.end(), 0L) / runs;
+    res.rfd_count = std::accumulate(rfd_count_arr.begin(), rfd_count_arr.end(), 0L) / runs;
 
     return res;
 }
@@ -129,7 +141,7 @@ int main() {
                                 if (abs(cross - mut) <= 0.4) continue;
                                 for (auto& met : metric_types) {
                                     auto res = run_benchmark(csv, sim, beta, pop, gen, cross, mut,
-                                                             met);
+                                                             met, 5);
                                     results.push_back(res);
                                 }
                             }
