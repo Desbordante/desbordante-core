@@ -7,6 +7,7 @@
 
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/fastdd/model/differential_function.h"
+#include "core/algorithms/dd/fastdd/util/bitset_concept.h"
 #include "core/algorithms/dd/fastdd/util/distance_calculator.h"
 #include "core/model/table/column_index.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
@@ -116,7 +117,7 @@ public:
                 typed_relation_->GetColumnData(column_index).GetTypeId());
     }
 
-    template <typename Bitset>
+    template <BoostDynamicBitsetCompatible Bitset>
     std::vector<Bitset> GetSatisfiedDFs(model::ColumnIndex const column_index) const {
         return std::vector<Bitset>(zone_to_bitset_[column_index].begin(),
                                    zone_to_bitset_[column_index].end());

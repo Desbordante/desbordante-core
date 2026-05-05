@@ -9,6 +9,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/dd/fastdd/trees/minimize_tree.h"
+#include "core/algorithms/dd/fastdd/util/bitset_concept.h"
 #include "core/algorithms/dd/fastdd/util/dif_func_info.h"
 
 namespace algos::dd {
@@ -18,7 +19,7 @@ private:
     MinimizeTree tree_;
     std::shared_ptr<DifFuncInfo const> dif_func_info_;
 
-    template <typename Bitset>
+    template <BoostDynamicBitsetCompatible Bitset>
     std::vector<std::size_t> TransformToNodes(Bitset const& bitset) const {
         std::vector<std::size_t> nodes;
         nodes.reserve(bitset.count());
@@ -30,7 +31,7 @@ private:
         return nodes;
     }
 
-    template <typename Bitset>
+    template <BoostDynamicBitsetCompatible Bitset>
     boost::dynamic_bitset<> TransformToBitset(Bitset const& bitset) const {
         boost::dynamic_bitset<> transformed(bitset.size());
         transformed.flip();
@@ -47,7 +48,7 @@ public:
     explicit TranslatingMinimizeTree(std::shared_ptr<DifFuncInfo const> dif_func_info)
         : dif_func_info_(dif_func_info) {}
 
-    template <typename Bitset>
+    template <BoostDynamicBitsetCompatible Bitset>
     std::vector<Bitset> Minimize(std::vector<Bitset> candidates) {
         std::ranges::sort(candidates, [](Bitset const& a, Bitset const& b) {
             int diff = a.count() - b.count();

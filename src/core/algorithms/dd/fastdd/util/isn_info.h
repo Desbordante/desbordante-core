@@ -21,6 +21,7 @@ class ISNInfo {
 private:
     std::vector<std::size_t> bases_;
     std::vector<DFPack> df_packs_;
+    bool overflows_;
 
 public:
     ISNInfo(DifferentialFunctionBuilder const& df_builder);
@@ -31,6 +32,10 @@ public:
 
     std::vector<std::size_t> const& GetBases() const noexcept {
         return bases_;
+    }
+
+    bool Overflows() const noexcept {
+        return overflows_;
     }
 };
 

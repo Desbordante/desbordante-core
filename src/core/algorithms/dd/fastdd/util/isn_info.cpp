@@ -1,10 +1,14 @@
 #include "core/algorithms/dd/fastdd/util/isn_info.h"
 
+#include <limits>
 #include <utility>
+
+#include "core/util/logger.h"
 
 namespace algos::dd {
 
 ISNInfo::ISNInfo(DifferentialFunctionBuilder const& df_builder) {
+    overflows_ = false;
     std::size_t const num_columns = df_builder.GetDifFuncsSize();
     bases_.reserve(num_columns);
     df_packs_.reserve(num_columns);
@@ -19,7 +23,11 @@ ISNInfo::ISNInfo(DifferentialFunctionBuilder const& df_builder) {
                 df_builder.GetDifFuncs()[index][0].GetColumn()->GetIndex();
         df_packs_.emplace_back(std::move(cur_thresholds), std::move(cur_threshold_zones),
                                column_index, cur_base, is_distance_ordered);
+        if (cur_base > std::numeric_limits<std::size_t>::max() / num_intervals) {
+            overflows_ = true;
+        }
         cur_base *= num_intervals;
+        LOG_TRACE("Column: {}; intervals: {}; cur_base: {}", index, num_intervals, cur_base);
     }
 }
 
