@@ -628,7 +628,9 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::ind
     ${DESBORDANTE_PREFIX}::ind::spider
     ${DESBORDANTE_PREFIX}::cind
-    ${DESBORDANTE_PREFIX}::cind::miners
+    ${DESBORDANTE_PREFIX}::cind::miners::cinderella
+    ${DESBORDANTE_PREFIX}::cind::miners::pli
+    ${DESBORDANTE_PREFIX}::cind::miners::cure
     ${DESBORDANTE_PREFIX}::ind::mind
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types

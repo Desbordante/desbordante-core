@@ -5,7 +5,6 @@ target_sources(
     PRIVATE conditions/algo_type/option.cpp
             conditions/completeness/option.cpp
             conditions/condition_type/option.cpp
-            conditions/support/option.cpp
             conditions/validity/option.cpp
             column_index/option.cpp
             column_index/validate_index.cpp
