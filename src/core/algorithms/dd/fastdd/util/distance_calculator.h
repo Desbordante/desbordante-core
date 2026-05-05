@@ -40,6 +40,11 @@ public:
 
         return type.Compare(first_value, second_value);
     }
+
+    bool IsDistanceOrdered(model::ColumnIndex column_index) const {
+        return model::Type::IsDistanceOrdered(
+                typed_relation_->GetColumnData(column_index).GetTypeId());
+    }
 };
 
 }  // namespace algos::dd
