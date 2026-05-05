@@ -26,21 +26,21 @@ CureCind::CureCind(config::InputTables& input_tables) : CindMiner(input_tables) 
 CureCind::CureAttributes CureCind::ClassifyCureAttributes(model::IND const& aind) const {
     CureAttributes result;
 
-    auto const& lhs = aind.GetLhs();
-    auto const& rhs = aind.GetRhs();
+    model::ColumnCombination const& lhs = aind.GetLhs();
+    model::ColumnCombination const& rhs = aind.GetRhs();
 
-    auto const& lhs_indices = lhs.GetColumnIndices();
-    auto const& rhs_indices = rhs.GetColumnIndices();
+    std::vector<model::ColumnIndex> const& lhs_indices = lhs.GetColumnIndices();
+    std::vector<model::ColumnIndex> const& rhs_indices = rhs.GetColumnIndices();
 
-    auto const lhs_table = lhs.GetTableIndex();
-    auto const rhs_table = rhs.GetTableIndex();
+    model::TableIndex const lhs_table = lhs.GetTableIndex();
+    model::TableIndex const rhs_table = rhs.GetTableIndex();
     bool const same_table = (lhs_table == rhs_table);
 
     std::unordered_set<model::ColumnIndex> lhs_set(lhs_indices.begin(), lhs_indices.end());
     std::unordered_set<model::ColumnIndex> rhs_set(rhs_indices.begin(), rhs_indices.end());
 
-    for (auto const& column : tables_.GetTable(lhs_table).GetColumnData()) {
-        auto const col_index = column.GetColumn()->GetIndex();
+    for (model::EncodedColumnData const& column : tables_.GetTable(lhs_table).GetColumnData()) {
+        model::ColumnIndex const col_index = column.GetColumn()->GetIndex();
         if (lhs_set.contains(col_index)) {
             result.lhs_inclusion.push_back(&column);
         } else if (same_table && rhs_set.contains(col_index)) {
@@ -50,8 +50,8 @@ CureCind::CureAttributes CureCind::ClassifyCureAttributes(model::IND const& aind
         }
     }
 
-    for (auto const& column : tables_.GetTable(rhs_table).GetColumnData()) {
-        auto const col_index = column.GetColumn()->GetIndex();
+    for (model::EncodedColumnData const& column : tables_.GetTable(rhs_table).GetColumnData()) {
+        model::ColumnIndex const col_index = column.GetColumn()->GetIndex();
         if (rhs_set.contains(col_index)) {
             result.rhs_inclusion.push_back(&column);
         } else if (same_table && lhs_set.contains(col_index)) {
@@ -80,10 +80,10 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
     std::vector<PatternPair> patterns;
 
     for (std::size_t li = 0; li < attrs.lhs_conditional.size(); ++li) {
-        auto const* lhs_attr = attrs.lhs_conditional[li];
+        model::EncodedColumnData const* lhs_attr = attrs.lhs_conditional[li];
 
         for (std::size_t ri = 0; ri < attrs.rhs_conditional.size(); ++ri) {
-            auto const* rhs_attr = attrs.rhs_conditional[ri];
+            model::EncodedColumnData const* rhs_attr = attrs.rhs_conditional[ri];
 
             std::unordered_map<std::pair<int, int>, std::size_t, PairIntHash> pair_counts;
 
@@ -124,11 +124,11 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
     std::unordered_map<CoverKey, CoverEntry, PairIntHash> cover;
 
     std::size_t total_joined = 0;
-    for (auto const& p : patterns) {
+    for (PatternPair const& p : patterns) {
         total_joined += p.support;
     }
 
-    for (auto const& p : patterns) {
+    for (PatternPair const& p : patterns) {
         CoverKey key{p.lhs_attr_idx, p.lhs_value};
         auto it = cover.find(key);
 
@@ -142,7 +142,7 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
             entry.support = p.support;
             cover.emplace(std::move(key), std::move(entry));
         } else {
-            auto& entry = it->second;
+            CoverEntry& entry = it->second;
             std::size_t const rhs_pos = lhs_cond_size + p.rhs_attr_idx;
             std::string const rhs_decoded =
                     attrs.rhs_conditional[p.rhs_attr_idx]->DecodeValue(p.rhs_value);
@@ -172,9 +172,9 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
 }
 
 CIND CureCind::ExecuteSingle(model::IND const& aind) {
-    auto attrs = ClassifyCureAttributes(aind);
-    auto patterns = DiscoverPatterns(attrs);
-    auto conditions = MinimalCover(patterns, attrs);
+    CureAttributes attrs = ClassifyCureAttributes(aind);
+    std::vector<PatternPair> patterns = DiscoverPatterns(attrs);
+    std::vector<Condition> conditions = MinimalCover(patterns, attrs);
 
     AttrsType all_cond;
     all_cond.reserve(attrs.lhs_conditional.size() + attrs.rhs_conditional.size());
