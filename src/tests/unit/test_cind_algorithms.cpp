@@ -130,8 +130,8 @@ struct ExpectedCondition {
 };
 
 void CheckCondition(std::list<algos::cind::CIND> const& cinds, ExpectedCondition const& expected) {
-    for (auto const& cind : cinds) {
-        for (auto const& cond : cind.conditions) {
+    for (algos::cind::CIND const& cind : cinds) {
+        for (algos::cind::Condition const& cond : cind.conditions) {
             if (cond.condition_attrs_values == expected.data) {
                 EXPECT_NEAR(cond.validity, expected.validity, 1e-3)
                         << "validity mismatch for data = " << cond.ToString();
@@ -148,32 +148,27 @@ void CheckCondition(std::list<algos::cind::CIND> const& cinds, ExpectedCondition
 class TestCureCind : public ::testing::TestWithParam<CureCindParams> {};
 
 TEST_P(TestCureCind, TotalConditions) {
-    auto const& p = GetParam();
-    auto mp = MakeCureParams(p.support);
+    CureCindParams const& p = GetParam();
+    algos::StdParamsMap mp = MakeCureParams(p.support);
     auto cind_algo = algos::CreateAndLoadAlgorithm<algos::cind::CindAlgorithm>(mp);
     cind_algo->Execute();
     ASSERT_FALSE(cind_algo->CINDList().empty());
     size_t total_conditions = 0;
-    for (auto const& cind : cind_algo->CINDList()) {
+    for (algos::cind::CIND const& cind : cind_algo->CINDList()) {
         total_conditions += cind.ConditionsNumber();
     }
     ASSERT_EQ(total_conditions, p.expected_total_conditions);
 }
 
-// clang-format off
-INSTANTIATE_TEST_SUITE_P(
-    CINDTestSuite, TestCureCind, ::testing::Values(
-        CureCindParams{1, 86},
-        CureCindParams{2, 51},
-        CureCindParams{3, 32}
-    ));
-// clang-format on
+INSTANTIATE_TEST_SUITE_P(CINDTestSuite, TestCureCind,
+                         ::testing::Values(CureCindParams{1, 86}, CureCindParams{2, 51},
+                                           CureCindParams{3, 32}));
 
 TEST(TestCureCindConditions, KnownConditionsAtSupport2) {
-    auto mp = MakeCureParams(2);
+    algos::StdParamsMap mp = MakeCureParams(2);
     auto cind_algo = algos::CreateAndLoadAlgorithm<algos::cind::CindAlgorithm>(mp);
     cind_algo->Execute();
-    auto const& cinds = cind_algo->CINDList();
+    std::list<algos::cind::CIND> const& cinds = cind_algo->CINDList();
     ASSERT_FALSE(cinds.empty());
 
     CheckCondition(cinds,
