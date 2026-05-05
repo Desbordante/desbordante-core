@@ -8,10 +8,11 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/dd/fastdd/trees/node.h"
+#include "core/algorithms/dd/fastdd/util/bitset_concept.h"
 
 namespace algos::dd {
 
-template <typename Bitset>
+template <BoostDynamicBitsetCompatible Bitset>
 class TreeSearch {
 private:
     std::unique_ptr<Node<Bitset>> root_ = std::make_unique<Node<Bitset>>();
