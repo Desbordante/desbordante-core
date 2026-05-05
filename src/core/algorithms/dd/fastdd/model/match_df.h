@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include "core/algorithms/dd/fastdd/util/bitset_concept.h"
@@ -23,6 +24,8 @@ public:
             bitset_ |= count_to_predicates[i - 1][offset];
         }
     }
+
+    explicit MatchDF(Bitset bitset) : bitset_(std::move(bitset)) {}
 
     Bitset const& GetBitset() const noexcept {
         return bitset_;

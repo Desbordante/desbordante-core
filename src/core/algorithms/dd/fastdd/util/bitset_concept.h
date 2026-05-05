@@ -31,6 +31,7 @@ concept BoostDynamicBitsetCompatible =
             { bs1.find_first() } -> std::same_as<std::size_t>;
             { bs1.find_next(index) } -> std::same_as<std::size_t>;
             { BitsetType::npos } -> std::convertible_to<std::size_t>;
+            { boost::hash<BitsetType>()(bs1) } -> std::same_as<size_t>;
         };
 
 }  // namespace algos::dd

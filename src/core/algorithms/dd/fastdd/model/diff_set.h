@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/unordered/unordered_flat_set.hpp>
@@ -41,8 +42,19 @@ public:
         }
     }
 
+    void Build(boost::unordered::unordered_flat_set<Bitset> bitset_set) {
+        match_dfs_.reserve(bitset_set.size());
+        for (auto&& bitset : bitset_set) {
+            match_dfs_.emplace_back(std::move(bitset));
+        }
+    }
+
     std::vector<MatchDF<Bitset>> GetMatchDFs() const noexcept {
         return match_dfs_;
+    }
+
+    std::vector<std::vector<Bitset>> const& GetOffsetToPredicates() const noexcept {
+        return offset_to_predicates_;
     }
 };
 

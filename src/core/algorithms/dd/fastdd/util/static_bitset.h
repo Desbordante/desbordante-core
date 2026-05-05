@@ -17,6 +17,12 @@ private:
 
     model::bitset_impl::BitsetImpl<N> static_bitset_;
 
+    size_t HashCode() const noexcept {
+        return std::hash<model::bitset_impl::BitsetImpl<N>>()(static_bitset_);
+    }
+
+    friend struct boost::hash<StaticBitset>;
+
 public:
     static std::size_t const npos = N;
 
@@ -128,3 +134,10 @@ inline bool operator<(StaticBitset<Size> const& left, StaticBitset<Size> const& 
 }
 
 }  // namespace algos::dd
+
+template <size_t Size>
+struct boost::hash<algos::dd::StaticBitset<Size>> {
+    size_t operator()(algos::dd::StaticBitset<Size> const& b) const noexcept {
+        return b.HashCode();
+    }
+};
