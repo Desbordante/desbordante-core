@@ -3,6 +3,7 @@
 #include <atomic>
 #include <boost/lockfree/queue.hpp>
 #include <memory>
+#include <semaphore>
 #include <thread>
 #include <vector>
 
@@ -10,17 +11,9 @@ namespace algos::tke {
 
 namespace {
 
-struct ParentContext {
-    CompositeEpisode episode;
-    std::atomic<int> ref_count;
-
-    ParentContext(CompositeEpisode&& ep, int valid_ext_count)
-        : episode(std::move(ep)), ref_count(valid_ext_count) {}
-};
-
 struct Task {
-    ParentContext* parent;
-    size_t ext_idx;
+    CompositeEpisode* parent;
+    size_t ext_count;
 };
 
 }  // namespace
@@ -61,30 +54,39 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
                                                              : initial_minsup};
     std::atomic<bool> terminate_flag{false};
     std::atomic<size_t> tasks_in_flight{0};
+    std::counting_semaphore<> tasks_sem{0};
 
     auto worker_loop = [&]() {
-        Task task;
-        while (!terminate_flag.load(std::memory_order_relaxed)) {
-            if (tasks.pop(task)) {
-                size_t const cur_min = atomic_minsup.load(std::memory_order_relaxed);
-                ParallelEpisode const& ext = parallel_episodes[task.ext_idx];
+        while (true) {
+            tasks_sem.acquire();
+            if (terminate_flag.load(std::memory_order_relaxed)) break;
 
-                if (task.parent->episode.GetSupport() >= cur_min && ext.GetSupport() >= cur_min) {
-                    std::optional<CompositeEpisode> child =
-                            task.parent->episode.TryExtend(ext, cur_min, window_length_);
-                    if (child &&
-                        child->GetSupport() >= atomic_minsup.load(std::memory_order_relaxed)) {
-                        processed.push(new CompositeEpisode(std::move(*child)));
+            Task task;
+            tasks.pop(task);
+
+            size_t const task_minsup = atomic_minsup.load(std::memory_order_relaxed);
+            if (task.parent->GetSupport() < task_minsup) {
+                delete task.parent;
+                tasks_in_flight.fetch_sub(1, std::memory_order_release);
+                continue;
+            }
+
+            for (size_t i = 0; i < task.ext_count; ++i) {
+                ParallelEpisode const& ext = parallel_episodes[i];
+
+                size_t const cur_min = atomic_minsup.load(std::memory_order_relaxed);
+                std::optional<CompositeEpisode> child =
+                        task.parent->TryExtend(ext, cur_min, window_length_);
+                if (child &&
+                    child->GetSupport() >= atomic_minsup.load(std::memory_order_relaxed)) {
+                    auto* result = new CompositeEpisode(std::move(*child));
+                    while (!processed.push(result)) {
                     }
                 }
-
-                if (task.parent->ref_count.fetch_sub(1, std::memory_order_acq_rel) == 1) {
-                    delete task.parent;
-                }
-                tasks_in_flight.fetch_sub(1, std::memory_order_release);
-            } else {
-                std::this_thread::yield();
             }
+
+            delete task.parent;
+            tasks_in_flight.fetch_sub(1, std::memory_order_release);
         }
     };
 
@@ -95,82 +97,59 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
     }
 
     size_t const high_watermark = threads_num_ * 4;
-    ParentContext* current_parent = nullptr;
-    size_t current_ext_idx = 0;
-    size_t current_ext_count = 0;
 
     while (true) {
-        bool did_work = false;
-
         CompositeEpisode* ep_ptr = nullptr;
         while (processed.pop(ep_ptr)) {
-            did_work = true;
             std::unique_ptr<CompositeEpisode> ep(ep_ptr);
             if (TryAdd(std::move(*ep), top_k, explore, initial_minsup)) {
                 atomic_minsup.store(top_k.top().GetSupport(), std::memory_order_relaxed);
             }
         }
 
-        size_t const cur_min = atomic_minsup.load(std::memory_order_relaxed);
-        if (!explore.empty() && explore.top().GetSupport() < cur_min) {
-            explore = Explore();
-            did_work = true;
-        }
+        while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark &&
+               !explore.empty()) {
+            CompositeEpisode parent_ep =
+                    std::move(const_cast<CompositeEpisode&>(explore.top()));
+            explore.pop();
 
-        while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark) {
-            if (current_parent == nullptr) {
-                if (explore.empty()) break;
+            size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
+            bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
+                                                     : parent_ep.GetSupport() < minsup_now;
+            if (stale) continue;
 
-                CompositeEpisode parent_ep =
-                        std::move(const_cast<CompositeEpisode&>(explore.top()));
-                explore.pop();
-
-                size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
-                bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
-                                                         : parent_ep.GetSupport() < minsup_now;
-                if (stale) continue;
-
-                size_t valid_n = 0;
-                while (valid_n < n && parallel_episodes[valid_n].GetSupport() >= minsup_now) {
-                    ++valid_n;
-                }
-                if (valid_n == 0) continue;
-
-                current_parent =
-                        new ParentContext(std::move(parent_ep), static_cast<int>(valid_n));
-                current_ext_idx = 0;
-                current_ext_count = valid_n;
+            size_t valid_n = 0;
+            while (valid_n < n && parallel_episodes[valid_n].GetSupport() >= minsup_now) {
+                ++valid_n;
             }
+            if (valid_n == 0) continue;
 
+            auto* parent = new CompositeEpisode(std::move(parent_ep));
             tasks_in_flight.fetch_add(1, std::memory_order_relaxed);
-            if (!tasks.push({current_parent, current_ext_idx})) {
+            if (!tasks.push({parent, valid_n})) {
+                delete parent;
                 tasks_in_flight.fetch_sub(1, std::memory_order_release);
                 break;
             }
-            did_work = true;
-            ++current_ext_idx;
-
-            if (current_ext_idx == current_ext_count) {
-                current_parent = nullptr;
-            }
+            tasks_sem.release();
         }
 
-        if (explore.empty() && current_parent == nullptr &&
-            tasks_in_flight.load(std::memory_order_acquire) == 0) {
-            if (processed.pop(ep_ptr)) {
+        if (explore.empty() && tasks_in_flight.load(std::memory_order_acquire) == 0) {
+            bool got_any = false;
+            while (processed.pop(ep_ptr)) {
+                got_any = true;
                 std::unique_ptr<CompositeEpisode> ep(ep_ptr);
-                TryAdd(std::move(*ep), top_k, explore, initial_minsup);
-                continue;
+                if (TryAdd(std::move(*ep), top_k, explore, initial_minsup)) {
+                    atomic_minsup.store(top_k.top().GetSupport(), std::memory_order_relaxed);
+                }
             }
+            if (got_any) continue;
             break;
-        }
-
-        if (!did_work) {
-            std::this_thread::yield();
         }
     }
 
     terminate_flag.store(true, std::memory_order_relaxed);
+    tasks_sem.release(static_cast<std::ptrdiff_t>(threads_num_));
     for (std::thread& t : workers) t.join();
 }
 

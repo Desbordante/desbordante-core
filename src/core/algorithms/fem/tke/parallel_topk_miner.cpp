@@ -3,6 +3,7 @@
 #include <atomic>
 #include <boost/lockfree/queue.hpp>
 #include <memory>
+#include <semaphore>
 #include <thread>
 #include <vector>
 
@@ -10,17 +11,9 @@ namespace algos::tke {
 
 namespace {
 
-struct ParentContext {
-    ParallelEpisode episode;
-    std::atomic<int> ref_count;
-
-    ParentContext(ParallelEpisode&& ep, int valid_ext_count)
-        : episode(std::move(ep)), ref_count(valid_ext_count) {}
-};
-
 struct Task {
-    ParentContext* parent;
-    model::Event event;
+    ParallelEpisode* parent;
+    model::Event start_event;
 };
 
 }  // namespace
@@ -59,29 +52,36 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
     std::atomic<size_t> atomic_minsup{(top_k.size() == k_) ? top_k.top().GetSupport() : 1};
     std::atomic<bool> terminate_flag{false};
     std::atomic<size_t> tasks_in_flight{0};
+    std::counting_semaphore<> tasks_sem{0};
 
     auto worker_loop = [&]() {
-        Task task;
-        while (!terminate_flag.load(std::memory_order_relaxed)) {
-            if (tasks.pop(task)) {
-                size_t const cur_min = atomic_minsup.load(std::memory_order_relaxed);
+        while (true) {
+            tasks_sem.acquire();
+            if (terminate_flag.load(std::memory_order_relaxed)) break;
 
-                if (task.parent->episode.GetSupport() >= cur_min) {
-                    ParallelEpisode child = task.parent->episode.ParallelExtension(
-                            task.event, *events_loc_lists_[task.event]);
+            Task task;
+            tasks.pop(task);
 
-                    if (child.GetSupport() >= atomic_minsup.load(std::memory_order_relaxed)) {
-                        processed.push(new ParallelEpisode(std::move(child)));
+            size_t const task_minsup = atomic_minsup.load(std::memory_order_relaxed);
+            if (task.parent->GetSupport() < task_minsup) {
+                delete task.parent;
+                tasks_in_flight.fetch_sub(1, std::memory_order_release);
+                continue;
+            }
+
+            for (model::Event event = task.start_event; event < events_num_; ++event) {
+                ParallelEpisode child =
+                        task.parent->ParallelExtension(event, *events_loc_lists_[event]);
+
+                if (child.GetSupport() >= atomic_minsup.load(std::memory_order_relaxed)) {
+                    auto* result = new ParallelEpisode(std::move(child));
+                    while (!processed.push(result)) {
                     }
                 }
-
-                if (task.parent->ref_count.fetch_sub(1, std::memory_order_acq_rel) == 1) {
-                    delete task.parent;
-                }
-                tasks_in_flight.fetch_sub(1, std::memory_order_release);
-            } else {
-                std::this_thread::yield();
             }
+
+            delete task.parent;
+            tasks_in_flight.fetch_sub(1, std::memory_order_release);
         }
     };
 
@@ -92,78 +92,56 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
     }
 
     size_t const high_watermark = threads_num_ * 4;
-    ParentContext* current_parent = nullptr;
-    model::Event current_event = 0;
-    model::Event end_event = 0;
 
     while (true) {
-        bool did_work = false;
-
         ParallelEpisode* ep_ptr = nullptr;
         while (processed.pop(ep_ptr)) {
-            did_work = true;
             std::unique_ptr<ParallelEpisode> ep(ep_ptr);
             if (TryAdd(std::move(*ep), top_k, explore)) {
                 atomic_minsup.store(top_k.top().GetSupport(), std::memory_order_relaxed);
             }
         }
 
-        size_t const cur_min = atomic_minsup.load(std::memory_order_relaxed);
-        if (!explore.empty() && explore.top().GetSupport() < cur_min) {
-            explore = Explore();
-            did_work = true;
-        }
+        while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark &&
+               !explore.empty()) {
+            ParallelEpisode parent_ep =
+                    std::move(const_cast<ParallelEpisode&>(explore.top()));
+            explore.pop();
 
-        while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark) {
-            if (current_parent == nullptr) {
-                if (explore.empty()) break;
+            size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
+            bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
+                                                     : parent_ep.GetSupport() < minsup_now;
+            if (stale) continue;
 
-                ParallelEpisode parent_ep = std::move(const_cast<ParallelEpisode&>(explore.top()));
-                explore.pop();
+            model::Event const start_event = parent_ep.GetLastEvent() + 1;
+            if (start_event >= events_num_) continue;
 
-                size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
-                bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
-                                                         : parent_ep.GetSupport() < minsup_now;
-                if (stale) continue;
-
-                model::Event start_event = parent_ep.GetLastEvent() + 1;
-                if (start_event >= events_num_) continue;
-
-                size_t valid_n = events_num_ - start_event;
-                current_parent = new ParentContext(std::move(parent_ep), static_cast<int>(valid_n));
-                current_event = start_event;
-                end_event = events_num_;
-            }
-
+            auto* parent = new ParallelEpisode(std::move(parent_ep));
             tasks_in_flight.fetch_add(1, std::memory_order_relaxed);
-            if (!tasks.push({current_parent, current_event})) {
+            if (!tasks.push({parent, start_event})) {
+                delete parent;
                 tasks_in_flight.fetch_sub(1, std::memory_order_release);
                 break;
             }
-            did_work = true;
-            ++current_event;
-
-            if (current_event == end_event) {
-                current_parent = nullptr;
-            }
+            tasks_sem.release();
         }
 
-        if (explore.empty() && current_parent == nullptr &&
-            tasks_in_flight.load(std::memory_order_acquire) == 0) {
-            if (processed.pop(ep_ptr)) {
+        if (explore.empty() && tasks_in_flight.load(std::memory_order_acquire) == 0) {
+            bool got_any = false;
+            while (processed.pop(ep_ptr)) {
+                got_any = true;
                 std::unique_ptr<ParallelEpisode> ep(ep_ptr);
-                TryAdd(std::move(*ep), top_k, explore);
-                continue;
+                if (TryAdd(std::move(*ep), top_k, explore)) {
+                    atomic_minsup.store(top_k.top().GetSupport(), std::memory_order_relaxed);
+                }
             }
+            if (got_any) continue;
             break;
-        }
-
-        if (!did_work) {
-            std::this_thread::yield();
         }
     }
 
     terminate_flag.store(true, std::memory_order_relaxed);
+    tasks_sem.release(static_cast<std::ptrdiff_t>(threads_num_));
     for (std::thread& t : workers) t.join();
 }
 
