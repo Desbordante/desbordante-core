@@ -162,6 +162,12 @@ public:
 
     ~WorkerThreadPool() {
         Terminate();
+        // Join workers before any other member is destroyed. Members are
+        // destroyed in reverse declaration order, so worker_threads_ would
+        // otherwise be destroyed AFTER working_mutex_/working_var_, allowing
+        // a worker that is still inside its unique_lock dtor to touch a
+        // destroyed mutex.
+        worker_threads_.clear();
     }
 };
 }  // namespace util
