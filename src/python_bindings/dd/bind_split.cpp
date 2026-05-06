@@ -72,5 +72,7 @@ void BindSplit(py::module_& main_module) {
             .def("__hash__", [](DDString const& dd) { return py::hash(py::str(dd.ToString())); })
             .def("to_json", &model::DDString::ToJSON);
     BindPrimitiveNoBase<dd::Split>(dd_module, "Split").def("get_dds", &dd::Split::GetDDStringList);
+    BindPrimitiveNoBase<dd::LatticeAlgorithm>(dd_module, "LatticeAlgorithm")
+            .def("get_adds", &dd::LatticeAlgorithm::GetDDStringList);
 }
 }  // namespace python_bindings
