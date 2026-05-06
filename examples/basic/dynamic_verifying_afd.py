@@ -1,7 +1,6 @@
 import desbordante
 import pandas as pd
 
-
 RED_CODE = "\033[1;41m"
 GREEN_CODE = "\033[1;42m"
 BLUE_CODE = "\033[1;46m"
@@ -48,7 +47,7 @@ def print_table_and_changes(data, insert_df=None, delete_set=None, update_df=Non
         print(UPDATE_CODE + 'Rows to update:')
         update_rows = update_df.to_string(index=True, index_names=False).split('\n')
         print('\n'.join(update_rows), end=DEFAULT_COLOR_CODE+'\n')
-    
+
     print('\nCurrent table state:')
     data_rows = data.to_string().split('\n')
     print(data_rows[0])
@@ -81,7 +80,7 @@ def update_and_print_data_table(data, insert_df=None, delete_set=None, update_df
 
 def main_scenario(table='examples/datasets/DnD.csv'):
     global max_data_index
-    print(BOLD_CODE + 'This example shows how to verify AFD in the dynamic table using dynamic_fd_verification.\n' + 
+    print(BOLD_CODE + 'This example shows how to verify AFD in the dynamic table using dynamic_fd_verification.\n' +
           'If you want to know how to use dynamic_fd_verification, please see dynamic_verifying_fd.py example.')
     print(f"{BOLD_CODE}First, let's look at the DnD.csv table and try verifying the [Creature, HaveMagic] -> [Strength] FD.{DEFAULT_COLOR_CODE}")
     data = pd.read_csv(table, header=[0])

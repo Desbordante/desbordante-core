@@ -1,13 +1,13 @@
 """Typo mining example using Desbordante algorithms."""
 
+import operator
 from functools import reduce
 from itertools import groupby, islice
-import operator
 
-from colorama import Style, Fore
-from jellyfish import levenshtein_distance
 import desbordante
-import pandas
+import pandas as pd
+from colorama import Fore, Style
+from jellyfish import levenshtein_distance
 
 # Value cluster filtering parameters.
 RADIUS = 3
@@ -53,12 +53,12 @@ CONFIG_STRING = f"""Starting typo discovery scenario with parameters:
 
 
 def configure_dataframe_print():
-    pandas.set_option('display.max_columns', None)
-    pandas.set_option('display.width', None)
-    pandas.set_option('display.max_colwidth', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', None)
 
 
-def get_squashed_sorted_clusters(dataset: pandas.DataFrame, lhs_indices, rhs_index):
+def get_squashed_sorted_clusters(dataset: pd.DataFrame, lhs_indices, rhs_index):
     def get_lhs(row_count_pair):
         row, _ = row_count_pair
         return row[:-1]
@@ -143,7 +143,7 @@ def make_display_df(squashed_sorted_clusters, original_df, lhs_indices, rhs_inde
     for lhs, value_info in squashed_sorted_clusters:
         for value, count in value_info:
             display_rows.append((count, *lhs, value))
-    return pandas.DataFrame(display_rows, columns=['rows count']
+    return pd.DataFrame(display_rows, columns=['rows count']
                             + [original_df.columns[col] for col in lhs_indices]
                             + [original_df.columns[rhs_index]])
 
@@ -169,7 +169,7 @@ def get_typo_candidates_df(df, display_df):
         found_rows = df[mask]
         typo_candidate_rows.append(found_rows.values[0])
         typo_candidate_row_indices.append(found_rows.index.values[0])
-    return pandas.DataFrame(typo_candidate_rows, columns=df.columns, index=typo_candidate_row_indices)
+    return pd.DataFrame(typo_candidate_rows, columns=df.columns, index=typo_candidate_row_indices)
 
 
 def main():
@@ -178,7 +178,7 @@ def main():
     print(CONFIG_STRING)
     print()
 
-    df = pandas.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, na_filter=False, dtype='string')
+    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, na_filter=False, dtype='string')
     print('Dataset sample:')
     print(df)
     print()

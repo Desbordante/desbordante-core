@@ -1,5 +1,7 @@
-import desbordante
 import csv
+
+import desbordante
+
 
 def row_to_padded_string(row, widths):
     return ''.join(field.ljust(width) for width, field in zip(widths, row))
@@ -7,7 +9,7 @@ def row_to_padded_string(row, widths):
 def print_table(filename: str):
     with open(filename, newline='') as table:
         rows = list(csv.reader(table, delimiter=','))
-    
+
     column_widths = []
     for col_num in range(len(rows[0])):
         max_len = max(len(row[col_num]) for row in rows)

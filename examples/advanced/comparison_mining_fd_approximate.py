@@ -36,7 +36,7 @@ exact_fd.load_data(table=(TABLE, ';', False))
 exact_fd.execute()
 result_exact = set(exact_fd.get_fds())
 
-print(f"An exact FD discovery algorithm, in contrast, consistently identified 78 FDs.")
+print("An exact FD discovery algorithm, in contrast, consistently identified 78 FDs.")
 
 print('''
 This highlights a key property of EulerFD: it may produce results with both
@@ -63,7 +63,7 @@ for fd in sorted(diff_76, key=str):
 print("Thus, a single run of EulerFD can both miss valid FDs and generate false FDs.")
 
 print()
-print(f"Next, let's analyze the results with a seed of {SEED_78_FD}, where EulerFD identified 78 FDs") 
+print(f"Next, let's analyze the results with a seed of {SEED_78_FD}, where EulerFD identified 78 FDs")
 print(f"EulerFD not found {len(result_exact - result78)} FDs.")
 print(f"EulerFD found {len(result78 - result_exact)} false FDs.")
 print(f"Therefore, with the seed {SEED_78_FD}, EulerFD obtained the exact result.")

@@ -1,7 +1,8 @@
+import textwrap
+
 import desbordante
 import pandas as pd
 from tabulate import tabulate
-import textwrap
 
 GREEN_CODE = "\033[1;42m"
 RED_CODE = "\033[1;41m"
@@ -127,8 +128,8 @@ This error indicates how accurately the dependency holds between the datasets.
 In this scenario, we will use the 'orders' and 'customers' datasets.""")
     print()
 
-    verify = lambda lhs_df, rhs_df: aind_verify(('orders', lhs_df, [1]),
-                                                ('customers', rhs_df, [0]))
+    def verify(lhs_df, rhs_df):
+        return aind_verify(('orders', lhs_df, [1]), ('customers', rhs_df, [0]))
 
     lhs_df = get_table_df('orders')
     rhs_df = get_table_df('customers')

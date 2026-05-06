@@ -1,7 +1,7 @@
-import desbordante
-import pandas
-
 from os.path import join
+
+import desbordante
+import pandas as pd
 
 # Parameters for pandas.read_csv(...).
 HEADER = 0
@@ -45,9 +45,9 @@ def print_fds(fds):
 
 
 def main():
-    df1 = pandas.read_csv(DATASET1_PATH, sep=SEPARATOR, header=HEADER)
-    df2 = pandas.read_csv(DATASET2_PATH, sep=SEPARATOR, header=HEADER)
-    df3 = pandas.read_csv(DATASET3_PATH, sep=SEPARATOR, header=HEADER)
+    df1 = pd.read_csv(DATASET1_PATH, sep=SEPARATOR, header=HEADER)
+    df2 = pd.read_csv(DATASET2_PATH, sep=SEPARATOR, header=HEADER)
+    df3 = pd.read_csv(DATASET3_PATH, sep=SEPARATOR, header=HEADER)
     if not (df1.columns.tolist() == df2.columns.tolist() == df3.columns.tolist()):
         print('Datasets must have the same schemas!')
         return

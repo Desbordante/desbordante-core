@@ -1,5 +1,5 @@
 import desbordante
-import pandas
+import pandas as pd
 
 TABLE_PATH = 'examples/datasets/cfd_verification_datasets/city.csv'
 TABLE_PATH_FIXED = 'examples/datasets/cfd_verification_datasets/city_fixed.csv'
@@ -60,7 +60,7 @@ def print_table_with_highlight(table, indices_to_highlight):
                 print(line_text)
 
 def scenario_incorrect_data():
-    table = pandas.read_csv(TABLE_PATH)
+    table = pd.read_csv(TABLE_PATH)
     print("\nIn the first example, let's look at a dataset containing real estate properties in different cities.\n")
     print(table)
     print("\nLet's say we want to check whether highly priced buildings in Los Angeles are determined by (depend on) a specific building type.\n")
@@ -68,7 +68,7 @@ def scenario_incorrect_data():
     algo.load_data(table=table)
 
     lhs, rhs = [("City", "Los Angeles"), ("BuildingType", "_")], ("BuildingCost", "high")
-    print(f'This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")\n')
+    print('This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")\n')
     algo.execute(cfd_rule_left=lhs, cfd_rule_right=rhs, minconf = 1)
 
     print_results(table, algo, lhs, rhs)
@@ -81,7 +81,7 @@ def scenario_incorrect_data():
 
     print_table_with_highlight(table, indices_to_highlight)
 
-    table = pandas.read_csv(TABLE_PATH_FIXED)
+    table = pd.read_csv(TABLE_PATH_FIXED)
     algo = desbordante.cfd_verification.algorithms.Default()
     algo.load_data(table=table)
 

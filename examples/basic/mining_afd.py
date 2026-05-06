@@ -15,7 +15,7 @@ will find all AFDs, which have their error equal or less than the threshold, acc
 
 Currently, Desbordante supports:
 1) Five metrics: g1, pdep, tau, mu+, rho.
-2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest. 
+2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest.
 Unfortunately, Pyro can handle only the g1 metric, for the rest use Tane.
 
 For more information consider:
@@ -52,3 +52,4 @@ for MEASURE in  ERROR_MEASURES:
     for fd in result:
         print(fd)
     print()
+
