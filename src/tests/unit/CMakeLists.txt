@@ -428,6 +428,15 @@ desbordante_add_test(
     model.bitset SRCS test_bitset.cpp LIBS spdlog::spdlog_header_only Boost::headers
 )
 desbordante_add_test(
+    util.worker_thread_pool
+    SRCS
+    test_worker_thread_pool.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::util
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+desbordante_add_test(
     model.types.numeric_type_cast SRCS test_numerictype_cast.cpp LIBS better-enums Boost::headers
 )
 desbordante_add_test(
