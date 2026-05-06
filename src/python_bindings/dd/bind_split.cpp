@@ -67,5 +67,7 @@ void BindSplit(py::module_& main_module) {
                     }));
 
     BindPrimitiveNoBase<dd::Split>(dd_module, "Split").def("get_dds", &dd::Split::GetDDStringList);
+    BindPrimitiveNoBase<dd::LatticeAlgorithm>(dd_module, "LatticeAlgorithm")
+            .def("get_adds", &dd::LatticeAlgorithm::GetDDStringList);
 }
 }  // namespace python_bindings
