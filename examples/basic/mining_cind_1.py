@@ -280,13 +280,91 @@ printlns(
     "but no concrete pattern passed validity >= 0.95 and completeness >= 0.5."
 )
 
-algo2, cinds_strict = mine(error=0.3, validity=0.95, completeness=0.5,
-                           condition_type="group")
+strict_validity = 0.95
+strict_completeness = 0.5
+algo2, cinds_strict = mine(error=0.3, validity=strict_validity,
+                           completeness=strict_completeness, condition_type="group")
 print(f"  found {len(cinds_strict)} CIND(s):")
 for i, c in enumerate(cinds_strict, start=1):
     print(f"    #{i:<2}  {fmt_ind(c.get_ind_string()):<48} "
           f"{c.conditions_number():>3} cond.")
 print()
+
+printlns(
+    "Look at the same condition `cent='18'` in CINDs #3 and #4. CINDs #3 "
+    "and #4 cover the same four en rows (Cecil, Mel, Buddy, Sante), and "
+    "the condition `cent='18'` selects exactly Cecil, Mel and Buddy in "
+    "both CINDs. Yet `cent='18'` passes the strict thresholds for #4 and "
+    "fails for #3 - because the underlying AINDs go in opposite "
+    "directions and Cecil sits on the failing side of just one of them."
+)
+
+algo3, cinds_all = mine(error=0.3, validity=0.0, completeness=0.0,
+                        condition_type="group")
+all_by_ind = {c.get_ind_string(): c for c in cinds_all}
+target_data = ('-', '18', '-')
+
+
+def find_cent18(cind):
+    for cond in cind.get_conditions():
+        if cond.data() == target_data:
+            return cond
+    return None
+
+
+print(f"  Comparing condition data = {target_data} (i.e. cent='18'):")
+print()
+for i, c_strict in enumerate(cinds_strict, start=1):
+    if c_strict.conditions_number() > 1:
+        continue
+    ind_str = c_strict.get_ind_string()
+    c_all = all_by_ind.get(ind_str)
+    if c_all is None:
+        continue
+    cond = find_cent18(c_all)
+    if cond is None:
+        continue
+    v = cond.validity()
+    comp = cond.completeness()
+    ok = v >= strict_validity and comp >= strict_completeness
+    tag = "PASS" if ok else "fail"
+    print(f"  {YELLOW}>>> CIND #{i}: {fmt_ind(ind_str)}{RESET}")
+    print(f"  conditional attributes: {fmt_attrs(c_all.get_condition_attributes())}")
+    print(f"    [{tag}]  validity={v:.3f}  completeness={comp:.3f}  "
+          f"(thresholds: validity>={strict_validity}, "
+          f"completeness>={strict_completeness})")
+    print()
+
+printlns(
+    "Why the same `cent='18'` behaves differently:"
+)
+print("    en row     cent  birthplace  deathplace")
+print("    -----------------------------------------")
+print("    Cecil       18    SA          USA")
+print("    Mel         18    USA         USA")
+print("    Buddy       18    CO          CO")
+print("    Sante       19    -           -")
+print()
+print(f"  {YELLOW}CIND #3: en.[birthplace] subseteq en.[deathplace]{RESET}")
+print(f"    inclusion key = birthplace; en.deathplace set = {{USA, CO, -}}")
+print(f"    cent=18 selects rows with these birthplaces: SA, USA, CO  (3)")
+print(f"    among those, birthplace SA is NOT in the deathplace set -> Cecil")
+print(f"    breaks inclusion. Only USA and CO satisfy it.")
+print(f"    -> validity = 2/3 = 0.667, fails validity>=0.95")
+print()
+print(f"  {YELLOW}CIND #4: en.[deathplace] subseteq en.[birthplace]{RESET}")
+print(f"    inclusion key = deathplace; en.birthplace set = {{SA, USA, CO, -}}")
+print(f"    cent=18 selects rows with these deathplaces: USA, CO  (2 unique,")
+print(f"    since Cecil and Mel share deathplace=USA)")
+print(f"    both deathplace values are in the birthplace set.")
+print(f"    -> validity = 2/2 = 1.000, passes validity>=0.95")
+print()
+printlns(
+    "So the same row Cecil that broke CIND #3 (his birthplace SA is not a "
+    "deathplace) does not break CIND #4 (his deathplace USA is a "
+    "birthplace). Same condition, different inclusion direction, "
+    "different verdict."
+)
 
 printlns(
     "In practice the workflow is iterative: start permissive to see what is "

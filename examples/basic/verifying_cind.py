@@ -266,7 +266,7 @@ print()
 banner("See also")
 
 print("Related primitives in Desbordante:")
-print("  * CIND mining           -  examples/basic/mining_cind.py")
+print("  * CIND mining           -  examples/basic/mining_cind_1.py")
 print("  * IND mining            -  examples/basic/mining_ind.py")
 print("  * AIND mining           -  examples/basic/mining_aind.py")
 print("  * IND/AIND verification -  examples/basic/verifying_ind_aind.py")
