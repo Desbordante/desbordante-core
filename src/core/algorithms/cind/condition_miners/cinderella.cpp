@@ -8,21 +8,14 @@
 #include <unordered_set>
 #include <vector>
 
-#include <boost/container_hash/hash.hpp>
-
 #include "core/algorithms/cind/condition.h"
 #include "core/algorithms/cind/condition_miners/basket.h"
 #include "core/algorithms/cind/types.h"
+#include "core/algorithms/cind/utils.h"
 #include "itemset_node.h"
 
 namespace algos::cind {
 namespace {
-
-struct VectorIntHash {
-    std::size_t operator()(std::vector<int> const& vec) const noexcept {
-        return boost::hash_value(vec);
-    }
-};
 
 std::vector<BasketInfo> MergeBaskets(std::vector<BasketInfo> const& baskets1,
                                      std::vector<BasketInfo> const& baskets2) {
@@ -71,26 +64,17 @@ CIND Cinderella::ExecuteSingle(model::IND const& aind) {
 
 std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
     // algorithm uses modified left-outer join representation to build the baskets
-    std::unordered_set<std::vector<int>, VectorIntHash> rhs_values;
+    std::unordered_set<std::vector<int>, utils::VecIntHash> rhs_values;
 
     for (size_t index = 0; index < attributes.rhs_inclusion.front()->GetNumRows(); ++index) {
-        std::vector<int> row;
-        row.reserve(attributes.rhs_inclusion.size());
-        for (auto& attr : attributes.rhs_inclusion) {
-            row.push_back(attr->GetValue(index));
-        }
-        rhs_values.insert(std::move(row));
+        rhs_values.insert(utils::MakeKey(index, attributes.rhs_inclusion));
     }
 
     std::vector<Basket> result;
-    std::unordered_map<std::vector<int>, std::size_t, VectorIntHash> basket_id_by_value;
+    std::unordered_map<std::vector<int>, std::size_t, utils::VecIntHash> basket_id_by_value;
 
     for (size_t index = 0; index < attributes.lhs_inclusion.front()->GetNumRows(); ++index) {
-        std::vector<int> row;
-        row.reserve(attributes.lhs_inclusion.size());
-        for (auto& attr : attributes.lhs_inclusion) {
-            row.push_back(attr->GetValue(index));
-        }
+        std::vector<int> row = utils::MakeKey(index, attributes.lhs_inclusion);
 
         if (condition_type_._value == CondType::group) {
             auto it = basket_id_by_value.find(row);

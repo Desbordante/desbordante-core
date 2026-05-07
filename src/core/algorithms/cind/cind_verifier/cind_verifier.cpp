@@ -10,10 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include <boost/container_hash/hash.hpp>
-#include <boost/functional/hash.hpp>
-
 #include "core/algorithms/cind/condition.h"
+#include "core/algorithms/cind/utils.h"
 #include "core/config/conditions/completeness/option.h"
 #include "core/config/conditions/condition_type/option.h"
 #include "core/config/conditions/validity/option.h"
@@ -31,12 +29,6 @@
 namespace algos::cind {
 namespace {
 
-struct VecIntHash {
-    std::size_t operator()(std::vector<int> const& v) const noexcept {
-        return boost::hash_value(v);
-    }
-};
-
 inline bool IsWildcard(std::string const& s) {
     return s == kAnyValue || s == "_";
 }
@@ -47,16 +39,6 @@ inline std::string StripQuotes(std::string s) {
         return s.substr(1, s.size() - 2);
     }
     return s;
-}
-
-std::vector<int> MakeKey(std::size_t row,
-                         std::vector<model::EncodedColumnData const*> const& cols) {
-    std::vector<int> key;
-    key.reserve(cols.size());
-    for (auto const* c : cols) {
-        key.push_back(c->GetValue(row));
-    }
-    return key;
 }
 
 std::vector<model::EncodedColumnData const*> BuildOrderedColumns(
@@ -198,26 +180,26 @@ void CINDVerifier::VerifyCIND() {
             std::ranges::all_of(cond_vals, [](std::string const& s) { return IsWildcard(s); });
 
     // Build RHS key set
-    std::unordered_set<std::vector<int>, VecIntHash> rhs_keys;
+    std::unordered_set<std::vector<int>, utils::VecIntHash> rhs_keys;
     {
         std::size_t rhs_rows = rhs_inclusion.front()->GetNumRows();
         rhs_keys.reserve(rhs_rows);
         for (std::size_t r = 0; r < rhs_rows; ++r) {
-            rhs_keys.insert(MakeKey(r, rhs_inclusion));
+            rhs_keys.insert(utils::MakeKey(r, rhs_inclusion));
         }
     }
 
     if (all_wildcards) {
         // Simple inclusion check: every LHS row key must appear in RHS keys
-        std::unordered_map<std::vector<int>, Cluster, VecIntHash> violating_map;
+        std::unordered_map<std::vector<int>, Cluster, utils::VecIntHash> violating_map;
         std::size_t const lhs_rows = lhs_inclusion.front()->GetNumRows();
         std::size_t distinct_keys = 0;
 
         {
-            std::unordered_set<std::vector<int>, VecIntHash> seen_keys;
+            std::unordered_set<std::vector<int>, utils::VecIntHash> seen_keys;
             seen_keys.reserve(lhs_rows);
             for (std::size_t l = 0; l < lhs_rows; ++l) {
-                auto key = MakeKey(l, lhs_inclusion);
+                auto key = utils::MakeKey(l, lhs_inclusion);
                 seen_keys.insert(key);
                 if (!rhs_keys.contains(key)) {
                     violating_map[std::move(key)].push_back(static_cast<model::TupleIndex>(l));
@@ -289,13 +271,13 @@ void CINDVerifier::VerifyCIND() {
         Cluster matching_rows;
     };
 
-    std::unordered_map<Key, Acc, VecIntHash> acc_by_key;
+    std::unordered_map<Key, Acc, utils::VecIntHash> acc_by_key;
     {
         std::size_t lhs_rows = lhs_inclusion.front()->GetNumRows();
         acc_by_key.reserve(lhs_rows);
 
         for (std::size_t l = 0; l < lhs_rows; ++l) {
-            auto key = MakeKey(l, lhs_inclusion);
+            auto key = utils::MakeKey(l, lhs_inclusion);
 
             auto it = acc_by_key.find(key);
             if (it == acc_by_key.end()) {

@@ -106,4 +106,78 @@ INSTANTIATE_TEST_SUITE_P(
     ));
 // clang-format on
 
+// --- CureCind tests ---
+
+namespace {
+algos::StdParamsMap MakeCureParams(unsigned int support,
+                                   CSVConfigs const& csv_configs = {kTestCINDDe, kTestCINDEn}) {
+    algos::cind::AlgoType const cure = algos::cind::AlgoType::cure_cind;
+    return {{config::names::kCsvConfigs, csv_configs},
+            {config::names::kAlgoType, cure},
+            {config::names::kError, config::ErrorType{0.5}},
+            {config::names::kCindMinSupport, support}};
+}
+
+struct CureCindParams final {
+    unsigned int support;
+    size_t expected_total_conditions;
+};
+
+struct ExpectedCondition {
+    std::vector<std::string> data;
+    double validity;
+    double completeness;
+};
+
+void CheckCondition(std::list<algos::cind::CIND> const& cinds, ExpectedCondition const& expected) {
+    for (algos::cind::CIND const& cind : cinds) {
+        for (algos::cind::Condition const& cond : cind.conditions) {
+            if (cond.condition_attrs_values == expected.data) {
+                EXPECT_NEAR(cond.validity, expected.validity, 1e-3)
+                        << "validity mismatch for data = " << cond.ToString();
+                EXPECT_NEAR(cond.completeness, expected.completeness, 1e-3)
+                        << "completeness mismatch for data = " << cond.ToString();
+                return;
+            }
+        }
+    }
+    ADD_FAILURE() << "expected condition not found in mined CINDs";
+}
+}  // namespace
+
+class TestCureCind : public ::testing::TestWithParam<CureCindParams> {};
+
+TEST_P(TestCureCind, TotalConditions) {
+    CureCindParams const& p = GetParam();
+    algos::StdParamsMap mp = MakeCureParams(p.support);
+    auto cind_algo = algos::CreateAndLoadAlgorithm<algos::cind::CindAlgorithm>(mp);
+    cind_algo->Execute();
+    ASSERT_FALSE(cind_algo->CINDList().empty());
+    size_t total_conditions = 0;
+    for (algos::cind::CIND const& cind : cind_algo->CINDList()) {
+        total_conditions += cind.ConditionsNumber();
+    }
+    ASSERT_EQ(total_conditions, p.expected_total_conditions);
+}
+
+INSTANTIATE_TEST_SUITE_P(CINDTestSuite, TestCureCind,
+                         ::testing::Values(CureCindParams{1, 86}, CureCindParams{2, 51},
+                                           CureCindParams{3, 32}));
+
+TEST(TestCureCindConditions, KnownConditionsAtSupport2) {
+    algos::StdParamsMap mp = MakeCureParams(2);
+    auto cind_algo = algos::CreateAndLoadAlgorithm<algos::cind::CindAlgorithm>(mp);
+    cind_algo->Execute();
+    std::list<algos::cind::CIND> const& cinds = cind_algo->CINDList();
+    ASSERT_FALSE(cinds.empty());
+
+    CheckCondition(cinds,
+                   {{"-", "-", "-", "Schauspieler", "18", "SA", "USA", "Actor"}, 0.2449, 0.2449});
+    CheckCondition(cinds,
+                   {{"-", "-", "-", "Actor", "18", "Sud, Kap", "USA, Cal, LA", "Schauspieler"},
+                    0.2449,
+                    0.2449});
+    CheckCondition(cinds, {{"-", "18", "-", "Mel Sheppard", "18", "Athlette"}, 1.0, 1.0});
+}
+
 }  // namespace tests

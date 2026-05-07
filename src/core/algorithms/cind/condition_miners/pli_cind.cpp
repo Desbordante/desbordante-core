@@ -7,22 +7,13 @@
 #include <utility>
 #include <vector>
 
-#include <boost/container_hash/hash.hpp>
-
 #include "core/algorithms/cind/condition.h"
 #include "core/algorithms/cind/condition_miners/position_lists_set.h"
 #include "core/algorithms/cind/types.h"
+#include "core/algorithms/cind/utils.h"
 #include "core/model/table/encoded_column_data.h"
 
 namespace algos::cind {
-
-namespace {
-struct VectorIntHash {
-    std::size_t operator()(std::vector<int> const& vec) const noexcept {
-        return boost::hash_value(vec);
-    }
-};
-}  // namespace
 
 PliCind::PliCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
 
@@ -36,32 +27,23 @@ CIND PliCind::ExecuteSingle(model::IND const& aind) {
 }
 
 std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes const& attrs) {
-    std::unordered_set<std::vector<int>, VectorIntHash> rhs_values;
+    std::unordered_set<std::vector<int>, utils::VecIntHash> rhs_values;
     for (size_t index = 0; index < attrs.rhs_inclusion.front()->GetNumRows(); ++index) {
-        std::vector<int> row;
-        row.reserve(attrs.rhs_inclusion.size());
-        for (auto const& attr : attrs.rhs_inclusion) {
-            row.push_back(attr->GetValue(index));
-        }
-        rhs_values.insert(std::move(row));
+        rhs_values.insert(utils::MakeKey(index, attrs.rhs_inclusion));
     }
 
     // included row_id for rows, group_id for groups
     std::vector<int> included_pos;
 
     bool const is_group = (condition_type_._value == CondType::group);
-    std::unordered_map<std::vector<int>, int, VectorIntHash> group_idx;
+    std::unordered_map<std::vector<int>, int, utils::VecIntHash> group_idx;
     std::vector<int> row_to_group;
     if (is_group) {
         row_to_group.reserve(attrs.lhs_inclusion.front()->GetNumRows());
     }
 
     for (size_t index = 0; index < attrs.lhs_inclusion.front()->GetNumRows(); ++index) {
-        std::vector<int> row;
-        row.reserve(attrs.lhs_inclusion.size());
-        for (auto const& attr : attrs.lhs_inclusion) {
-            row.push_back(attr->GetValue(index));
-        }
+        std::vector<int> row = utils::MakeKey(index, attrs.lhs_inclusion);
 
         int included_pos_id = static_cast<int>(index);
 
