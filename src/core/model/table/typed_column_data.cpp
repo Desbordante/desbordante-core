@@ -5,6 +5,7 @@
 
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/create_type.h"
+#include "core/model/types/type_deduction.h"
 
 namespace {
 
@@ -20,69 +21,6 @@ size_t GetNextAlignedOffset(size_t cur_offset, size_t align) {
 }  // namespace
 
 namespace model {
-
-TypeId TypedColumnDataFactory::DeduceColumnType() const {
-    bool is_undefined = true;
-    std::bitset<5> candidate_types_bitset("11111");
-    TypeId first_type_id = +TypeId::kUndefined;
-    for (std::size_t i = 0; i != unparsed_.size(); ++i) {
-        if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
-            is_undefined = false;
-            if (first_type_id != +TypeId::kUndefined) {
-                auto& type_check = kTypeIdToChecker.at(first_type_id);
-                if (type_check(unparsed_[i])) {
-                    // undelimited and delimited dates have different bitsets
-                    if (first_type_id == +TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) {
-                        candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
-                    }
-                    continue;
-                }
-            }
-
-            std::bitset<5> new_candidate_types_bitset("00000");
-            bool matched = false;
-            for (auto const& [type_id, type_check] : kTypeIdToChecker) {
-                if (type_id != first_type_id && type_check(unparsed_[i])) {
-                    if (first_type_id == +TypeId::kUndefined && !matched) {
-                        first_type_id = type_id;
-                    }
-                    matched = true;
-                    new_candidate_types_bitset |= kTypeIdToBitset.at(type_id);
-                    // possible value types are known at the first match except for dates
-                    // (undelimited dates could be ints or doubles and delimited couldn't)
-                    if (type_id == +TypeId::kDate && kUndelimitedDateCheck(unparsed_[i])) {
-                        new_candidate_types_bitset |= kTypeIdToBitset.at(+TypeId::kInt);
-                    }
-                    break;
-                }
-            }
-            if (!matched) {
-                new_candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
-            }
-
-            candidate_types_bitset &= new_candidate_types_bitset;
-            if (candidate_types_bitset.none()) {
-                if (treat_mixed_as_string_) {
-                    candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
-                } else {
-                    return +TypeId::kMixed;
-                }
-            }
-        }
-    }
-
-    if (is_undefined) {
-        return +TypeId::kUndefined;
-    }
-
-    for (std::size_t i = 0; i < 5; i++) {
-        if (candidate_types_bitset[i]) {
-            return kAllCandidateTypes[i];
-        }
-    }
-
-    return +TypeId::kMixed;
-}
 
 TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap(TypeId const type_id) const {
     TypeMap type_map;
@@ -246,7 +184,7 @@ TypedColumnData TypedColumnDataFactory::CreateFromTypeMap(std::unique_ptr<Type c
 }
 
 TypedColumnData TypedColumnDataFactory::CreateFrom() {
-    TypeId const type_id = DeduceColumnType();
+    TypeId const type_id = DeduceColumnType(unparsed_, treat_mixed_as_string_);
     TypeMap type_map = CreateTypeMap(type_id);
 
     return CreateFromTypeMap(CreateType(type_id, is_null_equal_null_), std::move(type_map));

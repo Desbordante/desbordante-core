@@ -20,9 +20,11 @@
 namespace algos {
 
 namespace dc {
+
+using Violation = std::pair<size_t, size_t>;
+
 struct SetComparator {
-    bool operator()(std::pair<size_t, size_t> const& lhs,
-                    std::pair<size_t, size_t> const& rhs) const {
+    bool operator()(Violation const& lhs, Violation const& rhs) const {
         return (lhs.first != rhs.first) ? (lhs.first < rhs.first) : (lhs.second < rhs.second);
     }
 };
@@ -39,20 +41,24 @@ private:
     // If a certain pair contains equal left and right record number
     // it means that that DC is a one-tuple one and it sufficient
     // for a single tuple to violate it. e.g. {{2, 2}}
-    std::set<std::pair<size_t, size_t>, dc::SetComparator> violations_;
+    std::set<dc::Violation, dc::SetComparator> violations_;
     std::unique_ptr<ColumnLayoutRelationData> relation_;
     std::vector<model::TypedColumnData> data_;
-    config::InputTable input_table_;
-    bool do_collect_violations_;
-    std::string dc_string_;
     size_t index_offset_;
     bool result_;
+    dc::DC dc_;
+
+    // options
+    config::InputTable input_table_;
+    std::string dc_string_;
+    bool do_collect_violations_;
+    bool enable_ordering_;
 
     void RegisterOptions();
 
     void MakeExecuteOptsAvailable();
 
-    bool Verify(dc::DC dc);
+    bool Verify(std::string dc);
 
     bool VerifyOneTuple(dc::DC const& dc);
 
@@ -107,6 +113,10 @@ private:
         }
     }
 
+    void EnrichViolations();
+
+    bool ViolationHolds(size_t s_ind, size_t t_ind, dc::DC const& dc);
+
 public:
     DCVerifier();
 
@@ -114,13 +124,22 @@ public:
         return result_;
     }
 
-    std::vector<std::pair<size_t, size_t>> GetViolations() {
+    std::vector<dc::Violation> GetViolations() {
+        if (enable_ordering_) EnrichViolations();
         return {violations_.begin(), violations_.end()};
     }
 
     void ResetState() final {
         violations_.clear();
     };
+
+    size_t GetIndexOffset() const noexcept {
+        assert(relation_);
+        std::string col_name = relation_->GetSchema()->GetColumns().front().get()->GetName();
+        boost::regex re("[0-9]+");
+        bool has_header = !boost::regex_match(col_name, re);
+        return 1 + static_cast<size_t>(has_header);
+    }
 
     void LoadDataInternal() final;
     unsigned long long int ExecuteInternal() final;

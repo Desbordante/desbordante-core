@@ -49,6 +49,16 @@ add_library(frozen INTERFACE)
 target_include_directories(frozen SYSTEM INTERFACE "${frozen_SOURCE_DIR}/include")
 
 CPMAddPackage(
+    NAME roaring
+    GITHUB_REPOSITORY RoaringBitmap/CRoaring
+    GIT_TAG v2.1.2
+    OPTIONS "ROARING_BUILD_TESTS OFF" "ROARING_BUILD_BENCHMARKS OFF"
+    SYSTEM YES
+)
+# add_library(roaring INTERFACE)
+# target_include_directories(roaring SYSTEM INTERFACE "${roaring_SOURCE_DIR}/include")
+
+CPMAddPackage(
     NAME better-enums
     GITHUB_REPOSITORY aantron/better-enums
     GIT_TAG 0.11.3

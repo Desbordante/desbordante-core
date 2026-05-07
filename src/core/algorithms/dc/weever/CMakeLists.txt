@@ -1,6 +1,6 @@
-set(NAME dc.verifier)
+set(NAME dc.weever)
 desbordante_add_lib(NAME)
-target_sources(${NAME} PRIVATE dc_verifier.cpp)
+target_sources(${NAME} PRIVATE weever.cpp)
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::model::table
@@ -10,6 +10,6 @@ target_link_libraries(
             spdlog::spdlog_header_only
             frozen
             better-enums
-            Boost::headers
             roaring
+            Boost::headers
 )

@@ -72,6 +72,7 @@ extern CSVConfig const kRulesSynthetic2;
 extern CSVConfig const kSimpleTypes;
 extern CSVConfig const kSimpleTypes1;
 extern CSVConfig const kSimpleTypos;
+extern CSVConfig const kTax;
 extern CSVConfig const kTennis;
 extern CSVConfig const kTest1;
 extern CSVConfig const kTestCINDEn;

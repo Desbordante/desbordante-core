@@ -27,6 +27,8 @@ target_link_libraries(
             Boost::headers
             Desbordante.bindlib.util
             Desbordante.bindlib.data
+            frozen
+            roaring
 )
 
 # Uncomment to debug linker issues
@@ -109,14 +111,17 @@ desbordante_add_bind(
     SRCS
     dc/bind_dc_verification.cpp
     dc/bind_fastadc.cpp
+    dc/bind_weever.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dc::verifier
     ${DESBORDANTE_PREFIX}::dc::fastadc
+    ${DESBORDANTE_PREFIX}::dc::weever
     frozen
     better-enums
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers
+    roaring
 )
 
 desbordante_add_bind(
@@ -154,6 +159,7 @@ desbordante_add_bind(
     better-enums
     spdlog::spdlog_header_only
     Boost::headers
+    frozen
 )
 
 desbordante_add_bind(
@@ -165,6 +171,8 @@ desbordante_add_bind(
     better-enums
     spdlog::spdlog_header_only
     Boost::headers
+    frozen
+    roaring
 )
 
 desbordante_add_bind(

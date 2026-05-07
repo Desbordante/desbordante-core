@@ -67,6 +67,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::ucc::pyro
               ${DESBORDANTE_PREFIX}::ucc::hpivalid
               ${DESBORDANTE_PREFIX}::ucc::verifier
+              ${DESBORDANTE_PREFIX}::dc::weever
 )
 
 set(NAME algos)
@@ -76,5 +77,5 @@ target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
             ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only better-enums
-            Boost::headers
+            Boost::headers frozen roaring
 )

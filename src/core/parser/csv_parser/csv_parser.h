@@ -29,6 +29,7 @@ private:
     std::string next_line_;
     int number_of_columns_;
     std::vector<std::string> column_names_;
+    std::filesystem::path path_;
     std::string relation_name_;
     void GetNext();
     void PeekNext();
@@ -67,6 +68,14 @@ public:
 
     std::string GetRelationName() const override {
         return relation_name_;
+    }
+
+    std::filesystem::path const& GetPath() const {
+        return path_;
+    }
+
+    bool HasHeader() const noexcept {
+        return has_header_;
     }
 
     void Reset() override;

@@ -41,6 +41,10 @@ public:
         return op_;
     }
 
+    void Inverse() {
+        op_ = kInverseMap.at(op_);
+    }
+
     static constexpr frozen::unordered_map<OperatorType, frozen::string, 6> kOperatorTypeToString{
             {OperatorType::kEqual, "=="},        {OperatorType::kUnequal, "!="},
             {OperatorType::kGreater, ">"},       {OperatorType::kLess, "<"},
@@ -50,6 +54,15 @@ public:
             {"==", OperatorType::kEqual},        {"!=", OperatorType::kUnequal},
             {">", OperatorType::kGreater},       {"<", OperatorType::kLess},
             {">=", OperatorType::kGreaterEqual}, {"<=", OperatorType::kLessEqual}};
+
+    static constexpr frozen::unordered_map<OperatorType, OperatorType, 6> kInverseMap{
+            {OperatorType::kEqual, OperatorType::kUnequal},
+            {OperatorType::kUnequal, OperatorType::kEqual},
+            {OperatorType::kGreater, OperatorType::kLessEqual},
+            {OperatorType::kLess, OperatorType::kGreaterEqual},
+            {OperatorType::kGreaterEqual, OperatorType::kLess},
+            {OperatorType::kLessEqual, OperatorType::kGreater},
+    };
 };
 
 }  // namespace algos::dc

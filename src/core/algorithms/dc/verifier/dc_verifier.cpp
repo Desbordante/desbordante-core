@@ -51,35 +51,27 @@ void DCVerifier::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option<bool>(&do_collect_violations_, kDoCollectViolations,
                                 kDDoCollectViolations, false));
+    RegisterOption(Option<bool>(&enable_ordering_, kEnableOrdering, kDEnableOrdering, false));
 }
 
 void DCVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::names::kDenialConstraint});
     MakeOptionsAvailable({config::names::kDoCollectViolations});
+    MakeOptionsAvailable({config::names::kEnableOrdering});
 }
 
 void DCVerifier::LoadDataInternal() {
     data_ = model::CreateTypedColumnData(*input_table_, true);
     input_table_->Reset();
     relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+    index_offset_ = GetIndexOffset();
 }
 
 unsigned long long int DCVerifier::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
-    dc::DC dc;
-    try {
-        dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
-        dc = parser.Parse();
-    } catch (std::exception const& e) {
-        LOG_INFO("{}", e.what());
-        return 0;
-    }
-
-    std::string col_name = relation_->GetSchema()->GetColumns().front().get()->GetName();
-    boost::regex re("[0-9]+");
-    bool has_header = !boost::regex_match(col_name, re);
-    index_offset_ = 1 + static_cast<size_t>(has_header);
-    result_ = Verify(dc);
+    LOG_DEBUG("[DCVerifier] Start verification");
+    result_ = Verify({dc_string_});
+    LOG_DEBUG("[DCVerifier] End verification");
 
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start);
@@ -87,10 +79,23 @@ unsigned long long int DCVerifier::ExecuteInternal() {
     return elapsed_time.count();
 }
 
-bool DCVerifier::Verify(dc::DC dc) {
-    dc.ConvertEqualities();
+bool DCVerifier::Verify(std::string dc_string) {
+    try {
+        std::vector<model::Type const*> types;
+        for (auto const& col : data_) {
+            types.push_back(&col.GetType());
+        }
+
+        dc::DCParser parser = dc::DCParser(dc_string, relation_->GetSchema(), types);
+        dc_ = parser.Parse();
+    } catch (std::exception const& e) {
+        LOG_INFO("{}", e.what());
+        return 0;
+    }
+
+    dc_.ConvertEqualities();
     std::vector<dc::Predicate> no_diseq_preds, diseq_preds;
-    std::vector<dc::Predicate> predicates = dc.GetPredicates();
+    std::vector<dc::Predicate> predicates = dc_.GetPredicates();
 
     for (auto& pred : predicates) {
         auto op = pred.GetOperator();
@@ -104,7 +109,7 @@ bool DCVerifier::Verify(dc::DC dc) {
 
     size_t diseq_preds_count = diseq_preds.size();
     size_t all_comb_count = std::pow(2, diseq_preds_count);
-    dc::DCType dc_type = dc.GetType();
+    dc::DCType dc_type = dc_.GetType();
 
     // Otherwise it is not possible to collect violations
     if (dc_type == dc::DCType::kOneInequality and do_collect_violations_ == true)
@@ -465,6 +470,36 @@ bool DCVerifier::ContainsNullOrEmpty(std::vector<mo::ColumnIndex> const& indices
                                      size_t tuple_ind) const {
     auto l = [this, tuple_ind](mo::ColumnIndex ind) { return data_[ind].IsNullOrEmpty(tuple_ind); };
     return std::any_of(indices.begin(), indices.end(), l);
+}
+
+bool DCVerifier::ViolationHolds(size_t s_ind, size_t t_ind, dc::DC const& dc) {
+    std::vector<std::byte const*> s_row = GetRow(s_ind - index_offset_);
+    std::vector<std::byte const*> t_row = GetRow(t_ind - index_offset_);
+
+    std::vector<dc::Predicate> predicates = dc.GetPredicates();
+    return std::ranges::all_of(predicates, [&s_row, &t_row](dc::Predicate const& pred) {
+        return pred.Eval(s_row, t_row);
+    });
+}
+
+void DCVerifier::EnrichViolations() {
+    std::vector<dc::Violation> new_violations;
+    LOG_DEBUG("[DCVerifier] Enrich violations start, violations_ size: {}", violations_.size());
+    for (dc::Violation const& v : violations_) {
+        if (v.first == v.second) {
+            new_violations.push_back({v.first, v.second});
+            continue;
+        }
+        if (ViolationHolds(v.second, v.first, dc_)) {
+            new_violations.push_back({v.second, v.first});
+        }
+        if (ViolationHolds(v.first, v.second, dc_)) {
+            new_violations.push_back({v.first, v.second});
+        }
+    }
+    LOG_DEBUG("[DCVerifier] Enrich violations end");
+    violations_.clear();
+    violations_.insert(new_violations.begin(), new_violations.end());
 }
 
 }  // namespace algos

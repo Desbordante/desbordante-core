@@ -8,17 +8,17 @@
 #include "core/algorithms/dc/model/dc.h"
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
-#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/typed_column_data.h"
 
 namespace mo = model;
 
 namespace algos::dc {
 
-DCParser::DCParser(std::string dc_string, ColumnLayoutRelationData const* relation,
-                   std::vector<model::TypedColumnData> const& data)
-    : relation_(relation),
-      data_(data),
+DCParser::DCParser(std::string dc_string, RelationalSchema const* schema,
+                   std::vector<model::Type const*> const& types)
+    : schema_(schema),
+      types_(types),
       dc_string_(std::move(dc_string)),
       has_next_predicate_(true),
       cur_(0) {
@@ -136,7 +136,7 @@ bool DCParser::IsVarOperand(std::string op) const {
 ColumnOperand DCParser::ConvertToVariableOperand(std::string const& operand) const {
     dc::Tuple tuple = operand.front() == 't' ? dc::Tuple::kT : dc::Tuple::kS;
     std::string name = operand.substr(2);
-    std::vector<std::unique_ptr<Column>> const& cols = relation_->GetSchema()->GetColumns();
+    std::vector<std::unique_ptr<Column>> const& cols = schema_->GetColumns();
     std::vector<std::unique_ptr<Column>>::const_iterator it;
     if (!cols.front()->GetName().empty()) {  // Has header
         auto pred = [&name](auto const& col) { return name == col->GetName(); };
@@ -157,7 +157,7 @@ ColumnOperand DCParser::ConvertToVariableOperand(std::string const& operand) con
     }
 
     size_t col_ind = column->GetIndex();
-    return {column, tuple, &data_[col_ind].GetType()};
+    return {column, tuple, types_[col_ind]};
 }
 
 }  // namespace algos::dc

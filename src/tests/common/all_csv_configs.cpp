@@ -86,6 +86,7 @@ CSVConfig const kSimpleTypes = CreateCsvConfig("SimpleTypes.csv", ',', true);
 CSVConfig const kSimpleTypes1 = CreateCsvConfig("SimpleTypes1.csv", ',', true);
 CSVConfig const kSimpleTypos = CreateCsvConfig("SimpleTypos.csv", ',', true);
 CSVConfig const kTennis = CreateCsvConfig("cfd_data/tennis.csv", ',', true);
+CSVConfig const kTax = CreateCsvConfig("Tax.csv", ',', true);
 CSVConfig const kTest1 = CreateCsvConfig("Test1.csv", ',', true);
 CSVConfig const kTestCINDEn = CreateCsvConfig("cind/cind_test_en.csv", ',', true);
 CSVConfig const kTestCINDDe = CreateCsvConfig("cind/cind_test_de.csv", ',', true);

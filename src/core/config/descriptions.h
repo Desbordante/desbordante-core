@@ -125,6 +125,8 @@ constexpr auto kDMinStructuralZeroesAmount =
 constexpr auto kDOnlySFD = "Don't mine correlations";
 // DC verifier
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
+constexpr auto kDEnableOrdering =
+        "When off violations pairs (a, b) and (b, a) are not distinguishable";
 // DD verifier
 constexpr auto kDDDString = "Differential dependency that needs to be verified";
 // DES

@@ -32,6 +32,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- AR ---
@@ -46,6 +48,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- CFD ---
@@ -62,6 +66,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 
 desbordante_add_test(
@@ -89,6 +95,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- CSV ---
@@ -114,6 +122,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- DC ---
@@ -132,6 +142,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     dc.verifier
@@ -139,12 +151,49 @@ desbordante_add_test(
     test_dc_verifier.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::dc::fastadc
+    ${DESBORDANTE_PREFIX}::dc::fastadc::structs
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    frozen
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
+)
+desbordante_add_test(
+    dc.weever
+    SRCS
+    test_weever.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::dc::weever
+    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::testlib::mock
+    ${DESBORDANTE_PREFIX}::parser::csv
+    spdlog::spdlog_header_only
+    better-enums
+    Boost::headers
+    gmock
+    frozen
+    roaring
+)
+desbordante_add_test(
+    dc.weever.benchmark
+    SRCS
+    benchmark_weever.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::dc::weever
+    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::testlib::mock
+    ${DESBORDANTE_PREFIX}::parser::csv
+    spdlog::spdlog_header_only
+    better-enums
+    Boost::headers
+    gmock
+    frozen
+    roaring
 )
 
 # --- DD ---
@@ -158,6 +207,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     dd.split
@@ -169,6 +220,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- DES ---
@@ -186,6 +239,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- FD ---
@@ -211,6 +266,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.approx
@@ -227,6 +284,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.afd_metric
@@ -239,6 +298,8 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.mine
@@ -256,6 +317,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.tane.pfd
@@ -270,6 +333,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.pfd_verifier
@@ -282,6 +347,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.sfd.cords
@@ -295,6 +362,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.tane
@@ -309,6 +378,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.verifier.dynamic
@@ -323,6 +394,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     fd.verifier
@@ -336,6 +409,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- GFD ---
@@ -350,6 +425,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     gfd.validator
@@ -362,21 +439,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
-)
-
-# --- FSM ---
-desbordante_add_test(
-    fsm.gspan
-    SRCS
-    test_gspan.cpp
-    LIBS
-    ${DESBORDANTE_PREFIX}::fsm::gspan
-    ${DESBORDANTE_PREFIX}::testlib::common
-    ${DESBORDANTE_PREFIX}::algos
-    spdlog::spdlog_header_only
-    better-enums
-    gmock
-    Boost::headers
+    frozen
+    roaring
 )
 
 # --- IND ---
@@ -396,6 +460,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     ind.faida
@@ -409,6 +475,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     ind.verifier
@@ -421,6 +489,8 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     better-enums
     Boost::headers
+    frozen
+    roaring
 )
 
 # --- Model ---
@@ -444,6 +514,8 @@ desbordante_add_test(
     better-enums
     gmock
     Boost::headers
+    frozen
+    roaring
 )
 desbordante_add_test(
     model.table
@@ -456,6 +528,17 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::parser::csv
     better-enums
     Boost::headers
+)
+desbordante_add_test(
+    model.dynamic_row_table
+    SRCS
+    test_typed_dynamic_row_table_data.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::model::types
+    ${DESBORDANTE_PREFIX}::util
+    better-enums
+    Boost::headers
+    spdlog::spdlog_header_only
 )
 
 # --- ND ---
@@ -470,6 +553,8 @@ desbordante_add_test(
     better-enums
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 
 # --- MD ---
@@ -485,6 +570,8 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 desbordante_add_test(
     md.metrics
@@ -497,6 +584,8 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 desbordante_add_test(
     md.verifier
@@ -510,6 +599,8 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 
 # --- Metric ---
@@ -524,6 +615,8 @@ desbordante_add_test(
     better-enums
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 
 # --- OD ---
@@ -538,6 +631,8 @@ desbordante_add_test(
     better-enums
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 desbordante_add_test(
     od.order
@@ -550,6 +645,8 @@ desbordante_add_test(
     better-enums
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 desbordante_add_test(
     od.set_based_aod_verifier
@@ -563,6 +660,8 @@ desbordante_add_test(
     better-enums
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    frozen
+    roaring
 )
 
 # --- UCC ---
@@ -584,6 +683,8 @@ desbordante_add_test(
     gmock
     Boost::headers
     ${DESBORDANTE_PREFIX}::fd::hy::model
+    frozen
+    roaring
 )
 desbordante_add_test(
     ucc.verifier
@@ -599,6 +700,8 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::fd::hy::model
+    frozen
+    roaring
 )
 
 # --- Util ---
@@ -614,4 +717,14 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+)
+
+desbordante_add_test(
+    lttree
+    SRCS
+    test_lttree.cpp
+    LIBS
+    gmock
+    roaring
+    spdlog
 )
