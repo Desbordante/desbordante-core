@@ -2147,7 +2147,7 @@ References:
 
 '''
 
-snapshots['test_example[basic/mining_cind_cure.py-None-mining_cind_cure_output] mining_cind_cure_output'] = '''================================================================================
+snapshots['test_example[basic/mining_cind_2.py-None-mining_cind_2_output] mining_cind_2_output'] = '''================================================================================
 \x1b[1;36mDiscovering CINDs with the Cure algorithm\x1b[0m
 ================================================================================
 In this example we discover Conditional Inclusion Dependencies with the Cure
