@@ -21,6 +21,10 @@ if(POLICY CMP0175)
     cmake_policy(SET CMP0175 NEW)
 endif()
 
+# ---- Default flags ----
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-O0")
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O3")
+
 # ---- Project ----
 
 project(
@@ -118,9 +122,7 @@ if(DESBORDANTE_BUILD_NATIVE)
     string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
 endif()
 
-# RELEASE build options
-string(JOIN ";" RELEASE_BUILD_OPTS "${BUILD_OPTS}" "-O3")
-
+set(RELEASE_BUILD_OPTS ${BUILD_OPTS})
 set(DEBUG_BUILD_OPTS "${BUILD_OPTS}")
 
 # Set common DEBUG build options
@@ -169,7 +171,6 @@ if(ASAN)
         ";"
         DEBUG_BUILD_OPTS
         "${DEBUG_BUILD_OPTS}"
-        "-O1"
         "-Wno-error" # Use of -Werror is discouraged with sanitizers
         # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
         "${ASAN_OPTS}"
@@ -196,11 +197,8 @@ elseif(UBSAN)
                "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt"
         )
     endif()
-    string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-O1" "${UBSAN_OPTS}")
+    string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "${UBSAN_OPTS}")
     set(DEBUG_LINK_OPTS "${UBSAN_OPTS}")
-else()
-    # No sanitizer, just debug build
-    string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-O0")
 endif()
 
 if(DESBORDANTE_GDB_SYMBOLS)
