@@ -64,7 +64,7 @@ option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
 # - Enabled for wide datasets (>32 columns) with potential performance penalty
 option(DESBORDANTE_SAFE_VERTICAL_HASHING
        "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
-    at the cost of reduced performance. Recommended for exploratory data analysis." OFF
+       at the cost of reduced performance. Recommended for exploratory data analysis." ON
 )
 option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
