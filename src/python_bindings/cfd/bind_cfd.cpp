@@ -13,36 +13,22 @@
 #include "core/algorithms/cfd/model/raw_cfd.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace py = pybind11;
 
 namespace {
-template <typename ElementType>
-py::tuple VectorToTuple(std::vector<ElementType> vec) {
-    size_t const size = vec.size();
-    py::tuple tuple(size);
-    for (size_t i = 0; i < size; ++i) {
-        tuple[i] = std::move(vec[i]);
-    }
-    return tuple;
-}
-
-template <typename ElementType>
-py::tuple VectorVectorToTuple(std::vector<std::vector<ElementType>> vec) {
-    size_t const size = vec.size();
-    py::tuple tuple(size);
-    for (size_t i = 0; i < size; ++i) {
-        tuple[i] = VectorToTuple(std::move(vec[i]));
-    }
-    return tuple;
-}
-
 py::tuple MakeCfdTuple(algos::cfd::cfun::CCFD const& cfd) {
     auto [lhs, rhs] = cfd.GetEmbeddedFd().ToNameTuple();
-    auto tableau = cfd.GetTableau();
-    return py::make_tuple(VectorToTuple(std::move(lhs)), std::move(rhs),
-                          VectorVectorToTuple(std::move(tableau)), cfd.GetSupport());
+    auto get_pattern_tuple = [](algos::cfd::cfun::CCFD::Condition const& pattern) {
+        return python_bindings::VectorToTuple(pattern);
+    };
+    return py::make_tuple(
+            python_bindings::VectorToTuple(lhs), std::move(rhs),
+            python_bindings::VectorToTuple(cfd.GetTableau(), std::move(get_pattern_tuple)),
+            cfd.GetSupport());
 }
+}  // namespace
 
 void BindFdFirst(py::module_& cfd_module) {
     using namespace algos::cfd;
@@ -111,8 +97,12 @@ void BindCfun(pybind11::module_& cfd_module) {
 
                         auto embedded_fd_tuple =
                                 py::make_tuple(std::move(schema), std::move(lhs), std::move(rhs));
-                        auto tableau = cfd.GetTableau();
-                        auto tableau_tuple = VectorVectorToTuple(std::move(tableau));
+                        auto get_pattern_tuple =
+                                [](algos::cfd::cfun::CCFD::Condition const& pattern) {
+                                    return python_bindings::VectorToTuple(pattern);
+                                };
+                        auto tableau_tuple = python_bindings::VectorToTuple(
+                                cfd.GetTableau(), std::move(get_pattern_tuple));
                         return py::make_tuple(std::move(embedded_fd_tuple),
                                               std::move(tableau_tuple), cfd.GetSupport());
                     },
@@ -150,8 +140,6 @@ void BindCfun(pybind11::module_& cfd_module) {
                         return CCFD(std::move(embedded_fd), std::move(tableau), support);
                     }));
 }
-
-}  // namespace
 
 namespace python_bindings {
 
