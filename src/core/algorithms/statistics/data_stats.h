@@ -83,10 +83,9 @@ protected:
     // Общая функция-движок для всех корреляций
     template <typename CalcFunc>
     Statistic GetOrCalcCorrelation(
-        size_t i1, size_t i2, 
-        std::map<std::pair<size_t, size_t>, Statistic>& cache,
-        bool numeric_only,
-        CalcFunc calc_func) const { // <--- ОБЯЗАТЕЛЬНО ДОБАВЬ const ЗДЕСЬ
+            size_t i1, size_t i2, std::map<std::pair<size_t, size_t>, Statistic>& cache,
+            bool numeric_only,
+            CalcFunc calc_func) const {  // <--- ОБЯЗАТЕЛЬНО ДОБАВЬ const ЗДЕСЬ
 
         if (numeric_only) {
             // Проверь, как у тебя называется доступ к типу: .type-> или .GetType().
@@ -96,8 +95,8 @@ protected:
         }
 
         if (i1 == i2) {
-        mo::DoubleType double_type;
-        return Statistic(double_type.MakeValue(1.0), &double_type, false);
+            mo::DoubleType double_type;
+            return Statistic(double_type.MakeValue(1.0), &double_type, false);
         }
 
         auto key = std::make_pair(std::min(i1, i2), std::max(i1, i2));
@@ -105,10 +104,10 @@ protected:
             return it->second;
         }
 
-    Statistic result = calc_func(i1, i2);
-    cache[key] = result;
-    return result;
-}
+        Statistic result = calc_func(i1, i2);
+        cache[key] = result;
+        return result;
+    }
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
