@@ -36,9 +36,9 @@ public:
         };
 
         auto run_sized = [&]<std::size_t Bits>() {
-            auto clue_set = thread_pool
-                                    ? BuildClueSetParallelSized<Bits>(pli_shards, packs, *thread_pool)
-                                    : BuildClueSetSized<Bits>(pli_shards, packs);
+            auto clue_set =
+                    thread_pool ? BuildClueSetParallelSized<Bits>(pli_shards, packs, *thread_pool)
+                                : BuildClueSetSized<Bits>(pli_shards, packs);
             consume(clue_set);
         };
 

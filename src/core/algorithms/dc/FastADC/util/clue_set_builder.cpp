@@ -39,7 +39,7 @@ ClueSetT<ClueT> BuildClueSetScalar(std::vector<PliShard> const& pli_shards,
         for (size_t j = i; j < pli_shards.size(); j++) {
             if (i == j) {
                 SingleClueSetBuilderT<ClueT>{pli_shards[i]}.BuildClueSet(packs, forward_clues,
-                                                                        partial_clue_set);
+                                                                         partial_clue_set);
             } else {
                 CrossClueSetBuilderT<ClueT>{pli_shards[i], pli_shards[j]}.BuildClueSet(
                         packs, forward_clues, reverse_clues, partial_clue_set);
