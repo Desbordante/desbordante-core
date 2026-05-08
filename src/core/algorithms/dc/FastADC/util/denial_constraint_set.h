@@ -24,7 +24,9 @@ private:
         bool operator()(DenialConstraint const& lhs, DenialConstraint const& rhs) const;
     };
 
-    std::unordered_set<DenialConstraint, DCHash, DCEqual> constraints_;
+    using ConstraintsSet = std::unordered_set<DenialConstraint, DCHash, DCEqual>;
+
+    ConstraintsSet constraints_;
     std::vector<DenialConstraint> result_;
     PredicateProvider* predicate_provider_;
 
@@ -141,7 +143,7 @@ public:
     }
 
     void Clear() {
-        constraints_ = decltype(constraints_)(0, DCHash(nullptr), DCEqual(nullptr));
+        constraints_ = ConstraintsSet(0, DCHash(nullptr), DCEqual(nullptr));
         result_.clear();
         predicate_provider_ = nullptr;
     }

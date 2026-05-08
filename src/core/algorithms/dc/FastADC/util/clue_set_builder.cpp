@@ -15,18 +15,18 @@ namespace algos::fastadc {
 namespace {
 
 template <typename ClueT>
-ClueSetT<ClueT> BuildClueSetScalar(std::vector<PliShard> const& pliShards,
+ClueSetT<ClueT> BuildClueSetScalar(std::vector<PliShard> const& pli_shards,
                                    PredicatePacks const& packs) {
-    if (pliShards.empty()) {
+    if (pli_shards.empty()) {
         return {};
     }
 
     ClueSetT<ClueT> clue_set;
     ClueSetT<ClueT> partial_clue_set;
 
-    // Range of all pliShards is equal, so it's safe to pass a pre-allocated vector of
-    // pliShards[0]'s range
-    size_t range = pliShards[0].Range();
+    // Range of all pli_shards is equal, so it's safe to pass a pre-allocated vector of
+    // pli_shards[0]'s range
+    size_t range = pli_shards[0].Range();
     size_t evidence_count = range * range;
 
     clue_set.reserve(range * 2);
@@ -35,13 +35,13 @@ ClueSetT<ClueT> BuildClueSetScalar(std::vector<PliShard> const& pliShards,
     std::vector<ClueT> forward_clues(evidence_count, ClueT{});
     std::vector<ClueT> reverse_clues(evidence_count, ClueT{});
 
-    for (size_t i = 0; i < pliShards.size(); i++) {
-        for (size_t j = i; j < pliShards.size(); j++) {
+    for (size_t i = 0; i < pli_shards.size(); i++) {
+        for (size_t j = i; j < pli_shards.size(); j++) {
             if (i == j) {
-                SingleClueSetBuilderT<ClueT>{pliShards[i]}.BuildClueSet(packs, forward_clues,
+                SingleClueSetBuilderT<ClueT>{pli_shards[i]}.BuildClueSet(packs, forward_clues,
                                                                         partial_clue_set);
             } else {
-                CrossClueSetBuilderT<ClueT>{pliShards[i], pliShards[j]}.BuildClueSet(
+                CrossClueSetBuilderT<ClueT>{pli_shards[i], pli_shards[j]}.BuildClueSet(
                         packs, forward_clues, reverse_clues, partial_clue_set);
             }
 
@@ -96,21 +96,21 @@ struct ThreadLocalBuffersT {
 };
 
 template <typename ClueT>
-ClueSetT<ClueT> BuildClueSetParallelScalar(std::vector<PliShard> const& pliShards,
+ClueSetT<ClueT> BuildClueSetParallelScalar(std::vector<PliShard> const& pli_shards,
                                            PredicatePacks const& packs,
                                            util::WorkerThreadPool* thread_pool) {
     if (!thread_pool) {
-        return BuildClueSetScalar<ClueT>(pliShards, packs);
+        return BuildClueSetScalar<ClueT>(pli_shards, packs);
     }
 
-    size_t const n_shards = pliShards.size();
+    size_t const n_shards = pli_shards.size();
     size_t const task_count = (n_shards * (n_shards + 1)) / 2;
 
     if (task_count <= 1) {
-        return BuildClueSetScalar<ClueT>(pliShards, packs);
+        return BuildClueSetScalar<ClueT>(pli_shards, packs);
     }
 
-    size_t const range = pliShards[0].Range();
+    size_t const range = pli_shards[0].Range();
     size_t const evidence_count = range * range;
 
     ClueSetT<ClueT> global_clue_set;
@@ -118,7 +118,7 @@ ClueSetT<ClueT> BuildClueSetParallelScalar(std::vector<PliShard> const& pliShard
     std::mutex global_mutex;
 
     thread_pool->ExecIndexWithResource(
-            [&pliShards, &packs, n_shards](size_t task_id, ThreadLocalBuffersT<ClueT>& buffers) {
+            [&pli_shards, &packs, n_shards](size_t task_id, ThreadLocalBuffersT<ClueT>& buffers) {
                 auto const [i, j] = TaskIdToIndices(task_id, n_shards);
                 if (i >= n_shards || j >= n_shards) {
                     throw std::runtime_error("TaskIdToIndices produced out-of-bounds shard index");
@@ -127,10 +127,10 @@ ClueSetT<ClueT> BuildClueSetParallelScalar(std::vector<PliShard> const& pliShard
                 buffers.task_clue_set.clear();
 
                 if (i == j) {
-                    SingleClueSetBuilderT<ClueT>{pliShards[i]}.BuildClueSet(
+                    SingleClueSetBuilderT<ClueT>{pli_shards[i]}.BuildClueSet(
                             packs, buffers.forward_clues, buffers.task_clue_set);
                 } else {
-                    CrossClueSetBuilderT<ClueT>{pliShards[i], pliShards[j]}.BuildClueSet(
+                    CrossClueSetBuilderT<ClueT>{pli_shards[i], pli_shards[j]}.BuildClueSet(
                             packs, buffers.forward_clues, buffers.reverse_clues,
                             buffers.task_clue_set);
                 }
@@ -161,26 +161,26 @@ ClueSetT<ClueT> BuildClueSetParallelScalar(std::vector<PliShard> const& pliShard
 
 }  // namespace
 
-ClueSet BuildClueSet(std::vector<PliShard> const& pliShards, PredicatePacks const& packs) {
-    return BuildClueSetScalar<Clue>(pliShards, packs);
+ClueSet BuildClueSet(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs) {
+    return BuildClueSetScalar<Clue>(pli_shards, packs);
 }
 
-ClueSet BuildClueSetParallel(std::vector<PliShard> const& pliShards, PredicatePacks const& packs,
+ClueSet BuildClueSetParallel(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs,
                              util::WorkerThreadPool* thread_pool) {
-    return BuildClueSetParallelScalar<Clue>(pliShards, packs, thread_pool);
+    return BuildClueSetParallelScalar<Clue>(pli_shards, packs, thread_pool);
 }
 
 template <std::size_t Bits>
-ClueSetT<model::Bitset<Bits>> BuildClueSetSized(std::vector<PliShard> const& pliShards,
+ClueSetT<model::Bitset<Bits>> BuildClueSetSized(std::vector<PliShard> const& pli_shards,
                                                 PredicatePacks const& packs) {
-    return BuildClueSetScalar<model::Bitset<Bits>>(pliShards, packs);
+    return BuildClueSetScalar<model::Bitset<Bits>>(pli_shards, packs);
 }
 
 template <std::size_t Bits>
-ClueSetT<model::Bitset<Bits>> BuildClueSetParallelSized(std::vector<PliShard> const& pliShards,
+ClueSetT<model::Bitset<Bits>> BuildClueSetParallelSized(std::vector<PliShard> const& pli_shards,
                                                        PredicatePacks const& packs,
                                                        util::WorkerThreadPool* thread_pool) {
-    return BuildClueSetParallelScalar<model::Bitset<Bits>>(pliShards, packs, thread_pool);
+    return BuildClueSetParallelScalar<model::Bitset<Bits>>(pli_shards, packs, thread_pool);
 }
 
 template ClueSetT<model::Bitset<8>> BuildClueSetSized<8>(std::vector<PliShard> const&,

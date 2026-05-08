@@ -9,19 +9,19 @@ struct Evidence {
     PredicateBitset evidence;
 
     Evidence(PredicateBitset const& satisfied, int64_t count,
-             PredicateBitset const& cardinalityMask,
-             std::vector<PredicateBitset> const& correctionMap)
+             PredicateBitset const& cardinality_mask,
+             std::vector<PredicateBitset> const& correction_map)
         : count(count) {
-        evidence = cardinalityMask;
+        evidence = cardinality_mask;
 
         for (size_t pos = 0; pos < satisfied.size(); ++pos) {
             if (satisfied.test(pos)) {
-                evidence ^= correctionMap[pos];
+                evidence ^= correction_map[pos];
             }
         }
     }
 
-    Evidence(PredicateBitset bitSet, int64_t count) : count(count), evidence(bitSet) {}
+    Evidence(PredicateBitset bit_set, int64_t count) : count(count), evidence(bit_set) {}
 };
 
 }  // namespace algos::fastadc
