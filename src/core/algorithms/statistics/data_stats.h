@@ -9,9 +9,10 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/types/numeric_type.h"
 
 namespace algos {
-
+namespace mo = model;
 class DataStats : public Algorithm {
     config::EqNullsType is_null_equal_null_;
     config::ThreadNumType threads_num_;
@@ -74,16 +75,40 @@ class DataStats : public Algorithm {
 protected:
     config::InputTable input_table_;
 
-    struct PairHash {
-        std::size_t operator()(std::pair<size_t, size_t> const& p) const {
-            return p.first ^ (p.second << 1);
-        }
-    };
+    mutable std::map<std::pair<size_t, size_t>, Statistic> pearson_cache_;
+    mutable std::map<std::pair<size_t, size_t>, Statistic> spearman_cache_;
+    mutable std::map<std::pair<size_t, size_t>, Statistic> kendall_cache_;
+    mutable std::map<std::pair<size_t, size_t>, Statistic> cramers_v_cache_;
 
-    mutable std::unordered_map<std::pair<size_t, size_t>, Statistic, PairHash> pearson_cache_;
-    mutable std::unordered_map<std::pair<size_t, size_t>, Statistic, PairHash> spearman_cache_;
-    mutable std::unordered_map<std::pair<size_t, size_t>, Statistic, PairHash> kendall_cache_;
-    mutable std::unordered_map<std::pair<size_t, size_t>, Statistic, PairHash> cramers_v_cache_;
+    // Общая функция-движок для всех корреляций
+    template <typename CalcFunc>
+    Statistic GetOrCalcCorrelation(
+        size_t i1, size_t i2, 
+        std::map<std::pair<size_t, size_t>, Statistic>& cache,
+        bool numeric_only,
+        CalcFunc calc_func) const { // <--- ОБЯЗАТЕЛЬНО ДОБАВЬ const ЗДЕСЬ
+
+        if (numeric_only) {
+            // Проверь, как у тебя называется доступ к типу: .type-> или .GetType().
+            if (!col_data_[i1].GetType().IsNumeric() || !col_data_[i2].GetType().IsNumeric()) {
+                return {};
+            }
+        }
+
+        if (i1 == i2) {
+        mo::DoubleType double_type;
+        return Statistic(double_type.MakeValue(1.0), &double_type, false);
+        }
+
+        auto key = std::make_pair(std::min(i1, i2), std::max(i1, i2));
+        if (auto it = cache.find(key); it != cache.end()) {
+            return it->second;
+        }
+
+    Statistic result = calc_func(i1, i2);
+    cache[key] = result;
+    return result;
+}
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
