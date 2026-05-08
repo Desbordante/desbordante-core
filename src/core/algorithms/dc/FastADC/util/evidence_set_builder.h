@@ -1,8 +1,7 @@
 #pragma once
 
-#include <bit>
 #include <cstddef>
-#include <cstdint>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -24,47 +23,41 @@ public:
                     "FastADC: predicate space is too large (clue bits exceed maximum supported).");
         }
 
-        auto consume_scalar = [this](auto const& clue_set) {
+        auto consume = [this](auto const& clue_set) {
             clues_.reserve(clue_set.size());
             for (auto const& [clue, count] : clue_set) {
                 PredicateBitset bitset;
-                uint64_t tmp = static_cast<uint64_t>(clue);
-                while (tmp != 0) {
-                    auto const pos = static_cast<size_t>(std::countr_zero(tmp));
+                for (size_t pos = clue._Find_first(); pos < clue.size();
+                     pos = clue._Find_next(pos)) {
                     bitset.set(pos);
-                    tmp &= (tmp - 1);
                 }
                 clues_.emplace_back(bitset, count);
             }
         };
 
+        auto run_sized = [&]<std::size_t Bits>() {
+            auto clue_set = thread_pool
+                                    ? BuildClueSetParallelSized<Bits>(pli_shards, packs, thread_pool)
+                                    : BuildClueSetSized<Bits>(pli_shards, packs);
+            consume(clue_set);
+        };
+
         if (clue_bit_count <= 8) {
-            auto clue_set = thread_pool ? BuildClueSetParallel8(pli_shards, packs, thread_pool)
-                                        : BuildClueSet8(pli_shards, packs);
-            consume_scalar(clue_set);
+            run_sized.template operator()<8>();
         } else if (clue_bit_count <= 16) {
-            auto clue_set = thread_pool ? BuildClueSetParallel16(pli_shards, packs, thread_pool)
-                                        : BuildClueSet16(pli_shards, packs);
-            consume_scalar(clue_set);
+            run_sized.template operator()<16>();
         } else if (clue_bit_count <= 32) {
-            auto clue_set = thread_pool ? BuildClueSetParallel32(pli_shards, packs, thread_pool)
-                                        : BuildClueSet32(pli_shards, packs);
-            consume_scalar(clue_set);
+            run_sized.template operator()<32>();
         } else if (clue_bit_count <= 64) {
-            auto clue_set = thread_pool ? BuildClueSetParallel64(pli_shards, packs, thread_pool)
-                                        : BuildClueSet64(pli_shards, packs);
-            consume_scalar(clue_set);
+            run_sized.template operator()<64>();
         } else {
             LOG_WARN(
-                    "Using 128-bit representation for clues ({} bits required). Performance may be "
+                    "Using {}-bit representation for clues ({} bits required). Performance may be "
                     "degraded.",
-                    clue_bit_count);
+                    static_cast<size_t>(kMaxPredicateBits), clue_bit_count);
             auto clue_set = thread_pool ? BuildClueSetParallel(pli_shards, packs, thread_pool)
                                         : BuildClueSet(pli_shards, packs);
-            clues_.reserve(clue_set.size());
-            for (auto const& [clue, count] : clue_set) {
-                clues_.emplace_back(clue, count);
-            }
+            consume(clue_set);
         }
     }
 

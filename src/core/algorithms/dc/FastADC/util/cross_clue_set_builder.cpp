@@ -1,8 +1,6 @@
 #include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
 
 #include <cstddef>
-#include <cstdint>
-#include <type_traits>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
@@ -11,11 +9,7 @@ namespace algos::fastadc {
 
 template <typename ClueT>
 inline void SetClueBit(ClueT& clue, size_t pos) {
-    if constexpr (std::is_integral_v<ClueT>) {
-        clue |= static_cast<ClueT>(uint64_t{1} << pos);
-    } else {
-        clue.set(pos);
-    }
+    clue.set(pos);
 }
 
 template <typename ClueT>
@@ -210,10 +204,10 @@ void CrossClueSetBuilderT<ClueT>::CorrectNumCross(std::vector<ClueT>& forwardArr
     }
 }
 
-template class CrossClueSetBuilderT<uint8_t>;
-template class CrossClueSetBuilderT<uint16_t>;
-template class CrossClueSetBuilderT<uint32_t>;
-template class CrossClueSetBuilderT<uint64_t>;
+template class CrossClueSetBuilderT<model::Bitset<8>>;
+template class CrossClueSetBuilderT<model::Bitset<16>>;
+template class CrossClueSetBuilderT<model::Bitset<32>>;
+template class CrossClueSetBuilderT<model::Bitset<64>>;
 template class CrossClueSetBuilderT<Clue>;
 
 }  // namespace algos::fastadc

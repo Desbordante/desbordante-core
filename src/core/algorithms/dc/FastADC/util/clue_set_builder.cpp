@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <mutex>
 #include <stdexcept>
 #include <utility>
@@ -166,53 +165,44 @@ ClueSet BuildClueSet(std::vector<PliShard> const& pliShards, PredicatePacks cons
     return BuildClueSetScalar<Clue>(pliShards, packs);
 }
 
-ClueSetT<uint8_t> BuildClueSet8(std::vector<PliShard> const& pliShards,
-                                PredicatePacks const& packs) {
-    return BuildClueSetScalar<uint8_t>(pliShards, packs);
-}
-
-ClueSetT<uint16_t> BuildClueSet16(std::vector<PliShard> const& pliShards,
-                                  PredicatePacks const& packs) {
-    return BuildClueSetScalar<uint16_t>(pliShards, packs);
-}
-
-ClueSetT<uint32_t> BuildClueSet32(std::vector<PliShard> const& pliShards,
-                                  PredicatePacks const& packs) {
-    return BuildClueSetScalar<uint32_t>(pliShards, packs);
-}
-
-ClueSetT<uint64_t> BuildClueSet64(std::vector<PliShard> const& pliShards,
-                                  PredicatePacks const& packs) {
-    return BuildClueSetScalar<uint64_t>(pliShards, packs);
-}
-
 ClueSet BuildClueSetParallel(std::vector<PliShard> const& pliShards, PredicatePacks const& packs,
                              util::WorkerThreadPool* thread_pool) {
     return BuildClueSetParallelScalar<Clue>(pliShards, packs, thread_pool);
 }
 
-ClueSetT<uint8_t> BuildClueSetParallel8(std::vector<PliShard> const& pliShards,
-                                        PredicatePacks const& packs,
-                                        util::WorkerThreadPool* thread_pool) {
-    return BuildClueSetParallelScalar<uint8_t>(pliShards, packs, thread_pool);
+template <std::size_t Bits>
+ClueSetT<model::Bitset<Bits>> BuildClueSetSized(std::vector<PliShard> const& pliShards,
+                                                PredicatePacks const& packs) {
+    return BuildClueSetScalar<model::Bitset<Bits>>(pliShards, packs);
 }
 
-ClueSetT<uint16_t> BuildClueSetParallel16(std::vector<PliShard> const& pliShards,
-                                          PredicatePacks const& packs,
-                                          util::WorkerThreadPool* thread_pool) {
-    return BuildClueSetParallelScalar<uint16_t>(pliShards, packs, thread_pool);
+template <std::size_t Bits>
+ClueSetT<model::Bitset<Bits>> BuildClueSetParallelSized(std::vector<PliShard> const& pliShards,
+                                                       PredicatePacks const& packs,
+                                                       util::WorkerThreadPool* thread_pool) {
+    return BuildClueSetParallelScalar<model::Bitset<Bits>>(pliShards, packs, thread_pool);
 }
 
-ClueSetT<uint32_t> BuildClueSetParallel32(std::vector<PliShard> const& pliShards,
-                                          PredicatePacks const& packs,
-                                          util::WorkerThreadPool* thread_pool) {
-    return BuildClueSetParallelScalar<uint32_t>(pliShards, packs, thread_pool);
-}
+template ClueSetT<model::Bitset<8>> BuildClueSetSized<8>(std::vector<PliShard> const&,
+                                                         PredicatePacks const&);
+template ClueSetT<model::Bitset<16>> BuildClueSetSized<16>(std::vector<PliShard> const&,
+                                                           PredicatePacks const&);
+template ClueSetT<model::Bitset<32>> BuildClueSetSized<32>(std::vector<PliShard> const&,
+                                                           PredicatePacks const&);
+template ClueSetT<model::Bitset<64>> BuildClueSetSized<64>(std::vector<PliShard> const&,
+                                                           PredicatePacks const&);
 
-ClueSetT<uint64_t> BuildClueSetParallel64(std::vector<PliShard> const& pliShards,
-                                          PredicatePacks const& packs,
-                                          util::WorkerThreadPool* thread_pool) {
-    return BuildClueSetParallelScalar<uint64_t>(pliShards, packs, thread_pool);
-}
+template ClueSetT<model::Bitset<8>> BuildClueSetParallelSized<8>(std::vector<PliShard> const&,
+                                                                 PredicatePacks const&,
+                                                                 util::WorkerThreadPool*);
+template ClueSetT<model::Bitset<16>> BuildClueSetParallelSized<16>(std::vector<PliShard> const&,
+                                                                   PredicatePacks const&,
+                                                                   util::WorkerThreadPool*);
+template ClueSetT<model::Bitset<32>> BuildClueSetParallelSized<32>(std::vector<PliShard> const&,
+                                                                   PredicatePacks const&,
+                                                                   util::WorkerThreadPool*);
+template ClueSetT<model::Bitset<64>> BuildClueSetParallelSized<64>(std::vector<PliShard> const&,
+                                                                   PredicatePacks const&,
+                                                                   util::WorkerThreadPool*);
 
 }  // namespace algos::fastadc
