@@ -13,7 +13,7 @@ namespace algos::fastadc {
 ClueSet BuildClueSet(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs);
 
 ClueSet BuildClueSetParallel(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs,
-                             util::WorkerThreadPool* thread_pool);
+                             util::WorkerThreadPool& thread_pool);
 
 template <std::size_t Bits>
 ClueSetT<model::Bitset<Bits>> BuildClueSetSized(std::vector<PliShard> const& pli_shards,
@@ -21,7 +21,7 @@ ClueSetT<model::Bitset<Bits>> BuildClueSetSized(std::vector<PliShard> const& pli
 
 template <std::size_t Bits>
 ClueSetT<model::Bitset<Bits>> BuildClueSetParallelSized(std::vector<PliShard> const& pli_shards,
-                                                       PredicatePacks const& packs,
-                                                       util::WorkerThreadPool* thread_pool);
+                                                        PredicatePacks const& packs,
+                                                        util::WorkerThreadPool& thread_pool);
 
 }  // namespace algos::fastadc

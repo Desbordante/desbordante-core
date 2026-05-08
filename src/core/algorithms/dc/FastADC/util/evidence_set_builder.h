@@ -37,7 +37,7 @@ public:
 
         auto run_sized = [&]<std::size_t Bits>() {
             auto clue_set = thread_pool
-                                    ? BuildClueSetParallelSized<Bits>(pli_shards, packs, thread_pool)
+                                    ? BuildClueSetParallelSized<Bits>(pli_shards, packs, *thread_pool)
                                     : BuildClueSetSized<Bits>(pli_shards, packs);
             consume(clue_set);
         };
@@ -55,7 +55,7 @@ public:
                     "Using {}-bit representation for clues ({} bits required). Performance may be "
                     "degraded.",
                     static_cast<size_t>(kMaxPredicateBits), clue_bit_count);
-            auto clue_set = thread_pool ? BuildClueSetParallel(pli_shards, packs, thread_pool)
+            auto clue_set = thread_pool ? BuildClueSetParallel(pli_shards, packs, *thread_pool)
                                         : BuildClueSet(pli_shards, packs);
             consume(clue_set);
         }
