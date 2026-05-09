@@ -9,7 +9,7 @@
 #include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::pac_verifier {
-/// @brief Base class for Probabilistic Approximate Constrains verifiers
+/// @brief Base class for Probabilistic Approximate Constraints verifiers
 class PACVerifier : public Algorithm {
 private:
     constexpr static double kDefaultMinDelta = 0.9;

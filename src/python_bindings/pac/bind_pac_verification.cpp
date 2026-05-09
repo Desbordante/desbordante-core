@@ -16,11 +16,6 @@ namespace py = pybind11;
 
 namespace python_bindings {
 void BindPACVerification(py::module_& main_module) {
-    using namespace algos::pac_verifier;
-    using namespace model;
-    using namespace std::string_literals;
-    using namespace pybind11::literals;
-
     auto pac_verification_module = main_module.def_submodule("pac_verification");
     auto algos_module = pac_verification_module.def_submodule("algorithms");
 

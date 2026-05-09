@@ -3,8 +3,10 @@
 #include <pybind11/pybind11.h>
 
 #include <cstdlib>
+#include <stdexcept>
 #include <vector>
 
+#include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
 #include <pybind11/functional.h>
 #include <pybind11/operators.h>
@@ -13,6 +15,7 @@
 
 #include "core/algorithms/pac/domain_pac.h"
 #include "python_bindings/pac/bind_domains.h"
+#include "python_bindings/py_util/table_serialization.h"
 
 namespace py = pybind11;
 
@@ -38,6 +41,7 @@ namespace python_bindings {
 void BindPAC(py::module& main_module) {
     using namespace model;
     using namespace pybind11::literals;
+    using namespace table_serialization;
 
     auto pac_module = main_module.def_submodule("pac");
 
@@ -56,7 +60,27 @@ void BindPAC(py::module& main_module) {
             .def("__str__", &DomainPAC::ToLongString)
             .def(py::self == py::self)
             .def("__hash__",
-                 [](DomainPAC const& d_pac) { return py::hash(DomainPACToTuple(d_pac)); });
+                 [](DomainPAC const& d_pac) { return py::hash(DomainPACToTuple(d_pac)); })
+            .def(py::pickle(
+                    [](DomainPAC const& d_pac) {
+                        auto const* schema = d_pac.GetColumns().GetSchema();
+                        auto schema_state = SerializeRelationalSchema(schema);
+                        auto columns_state = SerializeVertical(d_pac.GetColumns());
+                        return py::make_tuple(std::move(schema_state), std::move(columns_state),
+                                              d_pac.GetDomainName(), d_pac.GetEpsilon(),
+                                              d_pac.GetDelta());
+                    },
+                    [](py::tuple t) {
+                        if (t.size() != 5) {
+                            throw std::runtime_error("Invalid state for Domain PAC pickle");
+                        }
+                        auto schema = DeserializeRelationalSchema(t[0].cast<py::tuple>());
+                        auto columns = DeserializeVertical(t[1].cast<py::tuple>(), schema.get());
+                        auto domain_name = t[2].cast<std::string>();
+                        auto epsilon = t[3].cast<double>();
+                        auto delta = t[4].cast<double>();
+                        return DomainPAC(epsilon, delta, domain_name, std::move(columns));
+                    }));
 
     BindDomains(pac_module);
 }

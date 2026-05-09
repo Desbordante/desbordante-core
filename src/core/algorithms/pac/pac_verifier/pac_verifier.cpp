@@ -146,10 +146,25 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         begin = std::ranges::upper_bound(
                 begin, end, min_epsilon_, {},
                 [](std::pair<double, double> const& pair) { return pair.first; });
-        // Don't add (min_eps, delta_{j - 1}) if j == 0, because delta_{-1} is less than min_delta
-        if (begin != empirical_probabilities.begin()) {
+        auto eps_delta_pair = GetEpsilonDeltaForEpsilon(min_epsilon_);
+        if (max_epsilon_ > 0 && eps_delta_pair.first > max_epsilon_) {
+            // No pairs between min_eps and max_eps -- should take a pair before min_eps
+            if (begin == empirical_probabilities.begin()) {
+                // No pair before min_eps. It is only possible in "Warning" case -- if concrete
+                // algorithm has violated the contract
+                return {0, 0};
+            }
+            // Take eps < min_eps, refine it, and then clamp to max_epsilon (we already know that
+            // refine(min_eps) > max_eps, so no explicit refinement needed)
+            // TODO: This needs more thought with reversed refinement direction
+            // (RefinementDirection()? -- should be avoided at all costs)
+            auto eps = std::prev(begin)->first;
+            auto [epsilon, delta] = GetEpsilonDeltaForEpsilon(eps);
+            return {std::min(epsilon, max_epsilon_), delta};
+        }
+        if (eps_delta_pair.second > min_delta_ - kDistThreshold || begin == end) {
             std::advance(begin, -1);
-            *begin = GetEpsilonDeltaForEpsilon(min_epsilon_);
+            *begin = eps_delta_pair;
         }
 
         // If begin != empirical_probs.begin, a new pair is added.

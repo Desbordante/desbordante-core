@@ -118,7 +118,7 @@ pac = algo.get_pac()
 
 print(f"Algorithm result: {RED}{pac}{ENDC}.\n")
 print(
-    f"This PAC shows that only {BLUE}{pac.delta * 100:.1f}%{ENDC} of the values fall into {BLUE}{segment}±{pac.epsilon:.0f}{ENDC}, while we require {BLUE}90%{ENDC}"
+    f"This PAC shows that only {BLUE}{pac.delta * 100:.1f}%{ENDC} of the values fall into {BLUE}{segment}±{pac.epsilon:.0f}{ENDC}, while we require {BLUE}90%{ENDC}."
 )
 print(
     f"""

@@ -5095,7 +5095,7 @@ for which PAC with ε=\x1b[34m5\x1b[0m holds.
 
 Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.681818 on columns [t]\x1b[0m.
 
-This PAC shows that only \x1b[34m68.2%\x1b[0m of the values fall into \x1b[34m[85, 95]±5\x1b[0m, while we require \x1b[34m90%\x1b[0m
+This PAC shows that only \x1b[34m68.2%\x1b[0m of the values fall into \x1b[34m[85, 95]±5\x1b[0m, while we require \x1b[34m90%\x1b[0m.
 
 Also, let's run algorithm with max_epsilon=\x1b[34m0\x1b[0m and min_delta=\x1b[34m0.9\x1b[0m to check which ε
 is needed to satisfy δ=\x1b[34m0.9\x1b[0m. With these parameters algorithm enters special mode and returns
