@@ -46,8 +46,8 @@ void FastDD::MakeExecuteOptsAvailable() {
 }
 
 void FastDD::LoadDataInternal() {
-    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_,
-                                                                       false);  // nulls are ignored
+    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, false,
+                                                                       true);  // nulls are ignored
     if (typed_relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: DD mining is meaningless.");
     }
@@ -83,8 +83,11 @@ void FastDD::CheckTypes() {
                                         "\" type undefined.");
         }
         if (type_id == model::TypeId::kMixed) {
-            throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                        "\" contains values of different types.");
+            LOG_WARN(
+                    "Column with index \"{}\" contains values of different types. Those values "
+                    "will be "
+                    "treated as strings.",
+                    column_index);
         }
 
         type_ids_[column_index] = type_id;
