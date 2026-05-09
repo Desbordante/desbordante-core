@@ -14,6 +14,7 @@
 #include "core/algorithms/dd/fastdd/util/distance_calculator.h"
 #include "core/algorithms/dd/fastdd/util/min_max_dif_calculator.h"
 #include "core/algorithms/dd/fastdd/util/static_bitset.h"
+#include "core/algorithms/dd/fastdd/util/threshold_calculator.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -126,6 +127,11 @@ unsigned long long FastDD::ExecuteInternal() {
 
     std::shared_ptr<DistanceCalculator> distance_calculator =
             std::make_shared<DistanceCalculator>(typed_relation_);
+    ThresholdCalculator threshold_calculator(difference_typed_relation_, distance_calculator,
+                                             num_rows_, num_columns_);
+    std::vector<std::vector<model::DFConstraint>> const& thresholds =
+            threshold_calculator.GetThresholds();
+    distance_calculator->SetMaxThresholds(thresholds);
 
     PliShardBuilder pli_shard_builder(shard_length_);
     std::vector<PliShard> pli_shards =
@@ -135,9 +141,8 @@ unsigned long long FastDD::ExecuteInternal() {
     MinMaxDifCalculator min_max_dif_calculator(distance_calculator, pli_shards);
 
     DifferentialFunctionBuilder df_builder(typed_relation_, num_rows_, num_columns_,
-                                           distance_calculator,
                                            min_max_dif_calculator.GetMinMaxDif());
-    df_builder.BuildDFList(difference_typed_relation_);
+    df_builder.BuildDFList(thresholds);
     LOG_INFO("Built DF set");
     LOG_INFO("Search space size: {}", df_builder.GetDifFuncNum());
 

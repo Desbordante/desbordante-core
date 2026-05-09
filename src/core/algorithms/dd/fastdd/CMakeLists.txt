@@ -8,6 +8,7 @@ target_sources(
             util/differential_function_builder.cpp
             util/isn_info.cpp
             util/min_max_dif_calculator.cpp
+            util/threshold_calculator.cpp
 )
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers)
