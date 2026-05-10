@@ -1346,8 +1346,10 @@ Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
                 for (size_t i = 0; i < col1.GetNumRows(); ++i) {
                     if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
 
-                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), reinterpret_cast<std::byte*>(&vals1.emplace_back()));
-                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), reinterpret_cast<std::byte*>(&vals2.emplace_back()));
+                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(),
+                                             reinterpret_cast<std::byte*>(&vals1.emplace_back()));
+                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(),
+                                             reinterpret_cast<std::byte*>(&vals2.emplace_back()));
                 }
 
                 size_t n = vals1.size();
@@ -1415,8 +1417,10 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
                 for (size_t i = 0; i < col1.GetNumRows(); ++i) {
                     if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
 
-                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), reinterpret_cast<std::byte*>(&vals1.emplace_back()));
-                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), reinterpret_cast<std::byte*>(&vals2.emplace_back()));
+                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(),
+                                             reinterpret_cast<std::byte*>(&vals1.emplace_back()));
+                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(),
+                                             reinterpret_cast<std::byte*>(&vals2.emplace_back()));
                 }
 
                 size_t n = vals1.size();
@@ -1450,8 +1454,8 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
     InvalidateCache();
     return GetOrCalcCorrelation(
             index1, index2, kendall_cache_, true, [this](size_t i1, size_t i2) -> Statistic {
-                const auto& col1 = col_data_[i1];
-                const auto& col2 = col_data_[i2];
+                auto const& col1 = col_data_[i1];
+                auto const& col2 = col_data_[i2];
 
                 std::vector<double> vals1, vals2;
                 mo::DoubleType double_type;
@@ -1459,8 +1463,10 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
                 for (size_t i = 0; i < col1.GetNumRows(); ++i) {
                     if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
 
-                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), reinterpret_cast<std::byte*>(&vals1.emplace_back()));
-                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), reinterpret_cast<std::byte*>(&vals2.emplace_back()));
+                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(),
+                                             reinterpret_cast<std::byte*>(&vals1.emplace_back()));
+                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(),
+                                             reinterpret_cast<std::byte*>(&vals2.emplace_back()));
                 }
 
                 size_t n = vals1.size();
