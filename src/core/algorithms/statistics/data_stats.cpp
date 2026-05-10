@@ -1502,7 +1502,6 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
 }
 
 Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const {
-    // Для Крамера отсекаем числовые колонки до вызова кэша
     if (col_data_[index1].IsNumeric() || col_data_[index2].IsNumeric()) return {};
 
     return GetOrCalcCorrelation(
@@ -1513,7 +1512,6 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
                 std::map<std::string, size_t> categories1;
                 std::map<std::string, size_t> categories2;
 
-                // Храним индексы категорий для каждой строки, чтобы не искать в map дважды
                 std::vector<std::pair<size_t, size_t>> row_categories;
                 row_categories.reserve(col1.GetNumRows());
 
@@ -1550,13 +1548,11 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
 
                 if (r < 2 || c < 2) return Statistic{};
 
-                // Оптимизация: используем плоский вектор `std::vector` вместо `std::map`
                 std::vector<size_t> contingency(r * c, 0);
                 for (auto const& pair : row_categories) {
                     contingency[pair.first * c + pair.second]++;
                 }
 
-                // Заранее считаем суммы по строкам и столбцам
                 std::vector<size_t> row_sums(r, 0);
                 std::vector<size_t> col_sums(c, 0);
                 for (size_t i = 0; i < r; ++i) {

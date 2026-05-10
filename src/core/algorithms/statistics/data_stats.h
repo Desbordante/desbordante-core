@@ -80,15 +80,11 @@ protected:
     mutable std::map<std::pair<size_t, size_t>, Statistic> kendall_cache_;
     mutable std::map<std::pair<size_t, size_t>, Statistic> cramers_v_cache_;
 
-    // Общая функция-движок для всех корреляций
     template <typename CalcFunc>
-    Statistic GetOrCalcCorrelation(
-            size_t i1, size_t i2, std::map<std::pair<size_t, size_t>, Statistic>& cache,
-            bool numeric_only,
-            CalcFunc calc_func) const {  // <--- ОБЯЗАТЕЛЬНО ДОБАВЬ const ЗДЕСЬ
-
+    Statistic GetOrCalcCorrelation(size_t i1, size_t i2,
+                                   std::map<std::pair<size_t, size_t>, Statistic>& cache,
+                                   bool numeric_only, CalcFunc calc_func) const {
         if (numeric_only) {
-            // Проверь, как у тебя называется доступ к типу: .type-> или .GetType().
             if (!col_data_[i1].GetType().IsNumeric() || !col_data_[i2].GetType().IsNumeric()) {
                 return {};
             }
