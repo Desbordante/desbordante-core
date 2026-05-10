@@ -5,6 +5,9 @@ target_sources(
                     util/value_combination.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
-                    spdlog::spdlog_header_only magic_enum::magic_enum Boost::headers
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::config
+    PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
+            ${DESBORDANTE_PREFIX}::util spdlog::spdlog_header_only magic_enum::magic_enum
+            Boost::headers
 )

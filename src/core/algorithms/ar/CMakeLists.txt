@@ -5,6 +5,8 @@ set(NAME ar)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE ar_algorithm.cpp)
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::transaction ${DESBORDANTE_PREFIX}::algos
-                    magic_enum::magic_enum spdlog::spdlog_header_only Boost::headers
+    ${NAME}
+    PRIVATE ${DESBORDANTE_PREFIX}::model::transaction ${DESBORDANTE_PREFIX}::algos
+            ${DESBORDANTE_PREFIX}::util magic_enum::magic_enum spdlog::spdlog_header_only
+            Boost::headers
 )

@@ -15,6 +15,8 @@ target_sources(
 )
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only
-                    ${DESBORDANTE_PREFIX}::algos Boost::headers
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::config
+    PRIVATE ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::model::table
+            ${DESBORDANTE_PREFIX}::util spdlog::spdlog_header_only Boost::headers
 )

@@ -2,4 +2,7 @@ set(NAME od.set_based_aod_verifier)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE verifier.cpp)
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
-target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers)
+target_link_libraries(
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::config ${DESBORDANTE_PREFIX}::util
+                    spdlog::spdlog_header_only Boost::headers
+)

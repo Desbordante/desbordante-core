@@ -33,6 +33,8 @@ target_sources(
             preprocessing/column_matches/smith_waterman_gotoh.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only
-                    magic_enum::magic_enum Boost::headers
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::config
+    PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only magic_enum::magic_enum
+            Boost::headers
 )

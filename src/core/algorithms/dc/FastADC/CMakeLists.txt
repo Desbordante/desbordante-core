@@ -24,6 +24,8 @@ set(NAME dc.fastadc)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE fastadc.cpp)
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::dc::fastadc::structs spdlog::spdlog_header_only
-                    magic_enum::magic_enum Boost::headers
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::config ${DESBORDANTE_PREFIX}::model::table
+    PRIVATE ${DESBORDANTE_PREFIX}::dc::fastadc::structs spdlog::spdlog_header_only
+            magic_enum::magic_enum Boost::headers
 )

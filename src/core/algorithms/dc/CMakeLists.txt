@@ -13,5 +13,7 @@ set(NAME dc.parser)
 desbordante_add_lib(NAME OBJECT)
 target_sources(${NAME} PRIVATE parser/dc_parser.cpp)
 target_link_libraries(
-    ${NAME} PRIVATE spdlog::spdlog_header_only magic_enum::magic_enum Boost::headers
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::config ${DESBORDANTE_PREFIX}::model::table
+    PRIVATE spdlog::spdlog_header_only magic_enum::magic_enum Boost::headers
 )

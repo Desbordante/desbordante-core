@@ -2,8 +2,10 @@ set(NAME fd.verifier)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE fd_verifier.cpp stats_calculator.cpp)
 target_link_libraries(
-    ${NAME} PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::model::table
-                    magic_enum::magic_enum Boost::headers
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::config
+    PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::model::table magic_enum::magic_enum
+            Boost::headers
 )
 
 set(NAME fd.verifier.dynamic)

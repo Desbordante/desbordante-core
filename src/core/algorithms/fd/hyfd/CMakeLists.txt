@@ -8,6 +8,7 @@ desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE hyfd.cpp inductor.cpp validator.cpp)
 target_link_libraries(
     ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::config
     PRIVATE ${DESBORDANTE_PREFIX}::fd::hy::common ${DESBORDANTE_PREFIX}::fd::hy::model
             ${DESBORDANTE_PREFIX}::fd::pli spdlog::spdlog_header_only magic_enum::magic_enum
             Boost::headers
