@@ -902,6 +902,7 @@ TEST(TestDataStats, TestLastCharFrequency) {
 TEST(TestDataStats, TestPearsonCorrelation) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
 
     algos::Statistic pearson_stat = stats.GetPearsonCorrelation(2, 7);
     EXPECT_TRUE(pearson_stat.HasValue());

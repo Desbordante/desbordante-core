@@ -1142,6 +1142,7 @@ std::string DataStats::ToString() const {
 void DataStats::LoadDataInternal() {
     col_data_ = mo::CreateTypedColumnData(*input_table_, is_null_equal_null_);
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
+    ++data_generation_;
     pearson_cache_.clear();
     spearman_cache_.clear();
     kendall_cache_.clear();
@@ -1322,7 +1323,18 @@ Statistic DataStats::GetGiniCoefficient(size_t index) const {
     return Statistic(double_type.MakeValue(gini), &double_type, false);
 }
 
+void DataStats::InvalidateCache() const {
+    if (cache_generation_ != data_generation_) {
+        pearson_cache_.clear();
+        spearman_cache_.clear();
+        kendall_cache_.clear();
+        cramers_v_cache_.clear();
+        cache_generation_ = data_generation_;
+    }
+}
+
 Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
+    InvalidateCache();
     return GetOrCalcCorrelation(
             index1, index2, pearson_cache_, true, [this](size_t i1, size_t i2) -> Statistic {
                 mo::TypedColumnData const& col1 = col_data_[i1];
@@ -1330,21 +1342,13 @@ Statistic DataStats::GetPearsonCorrelation(size_t index1, size_t index2) const {
 
                 std::vector<double> vals1, vals2;
                 mo::DoubleType double_type;
-                std::byte* temp1 = double_type.Allocate();
-                std::byte* temp2 = double_type.Allocate();
 
                 for (size_t i = 0; i < col1.GetNumRows(); ++i) {
                     if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
 
-                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
-                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
-
-                    vals1.push_back(mo::Type::GetValue<double>(temp1));
-                    vals2.push_back(mo::Type::GetValue<double>(temp2));
+                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), reinterpret_cast<std::byte*>(&vals1.emplace_back()));
+                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), reinterpret_cast<std::byte*>(&vals2.emplace_back()));
                 }
-
-                double_type.Free(temp1);
-                double_type.Free(temp2);
 
                 size_t n = vals1.size();
                 if (n < 2) return Statistic{};
@@ -1399,6 +1403,7 @@ std::vector<double> DataStats::GetRanks(std::vector<double> const& data) {
 }
 
 Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const {
+    InvalidateCache();
     return GetOrCalcCorrelation(
             index1, index2, spearman_cache_, true, [this](size_t i1, size_t i2) -> Statistic {
                 mo::TypedColumnData const& col1 = col_data_[i1];
@@ -1406,21 +1411,13 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
 
                 std::vector<double> vals1, vals2;
                 mo::DoubleType double_type;
-                std::byte* temp1 = double_type.Allocate();
-                std::byte* temp2 = double_type.Allocate();
 
                 for (size_t i = 0; i < col1.GetNumRows(); ++i) {
                     if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
 
-                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
-                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
-
-                    vals1.push_back(mo::Type::GetValue<double>(temp1));
-                    vals2.push_back(mo::Type::GetValue<double>(temp2));
+                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), reinterpret_cast<std::byte*>(&vals1.emplace_back()));
+                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), reinterpret_cast<std::byte*>(&vals2.emplace_back()));
                 }
-
-                double_type.Free(temp1);
-                double_type.Free(temp2);
 
                 size_t n = vals1.size();
                 if (n < 2) return Statistic{};
@@ -1450,39 +1447,31 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
 }
 
 Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
+    InvalidateCache();
     return GetOrCalcCorrelation(
             index1, index2, kendall_cache_, true, [this](size_t i1, size_t i2) -> Statistic {
-                mo::TypedColumnData const& col1 = col_data_[i1];
-                mo::TypedColumnData const& col2 = col_data_[i2];
+                const auto& col1 = col_data_[i1];
+                const auto& col2 = col_data_[i2];
 
-                std::vector<std::pair<double, double>> pairs;
+                std::vector<double> vals1, vals2;
                 mo::DoubleType double_type;
-                std::byte* temp1 = double_type.Allocate();
-                std::byte* temp2 = double_type.Allocate();
 
                 for (size_t i = 0; i < col1.GetNumRows(); ++i) {
                     if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
 
-                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), temp1);
-                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), temp2);
-
-                    double v1 = mo::Type::GetValue<double>(temp1);
-                    double v2 = mo::Type::GetValue<double>(temp2);
-                    pairs.emplace_back(v1, v2);
+                    mo::DoubleType::MakeFrom(col1.GetValue(i), col1.GetType(), reinterpret_cast<std::byte*>(&vals1.emplace_back()));
+                    mo::DoubleType::MakeFrom(col2.GetValue(i), col2.GetType(), reinterpret_cast<std::byte*>(&vals2.emplace_back()));
                 }
 
-                double_type.Free(temp1);
-                double_type.Free(temp2);
-
-                size_t n = pairs.size();
+                size_t n = vals1.size();
                 if (n < 2) return Statistic{};
 
                 long long concordant = 0, discordant = 0;
 
                 for (size_t i = 0; i < n; ++i) {
                     for (size_t j = i + 1; j < n; ++j) {
-                        double dx = pairs[i].first - pairs[j].first;
-                        double dy = pairs[i].second - pairs[j].second;
+                        double dx = vals1[i] - vals1[j];
+                        double dy = vals2[i] - vals2[j];
 
                         if (dx * dy > 0) {
                             ++concordant;
@@ -1502,6 +1491,7 @@ Statistic DataStats::GetKendallCorrelation(size_t index1, size_t index2) const {
 }
 
 Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const {
+    InvalidateCache();
     if (col_data_[index1].IsNumeric() || col_data_[index2].IsNumeric()) return {};
 
     return GetOrCalcCorrelation(

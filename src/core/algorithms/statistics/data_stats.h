@@ -79,6 +79,9 @@ protected:
     mutable std::map<std::pair<size_t, size_t>, Statistic> spearman_cache_;
     mutable std::map<std::pair<size_t, size_t>, Statistic> kendall_cache_;
     mutable std::map<std::pair<size_t, size_t>, Statistic> cramers_v_cache_;
+    mutable size_t cache_generation_ = 0;
+    size_t data_generation_ = 0;
+    void InvalidateCache() const;
 
     template <typename CalcFunc>
     Statistic GetOrCalcCorrelation(size_t i1, size_t i2,
