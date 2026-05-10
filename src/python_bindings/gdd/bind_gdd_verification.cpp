@@ -55,12 +55,13 @@ std::string Repr(model::gdd::detail::GddToken const& token) {
 std::string Repr(model::gdd::detail::ConstValue const& value) {
     using model::gdd::detail::ConstValue;
 
-    return std::visit(Overloaded{
-                              [](int64_t v) { return "ConstValue(" + std::to_string(v) + ")"; },
-                              [](double v) { return "ConstValue(" + std::to_string(v) + ")"; },
-                              [](std::string const& v) { return "ConstValue('" + v + "')"; },
-                      },
-                      value);
+    return std::visit(
+            Overloaded{
+                    [](std::int64_t v) { return "ConstValue(" + std::to_string(v) + ")"; },
+                    [](double v) { return "ConstValue(" + std::to_string(v) + ")"; },
+                    [](std::string const& v) { return "ConstValue('" + v + "')"; },
+            },
+            value);
 }
 
 std::string Repr(model::gdd::detail::DistanceOperand const& operand) {
@@ -235,8 +236,8 @@ void BindGddVerification(pybind11::module_& main_module) {
                  }),
                  "lhs"_a, "rhs"_a, "threshold"_a, "metric"_a, "op"_a)
 
-            .def(py::init([](GddToken lhs, int64_t rhs, double threshold, DistanceMetric metric,
-                             CmpOp op) {
+            .def(py::init([](GddToken lhs, std::int64_t rhs, double threshold,
+                             DistanceMetric metric, CmpOp op) {
                      return DistanceConstraint{
                              DistanceOperand{std::move(lhs)},
                              DistanceOperand{ConstValue{rhs}},
@@ -271,8 +272,8 @@ void BindGddVerification(pybind11::module_& main_module) {
                  }),
                  "lhs"_a, "rhs"_a, "threshold"_a, "metric"_a, "op"_a)
 
-            .def(py::init([](int64_t lhs, GddToken rhs, double threshold, DistanceMetric metric,
-                             CmpOp op) {
+            .def(py::init([](std::int64_t lhs, GddToken rhs, double threshold,
+                             DistanceMetric metric, CmpOp op) {
                      return DistanceConstraint{
                              DistanceOperand{ConstValue{lhs}},
                              DistanceOperand{std::move(rhs)},
@@ -307,8 +308,8 @@ void BindGddVerification(pybind11::module_& main_module) {
                  }),
                  "lhs"_a, "rhs"_a, "threshold"_a, "metric"_a, "op"_a)
 
-            .def(py::init([](int64_t lhs, int64_t rhs, double threshold, DistanceMetric metric,
-                             CmpOp op) {
+            .def(py::init([](std::int64_t lhs, std::int64_t rhs, double threshold,
+                             DistanceMetric metric, CmpOp op) {
                      return DistanceConstraint{
                              DistanceOperand{ConstValue{lhs}},
                              DistanceOperand{ConstValue{rhs}},
@@ -373,7 +374,7 @@ void BindGddVerification(pybind11::module_& main_module) {
 
     gdd_module.def(
             "AttrConst",
-            [](std::size_t pid, std::string attr, int64_t c, DistanceMetric metric, CmpOp op,
+            [](std::size_t pid, std::string attr, std::int64_t c, DistanceMetric metric, CmpOp op,
                double t) {
                 return DistanceConstraint{
                         .lhs = DistanceOperand{GddToken{pid, AttrTag{std::move(attr)}}},
@@ -429,7 +430,7 @@ void BindGddVerification(pybind11::module_& main_module) {
 
     gdd_module.def(
             "RelConst",
-            [](std::size_t pid, std::string rela, int64_t cr) {
+            [](std::size_t pid, std::string rela, std::int64_t cr) {
                 return DistanceConstraint{
                         .lhs = DistanceOperand{GddToken{pid, RelTag{std::move(rela)}}},
                         .rhs = DistanceOperand{ConstValue{cr}},

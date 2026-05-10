@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <unordered_set>
+#include <utility>
 #include <variant>
 
 #include "core/algorithms/gdd/gdd_graph_description.h"
@@ -34,7 +36,7 @@ struct GddToken {
     bool operator==(GddToken const&) const = default;
 };
 
-using ConstValue = std::variant<int64_t, double, std::string>;
+using ConstValue = std::variant<std::int64_t, double, std::string>;
 using DistanceOperand = std::variant<GddToken, ConstValue>;
 
 enum class DistanceMetric : std::uint8_t { kAbsDiff, kEditDistance };
@@ -67,7 +69,33 @@ private:
     Phi lhs_;
     Phi rhs_;
 
-    std::optional<gdd::vertex_t> FindPatternVertexById(size_t id) const;
+    static std::size_t ExtractVertexIdFromConst(gdd::detail::ConstValue const& cv);
+
+    static std::optional<std::pair<std::size_t, std::string>> TokenAsRelation(
+            gdd::detail::DistanceOperand const& operand);
+
+    static std::unordered_set<gdd::vertex_t> CollectRelationTargets(gdd::graph_t const& g,
+                                                                    gdd::vertex_t gv,
+                                                                    std::string const& rel_label);
+
+    std::optional<gdd::vertex_t> FindPatternVertexById(std::size_t id) const;
+
+    std::optional<gdd::vertex_t> ResolveGraphVertex(
+            std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
+            std::size_t pv_id) const;
+
+    std::optional<gdd::detail::ConstValue> ResolveScalar(
+            gdd::graph_t const& g, std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
+            gdd::detail::DistanceOperand const& op) const;
+
+    bool SatisfiesRelationConstraint(gdd::graph_t const& g,
+                                     std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
+                                     std::pair<std::size_t, std::string> const& lhs_rel,
+                                     gdd::detail::DistanceOperand const& rhs) const;
+
+    bool SatisfiesAttributeConstraint(
+            gdd::graph_t const& g, std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
+            gdd::detail::DistanceConstraint const& constraint) const;
 
     bool SatisfiesConstraint(gdd::graph_t const& g,
                              std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
@@ -101,6 +129,11 @@ public:
 
     Phi const& GetRhs() const noexcept {
         return rhs_;
+    }
+
+    static bool LabelsMatch(std::string const& pattern_label,
+                            std::string const& graph_label) noexcept {
+        return pattern_label == graph_label;  // TODO: wildcards
     }
 
     // Testing purposes only

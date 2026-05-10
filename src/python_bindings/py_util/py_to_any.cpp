@@ -15,7 +15,7 @@
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
-#include "core/algorithms/gdd/gdd.h"
+#include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -128,7 +128,6 @@ std::pair<std::type_index, ConvFunc> const kCharEnumConvPair{
                     error_message << '|';
                 }
             }
-            error_message.seekp(-1, std::stringstream::cur);
             error_message << ']';
 
             throw config::ConfigurationError(error_message.str());

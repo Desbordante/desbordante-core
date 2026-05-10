@@ -349,7 +349,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::gdd
     ${DESBORDANTE_PREFIX}::gdd::validator
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
