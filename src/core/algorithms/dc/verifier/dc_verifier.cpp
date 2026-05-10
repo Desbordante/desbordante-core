@@ -428,7 +428,7 @@ std::pair<util::Rect<Point>, util::Rect<Point>> DCVerifier::SearchRanges(
 
 bool DCVerifier::Eval(std::vector<std::byte const*> row, std::vector<dc::Predicate> preds) const {
     dc::Component left_comp, right_comp;
-    std::byte const* left_val;
+    std::byte const* left_val = nullptr;
     std::byte const* right_val;
     for (auto const& pred : preds) {
         dc::ColumnOperand left_op = pred.GetLeftOperand();
