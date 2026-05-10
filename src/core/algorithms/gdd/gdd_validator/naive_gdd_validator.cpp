@@ -22,7 +22,7 @@ NaiveGddValidator::DomainT NaiveGddValidator::BuildDomain(model::gdd::graph_t co
 
     for (auto [pv, pend] = boost::vertices(pattern); pv != pend; ++pv) {
         for (auto [gv, gend] = boost::vertices(graph); gv != gend; ++gv) {
-            if (pattern[*pv].label == graph[*gv].label) {  // TODO: wildcards
+            if (model::Gdd::LabelsMatch(pattern[*pv].label, graph[*gv].label)) {
                 dom[*pv].emplace_back(*gv);
             }
         }
@@ -40,7 +40,7 @@ bool NaiveGddValidator::GraphHasCompatibleEdge(VertexT graph_src, VertexT graph_
             continue;
         }
 
-        if (LabelsMatch(pattern_edge_label, graph[graph_edge].label)) {
+        if (model::Gdd::LabelsMatch(pattern_edge_label, graph[graph_edge].label)) {
             return true;
         }
     }

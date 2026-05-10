@@ -177,7 +177,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::gdd
     ${DESBORDANTE_PREFIX}::gdd::validator
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
