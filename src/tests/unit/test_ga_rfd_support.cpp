@@ -29,7 +29,7 @@ static algos::StdParamsMap MakeParams(
         std::size_t max_gen, std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics = {}) {
     algos::StdParamsMap params{{config::names::kTable, table},
                                {config::names::kRfdMinSimilarity, min_sim},
-                               {config::names::kMinimumConfidence, beta},
+                               {config::names::kRfdMinimumConfidence, beta},
                                {config::names::kPopulationSize, pop_size},
                                {config::names::kRfdMaxGenerations, max_gen},
                                {config::names::kRfdCrossoverProbability, 0.85},

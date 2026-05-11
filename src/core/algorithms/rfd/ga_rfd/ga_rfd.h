@@ -8,9 +8,9 @@
 #include <memory>
 #include <optional>
 #include <random>
-#include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -38,6 +38,16 @@ public:
         bool operator<(Individual const& other) const {
             if (lhs_mask != other.lhs_mask) return lhs_mask < other.lhs_mask;
             return rhs_index < other.rhs_index;
+        }
+
+        bool operator==(Individual const& other) const {
+            return lhs_mask == other.lhs_mask && rhs_index == other.rhs_index;
+        }
+    };
+
+    struct IndividualHash {
+        std::size_t operator()(Individual const& ind) const {
+            return (static_cast<std::size_t>(ind.lhs_mask) << 8) | ind.rhs_index;
         }
     };
 
@@ -67,7 +77,7 @@ private:
     double mutation_probability_ = 1.0;
     std::uint32_t seed_ = std::random_device{}();  // random number generator seed
 
-    std::set<RFD> discovered_;
+    std::unordered_set<RFD, RFDHash> discovered_;
 
     // Algorithm overrides
     void RegisterOptions();
@@ -82,22 +92,26 @@ private:
     // Computes conf and supp for a single individual
     [[nodiscard]] Individual Evaluate(Individual const& ind) const noexcept;
     // Computes conf and supp for all individuals
-    void EvaluatePopulation(std::set<Individual>& pop) const noexcept;
+    void EvaluatePopulation(std::unordered_set<Individual, IndividualHash>& pop) const noexcept;
     // Checks each individual threshold satisfies conf
-    [[nodiscard]] bool AllOf(std::set<Individual> const& pop) const noexcept;
+    [[nodiscard]] bool AllOf(
+            std::unordered_set<Individual, IndividualHash> const& pop) const noexcept;
     // Computes fitness from conf: 1.0 if confidence >= beta, else confidence / beta.
     [[nodiscard]] double Fitness(double confidence) const noexcept;
 
     // GA methods
-    [[nodiscard]] std::set<Individual> InitializePopulation(std::mt19937& rng) const;
-    [[nodiscard]] std::set<Individual> Select(std::set<Individual> const& pop,
-                                              std::mt19937& rng) const;
-    [[nodiscard]] std::set<Individual> Crossover(std::set<Individual> const& selected,
-                                                 std::mt19937& rng) const;
-    [[nodiscard]] std::set<Individual> Mutate(std::set<Individual> const& pop,
-                                              std::mt19937& rng) const;
+    [[nodiscard]] std::unordered_set<Individual, IndividualHash> InitializePopulation(
+            std::mt19937& rng) const;
+    [[nodiscard]] std::unordered_set<Individual, IndividualHash> Select(
+            std::unordered_set<Individual, IndividualHash> const& pop, std::mt19937& rng) const;
+    [[nodiscard]] std::unordered_set<Individual, IndividualHash> Crossover(
+            std::unordered_set<Individual, IndividualHash> const& selected,
+            std::mt19937& rng) const;
+    [[nodiscard]] std::unordered_set<Individual, IndividualHash> Mutate(
+            std::unordered_set<Individual, IndividualHash> const& pop, std::mt19937& rng) const;
 
-    [[nodiscard]] std::set<RFD> Finalize(std::set<Individual> const& pop) const;
+    [[nodiscard]] std::unordered_set<RFD, RFDHash> Finalize(
+            std::unordered_set<Individual, IndividualHash> const& pop) const;
 
     friend class tests::GaRfdTester;
 

@@ -263,11 +263,13 @@ auto const kDAlgoType = details::kDAlgoTypeString.c_str();
 constexpr auto kDCindCondValues =
         "Condition values aligned with conditional attributes order. "
         "Use '-' or '_' as wildcard. If empty => all wildcards.";
-// GA-rfd
+// GA-RFD
 constexpr auto kDRfdMinSimilarity =
         "minimum similarity in [0, 1] for two values to be considered similar";
+constexpr auto kDRfdMinimumConfidence =
+        "minimum confidence in [0, 1] describes the coverage percentage";
 constexpr auto kDRfdCrossoverProbability = "probability of applying crossover between individuals";
 constexpr auto kDRfdMutationProbability = "probability of mutating an individual";
 constexpr auto kDRfdMaxGenerations = "maximum number of genetic algorithm generations";
-constexpr auto kDCacheMaxSize = "Maximum size of the support cache";
+constexpr auto kDCacheMaxSize = "maximum size of the support cache";
 }  // namespace config::descriptions

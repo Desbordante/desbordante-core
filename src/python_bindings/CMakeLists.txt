@@ -295,7 +295,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd
     ${DESBORDANTE_PREFIX}::rfd
     Boost::headers
-    better-enums
+    magic_enum::magic_enum
 )
 
 desbordante_add_bind(

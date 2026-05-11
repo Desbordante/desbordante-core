@@ -108,7 +108,7 @@ enum class AlgorithmType : char {
     kArVerifier,
 
 /* Frequent subgraph mining algorithms */
-    kGspan
+    kGspan,
 
 /* GA-RFD mining algorithms */
     kGarfd
