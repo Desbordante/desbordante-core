@@ -107,13 +107,12 @@ print(
     f"""This result is not directly informative for our goal. Since both ε and δ exceed the required values,
 we cannot determine whether the constraint holds for ε={BLUE}5{ENDC} and δ={BLUE}0.9{ENDC}.
 
-Let\'s run algorithm with min_epsilon={BLUE}5{ENDC} and max_epsilon={BLUE}5{ENDC}. This will give us the exact δ,
-for which PAC with ε={BLUE}5{ENDC} holds.
+The algorithm provides a special function {BOLD}verify{ENDC}, which gives the exact ε for given δ
+and vice versa. Let\'s call {BOLD}verify{ENDC} with epsilon={BLUE}5{ENDC}.
 """
 )
 
-# Note that, when min_epsilon or max_epsilon is specified, default min_delta becomes 0
-algo.execute(min_epsilon=5, max_epsilon=5)
+algo.verify(epsilon=5)
 pac = algo.get_pac()
 
 print(f"Algorithm result: {RED}{pac}{ENDC}.\n")
@@ -122,15 +121,14 @@ print(
 )
 print(
     f"""
-Also, let\'s run algorithm with max_epsilon={BLUE}0{ENDC} and min_delta={BLUE}0.9{ENDC} to check which ε
-is needed to satisfy δ={BLUE}0.9{ENDC}. With these parameters algorithm enters special mode and returns
-pair (ε, min_delta), so that we can validate PAC with the given δ.
+Also, let\'s check which ε is needed to satisfy δ={BLUE}0.9{ENDC} by calling {BOLD}verify{ENDC} with delta={BLUE}0.9{ENDC}.
 """
 )
 
-# Actually, algorithm enters this mode whenever max_epsilon is less than epsilon needed to satisfy
-# min_delta.
-algo.execute(max_epsilon=0, min_delta=0.9)
+# Calling verify(delta=0.9) is equivalent to execute(min_epsilon=0, max_epsilon=0, min_delta=0.9)
+# Whenever max_epsilon is not enough to satisfy min_delta, algorithm verifies PAC with δ=min_delta
+# Calling verify(epsilon=3) is equivalent to execute(min_epsilon=3, max_epsilon=3, min_delta=0)
+algo.verify(delta=0.9)
 
 pac = algo.get_pac()
 print(f"Algorithm result: {RED}{pac}{ENDC}.\n")
