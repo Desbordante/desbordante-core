@@ -48,6 +48,10 @@ public:
         map_.clear();
         list_.clear();
     }
+
+    std::size_t max_size() const noexcept {
+        return max_size_;
+    }
 };
 
 }  // namespace algos::rfd::util

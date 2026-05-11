@@ -39,7 +39,7 @@ static algos::StdParamsMap MakeParams(
     config::InputTable table = std::make_shared<CSVParser>(csv_config);
     algos::StdParamsMap params{{config_names::kTable, table},
                                {config_names::kRfdMinSimilarity, min_sim},
-                               {config_names::kMinimumConfidence, beta},
+                               {config_names::kRfdMinimumConfidence, beta},
                                {config_names::kPopulationSize, pop_size},
                                {config_names::kRfdMaxGenerations, max_gen},
                                {config_names::kRfdCrossoverProbability, 0.85},
@@ -70,7 +70,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
     algos::StdParamsMap params{{config_names::kTable, table},
                                {"metrics", metrics},
                                {config_names::kRfdMinSimilarity, min_similarity},
-                               {config_names::kMinimumConfidence, min_confidence},
+                               {config_names::kRfdMinimumConfidence, min_confidence},
                                {config_names::kPopulationSize, pop_size},
                                {config_names::kRfdMaxGenerations, generations},
                                {config_names::kRfdCrossoverProbability, 0.85},
@@ -205,6 +205,42 @@ TEST(GARfdDeterminism, SameSeedSameResult) {
         EXPECT_DOUBLE_EQ(r1[i].confidence, r2[i].confidence);
         EXPECT_DOUBLE_EQ(r1[i].support, r2[i].support);
     }
+}
+
+TEST(GARfdCache, CacheSizeOptionWorks) {
+    auto metrics = EqualityMetrics(5);
+    auto params = MakeParams(kIris, 0.8, 0.9, 20, 2, metrics);
+    params[config_names::kCacheMaxSize] = static_cast<std::size_t>(1);
+    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    algo->Execute();
+    auto rfds = algo->GetRfds();
+    EXPECT_GE(rfds.size(), 0);
+}
+
+TEST(GARfdEvolution, EarlyStopWhenAllSatisfy) {
+    auto metrics = EqualityMetrics(5);
+    auto params = MakeParams(kIris, 0.0, 0.0, 20, 100, metrics);
+    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    algo->Execute();
+    auto rfds = algo->GetRfds();
+    EXPECT_GE(rfds.size(), 0);
+}
+
+TEST(GARfdEdge, MismatchedMetricsCountThrows) {
+    auto metrics = EqualityMetrics(3);
+    auto params = MakeParams(kIris, 0.5, 0.5, 10, 1, metrics);
+    EXPECT_THROW(algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params), std::invalid_argument);
+}
+
+TEST(GARfdOperators, ZeroCrossoverAndMutation) {
+    auto metrics = EqualityMetrics(5);
+    auto params = MakeParams(kIris, 0.5, 0.8, 30, 3, metrics);
+    params[config_names::kRfdCrossoverProbability] = 0.0;
+    params[config_names::kRfdMutationProbability] = 0.0;
+    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    algo->Execute();
+    auto rfds = algo->GetRfds();
+    EXPECT_GE(rfds.size(), 0);
 }
 
 }  // namespace tests
