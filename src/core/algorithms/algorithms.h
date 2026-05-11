@@ -6,6 +6,7 @@
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "core/algorithms/cfd/mining_algorithms.h"
 #include "core/algorithms/cind/verification_algorithms.h"
+#include "core/algorithms/cmspade/cmspade.h"
 #include "core/algorithms/dd/mining_algorithms.h"
 #include "core/algorithms/fd/mining_algorithms.h"
 #include "core/algorithms/fd/sfd/cords.h"
@@ -21,4 +22,4 @@
 #include "core/algorithms/od/mining_algorithms.h"
 #include "core/algorithms/statistics/algorithms.h"
 #include "core/algorithms/ucc/mining_algorithms.h"
-#include "core/algorithms/ucc/verification_algorithms.h"
+#include "core/algorithms/ucc/verification_algorithms.h" 

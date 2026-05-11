@@ -13,7 +13,7 @@ using AlgorithmTypes =
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, cind::CINDVerifier,
                    Fastod, GfdValidator, EGfdValidator, NaiveGfdValidator, order::Order, dd::Split,
                    Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier,
-                   ar_verifier::ARVerifier, GSpan>;
+                   ar_verifier::ARVerifier, GSpan, cmspade::CMSpade>;
 
 // clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
@@ -108,7 +108,10 @@ enum class AlgorithmType : char {
     kArVerifier,
 
 /* Frequent subgraph mining algorithms*/
-    kGspan
+    kGspan,
+
+/* Frequent patterns mining algorithm */
+    kCMSpade
 };
 // clang-format on
 
