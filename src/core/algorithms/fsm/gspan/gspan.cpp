@@ -191,19 +191,19 @@ void GSpan::RegisterOptions() {
 
 void GSpan::LoadDataInternal() {
     std::ifstream f(graph_database_path_);
-    graph_database_ = gspan::parser::ReadGraphs(f);
+    raw_dataset_ = gspan::parser::ReadGraphs(f);
+    pruned_graphs_ = raw_dataset_;
 }
 
 void GSpan::ResetState() {
-    std::ifstream f(graph_database_path_);
-    graph_database_ = gspan::parser::ReadGraphs(f);
+    pruned_graphs_ = raw_dataset_;
     frequent_subgraphs_.clear();
     frequent_vertex_labels_.clear();
     empty_graphs_removed_ = 0;
 }
 
 unsigned long long GSpan::ExecuteInternal() {
-    min_sup_ = static_cast<int>(std::ceil(min_frequency_ * graph_database_.size()));
+    min_sup_ = static_cast<int>(std::ceil(min_frequency_ * raw_dataset_.size()));
 
     std::size_t elapsed_time = util::TimedInvoke(&GSpan::MineSubgraphs, this);
     LOG_DEBUG("Mining complete: {} frequent subgraphs found", frequent_subgraphs_.size());
@@ -218,7 +218,7 @@ unsigned long long GSpan::ExecuteInternal() {
 }
 
 void GSpan::MineSubgraphs() {
-    LOG_INFO("Starting GSpan algorithm: {} graphs, min_sup_={}", graph_database_.size(), min_sup_);
+    LOG_INFO("Starting GSpan algorithm: {} graphs, min_sup_={}", raw_dataset_.size(), min_sup_);
 
     LOG_DEBUG("Searching for frequent vertex labels");
     FindAllOnlyOneVertex();
@@ -231,8 +231,8 @@ void GSpan::MineSubgraphs() {
     // Set with all the graph ids
     LOG_DEBUG("Building active graph set");
     std::unordered_set<int> graph_ids;
-    for (size_t i = 0; i < graph_database_.size(); i++) {
-        graph_t& graph = graph_database_[i];
+    for (size_t i = 0; i < pruned_graphs_.size(); i++) {
+        graph_t& graph = pruned_graphs_[i];
         if (boost::num_vertices(graph) != 0) {
             graph_ids.insert(i);
             PrecalculateLabelsToVertices(graph);
@@ -273,7 +273,7 @@ void GSpan::RemoveInfrequentVertexPairs() {
     std::unordered_map<int, int> edge_label_to_support;
 
     // Calculate the support of each entry
-    for (graph_t& graph : graph_database_) {
+    for (graph_t& graph : pruned_graphs_) {
         for (auto v1 : boost::make_iterator_range(boost::vertices(graph))) {
             int v1_label = graph[v1].label;
             for (auto edge : boost::make_iterator_range(boost::out_edges(v1, graph))) {
@@ -306,7 +306,7 @@ void GSpan::RemoveInfrequentVertexPairs() {
     matrix.RemoveInfrequent(min_sup_);
 
     // Remove infrequent edges
-    for (gspan::graph_t& graph : graph_database_) {
+    for (gspan::graph_t& graph : pruned_graphs_) {
         boost::remove_edge_if(
                 [&](gspan::edge_t e) {
                     auto v1 = boost::source(e, graph);
@@ -371,7 +371,7 @@ void GSpan::GSpanDFS(gspan::DFSCode const& code, std::unordered_set<int> graph_i
                 LOG_TRACE("New frequent subgraph: size={}, support={}", new_code.Size(), sup);
                 frequent_subgraphs_.emplace_back(
                         frequent_subgraphs_.size(), new_code,
-                        TranslateToOriginalIds(new_graph_ids, graph_database_), sup);
+                        TranslateToOriginalIds(new_graph_ids, pruned_graphs_), sup);
                 GSpanDFS(new_code, std::move(new_graph_ids));
             }
         }
@@ -463,7 +463,7 @@ GSpan::RightMostPathExtensions(DFSCode const& code, std::unordered_set<int> grap
     std::unordered_map<ExtendedEdge, std::unordered_set<int>, ExtendedEdge::Hash> out;
 
     for (int graph_id : graph_ids) {
-        auto const& graph = graph_database_[graph_id];
+        auto const& graph = pruned_graphs_[graph_id];
 
         EnumerateRightMostExtensions(code, graph,
                                      [&](ExtendedEdge const& ee) { out[ee].insert(graph_id); });
@@ -518,8 +518,8 @@ void GSpan::FindAllOnlyOneVertex() {
     // to count the support of each vertex
     std::unordered_map<int, std::unordered_set<int>> label_map;
 
-    for (size_t i = 0; i < graph_database_.size(); i++) {
-        auto const& graph = graph_database_[i];
+    for (size_t i = 0; i < pruned_graphs_.size(); i++) {
+        auto const& graph = pruned_graphs_[i];
         for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
             if (boost::degree(vertex, graph) != 0) {
                 int label = graph[vertex].label;
@@ -538,14 +538,14 @@ void GSpan::FindAllOnlyOneVertex() {
             if (output_single_vertices_) {
                 DFSCode temp;
                 temp.Add(ExtendedEdge(Vertex(0, label), Vertex(0, label), -1));
-                frequent_subgraphs_.emplace_back(
-                        frequent_subgraphs_.size(), temp,
-                        TranslateToOriginalIds(temp_sup_g, graph_database_), sup);
+                frequent_subgraphs_.emplace_back(frequent_subgraphs_.size(), temp,
+                                                 TranslateToOriginalIds(temp_sup_g, pruned_graphs_),
+                                                 sup);
             }
         } else {
             LOG_TRACE("Removing infrequent vertex label {} (support={})", label, sup);
             for (int graph_id : temp_sup_g) {
-                gspan::graph_t& graph = graph_database_[graph_id];
+                gspan::graph_t& graph = pruned_graphs_[graph_id];
                 RemoveInfrequentLabel(graph, label);
             }
         }
