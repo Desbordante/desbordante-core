@@ -26,4 +26,10 @@ struct RFD {
     [[nodiscard]] std::string ToString() const;
 };
 
+struct RFDHash {
+    std::size_t operator()(const RFD& rfd) const {
+        return (static_cast<std::size_t>(rfd.lhs_mask) << 8) | rfd.rhs_index;
+    }
+};
+
 }  // namespace algos::rfd

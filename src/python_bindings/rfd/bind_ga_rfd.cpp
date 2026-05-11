@@ -58,4 +58,4 @@ void BindGaRfd(py::module_& main_module) {
     ga_cls.def("get_rfds", &GaRfd::GetRfds);
 }
 
-}
+}  // namespace python_bindings
