@@ -12,10 +12,7 @@ target_sources(
 
 target_link_libraries(
     ${NAME}
-    PUBLIC
-        ${DESBORDANTE_PREFIX}::cmspade::model
-        ${DESBORDANTE_PREFIX}::cmspade::parser
-        Boost::headers
-    PRIVATE
-        ${DESBORDANTE_PREFIX}::algos better-enums
+    PUBLIC ${DESBORDANTE_PREFIX}::cmspade::model ${DESBORDANTE_PREFIX}::cmspade::parser
+           Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::algos magic_enum::magic_enum
 )

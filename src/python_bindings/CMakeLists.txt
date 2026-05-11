@@ -88,9 +88,9 @@ desbordante_add_bind(
     cmspade
     SRCS cmspade/bind_cmspade.cpp
     LIBS 
-    ${DESBORDANTE_PREFIX}::cmspade 
-    Boost::headers 
+    ${DESBORDANTE_PREFIX}::cmspade  
     better-enums
+    magic_enum::magic_enum
 )
 
 desbordante_add_bind(

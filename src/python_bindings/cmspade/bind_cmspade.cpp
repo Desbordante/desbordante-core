@@ -1,6 +1,7 @@
 #include "python_bindings/cmspade/bind_cmspade.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/cmspade/cmspade.h"

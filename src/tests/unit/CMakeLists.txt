@@ -58,7 +58,7 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::cmspade
     ${DESBORDANTE_PREFIX}::testlib::common
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
 )
