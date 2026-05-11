@@ -18,6 +18,7 @@ std::vector<gspan::graph_t> ReadGraphs(std::istream& stream) {
                 continue;
             }
 
+            int edge_id = 0;
             gspan::graph_t graph;
             std::vector<std::string> items;
             boost::split(items, line, boost::is_any_of(" "));
@@ -59,8 +60,15 @@ std::vector<gspan::graph_t> ReadGraphs(std::istream& stream) {
 
                     auto vertex1 = id_to_desc[vertex1_id];
                     auto vertex2 = id_to_desc[vertex2_id];
-                    auto edge = boost::add_edge(vertex1, vertex2, graph);
-                    graph[edge.first].label = edge_label;
+                    auto edge1 = boost::add_edge(vertex1, vertex2, graph);
+                    graph[edge1.first].label = edge_label;
+                    graph[edge1.first].id = edge_id;
+
+                    auto edge2 = boost::add_edge(vertex2, vertex1, graph);
+                    graph[edge2.first].label = edge_label;
+                    graph[edge2.first].id = edge_id;
+
+                    edge_id++;
                 }
             }
             result.push_back(std::move(graph));

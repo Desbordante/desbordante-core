@@ -21,8 +21,8 @@ struct FrequentSubgraph {
 
     int support;
 
-    FrequentSubgraph(size_t id, DFSCode const& dfs_code, boost::unordered_flat_set<int> const& graphs_ids,
-                     int support)
+    FrequentSubgraph(size_t id, DFSCode const& dfs_code,
+                     boost::unordered_flat_set<int> const& graphs_ids, int support)
         : id(id), dfs_code(dfs_code), graphs_ids(graphs_ids), support(support) {}
 
     int CompareTo(FrequentSubgraph const& other) {

@@ -10,20 +10,9 @@
 namespace gspan {
 
 class DFSCode {
-    int rightmost_;
-    std::vector<int> rightmost_path_;
     std::vector<ExtendedEdge> extended_edges_;
 
 public:
-    DFSCode() {
-        rightmost_ = -1;
-    }
-
-    bool NotPreOfRM(int vertex) const {
-        if (rightmost_path_.size() <= 1) return true;
-        return vertex != rightmost_path_[rightmost_path_.size() - 2];
-    }
-
     std::vector<int> GetVertexLabels() const {
         std::vector<int> result;
         std::unordered_map<int, int> id_to_label;
@@ -42,22 +31,11 @@ public:
     }
 
     void Add(ExtendedEdge const& edge) {
-        if (extended_edges_.empty()) {
-            rightmost_ = 1;
-            rightmost_path_.push_back(0);
-            rightmost_path_.push_back(1);
-        } else {
-            int id1 = edge.vertex1.id;
-            int id2 = edge.vertex2.id;
-            if (id1 < id2) {
-                rightmost_ = id2;
-                while (!rightmost_path_.empty() && rightmost_path_.back() > id1) {
-                    rightmost_path_.pop_back();
-                }
-                rightmost_path_.push_back(id2);
-            }
-        }
         extended_edges_.push_back(edge);
+    }
+
+    void Pop() {
+        extended_edges_.pop_back();
     }
 
     ExtendedEdge const& operator[](size_t i) const {
@@ -66,10 +44,6 @@ public:
 
     ExtendedEdge& operator[](size_t i) {
         return extended_edges_[i];
-    }
-
-    bool OnRightMostPath(int vertex_id) const {
-        return std::ranges::find(rightmost_path_, vertex_id) != rightmost_path_.end();
     }
 
     bool ContainEdge(int v1, int v2) const {
@@ -87,14 +61,6 @@ public:
 
     bool Empty() const {
         return extended_edges_.empty();
-    }
-
-    int GetRightMost() const {
-        return rightmost_;
-    }
-
-    std::vector<int> const& GetRightMostPath() const {
-        return rightmost_path_;
     }
 
     std::vector<ExtendedEdge> const& GetExtendedEdges() const {
