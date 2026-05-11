@@ -40,5 +40,5 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::model::types
             Boost::headers
             spdlog::spdlog_header_only
-            better-enums
+            magic_enum::magic_enum
 )

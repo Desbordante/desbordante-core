@@ -27,7 +27,7 @@ inline void GaRfdBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkCo
 
         algos::StdParamsMap params{{kCsvConfig, tests::kNeighbors10k},
                                    {kRfdMinSimilarity, 0.9},
-                                   {kMinimumConfidence, 0.9},
+                                   {kRfdMinimumConfidence, 0.9},
                                    {kPopulationSize, std::size_t{924}},
                                    {kRfdMaxGenerations, std::size_t{64}},
                                    {kRfdCrossoverProbability, 0.85},

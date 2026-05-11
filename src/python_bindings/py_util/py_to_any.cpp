@@ -46,9 +46,6 @@
 #include "python_bindings/py_util/iterable_sequence_stream.h"
 #include "python_bindings/py_util/py_custom_metrics.h"
 
-#include "core/algorithms/rfd/similarity_metric.h"
-#include "python_bindings/rfd/py_similarity_metric.h"
-
 namespace {
 
 namespace py = pybind11;
@@ -276,11 +273,13 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         {typeid(config::CustomMetricType), CustomMetricToAny},
         {typeid(config::CustomMetricsType), CustomMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
-        {typeid(std::shared_ptr<algos::rfd::SimilarityMetric>), [](std::string_view, py::handle obj) {
-            return std::shared_ptr<algos::rfd::SimilarityMetric>(
-                new python_bindings::PySimilarityMetric(py::reinterpret_borrow<py::object>(obj)));
-        }},
-    };
+        {typeid(std::shared_ptr<algos::rfd::SimilarityMetric>),
+         [](std::string_view, py::handle obj) {
+             return std::shared_ptr<algos::rfd::SimilarityMetric>(
+                     new python_bindings::PySimilarityMetric(
+                             py::reinterpret_borrow<py::object>(obj)));
+         }},
+};
 
 }  // namespace
 
