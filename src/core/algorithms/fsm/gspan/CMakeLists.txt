@@ -2,7 +2,7 @@ set(NAME fsm.gspan)
 desbordante_add_lib(NAME)
 target_sources(
     ${NAME}
-    PRIVATE gspan.cpp graph_parser.cpp extended_edge.cpp
+    PRIVATE gspan.cpp graph_parser.cpp extended_edge.cpp history.cpp
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(

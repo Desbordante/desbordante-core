@@ -41,4 +41,33 @@ public:
     std::string ToString() const;
 };
 
+struct ExtendedEdgeProjectCompare {
+    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const {
+        return std::tuple{first.vertex1.label, first.label, first.vertex2.label} <
+               std::tuple{second.vertex1.label, second.label, second.vertex2.label};
+    }
+};
+
+struct ExtendedEdgeBackwardCompare {
+    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const {
+        if (first.vertex2.id != second.vertex2.id) {
+            return first.vertex2.id < second.vertex2.id;
+        }
+        return first.label < second.label;
+    }
+};
+
+struct ExtendedEdgeForwardCompare {
+    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const {
+        if (first.vertex1.id != second.vertex1.id) {
+            return first.vertex1.id > second.vertex1.id;
+        }
+        if (first.label != second.label) {
+            return first.label < second.label;
+        }
+
+        return first.vertex2.label < second.vertex2.label;
+    }
+};
+
 }  // namespace gspan
