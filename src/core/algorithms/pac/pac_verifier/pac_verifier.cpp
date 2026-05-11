@@ -44,11 +44,6 @@ void PACVerifier::ProcessCommonExecuteOpts() {
         delta_steps_ = std::round((1 - min_delta_) * 1000);
     }
 
-    // Ignore min_delta if min_eps == max_eps ("validation")
-    if (min_epsilon_ >= 0 && min_epsilon_ == max_epsilon_) {
-        min_delta_ = 0;
-    }
-
     if (max_epsilon_ > 0 && max_epsilon_ < min_epsilon_) {
         throw config::ConfigurationError("Min epsilon must be less or equal to max epsilon");
     }
@@ -94,6 +89,13 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
     LOG_TRACE("Empirical probabilities:");
     for ([[maybe_unused]] auto const& [eps, delta] : empirical_probabilities) {
         LOG_TRACE("\t{}, {}", eps, delta);
+    }
+
+    if (max_epsilon_ >= 0 && min_epsilon_ >= 0 && max_epsilon_ - min_epsilon_ < kDistThreshold) {
+        // Even though this situation should be handled correctly in next `if`s, it's handled
+        // separately for clarity (and reliability)
+        LOG_DEBUG("Got min_epsilon == max_epsilon, entering validation mode");
+        return GetEpsilonDeltaForEpsilon(min_epsilon_);
     }
 
     if (empirical_probabilities.size() == 1) {
