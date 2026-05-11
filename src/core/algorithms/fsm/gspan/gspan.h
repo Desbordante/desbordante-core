@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <vector>
+
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
 
@@ -9,6 +10,7 @@
 #include "core/config/names_and_descriptions.h"
 #include "frequent_subgraph.h"
 #include "graph.h"
+#include "projection.h"
 
 namespace algos {
 class GSpan : public Algorithm {
@@ -40,13 +42,13 @@ protected:
     void FindAllOnlyOneVertex();
     void RemoveInfrequentLabel(gspan::graph_t& graph, int label);
     void RemoveInfrequentVertexPairs();
-    void GSpanDFS(gspan::DFSCode const& code, boost::unordered_flat_set<int> graph_ids);
+    void GSpanDFS(gspan::DFSCode const& code, gspan::Projection embeddings);
 
-    boost::unordered_flat_map<gspan::ExtendedEdge, boost::unordered_flat_set<int>, gspan::ExtendedEdge::Hash>
-    RightMostPathExtensions(gspan::DFSCode const& code, boost::unordered_flat_set<int> graph_ids);
+    gspan::projection_map_t RightMostPathExtensions(gspan::DFSCode const& code,
+                                                    gspan::Projection const& embeddings);
 
-    boost::unordered_flat_set<gspan::ExtendedEdge, gspan::ExtendedEdge::Hash>
-    RightMostPathExtensionsFromSingle(gspan::DFSCode const& code, gspan::graph_t const& graph);
+    boost::unordered_flat_map<gspan::ExtendedEdge, gspan::FlatIsoms, gspan::ExtendedEdge::Hash>
+    RightMostPathExtensionsFromSingle(gspan::DFSCode const& code, gspan::graph_t const& graph, gspan::FlatIsoms const& current_isoms);
 
     bool IsCanonical(gspan::DFSCode const& code);
 
