@@ -8,8 +8,10 @@
 #include <utility>
 #include <vector>
 
+#include "core/algorithms/algo_factory.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
+#include "core/config/names.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
@@ -26,6 +28,7 @@ void BindDomainPACVerification(py::module_& pac_verification_module) {
     using namespace algos::pac_verifier;
     using namespace pybind11::literals;
     using namespace std::string_literals;
+    using namespace config::names;
 
     py::class_<DomainPACHighlight>(pac_verification_module, "DomainPACHighlight")
             .def_property_readonly("indices", &DomainPACHighlight::GetRowNums)
@@ -47,6 +50,18 @@ void BindDomainPACVerification(py::module_& pac_verification_module) {
             BindPrimitiveNoBase<DomainPACVerifier>(pac_verification_module, "DomainPACVerifier")
                     .def("get_pac", &DomainPACVerifier::GetPAC)
                     .def("get_highlights", &DomainPACVerifier::GetHighlights, "eps_1"_a = -1,
-                         "eps_2"_a = -1);
+                         "eps_2"_a = -1)
+                    .def(
+                            "verify",
+                            [](DomainPACVerifier& verifier, double epsilon, double delta) {
+                                algos::ConfigureFromMap(verifier, {
+                                                                          {kMinEpsilon, epsilon},
+                                                                          {kMaxEpsilon, epsilon},
+                                                                          {kMinDelta, delta},
+                                                                  });
+                                verifier.Execute();
+                            },
+                            "Verify PAC with given epsilon or delta", "epsilon"_a = -1,
+                            "delta"_a = -1);
 }
 }  // namespace python_bindings
