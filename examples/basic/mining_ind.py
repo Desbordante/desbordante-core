@@ -37,3 +37,5 @@ print_table('examples/datasets/ind_datasets/course.csv')
 print()
 print('department.csv:\n')
 print_table('examples/datasets/ind_datasets/department.csv')
+
+print('See also examples/datasets/mining_ind_dataframes.py for usage with pandas DataFrames')
