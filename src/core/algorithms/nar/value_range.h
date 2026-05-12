@@ -67,6 +67,40 @@ struct NumericValueRange : public ValueRange {
     }
 };
 
+struct BoolValueRange : public ValueRange {
+    bool lower_bound{};
+    bool upper_bound{};
+
+    explicit BoolValueRange(TypedColumnData const& column) {
+        auto [min_ptr, max_ptr] = std::ranges::minmax(
+                column.GetData(), {},
+                [](std::byte const* value) { return Type::GetValue<bool>(value); });
+        lower_bound = Type::GetValue<bool>(min_ptr);
+        upper_bound = Type::GetValue<bool>(max_ptr);
+        assert(lower_bound <= upper_bound);
+    }
+
+    explicit BoolValueRange(bool lower_bound, bool upper_bound)
+        : lower_bound(lower_bound), upper_bound(upper_bound) {
+        assert(lower_bound <= upper_bound);
+    }
+
+    [[nodiscard]] bool Includes(std::byte const* value) const override {
+        bool v = Type::GetValue<bool>(value);
+        return v >= lower_bound && v <= upper_bound;
+    }
+
+    TypeId GetTypeId() const noexcept override {
+        return TypeId::kBool;
+    }
+
+    [[nodiscard]] std::string ToString() const override {
+        std::ostringstream result;
+        result << "[" << (lower_bound ? "1" : "0") << " - " << (upper_bound ? "1" : "0") << "]";
+        return result.str();
+    }
+};
+
 std::shared_ptr<ValueRange> CreateValueRange(TypedColumnData const& column);
 
 }  // namespace model

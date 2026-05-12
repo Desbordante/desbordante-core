@@ -175,12 +175,15 @@ private:
     bool is_null_equal_null_;
     bool treat_mixed_as_string_;
 
-    inline static std::vector<TypeId> const kAllCandidateTypes = {
-            TypeId::kDate, TypeId::kInt, TypeId::kBigInt, TypeId::kDouble, TypeId::kString};
+    inline static std::vector<TypeId> const kAllCandidateTypes = {TypeId::kDate,   TypeId::kInt,
+                                                                  TypeId::kBigInt, TypeId::kDouble,
+                                                                  TypeId::kBool,   TypeId::kString};
     inline static std::unordered_map<TypeId, boost::regex> const kTypeIdToRegex = {
             {TypeId::kDate,
              boost::regex(
                      R"(^(\d{4})([-.\/]?)(1[0-2]|0[1-9]|[1-9])\2(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
+            {TypeId::kBool,
+             boost::regex(R"(^\s*(true|false|0|1)\s*$)", boost::regex_constants::icase)},
             {TypeId::kDouble,
              boost::regex(
                      R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
@@ -231,16 +234,21 @@ private:
                      [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kBigInt));
                      }},
-                    {TypeId::kDouble, [](std::string const& val) {
+                    {TypeId::kDouble,
+                     [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kDouble));
+                     }},
+                    {TypeId::kBool, [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kBool));
                      }}};
     // each 1 represents a possible type from kAllCandidateTypes
-    inline static std::unordered_map<TypeId, std::bitset<5>> const kTypeIdToBitset = {
-            {TypeId::kDate, std::bitset<5>("00001")},  // bitset for delimited dates
-            {TypeId::kInt, std::bitset<5>("01110")},
-            {TypeId::kBigInt, std::bitset<5>("01100")},
-            {TypeId::kDouble, std::bitset<5>("01000")},
-            {TypeId::kString, std::bitset<5>("10000")}};
+    inline static std::unordered_map<TypeId, std::bitset<6>> const kTypeIdToBitset = {
+            {TypeId::kDate, std::bitset<6>("000001")},  // bitset for delimited dates
+            {TypeId::kInt, std::bitset<6>("011110")},
+            {TypeId::kBigInt, std::bitset<6>("011100")},
+            {TypeId::kDouble, std::bitset<6>("011000")},
+            {TypeId::kBool, std::bitset<6>("010000")},
+            {TypeId::kString, std::bitset<6>("100000")}};
 
     size_t CalculateMixedBufSize(std::vector<TypeId> const& types_layout,
                                  TypeIdToType const& type_id_to_type) const noexcept;

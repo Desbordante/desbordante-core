@@ -58,6 +58,7 @@ enum class TypeId : char  {
                  * (arbitrary-precision integer value) */
     kString,    /* Except for nulls and empties column contains only strings
                  * (string value, sequence of characters) */
+    kBool,      /* Column contains only boolean values (true/false or 1/0) */
     kDate,      /* Column contains only valid dates in the range 1400-Jan-01 to 9999-Dec-31
                  * (class date from boost::gregorian)  */
     kNull,      /* Column contains only nulls ("NULL" value) */

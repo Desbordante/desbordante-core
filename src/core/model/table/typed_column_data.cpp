@@ -23,7 +23,8 @@ namespace model {
 
 TypeId TypedColumnDataFactory::DeduceColumnType() const {
     bool is_undefined = true;
-    std::bitset<5> candidate_types_bitset("11111");
+
+    std::bitset<6> candidate_types_bitset("111111");
     TypeId first_type_id = TypeId::kUndefined;
     auto matcher_map_iter = kTypeIdToChecker.begin();
     for (std::size_t i = 0; i != unparsed_.size(); ++i) {
@@ -43,7 +44,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                 }
             }
 
-            std::bitset<5> new_candidate_types_bitset("00000");
+            std::bitset<6> new_candidate_types_bitset("000000");
             bool matched = false;
             for (auto const& [type_id, type_check] : kTypeIdToChecker) {
                 if (type_id != first_type_id && type_check(unparsed_[i])) {
@@ -79,7 +80,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
         return TypeId::kUndefined;
     }
 
-    for (std::size_t i = 0; i < 5; i++) {
+    for (std::size_t i = 0; i < 6; i++) {
         if (candidate_types_bitset[i]) {
             return kAllCandidateTypes[i];
         }

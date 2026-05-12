@@ -127,7 +127,7 @@ public:
                 {TypeId::kNull, alignof(Null)},     {TypeId::kEmpty, alignof(Empty)},
                 {TypeId::kInt, alignof(Int)},       {TypeId::kDouble, alignof(Double)},
                 {TypeId::kString, alignof(String)}, {TypeId::kBigInt, alignof(BigInt)},
-                {TypeId::kDate, alignof(Date)}};
+                {TypeId::kDate, alignof(Date)},     {TypeId::kBool, alignof(bool)}};
         assert(type_to_alignment.find(type_id) != type_to_alignment.end());
         return type_to_alignment.at(type_id);
     }
