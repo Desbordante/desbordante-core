@@ -1334,21 +1334,17 @@ void DataStats::InvalidateCache() const {
 }
 
 std::vector<std::pair<double, double>> DataStats::ExtractNumericPairs(
-    mo::TypedColumnData const& col1, 
-    mo::TypedColumnData const& col2) const {
-    
+        mo::TypedColumnData const& col1, mo::TypedColumnData const& col2) const {
     auto const& t1 = static_cast<mo::INumericType const&>(col1.GetType());
     auto const& t2 = static_cast<mo::INumericType const&>(col2.GetType());
-    
+
     std::vector<std::pair<double, double>> out;
     out.reserve(col1.GetNumRows());
-    
+
     for (size_t i = 0; i < col1.GetNumRows(); ++i) {
         if (col1.IsNullOrEmpty(i) || col2.IsNullOrEmpty(i)) continue;
-        out.emplace_back(
-            t1.GetValueAs<double>(col1.GetValue(i)),
-            t2.GetValueAs<double>(col2.GetValue(i))
-        );
+        out.emplace_back(t1.GetValueAs<double>(col1.GetValue(i)),
+                         t2.GetValueAs<double>(col2.GetValue(i)));
     }
     return out;
 }
@@ -1450,8 +1446,7 @@ Statistic DataStats::GetSpearmanCorrelation(size_t index1, size_t index2) const 
                 double spearman = numerator / std::sqrt(sum_sq1 * sum_sq2);
 
                 mo::DoubleType double_type;
-                return Statistic(double_type.MakeValue(spearman), &double_type,
-                                 false);
+                return Statistic(double_type.MakeValue(spearman), &double_type, false);
             });
 }
 

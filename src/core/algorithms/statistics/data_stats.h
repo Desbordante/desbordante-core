@@ -85,14 +85,14 @@ protected:
 
     template <typename CalcFunc>
     Statistic GetOrCalcCorrelation(size_t i1, size_t i2,
-                                std::map<std::pair<size_t, size_t>, Statistic>& cache,
-                                bool numeric_only, CalcFunc calc_func) const {
+                                   std::map<std::pair<size_t, size_t>, Statistic>& cache,
+                                   bool numeric_only, CalcFunc calc_func) const {
         auto key = std::make_pair(std::min(i1, i2), std::max(i1, i2));
 
         if (auto it = cache.find(key); it != cache.end()) {
             return it->second;
         }
-        
+
         if (numeric_only) {
             if (!col_data_[i1].GetType().IsNumeric() || !col_data_[i2].GetType().IsNumeric()) {
                 return {};
@@ -111,7 +111,8 @@ protected:
         return result;
     }
 
-    std::vector<std::pair<double, double>> ExtractNumericPairs(const model::TypedColumnData& col1, const model::TypedColumnData& col2) const;
+    std::vector<std::pair<double, double>> ExtractNumericPairs(
+            model::TypedColumnData const& col1, model::TypedColumnData const& col2) const;
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
