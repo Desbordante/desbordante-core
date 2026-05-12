@@ -106,5 +106,7 @@ jobs:
           source .venv/bin/activate
 
           cp test_input_data/TestDataStats.csv src/python_bindings
+          cp test_input_data/TestBool.csv src/python_bindings
+          cp test_input_data/TestDiacritics.csv src/python_bindings
           cd src/python_bindings
           python test_pybind_data_stats.py

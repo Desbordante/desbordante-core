@@ -899,4 +899,61 @@ TEST(TestDataStats, TestLastCharFrequency) {
     EXPECT_EQ(result, " :4");
 }
 
+TEST(TestDataStats, TestGetMinWhiteSpaces) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    auto stat = stats.GetMinWhiteSpaces(11);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 0);
+}
+
+TEST(TestDataStats, TestGetMaxWhiteSpaces) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    auto stat = stats.GetMaxWhiteSpaces(11);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 13);
+}
+
+TEST(TestDataStats, TestGetTrueCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestBool);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+    auto stat = stats.GetTrueCount(0);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 3);
+}
+
+TEST(TestDataStats, TestGetFalseCount) {
+    auto stats_ptr = MakeStatAlgorithm(kTestBool);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+    auto stat = stats.GetFalseCount(0);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_EQ(value, 2);
+}
+
+TEST(TestDataStats, TestGetZeroPercent) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats& stats = *stats_ptr;
+    algos::Statistic stat = stats.GetZeroPercent(7);
+    ASSERT_TRUE(stat.HasValue());
+    double value = mo::Type::GetValue<mo::Double>(stat.GetData());
+    EXPECT_DOUBLE_EQ(value, 3.0 / 8.0);
+}
+
+TEST(TestDataStats, TestGetNumberOfDiacriticChars) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDiacritics);
+    algos::DataStats& stats = *stats_ptr;
+    stats.Execute();
+    auto stat = stats.GetNumberOfDiacriticChars(1);
+    ASSERT_TRUE(stat.HasValue());
+    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
+    EXPECT_GE(value, 6);
+}
+
 };  // namespace tests

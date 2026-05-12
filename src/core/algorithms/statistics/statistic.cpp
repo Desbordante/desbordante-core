@@ -138,6 +138,12 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(jarque_bera_statistic, "jarque_bera_statistic");
     try_add_stat(entropy, "entropy");
     try_add_stat(gini_coefficient, "gini_coefficient");
+    try_add_stat(min_white_spaces, "min_white_spaces");
+    try_add_stat(max_white_spaces, "max_white_spaces");
+    try_add_stat(true_count, "true_count");
+    try_add_stat(false_count, "false_count");
+    try_add_stat(zero_percent, "zero_percent");
+    try_add_stat(num_diacritic_chars, "num_diacritic_chars");
 
     return res;
 }

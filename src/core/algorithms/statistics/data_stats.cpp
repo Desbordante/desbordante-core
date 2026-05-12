@@ -1,6 +1,9 @@
 #include "core/algorithms/statistics/data_stats.h"
 
 #include <set>
+#include <unicode/normlzr.h>
+#include <unicode/uchar.h>
+#include <unicode/unistr.h>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -320,9 +323,57 @@ Statistic DataStats::GetNumberOfZeros(size_t index) const {
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kEqual);
 }
 
+Statistic DataStats::GetZeroPercent(size_t index) const {
+    if (all_stats_[index].num_diacritic_chars.HasValue()) return all_stats_[index].zero_percent;
+    mo::TypedColumnData const& col = col_data_[index];
+    if (!col.IsNumeric()) return {};
+
+    int total = NumberOfValues(index) - GetNumNulls(index);
+    assert(total >= 0);
+    if (total == 0) return {};
+
+    Statistic zeros_stat = GetNumberOfZeros(index);
+    mo::Int zeros = mo::Type::GetValue<mo::Int>(zeros_stat.GetData());
+    double percent = static_cast<double>(zeros) / total;
+
+    mo::DoubleType double_type;
+    std::byte* result = double_type.MakeValue(percent);
+    return Statistic(result, &double_type, false);
+}
+
 Statistic DataStats::GetNumberOfNegatives(size_t index) const {
     if (all_stats_[index].num_negatives.HasValue()) return all_stats_[index].num_negatives;
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kLess);
+}
+
+Statistic DataStats::CountBool(size_t index, bool expected) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != mo::TypeId::kBool) return {};
+
+    size_t count = 0;
+    std::vector<std::byte const*> const& data = col.GetData();
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        bool value = *reinterpret_cast<bool const*>(data[i]);
+        if (value == expected) count++;
+    }
+
+    mo::IntType int_type;
+    return Statistic(int_type.MakeValue(count), &int_type, false);
+}
+
+Statistic DataStats::GetTrueCount(size_t index) const {
+    if (all_stats_[index].true_count.HasValue()) return all_stats_[index].true_count;
+
+    return CountBool(index, true);
+}
+
+Statistic DataStats::GetFalseCount(size_t index) const {
+    if (all_stats_[index].false_count.HasValue()) return all_stats_[index].false_count;
+
+    return CountBool(index, false);
 }
 
 Statistic DataStats::GetSumOfSquares(size_t index) const {
@@ -671,6 +722,26 @@ Statistic DataStats::GetMaxNumberOfChars(size_t index) const {
     return GetStringMaxOf(index, [](std::string const& line) { return line.size(); });
 }
 
+Statistic DataStats::GetMinWhiteSpaces(size_t index) const {
+    if (all_stats_[index].min_white_spaces.HasValue()) return all_stats_[index].min_white_spaces;
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
+
+    return GetStringMinOf(index, [](std::string const& line) {
+        return std::count(line.begin(), line.end(), ' ');
+    });
+}
+
+Statistic DataStats::GetMaxWhiteSpaces(size_t index) const {
+    if (all_stats_[index].max_white_spaces.HasValue()) return all_stats_[index].max_white_spaces;
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
+
+    return GetStringMaxOf(index, [](std::string const& line) {
+        return std::count(line.begin(), line.end(), ' ');
+    });
+}
+
 std::vector<std::string> DataStats::GetWordsInString(std::string line) {
     std::istringstream iss(line);
     std::vector<std::string> words_in_row(std::istream_iterator<std::string>{iss},
@@ -731,6 +802,43 @@ Statistic DataStats::GetNumberOfWords(size_t index) const {
 
     return GetStringSumOf(index,
                           [](std::string const& line) { return GetNumberOfWordsInString(line); });
+}
+
+Statistic DataStats::GetNumberOfDiacriticChars(size_t index) const {
+    if (all_stats_[index].num_diacritic_chars.HasValue())
+        return all_stats_[index].num_diacritic_chars;
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
+
+    UErrorCode err = U_ZERO_ERROR;
+    icu::Normalizer2 const* norm = icu::Normalizer2::getNFDInstance(err);
+
+    if (U_FAILURE(err) || norm == nullptr) return {};
+
+    size_t count = 0;
+
+    for (size_t i = 0; i < col.GetNumRows(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+
+        std::string const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
+
+        icu::UnicodeString ustr = icu::UnicodeString::fromUTF8(str);
+
+        icu::UnicodeString decomposed = norm->normalize(ustr, err);
+
+        for (int32_t pos = 0; pos < decomposed.length();) {
+            UChar32 c = decomposed.char32At(pos);
+            pos += U16_LENGTH(c);
+
+            if (u_charType(c) == U_NON_SPACING_MARK) {
+                count++;
+            }
+        }
+    }
+
+    mo::IntType int_type;
+    std::byte const* res = int_type.MakeValue(count);
+    return Statistic(res, &int_type, false);
 }
 
 std::vector<char> DataStats::GetTopKChars(size_t index, size_t k) const {
@@ -1029,6 +1137,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].skewness = GetSkewness(index);
             all_stats_[index].STD = GetCorrectedSTD(index);
             all_stats_[index].num_zeros = GetNumberOfZeros(index);
+            all_stats_[index].zero_percent = GetZeroPercent(index);
             all_stats_[index].num_negatives = GetNumberOfNegatives(index);
             all_stats_[index].sum_of_squares = GetSumOfSquares(index);
             all_stats_[index].geometric_mean = GetGeometricMean(index);
@@ -1063,6 +1172,12 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].special_chars_count = GetNumberOfRowsWithSpecialChars(index);
             all_stats_[index].first_char_freq = GetFirstCharFrequency(index);
             all_stats_[index].last_char_freq = GetLastCharFrequency(index);
+            all_stats_[index].min_white_spaces = GetMinWhiteSpaces(index);
+            all_stats_[index].max_white_spaces = GetMaxWhiteSpaces(index);
+            all_stats_[index].num_diacritic_chars = GetNumberOfDiacriticChars(index);
+            // boolean counts
+            all_stats_[index].true_count = GetTrueCount(index);
+            all_stats_[index].false_count = GetFalseCount(index);
         }
 
         all_stats_[index].is_categorical = IsCategorical(
