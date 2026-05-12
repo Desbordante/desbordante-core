@@ -2363,6 +2363,41 @@ Faculty of Sociology                  29C University st.
 Faculty of Physics                    10 Academic av.      
 Institute of Chemistry                11 Academic av.      
 Graduate School of Managemment        49 Science sq.       
+See also examples/datasets/mining_ind_dataframes.py for usage with pandas DataFrames
+'''
+
+snapshots['test_example[basic/mining_ind_dataframes.py-None-mining_ind_dataframes_output] mining_ind_dataframes_output'] = '''Found inclusion dependencies (-> means "is included in"):
+
+(course, [Department name]) -> (department, [Department name])
+(instructor, [Department name]) -> (department, [Department name])
+(student, [Department name]) -> (department, [Department name])
+(teaches, [Instructor ID]) -> (instructor, [ID])
+(teaches, [Course ID]) -> (course, [Course ID])
+
+Tables for first IND:
+
+course
+  Course ID             Title                      Department name
+0      IT-1  Computer Science  Institute of Information Technology
+1      MM-3           Algebra    Mathematics and Mechanics Faculty
+2       H-1           History                 Institute of History
+3      FL-2           English         Faculty of Foreign Languages
+4      IT-2       Programming  Institute of Information Technology
+5       S-5        Philosophy                 Faculty of Sociology
+6       P-2           Physics                   Faculty of Physics
+7       C-8         Chemistry               Institute of Chemistry
+
+department
+                       Department name            Building
+0  Institute of Information Technology      5 Academic av.
+1    Mathematics and Mechanics Faculty      3 Academic av.
+2                 Institute of History  29A University st.
+3         Faculty of Foreign Languages      10 Science sq.
+4                 Faculty of Sociology  29C University st.
+5                   Faculty of Physics     10 Academic av.
+6               Institute of Chemistry     11 Academic av.
+7       Graduate School of Managemment      49 Science sq.
+
 '''
 
 snapshots['test_example[basic/mining_list_od.py-None-mining_list_od_output] mining_list_od_output'] = '''
