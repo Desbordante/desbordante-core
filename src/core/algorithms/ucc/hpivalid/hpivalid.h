@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "core/algorithms/ucc/hpivalid/config.h"
 #include "core/algorithms/ucc/hpivalid/pli_table.h"
 #include "core/algorithms/ucc/hpivalid/result_collector.h"
 #include "core/algorithms/ucc/ucc_algorithm.h"

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <boost/dynamic_bitset.hpp>
 #include <utility>
 #include <vector>

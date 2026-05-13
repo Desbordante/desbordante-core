@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <cstddef>
 #include <memory>
 #include <sstream>
@@ -9,7 +8,6 @@
 
 #include "core/algorithms/nar/value_range.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
-#include "core/model/types/types.h"
 
 namespace model {
 

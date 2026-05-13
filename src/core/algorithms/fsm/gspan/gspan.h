@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cmath>
 #include <vector>
 #include <climits>
 #include <filesystem>

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <cmath>
 #include <vector>
 #include <cstddef>
 #include <memory>
@@ -14,7 +13,6 @@
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/position_list_index_with_singletons.h"
 #include "core/model/table/relation_data.h"
-#include "core/model/table/relational_schema.h"
 #include "core/model/table/position_list_index.h"
 
 class ColumnLayoutRelationData final : public RelationData {

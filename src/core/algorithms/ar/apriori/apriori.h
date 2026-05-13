@@ -11,7 +11,6 @@
 #include "core/algorithms/ar/apriori/candidate_hash_tree.h"
 #include "core/algorithms/ar/apriori/node.h"
 #include "core/algorithms/ar/ar_algorithm.h"
-#include "core/model/transaction/itemset.h"
 
 namespace algos {
 

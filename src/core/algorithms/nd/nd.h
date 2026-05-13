@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/model/table/column.h"
 #include <string>
 #include <tuple>
 #include <variant>

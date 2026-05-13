@@ -5,7 +5,6 @@
 #include <vector>
 #include <utility>
 
-#include "core/algorithms/md/column_match.h"
 #include "core/algorithms/md/column_similarity_classifier.h"
 #include "core/algorithms/md/decision_boundary.h"
 #include "core/algorithms/md/hymd/column_match_info.h"

@@ -1,21 +1,16 @@
 #pragma once
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
-
-#include <boost/dynamic_bitset.hpp>
 #include <cstddef>
 #include <vector>
 
 #include "core/algorithms/fd/aidfd/search_tree.h"
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/config/tabular_data/input_table_type.h"
-#include "core/model/table/column.h"
 #include "core/model/table/relational_schema.h"
-#include "core/model/table/vertical.h"
 
 namespace algos {
 

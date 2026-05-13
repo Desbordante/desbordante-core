@@ -12,8 +12,6 @@
 
 namespace algos::fastod {
 
-class StrippedPartition;
-
 class RangeBasedStrippedPartition {
 private:
     std::vector<DataFrame::Range> indexes_;

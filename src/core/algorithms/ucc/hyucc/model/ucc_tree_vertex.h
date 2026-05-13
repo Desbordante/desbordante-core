@@ -4,8 +4,6 @@
 #include <cassert>
 #include <memory>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <utility>

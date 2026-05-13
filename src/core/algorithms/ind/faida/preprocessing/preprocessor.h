@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/algorithms/ind/faida/preprocessing/hashed_column_store.h"
 #include <cstddef>
 #include <memory>
 #include <string>

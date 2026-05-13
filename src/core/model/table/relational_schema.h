@@ -5,21 +5,13 @@
 
 #pragma once
 
-#include <functional>
-#include <list>
 #include <boost/dynamic_bitset.hpp>
 #include <memory>
 #include <string>
-#include <unordered_set>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
-
-#include "core/util/bitset_utils.h"
 #include <cstddef>
 
 class Column;
-
 class Vertical;
 
 class RelationalSchema {

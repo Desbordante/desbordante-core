@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cassert>
-#include <deque>
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -11,7 +10,6 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
-#include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/dynamic_table_data.h"

@@ -12,7 +12,6 @@
 #include "core/model/table/idataset_stream.h"
 #include "core/model/transaction/input_format_type.h"
 #include "core/model/transaction/itemset.h"
-#include "core/model/transaction/transactional_input_format.h"
 
 namespace model {
 

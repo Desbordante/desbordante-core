@@ -1,9 +1,6 @@
 #pragma once
 
-#include <algorithm>
 #include <concepts>
-#include <stddef.h>
-#include <stdint.h>
 #include <string>
 #include <unordered_map>
 #include <vector>

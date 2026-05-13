@@ -1,15 +1,11 @@
 #pragma once
 
-#include <string>
-#include <utility>
 #include <vector>
 #include <cstddef>
 #include <list>
 #include <memory>
 
-#include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "core/algorithms/fd/sfd/contingency_table.h"
 #include "core/algorithms/fd/sfd/correlation.h"
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/algorithms/fd/sfd/sample.h"

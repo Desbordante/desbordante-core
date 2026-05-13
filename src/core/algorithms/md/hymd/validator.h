@@ -3,7 +3,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered/unordered_map.hpp>
 #include <cstddef>
-#include <unordered_set>
 #include <vector>
 #include <algorithm>
 #include <unordered_map>

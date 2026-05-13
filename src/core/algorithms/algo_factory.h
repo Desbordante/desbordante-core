@@ -5,13 +5,10 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
-
-#include <boost/any.hpp>
 #include <unordered_map>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
-#include "core/algorithms/algorithm_types.h"
 
 namespace algos {
 

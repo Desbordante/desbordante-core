@@ -4,8 +4,6 @@
 #include <memory>
 #include <queue>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 #include <cstddef>
 
 #include "core/algorithms/fd/hycommon/all_column_combinations.h"

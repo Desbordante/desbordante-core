@@ -3,8 +3,6 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
-#include <ranges>
-#include <span>
 #include <stdexcept>
 #include <vector>
 

@@ -4,8 +4,6 @@
 #include <cstddef>
 #include <vector>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "core/algorithms/md/hymd/lattice/md_lattice.h"
 #include "core/algorithms/md/hymd/lattice/node_base.h"
 #include "core/algorithms/md/hymd/lattice/validation_info.h"

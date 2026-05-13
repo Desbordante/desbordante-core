@@ -1,9 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
 #include <ostream>
-#include <stdexcept>
 #include <string>
 #include <vector>
 #include <utility>

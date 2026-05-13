@@ -23,7 +23,6 @@ namespace model {
 
 // forward declaration
 class PLICache;
-
 template <class Value>
 class VerticalMap;
 

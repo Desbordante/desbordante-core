@@ -1,8 +1,5 @@
 #pragma once
 
-#include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <string>
 #include <unordered_map>
 #include <utility>

@@ -21,8 +21,6 @@ typedef unsigned __int64 uint64_t;
 
 #else	// defined(_MSC_VER)
 
-#include <stdint.h>
-
 #endif // !defined(_MSC_VER)
 
 //-----------------------------------------------------------------------------

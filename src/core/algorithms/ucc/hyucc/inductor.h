@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "core/algorithms/ucc/hyucc/model/non_ucc_list.h"
 #include "core/algorithms/ucc/hyucc/model/ucc_tree.h"
 #include "core/algorithms/ucc/raw_ucc.h"

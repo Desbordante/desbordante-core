@@ -1,12 +1,9 @@
 #pragma once
 
-#include <list>
 #include <boost/dynamic_bitset.hpp>
 #include <utility>
 #include <variant>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 #include <iosfwd>
 #include <memory>
 #include <string>

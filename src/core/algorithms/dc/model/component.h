@@ -5,8 +5,6 @@
 #include <utility>
 
 #include "core/algorithms/dc/model/operator.h"
-#include "core/model/types/builtin.h"
-#include "core/model/types/types.h"
 #include "core/model/types/type.h"
 
 namespace algos::dc {

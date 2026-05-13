@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 #include <cstddef>

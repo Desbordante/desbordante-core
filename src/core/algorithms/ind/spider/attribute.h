@@ -9,8 +9,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 #include <memory>
 
 #include "core/config/error/type.h"

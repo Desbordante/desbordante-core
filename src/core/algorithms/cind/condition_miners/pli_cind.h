@@ -7,7 +7,6 @@
 
 // #include "algorithms/ind/cind/condition.h"
 #include "cind_miner.h"
-#include "core/algorithms/cind/cind.h"
 #include "position_lists_set.h"
 #include "core/algorithms/cind/condition.h"
 #include "core/config/tabular_data/input_tables_type.h"

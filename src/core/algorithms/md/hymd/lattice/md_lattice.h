@@ -2,23 +2,16 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <cstddef>
-#include <functional>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 #include <utility>
 
 #include "core/algorithms/md/hymd/lattice/md.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "core/algorithms/md/hymd/lattice/md_node.h"
-#include "core/algorithms/md/hymd/lattice/node_base.h"
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lattice/single_level_func.h"
 #include "core/algorithms/md/hymd/lattice/support_node.h"
 #include "core/algorithms/md/hymd/lhs_ccv_ids_info.h"
-#include "core/algorithms/md/hymd/md_element.h"
 #include "core/algorithms/md/hymd/md_lhs.h"
 #include "core/algorithms/md/hymd/pair_comparison_result.h"
 #include "core/algorithms/md/hymd/rhss.h"

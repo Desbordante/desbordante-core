@@ -1,7 +1,5 @@
 #pragma once
 
-class ProfilingContext;
-
 #include <mutex>
 #include <cstddef>
 #include <memory>

@@ -9,9 +9,6 @@
 #include <cstddef>
 #include <utility>
 
-#include <boost/dynamic_bitset.hpp>
-
-#include "core/util/custom_hashes.h"
 #include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical.h"
 

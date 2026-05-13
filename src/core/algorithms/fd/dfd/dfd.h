@@ -1,10 +1,7 @@
 #pragma once
 
-#include <random>
-#include <stack>
 #include <vector>
 
-#include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/vertical.h"

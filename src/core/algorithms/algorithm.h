@@ -1,6 +1,5 @@
 #pragma once
 
-#include <filesystem>
 #include <boost/any.hpp>
 #include <string_view>
 #include <typeindex>
@@ -8,15 +7,11 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
-
-#include <boost/any.hpp>
 #include <cassert>
 #include <memory>
 
 #include "core/config/ioption.h"
 #include "core/config/option.h"
-#include "core/model/table/idataset_stream.h"
-#include "core/parser/csv_parser/csv_parser.h"
 
 namespace algos {
 

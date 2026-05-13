@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 
-#include "core/model/types/types.h"
 #include "core/model/types/type.h"
 
 namespace algos {

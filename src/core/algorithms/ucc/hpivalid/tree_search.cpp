@@ -1,7 +1,6 @@
 #include "core/algorithms/ucc/hpivalid/tree_search.h"
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <deque>

@@ -5,8 +5,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <mutex>
 #include <unordered_map>
-
-#include <boost/dynamic_bitset.hpp>
 #include <cstddef>
 #include <memory>
 #include <utility>

@@ -8,7 +8,6 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ucc/ucc_verifier/ucc_stats_calculator.h"
-#include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_relation_data.h"

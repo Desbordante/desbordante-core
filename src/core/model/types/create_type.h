@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <boost/pointer_cast.hpp>
 #include <memory>
 #include <stdexcept>

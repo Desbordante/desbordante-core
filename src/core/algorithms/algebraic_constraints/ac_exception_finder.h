@@ -6,7 +6,6 @@
 
 #include "core/algorithms/algebraic_constraints/ac_exception.h"
 #include "core/algorithms/algebraic_constraints/ranges_collection.h"
-#include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/table/typed_column_data.h"
 
 namespace algos {

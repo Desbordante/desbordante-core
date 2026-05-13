@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstddef>
-
 #include <magic_enum/magic_enum.hpp>
 #include <cstddef>
 #include <array>

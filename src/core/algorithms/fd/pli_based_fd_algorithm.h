@@ -1,11 +1,9 @@
 #pragma once
 
-#include <optional>
 #include <cassert>
 #include <memory>
 
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "core/config/equal_nulls/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_relation_data.h"
 

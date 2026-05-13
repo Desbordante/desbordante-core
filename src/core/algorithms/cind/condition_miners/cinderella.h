@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "basket.h"
-#include "core/algorithms/cind/cind.h"
 #include "core/algorithms/cind/condition_miners/cind_miner.h"
 #include "itemset.h"
 #include "core/algorithms/cind/condition.h"

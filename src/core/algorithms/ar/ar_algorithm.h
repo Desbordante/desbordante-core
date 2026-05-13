@@ -4,8 +4,6 @@
 #include <set>
 #include <stack>
 #include <vector>
-
-#include <boost/any.hpp>
 #include <memory>
 #include <string>
 
@@ -13,7 +11,6 @@
 #include "core/algorithms/ar/ar.h"
 #include "core/config/ar_minimum_conf/type.h"
 #include "core/config/ar_minimum_support/type.h"
-#include "core/config/tabular_data/input_table_type.h"
 #include "core/model/transaction/transactional_data.h"
 
 namespace algos {

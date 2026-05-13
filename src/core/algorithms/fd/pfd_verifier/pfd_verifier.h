@@ -8,8 +8,6 @@
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/pfd_verifier/pfd_stats_calculator.h"
 #include "core/algorithms/fd/tane/enums.h"
-#include "core/config/equal_nulls/type.h"
-#include "core/config/error/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"

@@ -7,8 +7,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include <boost/functional/hash.hpp>
 #include <cstddef>
 #include <typeindex>
 #include <utility>

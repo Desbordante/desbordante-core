@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -10,7 +9,6 @@
 
 #include "core/algorithms/dc/model/predicate.h"
 #include "core/model/table/column.h"
-#include "core/model/table/vertical.h"
 #include "core/algorithms/dc/model/column_operand.h"
 #include "core/algorithms/dc/model/operator.h"
 

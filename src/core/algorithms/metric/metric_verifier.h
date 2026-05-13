@@ -1,10 +1,7 @@
 #pragma once
 
-#include <algorithm>
 #include <magic_enum/magic_enum.hpp>
 #include <cstddef>
-#include <filesystem>
-#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>

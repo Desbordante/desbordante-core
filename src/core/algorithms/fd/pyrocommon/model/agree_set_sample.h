@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <memory>
 #include <vector>
 
@@ -75,5 +74,3 @@ private:
 
 }  // namespace model
 
-// include template implementation
-#include "core/algorithms/fd/pyrocommon/model/agree_set_sample_impl.h"

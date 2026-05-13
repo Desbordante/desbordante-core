@@ -9,7 +9,6 @@
 #include "core/config/thread_number/option.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/idataset_stream.h"
 #include "core/config/common_option.h"
 
 namespace algos {

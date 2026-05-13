@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/model/table/column_data.h"
 #include <vector>
 
 #include "core/model/table/vertical.h"

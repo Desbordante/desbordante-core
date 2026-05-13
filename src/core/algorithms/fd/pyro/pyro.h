@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <mutex>
 #include <memory>
 
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
