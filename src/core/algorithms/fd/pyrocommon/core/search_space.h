@@ -4,6 +4,11 @@
 #include <memory>
 #include <set>
 #include <utility>
+#include <functional>
+#include <optional>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
 #include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"

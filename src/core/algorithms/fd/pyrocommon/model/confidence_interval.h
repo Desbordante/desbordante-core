@@ -2,6 +2,8 @@
 #include <string>
 
 #include <boost/format.hpp>
+#include <string>
+#include <iosfwd>
 
 namespace model {
 

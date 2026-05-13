@@ -4,6 +4,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <cstddef>
+#include <unordered_map>
+#include <utility>
 
 #include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/config/indices/type.h"

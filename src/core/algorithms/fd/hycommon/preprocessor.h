@@ -3,6 +3,10 @@
 #include <tuple>
 
 #include <boost/dynamic_bitset.hpp>
+#include <tuple>
+#include <cstddef>
+#include <variant>
+#include <vector>
 
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/model/table/column_layout_relation_data.h"

@@ -3,12 +3,17 @@
 #include <chrono>
 #include <memory>
 #include <stdexcept>
+#include <functional>
 
 #include "core/config/equal_nulls/option.h"
 #include "core/config/indices/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/config/common_option.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
 
 namespace algos::fd_verifier {
 

@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
 #include <utility>
+#include <iosfwd>
+#include <string>
 
 #include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
 #include "core/model/table/vertical.h"

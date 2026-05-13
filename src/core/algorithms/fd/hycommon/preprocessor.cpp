@@ -2,8 +2,12 @@
 
 #include <algorithm>
 #include <vector>
+#include <deque>
+#include <iterator>
+#include <utility>
 
 #include "core/algorithms/fd/hycommon/util/pli_util.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos::hy::util {
 

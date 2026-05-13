@@ -1,7 +1,11 @@
 #pragma once
 
+#include <magic_enum/magic_enum.hpp>
 #include <cstddef>
 #include <memory>
+#include <array>
+#include <deque>
+#include <utility>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"

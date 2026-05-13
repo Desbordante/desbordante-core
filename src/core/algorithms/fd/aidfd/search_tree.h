@@ -4,6 +4,10 @@
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
+#include <utility>
+#include <cstddef>
+#include <functional>
+#include <memory>
 
 class SearchTree {
 public:

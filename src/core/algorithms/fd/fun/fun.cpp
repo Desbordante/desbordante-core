@@ -1,6 +1,17 @@
 #include "core/algorithms/fd/fun/fun.h"
 
+#include <boost/dynamic_bitset.hpp>
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include "core/util/logger.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos {
 

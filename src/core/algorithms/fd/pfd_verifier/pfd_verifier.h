@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <vector>
+#include <cassert>
+#include <cstddef>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/pfd_verifier/pfd_stats_calculator.h"
@@ -11,6 +13,8 @@
 #include "core/config/error_measure/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos {
 

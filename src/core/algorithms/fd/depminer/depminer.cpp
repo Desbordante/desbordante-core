@@ -1,12 +1,21 @@
 #include "core/algorithms/fd/depminer/depminer.h"
 
+#include <boost/dynamic_bitset.hpp>
 #include <chrono>
 #include <list>
 #include <memory>
+#include <cstddef>
+#include <iomanip>
+#include <utility>
 
 #include "core/model/table/agree_set_factory.h"
 #include "core/model/table/relational_schema.h"
 #include "core/util/logger.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/util/custom_hashes.h"
+#include "core/util/primitive_collection.h"
 
 namespace algos {
 

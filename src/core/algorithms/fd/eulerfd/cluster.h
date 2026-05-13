@@ -5,6 +5,7 @@
 #include <functional>
 #include <numeric>
 #include <vector>
+#include <cstddef>
 
 namespace algos {
 

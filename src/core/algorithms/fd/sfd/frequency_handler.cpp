@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <compare>
 
 #include "core/model/table/column_index.h"
 #include "core/model/table/tuple_index.h"

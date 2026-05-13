@@ -1,9 +1,11 @@
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
 #include <memory>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
+#include <cstddef>
 
 #include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 #include "core/algorithms/fd/raw_fd.h"

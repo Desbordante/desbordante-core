@@ -2,9 +2,12 @@
 #include <functional>
 #include <list>
 #include <mutex>
+#include <string>
 
 #include "core/algorithms/fd/pyrocommon/model/partial_fd.h"
 #include "core/algorithms/fd/pyrocommon/model/partial_key.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
 
 class DependencyConsumer {
 private:

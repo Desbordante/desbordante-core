@@ -1,8 +1,13 @@
 #include "core/algorithms/fd/tane/model/lattice_level.h"
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <algorithm>
+#include <cassert>
+#include <utility>
 
 #include "core/util/logger.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 

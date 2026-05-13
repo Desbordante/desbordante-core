@@ -3,14 +3,29 @@
 #include <chrono>
 #include <mutex>
 #include <thread>
+#include <functional>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/pyrocommon/core/fd_g1_strategy.h"
 #include "core/config/error/option.h"
-#include "core/config/max_lhs/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
+#include "core/algorithms/fd/pyrocommon/model/partial_fd.h"
+#include "core/config/common_option.h"
+#include "core/config/option.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
 
 namespace algos {
 
