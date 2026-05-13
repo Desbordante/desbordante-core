@@ -27,7 +27,7 @@ namespace algos::dd {
 template <BoostDynamicBitsetCompatible Bitset>
 class HybridEvidenceInverter {
 private:
-    std::vector<MatchDF<Bitset>> match_dfs_;
+    std::vector<Bitset> match_dfs_;
     std::vector<std::vector<DifferentialFunction>> dif_funcs_;
     std::vector<Bitset> column_to_dif_funcs_;
     std::shared_ptr<DifFuncInfo const> dif_func_info_;
@@ -48,7 +48,7 @@ private:
             dif_func_to_not_satisfied_bitsets_.emplace_back(match_dfs_.size());
         }
         for (std::size_t i = 0; i != match_dfs_.size(); ++i) {
-            Bitset const& diff_bitset = match_dfs_[i].GetBitset();
+            Bitset const& diff_bitset = match_dfs_[i];
             for (std::size_t j = 0; j != dif_func_info_->dif_func_num_; ++j) {
                 if (diff_bitset[j]) {
                     dif_func_to_satisfied_bitsets_[j].set(i);
@@ -100,7 +100,7 @@ private:
         for (auto const& bitset : minimized_bitsets) {
             // check if LHS is not trivial
             if (std::ranges::any_of(match_dfs_, [&bitset](auto const& match_df) {
-                    return bitset.is_subset_of(match_df.GetBitset());
+                    return bitset.is_subset_of(match_df);
                 })) {
                 std::vector<DifferentialFunction> lhs;
                 lhs.reserve(bitset.count());
@@ -201,7 +201,7 @@ private:
     }
 
 public:
-    HybridEvidenceInverter(std::vector<MatchDF<Bitset>> match_dfs,
+    HybridEvidenceInverter(std::vector<Bitset> match_dfs,
                            DifferentialFunctionBuilder const& df_builder)
         : match_dfs_(std::move(match_dfs)) {
         dif_funcs_ = df_builder.GetDifFuncs();
@@ -285,7 +285,7 @@ public:
                 cur_diff_bitsets.reserve(cur_bitset.count());
                 for (std::size_t index = cur_bitset.find_first();
                      index != boost::dynamic_bitset<>::npos; index = cur_bitset.find_next(index)) {
-                    Bitset diff_bitset = match_dfs_[index].GetBitset();
+                    Bitset diff_bitset = match_dfs_[index];
                     for (std::size_t k = dif_func_info_->dif_func_nums_[i];
                          k != dif_func_info_->dif_func_nums_[i + 1]; ++k) {
                         diff_bitset.set(k, false);

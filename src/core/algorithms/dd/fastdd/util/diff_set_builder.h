@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <limits>
 #include <memory>
 #include <unordered_set>
 #include <utility>
@@ -26,24 +27,24 @@ private:
     DiffSet<Bitset> diff_set_;
     std::vector<std::vector<Bitset>> const& offset_to_predicates_;
     std::size_t bitset_size_;
+    std::vector<model::DFConstraint> min_max_dif_;
 
     template <typename ClueType>
-    boost::unordered::unordered_flat_set<ClueType> BuildISNs(
-            std::vector<PliShard> pli_shards) const {
+    boost::unordered::unordered_flat_set<ClueType> BuildISNs(std::vector<PliShard> pli_shards) {
         boost::unordered::unordered_flat_set<ClueType> final_clue_set;
 
         for (std::size_t i = 0; i != pli_shards.size(); ++i) {
             SingleISNBuilder<ClueType, Bitset> single(isn_info_, distance_calculator_,
                                                       pli_shards[i], offset_to_predicates_,
-                                                      bitset_size_);
+                                                      min_max_dif_, bitset_size_);
             boost::unordered::unordered_flat_set<ClueType> clue_set = single.BuildISNs();
             for (auto&& clue : clue_set) {
                 final_clue_set.insert(std::move(clue));
             }
             for (std::size_t j = i + 1; j != pli_shards.size(); ++j) {
-                CrossISNBuilder<ClueType, Bitset> cross(isn_info_, distance_calculator_,
-                                                        pli_shards[i], pli_shards[j],
-                                                        offset_to_predicates_, bitset_size_);
+                CrossISNBuilder<ClueType, Bitset> cross(
+                        isn_info_, distance_calculator_, pli_shards[i], pli_shards[j],
+                        offset_to_predicates_, min_max_dif_, bitset_size_);
                 boost::unordered::unordered_flat_set<ClueType> clue_set = cross.BuildISNs();
                 for (auto&& clue : clue_set) {
                     final_clue_set.insert(std::move(clue));
@@ -61,7 +62,8 @@ public:
           distance_calculator_(distance_calculator),
           diff_set_(df_builder, isn_info_),
           offset_to_predicates_(diff_set_.GetOffsetToPredicates()),
-          bitset_size_(df_builder.GetDifFuncNum()) {}
+          bitset_size_(df_builder.GetDifFuncNum()),
+          min_max_dif_(df_builder.GetDifFuncsSize(), {std::numeric_limits<double>::max(), 0}) {}
 
     void BuildDiffSet(std::vector<PliShard> pli_shards) {
         if (!isn_info_->Overflows()) {
@@ -77,6 +79,10 @@ public:
 
     DiffSet<Bitset> GetDiffSet() const noexcept {
         return diff_set_;
+    }
+
+    std::vector<model::DFConstraint> GetMinMaxDif() const noexcept {
+        return min_max_dif_;
     }
 };
 
