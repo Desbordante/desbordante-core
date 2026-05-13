@@ -1,3 +1,4 @@
+#pragma once
 
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/config/error/type.h"
