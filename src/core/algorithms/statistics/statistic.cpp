@@ -1,6 +1,8 @@
 #include "core/algorithms/statistics/statistic.h"
 
 #include <memory>
+#include <sstream>
+#include <utility>
 
 namespace algos {
 

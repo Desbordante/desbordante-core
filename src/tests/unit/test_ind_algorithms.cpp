@@ -1,4 +1,11 @@
 #include <gtest/gtest.h>
+#include <exception>
+#include <iostream>
+#include <list>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/config/equal_nulls/type.h"
@@ -10,6 +17,12 @@
 #include "tests/common/csv_config_util.h"
 #include "tests/unit/test_hash_util.h"
 #include "tests/unit/test_ind_util.h"
+#include "core/algorithms/ind/faida/faida.h"
+#include "core/algorithms/ind/ind.h"
+#include "core/algorithms/ind/mind/mind.h"
+#include "core/algorithms/ind/spider/spider.h"
+#include "core/config/exceptions.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 namespace {

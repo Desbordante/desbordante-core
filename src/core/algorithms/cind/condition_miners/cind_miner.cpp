@@ -5,6 +5,11 @@
 #include "core/algorithms/cind/types.h"
 #include "core/model/table/encoded_tables.h"
 #include "core/util/timed_invoke.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_combination.h"
+#include "core/model/table/column_encoded_relation_data.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/relational_schema.h"
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables)

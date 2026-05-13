@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/container_hash/hash.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -7,6 +8,7 @@
 #include <vector>
 
 #include <boost/functional/hash.hpp>
+#include <cstddef>
 
 #include "core/algorithms/cfd/cfd_verifier/highlight.h"
 #include "core/algorithms/cfd/model/cfd_relation_data.h"

@@ -1,10 +1,16 @@
 #include <gtest/gtest.h>
+#include <cmath>
+#include <memory>
+#include <string>
+#include <utility>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
 #include "core/config/indices/type.h"
 #include "tests/common/all_csv_configs.h"
+#include "core/config/names.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 using namespace config::names;

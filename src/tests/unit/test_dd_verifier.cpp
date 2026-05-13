@@ -1,13 +1,18 @@
+#include <gtest/gtest.h>
 #include <cstddef>
 #include <memory>
-
-#include <gtest/gtest.h>
+#include <list>
+#include <string>
+#include <unordered_map>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/dd/dd_verifier/FuncMetric.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "tests/common/all_csv_configs.h"
+#include "core/algorithms/dd/dd.h"
+#include "core/config/names.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 struct DDVerifyingParams {

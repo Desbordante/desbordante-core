@@ -1,18 +1,20 @@
 #include "pli_cind.h"
 
+#include <boost/container_hash/hash.hpp>
 #include <algorithm>
 #include <iterator>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-
-#include <boost/container_hash/hash.hpp>
+#include <string>
 
 #include "core/algorithms/cind/condition.h"
 #include "core/algorithms/cind/condition_miners/position_lists_set.h"
 #include "core/algorithms/cind/types.h"
 #include "core/model/table/encoded_column_data.h"
+#include "core/algorithms/cind/cind.h"
+#include "core/algorithms/cind/condition_miners/cind_miner.h"
 
 namespace algos::cind {
 

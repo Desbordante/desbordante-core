@@ -1,5 +1,12 @@
 #include "ar_verifier.h"
 
+#include <algorithm>
+#include <functional>
+#include <ranges>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
+
 #include "core/config/ar_minimum_conf/option.h"
 #include "core/config/ar_minimum_support/option.h"
 #include "core/config/names_and_descriptions.h"
@@ -10,6 +17,10 @@
 #include "core/util/enum_to_str.h"
 #include "core/util/logger.h"
 #include "core/util/timed_invoke.h"
+#include "core/config/common_option.h"
+#include "core/config/exceptions.h"
+#include "core/config/option.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace algos::ar_verifier {
 ARVerifier::ARVerifier() {

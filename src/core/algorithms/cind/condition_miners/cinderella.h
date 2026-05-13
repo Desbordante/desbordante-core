@@ -6,6 +6,8 @@
 #include "core/algorithms/cind/cind.h"
 #include "core/algorithms/cind/condition_miners/cind_miner.h"
 #include "itemset.h"
+#include "core/algorithms/cind/condition.h"
+#include "core/config/tabular_data/input_tables_type.h"
 
 namespace algos::cind {
 class Cinderella final : public CindMiner {

@@ -1,5 +1,7 @@
 #include "core/algorithms/dc/FastADC/util/denial_constraint_set.h"
 
+#include <typeindex>
+
 #include "core/algorithms/dc/FastADC/providers/predicate_provider.h"
 
 namespace algos::fastadc {

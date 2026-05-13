@@ -2,10 +2,10 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <iostream>
 #include <random>
 
 #include "core/algorithms/cfd/util/set_util.h"
+#include "core/model/table/column.h"
 
 // see algorithms/cfd/LICENSE
 

@@ -1,9 +1,11 @@
 #include "core/algorithms/dc/FastADC/util/single_clue_set_builder.h"
 
 #include <cstddef>
+#include <cinttypes>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
+#include "core/model/types/bitset.h"
 
 namespace algos::fastadc {
 

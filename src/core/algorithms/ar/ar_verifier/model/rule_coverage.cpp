@@ -1,6 +1,7 @@
 #include "core/algorithms/ar/ar_verifier/model/rule_coverage.h"
 
 #include <algorithm>
+#include <iterator>
 
 namespace algos::ar_verifier::model {
 

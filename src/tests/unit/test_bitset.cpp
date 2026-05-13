@@ -1,13 +1,14 @@
+#include <gtest/gtest.h>
 #include <bitset>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <unordered_set>
-
-#include <gtest/gtest.h>
+#include <cstddef>
+#include <version>
 
 #include "core/model/types/bitset.h"
+#include "core/util/logger.h"
 
 namespace tests {
 

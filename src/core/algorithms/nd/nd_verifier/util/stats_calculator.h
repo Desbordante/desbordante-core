@@ -5,6 +5,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <algorithm>
+#include <climits>
+#include <cstddef>
+#include <utility>
 
 #include "core/algorithms/nd/nd.h"
 #include "core/algorithms/nd/nd_verifier/util/highlight.h"

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <set>
+#include <cstddef>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/statistics/statistic.h"
@@ -8,6 +11,10 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/algorithms/algorithm.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/numeric_type.h"
 
 namespace algos {
 

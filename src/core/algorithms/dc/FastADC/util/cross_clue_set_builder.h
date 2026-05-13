@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/common_clue_set_builder.h"

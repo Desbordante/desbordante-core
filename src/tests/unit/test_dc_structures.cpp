@@ -1,8 +1,18 @@
+#include <gtest/gtest.h>
 #include <memory>
 #include <optional>
-
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <array>
+#include <bitset>
+#include <cinttypes>
+#include <compare>
+#include <cstddef>
+#include <iterator>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/dc/FastADC/misc/misc.h"
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
@@ -22,6 +32,18 @@
 #include "core/util/worker_thread_pool.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/unit/test_dc_structures_correct_results.h"
+#include "core/algorithms/dc/FastADC/model/column_operand.h"
+#include "core/algorithms/dc/FastADC/model/evidence.h"
+#include "core/algorithms/dc/FastADC/model/evidence_set.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
+#include "core/algorithms/dc/FastADC/providers/predicate_provider.h"
+#include "core/algorithms/dc/FastADC/util/common_clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/denial_constraint_set.h"
+#include "core/model/table/column.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
 
 namespace tests {
 

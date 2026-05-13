@@ -7,6 +7,10 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <cassert>
+#include <cinttypes>
+#include <cstddef>
+#include <type_traits>
 
 #include "core/algorithms/dc/FastADC/misc/misc.h"
 #include "core/algorithms/dc/FastADC/providers/index_provider.h"

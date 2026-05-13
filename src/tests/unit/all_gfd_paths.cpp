@@ -1,6 +1,9 @@
 #include "tests/unit/all_gfd_paths.h"
 
+#include <fstream>
+
 #include "tests/common/csv_config_util.h"
+#include "core/parser/graph_parser/graph_parser.h"
 
 namespace tests {
 

@@ -1,12 +1,22 @@
-#include <algorithm>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <list>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 #include "core/util/bitset_utils.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/unit/test_fd_util.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/fd.h"
+#include "core/algorithms/fd/raw_fd.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 

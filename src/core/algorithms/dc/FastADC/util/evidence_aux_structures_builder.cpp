@@ -3,8 +3,10 @@
 #include <cassert>
 #include <cstddef>
 #include <stdexcept>
+#include <bitset>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/util/logger.h"
 
 namespace algos::fastadc {
 

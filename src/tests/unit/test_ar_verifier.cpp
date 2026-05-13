@@ -1,10 +1,16 @@
 #include <gtest/gtest.h>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/ar/ar_verifier/ar_verifier.h"
 #include "core/config/names.h"
 #include "core/model/transaction/input_format_type.h"
 #include "tests/common/all_csv_configs.h"
+#include "core/config/exceptions.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 namespace onam = config::names;

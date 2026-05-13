@@ -4,6 +4,8 @@
 #include <map>
 #include <numeric>
 #include <vector>
+#include <functional>
+#include <initializer_list>
 
 std::vector<std::vector<int>> Balancer::Balance(std::vector<int> const& weights,
                                                 int const& processors_num) {

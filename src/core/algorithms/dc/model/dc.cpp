@@ -7,9 +7,11 @@
 #include <string_view>
 #include <utility>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/model/tuple.h"
 
 namespace algos::dc {
 

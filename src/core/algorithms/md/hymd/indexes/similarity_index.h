@@ -1,5 +1,8 @@
 #pragma once
 
+#include <boost/container/flat_map.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
+#include <boost/container/vector.hpp>
 #include <cassert>
 #include <map>
 #include <mutex>
@@ -7,6 +10,9 @@
 
 #include <boost/container/flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
+#include <functional>
+#include <memory>
+#include <utility>
 
 #include "core/algorithms/md/hymd/column_classifier_value_id.h"
 #include "core/algorithms/md/hymd/table_identifiers.h"

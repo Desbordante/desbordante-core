@@ -1,6 +1,9 @@
 #pragma once
 
 #include <assert.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -8,6 +11,7 @@
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/move/utility_core.hpp>
+#include <typeindex>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/providers/index_provider.h"

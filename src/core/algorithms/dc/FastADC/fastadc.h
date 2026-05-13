@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <string>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
@@ -11,6 +12,7 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/util/worker_thread_pool.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
 
 namespace algos::dc {
 

@@ -3,10 +3,6 @@
 #include <memory>
 #include <utility>
 
-#include <boost/dynamic_bitset.hpp>
-
-#include "core/util/logger.h"
-
 namespace model {
 
 PositionListsSet::PositionListsSet(ClusterCollection clusters, size_t size, size_t relation_size)

@@ -1,14 +1,18 @@
+#include <gtest/gtest.h>
 #include <list>
 #include <optional>
 #include <set>
 #include <string>
-
-#include <gtest/gtest.h>
+#include <memory>
+#include <utility>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
+#include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/split/split.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 

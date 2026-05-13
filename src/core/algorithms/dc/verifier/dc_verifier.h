@@ -5,6 +5,11 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <optional>
+#include <set>
+#include <unordered_set>
+#include <utility>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/dc/model/dc.h"
@@ -15,6 +20,9 @@
 #include "core/model/table/typed_column_data.h"
 #include "core/util/kdtree.h"
 #include "core/util/static_map.h"
+#include "core/algorithms/dc/model/component.h"
+#include "core/algorithms/dc/model/predicate.h"
+#include "core/model/table/column.h"
 
 namespace algos {
 namespace dc {

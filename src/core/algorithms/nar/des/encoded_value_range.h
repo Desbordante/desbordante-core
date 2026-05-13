@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+
 #include "core/algorithms/nar/des/rng.h"
 #include "core/algorithms/nar/value_range.h"
 

@@ -6,6 +6,8 @@
 #include <vector>
 
 #include <boost/any.hpp>
+#include <memory>
+#include <string>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ar/ar.h"

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <iterator>
 
 #include "core/model/table/column.h"
 #include "core/model/table/vertical.h"

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "core/model/types/type.h"
 #include "core/util/static_map.h"

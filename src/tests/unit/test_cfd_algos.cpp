@@ -3,12 +3,18 @@
 
 #include <gtest/gtest.h>
 #include <magic_enum/magic_enum.hpp>
+#include <memory>
+#include <optional>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cfd/fd_first_algorithm.h"
 #include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 

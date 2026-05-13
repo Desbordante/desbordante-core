@@ -1,4 +1,8 @@
 #include <gtest/gtest.h>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/tane/pfdtane.h"
@@ -6,6 +10,10 @@
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
+#include "core/algorithms/fd/tane/enums.h"
+#include "core/config/error/type.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/position_list_index.h"
 
 namespace tests {
 namespace onam = config::names;

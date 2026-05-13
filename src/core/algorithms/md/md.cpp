@@ -1,6 +1,8 @@
 #include "core/algorithms/md/md.h"
 
-#include <ranges>
+#include <algorithm>
+#include <iterator>
+#include <sstream>
 
 #include "core/model/table/column.h"
 #include "core/util/get_preallocated_vector.h"

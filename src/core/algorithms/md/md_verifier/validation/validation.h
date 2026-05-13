@@ -3,6 +3,7 @@
 #include <memory>
 #include <variant>
 #include <vector>
+#include <utility>
 
 #include "core/algorithms/md/column_match.h"
 #include "core/algorithms/md/column_similarity_classifier.h"
@@ -13,6 +14,10 @@
 #include "core/algorithms/md/md_verifier/highlights/highlights.h"
 #include "core/algorithms/md/similarity.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/algorithms/md/hymd/indexes/records_info.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/model/index.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::md {
 

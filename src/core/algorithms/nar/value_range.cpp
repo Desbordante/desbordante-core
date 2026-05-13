@@ -1,5 +1,9 @@
 #include "core/algorithms/nar/value_range.h"
 
+#include <ranges>
+#include <sstream>
+#include <unordered_set>
+
 namespace model {
 
 ValueRange::~ValueRange() {}

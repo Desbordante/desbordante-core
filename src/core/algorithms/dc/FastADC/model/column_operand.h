@@ -2,6 +2,9 @@
 
 #include <boost/container_hash/hash.hpp>
 #include <magic_enum/magic_enum.hpp>
+#include <cstddef>
+#include <string>
+#include <typeindex>
 
 #include "core/model/table/column.h"
 #include "core/util/enum_to_str.h"

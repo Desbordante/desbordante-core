@@ -1,6 +1,10 @@
 #include "core/algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 
 #include <cassert>
+#include <algorithm>
+#include <functional>
+#include <map>
+#include <utility>
 
 #include "core/algorithms/md/hymd/utility/reserve_more.h"
 

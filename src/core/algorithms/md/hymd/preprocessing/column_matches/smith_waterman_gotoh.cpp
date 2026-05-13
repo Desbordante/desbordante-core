@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <cstddef>
 
 namespace {
 double SubstitutionCompare(char a, char b) {

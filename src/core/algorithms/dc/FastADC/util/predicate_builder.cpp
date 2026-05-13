@@ -1,8 +1,8 @@
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
 
 #include <array>
-#include <assert.h>
 #include <bitset>
+#include <cassert>
 
 #include "core/algorithms/dc/FastADC/misc/typed_column_data_value_differences.h"
 #include "core/algorithms/dc/FastADC/model/column_operand.h"
@@ -11,7 +11,6 @@
 #include "core/algorithms/dc/FastADC/providers/index_provider.h"
 #include "core/algorithms/dc/FastADC/providers/predicate_provider.h"
 #include "core/model/table/typed_column_data.h"
-#include "core/model/types/builtin.h"
 #include "core/util/logger.h"
 
 namespace algos::fastadc {

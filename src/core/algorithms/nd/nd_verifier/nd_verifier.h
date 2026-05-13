@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cstddef>
+#include <utility>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/nd/nd.h"

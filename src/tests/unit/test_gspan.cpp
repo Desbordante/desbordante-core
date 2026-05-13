@@ -1,11 +1,16 @@
+#include <gtest/gtest.h>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/range/irange.hpp>
+#include <boost/range/iterator_range_core.hpp>
 #include <climits>
 #include <filesystem>
-#include <map>
 #include <sstream>
 #include <unordered_set>
-
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fsm/gspan/dfscode.h"
@@ -14,6 +19,9 @@
 #include "core/algorithms/fsm/gspan/gspan.h"
 #include "core/config/names.h"
 #include "tests/common/csv_config_util.h"
+#include "core/algorithms/fsm/gspan/frequent_subgraph.h"
+#include "core/algorithms/fsm/gspan/graph.h"
+#include "core/config/exceptions.h"
 
 namespace tests {
 

@@ -1,6 +1,7 @@
 #include "tests/common/all_csv_configs.h"
 
 #include <string_view>
+#include <filesystem>
 
 #include "tests/common/csv_config_util.h"
 
