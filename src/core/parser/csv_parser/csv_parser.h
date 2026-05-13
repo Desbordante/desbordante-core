@@ -9,6 +9,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstddef>
 
 #include "core/model/table/idataset_stream.h"
 

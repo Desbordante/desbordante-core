@@ -2,9 +2,15 @@
 
 #include <memory>
 #include <utility>
+#include <set>
+#include <string>
 
 #include "core/model/table/table_index.h"
 #include "core/util/logger.h"
+#include "core/model/table/column.h"
+#include "core/model/table/encoded_column_data.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/value_dictionary.h"
 
 namespace model {
 std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom(

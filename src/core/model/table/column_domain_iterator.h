@@ -8,6 +8,9 @@
 #include <memory>
 #include <queue>
 #include <vector>
+#include <compare>
+#include <functional>
+#include <string>
 
 #include "core/model/table/column_domain.h"
 

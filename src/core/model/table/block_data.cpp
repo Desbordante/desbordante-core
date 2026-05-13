@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <cassert>
 #include <limits>
+#include <cstddef>
+#include <iterator>
 
 namespace model {
 

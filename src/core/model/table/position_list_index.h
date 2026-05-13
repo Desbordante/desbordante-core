@@ -8,8 +8,10 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 #include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
 
 class ColumnLayoutRelationData;
 

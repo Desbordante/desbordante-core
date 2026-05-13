@@ -12,6 +12,7 @@
 #include "core/model/table/position_list_index.h"
 
 class ColumnLayoutRelationData;
+#include "core/model/table/relational_schema.h"
 
 namespace model {
 

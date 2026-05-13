@@ -5,19 +5,20 @@
 
 #include "core/model/table/position_list_index.h"
 
+#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <deque>
 #include <map>
 #include <memory>
 #include <utility>
-
-#include <boost/dynamic_bitset.hpp>
+#include <cassert>
+#include <cstddef>
 
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
 #include "core/util/logger.h"
+#include "core/model/table/column_data.h"
 
 namespace model {
 

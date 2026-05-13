@@ -2,9 +2,11 @@
 
 #include <memory>
 #include <utility>
+#include <algorithm>
+#include <stdexcept>
 
 #include "core/model/table/vertical.h"
-#include "core/model/table/vertical_map.h"
+#include "core/model/table/column.h"
 
 RelationalSchema::RelationalSchema(std::string name) : columns_(), name_(std::move(name)) {}
 

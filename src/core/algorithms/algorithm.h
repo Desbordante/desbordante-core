@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <boost/any.hpp>
 #include <string_view>
 #include <typeindex>
 #include <unordered_map>
@@ -9,6 +10,8 @@
 #include <vector>
 
 #include <boost/any.hpp>
+#include <cassert>
+#include <memory>
 
 #include "core/config/ioption.h"
 #include "core/config/option.h"

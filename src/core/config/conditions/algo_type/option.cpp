@@ -1,5 +1,8 @@
 #include "core/config/conditions/algo_type/option.h"
 
+#include <optional>
+#include <variant>
+
 #include "core/config/names_and_descriptions.h"
 
 namespace config {

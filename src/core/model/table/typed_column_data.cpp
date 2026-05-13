@@ -2,6 +2,8 @@
 
 #include <bitset>
 #include <cstddef>
+#include <algorithm>
+#include <cassert>
 
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/create_type.h"

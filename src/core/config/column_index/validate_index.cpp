@@ -1,5 +1,7 @@
 #include "core/config/column_index/validate_index.h"
 
+#include <string>
+
 #include "core/config/exceptions.h"
 
 namespace config {

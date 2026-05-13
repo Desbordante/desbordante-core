@@ -1,5 +1,7 @@
 #include "core/model/table/identifier_set.h"
 
+#include "core/model/table/column_data.h"
+
 namespace model {
 
 IdentifierSet::IdentifierSet(ColumnLayoutRelationData const* const relation, int index)

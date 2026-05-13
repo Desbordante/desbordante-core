@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <vector>
+#include <cstddef>
 
 namespace util {
 

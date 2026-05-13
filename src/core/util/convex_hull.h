@@ -5,6 +5,7 @@
 #include <numeric>
 #include <utility>
 #include <vector>
+#include <functional>
 
 namespace util {
 

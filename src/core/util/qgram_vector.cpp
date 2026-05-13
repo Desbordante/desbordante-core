@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cmath>
 #include <numeric>
+#include <cstddef>
+#include <utility>
 
 namespace util {
 

@@ -3,8 +3,12 @@
 #include <memory>
 
 #include <boost/pointer_cast.hpp>
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
 
 #include "core/model/types/type.h"
+#include "core/model/types/builtin.h"
 
 namespace model {
 

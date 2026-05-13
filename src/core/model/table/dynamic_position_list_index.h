@@ -2,6 +2,11 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <cstddef>
+#include <optional>
+#include <string>
+#include <unordered_set>
+#include <utility>
 
 #include "core/algorithms/cind/condition_miners/position_lists_set.h"
 #include "core/model/table/column.h"

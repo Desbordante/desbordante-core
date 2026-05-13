@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cassert>
+#include <stdexcept>
+#include <string>
 
 #include "core/config/exceptions.h"
 

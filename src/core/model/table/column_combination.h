@@ -3,6 +3,9 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cstddef>
+#include <utility>
 
 #include "core/model/table/arity_index.h"
 #include "core/model/table/column_index.h"

@@ -1,5 +1,8 @@
 #include "core/config/transactional_data/option.h"
 
+#include <optional>
+#include <variant>
+
 #include "core/config/names_and_descriptions.h"
 
 namespace config {
