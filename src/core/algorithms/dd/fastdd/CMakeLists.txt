@@ -7,7 +7,6 @@ target_sources(
             trees/translating_tree_search.cpp
             util/differential_function_builder.cpp
             util/isn_info.cpp
-            util/min_max_dif_calculator.cpp
             util/threshold_calculator.cpp
 )
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)

@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
+#include <limits>
+#include <numeric>
 #include <set>
 #include <unordered_map>
 #include <utility>
@@ -14,20 +17,23 @@
 namespace algos::dd {
 
 void DifferentialFunctionBuilder::AddThresholds(std::vector<model::DFConstraint> const& thresholds,
-                                                model::ColumnIndex const column_index) {
-    auto pair_compare = [](model::DFConstraint const& first_pair,
-                           model::DFConstraint const& second_pair) {
-        return first_pair.LongerThan(second_pair);
+                                                model::ColumnIndex const column_index,
+                                                std::size_t const offset,
+                                                model::DFConstraint const& min_max_dif) {
+    auto pair_compare = [](std::pair<model::DFConstraint, std::size_t> const& first_pair,
+                           std::pair<model::DFConstraint, std::size_t> const& second_pair) {
+        return first_pair.first.LongerThan(second_pair.first);
     };
 
-    std::set<model::DFConstraint, decltype(pair_compare)> limits(pair_compare);
+    std::set<std::pair<model::DFConstraint, std::size_t>, decltype(pair_compare)> limits(
+            pair_compare);
 
     Column const* column = typed_relation_->GetColumnData(column_index).GetColumn();
 
-    for (auto const& threshold : thresholds) {
-        auto intersect = threshold.IntersectWith(min_max_dif_[column_index]);
-        if (intersect && *intersect != min_max_dif_[column_index]) {
-            limits.insert(*intersect);
+    for (std::size_t threshold_index = 0; threshold_index != thresholds.size(); ++threshold_index) {
+        auto intersect = thresholds[threshold_index].IntersectWith(min_max_dif);
+        if (intersect && *intersect != min_max_dif) {
+            limits.emplace(*intersect, threshold_index + offset);
         }
     }
 
@@ -35,9 +41,14 @@ void DifferentialFunctionBuilder::AddThresholds(std::vector<model::DFConstraint>
         differential_functions_.emplace_back();
         differential_functions_.back().reserve(limits.size());
         std::ranges::transform(limits, std::back_inserter(differential_functions_.back()),
-                               [column](auto const& constraint) {
-                                   return DifferentialFunction{constraint, column};
+                               [column](auto const& constraint_pair) {
+                                   return DifferentialFunction{constraint_pair.first, column};
                                });
+        std::size_t cur_offset = 0;
+        for (auto const& [_, old_index] : limits) {
+            old_index_to_new_index_[old_index] = dif_func_nums_.back() + cur_offset;
+            ++cur_offset;
+        }
         dif_func_nums_.push_back(dif_func_nums_.back() + differential_functions_.back().size());
         LOG_DEBUG("Column: {}", column_index);
         for (auto const& dif_func : differential_functions_.back()) {
@@ -87,16 +98,49 @@ void DifferentialFunctionBuilder::CalculateThresholdZones() {
 }
 
 void DifferentialFunctionBuilder::BuildDFList(
-        std::vector<std::vector<model::DFConstraint>> const& thresholds) {
+        std::vector<std::vector<model::DFConstraint>> const& thresholds,
+        std::vector<model::DFConstraint> const& min_max_dif) {
     LOG_DEBUG("Number of columns: {}", num_columns_);
-    differential_functions_.reserve(num_columns_);
-    dif_func_nums_.reserve(num_columns_ + 1);
+    differential_functions_.reserve(thresholds.size());
+    dif_func_nums_.reserve(thresholds.size() + 1);
     dif_func_nums_.push_back(0);
+    std::size_t const threshold_num =
+            std::accumulate(thresholds.begin(), thresholds.end(), 0UL,
+                            [](std::size_t res, auto const& col_thresholds) {
+                                return res + col_thresholds.size();
+                            });
+    old_index_to_new_index_ = std::vector<std::size_t>(threshold_num, threshold_num + 1);
 
-    for (model::ColumnIndex column_index = 0; column_index != num_columns_; ++column_index) {
-        AddThresholds(thresholds[column_index], column_index);
+    std::size_t offset = 0;
+    for (model::ColumnIndex column_index = 0; column_index != thresholds.size(); ++column_index) {
+        AddThresholds(thresholds[column_index], column_index, offset,
+                      min_max_dif.empty()
+                              ? model::DFConstraint{0, std::numeric_limits<double>::max()}
+                              : min_max_dif[column_index]);
+        offset += thresholds[column_index].size();
     }
     CalculateThresholdZones();
+}
+
+void DifferentialFunctionBuilder::UpdateDFList(
+        std::vector<model::DFConstraint> const& min_max_dif) {
+    std::vector<std::vector<model::DFConstraint>> thresholds;
+    thresholds.reserve(differential_functions_.size());
+    for (std::size_t index = 0; index != differential_functions_.size(); ++index) {
+        thresholds.emplace_back();
+        thresholds[index].reserve(differential_functions_[index].size());
+        std::ranges::transform(differential_functions_[index],
+                               std::back_inserter(thresholds[index]),
+                               [](auto const& dif_func) { return dif_func.GetConstraint(); });
+    }
+
+    differential_functions_.clear();
+    dif_func_nums_.clear();
+    thresholds_.clear();
+    threshold_zones_.clear();
+    zone_to_bitset_.clear();
+
+    BuildDFList(thresholds, min_max_dif);
 }
 
 }  // namespace algos::dd

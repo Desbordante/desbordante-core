@@ -12,7 +12,6 @@
 #include "core/algorithms/dd/fastdd/model/pli_shard.h"
 #include "core/algorithms/dd/fastdd/util/differential_function_builder.h"
 #include "core/algorithms/dd/fastdd/util/distance_calculator.h"
-#include "core/algorithms/dd/fastdd/util/min_max_dif_calculator.h"
 #include "core/algorithms/dd/fastdd/util/static_bitset.h"
 #include "core/algorithms/dd/fastdd/util/threshold_calculator.h"
 #include "core/config/names_and_descriptions.h"
@@ -138,13 +137,11 @@ unsigned long long FastDD::ExecuteInternal() {
             pli_shard_builder.BuildPliShards(typed_relation_->GetColumnData());
     LOG_INFO("Built PLIs");
     LOG_DEBUG("Number of PLI shards: {}", pli_shards.size());
-    MinMaxDifCalculator min_max_dif_calculator(distance_calculator, pli_shards);
 
-    DifferentialFunctionBuilder df_builder(typed_relation_, num_rows_, num_columns_,
-                                           min_max_dif_calculator.GetMinMaxDif());
+    DifferentialFunctionBuilder df_builder(typed_relation_, num_rows_, num_columns_);
     df_builder.BuildDFList(thresholds);
     LOG_INFO("Built DF set");
-    LOG_INFO("Search space size: {}", df_builder.GetDifFuncNum());
+    LOG_INFO("Initial search space size: {}", df_builder.GetDifFuncNum());
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
