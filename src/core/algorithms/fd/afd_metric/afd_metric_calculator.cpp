@@ -1,24 +1,24 @@
 #include "afd_metric_calculator.h"
 
-#include <cmath>
-#include <iterator>
 #include <algorithm>
+#include <cmath>
 #include <functional>
+#include <iterator>
 #include <stdexcept>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
 
+#include "core/config/common_option.h"
 #include "core/config/descriptions.h"
+#include "core/config/error/type.h"
 #include "core/config/indices/option.h"
 #include "core/config/names.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/util/timed_invoke.h"
-#include "core/config/common_option.h"
-#include "core/config/error/type.h"
-#include "core/config/option.h"
 #include "core/model/table/relational_schema.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::afd_metric_calculator {
 

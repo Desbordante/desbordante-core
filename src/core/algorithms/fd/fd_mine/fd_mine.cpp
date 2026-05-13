@@ -1,20 +1,21 @@
 #include "core/algorithms/fd/fd_mine/fd_mine.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <queue>
-#include <vector>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
+#include <queue>
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
-#include "core/util/logger.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 #include "core/model/table/column.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

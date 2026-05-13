@@ -1,18 +1,19 @@
 #pragma once
 
-#include <boost/unordered_map.hpp>
 #include <cstddef>
-#include <utility>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
+
+#include <boost/unordered_map.hpp>
 
 #include "core/algorithms/cfd/model/cfd_column_data.h"
 #include "core/algorithms/cfd/model/cfd_types.h"
+#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/relation_data.h"
-#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/model/table/relational_schema.h"
 
 // see algorithms/cfd/LICENSE

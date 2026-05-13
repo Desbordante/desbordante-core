@@ -1,8 +1,8 @@
 #include "core/config/thread_number/option.h"
 
-#include <thread>
 #include <optional>
 #include <string>
+#include <thread>
 #include <variant>
 
 #include "core/config/exceptions.h"

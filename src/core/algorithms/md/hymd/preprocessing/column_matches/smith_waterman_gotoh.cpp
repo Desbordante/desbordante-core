@@ -1,8 +1,8 @@
 #include "core/algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
 
 #include <algorithm>
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 namespace {
 double SubstitutionCompare(char a, char b) {

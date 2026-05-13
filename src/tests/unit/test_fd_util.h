@@ -5,8 +5,8 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
-#include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
+#include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/pyro/pyro.h"
 #include "core/config/error/type.h"
 #include "core/config/names.h"

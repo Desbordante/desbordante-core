@@ -1,10 +1,11 @@
 #pragma once
-#include <boost/container_hash/hash.hpp>
+#include <cstddef>
 #include <memory>
+#include <typeindex>
 #include <unordered_map>
 #include <vector>
-#include <cstddef>
-#include <typeindex>
+
+#include <boost/container_hash/hash.hpp>
 
 template <>
 struct std::hash<std::vector<int>> {

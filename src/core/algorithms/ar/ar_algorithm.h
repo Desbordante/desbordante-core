@@ -1,11 +1,11 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <set>
 #include <stack>
-#include <vector>
-#include <memory>
 #include <string>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ar/ar.h"

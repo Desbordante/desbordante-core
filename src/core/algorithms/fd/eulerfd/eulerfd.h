@@ -1,21 +1,22 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <array>
 #include <cstdlib>
 #include <memory>
 #include <unordered_set>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/algorithms/fd/eulerfd/cluster.h"
 #include "core/algorithms/fd/eulerfd/mlfq.h"
 #include "core/algorithms/fd/eulerfd/search_tree.h"
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/config/custom_random_seed/type.h"
-#include "core/model/table/relational_schema.h"
-#include "core/util/custom_random.h"
-#include "core/algorithms/fd/eulerfd/cluster.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/relational_schema.h"
+#include "core/util/custom_random.h"
 
 namespace algos {
 

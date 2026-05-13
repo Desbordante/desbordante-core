@@ -1,6 +1,3 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
@@ -12,19 +9,22 @@
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/depminer/depminer.h"
 #include "core/algorithms/fd/dfd/dfd.h"
 #include "core/algorithms/fd/fastfds/fastfds.h"
+#include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fdep/fdep.h"
 #include "core/algorithms/fd/fun/fun.h"
 #include "core/algorithms/fd/hyfd/hyfd.h"
 #include "core/algorithms/fd/pyro/pyro.h"
+#include "core/algorithms/fd/raw_fd.h"
 #include "core/algorithms/fd/tane/pfdtane.h"
 #include "core/algorithms/fd/tane/tane.h"
-#include "tests/unit/test_fd_util.h"
-#include "core/algorithms/algo_factory.h"
-#include "core/algorithms/fd/fd.h"
-#include "core/algorithms/fd/raw_fd.h"
 #include "core/config/error/type.h"
 #include "core/config/max_lhs/type.h"
 #include "core/config/names.h"
@@ -32,6 +32,7 @@
 #include "core/model/table/vertical.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
+#include "tests/unit/test_fd_util.h"
 
 using std::string, std::vector;
 using ::testing::ContainerEq, ::testing::Eq;

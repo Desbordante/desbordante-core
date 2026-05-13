@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "core/config/max_lhs/option.h"
 #include "core/config/common_option.h"
+#include "core/config/max_lhs/option.h"
 
 namespace algos {
 

@@ -1,8 +1,8 @@
 #include "core/algorithms/dc/model/component.h"
 
+#include <cassert>
 #include <stdexcept>
 #include <string>
-#include <cassert>
 
 #include "core/algorithms/dc/model/operator.h"
 #include "core/model/types/builtin.h"

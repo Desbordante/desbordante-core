@@ -5,11 +5,12 @@
 
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
-#include <cstddef>
+
+#include <boost/dynamic_bitset.hpp>
 
 class Column;
 class Vertical;

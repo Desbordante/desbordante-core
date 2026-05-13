@@ -5,7 +5,6 @@
 #include <pybind11/stl.h>
 
 #include "core/util/bitset_utils.h"
-
 #include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace py = pybind11;

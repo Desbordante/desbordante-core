@@ -3,9 +3,9 @@
 #include <string>
 #include <utility>
 
-#include "core/util/logger.h"
 #include "core/model/table/column.h"
 #include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
 
 namespace model {
 

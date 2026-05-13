@@ -1,9 +1,10 @@
 #include "core/config/error_measure/option.h"
 
-#include <magic_enum/magic_enum.hpp>
 #include <array>
 #include <optional>
 #include <variant>
+
+#include <magic_enum/magic_enum.hpp>
 
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/config/names_and_descriptions.h"

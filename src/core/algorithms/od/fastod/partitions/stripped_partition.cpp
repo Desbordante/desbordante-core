@@ -2,8 +2,8 @@
 
 #include "core/algorithms/od/fastod/partitions/stripped_partition.h"
 
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 #include <utility>
 
 namespace algos::fastod {

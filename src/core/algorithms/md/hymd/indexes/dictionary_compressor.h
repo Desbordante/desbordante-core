@@ -4,9 +4,9 @@
 #include <vector>
 
 #include "core/algorithms/md/hymd/indexes/compressed_records.h"
+#include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
 #include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
 #include "core/model/index.h"
-#include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
 
 namespace algos::hymd::indexes {
 

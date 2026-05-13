@@ -1,9 +1,10 @@
 #pragma once
 
-#include <boost/version.hpp>
 #include <cstddef>
 #include <string_view>
 #include <vector>
+
+#include <boost/version.hpp>
 
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/util/logger.h"

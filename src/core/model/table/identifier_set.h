@@ -1,13 +1,14 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/vertical.h"
+#include <boost/dynamic_bitset.hpp>
+
 #include "core/model/table/column.h"
+#include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 

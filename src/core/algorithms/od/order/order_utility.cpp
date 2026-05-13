@@ -2,8 +2,8 @@
 
 #include "core/model/table/column_index.h"
 #include "core/model/table/typed_column_data.h"
-#include "core/util/logger.h"
 #include "core/model/types/type.h"
+#include "core/util/logger.h"
 
 namespace algos::order {
 

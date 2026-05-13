@@ -1,10 +1,10 @@
 #pragma once
 
-#include <functional>
-#include <vector>
 #include <array>
 #include <cstddef>
+#include <functional>
 #include <memory>
+#include <vector>
 
 #include "core/algorithms/algebraic_constraints/ac_exception.h"
 #include "core/algorithms/algebraic_constraints/ac_exception_finder.h"

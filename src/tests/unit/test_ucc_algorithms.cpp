@@ -1,6 +1,3 @@
-#include <gtest/gtest.h>
-#include <memory>
-#include <string>
 #include <algorithm>
 #include <cassert>
 #include <exception>
@@ -8,21 +5,25 @@
 #include <iostream>
 #include <iterator>
 #include <list>
+#include <memory>
+#include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ucc/hpivalid/hpivalid.h"
 #include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/pyroucc/pyroucc.h"
 #include "core/algorithms/ucc/ucc.h"
 #include "core/algorithms/ucc/ucc_algorithm.h"
 #include "core/config/names.h"
 #include "core/config/thread_number/type.h"
+#include "core/model/table/vertical.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 #include "tests/unit/test_hash_util.h"
-#include "core/algorithms/ucc/hpivalid/hpivalid.h"
-#include "core/algorithms/ucc/pyroucc/pyroucc.h"
-#include "core/model/table/vertical.h"
-#include "core/parser/csv_parser/csv_parser.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();

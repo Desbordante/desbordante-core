@@ -1,7 +1,8 @@
 #include "core/algorithms/fd/aidfd/search_tree.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cassert>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, SearchTree::Bitset sets_union,
                        SearchTree::Bitset sets_inter, std::shared_ptr<Node> const& parent,

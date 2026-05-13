@@ -1,8 +1,8 @@
 #include "core/algorithms/cfd/cfd_verifier/cfd_stats_calculator.h"
 
-#include <ranges>
 #include <algorithm>
 #include <functional>
+#include <ranges>
 
 #include "core/algorithms/cfd/model/cfd_types.h"
 

@@ -1,17 +1,18 @@
-#include <gtest/gtest.h>
 #include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/ind/ind_verifier/ind_verifier.h"
 #include "core/config/error/type.h"
+#include "core/config/exceptions.h"
 #include "core/config/names.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
-#include "core/config/exceptions.h"
-#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 

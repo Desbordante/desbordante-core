@@ -1,11 +1,11 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
-#include <cstddef>
 #include <utility>
+#include <vector>
 
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_index.h"

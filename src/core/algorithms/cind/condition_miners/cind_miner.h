@@ -8,9 +8,9 @@
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/ind/ind.h"
 #include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/table/encoded_column_data.h"
 #include "core/model/table/encoded_tables.h"
 #include "core/util/primitive_collection.h"
-#include "core/model/table/encoded_column_data.h"
 
 namespace algos::cind {
 using model::EncodedColumnData;

@@ -1,8 +1,8 @@
 #include "core/model/table/dynamic_position_list_index.h"
 
+#include <cassert>
 #include <memory>
 #include <utility>
-#include <cassert>
 
 namespace {
 // O(cluster)

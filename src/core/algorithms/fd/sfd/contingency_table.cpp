@@ -1,7 +1,8 @@
 #include "core/algorithms/fd/sfd/contingency_table.h"
 
-#include <boost/math/distributions/chi_squared.hpp>
 #include <algorithm>
+
+#include <boost/math/distributions/chi_squared.hpp>
 
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/algorithms/fd/sfd/sample.h"

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <memory>
-#include <vector>
 #include <cassert>
 #include <cstddef>
+#include <memory>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/pfd_verifier/pfd_stats_calculator.h"

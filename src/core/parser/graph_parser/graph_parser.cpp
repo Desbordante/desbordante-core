@@ -1,21 +1,22 @@
 #include "core/parser/graph_parser/graph_parser.h"
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graphviz.hpp>
-#include <boost/property_map/function_property_map.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/any.hpp>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <boost/graph/properties.hpp>
-#include <boost/property_map/dynamic_property_map.hpp>
-#include <boost/smart_ptr/make_shared_object.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
 #include <string>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
+
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/any.hpp>
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graphviz.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/property_map/dynamic_property_map.hpp>
+#include <boost/property_map/function_property_map.hpp>
+#include <boost/smart_ptr/make_shared_object.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 
 namespace parser {
 

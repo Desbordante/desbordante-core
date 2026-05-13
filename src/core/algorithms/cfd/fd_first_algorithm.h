@@ -9,9 +9,9 @@
 #include "core/algorithms/cfd/cfd_discovery.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cfd/miner_node.h"
+#include "core/algorithms/cfd/model/cfd_types.h"
 #include "core/algorithms/cfd/model/partition_tidlist.h"
 #include "core/algorithms/cfd/util/prefix_tree.h"
-#include "core/algorithms/cfd/model/cfd_types.h"
 
 // see algorithms/cfd/LICENSE
 

@@ -1,6 +1,7 @@
 #pragma once
-#include <boost/format.hpp>
 #include <string>
+
+#include <boost/format.hpp>
 
 #include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"
 #include "core/algorithms/fd/pyrocommon/core/profiling_context.h"

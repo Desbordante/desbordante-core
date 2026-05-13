@@ -1,7 +1,7 @@
 #include "core/algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <map>
 #include <utility>

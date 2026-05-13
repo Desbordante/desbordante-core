@@ -1,12 +1,12 @@
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 
 #include <algorithm>
+#include <compare>
 #include <cstddef>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <compare>
 
 #include "core/model/table/column_index.h"
 #include "core/model/table/tuple_index.h"

@@ -5,12 +5,12 @@
  */
 #pragma once
 
-#include <memory>
-#include <queue>
-#include <vector>
 #include <compare>
 #include <functional>
+#include <memory>
+#include <queue>
 #include <string>
+#include <vector>
 
 #include "core/model/table/column_domain.h"
 

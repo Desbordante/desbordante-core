@@ -5,9 +5,9 @@
  */
 #pragma once
 
+#include <cstddef>
 #include <utility>
 #include <vector>
-#include <cstddef>
 
 namespace tests {
 

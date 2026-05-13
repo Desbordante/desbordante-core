@@ -1,16 +1,17 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <cstddef>
+#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
-#include <filesystem>
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/idataset_stream.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
-#include "core/config/tabular_data/input_table_type.h"
-#include "core/model/table/idataset_stream.h"
 
 namespace tests {
 

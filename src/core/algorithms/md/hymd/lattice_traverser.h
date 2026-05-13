@@ -1,16 +1,17 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <cstddef>
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "core/algorithms/md/hymd/lattice/level_getter.h"
+#include "core/algorithms/md/hymd/lattice/validation_info.h"
 #include "core/algorithms/md/hymd/recommendation.h"
+#include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "core/algorithms/md/hymd/validator.h"
 #include "core/util/worker_thread_pool.h"
-#include "core/algorithms/md/hymd/lattice/validation_info.h"
-#include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 
 namespace algos::hymd {
 

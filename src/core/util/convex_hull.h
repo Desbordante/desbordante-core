@@ -2,10 +2,10 @@
 
 #include <cassert>
 #include <cmath>
+#include <functional>
 #include <numeric>
 #include <utility>
 #include <vector>
-#include <functional>
 
 namespace util {
 

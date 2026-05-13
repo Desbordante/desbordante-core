@@ -1,9 +1,9 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <functional>
 #include <vector>
-#include <cstddef>
 
 namespace algos {
 

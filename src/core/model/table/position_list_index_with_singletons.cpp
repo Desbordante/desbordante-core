@@ -5,13 +5,13 @@
 #include "position_list_index_with_singletons.h"
 
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <map>
 #include <memory>
-#include <utility>
-#include <cstddef>
 #include <stdexcept>
 #include <unordered_map>
+#include <utility>
 
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"

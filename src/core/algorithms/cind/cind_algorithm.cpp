@@ -1,7 +1,5 @@
 #include "cind_algorithm.h"
 
-#include <boost/mp11/algorithm.hpp>
-#include <boost/type_index.hpp>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -9,24 +7,27 @@
 #include <unordered_set>
 #include <vector>
 
+#include <boost/mp11/algorithm.hpp>
+#include <boost/type_index.hpp>
+
 #include "condition_miners/cinderella.h"
 #include "condition_miners/pli_cind.h"
+#include "core/algorithms/algorithm_types.h"
+#include "core/algorithms/cind/condition_miners/cind_miner.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/create_algorithm.h"
+#include "core/config/common_option.h"
 #include "core/config/conditions/algo_type/option.h"
 #include "core/config/conditions/completeness/option.h"
 #include "core/config/conditions/condition_type/option.h"
 #include "core/config/conditions/validity/option.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/error/option.h"
+#include "core/config/exceptions.h"
 #include "core/config/mem_limit/option.h"
 #include "core/config/tabular_data/input_tables/option.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/timed_invoke.h"
-#include "core/algorithms/algorithm_types.h"
-#include "core/algorithms/cind/condition_miners/cind_miner.h"
-#include "core/config/common_option.h"
-#include "core/config/exceptions.h"
 
 namespace algos::cind {
 CindAlgorithm::CindAlgorithm() {

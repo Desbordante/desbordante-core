@@ -1,9 +1,9 @@
 #include "core/model/table/typed_column_data.h"
 
-#include <bitset>
-#include <cstddef>
 #include <algorithm>
+#include <bitset>
 #include <cassert>
+#include <cstddef>
 
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/create_type.h"

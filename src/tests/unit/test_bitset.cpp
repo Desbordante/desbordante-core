@@ -1,11 +1,12 @@
-#include <gtest/gtest.h>
 #include <bitset>
+#include <cstddef>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <cstddef>
 #include <version>
+
+#include <gtest/gtest.h>
 
 #include "core/model/types/bitset.h"
 #include "core/util/logger.h"

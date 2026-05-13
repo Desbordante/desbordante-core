@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -11,12 +10,14 @@
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
-#include "core/algorithms/dc/FastADC/util/closure.h"
-#include "core/algorithms/dc/FastADC/util/ntree_search.h"
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/model/predicate_set.h"
 #include "core/algorithms/dc/FastADC/providers/predicate_provider.h"
+#include "core/algorithms/dc/FastADC/util/closure.h"
+#include "core/algorithms/dc/FastADC/util/ntree_search.h"
 #include "core/model/types/builtin.h"
 
 namespace algos::fastadc {

@@ -5,8 +5,9 @@
  */
 #include "core/algorithms/ind/spider/attribute.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cstddef>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 namespace algos::spider {
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/common_clue_set_builder.h"

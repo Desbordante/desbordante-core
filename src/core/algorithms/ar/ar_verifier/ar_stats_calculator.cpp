@@ -1,12 +1,12 @@
 #include "core/algorithms/ar/ar_verifier/ar_stats_calculator.h"
 
-#include <ranges>
 #include <algorithm>
+#include <ranges>
 #include <utility>
 #include <vector>
 
-#include "core/util/enum_to_str.h"
 #include "core/model/transaction/itemset.h"
+#include "core/util/enum_to_str.h"
 
 namespace algos::ar_verifier {
 ClusterPriority ARStatsCalculator::CalculateClusterPriority(model::RuleCoverage const& coverage) {

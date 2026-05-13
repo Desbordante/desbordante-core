@@ -2,9 +2,9 @@
 
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
-#include <cstddef>
 
 #include "core/algorithms/od/fastod/partitions/stripped_partition.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"

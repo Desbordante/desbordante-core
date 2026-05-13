@@ -1,11 +1,12 @@
 #include "core/algorithms/gfd/gfd.h"
 
-#include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/properties.hpp>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/graph/vf2_sub_graph_iso.hpp>
 
 #include "core/algorithms/gfd/comparator.h"
 #include "core/parser/graph_parser/graph_parser.h"

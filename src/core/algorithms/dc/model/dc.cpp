@@ -1,13 +1,13 @@
 #include "core/algorithms/dc/model/dc.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <ranges>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
-#include <cstddef>
 
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"

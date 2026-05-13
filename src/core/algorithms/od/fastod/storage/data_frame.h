@@ -1,10 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <optional>
-#include <vector>
-#include <cstddef>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/od/fastod/model/attribute_set.h"
 #include "core/config/equal_nulls/type.h"

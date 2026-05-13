@@ -1,12 +1,12 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <queue>
 #include <stack>
-#include <vector>
-#include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "core/algorithms/ar/apriori/candidate_hash_tree.h"
 #include "core/algorithms/ar/apriori/node.h"

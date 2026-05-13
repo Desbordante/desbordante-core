@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <cstddef>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/algebraic_constraints/ac_exception.h"
 #include "core/algorithms/algebraic_constraints/ranges_collection.h"

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <tuple>
 #include <cstddef>
+#include <tuple>
 #include <variant>
 #include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/model/table/column_layout_relation_data.h"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <cstddef>
+#include <string>
 #include <string_view>
 
 #include "core/algorithms/od/fastod/hashing/hashing.h"

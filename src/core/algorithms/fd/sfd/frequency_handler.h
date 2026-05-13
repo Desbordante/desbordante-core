@@ -1,9 +1,9 @@
 #pragma once
 
-#include <unordered_map>
-#include <vector>
 #include <cstddef>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "core/model/table/column_index.h"
 #include "core/model/table/typed_column_data.h"

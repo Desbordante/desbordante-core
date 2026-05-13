@@ -1,27 +1,28 @@
-#include <gtest/gtest.h>
+#include <climits>
+#include <cstddef>
+#include <filesystem>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/range/iterator_range_core.hpp>
-#include <climits>
-#include <filesystem>
-#include <sstream>
-#include <unordered_set>
-#include <cstddef>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
+#include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fsm/gspan/dfscode.h"
 #include "core/algorithms/fsm/gspan/extended_edge.h"
-#include "core/algorithms/fsm/gspan/graph_parser.h"
-#include "core/algorithms/fsm/gspan/gspan.h"
-#include "core/config/names.h"
-#include "tests/common/csv_config_util.h"
 #include "core/algorithms/fsm/gspan/frequent_subgraph.h"
 #include "core/algorithms/fsm/gspan/graph.h"
+#include "core/algorithms/fsm/gspan/graph_parser.h"
+#include "core/algorithms/fsm/gspan/gspan.h"
 #include "core/config/exceptions.h"
+#include "core/config/names.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

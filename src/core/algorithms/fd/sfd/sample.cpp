@@ -1,13 +1,13 @@
 #include "core/algorithms/fd/sfd/sample.h"
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <numbers>
 #include <random>
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-#include <numbers>
 
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/model/table/tuple_index.h"

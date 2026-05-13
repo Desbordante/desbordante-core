@@ -5,10 +5,10 @@
 
 #include "core/config/ar_minimum_conf/option.h"
 #include "core/config/ar_minimum_support/option.h"
+#include "core/config/common_option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/config/common_option.h"
 #include "core/model/table/idataset_stream.h"
 
 namespace algos {

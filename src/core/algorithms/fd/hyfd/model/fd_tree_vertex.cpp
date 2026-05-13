@@ -1,9 +1,10 @@
 #include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
-#include <vector>
 #include <cassert>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 
 namespace algos::hyfd::fd_tree {
 

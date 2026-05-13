@@ -1,9 +1,9 @@
 #pragma once
 
-#include <queue>
-#include <vector>
 #include <cstddef>
+#include <queue>
 #include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/eulerfd/cluster.h"
 

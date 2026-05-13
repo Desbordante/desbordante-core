@@ -1,7 +1,7 @@
 #include "core/algorithms/cfd/util/partition_util.h"
 
-#include <numeric>
 #include <algorithm>
+#include <numeric>
 #include <utility>
 
 // see algorithms/cfd/LICENSE

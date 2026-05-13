@@ -1,15 +1,16 @@
-#include <gtest/gtest.h>
-#include <string>
 #include <memory>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/od/order/order.h"
-#include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
 #include "core/algorithms/od/order/order_utility.h"
+#include "core/config/names.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

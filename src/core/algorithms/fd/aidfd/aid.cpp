@@ -5,8 +5,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "core/config/tabular_data/input_table/option.h"
 #include "core/config/common_option.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column.h"
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/vertical.h"

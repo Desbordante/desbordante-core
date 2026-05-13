@@ -1,10 +1,11 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <utility>
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <utility>
+
+#include <boost/dynamic_bitset.hpp>
 
 namespace algos {
 

@@ -9,9 +9,9 @@
 #include "core/model/types/empty_type.h"
 #include "core/model/types/int_type.h"
 #include "core/model/types/mixed_type.h"
+#include "core/model/types/null_type.h"
 #include "core/model/types/string_type.h"
 #include "core/model/types/undefined_type.h"
-#include "core/model/types/null_type.h"
 
 namespace model {
 

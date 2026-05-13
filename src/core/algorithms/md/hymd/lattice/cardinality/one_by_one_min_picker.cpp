@@ -4,8 +4,8 @@
 #include <utility>
 
 #include "core/algorithms/md/hymd/md_lhs.h"
-#include "core/util/desbordante_assume.h"
 #include "core/model/index.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd::lattice::cardinality {
 

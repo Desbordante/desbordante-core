@@ -1,9 +1,9 @@
 #include "core/algorithms/nd/util/get_vertical_names.h"
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <vector>
-#include <iterator>
 
 #include "core/model/table/column.h"
 #include "core/model/table/vertical.h"

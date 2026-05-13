@@ -3,9 +3,9 @@
 #include <cstddef>
 #include <list>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/dd/dd.h"

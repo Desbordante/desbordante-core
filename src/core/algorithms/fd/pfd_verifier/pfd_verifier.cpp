@@ -1,17 +1,17 @@
 #include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
 
 #include <chrono>
-#include <memory>
 #include <functional>
+#include <memory>
 #include <stdexcept>
 #include <string_view>
 
 #include "core/algorithms/algorithm.h"
+#include "core/config/common_option.h"
 #include "core/config/error_measure/option.h"
 #include "core/config/indices/option.h"
 #include "core/config/names.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/config/common_option.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/relational_schema.h"
 

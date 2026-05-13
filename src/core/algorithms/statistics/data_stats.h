@@ -1,15 +1,15 @@
 #pragma once
 
-#include <set>
 #include <cstddef>
+#include <set>
 #include <string>
 #include <vector>
 
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/statistics/statistic.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/thread_number/type.h"
-#include "core/algorithms/algorithm.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/numeric_type.h"

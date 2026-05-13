@@ -1,13 +1,16 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <cstddef>
-#include <vector>
 #include <utility>
+#include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
 #include "core/algorithms/md/hymd/lattice/md.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "core/algorithms/md/hymd/lattice/md_node.h"
+#include "core/algorithms/md/hymd/lattice/multi_md.h"
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lattice/single_level_func.h"
 #include "core/algorithms/md/hymd/lattice/support_node.h"
@@ -17,8 +20,6 @@
 #include "core/algorithms/md/hymd/rhss.h"
 #include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "core/model/index.h"
-#include "core/algorithms/md/hymd/column_classifier_value_id.h"
-#include "core/algorithms/md/hymd/lattice/multi_md.h"
 
 namespace algos::hymd::lattice {
 

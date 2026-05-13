@@ -5,9 +5,9 @@
  */
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <optional>
-#include <cstddef>
 #include <string_view>
 
 #include "core/algorithms/ind/ind_algorithm.h"

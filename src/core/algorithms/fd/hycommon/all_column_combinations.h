@@ -1,8 +1,9 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-#include <unordered_set>
 #include <cstddef>
+#include <unordered_set>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/hycommon/column_combination_list.h"
 

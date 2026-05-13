@@ -1,15 +1,5 @@
 #include "core/algorithms/statistics/data_stats.h"
 
-#include <unicode/uchar.h>
-#include <unicode/unistr.h>
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
-#include <unicode/normalizer2.h>
-#include <unicode/umachine.h>
-#include <unicode/urename.h>
-#include <unicode/utypes.h>
-#include <unicode/uversion.h>
-#include <set>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -22,16 +12,27 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <set>
 #include <sstream>
 #include <string_view>
 #include <tuple>
+#include <unicode/normalizer2.h>
+#include <unicode/uchar.h>
+#include <unicode/umachine.h>
+#include <unicode/unistr.h>
+#include <unicode/urename.h>
+#include <unicode/utypes.h>
+#include <unicode/uversion.h>
 #include <unordered_map>
 #include <utility>
 
+#include <boost/asio/post.hpp>
+#include <boost/asio/thread_pool.hpp>
+
+#include "core/config/common_option.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
-#include "core/config/common_option.h"
 #include "core/model/types/double_type.h"
 #include "core/model/types/int_type.h"
 #include "core/model/types/mixed_type.h"

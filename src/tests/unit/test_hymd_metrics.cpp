@@ -1,8 +1,9 @@
-#include <gtest/gtest.h>
 #include <cmath>
 #include <functional>
 #include <string>
 #include <vector>
+
+#include <gtest/gtest.h>
 
 #include "core/algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/lcs.h"

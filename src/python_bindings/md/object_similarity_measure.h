@@ -8,14 +8,13 @@
 
 #include <pybind11/stl.h>
 
-#include "core/util/worker_thread_pool.h"
-
 #include "core/algorithms/md/hymd/lowest_bound.h"
 #include "core/algorithms/md/hymd/lowest_cc_value_id.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/basic_calculator.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "core/algorithms/md/hymd/preprocessing/similarity.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace python_bindings {
 namespace detail {

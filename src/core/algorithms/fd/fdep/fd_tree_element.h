@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 // For printing Dependencies
-#include <fstream>
-#include <string>
 #include <cstddef>
+#include <fstream>
 #include <limits>
+#include <string>
 
 #include "core/algorithms/fd/fd.h"
 #include "core/model/table/relational_schema.h"

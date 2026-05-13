@@ -1,16 +1,17 @@
-#include <gtest/gtest.h>
-#include <memory>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/numeric_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

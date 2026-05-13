@@ -5,20 +5,21 @@
 
 #include "core/model/table/position_list_index.h"
 
-#include <boost/dynamic_bitset.hpp>
 #include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <map>
 #include <memory>
 #include <utility>
-#include <cassert>
-#include <cstddef>
 
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
 #include "core/util/logger.h"
-#include "core/model/table/column_data.h"
 
 namespace model {
 

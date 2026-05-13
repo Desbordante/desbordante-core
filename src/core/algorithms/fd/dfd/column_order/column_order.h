@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "core/model/table/vertical.h"
 #include "core/model/table/position_list_index.h"
+#include "core/model/table/vertical.h"
 
 class ColumnOrder {
 private:

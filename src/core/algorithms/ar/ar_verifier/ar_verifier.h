@@ -1,10 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
-#include <vector>
-#include <cstddef>
 #include <unordered_map>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ar/ar.h"

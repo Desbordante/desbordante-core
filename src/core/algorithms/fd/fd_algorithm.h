@@ -1,7 +1,7 @@
 #pragma once
 
-#include <list>
 #include <algorithm>
+#include <list>
 #include <memory>
 #include <string>
 #include <utility>
@@ -10,10 +10,10 @@
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd.h"
 #include "core/config/max_lhs/type.h"
-#include "core/util/primitive_collection.h"
 #include "core/model/table/column.h"
 #include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical.h"
+#include "core/util/primitive_collection.h"
 
 namespace model {
 class AgreeSetFactory;

@@ -1,26 +1,26 @@
 #include "core/algorithms/fd/sfd/cords.h"
 
-#include <chrono>
-#include <utility>
-#include <vector>
 #include <algorithm>
+#include <chrono>
 #include <initializer_list>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/fd/sfd/contingency_table.h"
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/algorithms/fd/sfd/sample.h"
+#include "core/config/common_option.h"
 #include "core/config/equal_nulls/option.h"
+#include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_index.h"
-#include "core/model/table/typed_column_data.h"
-#include "core/config/common_option.h"
-#include "core/config/exceptions.h"
 #include "core/model/table/relational_schema.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos {
 Cords::Cords() : FDAlgorithm() {

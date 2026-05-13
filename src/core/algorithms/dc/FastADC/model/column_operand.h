@@ -1,10 +1,11 @@
 #pragma once
 
-#include <boost/container_hash/hash.hpp>
-#include <magic_enum/magic_enum.hpp>
 #include <cstddef>
 #include <string>
 #include <typeindex>
+
+#include <boost/container_hash/hash.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include "core/model/table/column.h"
 #include "core/util/enum_to_str.h"

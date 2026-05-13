@@ -1,12 +1,12 @@
 #include "core/algorithms/nd/nd_verifier/util/highlight.h"
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <iterator>
 
 #include "core/algorithms/nd/nd_verifier/util/value_combination.h"
 #include "core/util/range_to_string.h"

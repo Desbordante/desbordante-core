@@ -1,9 +1,9 @@
 #include "core/algorithms/nd/nd_verifier/util/value_combination.h"
 
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <memory>
 
 #include "core/model/types/create_type.h"
 #include "core/model/types/mixed_type.h"

@@ -1,12 +1,15 @@
 #include "core/algorithms/md/hymd/validator.h"
 
-#include <vector>
 #include <optional>
 #include <span>
 #include <tuple>
+#include <vector>
 
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/pli_cluster.h"
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
 #include "core/algorithms/md/hymd/table_identifiers.h"
 #include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "core/algorithms/md/hymd/utility/reserve_more.h"
@@ -16,9 +19,6 @@
 #include "core/util/bitset_utils.h"
 #include "core/util/erase_if_replace.h"
 #include "core/util/get_preallocated_vector.h"
-#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "core/algorithms/md/hymd/indexes/pli_cluster.h"
-#include "core/algorithms/md/hymd/md_lhs.h"
 
 namespace algos::hymd {
 using indexes::CompressedRecords;

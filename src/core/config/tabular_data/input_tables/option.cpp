@@ -3,8 +3,8 @@
 #include <cassert>
 #include <string>
 
-#include "core/config/names_and_descriptions.h"
 #include "core/config/exceptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 

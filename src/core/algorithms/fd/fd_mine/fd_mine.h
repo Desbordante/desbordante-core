@@ -1,10 +1,11 @@
 #pragma once
 
+#include <memory>
+#include <set>
+#include <unordered_set>
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
-#include <set>
-#include <memory>
-#include <unordered_set>
 
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/model/table/position_list_index.h"

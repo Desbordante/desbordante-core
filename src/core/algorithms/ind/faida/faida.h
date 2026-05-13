@@ -7,14 +7,14 @@
 #include <vector>
 
 #include "core/algorithms/ind/faida/inclusion_testing/iinclusion_tester.h"
+#include "core/algorithms/ind/faida/preprocessing/abstract_column_store.h"
+#include "core/algorithms/ind/faida/preprocessing/irow_iterator.h"
 #include "core/algorithms/ind/faida/preprocessing/preprocessor.h"
+#include "core/algorithms/ind/faida/util/simple_cc.h"
 #include "core/algorithms/ind/faida/util/simple_ind.h"
 #include "core/algorithms/ind/ind_algorithm.h"
 #include "core/config/max_arity/type.h"
 #include "core/config/thread_number/type.h"
-#include "core/algorithms/ind/faida/preprocessing/abstract_column_store.h"
-#include "core/algorithms/ind/faida/preprocessing/irow_iterator.h"
-#include "core/algorithms/ind/faida/util/simple_cc.h"
 
 namespace algos {
 

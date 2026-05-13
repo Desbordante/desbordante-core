@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <cassert>
 #include <cstddef>
 #include <deque>
 #include <memory>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ucc/ucc_verifier/ucc_stats_calculator.h"

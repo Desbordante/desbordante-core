@@ -1,7 +1,8 @@
 #include "core/algorithms/fd/eulerfd/search_tree.h"
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cassert>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 namespace algos {
 

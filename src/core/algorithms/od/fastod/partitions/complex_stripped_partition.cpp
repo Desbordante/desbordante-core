@@ -1,11 +1,11 @@
 #include "core/algorithms/od/fastod/partitions/complex_stripped_partition.h"
 
-#include <sstream>
 #include <algorithm>
 #include <cassert>
 #include <functional>
 #include <iterator>
 #include <limits>
+#include <sstream>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>

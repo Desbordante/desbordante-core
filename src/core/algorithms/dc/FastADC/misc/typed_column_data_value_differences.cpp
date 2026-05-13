@@ -1,10 +1,10 @@
 #include "core/algorithms/dc/FastADC/misc/typed_column_data_value_differences.h"
 
 #include <algorithm>
-#include <string>
-#include <unordered_map>
 #include <cinttypes>
 #include <cstddef>
+#include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "core/algorithms/dc/FastADC/misc/misc.h"

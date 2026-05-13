@@ -1,4 +1,3 @@
-#include <gtest/gtest.h>
 #include <cmath>
 #include <cstddef>
 #include <memory>
@@ -7,15 +6,17 @@
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/statistics/data_stats.h"
-#include "core/config/names.h"
-#include "core/util/logger.h"
-#include "tests/common/all_csv_configs.h"
 #include "core/algorithms/statistics/statistic.h"
+#include "core/config/names.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "core/util/logger.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace mo = model;

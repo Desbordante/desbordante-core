@@ -1,9 +1,9 @@
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 
+#include <bitset>
 #include <cassert>
 #include <cstddef>
 #include <stdexcept>
-#include <bitset>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/util/logger.h"

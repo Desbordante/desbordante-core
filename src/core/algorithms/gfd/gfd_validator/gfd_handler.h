@@ -1,11 +1,11 @@
 #pragma once
-#include <vector>
 #include <filesystem>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gfd/gfd.h"
-#include "core/config/names_and_descriptions.h"
 #include "core/algorithms/gfd/graph_descriptor.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace algos {
 

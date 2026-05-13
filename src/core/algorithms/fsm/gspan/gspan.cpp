@@ -1,12 +1,6 @@
 
 #include "gspan.h"
 
-#include <boost/container_hash/hash.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/pending/property.hpp>
-#include <boost/range/irange.hpp>
-#include <boost/range/iterator_range_core.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -15,15 +9,22 @@
 #include <string_view>
 #include <utility>
 
+#include <boost/container_hash/hash.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/pending/property.hpp>
+#include <boost/range/irange.hpp>
+#include <boost/range/iterator_range_core.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+
+#include "core/algorithms/fsm/gspan/frequent_subgraph.h"
+#include "core/algorithms/fsm/gspan/graph.h"
+#include "core/config/exceptions.h"
+#include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/util/logger.h"
 #include "core/util/timed_invoke.h"
 #include "graph_parser.h"
 #include "sparse_triangular_matrix.h"
-#include "core/algorithms/fsm/gspan/frequent_subgraph.h"
-#include "core/algorithms/fsm/gspan/graph.h"
-#include "core/config/exceptions.h"
-#include "core/config/option.h"
 
 using namespace gspan;
 

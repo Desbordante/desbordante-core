@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/model/table/column.h"

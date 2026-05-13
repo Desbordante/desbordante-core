@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <numeric>
 #include <cstddef>
+#include <numeric>
 #include <utility>
 
 namespace util {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <cstddef>
 #include <list>
 #include <memory>
+#include <vector>
 
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/fd/sfd/correlation.h"
