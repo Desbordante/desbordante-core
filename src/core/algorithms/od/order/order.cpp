@@ -1,9 +1,12 @@
 #include "core/algorithms/od/order/order.h"
 
 #include <algorithm>
-#include <iostream>
 #include <memory>
 #include <utility>
+#include <chrono>
+#include <cstddef>
+#include <initializer_list>
+#include <unordered_set>
 
 #include "core/algorithms/od/order/dependency_checker.h"
 #include "core/algorithms/od/order/list_lattice.h"
@@ -11,8 +14,14 @@
 #include "core/config/names_and_descriptions.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/tuple_index.h"
-#include "core/model/types/types.h"
 #include "core/util/logger.h"
+#include "core/config/common_option.h"
+#include "core/config/option.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/create_type.h"
+#include "core/model/types/mixed_type.h"
+#include "core/model/types/type.h"
 
 namespace algos::order {
 

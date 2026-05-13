@@ -5,6 +5,7 @@
  */
 #include "core/algorithms/ind/spider/spider.h"
 
+#include <boost/dynamic_bitset.hpp>
 #include <functional>
 #include <queue>
 #include <string>
@@ -18,6 +19,8 @@
 #include "core/config/option_using.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/timed_invoke.h"
+#include "core/config/common_option.h"
+#include "core/util/bitset_utils.h"
 
 namespace algos {
 

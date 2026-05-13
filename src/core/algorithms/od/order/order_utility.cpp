@@ -1,9 +1,9 @@
 #include "core/algorithms/od/order/order_utility.h"
 
-#include "core/algorithms/od/order/list_lattice.h"
 #include "core/model/table/column_index.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/util/logger.h"
+#include "core/model/types/type.h"
 
 namespace algos::order {
 

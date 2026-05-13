@@ -3,9 +3,13 @@
 #include <bit>
 #include <memory>
 #include <utility>
+#include <cstddef>
+#include <functional>
+#include <string_view>
 
 #include "core/algorithms/ind/faida/hashing/hashing.h"
 #include "core/algorithms/ind/faida/util/simple_cc.h"
+#include "core/model/table/arity_index.h"
 
 namespace algos::faida {
 

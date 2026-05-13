@@ -3,11 +3,15 @@
 #include <filesystem>
 #include <optional>
 #include <vector>
+#include <cstddef>
+#include <utility>
 
 #include "core/algorithms/od/fastod/model/attribute_set.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos::fastod {
 

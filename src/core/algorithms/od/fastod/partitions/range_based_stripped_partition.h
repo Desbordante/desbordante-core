@@ -4,9 +4,11 @@
 
 #include <string>
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/od/fastod/partitions/stripped_partition.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/model/table/column_index.h"
 
 namespace algos::fastod {
 

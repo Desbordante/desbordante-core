@@ -1,7 +1,7 @@
 #include "core/algorithms/od/order/dependency_checker.h"
 
-#include <algorithm>
 #include <unordered_set>
+#include <cstddef>
 
 #include "core/model/table/tuple_index.h"
 

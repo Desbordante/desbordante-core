@@ -5,8 +5,22 @@
  */
 #include "core/algorithms/ind/mind/mind.h"
 
+#include <boost/container_hash/hash.hpp>
+#include <boost/mp11/algorithm.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/type_index.hpp>
 #include <algorithm>
 #include <unordered_set>
+#include <cassert>
+#include <cmath>
+#include <functional>
+#include <iterator>
+#include <list>
+#include <string>
+#include <type_traits>
+#include <typeindex>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/create_algorithm.h"
 #include "core/algorithms/ind/ind_algorithm.h"
@@ -19,6 +33,14 @@
 #include "core/model/table/dataset_stream_fixed.h"
 #include "core/model/table/dataset_stream_projection.h"
 #include "core/util/timed_invoke.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/algorithm_types.h"
+#include "core/algorithms/ind/ind.h"
+#include "core/config/common_option.h"
+#include "core/config/exceptions.h"
+#include "core/model/table/arity_index.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos {
 

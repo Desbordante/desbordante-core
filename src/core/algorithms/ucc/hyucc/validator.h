@@ -10,6 +10,7 @@
 #include "core/algorithms/ucc/raw_ucc.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/position_list_index.h"
+#include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
 
 namespace algos::hyucc {
 

@@ -5,6 +5,9 @@
  */
 #include "core/algorithms/ind/spider/attribute.h"
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <cstddef>
+
 namespace algos::spider {
 
 std::vector<AttributeIndex> AINDAttribute::GetRefIds(config::ErrorType max_error) const {

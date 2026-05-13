@@ -5,6 +5,7 @@
  */
 #pragma once
 #include <vector>
+#include <cstddef>
 
 #include "core/algorithms/ind/ind_algorithm.h"
 #include "core/config/equal_nulls/type.h"

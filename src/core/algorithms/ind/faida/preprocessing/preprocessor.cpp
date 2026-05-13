@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "core/algorithms/ind/faida/hashing/hashing.h"
+#include "core/algorithms/ind/faida/preprocessing/hashed_column_store.h"
 
 namespace algos::faida {
 

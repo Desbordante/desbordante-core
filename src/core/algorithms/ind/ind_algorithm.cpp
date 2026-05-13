@@ -1,7 +1,10 @@
 #include "core/algorithms/ind/ind_algorithm.h"
 
+#include <cstddef>
+
 #include "core/config/names_and_descriptions.h"
 #include "core/config/tabular_data/input_tables/option.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace algos {
 

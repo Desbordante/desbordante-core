@@ -2,9 +2,12 @@
 
 #include <memory>
 #include <stdexcept>
+#include <algorithm>
+#include <iterator>
 
 #include "core/algorithms/od/fastod/util/type_util.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "core/model/types/builtin.h"
 
 namespace algos::fastod {
 

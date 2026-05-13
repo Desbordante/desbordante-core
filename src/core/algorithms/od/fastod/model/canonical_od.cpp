@@ -1,6 +1,7 @@
 #include "core/algorithms/od/fastod/model/canonical_od.h"
 
 #include <sstream>
+#include <utility>
 
 #include "core/algorithms/od/fastod/partitions/complex_stripped_partition.h"
 

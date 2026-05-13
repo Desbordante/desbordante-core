@@ -3,6 +3,9 @@
 #include <memory>
 #include <string_view>
 #include <vector>
+#include <list>
+#include <string>
+#include <utility>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ind/ind.h"
@@ -10,6 +13,7 @@
 #include "core/config/tabular_data/input_tables_type.h"
 #include "core/model/table/relational_schema.h"
 #include "core/util/primitive_collection.h"
+#include "core/model/table/column_combination.h"
 
 namespace algos {
 

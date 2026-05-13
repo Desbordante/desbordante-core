@@ -3,6 +3,9 @@
 #include <cstddef>
 
 #include <magic_enum/magic_enum.hpp>
+#include <cstddef>
+#include <array>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/od/fastod/model/removal_set.h"
@@ -11,6 +14,7 @@
 #include "core/algorithms/od/fastod/storage/partition_cache.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/config/column_index/type.h"
 
 namespace algos::od {
 
