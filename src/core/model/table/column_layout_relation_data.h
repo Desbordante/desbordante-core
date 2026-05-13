@@ -5,14 +5,15 @@
 
 #pragma once
 
-#include <cmath>
+#include <cstddef>
+#include <memory>
 #include <vector>
 
 #include "core/model/table/column_data.h"
 #include "core/model/table/idataset_stream.h"
+#include "core/model/table/position_list_index.h"
 #include "core/model/table/position_list_index_with_singletons.h"
 #include "core/model/table/relation_data.h"
-#include "core/model/table/relational_schema.h"
 
 class ColumnLayoutRelationData final : public RelationData {
 public:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <queue>
 #include <vector>
@@ -7,6 +8,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/hycommon/all_column_combinations.h"
+#include "core/algorithms/fd/hycommon/column_combination_list.h"
 #include "core/algorithms/fd/hycommon/efficiency_threshold.h"
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/config/thread_number/type.h"
@@ -23,6 +25,7 @@ namespace algos::hy {
 class Sampler {
 private:
     class Efficiency;
+
     double efficiency_threshold_ = kEfficiencyThreshold;
 
     PLIsPtr plis_;

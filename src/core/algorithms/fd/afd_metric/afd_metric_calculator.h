@@ -1,12 +1,15 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
+#include <deque>
 #include <memory>
+#include <utility>
+
+#include <magic_enum/magic_enum.hpp>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
-#include "core/algorithms/fd/tane/afd_measures.h"
-#include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_relation_data.h"

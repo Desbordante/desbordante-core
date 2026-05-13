@@ -1,5 +1,6 @@
-#include <iostream>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -7,6 +8,7 @@
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {

@@ -1,12 +1,13 @@
 #pragma once
 
-#include <memory>
+#include <cstddef>
 #include <string>
 #include <vector>
 
 #include "core/algorithms/od/fastod/model/removal_set.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/model/table/column_index.h"
 #include "core/model/table/tuple_index.h"
 
 namespace algos::fastod {

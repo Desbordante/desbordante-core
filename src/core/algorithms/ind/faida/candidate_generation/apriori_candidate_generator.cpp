@@ -1,7 +1,12 @@
 #include "core/algorithms/ind/faida/candidate_generation/apriori_candidate_generator.h"
 
 #include <algorithm>
+#include <iterator>
+#include <memory>
 #include <unordered_set>
+#include <utility>
+
+#include "core/algorithms/ind/faida/util/simple_cc.h"
 
 namespace algos::faida::apriori_candidate_generator {
 

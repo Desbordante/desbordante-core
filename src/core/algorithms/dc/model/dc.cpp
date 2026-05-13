@@ -1,6 +1,7 @@
 #include "core/algorithms/dc/model/dc.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <ranges>
 #include <sstream>
 #include <string>
@@ -10,6 +11,7 @@
 
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/model/tuple.h"
 
 namespace algos::dc {
 

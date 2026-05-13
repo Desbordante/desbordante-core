@@ -1,8 +1,13 @@
+#include <cstddef>
 #include <memory>
+#include <string>
 
 #include <gtest/gtest.h>
 
-#include "core/model/types/types.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/double_type.h"
+#include "core/model/types/int_type.h"
+#include "core/model/types/numeric_type.h"
 
 namespace tests {
 class NumericCast : public ::testing::Test {

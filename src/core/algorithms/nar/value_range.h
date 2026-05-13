@@ -1,6 +1,19 @@
 #pragma once
 
-#include "core/model/table/column_layout_typed_relation_data.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
 #include "core/model/types/type.h"
 
 namespace model {

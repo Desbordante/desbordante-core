@@ -1,5 +1,12 @@
 #include "core/algorithms/fd/tane/afd_measures.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <deque>
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
 namespace algos {
 using Cluster = model::PositionListIndex::Cluster;
 

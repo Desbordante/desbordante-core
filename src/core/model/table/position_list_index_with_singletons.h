@@ -5,13 +5,10 @@
 #pragma once
 #include <deque>
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
-#include "core/model/table/column.h"
 #include "core/model/table/position_list_index.h"
-
-class ColumnLayoutRelationData;
+#include "core/model/table/relational_schema.h"
 
 namespace model {
 

@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "core/algorithms/nd/nd_verifier/util/value_combination.h"

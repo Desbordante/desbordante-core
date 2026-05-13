@@ -1,10 +1,24 @@
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
+#include <boost/any.hpp>
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/od/fastod/fastod.h"
+#include "core/algorithms/od/fastod/model/attribute_set.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
 #include "core/algorithms/od/fastod/model/removal_set.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/od/set_based_verifier/verifier.h"
+#include "core/config/column_index/type.h"
+#include "core/config/indices/type.h"
+#include "core/config/names.h"
+#include "core/model/table/column_index.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {

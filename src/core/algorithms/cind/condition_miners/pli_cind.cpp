@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -9,7 +10,9 @@
 
 #include <boost/container_hash/hash.hpp>
 
+#include "core/algorithms/cind/cind.h"
 #include "core/algorithms/cind/condition.h"
+#include "core/algorithms/cind/condition_miners/cind_miner.h"
 #include "core/algorithms/cind/condition_miners/position_lists_set.h"
 #include "core/algorithms/cind/types.h"
 #include "core/model/table/encoded_column_data.h"

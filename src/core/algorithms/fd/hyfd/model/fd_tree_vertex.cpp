@@ -1,6 +1,7 @@
 #include "core/algorithms/fd/hyfd/model/fd_tree_vertex.h"
 
 #include <algorithm>
+#include <cassert>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>

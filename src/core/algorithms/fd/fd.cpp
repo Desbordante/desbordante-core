@@ -1,5 +1,7 @@
 #include "core/algorithms/fd/fd.h"
 
+#include <sstream>
+
 #include "core/util/bitset_utils.h"
 
 std::vector<model::ColumnIndex> FD::GetLhsIndices() const {

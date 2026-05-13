@@ -1,7 +1,5 @@
 #pragma once
 
-#include <thread>
-
 #include "core/config/common_option.h"
 #include "core/config/thread_number/type.h"
 

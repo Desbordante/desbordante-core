@@ -7,7 +7,6 @@
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/indexes/records_info.h"
 #include "core/algorithms/md/hymd/lattice/md_lattice_node_info.h"
-#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
 #include "core/algorithms/md/hymd/similarity_data.h"
 #include "core/algorithms/md/md_algorithm.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -81,6 +80,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
     class RegisterHelper;
+
     void RegisterResults(SimilarityData const& similarity_data,
                          std::vector<lattice::MdLatticeNodeInfo> lattice_mds);
 

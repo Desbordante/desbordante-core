@@ -1,7 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>

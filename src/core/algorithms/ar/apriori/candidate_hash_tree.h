@@ -1,5 +1,9 @@
 #pragma once
 
+#include <list>
+#include <unordered_map>
+#include <vector>
+
 #include "core/algorithms/ar/apriori/node.h"
 #include "core/model/transaction/transactional_data.h"
 

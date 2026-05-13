@@ -1,5 +1,6 @@
 #include "core/algorithms/od/fastod/util/type_util.h"
 
+#include <compare>
 #include <string>
 
 namespace algos::fastod {

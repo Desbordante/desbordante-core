@@ -1,13 +1,16 @@
 #pragma once
 
+#include <list>
 #include <memory>
-#include <string_view>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ind/ind.h"
 #include "core/config/error/type.h"
 #include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/table/column_combination.h"
 #include "core/model/table/relational_schema.h"
 #include "core/util/primitive_collection.h"
 

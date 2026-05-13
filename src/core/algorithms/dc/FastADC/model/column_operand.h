@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstddef>
+#include <string>
+#include <typeindex>
+
 #include <boost/container_hash/hash.hpp>
 #include <magic_enum/magic_enum.hpp>
 

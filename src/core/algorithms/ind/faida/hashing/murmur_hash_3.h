@@ -1,4 +1,5 @@
 #pragma once
+#include <cinttypes>
 //-----------------------------------------------------------------------------
 // MurmurHash3 was written by Austin Appleby, and is placed in the public
 // domain. The author hereby disclaims copyright to this source code.
@@ -19,8 +20,6 @@ typedef unsigned __int64 uint64_t;
 // Other compilers
 
 #else	// defined(_MSC_VER)
-
-#include <stdint.h>
 
 #endif // !defined(_MSC_VER)
 

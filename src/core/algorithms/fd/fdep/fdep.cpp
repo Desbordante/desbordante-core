@@ -1,10 +1,11 @@
 #include "core/algorithms/fd/fdep/fdep.h"
 
 #include <chrono>
+#include <stdexcept>
 
-#include "core/config/equal_nulls/option.h"
+#include "core/config/common_option.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/idataset_stream.h"
 #include "core/model/types/bitset.h"
 
 // #ifndef PRINT_FDS

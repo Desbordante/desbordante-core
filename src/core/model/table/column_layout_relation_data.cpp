@@ -4,10 +4,14 @@
 //
 #include "core/model/table/column_layout_relation_data.h"
 
-#include <map>
 #include <memory>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
 #include <utility>
 
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
 #include "core/util/logger.h"
 
 std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {

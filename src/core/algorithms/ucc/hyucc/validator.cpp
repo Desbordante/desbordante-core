@@ -1,13 +1,18 @@
 #include "core/algorithms/ucc/hyucc/validator.h"
 
+#include <cassert>
+#include <cstddef>
+#include <deque>
 #include <future>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/hycommon/efficiency_threshold.h"
 #include "core/algorithms/fd/hycommon/validator_helpers.h"
 #include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
+#include "core/util/bitset_utils.h"
 
 namespace {
 

@@ -1,16 +1,20 @@
 #include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
-#include "core/model/types/builtin.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
 
 namespace {
 using namespace algos::fd_verifier;

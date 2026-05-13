@@ -2,18 +2,17 @@
 
 #include <cstddef>
 #include <memory>
-#include <tuple>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "core/algorithms/md/decision_boundary.h"
 #include "core/algorithms/md/hymd/column_classifier_value_id.h"
 #include "core/algorithms/md/hymd/column_match_info.h"
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 #include "core/algorithms/md/hymd/indexes/records_info.h"
 #include "core/algorithms/md/hymd/lattice/rhs.h"
 #include "core/algorithms/md/hymd/lhs_ccv_ids_info.h"
-#include "core/algorithms/md/hymd/pair_comparison_result.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
 #include "core/model/index.h"
 #include "core/util/worker_thread_pool.h"

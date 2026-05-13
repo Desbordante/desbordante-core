@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstddef>
-#include <filesystem>
 #include <list>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -13,7 +13,6 @@
 #include "core/algorithms/dd/split/model/distance_position_list_index.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_index.h"
-#include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/builtin.h"
 

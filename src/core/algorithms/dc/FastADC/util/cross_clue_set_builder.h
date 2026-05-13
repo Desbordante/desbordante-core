@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"

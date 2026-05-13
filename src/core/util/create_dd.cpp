@@ -1,5 +1,7 @@
 #include "core/util/create_dd.h"
 
+#include <string>
+
 namespace util::dd {
 model::DFStringConstraint CreateDf(std::string_view const& col_name, double const lower_bound,
                                    double const upper_bound) {

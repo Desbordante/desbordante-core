@@ -1,8 +1,19 @@
 #include "core/algorithms/fd/dfd/lattice_traversal/lattice_traversal.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <memory>
 #include <random>
+#include <unordered_map>
+#include <utility>
+#include <variant>
 
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/algorithms/fd/dfd/node_category.h"
 #include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
 
 LatticeTraversal::LatticeTraversal(Column const* const rhs,
                                    ColumnLayoutRelationData const* const relation,

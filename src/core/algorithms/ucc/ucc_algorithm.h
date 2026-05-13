@@ -1,12 +1,9 @@
 #pragma once
 
 #include <list>
-#include <string_view>
-#include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ucc/ucc.h"
-#include "core/config/equal_nulls/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/util/primitive_collection.h"
 

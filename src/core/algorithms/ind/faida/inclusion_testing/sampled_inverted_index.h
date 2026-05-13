@@ -1,13 +1,18 @@
 #pragma once
 
+#include <cstddef>
 #include <hash_set2.hpp>
 #include <hash_table8.hpp>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/ind/faida/inclusion_testing/hll_data.h"
+#include "core/algorithms/ind/faida/util/simple_cc.h"
 #include "core/algorithms/ind/faida/util/simple_ind.h"
 #include "core/util/atomic_bit_vector.h"
 

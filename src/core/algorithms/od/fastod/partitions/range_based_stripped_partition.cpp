@@ -2,7 +2,11 @@
 
 #include "core/algorithms/od/fastod/partitions/range_based_stripped_partition.h"
 
+#include <algorithm>
 #include <sstream>
+#include <utility>
+
+#include "core/algorithms/od/fastod/partitions/stripped_partition.h"
 
 namespace algos::fastod {
 

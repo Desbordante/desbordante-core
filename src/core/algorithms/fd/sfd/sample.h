@@ -1,8 +1,6 @@
 #pragma once
 
-#include <algorithm>
-#include <cmath>
-#include <numbers>
+#include <cstddef>
 #include <vector>
 
 #include "core/algorithms/fd/sfd/frequency_handler.h"

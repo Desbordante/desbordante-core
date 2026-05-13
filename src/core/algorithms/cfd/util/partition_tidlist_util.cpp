@@ -1,5 +1,7 @@
 #include "core/algorithms/cfd/util/partition_tidlist_util.h"
 
+#include <unordered_map>
+
 #include "core/algorithms/cfd/util/tidlist_util.h"
 
 namespace algos::cfd {

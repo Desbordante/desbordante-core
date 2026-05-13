@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "core/config/tabular_data/input_table_type.h"
@@ -10,7 +12,6 @@
 #include "core/model/table/idataset_stream.h"
 #include "core/model/transaction/input_format_type.h"
 #include "core/model/transaction/itemset.h"
-#include "core/model/transaction/transactional_input_format.h"
 
 namespace model {
 

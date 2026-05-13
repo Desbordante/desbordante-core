@@ -1,10 +1,8 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 
 #include "core/algorithms/gfd/gfd.h"
-#include "core/parser/graph_parser/graph_parser.h"
 
 namespace tests {
 

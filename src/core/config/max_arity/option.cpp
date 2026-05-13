@@ -1,7 +1,11 @@
 #include "core/config/max_arity/option.h"
 
 #include <limits>
+#include <optional>
+#include <string>
+#include <variant>
 
+#include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
 
 namespace config {

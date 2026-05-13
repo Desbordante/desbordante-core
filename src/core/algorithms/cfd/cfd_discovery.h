@@ -1,12 +1,7 @@
 #pragma once
 
-#include <filesystem>
-#include <list>
-#include <map>
-#include <mutex>
-#include <vector>
-
-#include <boost/any.hpp>
+#include <memory>
+#include <string>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/cfd/model/cfd_relation_data.h"

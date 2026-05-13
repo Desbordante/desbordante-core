@@ -5,6 +5,8 @@
 #include <numeric>
 #include <unordered_map>
 
+#include "core/algorithms/cind/condition_miners/position_lists_set.h"
+
 namespace algos::fd_verifier {
 
 void DynamicStatsCalculator::CalculateStatistics(model::DynPLI const* lhs_pli,

@@ -1,12 +1,15 @@
 #pragma once
 
-#include <list>
+#include <iosfwd>
+#include <memory>
+#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "core/model/table/column.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/table/position_list_index_with_singletons.h"
 #include "core/model/table/relational_schema.h"

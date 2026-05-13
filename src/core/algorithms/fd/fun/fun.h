@@ -1,8 +1,13 @@
 #pragma once
 
+#include <list>
 #include <set>
+#include <unordered_map>
 
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 #include "core/util/custom_hashes.h"
 
 namespace algos {

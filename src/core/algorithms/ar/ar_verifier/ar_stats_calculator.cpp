@@ -1,7 +1,11 @@
 #include "core/algorithms/ar/ar_verifier/ar_stats_calculator.h"
 
+#include <algorithm>
 #include <ranges>
+#include <utility>
+#include <vector>
 
+#include "core/model/transaction/itemset.h"
 #include "core/util/enum_to_str.h"
 
 namespace algos::ar_verifier {

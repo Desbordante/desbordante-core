@@ -1,8 +1,18 @@
 #include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
 
-#include <boost/format.hpp>
-#include <boost/optional.hpp>
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/optional/optional.hpp>
+
+#include "core/model/table/column.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical_map.h"
 #include "core/util/logger.h"
 

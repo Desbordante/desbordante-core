@@ -1,6 +1,9 @@
 #include "core/algorithms/fd/sfd/sample.h"
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <numbers>
 #include <random>
 #include <string>
 #include <unordered_set>

@@ -1,7 +1,11 @@
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
-#include <fstream>
+#include <memory>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 #include "core/algorithms/ind/faida/hashing/hashing.h"
 #include "core/algorithms/ind/faida/preprocessing/irow_iterator.h"

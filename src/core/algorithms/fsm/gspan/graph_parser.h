@@ -2,7 +2,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <string>
 #include <vector>
 
 #include "frequent_subgraph.h"

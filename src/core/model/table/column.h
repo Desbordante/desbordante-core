@@ -3,8 +3,6 @@
 #include <string>
 #include <utility>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "core/model/table/column_index.h"
 #include "core/model/table/relational_schema.h"
 

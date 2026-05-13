@@ -1,10 +1,12 @@
 #include "core/model/table/relational_schema.h"
 
+#include <algorithm>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
+#include "core/model/table/column.h"
 #include "core/model/table/vertical.h"
-#include "core/model/table/vertical_map.h"
 
 RelationalSchema::RelationalSchema(std::string name) : columns_(), name_(std::move(name)) {}
 

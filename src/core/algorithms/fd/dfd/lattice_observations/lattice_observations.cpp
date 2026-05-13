@@ -1,5 +1,13 @@
 #include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
 
+#include <cstddef>
+#include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/model/table/relational_schema.h"
+
 NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node) {
     NodeCategory new_category;
     if (node.GetArity() <= 1) {

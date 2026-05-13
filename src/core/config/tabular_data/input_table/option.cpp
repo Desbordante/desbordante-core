@@ -1,5 +1,11 @@
 #include "core/config/tabular_data/input_table/option.h"
 
+#include <memory>
+#include <optional>
+#include <string>
+#include <variant>
+
+#include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
 
 namespace config {

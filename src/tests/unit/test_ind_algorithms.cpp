@@ -1,11 +1,25 @@
+#include <exception>
+#include <iostream>
+#include <list>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ind/faida/faida.h"
+#include "core/algorithms/ind/ind.h"
+#include "core/algorithms/ind/mind/mind.h"
+#include "core/algorithms/ind/spider/spider.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/error/type.h"
+#include "core/config/exceptions.h"
 #include "core/config/max_arity/type.h"
 #include "core/config/names.h"
 #include "core/config/thread_number/type.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 #include "tests/unit/test_hash_util.h"

@@ -14,6 +14,7 @@
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "core/algorithms/md/hymd/preprocessing/similarity.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace python_bindings {
 namespace detail {

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
@@ -9,6 +11,8 @@
 #include "core/algorithms/ar/ar_verifier/ar_stats_calculator.h"
 #include "core/config/ar_minimum_conf/type.h"
 #include "core/config/ar_minimum_support/type.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/transaction/transactional_data.h"
 
 namespace algos::ar_verifier {
 

@@ -1,13 +1,16 @@
 #pragma once
 
 #include <bitset>
+#include <cstddef>
 #include <functional>
 #include <ranges>
 #include <stdexcept>
 #include <string>
+#include <typeindex>
+#include <utility>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 #include "core/model/table/column_index.h"
 #include "core/model/types/bitset.h"

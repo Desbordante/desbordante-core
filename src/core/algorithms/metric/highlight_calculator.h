@@ -1,5 +1,12 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include "core/algorithms/metric/aliases.h"
 #include "core/algorithms/metric/highlight.h"
 #include "core/algorithms/metric/points.h"
 #include "core/config/indices/type.h"

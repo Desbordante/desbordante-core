@@ -1,5 +1,9 @@
 #include "core/config/ar_minimum_support/option.h"
 
+#include <optional>
+#include <string>
+#include <variant>
+
 #include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
 

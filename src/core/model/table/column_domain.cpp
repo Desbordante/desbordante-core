@@ -8,10 +8,13 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <iterator>
 #include <numeric>
+#include <stdexcept>
 #include <string>
 
 #include "core/config/thread_number/type.h"
+#include "core/model/table/block_data.h"
 #include "core/model/table/block_dataset_stream.h"
 #include "core/model/table/dataset_stream_fixed.h"
 #include "core/util/logger.h"

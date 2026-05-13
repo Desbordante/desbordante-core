@@ -1,10 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <utility>
 #include <vector>
 
 // #include "algorithms/ind/cind/condition.h"
 #include "cind_miner.h"
-#include "core/algorithms/cind/cind.h"
+#include "core/algorithms/cind/condition.h"
+#include "core/config/tabular_data/input_tables_type.h"
 #include "position_lists_set.h"
 
 namespace algos::cind {

@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <memory>
 #include <string_view>
-#include <unordered_set>
-#include <vector>
 
 #include "condition_miners/cind_miner.h"
 #include "core/algorithms/algorithm.h"

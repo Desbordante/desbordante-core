@@ -1,6 +1,7 @@
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 
 #include <algorithm>
+#include <compare>
 #include <cstddef>
 #include <tuple>
 #include <unordered_map>

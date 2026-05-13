@@ -1,5 +1,6 @@
 #include "core/algorithms/fd/eulerfd/mlfq.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace algos {

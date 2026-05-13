@@ -1,7 +1,9 @@
 #include "core/config/tabular_data/input_tables/option.h"
 
 #include <cassert>
+#include <string>
 
+#include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
 
 namespace config {

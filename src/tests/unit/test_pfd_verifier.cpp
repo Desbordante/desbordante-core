@@ -1,9 +1,20 @@
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
+#include "core/algorithms/fd/tane/enums.h"
+#include "core/config/error/type.h"
+#include "core/config/error_measure/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
+#include "core/model/table/position_list_index.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {

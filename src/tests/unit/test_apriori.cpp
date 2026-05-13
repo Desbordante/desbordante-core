@@ -1,9 +1,19 @@
+#include <list>
+#include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/ar/apriori/apriori.h"
+#include "core/algorithms/ar/ar.h"
+#include "core/algorithms/ar/ar_algorithm.h"
 #include "core/config/names.h"
 #include "core/model/transaction/input_format_type.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {

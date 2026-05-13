@@ -1,4 +1,7 @@
+#include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -6,7 +9,9 @@
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/od/fastod/fastod.h"
 #include "core/algorithms/od/fastod/hashing/hashing.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
 #include "core/config/names.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 

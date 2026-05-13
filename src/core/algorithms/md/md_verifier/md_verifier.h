@@ -1,12 +1,13 @@
 #pragma once
 
+#include <memory>
 #include <optional>
+#include <stdexcept>
+#include <vector>
 
 #include "core/algorithms/algorithm.h"
-#include "core/algorithms/md/column_match.h"
 #include "core/algorithms/md/decision_boundary.h"
-#include "core/algorithms/md/md_algorithm.h"
-#include "core/algorithms/md/md_verifier/cmptr.h"
+#include "core/algorithms/md/md.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/md/md_verifier/highlights/highlights.h"
 #include "core/algorithms/md/md_verifier/validation/validation.h"

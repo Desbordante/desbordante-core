@@ -1,7 +1,10 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 

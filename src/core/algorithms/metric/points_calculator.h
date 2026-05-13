@@ -1,8 +1,16 @@
 #pragma once
 
+#include <cstddef>
+#include <limits>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include "core/algorithms/metric/aliases.h"
 #include "core/algorithms/metric/points.h"
 #include "core/config/indices/type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/position_list_index.h"
 #include "core/util/convex_hull.h"
 
 namespace algos::metric {

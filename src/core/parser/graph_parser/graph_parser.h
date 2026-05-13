@@ -1,8 +1,6 @@
 #pragma once
 #include <filesystem>
 #include <fstream>
-#include <string>
-#include <vector>
 
 #include "core/algorithms/gfd/gfd.h"
 #include "core/algorithms/gfd/graph_descriptor.h"

@@ -1,31 +1,40 @@
 #include "cind_verifier.h"
 
 #include <algorithm>
+#include <functional>
+#include <iterator>
 #include <optional>
-#include <ranges>
+#include <set>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
-#include <boost/functional/hash.hpp>
 
 #include "core/algorithms/cind/condition.h"
+#include "core/config/column_index/type.h"
+#include "core/config/common_option.h"
 #include "core/config/conditions/completeness/option.h"
 #include "core/config/conditions/condition_type/option.h"
 #include "core/config/conditions/validity/option.h"
 #include "core/config/descriptions.h"
+#include "core/config/exceptions.h"
 #include "core/config/indices/option.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
-#include "core/config/option_using.h"
 #include "core/config/tabular_data/input_tables/option.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_encoded_relation_data.h"
 #include "core/model/table/encoded_column_data.h"
 #include "core/model/table/encoded_tables.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/table_index.h"
 #include "core/model/table/tuple_index.h"
+#include "core/model/table/value_dictionary.h"
 #include "core/util/timed_invoke.h"
 
 namespace algos::cind {

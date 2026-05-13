@@ -6,6 +6,7 @@
 #include <boost/unordered/unordered_flat_map.hpp>
 
 #include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "core/model/index.h"
 #include "core/util/logger.h"
 
 namespace {

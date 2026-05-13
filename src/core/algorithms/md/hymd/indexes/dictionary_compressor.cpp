@@ -1,7 +1,9 @@
 #include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 
 #include <cstddef>
+#include <utility>
 
+#include "core/algorithms/md/hymd/compressed_record.h"
 #include "core/model/index.h"
 #include "core/util/desbordante_assume.h"
 

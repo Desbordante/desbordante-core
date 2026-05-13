@@ -1,5 +1,6 @@
 #include "core/algorithms/md/hymd/indexes/similarity_index.h"
 
+#include <iterator>
 #include <ranges>
 
 namespace {

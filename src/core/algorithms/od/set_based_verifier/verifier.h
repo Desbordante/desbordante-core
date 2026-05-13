@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
+#include <vector>
 
 #include <magic_enum/magic_enum.hpp>
 
@@ -9,6 +11,7 @@
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
 #include "core/algorithms/od/fastod/storage/partition_cache.h"
+#include "core/config/column_index/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 

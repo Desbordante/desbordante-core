@@ -1,15 +1,11 @@
 #pragma once
 
-#include <memory>
-#include <tuple>
-#include <utility>
 #include <vector>
 
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/algorithms/fd/raw_fd.h"
 #include "core/config/thread_number/type.h"
-#include "core/model/table/position_list_index.h"
 
 namespace algos::hyfd {
 

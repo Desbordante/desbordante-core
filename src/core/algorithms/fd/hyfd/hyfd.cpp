@@ -1,8 +1,9 @@
 #include "core/algorithms/fd/hyfd/hyfd.h"
 
-#include <algorithm>
 #include <chrono>
 #include <memory>
+#include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -10,12 +11,17 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/hycommon/preprocessor.h"
-#include "core/algorithms/fd/hycommon/util/pli_util.h"
 #include "core/algorithms/fd/hyfd/inductor.h"
+#include "core/algorithms/fd/hyfd/model/fd_tree.h"
 #include "core/algorithms/fd/hyfd/sampler.h"
 #include "core/algorithms/fd/hyfd/validator.h"
+#include "core/config/common_option.h"
 #include "core/config/names.h"
 #include "core/config/thread_number/option.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 #include "core/util/logger.h"
 
 namespace algos::hyfd {

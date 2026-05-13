@@ -1,9 +1,15 @@
 #include "column_encoded_relation_data.h"
 
 #include <memory>
+#include <set>
+#include <string>
 #include <utility>
 
+#include "core/model/table/column.h"
+#include "core/model/table/encoded_column_data.h"
+#include "core/model/table/idataset_stream.h"
 #include "core/model/table/table_index.h"
+#include "core/model/table/value_dictionary.h"
 #include "core/util/logger.h"
 
 namespace model {

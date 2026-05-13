@@ -1,12 +1,11 @@
 #pragma once
 
-#include <string>
-#include <utility>
+#include <cstddef>
+#include <list>
+#include <memory>
 #include <vector>
 
-#include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "core/algorithms/fd/sfd/contingency_table.h"
 #include "core/algorithms/fd/sfd/correlation.h"
 #include "core/algorithms/fd/sfd/frequency_handler.h"
 #include "core/algorithms/fd/sfd/sample.h"
@@ -15,6 +14,8 @@
 #include "core/model/table/column.h"
 #include "core/model/table/column_index.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/util/primitive_collection.h"
 
 namespace algos {
 class Cords : public FDAlgorithm {

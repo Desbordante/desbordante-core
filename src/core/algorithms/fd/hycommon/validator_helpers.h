@@ -4,8 +4,6 @@
 #include <string_view>
 #include <vector>
 
-#include <boost/container_hash/hash.hpp>
-#include <boost/dynamic_bitset.hpp>
 #include <boost/version.hpp>
 
 #include "core/algorithms/fd/hycommon/types.h"

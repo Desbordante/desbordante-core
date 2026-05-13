@@ -1,9 +1,8 @@
 #pragma once
 
-#include <algorithm>
+#include <cinttypes>
 #include <concepts>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <vector>

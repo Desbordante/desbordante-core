@@ -1,17 +1,16 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <set>
 #include <stack>
+#include <string>
 #include <vector>
-
-#include <boost/any.hpp>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/ar/ar.h"
 #include "core/config/ar_minimum_conf/type.h"
 #include "core/config/ar_minimum_support/type.h"
-#include "core/config/tabular_data/input_table_type.h"
 #include "core/model/transaction/transactional_data.h"
 
 namespace algos {

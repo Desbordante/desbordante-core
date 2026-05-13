@@ -1,6 +1,10 @@
 #include "extended_edge.h"
 
+#include <compare>
 #include <sstream>
+#include <tuple>
+
+#include "core/algorithms/fsm/gspan/graph.h"
 
 namespace gspan {
 

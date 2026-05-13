@@ -1,5 +1,6 @@
 #include "core/algorithms/fd/hyfd/model/fd_tree.h"
 
+#include <cassert>
 #include <memory>
 #include <vector>
 

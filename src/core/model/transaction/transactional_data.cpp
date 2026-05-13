@@ -1,7 +1,7 @@
 #include "core/model/transaction/transactional_data.h"
 
+#include <algorithm>
 #include <cassert>
-#include <stdexcept>
 #include <unordered_map>
 
 #include "core/config/exceptions.h"

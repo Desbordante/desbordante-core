@@ -1,5 +1,11 @@
 #include "core/algorithms/cfd/model/partition_tidlist.h"
 
+#include <algorithm>
+#include <compare>
+#include <map>
+#include <unordered_map>
+#include <vector>
+
 namespace algos::cfd {
 
 int const PartitionTIdList::kSep = -1;

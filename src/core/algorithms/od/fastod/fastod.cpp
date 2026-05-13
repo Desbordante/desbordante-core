@@ -1,9 +1,12 @@
 #include "core/algorithms/od/fastod/fastod.h"
 
+#include <functional>
 #include <memory>
 
 #include <boost/unordered/unordered_map.hpp>
+#include <boost/unordered/unordered_map_fwd.hpp>
 
+#include "core/config/common_option.h"
 #include "core/config/error/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/time_limit/option.h"

@@ -1,12 +1,17 @@
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/dc/model/tuple.h"
 #include "core/algorithms/dc/verifier/dc_verifier.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/model/table/column_index.h"
+#include "core/parser/csv_parser/csv_parser.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {

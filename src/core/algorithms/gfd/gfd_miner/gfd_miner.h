@@ -2,12 +2,17 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <map>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gfd/gfd.h"
+#include "core/algorithms/gfd/graph_descriptor.h"
 #include "core/config/names_and_descriptions.h"
-#include "core/parser/graph_parser/graph_parser.h"
 
 namespace algos {
 

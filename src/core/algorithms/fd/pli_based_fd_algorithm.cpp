@@ -1,6 +1,9 @@
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 
-#include "core/config/equal_nulls/option.h"
+#include <stdexcept>
+#include <vector>
+
+#include "core/config/common_option.h"
 #include "core/config/tabular_data/input_table/option.h"
 
 namespace algos {

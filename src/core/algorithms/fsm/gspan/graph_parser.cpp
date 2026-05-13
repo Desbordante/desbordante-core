@@ -1,6 +1,19 @@
 #include "graph_parser.h"
 
-#include <boost/algorithm/string.hpp>
+#include <cstddef>
+#include <exception>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/pending/property.hpp>
+
+#include "core/algorithms/fsm/gspan/frequent_subgraph.h"
+#include "core/algorithms/fsm/gspan/graph.h"
 
 namespace gspan::parser {
 

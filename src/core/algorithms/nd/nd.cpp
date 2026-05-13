@@ -1,7 +1,5 @@
 #include "core/algorithms/nd/nd.h"
 
-#include <algorithm>
-
 #include "core/algorithms/nd/util/get_vertical_names.h"
 #include "core/util/range_to_string.h"
 

@@ -6,8 +6,9 @@
 #include "core/model/table/position_list_index.h"
 
 #include <algorithm>
-#include <chrono>
+#include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <map>
 #include <memory>
@@ -15,6 +16,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
 #include "core/util/logger.h"

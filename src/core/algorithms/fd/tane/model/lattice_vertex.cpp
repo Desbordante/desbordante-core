@@ -1,5 +1,10 @@
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 
+#include <cassert>
+#include <cstddef>
+#include <ostream>
+#include <type_traits>
+
 #include "core/util/getting_ptr.h"
 
 namespace model {

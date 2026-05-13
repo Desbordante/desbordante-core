@@ -1,6 +1,7 @@
 #include "core/util/worker_thread_pool.h"
 
 #include <cassert>
+#include <system_error>
 
 namespace util {
 WorkerThreadPool::WorkerThreadPool(std::size_t thread_num)

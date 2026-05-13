@@ -1,5 +1,9 @@
 #include "core/algorithms/fd/eulerfd/search_tree.h"
 
+#include <cassert>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 namespace algos {
 
 SearchTreeEulerFD::Node::Node(size_t bit, SearchTreeEulerFD::Bitset set,

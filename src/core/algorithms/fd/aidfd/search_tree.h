@@ -1,6 +1,8 @@
 #pragma once
 
-#include <unordered_map>
+#include <cstddef>
+#include <functional>
+#include <memory>
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>

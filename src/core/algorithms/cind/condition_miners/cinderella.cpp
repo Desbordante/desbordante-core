@@ -2,17 +2,26 @@
 #include "cinderella.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
+#include <memory>
+#include <string>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <variant>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
 
+#include "core/algorithms/cind/cind.h"
 #include "core/algorithms/cind/condition.h"
 #include "core/algorithms/cind/condition_miners/basket.h"
+#include "core/algorithms/cind/condition_miners/item.h"
+#include "core/algorithms/cind/condition_miners/itemset.h"
 #include "core/algorithms/cind/types.h"
+#include "core/model/table/encoded_column_data.h"
 #include "itemset_node.h"
 
 namespace algos::cind {

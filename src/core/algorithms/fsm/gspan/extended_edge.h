@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
+
+#include <boost/container_hash/hash.hpp>
 
 #include "graph.h"
 

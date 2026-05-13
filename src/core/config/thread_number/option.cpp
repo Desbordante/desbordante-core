@@ -1,6 +1,9 @@
 #include "core/config/thread_number/option.h"
 
+#include <optional>
+#include <string>
 #include <thread>
+#include <variant>
 
 #include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
