@@ -53,28 +53,42 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
-    std::vector<model::DFConstraint> min_max_dif_;
 
     std::vector<std::vector<ThresholdInfo>> thresholds_;
     std::vector<std::vector<std::size_t>> threshold_zones_;
     std::vector<std::vector<boost::dynamic_bitset<>>> zone_to_bitset_;
     std::vector<std::size_t> dif_func_nums_;
+    std::vector<std::size_t> old_index_to_new_index_;
 
     void AddThresholds(std::vector<model::DFConstraint> const& thresholds,
-                       model::ColumnIndex const column_index);
+                       model::ColumnIndex const column_index, std::size_t const offset,
+                       model::DFConstraint const& min_max_dif);
 
     void CalculateThresholdZones();
 
 public:
     DifferentialFunctionBuilder(
             std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation, unsigned num_rows,
-            model::ColumnIndex num_columns, std::vector<model::DFConstraint> min_max_dif)
-        : typed_relation_(typed_relation),
-          num_rows_(num_rows),
-          num_columns_(num_columns),
-          min_max_dif_(std::move(min_max_dif)) {}
+            model::ColumnIndex num_columns)
+        : typed_relation_(typed_relation), num_rows_(num_rows), num_columns_(num_columns) {}
 
-    void BuildDFList(std::vector<std::vector<model::DFConstraint>> const& thresholds);
+    void BuildDFList(std::vector<std::vector<model::DFConstraint>> const& thresholds,
+                     std::vector<model::DFConstraint> const& min_max_dif = {});
+    void UpdateDFList(std::vector<model::DFConstraint> const& min_max_dif);
+
+    template <BoostDynamicBitsetCompatible SourceBitset, BoostDynamicBitsetCompatible TargetBitset>
+    TargetBitset TranslateBitset(SourceBitset const& bitset) const {
+        TargetBitset result(GetDifFuncNum());
+
+        for (std::size_t index = bitset.find_first(); index != SourceBitset::npos;
+             index = bitset.find_next(index)) {
+            if (old_index_to_new_index_[index] < bitset.size()) {
+                result.set(old_index_to_new_index_[index]);
+            }
+        }
+
+        return result;
+    }
 
     std::vector<ThresholdInfo> const& GetThresholds(model::ColumnIndex const column_index) const {
         return thresholds_[column_index];

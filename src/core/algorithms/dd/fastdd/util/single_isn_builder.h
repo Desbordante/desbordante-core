@@ -24,6 +24,7 @@ private:
     std::shared_ptr<DistanceCalculator> distance_calculator_;
     PliShard const& pli_shard_;
     std::vector<std::vector<Bitset>> const& offset_to_predicates_;
+    std::vector<model::DFConstraint>& min_max_dif_;
     std::size_t bitset_size_;
     std::vector<ClueType> clues_;
 
@@ -32,6 +33,8 @@ private:
         std::vector<ThresholdInfo> const& thresholds = df_pack.thresholds;
         for (std::size_t i = 0; i != pli.Size(); ++i) {
             if (pli.GetCluster(i).size() > 1) {
+                min_max_dif_[df_pack.column_index].lower_bound =
+                        std::min(min_max_dif_[df_pack.column_index].lower_bound, 0.0);
                 std::size_t const interval_num =
                         std::lower_bound(thresholds.begin(), thresholds.end(),
                                          ThresholdInfo{0.0, true, thresholds.size()}) -
@@ -44,6 +47,10 @@ private:
             for (std::size_t j = i + 1; j != pli.Size(); ++j) {
                 double const diff = distance_calculator_->CalculateDistance(
                         df_pack.column_index, {pli.GetCluster(i)[0], pli.GetCluster(j)[0]});
+                min_max_dif_[df_pack.column_index].lower_bound =
+                        std::min(min_max_dif_[df_pack.column_index].lower_bound, diff);
+                min_max_dif_[df_pack.column_index].upper_bound =
+                        std::max(min_max_dif_[df_pack.column_index].upper_bound, diff);
                 std::size_t const interval_num =
                         std::lower_bound(thresholds.begin(), thresholds.end(),
                                          ThresholdInfo{diff, true, thresholds.size()}) -
@@ -59,6 +66,8 @@ private:
         Pli const& pli = pli_shard_.Plis()[df_pack.column_index];
         for (std::size_t i = 0; i != pli.Size(); ++i) {
             if (pli.GetCluster(i).size() > 1) {
+                min_max_dif_[df_pack.column_index].lower_bound =
+                        std::min(min_max_dif_[df_pack.column_index].lower_bound, 0.0);
                 std::size_t const interval_num =
                         std::lower_bound(df_pack.thresholds.begin(), df_pack.thresholds.end(),
                                          ThresholdInfo{0.0, true, df_pack.thresholds.size()}) -
@@ -74,7 +83,18 @@ private:
                 SetNumMask(pli.GetCluster(i), pli.GetCluster(j), df_pack.base, offset,
                            offset_to_predicates_[df_pack_index][offset]);
             }
+
+            if (i != pli.Size() - 1) {
+                double const diff = distance_calculator_->CalculateDistance(
+                        df_pack.column_index, {pli.GetCluster(i)[0], pli.GetCluster(i + 1)[0]});
+                min_max_dif_[df_pack.column_index].lower_bound =
+                        std::min(min_max_dif_[df_pack.column_index].lower_bound, diff);
+            }
         }
+        double const diff = distance_calculator_->CalculateDistance(
+                df_pack.column_index, {pli.GetCluster(0)[0], pli.GetCluster(pli.Size() - 1)[0]});
+        min_max_dif_[df_pack.column_index].upper_bound =
+                std::max(min_max_dif_[df_pack.column_index].upper_bound, diff);
     }
 
     void SetNumMask(Cluster const& cluster, std::size_t const base, std::size_t const offset,
@@ -172,11 +192,12 @@ public:
                      std::shared_ptr<DistanceCalculator> distance_calculator,
                      PliShard const& pli_shard,
                      std::vector<std::vector<Bitset>> const& offset_to_predicates,
-                     std::size_t bitset_size)
+                     std::vector<model::DFConstraint>& min_max_dif, std::size_t bitset_size)
         : isn_info_(isn_info),
           distance_calculator_(distance_calculator),
           pli_shard_(pli_shard),
           offset_to_predicates_(offset_to_predicates),
+          min_max_dif_(min_max_dif),
           bitset_size_(bitset_size) {}
 
     boost::unordered::unordered_flat_set<ClueType> BuildISNs() {
