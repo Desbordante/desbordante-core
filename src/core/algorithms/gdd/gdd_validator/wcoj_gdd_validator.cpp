@@ -16,7 +16,8 @@ namespace {
 
 // boost::breadth_first_search goes through out_edges only, and there is no
 // way to pass directed graph as undirected without making a copy of it (as far as I know)
-class BfsQueryVertexOrder { private:
+class BfsQueryVertexOrder {
+private:
     using GraphT = model::gdd::graph_t;
     using VertexT = model::gdd::vertex_t;
     using DomainT = std::unordered_map<VertexT, std::vector<VertexT>>;
@@ -147,9 +148,10 @@ void WcojGddValidator::Prepare(model::Gdd const& gdd, model::gdd::graph_t const&
 
     match_levels_.reserve(boost::num_vertices(*pattern_));
 
-    // O(Q_V * G_V)
     domain_ = BuildDomain(*pattern_, *graph_);
-    // O(Q_V + Q_E)
+    for (auto& set : domain_ | std::views::values) {
+        std::ranges::sort(set);
+    }
     qvo_ = BuildQueryVertexOrder();
 }
 
@@ -198,16 +200,11 @@ WcojGddValidator::OperationResult WcojGddValidator::Scan() {
     auto const& candidates = domain_it->second;
 
     MatchLevelT level;
-    // O(G_V)
     for (auto const gv : candidates) {
         level.emplace_back(MappingT{{first_pv, gv}});
     }
 
     match_levels_.emplace_back(std::move(level));
-    if (qvo_.size() == 1) {
-        return OperationResult::kFinished;
-    }
-
     return OperationResult::kProduced;
 }
 
@@ -320,6 +317,9 @@ std::vector<GddValidator::VertexT> const& WcojGddValidator::GetNeighbors(
         }
     }
 
+    std::ranges::sort(neighbors);
+    auto const [first, last] = std::ranges::unique(neighbors.begin(), neighbors.end());
+    neighbors.erase(first, last);
     return neighbors;
 }
 
@@ -337,7 +337,9 @@ std::vector<GddValidator::VertexT> WcojGddValidator::ComputeExtensionSet(
         return domain;
     }
 
-    std::unordered_set candidates(domain.begin(), domain.end());
+    std::vector<std::vector<VertexT> const*> lists;
+    lists.reserve(descriptors.size() + 1);
+    lists.push_back(&domain);
 
     for (auto const& [pattern_vertex, direction, edge_label] : descriptors) {
         auto const mapped_it = partial_match.find(pattern_vertex);
@@ -346,31 +348,33 @@ std::vector<GddValidator::VertexT> WcojGddValidator::ComputeExtensionSet(
                     "Descriptor references a pattern vertex absent from partial match");
         }
 
-        VertexT const mapped_graph_vertex = mapped_it->second;
         std::vector<VertexT> const& neighbors =
-                GetNeighbors(mapped_graph_vertex, direction, edge_label);
+                GetNeighbors(mapped_it->second, direction, edge_label);
 
         if (neighbors.empty()) {
             return {};
         }
 
-        std::unordered_set neighbor_set(neighbors.begin(), neighbors.end());
-
-        for (auto it = candidates.begin(); it != candidates.end();) {
-            if (!neighbor_set.contains(*it)) {
-                it = candidates.erase(it);
-            } else {
-                ++it;
-            }
-        }
-
-        if (candidates.empty()) {
-            return {};
-        }
+        // neighbors are cached in adjacency_index_, so the pointer lives
+        lists.push_back(&neighbors);
     }
 
-    std::vector extension_set(candidates.begin(), candidates.end());
-    return extension_set;
+    // for faster intersections, |A \cap B| <= max(|A|, |B|)
+    std::ranges::sort(lists, [](auto const* a, auto const* b) { return a->size() < b->size(); });
+
+    std::vector<VertexT> acc = IntersectSorted(*lists[0], *lists[1]);
+    for (std::size_t i = 2; i < lists.size() && !acc.empty(); ++i) {
+        acc = IntersectSorted(acc, *lists[i]);
+    }
+    return acc;
+}
+
+std::vector<GddValidator::VertexT> WcojGddValidator::IntersectSorted(
+        std::vector<VertexT> const& lhs, std::vector<VertexT> const& rhs) {
+    std::vector<VertexT> result;
+    result.reserve(std::min(lhs.size(), rhs.size()));
+    std::ranges::set_intersection(lhs, rhs, std::back_inserter(result));
+    return result;
 }
 
 }  // namespace algos

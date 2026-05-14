@@ -43,11 +43,13 @@ private:
     void Prepare(model::Gdd const& gdd, model::gdd::graph_t const& graph);
     std::vector<VertexT> BuildQueryVertexOrder() const;
     std::vector<AdjacencyDescriptor> BuildDescriptorsFor(VertexT new_pv, std::size_t level) const;
-    std::vector<VertexT> ComputeExtensionSet(
-            MappingT const& partial_match, VertexT new_pv,
-            std::vector<AdjacencyDescriptor> const& descriptors);
+    std::vector<VertexT> ComputeExtensionSet(MappingT const& partial_match, VertexT new_pv,
+                                             std::vector<AdjacencyDescriptor> const& descriptors);
     std::vector<VertexT> const& GetNeighbors(VertexT graph_vertex, Direction direction,
                                              std::string const& edge_label);
+
+    static std::vector<VertexT> IntersectSorted(std::vector<VertexT> const& lhs,
+                                                std::vector<VertexT> const& rhs);
 
     struct NeighborKeyHash {
         std::size_t operator()(NeighborKey const& key) const {
