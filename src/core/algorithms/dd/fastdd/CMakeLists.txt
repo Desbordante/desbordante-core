@@ -3,7 +3,6 @@ desbordante_add_lib(NAME OBJECT)
 target_sources(
     ${NAME}
     PRIVATE model/pli_shard.cpp
-            trees/minimize_tree.cpp
             trees/translating_tree_search.cpp
             util/differential_function_builder.cpp
             util/isn_info.cpp
