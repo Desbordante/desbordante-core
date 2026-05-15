@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
@@ -11,15 +10,16 @@
 #include "core/algorithms/dd/fastdd/trees/minimize_tree.h"
 #include "core/algorithms/dd/fastdd/util/bitset_concept.h"
 #include "core/algorithms/dd/fastdd/util/dif_func_info.h"
+#include "core/algorithms/dd/fastdd/util/static_bitset.h"
 
 namespace algos::dd {
 
+template <BoostDynamicBitsetCompatible Bitset>
 class TranslatingMinimizeTree {
 private:
-    MinimizeTree tree_;
-    std::shared_ptr<DifFuncInfo const> dif_func_info_;
+    std::shared_ptr<DifFuncInfo<Bitset> const> dif_func_info_;
+    MinimizeTree<Bitset> tree_;
 
-    template <BoostDynamicBitsetCompatible Bitset>
     std::vector<std::size_t> TransformToNodes(Bitset const& bitset) const {
         std::vector<std::size_t> nodes;
         nodes.reserve(bitset.count());
@@ -31,9 +31,8 @@ private:
         return nodes;
     }
 
-    template <BoostDynamicBitsetCompatible Bitset>
-    boost::dynamic_bitset<> TransformToBitset(Bitset const& bitset) const {
-        boost::dynamic_bitset<> transformed(bitset.size());
+    Bitset TransformToBitset(Bitset const& bitset) const {
+        Bitset transformed(bitset.size());
         transformed.flip();
 
         for (std::size_t index = bitset.find_first(); index != Bitset::npos;
@@ -45,10 +44,9 @@ private:
     }
 
 public:
-    explicit TranslatingMinimizeTree(std::shared_ptr<DifFuncInfo const> dif_func_info)
-        : dif_func_info_(dif_func_info) {}
+    explicit TranslatingMinimizeTree(std::shared_ptr<DifFuncInfo<Bitset> const> dif_func_info)
+        : dif_func_info_(dif_func_info), tree_(dif_func_info_->dif_func_num_) {}
 
-    template <BoostDynamicBitsetCompatible Bitset>
     std::vector<Bitset> Minimize(std::vector<Bitset> candidates) {
         std::ranges::sort(candidates, [](Bitset const& a, Bitset const& b) {
             int diff = a.count() - b.count();
@@ -57,9 +55,9 @@ public:
 
         std::vector<Bitset> result;
         for (auto const& candidate : candidates) {
-            std::optional<boost::dynamic_bitset<>> superset =
+            bool superset_found =
                     tree_.Add(TransformToBitset(candidate), TransformToNodes(candidate));
-            if (!superset) {
+            if (!superset_found) {
                 result.push_back(candidate);
             }
         }

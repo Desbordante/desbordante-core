@@ -30,12 +30,13 @@ private:
     std::vector<Bitset> match_dfs_;
     std::vector<std::vector<DifferentialFunction>> dif_funcs_;
     std::vector<Bitset> column_to_dif_funcs_;
-    std::shared_ptr<DifFuncInfo const> dif_func_info_;
+    std::shared_ptr<DifFuncInfo<Bitset> const> dif_func_info_;
 
     std::vector<boost::dynamic_bitset<>> dif_func_to_satisfied_bitsets_;
     std::vector<boost::dynamic_bitset<>> dif_func_to_not_satisfied_bitsets_;
 
-    std::unordered_map<std::size_t, std::shared_ptr<TranslatingMinimizeTree>> minimize_tree_map_;
+    std::unordered_map<std::size_t, std::shared_ptr<TranslatingMinimizeTree<Bitset>>>
+            minimize_tree_map_;
 
     static constexpr HittingSetEnumerationStrategy strategy_ = HittingSetEnumerationStrategy::MMCS;
 
@@ -81,7 +82,7 @@ private:
     std::vector<std::vector<DifferentialFunction>> Minimize(std::vector<Bitset> covers,
                                                             std::size_t rhs_column,
                                                             std::size_t rhs_offset) {
-        std::shared_ptr<TranslatingMinimizeTree> minimize_tree;
+        std::shared_ptr<TranslatingMinimizeTree<Bitset>> minimize_tree;
         std::size_t const minimize_tree_key =
                 dif_func_info_
                         ->dif_func_to_column_index_[dif_func_info_->dif_func_nums_[rhs_column] +
@@ -89,11 +90,11 @@ private:
         if (minimize_tree_map_[minimize_tree_key]) {
             minimize_tree = minimize_tree_map_[minimize_tree_key];
         } else {
-            minimize_tree = std::make_shared<TranslatingMinimizeTree>(dif_func_info_);
+            minimize_tree = std::make_shared<TranslatingMinimizeTree<Bitset>>(dif_func_info_);
             minimize_tree_map_[minimize_tree_key] = minimize_tree;
         }
 
-        std::vector<Bitset> minimized_bitsets = minimize_tree->Minimize<Bitset>(std::move(covers));
+        std::vector<Bitset> minimized_bitsets = minimize_tree->Minimize(std::move(covers));
 
         std::vector<std::vector<DifferentialFunction>> minimized_lhs;
         minimized_lhs.reserve(minimized_bitsets.size());
@@ -233,8 +234,7 @@ public:
             column_to_dif_funcs_.push_back(std::move(cur_column_bitset));
         }
 
-        std::vector<boost::dynamic_bitset<>> dif_func_to_bitset(
-                dif_func_num, boost::dynamic_bitset<>(dif_func_num));
+        std::vector<Bitset> dif_func_to_bitset(dif_func_num, Bitset(dif_func_num));
         for (auto& bitset : dif_func_to_bitset) {
             bitset.flip();
         }
@@ -259,7 +259,7 @@ public:
             }
         }
 
-        dif_func_info_ = std::make_shared<DifFuncInfo const>(
+        dif_func_info_ = std::make_shared<DifFuncInfo<Bitset> const>(
                 std::move(dif_func_sizes), std::move(dif_func_nums),
                 std::move(dif_func_to_column_index), std::move(dif_func_to_offset),
                 std::move(dif_func_to_bitset), dif_func_num, dif_funcs_.size());
