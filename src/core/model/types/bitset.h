@@ -146,6 +146,15 @@ public:
         return words_[NumWords - 1];
     }
 
+    bool DoIsSubsetOf(BaseBitset<NumWords> const& x) const noexcept {
+        for (size_t i{0}; i < NumWords; ++i) {
+            if (words_[i] & ~x.words_[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     void DoAnd(BaseBitset<NumWords> const& x) noexcept {
         for (size_t i{0}; i < NumWords; ++i) {
             words_[i] &= x.words_[i];
@@ -431,6 +440,10 @@ public:
         return word_;
     }
 
+    constexpr bool DoIsSubsetOf(BaseBitset<1> const& x) const noexcept {
+        return !(word_ & ~x.word_);
+    }
+
     constexpr void DoAnd(BaseBitset<1> const& x) noexcept {
         word_ &= x.word_;
     }
@@ -562,6 +575,10 @@ public:
 
     constexpr WordT HiWord() const noexcept {
         return 0;
+    }
+
+    constexpr bool DoIsSubsetOf([[maybe_unused]] BaseBitset<0> const&) const noexcept {
+        return true;
     }
 
     constexpr void DoAnd([[maybe_unused]] BaseBitset<0> const&) noexcept {}
@@ -764,6 +781,10 @@ public:
             n = Traits::length(str);
         }
         CopyFromPtr<CharT, Traits>(str, n, 0, n, zero, one);
+    }
+
+    bool is_subset_of(BitsetImpl<NumBits> const& rhs) const noexcept {
+        return this->DoIsSubsetOf(rhs);
     }
 
     BitsetImpl<NumBits>& operator&=(BitsetImpl<NumBits> const& rhs) noexcept {

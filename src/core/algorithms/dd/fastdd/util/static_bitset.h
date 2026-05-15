@@ -30,7 +30,7 @@ public:
 
     explicit StaticBitset(std::size_t size) : size_(size), static_bitset_() {}
 
-    StaticBitset(boost::dynamic_bitset<> const& bs) : StaticBitset(bs.size()) {
+    explicit StaticBitset(boost::dynamic_bitset<> const& bs) : StaticBitset(bs.size()) {
         for (std::size_t index = bs.find_first(); index != boost::dynamic_bitset<>::npos;
              index = bs.find_next(index)) {
             static_bitset_.set(index);
@@ -108,7 +108,7 @@ public:
     }
 
     bool is_subset_of(StaticBitset const& other) const noexcept {
-        return (static_bitset_ & ~other.static_bitset_).none();
+        return static_bitset_.is_subset_of(other.static_bitset_);
     }
 };
 
