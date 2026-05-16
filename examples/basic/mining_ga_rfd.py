@@ -14,11 +14,13 @@ The algorithm is based on the paper:
 The example shows how to find exact functional dependencies, approximate
 dependencies and relaxed dependencies using different similarity metrics.
 We also show how to define custom metrics and how to use RFDs for error
-detection in a small dataset.
+detection.
 """
 
+from collections import defaultdict 
 import desbordante
 import pandas as pd
+import itertools
 from tabulate import tabulate
 import textwrap
 import os
@@ -29,6 +31,8 @@ import os
 YELLOW = "\033[1;33m"
 CYAN = "\033[1;36m"
 GREEN = "\033[1;32m"
+RED = "\033[1;31m"
+BLUE = "\033[1;34m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
 
@@ -49,7 +53,7 @@ def banner(title, num=None):
     print("=" * 80)
 
 
-def print_table(df, title=None, show_index=True):
+def print_table(df, title=None, show_index=True, highlight_rows=None):
     if title:
         print(f"\n{YELLOW}{title}{RESET}")
     if show_index:
@@ -58,7 +62,21 @@ def print_table(df, title=None, show_index=True):
         display_df.index.name = "#"
     else:
         display_df = df
-    print(tabulate(display_df, headers="keys", tablefmt="psql", showindex=show_index))
+    
+    table_str = tabulate(display_df, headers="keys", tablefmt="psql", showindex=show_index)
+    
+    lines = table_str.split('\n')
+    
+    for i, line in enumerate(lines):
+        if highlight_rows and i > 2:
+            display_row_num = i - 2
+            if (display_row_num - 1) in highlight_rows:
+                print(f"{RED}{line}{RESET}")
+            else:
+                print(line)
+        else:
+            print(line)
+    print()
 
 
 def fmt_rfd(rfd, col_names):
@@ -74,7 +92,7 @@ def fmt_rfd(rfd, col_names):
 
 def print_rfds_table(rfds, col_names, title=None):
     if title:
-        print(f"\n{YELLOW}{title}{RESET}")
+        print(f"{YELLOW}{title}{RESET}")
     if not rfds:
         print("   (none)\n")
         return
@@ -119,11 +137,29 @@ def print_link(text, url):
 banner("Introduction", num=1)
 
 printlns(
-    "  In this example we will discover three kinds of dependencies from a " + 
-    f"small dataset: {BOLD}exact Functional Dependencies (FDs){RESET}, {BOLD}Approximate FDs " + 
-    f"(AFDs){RESET}, and {BOLD}Relaxed FDs (RFDs){RESET}. We will also define a custom similarity " + 
-    "metric and apply the discovered RFDs to error detection."
+    "  In this example we will learn the basics of RFD mining from tables. " +
+    "RFD (Relaxed Functional Dependency) is a pattern that captures " +
+    "the rule: «if two tuples are similar on a set of attributes X, " +
+    "then they are likely similar on attribute Y». Similarity is defined " +
+    "via configurable metrics and thresholds, making RFD more flexible " +
+    "than classical functional dependencies."
 )
+printlns(
+    "  This pattern is similar to FD (exact Functional Dependencies), " +
+    "AFD (Approximate FDs), but differs in that " +
+    "it allows per-attribute similarity metrics and controls acceptable " +
+    "deviations via the min_similarity and minconf parameters."
+)
+prints(
+    f"  This pattern is formally defined in the paper: " +
+    f"{BOLD}L. Caruccio, V. Deufemia, G. Polese. " +
+    "«A genetic algorithm to discover relaxed functional dependencies from data». " +
+    f"SEBD 2017{RESET}."
+)
+print("  ", end='')
+print_link("Read", "https://ceur-ws.org/Vol-2037/paper_22.pdf")
+print("\n")
+
 printlns(
     f"{YELLOW}!?{RESET}  It is important not to confuse RFD as a general term for 'approximate FD'. " + 
     "Here RFD refers to a concrete pattern defined by Caruccio et al. that " + 
@@ -148,14 +184,14 @@ printlns(
 prints("Informally, the dependency means:")
 printlns('  "If two tuples are similar on X, then they are likely similar on Y."')
 prints(
-    "Using equality metrics and setting confidence = 1.0 gives us exact FDs."
+    "* Using equality metrics and setting confidence = 1.0 gives us exact FDs."
 )
 printlns(
-    "Lowering confidence gives us exact AFDs."
+    "* Lowering confidence gives us AFDs."
 )
 
 print(f"{YELLOW}>>> 2.2. Confidence and support{RESET}")
-prints("Two numbers describe an RFD.")
+printlns("Two numbers describe an RFD.")
 printlns(
     f"  {BOLD}Confidence{RESET} tells us how reliable the rule is. " +
     "It is the fraction of pairs that are similar on X and Y, " +
@@ -180,6 +216,25 @@ COL_NAMES = ["height_cm", "weight_kg", "shoe_size_eu"]
 df = pd.read_csv(DATA_PATH, header=0)
 print_table(df, title="Sample data (8 persons, 3 numeric attributes)")
 
+printlns(
+    f"  {GREEN}Dataset description:{RESET} This dataset contains information about 8 people. " +
+    "Each row represents one person with three numeric attributes:"
+)
+prints(f"  * {BOLD}height_cm{RESET} — person's height in centimeters")
+prints(f"  * {BOLD}weight_kg{RESET} — person's weight in kilograms")
+prints(f"  * {BOLD}shoe_size_eu{RESET} — European shoe size")
+print()
+
+printlns(
+    f"  {GREEN}Hypothesis for this example:{RESET} we assume that if people have " +
+    "similar height and weight, then they will also have similar shoe sizes. " +
+    "We will test this hypothesis using the GA-RFD algorithm."
+)
+printlns(
+    "  In terms of RFD, we expect to discover a dependency of the form " +
+    f"{BOLD}[height_cm, weight_kg] -> shoe_size_eu{RESET} with high confidence. "
+)
+
 # ------------------------------------------------------------
 # 4. GA-RFD algorithm and key parameters
 # ------------------------------------------------------------
@@ -199,15 +254,30 @@ print("""
                           default 1.0)
   mutation_probability  - chance of random change (in [0,1], default 0.1)
   minconf               - minimum confidence (in [0,1], default 1.0)
-  min_similarity        - minimum similarity threshold for relaxed 
-                          comparisons (in [0,1], default 1.0)
+  min_similarity        - similarity threshold(s) for relaxed comparisons.
+                          Accepts a single value (applied to all columns)
+                          or a list of values (one per column). Values 
+                          must be in [0,1]. (default {1.0, 1.0, ...})
   seed                  - seed for reproducible results
   cache_size            - maximum number of cached comparisons, the bigger 
-                          than faster the algorithm will be (default 10000)
+                          the faster the algorithm will be (default 10000)
 """)
-prints(
+printlns(
     "  Because GA-RFD uses randomness, always set the seed if you need " + 
     "reproducible results."
+)
+
+print(f"{YELLOW}>>> Where are similarity metrics defined?{RESET}")
+printlns(
+    f"  Similarity metrics are set using the {BOLD}set_metrics(){RESET} method, which takes " +
+    "a list of metric functions (one per column). For example:"
+)
+printlns(
+    "  " + f"{BOLD}algo.set_metrics([abs_diff, abs_diff, equality]){RESET}"
+)
+printlns(
+    "  This assigns absolute difference metric to the first two columns " +
+    "and equality metric to the third column."
 )
 
 # ------------------------------------------------------------
@@ -218,7 +288,7 @@ banner("Built-in similarity metrics", num=5)
 print(f"""
 Desbordante provides three ready-to-use metrics:
   {BOLD}equality_metric(){RESET} - returns 1 if the two values are exactly equal, 
-                      0 otherwise;
+                                   0 otherwise;
   {BOLD}abs_diff_metric(){RESET} - for numeric attributes: 1 - |x-y| / max(|x|,|y|).
   {BOLD}levenshtein_metric(){RESET} - for strings: 1 - edit_distance(x,y) / max(len(x), len(y)).
 
@@ -232,9 +302,10 @@ lev = desbordante.rfd.levenshtein_metric()
 # ------------------------------------------------------------
 # 6. Exact FDs
 # ------------------------------------------------------------
-banner("Exact FDs (epsillon=1.0, equality metrics)", num=6)
+banner("Exact FDs (minconf=1.0, equality metrics)", num=6)
 
-print_table(df)
+print_table(df, title="Sample data - note duplicate weights in rows 1-2 and 5-6", 
+            highlight_rows=[0, 1, 4, 5])
 algo_fd = desbordante.rfd.algorithms.GaRfd()
 algo_fd.load_data(table=(DATA_PATH, ",", True))
 algo_fd.set_option("max_generations", 100)
@@ -242,16 +313,16 @@ algo_fd.set_option("seed", 42)
 algo_fd.execute()
 fds = algo_fd.get_rfds()
 
-print_rfds_table(fds, COL_NAMES, title=f"Found {len(fds)} exact FD(s) with epsillon=1.0")
+print_rfds_table(fds, COL_NAMES, title=f"Found {len(fds)} exact FD(s) with minconf=1.0")
 
 printlns(
-    "  With equality metrics and epsillon = 1.0, GA-RFD recovers classical FDs. " + 
+    "  With equality metrics and minconf = 1.0, GA-RFD recovers classical FDs. " + 
     "Note that support is not 1.0 — it is the fraction of all tuple pairs that " + 
     "have identical values on the left side. On this small dataset, only a few " + 
     "pairs match exactly on any single column, so support is low."
 )
 
-printlns(f"{YELLOW}Why does [weight_kg] -> [height_cm] have conf=1.000 and supp=0.071?{RESET}")
+printlns(f"{YELLOW}>>> Why does [weight_kg] -> [height_cm] have conf=1.000 and supp=0.071?{RESET}")
 printlns(
     "  There are 8 rows, therefore 8*7/2 = 28 tuple pairs. " + 
     "Only two pairs share the same weight: (row 1, row 2) with weight 70, " + 
@@ -264,7 +335,7 @@ printlns(
 # ------------------------------------------------------------
 # 7. Approximate FDs (lowering confidence)
 # ------------------------------------------------------------
-banner("Approximate FDs (AFDs): lowering confidence epsillon", num=7)
+banner("Approximate FDs (AFDs): lowering confidence minconf", num=7)
 
 print_table(df)
 algo_afd = desbordante.rfd.algorithms.GaRfd()
@@ -275,17 +346,17 @@ algo_afd.set_option("seed", 42)
 algo_afd.execute()
 afds = algo_afd.get_rfds()
 
-print_rfds_table(afds, COL_NAMES, title=f"Found {len(afds)} AFD(s) with epsillon>=0.6")
+print_rfds_table(afds, COL_NAMES, title=f"Found {len(afds)} AFD(s) with minconf>=0.6")
 
 printlns(
-    "  When we use equality metrics but lower epsillon below 1.0, " + 
+    "  When we use equality metrics but lower minconf below 1.0, " + 
     "the RFD pattern reduces to an Approximate Functional Dependency (AFD). " + 
-    "A epsillon of 0.6 means we accept dependencies that hold in at least 60% " + 
+    "A minconf of 0.6 means we accept dependencies that hold in at least 60% " + 
     "of the cases. The resulting dependencies are exactly the classical "
     "approximate FDs."
 )
 
-printlns(f"{YELLOW}Why does [height_cm] -> [shoe_size_eu] have conf=0.750 and supp=0.107?{RESET}")
+printlns(f"{YELLOW}>>> Why does [height_cm] -> [shoe_size_eu] have conf=0.750 and supp=0.107?{RESET}")
 printlns(
     "  There are 4 pairs with identical height: (1,2), (1,3), (2,3) from height 175 " + 
     "and (5,6) from height 178. Among them, the first three also share the same shoe size (40), " + 
@@ -296,15 +367,15 @@ printlns(
 # ------------------------------------------------------------
 # 8. Relaxed FDs with abs_diff metric
 # ------------------------------------------------------------
-banner("Relaxed FDs (RFDs): using abs_diff and min_similarity=0.8", num=8)
+banner("Relaxed FDs (RFDs): using abs_diff and min_similarity=[0.8]", num=8)
 
 printlns(
-    "  Now we allow 'similar' rather than 'equal' values by " + 
+    f"{YELLOW}Explanation{RESET}: Now we allow 'similar' rather than 'equal' values by " + 
     "setting min_similarity = 0.8 (values within about 20% " + 
     "are considered similar) and using abs_diff_metric() for all " + 
     "three columns."
 )
-printlns("On this example:")
+prints("On this example:")
 printlns(
     "  A tuple pair (t1,t2) satisfies the antecedent if, for each "
     "X-attribute, abs_diff(t1[A], t2[A]) >= 0.8."
@@ -314,7 +385,7 @@ print_table(df)
 algo_rfd = desbordante.rfd.algorithms.GaRfd()
 algo_rfd.load_data(table=(DATA_PATH, ",", True))
 algo_rfd.set_metrics([abs_diff, abs_diff, abs_diff])
-algo_rfd.set_option("min_similarity", 0.8)
+algo_rfd.set_option("min_similarity", [0.8])
 algo_rfd.set_option("minconf", 0.7)
 algo_rfd.set_option("max_generations", 100)
 algo_rfd.set_option("seed", 42)
@@ -322,20 +393,20 @@ algo_rfd.execute()
 rfds = algo_rfd.get_rfds()
 
 print_rfds_table(rfds, COL_NAMES,
-                 title=f"Found {len(rfds)} RFD(s) with min_similarity =0.8, beta>=0.7")
+                 title=f"Found {len(rfds)} RFD(s) with min_similarity=0.8, minconf>=0.7")
 
-print("For example, if the algorithm finds")
+print("For example, the algorithm finds")
 print(f"\n  {BOLD}[height_cm, weight_kg] -> shoe_size_eu{RESET}, it means:\n")
 printlns(
-    "'if two persons have similar height " + 
+    "'if two people have similar height " + 
     "and weight (within ~20%), then their shoe sizes are also " + 
-    "similar'. This is useful for imputation, anomaly detection, "
+    "similar'. This is useful for data imputation, anomaly detection, "
     "or schema understanding."
 )
 
-printlns(f"{YELLOW}Why does [height_cm] -> [shoe_size_eu] have conf=1.000 and supp=1.000?{RESET}")
+printlns(f"{YELLOW}>>> Why does [height_cm] -> [shoe_size_eu] have conf=1.000 and supp=1.000?{RESET}")
 printlns(
-    "  With min_similarity  = 0.8 almost every pair of rows is considered similar in height " + 
+    "  With min_similarity = 0.8 almost every pair of rows is considered similar in height " + 
     "(the smallest relative difference is larger than 0.8 for all pairs). Hence support " + 
     "is 1.0. All those pairs also have a relative shoe size difference >= 0.8, " + 
     "so confidence = 1.0. The rule is trivially satisfied because the threshold " + 
@@ -353,13 +424,14 @@ printlns(
 )
 prints("  Jaccard(s1,s2) = |grams(s1) INTERSECT grams(s2)| / |grams(s1) UNION grams(s2)|")
 printlns(
-    "This is robust to small typos: for example, '40' and '4O' (letter O) " +
-    "share the 2-gram '4', so their Jaccard similarity is > 0."
+    "This is robust to small typos: for example, 'Le Petit Cafe' and 'La Petite Cafe' " +
+    "share many 2-gram, so their Jaccard similarity is > 0."
 )
 
 JACCARD_DATA_PATH = "examples/datasets/jaccard_typo_data.csv"
+COL_NAMES_STR = ["restaurant", "cuisine", "district"]
 jaccard_df = pd.read_csv(JACCARD_DATA_PATH)
-print_table(jaccard_df, title="String dataset with a typo (row 3, shoe_size='4O'):")
+print_table(jaccard_df, title="String dataset with a typo:")
 
 
 def jaccard_2gram(a, b) -> float:
@@ -374,77 +446,138 @@ def jaccard_2gram(a, b) -> float:
 
 algo_custom = desbordante.rfd.algorithms.GaRfd()
 algo_custom.load_data(table=(JACCARD_DATA_PATH, ",", True))
-algo_custom.set_metrics([eq, eq, jaccard_2gram])
-algo_custom.set_option("min_similarity", 0.7)
-algo_custom.set_option("minconf", 0.4)
+algo_custom.set_metrics([jaccard_2gram, eq, eq])
+algo_custom.set_option("min_similarity", [0.6])
+algo_custom.set_option("minconf", 0.0001)
 algo_custom.set_option("max_generations", 150)
 algo_custom.set_option("population_size", 2000)
 algo_custom.set_option("seed", 42)
 algo_custom.execute()
 custom_rfds = algo_custom.get_rfds()
 
-print_rfds_table(custom_rfds, COL_NAMES,
+print_rfds_table(custom_rfds, COL_NAMES_STR,
                  title=f"RFDs found with Jaccard metric on data with typo")
 
 printlns(
-    "  Notice that the typo weakens the dependencies. Jaccard on 2-grams " +
-    "treats '40' and '4O' as partially similar (they share the 2-gram '4'), " +
-    "but the similarity is lower than with exact equality. You can adjust " +
-    "min_similarity to control the tolerance to typos."
+    "  Notice that even with the typos, the algorithm still finds some RFDs, " + 
+    "but their confidence is lower than with exact equality. " + 
+    "Jaccard on 2-grams treats 'Le Petit Cafe' and 'LePetitCafe' as partially " + 
+    "similar, but the similarity is not 1.0, so " + 
+    "the resulting dependencies are weaker. You can adjust min_similarity to " + 
+    "control the tolerance to typos."
 )
 
 # ------------------------------------------------------------
-# 10. Error detection with string dataset
+# 10. Error detection in a single dirty dataset
 # ------------------------------------------------------------
-banner("Error detection and data cleaning", num=10)
-
-printlns(
-    "  RFDs can flag inconsistent records. We take the same dataset " +
-    "used for Jaccard metric (which contained a deliberate typo) and " +
-    "compare the RFDs mined on the clean version versus the dirty one."
-)
+banner("Error detection and data cleaning (single dirty dataset)", num=10)
 
 CLEAN_DATA_PATH = "examples/datasets/jaccard_clean_data.csv"
 DIRTY_DATA_PATH = "examples/datasets/jaccard_typo_data.csv"
 
+clean_df = pd.read_csv(CLEAN_DATA_PATH)
 dirty_df = pd.read_csv(DIRTY_DATA_PATH)
-print_table(dirty_df, title="Dirty dataset (last row has typo '4O'):")
 
-printlns("Mining RFDs on clean data...")
+print_table(clean_df, title="Clean dataset:")
 algo_clean = desbordante.rfd.algorithms.GaRfd()
 algo_clean.load_data(table=(CLEAN_DATA_PATH, ",", True))
-algo_clean.set_metrics([eq, eq, jaccard_2gram])
-algo_clean.set_option("min_similarity", 0.7)
+algo_clean.set_metrics([jaccard_2gram, eq, eq])
+algo_clean.set_option("min_similarity", [0.3, 1.0, 1.0])
 algo_clean.set_option("minconf", 0.6)
-algo_clean.set_option("max_generations", 100)
-algo_clean.set_option("population_size", 500)
+algo_clean.set_option("max_generations", 1000)
+algo_clean.set_option("population_size", 5000)
 algo_clean.set_option("seed", 42)
 algo_clean.execute()
 clean_rfds = algo_clean.get_rfds()
-print_rfds_table(clean_rfds, COL_NAMES,
-                 title="RFDs on clean data (no typo)")
+print_rfds_table(clean_rfds, COL_NAMES_STR, title=f"Found {len(rfds)} RFD(s) on clean data")
 
-printlns("Mining RFDs on dirty data (with typo)...")
-algo_dirty = desbordante.rfd.algorithms.GaRfd()
-algo_dirty.load_data(table=(DIRTY_DATA_PATH, ",", True))
-algo_dirty.set_metrics([eq, eq, jaccard_2gram])
-algo_dirty.set_option("min_similarity", 0.7)
-algo_dirty.set_option("minconf", 0.6)
-algo_dirty.set_option("max_generations", 100)
-algo_dirty.set_option("population_size", 500)
-algo_dirty.set_option("seed", 42)
-algo_dirty.execute()
-dirty_rfds = algo_dirty.get_rfds()
-print_rfds_table(dirty_rfds, COL_NAMES,
-                 title="RFDs on dirty data (with typo)")
+print_table(dirty_df, title="Dirty dataset:")
+algo = desbordante.rfd.algorithms.GaRfd()
+algo.load_data(table=(DIRTY_DATA_PATH, ",", True))
+algo.set_metrics([jaccard_2gram, eq, eq])
 
+algo.set_option("min_similarity", [0.3, 1.0, 1.0])
+algo.set_option("minconf", 0.6)
+algo.set_option("max_generations", 1000)
+algo.set_option("population_size", 5000)
+algo.set_option("seed", 42)
+algo.execute()
+
+discovered_rfds = algo.get_rfds()
+print_rfds_table(discovered_rfds, COL_NAMES_STR, title=f"Found {len(rfds)} RFD(s) on dirty data")
+def extract_violations_for_garfd_rfds(df, rfds, metrics, thresholds):
+    from collections import defaultdict
+    import itertools
+
+    violation_reports = []
+    n = len(df)
+
+    for rfd in rfds:
+        lhs_indices = [i for i in range(len(df.columns)) if rfd.lhs_mask & (1 << i)]
+        rhs_idx = rfd.rhs_index
+
+        if not lhs_indices or rhs_idx >= len(df.columns):
+            continue
+
+        violation_count = defaultdict(int)
+        for i, j in itertools.combinations(range(n), 2):
+            lhs_sim = all(
+                metrics[col](str(df.iloc[i, col]), str(df.iloc[j, col])) >= thresholds[col]
+                for col in lhs_indices
+            )
+            if not lhs_sim:
+                continue
+
+            rhs_sim = metrics[rhs_idx](str(df.iloc[i, rhs_idx]), str(df.iloc[j, rhs_idx])) >= thresholds[rhs_idx]
+
+            if not rhs_sim:
+                violation_count[i] += 1
+                violation_count[j] += 1
+
+        violation_reports.append({
+            "rfd": rfd,
+            "violations": sorted(violation_count.items(), key=lambda x: x[1], reverse=True)
+        })
+    return violation_reports
+
+reports = extract_violations_for_garfd_rfds(
+    dirty_df,
+    discovered_rfds,
+    metrics=[jaccard_2gram, eq, eq],
+    thresholds=[0.3, 1.0, 1.0]
+)
+
+printlns("  Errors detected:")
+for report in reports:
+    rfd = report["rfd"]
+    lhs_names = [COL_NAMES_STR[i] for i in range(len(COL_NAMES_STR)) if rfd.lhs_mask & (1 << i)]
+    rhs_name = COL_NAMES_STR[rfd.rhs_index]
+    rule_str = f"[{', '.join(lhs_names)}] -> [{rhs_name}] (conf={rfd.confidence:.3f}, supp={rfd.support:.3f})"
+    printlns(f"* Rule: {rule_str}")
+
+    top_violations = report["violations"][:3]  # show only top 3
+    for j, (idx, count) in enumerate(top_violations):
+        prints(f"  Tuple #{idx+1} | Violating pairs: {count} | ")
+        prints(f"  Data: {dirty_df.iloc[idx].to_dict()}")
+        
+        if j < len(top_violations) - 1:
+            print("-" * 80)
+    print()
+
+printlns(f"{YELLOW}>>> Why do the RFD sets differ, and how do we spot errors?{RESET}")
 printlns(
-    "  On clean data we find the dependency [height_cm, weight_kg] -> shoe_size_eu " + 
-    "with high confidence. When the typo is present, the confidence drops, and the " + 
-    "dependency may disappear if it falls below the threshold. " + 
-    "This is exactly how you can use RFDs to spot erroneous records: " + 
-    "if a previously strong rule suddenly vanishes or weakens, the new record " + 
-    "that caused the change is a good candidate for review."
+    "  On clean data, [cuisine] -> [district] holds with confidence 1.0 "
+    "because every cuisine appears in only one district. "
+    "After adding rows 10-11 (Italian in Uptown), the confidence drops to 0.6. "
+    "This change signals a potential inconsistency."
+)
+printlns(
+    "  For each RFD discovered on the dirty dataset we count how many times "
+    "a tuple violates the rule (LHS similar, RHS dissimilar). Tuples with "
+    "the highest violation counts are the best candidates for manual review. "
+    "In our example, rows 10 and 11 are flagged precisely because they "
+    "introduced Italian cuisine into Uptown, breaking the previously clean "
+    "pattern."
 )
 
 # ------------------------------------------------------------
@@ -465,8 +598,8 @@ banner("Summary", num=12)
 
 printlns(
     "  We have seen how GA-RFD can discover exact FDs, approximate FDs, and " + 
-    "relaxed FDs by adjusting the similarity threshold min_similarity  and the confidence " + 
-    "beta. The choice of similarity metric is crucial: equality gives strict " + 
+    "relaxed FDs by adjusting the similarity threshold min_similarity and the confidence " + 
+    "minconf. The choice of similarity metric is crucial: equality gives strict " + 
     "comparisons, while absolute difference and Levenshtein allow fuzzy matching."
 )
 printlns(
@@ -482,15 +615,14 @@ printlns(
     "seed for reproducible experiments."
 )
 
-print(f"\n{GREEN}Next: try GA-RFD on your own dataset!{RESET}\n")
-print(f"{CYAN}References{RESET}")
-print("-" * 80)
+banner("See also")
 
-print("  ", end='')
-print_link("[1]", "https://ceur-ws.org/Vol-2037/paper_22.pdf")
-print(" L. Caruccio, V. Deufemia, G. Polese.")
-print("      A genetic algorithm to discover relaxed functional dependencies")
-print("      from data. SEBD 2017.")
-print("  ", end='')
-print_link("[2]", "https://github.com/Desbordante/desbordante-core/tree/main/docs/papers")
-print(" Desbordante documentation")
+print("Related primitives in Desbordante:")
+print("  * FD mining                -  examples/basic/mining_fd.py")
+print("  * AFD mining               -  examples/basic/mining_afd.py")
+print("  * MFD verifying            -  examples/basic/verifying_mfd.py") 
+print("  * MD mining                -  examples/basic/mining_md.py")
+print("  * Mining FD/AFD via GA-RFD -  examples/advanced/...")
+print()
+
+print(f"\n{GREEN}Next: try GA-RFD on your own dataset!{RESET}\n")

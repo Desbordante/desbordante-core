@@ -53,6 +53,7 @@ exclude = [
 extend-exclude = [
     # We only want to check code for now, skip datasets.
     "test_input_data/",
+    "examples/datasets/jaccard_typo_data.csv",
 ]
 [tool.typos.default]
 extend-ignore-re = [

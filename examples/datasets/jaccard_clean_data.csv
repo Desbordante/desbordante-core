@@ -1,14 +1,11 @@
-height_cm,weight_kg,shoe_size_eu
-180,80,42
-180,80,42
-180,80,42
-175,70,40
-175,70,40
-175,70,40
-170,60,38
-170,60,38
-170,60,38
-165,55,36
-165,55,36
-165,55,36
-180,80,42
+restaurant,cuisine,district
+Sakura,Japanese,Downtown
+Sakura Express,Japanese,Downtown
+Tokyo Ramen,Japanese,Downtown
+Bella Napoli,Italian,Midtown
+Bella Pizza,Italian,Midtown
+El Toro,Mexican,Uptown
+El Toro Express,Mexican,Uptown
+Golden Dragon,Chinese,Downtown
+Le Petit Cafe,French,Midtown
+Le Petit Bistro,French,Midtown
