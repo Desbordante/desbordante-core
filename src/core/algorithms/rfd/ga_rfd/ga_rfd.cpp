@@ -73,13 +73,16 @@ void GaRfd::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     auto check_prob_range = [](double v) { return InRangeInclusive(v, 0.0, 1.0); };
+    auto check_sim = [check_prob_range](auto const& vec) {
+        return std::ranges::all_of(vec, check_prob_range);
+    };
 
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&metrics_, "metrics", "List of similarity metrics",
                           std::vector<std::shared_ptr<SimilarityMetric>>{}});
-    RegisterOption(
-            Option{&min_similarity_, kRfdMinSimilarity, kDRfdMinSimilarity, 1.0}.SetValueCheck(
-                    check_prob_range));
+    RegisterOption(Option{&min_similarity_, kRfdMinSimilarity, kDRfdMinSimilarity,
+                          std::vector<double>{1.0}}
+                           .SetValueCheck(check_sim));
     RegisterOption(Option{&eps_, kRfdMinimumConfidence, kDRfdMinimumConfidence, 1.0}.SetValueCheck(
             check_prob_range));
     RegisterOption(Option{&population_size_, kPopulationSize, kDPopulationSize,
@@ -115,8 +118,8 @@ void GaRfd::LoadDataInternal() {
     for (size_t i = 0; i < num_attrs_; i++) {
         column_data_[i].push_back(std::move(first_row[i]));
     }
-    num_rows_ = 1;
 
+    num_rows_ = 1;
     while (input_table_->HasNextRow()) {
         auto row = input_table_->GetNextRow();
         if (row.size() != num_attrs_) [[unlikely]]
@@ -137,6 +140,14 @@ void GaRfd::LoadDataInternal() {
     if (debug)
         LOG_INFO("Loaded {} rows, {} attributes, {} total pairs", num_rows_, num_attrs_,
                  total_pairs_);
+
+    if (min_similarity_.empty()) {
+        min_similarity_.assign(num_attrs_, 1.0);
+    } else if (min_similarity_.size() == 1) {
+        min_similarity_.assign(num_attrs_, min_similarity_[0]);
+    } else if (min_similarity_.size() != num_attrs_) {
+        throw std::invalid_argument("min_similarity size must match the number of attributes");
+    }
 
     if (metrics_.empty()) {
         metrics_.clear();
@@ -170,7 +181,7 @@ void GaRfd::BuildSimilarityBitsets() {
             for (std::size_t j = i + 1; j < num_rows_; j++) {
                 try {
                     double const sim = metrics_[a]->Compare(col[i], col[j]);
-                    if (sim >= min_similarity_) {
+                    if (sim >= min_similarity_[a]) {
                         std::size_t const word_idx = pair_idx / 64;
                         std::size_t const bit_idx = pair_idx % 64;
                         bits[word_idx] |= (1ULL << bit_idx);
