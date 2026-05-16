@@ -108,34 +108,59 @@ std::pair<std::type_index, ConvFunc> const kEnumConvPair{
                           << "\". Possible values: " << possible_values.str();
 
             throw config::ConfigurationError(error_message.str());
-        }};
-
-template <typename EnumType>
-    requires magic_enum::is_scoped_enum_v<EnumType> || magic_enum::is_unscoped_enum_v<EnumType>
-std::pair<std::type_index, ConvFunc> const kCharEnumConvPair{
+        }};+    requires magic_enum::is_scoped_enum_v<EnumType> || magic_enum::is_unscoped_enum_v<EnumType>
+std::pair<std::type_index, ConvFunc> const kEnumConvPair{
         std::type_index(typeid(EnumType)),
         [](std::string_view option_name, py::handle value) -> boost::any {
-            using UnderlyingType = magic_enum::underlying_type_t<EnumType>;
-            static_assert(std::is_same_v<UnderlyingType, char>,
-                          "This converter is for char-based enums only.");
-
-            auto char_value = CastAndReplaceCastError<UnderlyingType>(option_name, value);
-            auto enum_optional = magic_enum::enum_cast<EnumType>(char_value);
+            auto user_str = CastAndReplaceCastError<std::string>(option_name, value);
+            auto enum_optional = util::EnumFromStr<EnumType>(user_str);
 
             if (enum_optional) return *enum_optional;
 
             std::stringstream error_message;
-            error_message << "Incorrect integral value '" << static_cast<int>(char_value)
-                          << "' for option \"" << option_name << "\". Possible values are: [";
+            std::stringstream possible_values;
 
-            constexpr auto& enum_values = magic_enum::enum_values<EnumType>();
-            for (size_t i = 0; i < enum_values.size(); ++i) {
-                error_message << static_cast<int>(magic_enum::enum_integer(enum_values[i]));
-                if (i < enum_values.size() - 1) {
-                    error_message << '|';
+            possible_values << "[";
+            constexpr auto& values = magic_enum::enum_values<EnumType>();
+            for (size_t i = 0; i < values.size(); ++i) {
+                possible_values << util::EnumToStr(values[i]);
+                if (i < values.size() - 1) {
+                    possible_values << "|";
                 }
             }
-            error_message << ']';
+            possible_values << "]";
+
+            error_message << "Incorrect value '" << user_str << "' for option \"" << option_name
+                          << "\". Possible values: " << possible_values.str();
+
+            throw config::ConfigurationError(error_message.str());
+        }};
+
+template <typename EnumType>
+    requires magic_enum::is_scoped_enum_v<EnumType> || magic_enum::is_unscoped_enum_v<EnumType>
+std::pair<std::type_index, ConvFunc> const kEnumConvPair{
+        std::type_index(typeid(EnumType)),
+        [](std::string_view option_name, py::handle value) -> boost::any {
+            auto user_str = CastAndReplaceCastError<std::string>(option_name, value);
+            auto enum_optional = util::EnumFromStr<EnumType>(user_str);
+
+            if (enum_optional) return *enum_optional;
+
+            std::stringstream error_message;
+            std::stringstream possible_values;
+
+            possible_values << "[";
+            constexpr auto& values = magic_enum::enum_values<EnumType>();
+            for (size_t i = 0; i < values.size(); ++i) {
+                possible_values << util::EnumToStr(values[i]);
+                if (i < values.size() - 1) {
+                    possible_values << "|";
+                }
+            }
+            possible_values << "]";
+
+            error_message << "Incorrect value '" << user_str << "' for option \"" << option_name
+                          << "\". Possible values: " << possible_values.str();
 
             throw config::ConfigurationError(error_message.str());
         }};
@@ -247,6 +272,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
                      new python_bindings::PySimilarityMetric(
                              py::reinterpret_borrow<py::object>(obj)));
          }},
+        kNormalConvPair<std::vector<double>>,
 };
 
 }  // namespace
