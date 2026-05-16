@@ -265,17 +265,11 @@ The `./build.sh` script generates the following file structure in `/path/to/desb
 ```
 ├───input_data
 │   └───some-sample-csv\'s.csv
-├───Desbordante_test
 ├───desbordante.cpython-*.so
 ```
 
-The `input_data` directory contains several .csv files that are used by `Desbordante_test`. Run `Desbordante_test` to perform unit testing:
-```sh
-cd build/target
-./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
-```
-
-Alternatively, you can run tests with CTest from any directory in `Desbordante` tree:
+The `input_data` directory contains several .csv files that are used by unit tests.
+You can run tests with CTest from any directory in the `Desbordante` tree:
 ```sh
 ctest --test-dir build --exclude-regex ".*HeavyDatasets.*" -j $JOBS
 ```
