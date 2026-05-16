@@ -1,0 +1,8 @@
+[
+    # --- GTest / GMock ---
+    { "include": ["@.*gtest/.*", "private", "<gtest/gtest.h>", "public"] },
+    { "include": ["@.*gmock/.*", "private", "<gmock/gmock.h>", "public"] },
+
+    # --- spdlog ---
+    { "include": ["@<spdlog/.*>", "private", "\"core/util/logger.h\"", "public"] },
+]
