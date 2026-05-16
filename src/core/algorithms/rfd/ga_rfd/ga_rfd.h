@@ -69,8 +69,8 @@ private:
     mutable std::unique_ptr<util::LRUCache<uint32_t, std::size_t>> support_cache_;
 
     // Parameters
-    double min_similarity_ = 1.0;  // similarity threshold for a pair of values
-    double eps_ = 1.0;             // minimum confidence for RFD
+    std::vector<double> min_similarity_;  // similarity thresholds per attribute
+    double eps_ = 1.0;                    // minimum confidence for RFD
     std::size_t max_generations_ = 32;
     std::size_t population_size_ = 1024;
     double crossover_probability_ = 1.0;

@@ -25,8 +25,10 @@ inline void GaRfdBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkCo
         std::vector<std::shared_ptr<algos::rfd::SimilarityMetric>> metrics{
                 abs_diff, abs_diff, abs_diff, eq, eq, eq, eq};
 
+        std::vector<double> sim_vec(7, 0.9);
+
         algos::StdParamsMap params{{kCsvConfig, tests::kNeighbors10k},
-                                   {kRfdMinSimilarity, 0.9},
+                                   {kRfdMinSimilarity, sim_vec},
                                    {kRfdMinimumConfidence, 0.9},
                                    {kPopulationSize, std::size_t{924}},
                                    {kRfdMaxGenerations, std::size_t{64}},
