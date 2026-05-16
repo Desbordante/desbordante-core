@@ -62,10 +62,8 @@ private:
 
     std::vector<Bitset> MinimizeDifferentialSet(std::vector<Bitset> bitsets) const {
         LOG_TRACE("Start minimize");
-        std::ranges::sort(bitsets, [](Bitset const& a, Bitset const& b) {
-            int diff = b.count() - a.count();
-            return diff != 0 ? diff < 0 : b < a;
-        });
+        std::ranges::sort(bitsets,
+                          [](Bitset const& a, Bitset const& b) { return a.count() > b.count(); });
         LOG_TRACE("Sorted");
 
         TreeSearch<Bitset> negative_search;
@@ -80,6 +78,7 @@ private:
     }
 
     std::vector<std::vector<DifferentialFunction>> Minimize(std::vector<Bitset> covers,
+                                                            std::vector<Bitset> cur_match_dfs,
                                                             std::size_t rhs_column,
                                                             std::size_t rhs_offset) {
         std::shared_ptr<TranslatingMinimizeTree<Bitset>> minimize_tree;
@@ -100,7 +99,7 @@ private:
         minimized_lhs.reserve(minimized_bitsets.size());
         for (auto const& bitset : minimized_bitsets) {
             // check if LHS is not trivial
-            if (std::ranges::any_of(match_dfs_, [&bitset](auto const& match_df) {
+            if (std::ranges::any_of(cur_match_dfs, [&bitset](auto const& match_df) {
                     return bitset.is_subset_of(match_df);
                 })) {
                 std::vector<DifferentialFunction> lhs;
@@ -275,43 +274,52 @@ public:
 
         for (std::size_t i = 0; i != dif_funcs_.size(); ++i) {
             for (std::size_t j = dif_funcs_[i].size(); j != 0; --j) {
-                boost::dynamic_bitset<> cur_bitset =
-                        dif_func_to_not_satisfied_bitsets_[dif_func_info_->dif_func_nums_[i] + j -
-                                                           1];
-                if (cur_bitset.none()) {
+                std::size_t const dif_func_index = dif_func_info_->dif_func_nums_[i] + j - 1;
+                boost::dynamic_bitset<> not_satisfied_bitset =
+                        dif_func_to_not_satisfied_bitsets_[dif_func_index];
+                boost::dynamic_bitset<> satisfied_bitset =
+                        dif_func_to_satisfied_bitsets_[dif_func_index];
+                if (not_satisfied_bitset.none() || satisfied_bitset.none()) {
                     continue;
                 }
-                std::vector<Bitset> cur_diff_bitsets;
-                cur_diff_bitsets.reserve(cur_bitset.count());
-                for (std::size_t index = cur_bitset.find_first();
-                     index != boost::dynamic_bitset<>::npos; index = cur_bitset.find_next(index)) {
+                std::vector<Bitset> not_satisfied_diff_bitsets;
+                not_satisfied_diff_bitsets.reserve(not_satisfied_bitset.count());
+                std::vector<Bitset> satisfied_diff_bitsets;
+                satisfied_diff_bitsets.reserve(satisfied_bitset.count());
+                for (std::size_t index = 0; index != match_dfs_.size(); ++index) {
                     Bitset diff_bitset = match_dfs_[index];
                     for (std::size_t k = dif_func_info_->dif_func_nums_[i];
                          k != dif_func_info_->dif_func_nums_[i + 1]; ++k) {
                         diff_bitset.set(k, false);
                     }
-                    cur_diff_bitsets.push_back(std::move(diff_bitset));
+                    if (not_satisfied_bitset[index]) {
+                        not_satisfied_diff_bitsets.push_back(std::move(diff_bitset));
+                    } else {
+                        satisfied_diff_bitsets.push_back(std::move(diff_bitset));
+                    }
                 }
                 LOG_DEBUG("Col {}; Dif_func {}; {}", i, j - 1, dif_funcs_[i][j - 1].ToString());
-                cur_diff_bitsets = MinimizeDifferentialSet(std::move(cur_diff_bitsets));
-                LOG_TRACE("Minimized differential set: {}", cur_diff_bitsets.size());
+                not_satisfied_diff_bitsets =
+                        MinimizeDifferentialSet(std::move(not_satisfied_diff_bitsets));
+                satisfied_diff_bitsets = MinimizeDifferentialSet(std::move(satisfied_diff_bitsets));
 
                 std::vector<Bitset> covers;
                 if constexpr (strategy_ == HittingSetEnumerationStrategy::EvidenceInverter) {
-                    EvidenceInverter<Bitset> inverter(std::move(cur_diff_bitsets),
+                    EvidenceInverter<Bitset> inverter(std::move(not_satisfied_diff_bitsets),
                                                       dif_func_info_->dif_func_num_,
                                                       column_to_dif_funcs_, i);
                     LOG_DEBUG("Built inverter");
                     covers = inverter.GetCovers();
                 } else {
-                    MMCS<Bitset> mmcs(std::move(cur_diff_bitsets), column_to_dif_funcs_, i);
+                    MMCS<Bitset> mmcs(std::move(not_satisfied_diff_bitsets), column_to_dif_funcs_,
+                                      i);
                     LOG_DEBUG("Built MMCS");
                     covers = mmcs.GetCovers();
                 }
                 LOG_DEBUG("Got covers: {}", covers.size());
 
                 std::vector<std::vector<DifferentialFunction>> minimized_covers =
-                        Minimize(std::move(covers), i, j - 1);
+                        Minimize(std::move(covers), std::move(satisfied_diff_bitsets), i, j - 1);
                 LOG_DEBUG("Minimized covers: {}", minimized_covers.size());
                 cur_result_size += minimized_covers.size();
                 cur_result.push_back(std::move(minimized_covers));
