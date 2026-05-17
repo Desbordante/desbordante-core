@@ -59,4 +59,17 @@ std::shared_ptr<SimilarityMetric> AbsoluteDifferenceMetric() {
             });
 }
 
+std::shared_ptr<SimilarityMetric> AbsoluteThresholdMetric(double diff) {
+    return std::make_shared<FunctionSimilarityMetric>(
+            [diff](std::string const& a, std::string const& b) {
+                try {
+                    double x = std::stod(a);
+                    double y = std::stod(b);
+                    return (std::abs(x - y) <= diff) ? 1.0 : 0.0;
+                } catch (...) {
+                    return 0.0;
+                }
+            });
+}
+
 }  // namespace algos::rfd
