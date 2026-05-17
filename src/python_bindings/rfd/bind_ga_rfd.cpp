@@ -36,6 +36,7 @@ void BindGaRfd(py::module_& main_module) {
     rfd_module.def("levenshtein_metric", &algos::rfd::LevenshteinMetric);
     rfd_module.def("equality_metric", &algos::rfd::EqualityMetric);
     rfd_module.def("abs_diff_metric", &algos::rfd::AbsoluteDifferenceMetric);
+    rfd_module.def("abs_threshold_metric", &algos::rfd::AbsoluteThresholdMetric);
 
     py::class_<RFD>(rfd_module, "RFD")
             .def(py::init<>())
