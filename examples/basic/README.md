@@ -15,6 +15,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_dd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_dd.py) — a scenario showing how to discover differential dependencies.
 + [mining_fd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_fd.py) — a scenario showing how to discover exact functional dependencies.
 + [mining_fd_approximate.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_fd_approximate.py) — a scenario showing how to discover exact functional dependencies using an approximate algorithm.
++ [mining_ga_rfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ga_rfd.py) — a scenario showing how to discover relaxed functional dependencies and detect errors using the GA-RFD algorithm.
 + [mining_gfd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_gfd) — scenarios showing how to discover graph functional dependencies.
 + [mining_ind.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ind.py) — a scenario showing how to discover inclusion dependencies.
 + [mining_list_od.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_list_od.py) — a scenario showing how to discover order dependencies based on list axiomatization.
