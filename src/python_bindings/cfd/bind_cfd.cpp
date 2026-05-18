@@ -18,15 +18,17 @@
 namespace py = pybind11;
 
 namespace {
+py::tuple MakeTableauTuple(algos::cfd::cfun::CCFD const& cfd) {
+    auto get_pattern_tuple = [](cfun::Condition const& cond) {
+        return py::make_tuple(python_bindings::VectorToTuple(cond.GetPattern()), cond.GetSupport());
+    };
+    return python_bindings::VectorToTuple(cfd.GetTableau(), std::move(get_pattern_tuple));
+}
+
 py::tuple MakeCfdTuple(algos::cfd::cfun::CCFD const& cfd) {
     auto [lhs, rhs] = cfd.GetEmbeddedFd().ToNameTuple();
-    auto get_pattern_tuple = [](algos::cfd::cfun::CCFD::Condition const& pattern) {
-        return python_bindings::VectorToTuple(pattern);
-    };
-    return py::make_tuple(
-            python_bindings::VectorToTuple(lhs), std::move(rhs),
-            python_bindings::VectorToTuple(cfd.GetTableau(), std::move(get_pattern_tuple)),
-            cfd.GetSupport());
+    return py::make_tuple(python_bindings::VectorToTuple(lhs), std::move(rhs),
+                          MakeTableauTuple(cfd), cfd.GetSupport());
 }
 }  // namespace
 
@@ -75,10 +77,36 @@ void BindFdFirst(py::module_& cfd_module) {
 
 void BindCfun(pybind11::module_& cfd_module) {
     using namespace algos::cfd::cfun;
-    auto cfdfinder_module = python_bindings::BindPrimitiveNoBase<CFUN>(cfd_module, "CFUN")
-                                    .def("get_cfds", &CFUN::GetCFDList);
+    auto cfun_module = python_bindings::BindPrimitiveNoBase<CFUN>(cfd_module, "CFUN")
+                               .def("get_cfds", &CFUN::GetCFDList);
 
-    py::class_<CCFD>(cfdfinder_module, "CCFD")
+    py::class_<CCFD::Condition>(cfun_module, "Condition")
+            .def_property_readonly("pattern", &CCFD::Condition::GetPattern)
+            .def_property_readonly("support", &CCFD::Condition::GetSupport)
+            .def(py::self == py::self)
+            .def("__hash__",
+                 [](CCFD::Condition const& cond) {
+                     return py::hash(py::make_tuple(
+                             python_bindings::VectorToTuple(cond.GetPattern()), cond.GetSupport()));
+                 })
+            .def(py::pickle(
+                    // __getstate__
+                    [](CCFD::Condition const& cond) {
+                        return py::make_tuple(python_bindings::VectorToTuple(cond.GetPattern()),
+                                              cond.GetSupport());
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 2) {
+                            throw std::runtime_error("Invalid state for Condition pickle!");
+                        }
+
+                        auto pattern = t[0].cast<std::vector<std::string>>();
+                        size_t support = t[1].cast<std::size_t>();
+                        return CCFD::Condition(std::move(pattern), support);
+                    }));
+
+    py::class_<CCFD>(cfun_module, "CCFD")
             .def("__str__", &CCFD::ToString)
             .def_property_readonly("embedded_fd", &CCFD::GetEmbeddedFd)
             .def_property_readonly("tableau", &CCFD::GetTableau)
@@ -94,22 +122,16 @@ void BindCfun(pybind11::module_& cfd_module) {
                                 embedded_fd.GetSchema().get());
                         auto lhs = table_serialization::SerializeVertical(embedded_fd.GetLhs());
                         auto rhs = table_serialization::SerializeColumn(embedded_fd.GetRhs());
-
                         auto embedded_fd_tuple =
                                 py::make_tuple(std::move(schema), std::move(lhs), std::move(rhs));
-                        auto get_pattern_tuple =
-                                [](algos::cfd::cfun::CCFD::Condition const& pattern) {
-                                    return python_bindings::VectorToTuple(pattern);
-                                };
-                        auto tableau_tuple = python_bindings::VectorToTuple(
-                                cfd.GetTableau(), std::move(get_pattern_tuple));
-                        return py::make_tuple(std::move(embedded_fd_tuple),
-                                              std::move(tableau_tuple), cfd.GetSupport());
+
+                        return py::make_tuple(std::move(embedded_fd_tuple), MakeTableauTuple(cfd),
+                                              cfd.GetSupport());
                     },
                     // __setstate__
                     [](py::tuple t) {
                         if (t.size() != 3) {
-                            throw std::runtime_error("Invalid state for CFD pickle!");
+                            throw std::runtime_error("Invalid state for CCFD pickle!");
                         }
 
                         auto embedded_fd_tuple = t[0].cast<py::tuple>();
@@ -132,10 +154,16 @@ void BindCfun(pybind11::module_& cfd_module) {
 
                         for (size_t i = 0; i < tableau_tuple.size(); ++i) {
                             auto condition_tuple = tableau_tuple[i].cast<py::tuple>();
-                            tableau.push_back(condition_tuple.cast<CCFD::Condition>());
+                            if (condition_tuple.size() != 2) {
+                                throw std::runtime_error("Invalid state for embedded FD pickle!");
+                            }
+                            auto pattern = condition_tuple[0].cast<std::vector<std::string>>();
+                            auto support = condition_tuple[1].cast<std::size_t>();
+
+                            tableau.emplace_back(std::move(pattern), support);
                         }
 
-                        auto support = t[2].cast<double>();
+                        auto support = t[2].cast<std::size_t>();
 
                         return CCFD(std::move(embedded_fd), std::move(tableau), support);
                     }));

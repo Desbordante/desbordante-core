@@ -8,6 +8,5 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::algos
             ${DESBORDANTE_PREFIX}::fd
             spdlog::spdlog_header_only
-            better-enums
             Boost::headers
 )

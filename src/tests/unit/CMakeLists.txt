@@ -104,7 +104,6 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
     Boost::headers
 )
 

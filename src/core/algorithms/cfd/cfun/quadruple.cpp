@@ -67,7 +67,7 @@ Quadruple Quadruple::Intersect(Quadruple const& other, size_t num_rows, size_t m
         }
     }
 
-    return {std::move(new_clusters), this->attribute_ | other.attribute_};
+    return Quadruple{std::move(new_clusters), this->attribute_ | other.attribute_};
 }
 
 bool Quadruple::HasSameBegin(Quadruple const& other) const noexcept {

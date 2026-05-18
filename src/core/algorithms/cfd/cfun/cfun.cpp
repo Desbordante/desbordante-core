@@ -1,11 +1,10 @@
-#include "core/algorithms/cfd/cfun/cfun.h"
-
 #include <algorithm>
 #include <chrono>
 #include <numeric>
 #include <ranges>
 
 #include "core/algorithms/cfd/cfun/attribute_utils.h"
+#include "core/algorithms/cfd/cfun/cfun.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -165,28 +164,30 @@ CCFD CFUN::DisplayCFD(Quadruple const& X, unsigned int num_col,
     auto lhs = X.GetAttributes();
     auto const& clusters = X.GetClusters();
 
+    std::size_t cfd_support = 0;
     CCFD::Tableau tableau;
     tableau.reserve(valid_cluster_id.size());
 
-    for (auto clusted_id : valid_cluster_id) {
-        CCFD::Condition condition;
-        condition.reserve(lhs.size() + 1);
+    std::ranges::transform(valid_cluster_id, std::back_inserter(tableau), [&](auto cluster_id) {
+        std::vector<std::string> pattern;
+        pattern.reserve(lhs.size() + 1);
 
-        unsigned int tuple_id = clusters[clusted_id].indices[0];
-        auto const& row = cfd_relation_->GetRow(tuple_id);
+        auto const& indices = clusters[cluster_id].indices;
+        cfd_support += indices.size();
+        auto const& row = cfd_relation_->GetRow(indices.front());
 
         util::ForEachIndex(
-                lhs, [&](auto attr) { condition.push_back(cfd_relation_->GetValue(row[attr])); });
-        condition.push_back(cfd_relation_->GetValue(row[num_col]));
-
-        tableau.push_back(std::move(condition));
-    }
+                lhs, [&](size_t attr) { pattern.push_back(cfd_relation_->GetValue(row[attr])); });
+        pattern.push_back(cfd_relation_->GetValue(row[num_col]));
+        return CCFD::Condition(std::move(pattern), indices.size());
+    });
 
     auto schema = cfd_relation_->GetSharedPtrSchema();
     Vertical lhs_v(schema.get(), std::move(lhs));
     Column rhs_c(schema.get(), schema->GetColumn(num_col)->GetName(), num_col);
 
-    return CCFD(std::move(lhs_v), std::move(rhs_c), std::move(tableau), std::move(schema));
+    return CCFD(std::move(lhs_v), std::move(rhs_c), std::move(tableau), cfd_support,
+                std::move(schema));
 }
 
 void CFUN::ComputeQuasiClosures(Level& current, Level const& last) const {

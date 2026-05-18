@@ -38,7 +38,8 @@ static void CheckEqualityExceptedCFDs(std::set<CFUNParams::Excepted_CFD> const& 
         auto embedded_fd = ccfd.GetEmbeddedFd().ToLongString();
 
         std::vector<std::string> patterns;
-        for (auto const& pattern : ccfd.GetTableau()) {
+        for (auto const& condition : ccfd.GetTableau()) {
+            auto const& pattern = condition.GetPattern();
             if (pattern.empty()) {
                 continue;
             }
