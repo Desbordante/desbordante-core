@@ -19,7 +19,7 @@ namespace py = pybind11;
 
 namespace {
 py::tuple MakeTableauTuple(algos::cfd::cfun::CCFD const& cfd) {
-    auto get_pattern_tuple = [](cfun::Condition const& cond) {
+    auto get_pattern_tuple = [](algos::cfd::cfun::Condition const& cond) {
         return py::make_tuple(python_bindings::VectorToTuple(cond.GetPattern()), cond.GetSupport());
     };
     return python_bindings::VectorToTuple(cfd.GetTableau(), std::move(get_pattern_tuple));

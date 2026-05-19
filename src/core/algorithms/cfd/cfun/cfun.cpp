@@ -1,10 +1,11 @@
+#include "core/algorithms/cfd/cfun/cfun.h"
+
 #include <algorithm>
 #include <chrono>
 #include <numeric>
 #include <ranges>
 
 #include "core/algorithms/cfd/cfun/attribute_utils.h"
-#include "core/algorithms/cfd/cfun/cfun.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
