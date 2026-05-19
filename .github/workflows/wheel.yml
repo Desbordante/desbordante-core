@@ -142,8 +142,9 @@ jobs:
         with:
           only: ${{ matrix.only }}
         env:
-          MACOSX_DEPLOYMENT_TARGET: 11.0
+          MACOSX_DEPLOYMENT_TARGET: 15.0
           CIBW_BEFORE_ALL_LINUX: >
+            yum install -y libicu-devel &&
             cd lib/boost &&
             ./bootstrap.sh --with-libraries=container,thread,graph &&
             ./b2 install -j4 --prefix=/usr &&
