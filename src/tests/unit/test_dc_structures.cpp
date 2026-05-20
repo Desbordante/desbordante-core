@@ -664,7 +664,7 @@ TEST(FastADCTest, TestDCCSVPredicateBuilding) {
     for (size_t i = 0; i < col_data.size(); ++i) {
         auto const& col = col_data[i];
         std::cout << "  Col[" << i << "]: name=" << col.GetColumn()->ToString()
-                  << "  typeId=" << col.GetTypeId()._to_string()
+                  << "  typeId=" << magic_enum::enum_name(col.GetTypeId())
                   << "  isNumeric=" << (col.IsNumeric() ? "yes" : "no")
                   << "  rows=" << col.GetNumRows() << "\n";
     }
@@ -720,6 +720,45 @@ TEST(HybridDCTest, AdultSuperTrimmed) {
     algo.Execute();
 
     std::cout << "HybridDC found " << algo.GetDCs().size() << " denial constraints\n";
+}
+
+TEST(HybridDCTest, TestDC2Exact) {
+    auto table_stream = std::make_shared<CSVParser>(kTestDC2);
+
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.0);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+
+    EXPECT_EQ(algo.GetDCs().size(), 603u);
+}
+
+TEST(HybridDCTest, TestDC2Approx) {
+    auto table_stream = std::make_shared<CSVParser>(kTestDC2);
+
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.01);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+
+    std::cout << "HybridDC(AEI, threshold=0.01) found " << algo.GetDCs().size()
+              << " denial constraints\n";
 }
 
 TEST(FastADCTest, AdultSuperTrimmedExact) {

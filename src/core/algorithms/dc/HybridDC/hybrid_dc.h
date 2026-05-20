@@ -21,6 +21,7 @@ private:
     bool allow_cross_columns_;
     double minimum_shared_value_;
     double comparable_threshold_;
+    double evidence_threshold_;
     unsigned threads_;
 
     config::InputTable input_table_;
