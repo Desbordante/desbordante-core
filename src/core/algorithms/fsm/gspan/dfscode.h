@@ -93,6 +93,10 @@ public:
         return rightmost_;
     }
 
+    size_t GetNumVertices() const {
+        return static_cast<size_t>(rightmost_ + 1);
+    }
+
     std::vector<int> const& GetRightMostPath() const {
         return rightmost_path_;
     }

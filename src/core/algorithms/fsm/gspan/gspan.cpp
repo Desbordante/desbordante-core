@@ -17,6 +17,21 @@ namespace algos {
 
 namespace {
 
+void BuildIsomFromHistory(HistoryNode const* leaf, size_t num_vertices,
+                          std::vector<vertex_t>& out_isom) {
+    out_isom.assign(num_vertices, (vertex_t)-1);
+
+    HistoryNode const* curr = leaf;
+    int current_dfs_id = num_vertices - 1;
+    while (curr != nullptr) {
+        if (curr->added_vertex != (vertex_t)-1) {
+            out_isom[current_dfs_id] = curr->added_vertex;
+            current_dfs_id--;
+        }
+        curr = curr->prev;
+    }
+}
+
 // Get all vertex descriptors having a given label (with bounds checking)
 std::vector<vertex_t> const& FindAllWithLabel(int target_label, graph_t const& graph) {
     return graph[boost::graph_bundle].label_to_vertices.at(target_label);
@@ -164,7 +179,7 @@ void GSpan::MineSubgraphs() {
     for (size_t i = 0; i < pruned_graphs_.size(); i++) {
         graph_t& graph = pruned_graphs_[i];
         if (boost::num_vertices(graph) != 0) {
-            embeddings.emplace_back(i, FlatIsoms{});
+            embeddings.push_back({(int)i, {}});
             PrecalculateLabelsToVertices(graph);
         } else {
             empty_graphs_removed_++;
@@ -275,6 +290,8 @@ void GSpan::GSpanDFS(gspan::DFSCode const& code, Projection embeddings) {
     LOG_TRACE("DFS step: pattern size={}, candidate graphs={}, patterns found={}", code.Size(),
               embeddings.size(), frequent_subgraphs_.size());
 
+    size_t pool_size_before_extensions = history_pool_.size();
+
     // If we have reached the maximum size, we do not need to extend this graph
     if (code.Size() == static_cast<size_t>(max_number_of_edges_)) {
         LOG_TRACE("Maximum pattern size reached, backtracking");
@@ -309,13 +326,16 @@ void GSpan::GSpanDFS(gspan::DFSCode const& code, Projection embeddings) {
             }
         }
     }
+    history_pool_.resize(pool_size_before_extensions);
 }
 
 template <class Emit>
 void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph,
-                                  FlatIsoms const& current_isoms, Emit&& emit) {
+                                  std::vector<HistoryNode const*> const& current_leaves,
+                                  Emit&& emit) {
     LOG_TRACE("Computing sgraph extensions: pattern size={}, vertices={}", code.Size(),
               boost::num_vertices(graph));
+
     if (code.Empty()) {
         LOG_TRACE("Empty pattern, collecting initial edges");
         for (auto edge : boost::make_iterator_range(boost::edges(graph))) {
@@ -326,32 +346,33 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph,
 
             if (l1 <= l2) {
                 ExtendedEdge ee(Vertex(0, l1), Vertex(1, l2), graph[edge].label);
-                vertex_t arr[2] = {v1, v2};
-                emit(ee, std::span<vertex_t const>{arr, 2}, nullptr);
+                emit(ee, nullptr, v1, v2);
             }
             if (l1 >= l2) {
                 ExtendedEdge ee(Vertex(0, l2), Vertex(1, l1), graph[edge].label);
-                vertex_t arr[2] = {v2, v1};
-                emit(ee, std::span<vertex_t const>{arr, 2}, nullptr);
+                emit(ee, nullptr, v2, v1);
             }
         }
     } else {
         auto rightmost = code.GetRightMost();
         size_t n = boost::num_vertices(graph);
         thread_local std::vector<int> inverted_isom;
+        thread_local std::vector<vertex_t> current_isom;
 
         if (inverted_isom.size() < n) {
             inverted_isom.resize(n, -1);
         }
 
-        LOG_TRACE("Found {} embeddings for extension", current_isoms.size());
-        for (auto isom : current_isoms) {
+        LOG_TRACE("Found {} embeddings for extension", current_leaves.size());
+        for (auto leaf : current_leaves) {
+            BuildIsomFromHistory(leaf, code.GetNumVertices(), current_isom);
+
             // Backward extensions from rightmost child
-            for (size_t dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
-                inverted_isom[isom[dfs_id]] = dfs_id;
+            for (size_t dfs_id = 0; dfs_id < current_isom.size(); ++dfs_id) {
+                inverted_isom[current_isom[dfs_id]] = dfs_id;
             }
 
-            auto mapped_rightmost = isom[rightmost];
+            auto mapped_rightmost = current_isom[rightmost];
             int mapped_rightmost_label = graph[mapped_rightmost].label;
             for (auto edge :
                  boost::make_iterator_range(boost::out_edges(mapped_rightmost, graph))) {
@@ -368,13 +389,13 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph,
                     int edge_label = graph[edge].label;
                     ExtendedEdge ee(Vertex(rightmost, mapped_rightmost_label),
                                     Vertex(inverted, graph[neighbor].label), edge_label);
-                    emit(ee, isom, nullptr);
+                    emit(ee, leaf, (vertex_t)-1, (vertex_t)-1);
                 }
             }
 
             // Forward extensions from nodes on rightmost path
             for (auto vertex : code.GetRightMostPath()) {
-                auto mapped_vertex = isom[vertex];
+                auto mapped_vertex = current_isom[vertex];
                 int mapped_vertex_label = graph[mapped_vertex].label;
                 for (auto edge :
                      boost::make_iterator_range(boost::out_edges(mapped_vertex, graph))) {
@@ -385,12 +406,12 @@ void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph,
                         int edge_label = graph[edge].label;
                         ExtendedEdge ee(Vertex(vertex, mapped_vertex_label),
                                         Vertex(rightmost + 1, graph[neighbor].label), edge_label);
-                        emit(ee, isom, &neighbor);
+                        emit(ee, leaf, neighbor, (vertex_t)-1);
                     }
                 }
             }
-            for (size_t dfs_id = 0; dfs_id < isom.size(); ++dfs_id) {
-                inverted_isom[isom[dfs_id]] = -1;
+            for (size_t dfs_id = 0; dfs_id < current_isom.size(); ++dfs_id) {
+                inverted_isom[current_isom[dfs_id]] = -1;
             }
         }
     }
@@ -404,37 +425,47 @@ projection_map_t GSpan::RightMostPathExtensions(DFSCode const& code, Projection 
         auto const& graph = pruned_graphs_[graph_id];
 
         EnumerateRightMostExtensions(
-                code, graph, proj.isoms,
-                [&](ExtendedEdge const& ee, std::span<vertex_t const> old_iso,
-                    vertex_t const* extra) {
-                    auto& entries = out[ee];
-                    if (entries.empty() || entries.back().graph_id != graph_id) {
-                        entries.push_back({graph_id, FlatIsoms{}});
+                code, graph, proj.history_leaves,
+                [&](ExtendedEdge const& ee, HistoryNode const* old_leaf, vertex_t v1, vertex_t v2) {
+                    HistoryNode const* new_leaf = old_leaf;
+                    if (v1 != (vertex_t)-1) {
+                        history_pool_.push_back(HistoryNode{new_leaf, v1});
+                        new_leaf = &history_pool_.back();
                     }
-                    if (extra) {
-                        entries.back().isoms.push_with_extra(old_iso, *extra);
-                    } else {
-                        entries.back().isoms.push(old_iso);
+                    if (v2 != (vertex_t)-1) {
+                        history_pool_.push_back(HistoryNode{new_leaf, v2});
+                        new_leaf = &history_pool_.back();
                     }
+
+                    auto& proj_entries = out[ee];
+                    if (proj_entries.empty() || proj_entries.back().graph_id != graph_id) {
+                        proj_entries.push_back({graph_id});
+                    }
+                    proj_entries.back().history_leaves.push_back(new_leaf);
                 });
     }
-
     return out;
 }
 
-boost::unordered_flat_map<ExtendedEdge, FlatIsoms, ExtendedEdge::Hash>
+boost::unordered_flat_map<ExtendedEdge, std::vector<HistoryNode const*>, ExtendedEdge::Hash>
 GSpan::RightMostPathExtensionsFromSingle(DFSCode const& code, graph_t const& graph,
-                                         FlatIsoms const& current_isoms) {
-    boost::unordered_flat_map<ExtendedEdge, FlatIsoms, ExtendedEdge::Hash> out;
+                                         std::vector<HistoryNode const*> const& current_leaves) {
+    boost::unordered_flat_map<ExtendedEdge, std::vector<HistoryNode const*>, ExtendedEdge::Hash>
+            out;
 
     EnumerateRightMostExtensions(
-            code, graph, current_isoms,
-            [&](ExtendedEdge const& ee, std::span<vertex_t const> old_iso, vertex_t const* extra) {
-                if (extra) {
-                    out[ee].push_with_extra(old_iso, *extra);
-                } else {
-                    out[ee].push(old_iso);
+            code, graph, current_leaves,
+            [&](ExtendedEdge const& ee, HistoryNode const* old_leaf, vertex_t v1, vertex_t v2) {
+                HistoryNode const* new_leaf = old_leaf;
+                if (v1 != (vertex_t)-1) {
+                    history_pool_.push_back(HistoryNode{new_leaf, v1});
+                    new_leaf = &history_pool_.back();
                 }
+                if (v2 != (vertex_t)-1) {
+                    history_pool_.push_back(HistoryNode{new_leaf, v2});
+                    new_leaf = &history_pool_.back();
+                }
+                out[ee].push_back(new_leaf);
             });
 
     return out;
@@ -444,12 +475,15 @@ bool GSpan::IsCanonical(DFSCode const& code) {
     LOG_TRACE("Checking canonicity: pattern size={}", code.Size());
     DFSCode canon;
     graph_t canon_graph = CreateGraphFromDFSCode(code);
-    FlatIsoms isoms;
+    std::vector<HistoryNode const*> isoms;
+
+    size_t initial_pool_size = history_pool_.size();
 
     for (size_t i = 0; i < code.Size(); i++) {
         auto extensions = RightMostPathExtensionsFromSingle(canon, canon_graph, isoms);
 
         if (extensions.empty()) {
+            history_pool_.resize(initial_pool_size);
             return false;
         }
 
@@ -460,6 +494,7 @@ bool GSpan::IsCanonical(DFSCode const& code) {
 
         if (min_ee.SmallerThan(code[i])) {
             LOG_TRACE("Non-canonical at edge {}", i);
+            history_pool_.resize(initial_pool_size);
             return false;
         }
 
@@ -468,6 +503,7 @@ bool GSpan::IsCanonical(DFSCode const& code) {
     }
 
     LOG_TRACE("Pattern is canonical");
+    history_pool_.resize(initial_pool_size);
     return true;
 }
 

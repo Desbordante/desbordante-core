@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <deque>
 #include <vector>
 
 #include <boost/unordered/unordered_flat_map.hpp>
@@ -15,6 +16,8 @@
 namespace algos {
 class GSpan : public Algorithm {
 protected:
+    std::deque<gspan::HistoryNode> history_pool_;
+
     // The minimum support represented as a count (number of subgraph occurrences)
     int min_sup_;
 
@@ -47,8 +50,10 @@ protected:
     gspan::projection_map_t RightMostPathExtensions(gspan::DFSCode const& code,
                                                     gspan::Projection const& embeddings);
 
-    boost::unordered_flat_map<gspan::ExtendedEdge, gspan::FlatIsoms, gspan::ExtendedEdge::Hash>
-    RightMostPathExtensionsFromSingle(gspan::DFSCode const& code, gspan::graph_t const& graph, gspan::FlatIsoms const& current_isoms);
+    boost::unordered_flat_map<gspan::ExtendedEdge, std::vector<gspan::HistoryNode const*>,
+                              gspan::ExtendedEdge::Hash>
+    RightMostPathExtensionsFromSingle(gspan::DFSCode const& code, gspan::graph_t const& graph,
+                                      std::vector<gspan::HistoryNode const*> const& current_leaves);
 
     bool IsCanonical(gspan::DFSCode const& code);
 
