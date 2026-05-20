@@ -10,6 +10,7 @@
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
+#include "core/algorithms/dc/FastADC/util/approximate_evidence_inverter.h"
 #include "core/algorithms/dc/HybridDC/hei_inverter.h"
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
@@ -38,6 +39,7 @@ void HybridDC::RegisterOptions() {
     RegisterOption(Option{&minimum_shared_value_, kMinimumSharedValue, kDMinimumSharedValue, 0.3});
     RegisterOption(
             Option{&comparable_threshold_, kComparableThreshold, kDComparableThreshold, 0.1});
+    RegisterOption(Option{&evidence_threshold_, kEvidenceThreshold, kDEvidenceThreshold, 0.0});
     RegisterOption(Option{&threads_, kThreads, kDThreads, 1U});
 }
 
@@ -45,7 +47,7 @@ void HybridDC::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
     MakeOptionsAvailable({kShardLength, kAllowCrossColumns, kMinimumSharedValue,
-                          kComparableThreshold, kThreads});
+                          kComparableThreshold, kEvidenceThreshold, kThreads});
 }
 
 util::WorkerThreadPool* HybridDC::GetThreadPool() {
@@ -89,13 +91,13 @@ void HybridDC::CheckTypes() {
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
         model::TypeId type_id = column.GetTypeId();
 
-        if (type_id == +model::TypeId::kMixed) {
+        if (type_id == model::TypeId::kMixed) {
             LOG_WARN(
                     "Column with index \"{}\" contains values of different types. Those values "
                     "will be "
                     "treated as strings.",
                     column_index);
-        } else if (!column.IsNumeric() && type_id != +model::TypeId::kString) {
+        } else if (!column.IsNumeric() && type_id != model::TypeId::kString) {
             throw std::invalid_argument(
                     "Column with index \"" + std::to_string(column_index) +
                     "\" is of unsupported type. Only numeric and string types are supported.");
@@ -166,14 +168,20 @@ unsigned long long HybridDC::ExecuteInternal() {
         }
     }
 
-    size_t n_predicates = predicate_builder.PredicateCount();
-    auto mutex_map = predicate_builder.TakeMutexMap();
-
     auto const inv_start = std::chrono::system_clock::now();
 
-    HEIInverter hei_inverter(n_predicates, mutex_map, pred_index_provider_,
-                              typed_relation_->GetSharedPtrSchema(), threads_);
-    dcs_ = hei_inverter.Run(evidence_set_builder.evidence_set);
+    if (evidence_threshold_ == 0.0) {
+        size_t n_predicates = predicate_builder.PredicateCount();
+        auto mutex_map = predicate_builder.TakeMutexMap();
+        HEIInverter hei_inverter(n_predicates, mutex_map, pred_index_provider_,
+                                  typed_relation_->GetSharedPtrSchema(), threads_);
+        dcs_ = hei_inverter.Run(evidence_set_builder.evidence_set);
+    } else {
+        ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
+                                         std::move(evidence_set_builder.evidence_set),
+                                         typed_relation_->GetSharedPtrSchema());
+        dcs_ = dcbuilder.BuildDenialConstraints().ObtainResult();
+    }
 
     auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - inv_start).count();
