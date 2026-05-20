@@ -65,10 +65,6 @@ public:
         return frequent_subgraphs_;
     }
 
-    std::vector<gspan::graph_t> const& GetGraphDatabase() const {
-        return raw_dataset_;
-    }
-
     int GetMinSup() const {
         return min_sup_;
     }
