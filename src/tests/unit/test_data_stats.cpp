@@ -10,7 +10,7 @@ namespace tests {
 namespace mo = model;
 
 // to run tests:
-// ./Desbordante_test --gtest_filter="*TestDataStats*"
+// ctest --test-dir build --tests-regex="^TestDataStats\..*"
 
 static algos::StdParamsMap GetParamMap(CSVConfig const &csv_config,
                                        bool const is_null_equal_null = true,
