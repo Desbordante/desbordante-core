@@ -178,7 +178,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::fem::maxfem
     ${DESBORDANTE_PREFIX}::bindlib::util
-    better-enums
+    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
