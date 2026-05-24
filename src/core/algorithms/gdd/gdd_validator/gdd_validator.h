@@ -18,7 +18,6 @@ private:
     std::vector<model::Gdd> result_;
     std::vector<GddCounterexample> counterexamples_;
 
-    void FilterValidGdds();
     void RegisterOptions();
 
     virtual void ExecuteInternal() final;

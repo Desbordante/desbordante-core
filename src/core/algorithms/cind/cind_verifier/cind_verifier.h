@@ -54,8 +54,6 @@ private:
     void LoadDataInternal() final;
     void ExecuteInternal() final;
 
-    void VerifyCIND();
-
 public:
     CINDVerifier();
 

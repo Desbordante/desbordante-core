@@ -49,10 +49,6 @@ void MaxFEM::MakeExecuteOptsAvailable() {
 void MaxFEM::ResetState() {}
 
 void MaxFEM::ExecuteInternal() {
-    FindFrequentEpisodes();
-}
-
-void MaxFEM::FindFrequentEpisodes() {
     LOG_DEBUG("Min support: {}. Window length: {}", min_support_, window_length_);
     LOG_DEBUG("Threads num: {}", threads_num_);
     LOG_DEBUG("Sequence length: {}", event_sequence_->Size());

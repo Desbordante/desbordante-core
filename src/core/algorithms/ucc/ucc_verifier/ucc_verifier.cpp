@@ -44,7 +44,9 @@ void UCCVerifier::LoadDataInternal() {
 }
 
 void UCCVerifier::ExecuteInternal() {
-    VerifyUCC();
+    std::shared_ptr<model::PLI const> pli = CalculatePLI();
+    stats_calculator_ = std::make_unique<UCCStatsCalculator>(relation_);
+    stats_calculator_->CalculateStatistics(pli->GetIndex());
 }
 
 std::shared_ptr<model::PLI const> UCCVerifier::CalculatePLI() {
@@ -54,12 +56,6 @@ std::shared_ptr<model::PLI const> UCCVerifier::CalculatePLI() {
         pli = pli->Intersect(relation_->GetColumnData(column_indices_[i]).GetPositionListIndex());
     }
     return pli;
-}
-
-void UCCVerifier::VerifyUCC() {
-    std::shared_ptr<model::PLI const> pli = CalculatePLI();
-    stats_calculator_ = std::make_unique<UCCStatsCalculator>(relation_);
-    stats_calculator_->CalculateStatistics(pli->GetIndex());
 }
 
 }  // namespace algos
