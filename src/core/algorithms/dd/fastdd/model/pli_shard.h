@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "core/algorithms/dd/fastdd/providers/index_provider.h"
+#include "core/algorithms/dd/fastdd/util/index_provider.h"
 #include "core/model/table/tuple_index.h"
 #include "core/model/table/typed_column_data.h"
 #include "core/model/types/type.h"

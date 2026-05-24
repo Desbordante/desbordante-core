@@ -51,7 +51,6 @@ private:
     std::vector<std::vector<DifferentialFunction>> differential_functions_;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    unsigned num_rows_;
     model::ColumnIndex num_columns_;
 
     std::vector<std::vector<ThresholdInfo>> thresholds_;
@@ -68,9 +67,9 @@ private:
 
 public:
     DifferentialFunctionBuilder(
-            std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation, unsigned num_rows,
+            std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
             model::ColumnIndex num_columns)
-        : typed_relation_(typed_relation), num_rows_(num_rows), num_columns_(num_columns) {}
+        : typed_relation_(typed_relation), num_columns_(num_columns) {}
 
     void BuildDFList(std::vector<std::vector<model::DFConstraint>> const& thresholds,
                      std::vector<model::DFConstraint> const& min_max_dif = {});

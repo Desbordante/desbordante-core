@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <unordered_set>
 
-#include "core/algorithms/dd/fastdd/providers/index_provider.h"
+#include "core/algorithms/dd/fastdd/util/index_provider.h"
 #include "core/model/table/column_index.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/type.h"

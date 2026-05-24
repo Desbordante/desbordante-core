@@ -55,7 +55,6 @@ public:
             std::byte const* first_value = column.GetValue(tuple_pair.first);
             std::byte const* second_value = column.GetValue(tuple_pair.second);
             if (column.GetTypeId() == model::TypeId::kString) {
-                auto const& type = column.GetType();
                 auto first_ptr = &model::Type::GetValue<model::String>(first_value);
                 auto second_ptr = &model::Type::GetValue<model::String>(second_value);
                 std::size_t const max_dist = std::max(first_ptr->size(), second_ptr->size());
