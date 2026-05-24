@@ -38,7 +38,6 @@ void Faida::LoadINDAlgorithmDataInternal() {
     auto const prep_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     prepr_time_ = prep_milliseconds.count();
-    LOG_DEBUG("Preprocessing time: {}", prepr_time_);
 }
 
 void Faida::ResetINDAlgorithmState() {
@@ -100,7 +99,6 @@ std::vector<std::shared_ptr<faida::SimpleCC>> Faida::ExtractCCs(
 }
 
 void Faida::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
     size_t level_num = 0;
 
     inclusion_tester_ = std::make_unique<faida::CombinedInclusionTester>(
@@ -137,16 +135,8 @@ void Faida::ExecuteInternal() {
         LOG_DEBUG("Found {} INDs on level {}", last_result.size(), level_num);
     }
 
-    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    unsigned long long const millis = elapsed_milliseconds.count();
-
     LOG_DEBUG("\nCertain checks:\t{}", inclusion_tester_->GetNumCertainChecks());
     LOG_DEBUG("Uncertain checks:\t{}", inclusion_tester_->GetNumUncertainChecks());
-    LOG_DEBUG("\nOverall time\t{}", millis + prepr_time_);
-    LOG_DEBUG("Time (without preprocessing):\t{}", millis);
-    LOG_DEBUG("\tInserting:\t{}", insert_time_);
-    LOG_DEBUG("\tChecking:\t{}", check_time_);
     LOG_DEBUG("\nIND count:\t{}", INDList().size());
 }
 
@@ -184,7 +174,6 @@ void Faida::InsertRows(faida::IInclusionTester::ActiveColumns const& active_colu
             std::chrono::system_clock::now() - start_time);
     size_t const millis = elapsed_milliseconds.count();
     insert_time_ += millis;
-    LOG_DEBUG("Insert rows time:\t{}", millis);
 }
 
 std::vector<faida::SimpleIND> Faida::TestCandidates(std::vector<SimpleIND> const& candidates) {
@@ -201,7 +190,6 @@ std::vector<faida::SimpleIND> Faida::TestCandidates(std::vector<SimpleIND> const
             std::chrono::system_clock::now() - start_time);
     size_t const millis = elapsed_milliseconds.count();
     check_time_ += millis;
-    LOG_DEBUG("Candidates check time:\t{}", millis);
     return result;
 }
 

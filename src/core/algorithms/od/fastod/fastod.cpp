@@ -87,8 +87,7 @@ void Fastod::PrintStatistics() const {
     size_t const fd_count = result_simple_.size();
     size_t const od_count = ocd_count + fd_count;
 
-    LOG_DEBUG("RESULT: Time={}, OD={}, FD={}, OCD={}", timer_.GetElapsedSeconds(), od_count,
-              fd_count, ocd_count);
+    LOG_DEBUG("RESULT: OD={}, FD={}, OCD={}", od_count, fd_count, ocd_count);
 }
 
 bool Fastod::IsComplete() const {

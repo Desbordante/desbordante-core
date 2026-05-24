@@ -9,7 +9,6 @@
 #include "core/model/transaction/input_format_type.h"
 #include "core/util/enum_to_str.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::ar_verifier {
 ARVerifier::ARVerifier() {
@@ -83,13 +82,9 @@ void ARVerifier::ExecuteInternal() {
     LOG_DEBUG("\tARule to verify: {}",
               ::model::ARStrings(ar_ids_, transactional_data_.get()).ToString());
 
-    auto const verification_time = ::util::TimedInvoke(&ARVerifier::VerifyAR, this);
+    VerifyAR();
 
-    LOG_DEBUG("AR verification took {} ms", std::to_string(verification_time));
-
-    auto const stats_calculation_time = ::util::TimedInvoke(&ARVerifier::CalculateStatistics, this);
-
-    LOG_DEBUG("Statistics calculation took {} ms", std::to_string(stats_calculation_time));
+    CalculateStatistics();
 }
 
 void ARVerifier::VerifyAR() {

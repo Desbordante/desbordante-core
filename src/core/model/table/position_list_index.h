@@ -43,7 +43,6 @@ private:
 
 public:
     static int intersection_count_;
-    static unsigned long long micros_;
     static int const kSingletonValueId;
 
     PositionListIndex(std::deque<Cluster> index, unsigned int size, double entropy,
