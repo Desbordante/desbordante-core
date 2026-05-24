@@ -27,15 +27,6 @@ class CindAlgorithm;
 /// \note modification(2): algorithm mines AINDs (unary)
 ///
 class Spider final : public INDAlgorithm {
-public:
-    /// timing information for algorithm stages
-    struct StageTimings {
-        size_t load;    /**< time taken for the data loading */
-        size_t compute; /**< time taken for the inds computing */
-        size_t total;   /**< total time taken for all stages */
-    };
-
-private:
     /* configuration stage fields */
     config::EqNullsType is_null_equal_null_;
     config::ThreadNumType threads_num_;
@@ -44,7 +35,6 @@ private:
 
     /* execution stage fields */
     std::vector<model::ColumnDomain> domains_; /*< loaded data */
-    StageTimings timings_;                     /*< timings info */
 
     void MakeLoadOptsAvailable();
     void LoadINDAlgorithmDataInternal() final;
@@ -55,15 +45,11 @@ private:
     void MineAINDs();
 
     void ExecuteInternal() final;
-    void ResetINDAlgorithmState() final;
+
+    void ResetINDAlgorithmState() final {}
 
 public:
     explicit Spider();
-
-    /// get information about stage timings
-    StageTimings const& GetStageTimings() const noexcept {
-        return timings_;
-    }
 
 private:
     friend class cind::CindAlgorithm;

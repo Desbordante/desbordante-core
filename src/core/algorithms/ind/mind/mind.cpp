@@ -18,7 +18,6 @@
 #include "core/model/table/column_combination.h"
 #include "core/model/table/dataset_stream_fixed.h"
 #include "core/model/table/dataset_stream_projection.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos {
 
@@ -59,7 +58,7 @@ bool Mind::ExternalOptionIsRequired(std::string_view option_name) const {
 }
 
 void Mind::LoadINDAlgorithmDataInternal() {
-    timings_.load = util::TimedInvoke(&Algorithm::LoadData, auind_algo_);
+    auind_algo_->LoadData();
 }
 
 void Mind::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
@@ -271,13 +270,8 @@ void Mind::MineNaryINDs() {
 }
 
 void Mind::ExecuteInternal() {
-    timings_.compute_uinds = util::TimedInvoke(&Mind::MineUnaryINDs, this);
-    timings_.compute_ninds = util::TimedInvoke(&Mind::MineNaryINDs, this);
-}
-
-void Mind::ResetINDAlgorithmState() {
-    timings_.compute_uinds = 0;
-    timings_.compute_ninds = 0;
+    MineUnaryINDs();
+    MineNaryINDs();
 }
 
 }  // namespace algos

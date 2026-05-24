@@ -35,7 +35,7 @@ public:
     CindMiner(config::InputTables& input_tables);
     virtual ~CindMiner() = default;
 
-    unsigned long long Execute(std::list<model::IND> const& aind_list);
+    void Execute(std::list<model::IND> const& aind_list);
 
     std::list<CIND> const& CINDList() const noexcept {
         return cind_collection_.AsList();
