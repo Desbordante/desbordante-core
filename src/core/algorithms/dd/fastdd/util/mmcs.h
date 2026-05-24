@@ -22,14 +22,14 @@ private:
 
     std::vector<Edge> column_to_dif_funcs_;
 
-    void UpdateCritAndUncov(std::vector<std::vector<Edgemark>>& removed_criticals_stack,
+    void UpdateCritAndUncov(std::vector<std::vector<Edgemark>>& removed_critical_stack,
                             std::vector<Edgemark>& crit, Edgemark& uncov,
                             Edgemark const& v_hittings) const {
         // update crit[] for vertices in S and put changes on stack
 
-        removed_criticals_stack.push_back(crit);
+        removed_critical_stack.push_back(crit);
 
-        std::ranges::for_each(removed_criticals_stack.back(),
+        std::ranges::for_each(removed_critical_stack.back(),
                               [&v_hittings](Edgemark& edgemark) { edgemark -= v_hittings; });
         std::ranges::for_each(crit, [&v_hittings](Edgemark& edgemark) { edgemark &= v_hittings; });
 
@@ -39,16 +39,16 @@ private:
         uncov &= v_hittings;
     }
 
-    void RestoreCritAndUncov(std::vector<std::vector<Edgemark>>& removed_criticals_stack,
+    void RestoreCritAndUncov(std::vector<std::vector<Edgemark>>& removed_critical_stack,
                              std::vector<Edgemark>& crit, Edgemark& uncov) const {
         uncov |= crit.back();
         crit.pop_back();
 
         for (std::size_t i = 0; i < crit.size(); ++i) {
-            crit[i] |= removed_criticals_stack.back()[i];
+            crit[i] |= removed_critical_stack.back()[i];
         }
 
-        removed_criticals_stack.pop_back();
+        removed_critical_stack.pop_back();
     }
 
     bool VertexWouldViolate(std::vector<Edgemark> const& crit, Edgemark const& v_hittings) const {
@@ -63,9 +63,9 @@ private:
 
     void ExtendOrConfirmS(Edge& s, Edge& cand, std::vector<Edgemark>& crit, Edgemark& uncov,
                           std::vector<Edgemark>& vertex_hittings,
-                          std::vector<std::vector<Edgemark>>& removed_criticals_stack,
+                          std::vector<std::vector<Edgemark>>& removed_critical_stack,
                           std::vector<Edge>& result) const {
-        // find edge from uncov with smallest intersecton C with CAND
+        // find edge from uncov with smallest intersection C with CAND
         Edge c = cand;
         c -= hypergraph_[uncov.find_first()];
         for (std::size_t i_e = uncov.find_next(uncov.find_first()); i_e != Edgemark::npos;
@@ -94,19 +94,19 @@ private:
                     }
 
                     // branch
-                    UpdateCritAndUncov(removed_criticals_stack, crit, uncov, vertex_hittings[v]);
+                    UpdateCritAndUncov(removed_critical_stack, crit, uncov, vertex_hittings[v]);
 
                     s.set(v);
                     if (uncov.none()) {
                         result.push_back(s);
                     } else if (!cand.none()) {
                         ExtendOrConfirmS(s, cand, crit, uncov, vertex_hittings,
-                                         removed_criticals_stack, result);
+                                         removed_critical_stack, result);
                     }
                     // update CAND
                     cand.set(v);
                     s.reset(v);
-                    RestoreCritAndUncov(removed_criticals_stack, crit, uncov);
+                    RestoreCritAndUncov(removed_critical_stack, crit, uncov);
                 }
             }
         }
@@ -151,10 +151,10 @@ public:
             }
         }
 
-        std::vector<std::vector<Edgemark>> removed_criticals_stack;
+        std::vector<std::vector<Edgemark>> removed_critical_stack;
         std::vector<Edge> result;
 
-        ExtendOrConfirmS(s, cand, crit, uncov, vertex_hittings, removed_criticals_stack, result);
+        ExtendOrConfirmS(s, cand, crit, uncov, vertex_hittings, removed_critical_stack, result);
 
         return result;
     }

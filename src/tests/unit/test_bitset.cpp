@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "core/model/types/bitset.h"
+#include "core/util/logger.h"
 
 namespace tests {
 

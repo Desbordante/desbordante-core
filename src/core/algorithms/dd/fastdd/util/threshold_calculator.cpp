@@ -22,10 +22,7 @@ ThresholdCalculator::ThresholdCalculator(
         std::shared_ptr<model::ColumnLayoutTypedRelationData> const& difference_typed_relation,
         std::shared_ptr<DistanceCalculator> distance_calculator, unsigned num_rows,
         model::ColumnIndex num_columns)
-    : distance_calculator_(distance_calculator),
-      thresholds_(num_columns),
-      num_rows_(num_rows),
-      num_columns_(num_columns) {
+    : distance_calculator_(distance_calculator), thresholds_(num_columns), num_rows_(num_rows) {
     if (difference_typed_relation) {
         for (model::ColumnIndex column_index = 0; column_index != num_columns; ++column_index) {
             GetThresholds(difference_typed_relation->GetColumnData(column_index), column_index);

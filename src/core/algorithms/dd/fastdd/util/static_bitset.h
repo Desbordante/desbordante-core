@@ -128,7 +128,7 @@ inline StaticBitset<N> operator-(StaticBitset<N> const& left, StaticBitset<N> co
 
 template <std::size_t Size>
 inline bool operator<(StaticBitset<Size> const& left, StaticBitset<Size> const& right) {
-    assert(left_.size() == right.size());
+    assert(left.size() == right.size());
 
     return left.static_bitset_ < right.static_bitset_;
 }

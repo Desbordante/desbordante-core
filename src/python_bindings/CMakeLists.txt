@@ -132,6 +132,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::dd::fastdd
     ${DESBORDANTE_PREFIX}::dd::split
     magic_enum::magic_enum
+    spdlog::spdlog_header_only
     Boost::headers
 )
 

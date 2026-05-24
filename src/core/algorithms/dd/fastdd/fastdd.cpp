@@ -138,7 +138,7 @@ unsigned long long FastDD::ExecuteInternal() {
     LOG_INFO("Built PLIs");
     LOG_DEBUG("Number of PLI shards: {}", pli_shards.size());
 
-    DifferentialFunctionBuilder df_builder(typed_relation_, num_rows_, num_columns_);
+    DifferentialFunctionBuilder df_builder(typed_relation_, num_columns_);
     df_builder.BuildDFList(thresholds);
     LOG_INFO("Built DF set");
     LOG_INFO("Initial search space size: {}", df_builder.GetDifFuncNum());

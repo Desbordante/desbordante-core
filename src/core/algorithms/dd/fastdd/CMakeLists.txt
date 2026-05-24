@@ -2,11 +2,8 @@ set(NAME dd.fastdd.structs)
 desbordante_add_lib(NAME OBJECT)
 target_sources(
     ${NAME}
-    PRIVATE model/pli_shard.cpp
-            trees/translating_tree_search.cpp
-            util/differential_function_builder.cpp
-            util/isn_info.cpp
-            util/threshold_calculator.cpp
+    PRIVATE model/pli_shard.cpp trees/translating_tree_search.cpp
+            util/differential_function_builder.cpp util/isn_info.cpp util/threshold_calculator.cpp
 )
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers)

@@ -50,7 +50,7 @@ private:
     void RunAlgo(DifferentialFunctionBuilder& df_builder,
                  std::shared_ptr<DistanceCalculator> const& distance_calculator,
                  std::vector<PliShard> pli_shards,
-                 std::chrono::_V2::system_clock::time_point start_time) {
+                 std::chrono::system_clock::time_point start_time) {
         DiffSetBuilder<Bitset> diff_set_builder(df_builder, distance_calculator);
         diff_set_builder.BuildDiffSet(std::move(pli_shards));
         DiffSet<Bitset> diff_set = diff_set_builder.GetDiffSet();

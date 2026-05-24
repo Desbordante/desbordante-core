@@ -17,7 +17,6 @@ private:
 
     std::vector<std::vector<model::DFConstraint>> thresholds_;
     unsigned num_rows_;
-    model::ColumnIndex num_columns_;
 
     void GetThresholds(model::TypedColumnData const& dif_column, model::ColumnIndex column_index);
     std::vector<std::size_t> SampleRows(std::size_t row_limit) const;
