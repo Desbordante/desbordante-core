@@ -21,7 +21,6 @@
 namespace model {
 
 int const PositionListIndex::kSingletonValueId = 0;
-unsigned long long PositionListIndex::micros_ = 0;
 int PositionListIndex::intersection_count_ = 0;
 
 PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigned int size,

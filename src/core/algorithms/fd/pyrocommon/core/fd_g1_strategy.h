@@ -13,8 +13,6 @@ private:
     model::ConfidenceInterval CalculateG1(model::ConfidenceInterval const& num_violations) const;
 
 public:
-    static unsigned long long nanos_;
-
     FdG1Strategy(Column const* rhs, double max_error, double deviation)
         : DependencyStrategy(max_error, deviation), rhs_(rhs) {}
 

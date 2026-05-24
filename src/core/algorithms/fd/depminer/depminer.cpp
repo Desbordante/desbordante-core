@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/depminer/depminer.h"
 
-#include <chrono>
 #include <list>
 #include <memory>
 
@@ -25,21 +24,15 @@ void Depminer::ExecuteInternal() {
     std::vector<CMAXSet> const c_max_cets = GenerateCmaxSets(agree_sets);
 
     // LHS
-    auto const lhs_time = std::chrono::system_clock::now();
     // 1
     for (auto const& column : schema_->GetColumns()) {
         LhsForColumn(column, c_max_cets);
     }
 
-    auto const lhs_elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - lhs_time);
-    LOG_INFO("> LHS FIND TIME: {}", lhs_elapsed_milliseconds.count());
     LOG_INFO("> FD COUNT: {}", this->fd_collection_.Size());
 }
 
 std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets) {
-    auto const start_time = std::chrono::system_clock::now();
-
     std::vector<CMAXSet> c_max_cets;
 
     for (auto const& column : this->schema_->GetColumns()) {
@@ -86,9 +79,6 @@ std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> con
         c_max_cets.push_back(result);
     }
 
-    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_INFO("> CMAX GENERATION TIME: {}", elapsed_milliseconds.count());
     LOG_INFO("> CMAX SETS COUNT: {}", c_max_cets.size());
 
     return c_max_cets;

@@ -1,6 +1,5 @@
 #include "core/algorithms/ucc/pyroucc/pyroucc.h"
 
-#include <chrono>
 #include <mutex>
 #include <thread>
 
@@ -48,8 +47,6 @@ void PyroUCC::ResetUCCAlgorithmState() {
 }
 
 void PyroUCC::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
     auto schema = relation_->GetSchema();
 
     auto profiling_context = std::make_unique<ProfilingContext>(
@@ -73,22 +70,10 @@ void PyroUCC::ExecuteInternal() {
         throw std::runtime_error("Unknown key error measure.");
     }
     search_space_ = std::make_unique<SearchSpace>(0, std::move(strategy), schema, launch_pad_order);
-    unsigned long long init_time_millis = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                                  std::chrono::system_clock::now() - start_time)
-                                                  .count();
-
-    start_time = std::chrono::system_clock::now();
 
     search_space_->SetContext(profiling_context.get());
     search_space_->EnsureInitialized();
     search_space_->Discover();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-
-    LOG_INFO("Init time: {} ms", init_time_millis);
-    LOG_INFO("Time: {}  milliseconds", elapsed_milliseconds.count());
-    LOG_INFO("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
 }
 
 }  // namespace algos
