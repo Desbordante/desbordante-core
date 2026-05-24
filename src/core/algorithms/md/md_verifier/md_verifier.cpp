@@ -96,10 +96,6 @@ void MDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kRightTable, kLeftTable, kMDLHS, kMDRHS, kThreads});
 }
 
-void MDVerifier::ExecuteInternal() {
-    VerifyMD();
-}
-
 model::MD MDVerifier::BuildMD(std::vector<ColumnSimilarityClassifier> const& lhs,
                               ColumnSimilarityClassifier const& rhs) {
     auto column_matches = std::make_shared<std::vector<model::md::ColumnMatch>>();
@@ -151,7 +147,7 @@ MDValidationCalculator MDVerifier::CreateValidator() const {
     return validator;
 }
 
-void MDVerifier::VerifyMD() {
+void MDVerifier::ExecuteInternal() {
     input_md_ = BuildMD(lhs_, rhs_);
     highlights_ = std::make_shared<MDHighlights>(input_md_->GetDescription().rhs);
 

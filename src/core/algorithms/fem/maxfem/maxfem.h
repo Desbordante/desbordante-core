@@ -28,8 +28,6 @@ private:
 
     void ExecuteInternal() override;
 
-    void FindFrequentEpisodes();
-
     std::map<model::Event, size_t> GetEventsSupports() const;
 
     void RemoveInfrequentEvents();

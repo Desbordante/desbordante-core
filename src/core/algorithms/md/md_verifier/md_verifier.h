@@ -40,7 +40,6 @@ private:
     void ResetState() override;
 
     void RegisterOptions();
-    void VerifyMD();
 
     MDValidationCalculator CreateValidator() const;
 

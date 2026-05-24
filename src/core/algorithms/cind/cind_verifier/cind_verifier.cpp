@@ -151,10 +151,6 @@ void CINDVerifier::LoadDataInternal() {
 }
 
 void CINDVerifier::ExecuteInternal() {
-    VerifyCIND();
-}
-
-void CINDVerifier::VerifyCIND() {
     model::TableIndex const lhs_table_idx = 0;
     model::TableIndex const rhs_table_idx =
             (input_tables_.size() == 1) ? 0

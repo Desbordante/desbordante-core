@@ -8,10 +8,6 @@
 
 namespace algos {
 
-void GddValidator::ExecuteInternal() {
-    FilterValidGdds();
-}
-
 void GddValidator::ResetState() {
     result_.clear();
     counterexamples_.clear();
@@ -33,7 +29,7 @@ void GddValidator::LoadDataInternal() {
     graph_ = parser::graph_parser::gdd::ReadGraph(graph_path_);
 }
 
-void GddValidator::FilterValidGdds() {
+void GddValidator::ExecuteInternal() {
     ResetState();
 
     std::size_t gdd_index = 0;

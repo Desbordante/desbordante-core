@@ -25,7 +25,6 @@ private:
     size_t num_rows_violating_ucc_ = 0;
     std::vector<model::PLI::Cluster> clusters_violating_ucc_;
 
-    void VerifyUCC();
     void CalculateStatistics(std::deque<model::PLI::Cluster> const& clusters);
     void RegisterOptions();
     void LoadDataInternal() override;

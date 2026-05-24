@@ -77,7 +77,7 @@ void INDVerifier::LoadDataInternal() {
     /* Do nothing, we don't prepocess any data before executing. */
 }
 
-void INDVerifier::VerifyIND() {
+void INDVerifier::ExecuteInternal() {
     /* Ensure, that all rows have model::IDatasetStream::GetNumberOfColumns() values. */
     using FixedStream = model::DatasetStreamFixed<model::IDatasetStream*>;
     /* Perform a projection of the fixed dataset stream. */
@@ -133,10 +133,6 @@ void INDVerifier::VerifyIND() {
 
     model::TupleIndex lhs_cardinality = lhs_rows.size();
     error_ = static_cast<Error>(GetViolatingClustersCount()) / lhs_cardinality;
-}
-
-void INDVerifier::ExecuteInternal() {
-    VerifyIND();
 }
 
 }  // namespace algos

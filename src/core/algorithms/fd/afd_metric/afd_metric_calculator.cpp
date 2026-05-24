@@ -46,10 +46,6 @@ void AFDMetricCalculator::LoadDataInternal() {
 }
 
 void AFDMetricCalculator::ExecuteInternal() {
-    CalculateMetric();
-}
-
-void AFDMetricCalculator::CalculateMetric() {
     auto num_rows = relation_->GetNumRows();
     auto lhs_pli = relation_->CalculatePLIWS(lhs_indices_);
     auto rhs_pli = relation_->CalculatePLIWS(rhs_indices_);

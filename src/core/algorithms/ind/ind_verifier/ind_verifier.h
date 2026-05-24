@@ -44,8 +44,6 @@ private:
 
     void LoadDataInternal() final;
 
-    void VerifyIND();
-
     void ExecuteInternal() final;
 
 public:
