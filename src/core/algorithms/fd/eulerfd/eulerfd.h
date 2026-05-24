@@ -80,7 +80,7 @@ class EulerFD : public FDAlgorithm {
     std::vector<size_t> attribute_frequencies_;
 
     void LoadDataInternal() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetStateFd() final;
     void MakeExecuteOptsAvailable() final;
 

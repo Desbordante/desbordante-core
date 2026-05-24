@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
 
-#include <chrono>
 #include <memory>
 
 #include "core/algorithms/algorithm.h"
@@ -32,13 +31,9 @@ void PFDVerifier::LoadDataInternal() {
     }
 }
 
-unsigned long long PFDVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
+void PFDVerifier::ExecuteInternal() {
     stats_calculator_ = std::make_unique<PFDStatsCalculator>(relation_, error_measure_);
     VerifyPFD();
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void PFDVerifier::VerifyPFD() const {

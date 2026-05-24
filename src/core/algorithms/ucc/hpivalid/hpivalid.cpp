@@ -40,7 +40,7 @@ hpiv::PLITable HPIValid::Preprocess() {
     return tab;
 }
 
-unsigned long long HPIValid::ExecuteInternal() {
+void HPIValid::ExecuteInternal() {
     hpiv::Config cfg;
     hpiv::ResultCollector rc(3600);
 
@@ -53,8 +53,6 @@ unsigned long long HPIValid::ExecuteInternal() {
     RegisterUCCs(rc);
 
     PrintInfo(rc);
-
-    return rc.GetTimeSinceStart();
 }
 
 void HPIValid::RegisterUCCs(hpiv::ResultCollector const& rc) {

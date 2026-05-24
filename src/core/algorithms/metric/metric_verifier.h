@@ -86,7 +86,7 @@ private:
 protected:
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     bool GetResult() const {

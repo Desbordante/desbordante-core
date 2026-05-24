@@ -5,12 +5,11 @@
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/parser/graph_parser/graph_parser.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos {
 
-unsigned long long GddValidator::ExecuteInternal() {
-    return util::TimedInvoke(&GddValidator::FilterValidGdds, this);
+void GddValidator::ExecuteInternal() {
+    FilterValidGdds();
 }
 
 void GddValidator::ResetState() {

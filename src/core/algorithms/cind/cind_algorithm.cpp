@@ -80,15 +80,12 @@ void CindAlgorithm::AddSpecificNeededOptions(
     previous_options.insert(spider_options.begin(), spider_options.end());
 }
 
-unsigned long long CindAlgorithm::ExecuteInternal() {
-    auto const spider_exec_time = static_cast<std::uint64_t>(spider_algo_->Execute());
-    auto const cind_exec_time =
-            static_cast<std::uint64_t>(cind_miner_->Execute(spider_algo_->INDList()));
+void CindAlgorithm::ExecuteInternal() {
+    spider_algo_->Execute();
+    auto const cind_exec_time = cind_miner_->Execute(spider_algo_->INDList());
 
-    timings_.compute = spider_exec_time + cind_exec_time;
+    timings_.compute = cind_exec_time;
     timings_.total = timings_.load + timings_.compute;
-
-    return static_cast<unsigned long long>(timings_.total);
 }
 
 void CindAlgorithm::ResetState() {

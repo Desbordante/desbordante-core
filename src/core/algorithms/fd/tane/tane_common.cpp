@@ -127,7 +127,7 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
     }
 }
 
-unsigned long long TaneCommon::ExecuteInternal() {
+void TaneCommon::ExecuteInternal() {
     long apriori_millis = 0;
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
@@ -242,7 +242,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
-    return apriori_millis;
 }
 
 }  // namespace tane

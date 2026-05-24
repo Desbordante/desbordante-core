@@ -479,9 +479,7 @@ long SDVerifier::CalculateOps(std::vector<double> const& values,
     return ops[n - 1];
 }
 
-unsigned long long SDVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::steady_clock::now();
-
+void SDVerifier::ExecuteInternal() {
     x_val_.clear();
     y_val_.clear();
     std::vector<size_t> selected_row_ids;
@@ -525,8 +523,7 @@ unsigned long long SDVerifier::ExecuteInternal() {
         ops_ = 0;
         confidence_ = 1.0;
         violations_.clear();
-        auto end_time = std::chrono::steady_clock::now();
-        return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+        return;
     }
 
     std::vector<size_t> p(rows);
@@ -549,9 +546,6 @@ unsigned long long SDVerifier::ExecuteInternal() {
 
     ops_ = CalculateOps(values, original_indices);
     confidence_ = static_cast<double>(rows - ops_) / rows;
-
-    auto end_time = std::chrono::steady_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 }
 
 }  // namespace algos::sd_verifier

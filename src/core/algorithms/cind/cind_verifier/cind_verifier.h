@@ -52,7 +52,7 @@ private:
     void ResetState() final;
 
     void LoadDataInternal() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     void VerifyCIND();
 

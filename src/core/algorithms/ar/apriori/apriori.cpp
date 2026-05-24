@@ -120,9 +120,7 @@ void Apriori::ResetStateAr() {
     root_ = Node();
 }
 
-unsigned long long Apriori::FindFrequent() {
-    auto start_time = std::chrono::system_clock::now();
-
+void Apriori::FindFrequent() {
     CreateFirstLevelCandidates();
     while (!candidates_.empty()) {
         unsigned candidates_count = 0;
@@ -140,17 +138,9 @@ unsigned long long Apriori::FindFrequent() {
         candidates_.clear();
         GenerateNextCandidateLevel();
     }
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    long long millis = elapsed_milliseconds.count();
-
-    return millis;
 }
 
-unsigned long long Apriori::GenerateAllRules() {
-    auto start_time = std::chrono::system_clock::now();
-
+void Apriori::GenerateAllRules() {
     std::queue<Node const*> path;
     UpdatePath(path, root_.children);
     unsigned long long frequent_count = 0;
@@ -166,12 +156,7 @@ unsigned long long Apriori::GenerateAllRules() {
         UpdatePath(path, curr_node->children);
     }
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    long long millis = elapsed_milliseconds.count();
-
     LOG_INFO("> Count of frequent itemsets: {}", frequent_count);
-    return millis;
 }
 
 std::list<std::set<std::string>> Apriori::GetFrequentList() const {

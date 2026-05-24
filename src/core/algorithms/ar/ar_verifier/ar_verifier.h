@@ -33,7 +33,7 @@ private:
     void RegisterOptions();
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
     void ResetState() override {
         stats_calculator_.ResetState();

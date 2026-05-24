@@ -356,7 +356,7 @@ void Order::PrintValidOD() {
     LOG_DEBUG("\n\n");
 }
 
-unsigned long long Order::ExecuteInternal() {
+void Order::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     CreateSingleColumnSortedPartitions();
     lattice_ = std::make_unique<ListLattice>(candidate_sets_, single_attributes_);
@@ -369,7 +369,6 @@ unsigned long long Order::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG_DEBUG("ms: {}\n", elapsed_milliseconds.count());
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos::order

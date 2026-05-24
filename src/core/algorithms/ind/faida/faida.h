@@ -33,7 +33,7 @@ private:
 
     void LoadINDAlgorithmDataInternal() final;
     void MakeExecuteOptsAvailable() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetINDAlgorithmState() override;
 
     // Insert rows into InclusionTester

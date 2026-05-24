@@ -49,19 +49,12 @@ void Aid::ResetStateFd() {
     sum_ = double{kWindowSize};
 }
 
-unsigned long long Aid::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
+void Aid::ExecuteInternal() {
     BuildClusters();
 
     CreateNegativeCover();
 
     InvertNegativeCover();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-
-    return elapsed_milliseconds.count();
 }
 
 void Aid::BuildClusters() {

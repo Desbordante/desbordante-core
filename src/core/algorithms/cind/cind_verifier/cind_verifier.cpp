@@ -26,7 +26,6 @@
 #include "core/model/table/encoded_column_data.h"
 #include "core/model/table/encoded_tables.h"
 #include "core/model/table/tuple_index.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::cind {
 namespace {
@@ -151,8 +150,8 @@ void CINDVerifier::LoadDataInternal() {
     }
 }
 
-unsigned long long CINDVerifier::ExecuteInternal() {
-    return util::TimedInvoke(&CINDVerifier::VerifyCIND, this);
+void CINDVerifier::ExecuteInternal() {
+    VerifyCIND();
 }
 
 void CINDVerifier::VerifyCIND() {

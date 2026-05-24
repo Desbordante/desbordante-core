@@ -54,7 +54,7 @@ private:
     void MineINDs();
     void MineAINDs();
 
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetINDAlgorithmState() final;
 
 public:

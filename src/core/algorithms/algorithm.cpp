@@ -80,20 +80,19 @@ void Algorithm::LoadData() {
     ExecutePrepare();
 }
 
-unsigned long long Algorithm::Execute() {
+void Algorithm::Execute() {
     if (!data_loaded_) {
         throw std::logic_error("Data must be processed before execution.");
     }
     if (!AllRequiredOptionsAreSet())
         throw std::logic_error("All options need to be set before execution.");
     ResetState();
-    auto time_ms = ExecuteInternal();
+    ExecuteInternal();
     for (auto const& opt_name : available_options_) {
         possible_options_.at(opt_name)->Unset();
     }
     ClearOptions();
     MakeExecuteOptsAvailable();
-    return time_ms;
 }
 
 void Algorithm::SetOption(std::string_view option_name, boost::any const& value) {

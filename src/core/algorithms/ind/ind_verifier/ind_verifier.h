@@ -46,7 +46,7 @@ private:
 
     void VerifyIND();
 
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     explicit INDVerifier();

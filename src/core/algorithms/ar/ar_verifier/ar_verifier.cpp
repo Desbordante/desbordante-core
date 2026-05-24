@@ -74,7 +74,7 @@ void ARVerifier::LoadDataInternal() {
     }
 }
 
-unsigned long long ARVerifier::ExecuteInternal() {
+void ARVerifier::ExecuteInternal() {
     ar_ids_ = ::model::ArIDs(string_rule_left_, string_rule_right_, transactional_data_.get(),
                              minconf_, minsup_);
     LOG_DEBUG("Parameters of ARVerifier:");
@@ -90,8 +90,6 @@ unsigned long long ARVerifier::ExecuteInternal() {
     auto const stats_calculation_time = ::util::TimedInvoke(&ARVerifier::CalculateStatistics, this);
 
     LOG_DEBUG("Statistics calculation took {} ms", std::to_string(stats_calculation_time));
-
-    return verification_time + stats_calculation_time;
 }
 
 void ARVerifier::VerifyAR() {

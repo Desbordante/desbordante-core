@@ -47,7 +47,7 @@ void PyroUCC::ResetUCCAlgorithmState() {
     search_space_.reset(nullptr);
 }
 
-unsigned long long PyroUCC::ExecuteInternal() {
+void PyroUCC::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     auto schema = relation_->GetSchema();
@@ -89,7 +89,6 @@ unsigned long long PyroUCC::ExecuteInternal() {
     LOG_INFO("Init time: {} ms", init_time_millis);
     LOG_INFO("Time: {}  milliseconds", elapsed_milliseconds.count());
     LOG_INFO("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos

@@ -26,7 +26,7 @@ private:
     StageTimings timings_{};
 
     void LoadDataInternal() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetState() final;
 
     void CreateSpiderAlgo();

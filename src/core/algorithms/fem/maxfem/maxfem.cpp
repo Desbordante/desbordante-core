@@ -11,7 +11,6 @@
 #include "core/config/option.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::maxfem {
 
@@ -49,8 +48,8 @@ void MaxFEM::MakeExecuteOptsAvailable() {
 
 void MaxFEM::ResetState() {}
 
-unsigned long long MaxFEM::ExecuteInternal() {
-    return util::TimedInvoke(&MaxFEM::FindFrequentEpisodes, this);
+void MaxFEM::ExecuteInternal() {
+    FindFrequentEpisodes();
 }
 
 void MaxFEM::FindFrequentEpisodes() {

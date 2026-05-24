@@ -53,12 +53,6 @@ void ResultCollector::SetStartTime() {
     exec_start_ = std::chrono::high_resolution_clock::now();
 }
 
-unsigned long long ResultCollector::GetTimeSinceStart() const {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(
-                   std::chrono::high_resolution_clock::now() - exec_start_)
-            .count();
-}
-
 void ResultCollector::CountDiffSets(unsigned number) {
     diff_sets_ += number;
 }

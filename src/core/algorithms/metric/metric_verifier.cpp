@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <chrono>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -139,9 +138,7 @@ void MetricVerifier::ResetState() {
     metric_fd_holds_ = false;
 }
 
-unsigned long long MetricVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
+void MetricVerifier::ExecuteInternal() {
     points_calculator_ = std::make_unique<PointsCalculator>(dist_from_null_is_infinity_,
                                                             typed_relation_, rhs_indices_);
     highlight_calculator_ = std::make_unique<HighlightCalculator>(typed_relation_, rhs_indices_);
@@ -158,10 +155,6 @@ unsigned long long MetricVerifier::ExecuteInternal() {
     SortHighlightsByDistanceDescending();
 
     VisualizeHighlights();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 std::string MetricVerifier::GetStringValue(config::IndicesType const& index_vec,

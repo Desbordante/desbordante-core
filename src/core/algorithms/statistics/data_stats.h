@@ -73,7 +73,7 @@ protected:
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     DataStats();

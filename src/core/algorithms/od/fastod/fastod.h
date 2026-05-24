@@ -54,7 +54,7 @@ private:
     void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
     void ResetState() override;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     void PrepareOptions();
     void RegisterOptions();

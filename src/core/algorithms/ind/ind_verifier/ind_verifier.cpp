@@ -18,7 +18,6 @@
 #include "core/model/table/dataset_stream_projection.h"
 #include "core/model/table/table_index.h"
 #include "core/model/table/tuple_index.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos {
 
@@ -136,8 +135,8 @@ void INDVerifier::VerifyIND() {
     error_ = static_cast<Error>(GetViolatingClustersCount()) / lhs_cardinality;
 }
 
-unsigned long long INDVerifier::ExecuteInternal() {
-    return util::TimedInvoke(&INDVerifier::VerifyIND, this);
+void INDVerifier::ExecuteInternal() {
+    VerifyIND();
 }
 
 }  // namespace algos

@@ -57,7 +57,7 @@ void NDVerifier::MakeExecuteOptsAvailable() {
                           config::names::kWeight});
 }
 
-unsigned long long NDVerifier::ExecuteInternal() {
+void NDVerifier::ExecuteInternal() {
     LOG_INFO("Parameters of NDVerifier:");
     LOG_INFO("\tInput table: {}", input_table_->GetRelationName());
     LOG_INFO("\tNull equals null: {}", is_null_equal_null_);
@@ -72,8 +72,6 @@ unsigned long long NDVerifier::ExecuteInternal() {
     auto stats_calculation_time = ::util::TimedInvoke(&NDVerifier::CalculateStats, this);
 
     LOG_DEBUG("Statistics calculation took {} ms", std::to_string(stats_calculation_time));
-
-    return verification_time + stats_calculation_time;
 }
 
 bool NDVerifier::NDHolds() const {

@@ -17,7 +17,7 @@ private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
 
     void LoadDataInternal() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
     hpiv::PLITable Preprocess();
     void RegisterUCCs(hpiv::ResultCollector const& rc);
     void PrintInfo(hpiv::ResultCollector const& rc) const;
