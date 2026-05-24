@@ -102,6 +102,7 @@ public:
         std::stack<StackNode> traversal_;
     };
 
+    // NOLINTBEGIN(readability-identifier-naming)
     Iterator begin() {
         return Iterator(root_.get());
     }
@@ -109,6 +110,8 @@ public:
     Iterator end() {
         return Iterator(root_.get(), true);
     }
+
+    // NOLINTEND(readability-identifier-naming)
 };
 
 }  // namespace algos::dd
