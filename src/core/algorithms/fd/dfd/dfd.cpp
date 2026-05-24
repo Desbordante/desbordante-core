@@ -28,11 +28,9 @@ void DFD::ResetStateFd() {
     unique_columns_.clear();
 }
 
-unsigned long long DFD::ExecuteInternal() {
+void DFD::ExecuteInternal() {
     auto partition_storage = std::make_unique<PartitionStorage>(relation_.get());
     RelationalSchema const* const schema = relation_->GetSchema();
-
-    auto start_time = std::chrono::system_clock::now();
 
     // search for unique columns
     for (auto const& column : schema->GetColumns()) {
@@ -74,14 +72,8 @@ unsigned long long DFD::ExecuteInternal() {
 
     search_space_pool.join();
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    long long apriori_millis = elapsed_milliseconds.count();
-
     LOG_INFO("> FD COUNT: {}", fd_collection_.Size());
     LOG_INFO("> HASH: {}", PliBasedFDAlgorithm::Fletcher16());
-
-    return apriori_millis;
 }
 
 }  // namespace algos

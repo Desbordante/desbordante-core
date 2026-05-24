@@ -114,7 +114,7 @@ void FastADC::PrintResults() {
     LOG_DEBUG("{}", dcs_.ToString());
 }
 
-unsigned long long FastADC::ExecuteInternal() {
+void FastADC::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
     LOG_DEBUG("Start");
 
@@ -154,7 +154,6 @@ unsigned long long FastADC::ExecuteInternal() {
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG_DEBUG("Algorithm time: {}", elapsed_milliseconds.count());
-    return elapsed_milliseconds.count();
 }
 
 // TODO: mb make this a list?

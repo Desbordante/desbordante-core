@@ -180,18 +180,14 @@ void HyMD::LoadDataInternal() {
     }
 }
 
-unsigned long long HyMD::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
-
+void HyMD::ExecuteInternal() {
     auto pool_holder = threads_ > 1 ? PoolHolder{threads_} : PoolHolder{};
 
     auto [similarity_data, short_sampling_enable] = SimilarityData::CreateFrom(
             records_info_.get(), column_matches_option_, pool_holder.GetPtr());
     if (similarity_data.GetColumnMatchNumber() == 0) {
         RegisterResults(similarity_data, {});
-        return std::chrono::duration_cast<std::chrono::milliseconds>(
-                       std::chrono::system_clock::now() - start_time)
-                .count();
+        return;
     }
 
     lattice::MdLattice lattice{GetLevelDefinitionFunc(level_definition_),
@@ -218,10 +214,6 @@ unsigned long long HyMD::ExecuteInternal() {
     }
 
     RegisterResults(similarity_data, lattice.GetAll());
-
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                                 start_time)
-            .count();
 }
 
 // Only serves to name parts of HyMD::RegisterResults.

@@ -1,6 +1,5 @@
 #include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 
-#include <chrono>
 #include <numeric>
 #include <stdexcept>
 
@@ -44,12 +43,8 @@ void UCCVerifier::LoadDataInternal() {
     }
 }
 
-unsigned long long UCCVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
+void UCCVerifier::ExecuteInternal() {
     VerifyUCC();
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 std::shared_ptr<model::PLI const> UCCVerifier::CalculatePLI() {

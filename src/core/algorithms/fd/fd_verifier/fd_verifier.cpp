@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
 
-#include <chrono>
 #include <memory>
 #include <stdexcept>
 
@@ -44,19 +43,13 @@ void FDVerifier::LoadDataInternal() {
             model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 }
 
-unsigned long long FDVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
+void FDVerifier::ExecuteInternal() {
     stats_calculator_ = std::make_unique<StatsCalculator>(relation_, typed_relation_, lhs_indices_,
                                                           rhs_indices_);
 
     VerifyFD();
     SortHighlightsByProportionDescending();
     stats_calculator_->PrintStatistics();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void FDVerifier::VerifyFD() const {

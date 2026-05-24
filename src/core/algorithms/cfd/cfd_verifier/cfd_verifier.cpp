@@ -67,7 +67,7 @@ void CFDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kCFDRuleLeft, kCFDRuleRight, kCfdMinimumSupport, kCfdMinimumConfidence});
 }
 
-unsigned long long CFDVerifier::ExecuteInternal() {
+void CFDVerifier::ExecuteInternal() {
     auto build_item_ids =
             [this](std::vector<CFDAttributeValuePair> const& rule_part) -> cfd::Itemset {
         cfd::Itemset item_ids;
@@ -97,8 +97,6 @@ unsigned long long CFDVerifier::ExecuteInternal() {
 
     auto stats_calculation_time = ::util::TimedInvoke(&CFDVerifier::CalculateStatistics, this);
     LOG_DEBUG("Statistics calculation took {} ms ", stats_calculation_time);
-
-    return verification_time + stats_calculation_time;
 }
 
 void CFDVerifier::VerifyCFD() {

@@ -26,7 +26,7 @@ private:
 
     void ResetState() override;
 
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
     void FindFrequentEpisodes();
 

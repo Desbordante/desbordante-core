@@ -1115,13 +1115,12 @@ Statistic DataStats::GetLastCharFrequency(size_t index) const {
     return GetCharFrequency(index, CharPosition::kLast);
 }
 
-unsigned long long DataStats::ExecuteInternal() {
+void DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
-        return 0;
+        return;
     }
 
-    auto start_time = std::chrono::system_clock::now();
     auto task = [this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
         if (this->col_data_[index].GetTypeId() != mo::TypeId::kMixed) {
@@ -1193,10 +1192,6 @@ unsigned long long DataStats::ExecuteInternal() {
     } else {
         for (size_t i = 0; i < all_stats_.size(); ++i) task(i);
     }
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 size_t DataStats::GetNumNulls(size_t index) const {

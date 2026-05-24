@@ -13,9 +13,7 @@ namespace algos {
 using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::vector, std::list,
         std::dynamic_pointer_cast;
 
-unsigned long long Depminer::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
-
+void Depminer::ExecuteInternal() {
     schema_ = relation_->GetSchema();
 
     // Agree sets
@@ -37,9 +35,6 @@ unsigned long long Depminer::ExecuteInternal() {
             std::chrono::system_clock::now() - lhs_time);
     LOG_INFO("> LHS FIND TIME: {}", lhs_elapsed_milliseconds.count());
     LOG_INFO("> FD COUNT: {}", this->fd_collection_.Size());
-    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets) {

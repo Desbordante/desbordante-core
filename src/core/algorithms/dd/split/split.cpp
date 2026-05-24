@@ -118,7 +118,7 @@ void Split::ParseDifferenceTable() {
     }
 }
 
-unsigned long long Split::ExecuteInternal() {
+void Split::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
     LOG_DEBUG("Start");
 
@@ -168,7 +168,6 @@ unsigned long long Split::ExecuteInternal() {
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG_INFO("Algorithm time: {}", elapsed_milliseconds.count());
-    return elapsed_milliseconds.count();
 }
 
 unsigned Split::ReduceDDs(auto const& start_time) {

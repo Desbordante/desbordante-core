@@ -21,10 +21,9 @@ void FdMine::ResetStateFd() {
     plis_.clear();
 }
 
-unsigned long long FdMine::ExecuteInternal() {
+void FdMine::ExecuteInternal() {
     // 1
     schema_ = relation_->GetSchema();
-    auto start_time = std::chrono::system_clock::now();
 
     relation_indices_ = dynamic_bitset<>(schema_->GetNumColumns());
 
@@ -53,10 +52,6 @@ unsigned long long FdMine::ExecuteInternal() {
     // 3
     Reconstruct();
     Display();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void FdMine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {

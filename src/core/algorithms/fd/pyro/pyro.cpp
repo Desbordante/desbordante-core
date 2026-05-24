@@ -42,7 +42,7 @@ void Pyro::ResetStateFd() {
     search_spaces_.clear();
 }
 
-unsigned long long Pyro::ExecuteInternal() {
+void Pyro::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     auto schema = relation_->GetSchema();
@@ -122,7 +122,6 @@ unsigned long long Pyro::ExecuteInternal() {
     LOG_INFO("Total trickle time: {} ms", total_trickle);
     LOG_INFO("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     LOG_INFO("HASH: {}", PliBasedFDAlgorithm::Fletcher16());
-    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos

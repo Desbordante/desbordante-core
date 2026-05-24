@@ -1,7 +1,6 @@
 #include "core/algorithms/fd/hyfd/hyfd.h"
 
 #include <algorithm>
-#include <chrono>
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -28,10 +27,9 @@ void HyFD::MakeExecuteOptsAvailableFDInternal() {
     MakeOptionsAvailable({config::names::kThreads});
 }
 
-unsigned long long HyFD::ExecuteInternal() {
+void HyFD::ExecuteInternal() {
     using namespace hy;
     LOG_TRACE("Executing");
-    auto const start_time = std::chrono::system_clock::now();
 
     auto [plis, pli_records, og_mapping] = Preprocess(relation_.get());
     auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
@@ -62,10 +60,6 @@ unsigned long long HyFD::ExecuteInternal() {
 
     auto fds = positive_cover_tree->FillFDs();
     RegisterFDs(std::move(fds), og_mapping);
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void HyFD::RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> const& og_mapping) {

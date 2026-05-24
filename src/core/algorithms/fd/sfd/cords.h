@@ -50,7 +50,7 @@ private:
     void MakeExecuteOptsAvailableFDInternal() override;
     void ResetStateFd() override;
 
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
     void Init(model::ColumnIndex columns, std::vector<model::TypedColumnData> const& data);
 

@@ -37,7 +37,7 @@ private:
     void LoadDataInternal() final;
 
     void ResetStateFd() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     // Building negative cover via violated dependencies
     void BuildNegativeCover();

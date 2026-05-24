@@ -99,7 +99,7 @@ std::vector<std::shared_ptr<faida::SimpleCC>> Faida::ExtractCCs(
     return {combinations.begin(), combinations.end()};
 }
 
-unsigned long long Faida::ExecuteInternal() {
+void Faida::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     size_t level_num = 0;
 
@@ -148,8 +148,6 @@ unsigned long long Faida::ExecuteInternal() {
     LOG_DEBUG("\tInserting:\t{}", insert_time_);
     LOG_DEBUG("\tChecking:\t{}", check_time_);
     LOG_DEBUG("\nIND count:\t{}", INDList().size());
-
-    return millis;
 }
 
 void Faida::InsertRows(faida::IInclusionTester::ActiveColumns const& active_columns,

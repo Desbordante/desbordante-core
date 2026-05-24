@@ -21,7 +21,7 @@ private:
     void FilterValidGdds();
     void RegisterOptions();
 
-    virtual unsigned long long ExecuteInternal() final;
+    virtual void ExecuteInternal() final;
 
     virtual void ResetState() final;
 

@@ -24,7 +24,7 @@ private:
     void MakeExecuteOptsAvailableFDInternal() final;
 
     void ResetStateFd() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     Pyro();

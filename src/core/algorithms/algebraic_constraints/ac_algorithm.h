@@ -114,7 +114,7 @@ public:
         ac_exception_finder_->CollectExceptions(this);
     }
 
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
     ACAlgorithm();
 };

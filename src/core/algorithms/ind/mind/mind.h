@@ -58,7 +58,7 @@ private:
 
     void MineUnaryINDs();
     void MineNaryINDs();
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
     void ResetINDAlgorithmState() override;
 
 public:
