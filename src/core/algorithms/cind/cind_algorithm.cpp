@@ -6,7 +6,6 @@
 #include "condition_miners/cinderella.h"
 #include "condition_miners/pli_cind.h"
 #include "core/algorithms/cind/types.h"
-#include "core/algorithms/create_algorithm.h"
 #include "core/config/conditions/algo_type/option.h"
 #include "core/config/conditions/completeness/option.h"
 #include "core/config/conditions/condition_type/option.h"
@@ -28,7 +27,7 @@ CindAlgorithm::CindAlgorithm() {
 }
 
 void CindAlgorithm::CreateSpiderAlgo() {
-    spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::kSpider);
+    spider_algo_ = std::make_unique<Spider>();
 }
 
 void CindAlgorithm::RegisterSpiderOptions() {
