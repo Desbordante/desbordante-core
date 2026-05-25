@@ -1,6 +1,7 @@
 #include "core/algorithms/dc/FastADC/fastadc.h"
 
 #include <chrono>
+#include <cstdio>
 #include <stdexcept>
 #include <vector>
 
@@ -115,7 +116,6 @@ void FastADC::PrintResults() {
 }
 
 unsigned long long FastADC::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
     LOG_DEBUG("Start");
 
     SetLimits();
@@ -124,6 +124,8 @@ unsigned long long FastADC::ExecuteInternal() {
     PredicateBuilder predicate_builder(&pred_provider_, pred_index_provider_, allow_cross_columns_,
                                        minimum_shared_value_, comparable_threshold_);
     predicate_builder.BuildPredicateSpace(typed_relation_->GetColumnData());
+
+    auto const evi_start = std::chrono::system_clock::now();
 
     PliShardBuilder pli_shard_builder(&int_prov_, &double_prov_, &string_prov_, shard_length_);
     pli_shard_builder.BuildPliShards(typed_relation_->GetColumnData());
@@ -138,10 +140,11 @@ unsigned long long FastADC::ExecuteInternal() {
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
-    LOG_DEBUG("Built evidence set");
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
+    auto const evi_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - evi_start).count();
+    fprintf(stderr, "[FastADC] Evidence time: %ldms\n", evi_ms);
+
+    auto const inv_start = std::chrono::system_clock::now();
 
     ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
                                      std::move(evidence_set_builder.evidence_set),
@@ -149,12 +152,14 @@ unsigned long long FastADC::ExecuteInternal() {
 
     dcs_ = dcbuilder.BuildDenialConstraints();
 
+    auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - inv_start).count();
+    fprintf(stderr, "[FastADC] Inversion time: %ldms\n", inv_ms);
+    fprintf(stderr, "[FastADC] Total computing time: %ldms\n", evi_ms + inv_ms);
+
     PrintResults();
 
-    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    LOG_DEBUG("Algorithm time: {}", elapsed_milliseconds.count());
-    return elapsed_milliseconds.count();
+    return evi_ms + inv_ms;
 }
 
 // TODO: mb make this a list?
