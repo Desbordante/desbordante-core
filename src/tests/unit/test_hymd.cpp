@@ -10,6 +10,7 @@
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
 #include "core/algorithms/md/hymd/utility/md_less.h"
 #include "core/config/names.h"

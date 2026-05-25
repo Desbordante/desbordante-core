@@ -7,6 +7,7 @@
 #include "core/algorithms/dd/dd_verifier/FuncMetric.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
+#include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {

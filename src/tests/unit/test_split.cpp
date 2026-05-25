@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/split/split.h"
 #include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"

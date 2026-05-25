@@ -3,8 +3,11 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/od/fastod/fastod.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
 #include "core/algorithms/od/fastod/model/removal_set.h"
 #include "core/algorithms/od/set_based_verifier/verifier.h"
+#include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {

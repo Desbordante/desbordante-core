@@ -7,7 +7,9 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ucc/hpivalid/hpivalid.h"
 #include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/pyroucc/pyroucc.h"
 #include "core/algorithms/ucc/ucc.h"
 #include "core/algorithms/ucc/ucc_algorithm.h"
 #include "core/config/names.h"
