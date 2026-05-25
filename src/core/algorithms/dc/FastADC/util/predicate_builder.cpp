@@ -3,6 +3,7 @@
 #include <array>
 #include <assert.h>
 #include <bitset>
+#include <stdexcept>
 
 #include "core/algorithms/dc/FastADC/misc/typed_column_data_value_differences.h"
 #include "core/algorithms/dc/FastADC/model/column_operand.h"
@@ -31,6 +32,13 @@ PredicateBuilder::PredicateBuilder(PredicateProvider* predicate_provider,
 
 void PredicateBuilder::BuildPredicateSpace(std::vector<model::TypedColumnData> const& input) {
     BuildAndCategorizePredicates(input);
+
+    if (predicates_.size() > kMaxPredicateBits) {
+        throw std::runtime_error(
+                "FastADC: predicate space is too large (" + std::to_string(predicates_.size()) +
+                " predicates exceed the maximum supported " + std::to_string(kMaxPredicateBits) +
+                "). Reduce the number of columns or disable cross-column predicates");
+    }
 
     predicate_index_provider->AddAll(predicates_);
     BuildMutexMap();
