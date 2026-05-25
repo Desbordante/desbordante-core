@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ind/faida/faida.h"
+#include "core/algorithms/ind/mind/mind.h"
+#include "core/algorithms/ind/spider/spider.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/error/type.h"
 #include "core/config/max_arity/type.h"

@@ -6,6 +6,7 @@
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
 #include "core/algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
+#include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/exceptions.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"

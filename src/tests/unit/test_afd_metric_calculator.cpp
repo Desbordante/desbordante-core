@@ -4,6 +4,7 @@
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
 #include "core/config/indices/type.h"
+#include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {
