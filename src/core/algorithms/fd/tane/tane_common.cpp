@@ -229,7 +229,6 @@ void TaneCommon::ExecuteInternal() {
         // TODO: printProfilingData
     }
 
-    LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
 }

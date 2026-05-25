@@ -42,7 +42,6 @@ private:
     unsigned int freq_ = 0;
 
 public:
-    static int intersection_count_;
     static int const kSingletonValueId;
 
     PositionListIndex(std::deque<Cluster> index, unsigned int size, double entropy,

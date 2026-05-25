@@ -21,7 +21,6 @@
 namespace model {
 
 int const PositionListIndex::kSingletonValueId = 0;
-int PositionListIndex::intersection_count_ = 0;
 
 PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigned int size,
                                      double entropy, unsigned long long nep,
@@ -163,7 +162,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
             }
             int probing_table_value_id = (*probing_table)[position];
             if (probing_table_value_id == kSingletonValueId) continue;
-            intersection_count_++;
             partial_index[probing_table_value_id].push_back(position);
         }
 
