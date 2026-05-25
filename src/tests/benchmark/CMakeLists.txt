@@ -17,6 +17,7 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::md::hy
             ${DESBORDANTE_PREFIX}::md::hy::preprocessing
             ${DESBORDANTE_PREFIX}::nar::des
+            ${DESBORDANTE_PREFIX}.compile_feats
             Boost::program_options
             magic_enum::magic_enum
             spdlog::spdlog_header_only
