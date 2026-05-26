@@ -1,8 +1,9 @@
 add_subdirectory(domain_pac_verifier)
+add_subdirectory(fd_pac_verifier)
 
 set(NAME pac.verifier)
 desbordante_add_lib(NAME OBJECT)
-target_sources(${NAME} PRIVATE pac_verifier.cpp)
+target_sources(${NAME} PRIVATE pac_verifier.cpp pairwise_pac_verifier.cpp)
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::config
