@@ -148,7 +148,7 @@ INSTANTIATE_TEST_SUITE_P(
                                          std::make_shared<Ball>(Strings{"3500", "0.2"}, 1,
                                                                 std::vector<double>{1e-3, 10}),
                                          0.803, 0.8, 0.7),
-                // -- Paramethrized "refinement" --
+                // -- Parametrized "refinement" --
                 // (finding optimal eps, delta on some segment of ECDF)
                 // Example from Comparison slides
                 // (https://github.com/p-senichenkov/Domain-PAC-validation-comparison/blob/main/slides/slides.pdf)
@@ -163,7 +163,7 @@ INSTANTIATE_TEST_SUITE_P(
                 CustomMetricBallsIntervalsParams(-1, -1, 6.217, 0.999, 0.95),
                 // Min_delta is greater than delta for max_eps => should return (??, min_delta)
                 CustomMetricBallsIntervalsParams(0, 1, 2.60487, 0.9, 0.9),
-                // "Totally constrainted" refinement -- all bounds are explicit
+                // "Totally constrained" refinement -- all bounds are explicit
                 CustomMetricBallsIntervalsParams(0, 1, 0.631, 0.625, 0.6),
                 // "Half-lines" on epsilon
                 //   a. Only min epsilon
