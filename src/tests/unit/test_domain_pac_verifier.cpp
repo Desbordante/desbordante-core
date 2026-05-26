@@ -159,11 +159,15 @@ INSTANTIATE_TEST_SUITE_P(
                 // (min_eps, ??) is considered a point too, and here it wins
                 DomainPACVerifyingParams(kSimpleTypos, {1},
                                          std::make_shared<Parallelepiped>("5", "7"), 1, 0.1, 0, 1),
+                // "Normal" case: min_delta <= real delta
+                CustomMetricBallsIntervalsParams(-1, -1, 6.217, 0.999, 0.95),
                 // Min_delta is greater than delta for max_eps => should return (??, min_delta)
                 CustomMetricBallsIntervalsParams(0, 1, 2.60487, 0.9, 0.9),
+                // "Totally constrainted" refinement -- all bounds are explicit
+                CustomMetricBallsIntervalsParams(0, 1, 0.631, 0.625, 0.6),
                 // -- Validation --
                 // (finding delta for the given eps)
-                // #14
+                // #16
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
                 // Min delta is greater than actual delta => should return actual delta
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774, 0.9, 1000)));
