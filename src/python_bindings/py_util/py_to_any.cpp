@@ -234,7 +234,6 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::unordered_set<size_t>>,
         kNormalConvPair<model::DDString>,
         kNormalConvPair<std::unordered_map<std::string, std::shared_ptr<Metric>>>,
-        kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
         kNormalConvPair<std::pair<std::string, std::string>>,
         kNormalConvPair<std::vector<model::Gdd>>,
