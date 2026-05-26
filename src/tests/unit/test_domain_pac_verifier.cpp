@@ -165,9 +165,18 @@ INSTANTIATE_TEST_SUITE_P(
                 CustomMetricBallsIntervalsParams(0, 1, 2.60487, 0.9, 0.9),
                 // "Totally constrainted" refinement -- all bounds are explicit
                 CustomMetricBallsIntervalsParams(0, 1, 0.631, 0.625, 0.6),
+                // "Half-lines" on epsilon
+                //   a. Only min epsilon
+                CustomMetricBallsIntervalsParams(4, -1, 6.217, 0.999),
+                //   b. Only max epsilon
+                CustomMetricBallsIntervalsParams(-1, 1, 0.631, 0.625),
+                //   c. Min epsilon and min delta
+                CustomMetricBallsIntervalsParams(2, -1, 6.217, 0.999),
+                //   d. Max epsilon and min delta
+                CustomMetricBallsIntervalsParams(-1, 1.3, 1.074, 0.705, 0.68),
                 // -- Validation --
                 // (finding delta for the given eps)
-                // #16
+                // #20
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
                 // Min delta is greater than actual delta => should return actual delta
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774, 0.9, 1000)));
