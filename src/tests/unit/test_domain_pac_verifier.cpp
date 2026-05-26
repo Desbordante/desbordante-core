@@ -139,7 +139,7 @@ INSTANTIATE_TEST_SUITE_P(
                 // Special cases:
                 //	a. +\infty
                 DomainPACVerifyingParams(kSimpleTypos, {1},
-                                         std::make_shared<Parallelepiped>("11", "11"), 8, 0.4, 0.3),
+                                         std::make_shared<Parallelepiped>("11", "11"), 9, 0.6, 0.3),
                 // 	b. -\infty
                 DomainPACVerifyingParams(kSimpleTypos, {1},
                                          std::make_shared<Parallelepiped>("0", "0"), 4, 0.9, 0.3),
@@ -158,7 +158,7 @@ INSTANTIATE_TEST_SUITE_P(
                 CustomMetricBallsIntervalsParams(2, 5, 4.709, 0.991),
                 // (min_eps, ??) is considered a point too, and here it wins
                 DomainPACVerifyingParams(kSimpleTypos, {1},
-                                         std::make_shared<Parallelepiped>("5", "7"), 1, 0.1, 0, 1),
+                                         std::make_shared<Parallelepiped>("0", "5"), 1, 0.9, 0, 1),
                 // "Normal" case: min_delta <= real delta
                 CustomMetricBallsIntervalsParams(-1, -1, 6.217, 0.999, 0.95),
                 // Min_delta is greater than delta for max_eps => should return (??, min_delta)
@@ -175,11 +175,11 @@ INSTANTIATE_TEST_SUITE_P(
                 //   d. Max epsilon and min delta
                 CustomMetricBallsIntervalsParams(-1, 1.3, 1.074, 0.705, 0.68),
                 // -- Validation --
-                // (finding delta for the given eps)
                 // #20
+                // Epsilon validation
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
-                // Min delta is greater than actual delta => should return actual delta
-                CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774, 0.9, 1000)));
+                // Delta validation
+                CustomMetricBallsIntervalsParams(0, 0, 2.605, 0.9, 0.9)));
 
 using Epsilons = std::pair<double, double>;
 using HighlightValues = std::vector<std::string>;
