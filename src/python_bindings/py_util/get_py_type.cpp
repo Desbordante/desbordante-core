@@ -129,7 +129,6 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
-            PyTypePair<std::vector<std::string>, kPyList, kPyStr>,
             PyTypePair<std::unordered_map<std::string, std::vector<unsigned int>>, kPyDict, kPyStr,
                        kPyList, kPyInt>,
             PyTypePair<std::vector<double>, kPyList, kPyFloat>,

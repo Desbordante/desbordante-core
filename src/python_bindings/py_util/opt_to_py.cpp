@@ -52,7 +52,6 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<config::IndicesType>,
         normal_conv_pair<model::DDString>,
         normal_conv_pair<model::Gdd>,
-        normal_conv_pair<std::vector<std::string>>,
         normal_conv_pair<std::vector<double>>,
         normal_conv_pair<std::shared_ptr<pac::model::IDomain>>,
         enum_conv_pair<algos::metric::MetricAlgo>,
