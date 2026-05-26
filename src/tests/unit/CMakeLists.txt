@@ -635,6 +635,11 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
 )
 
+# --- Static map ---
+desbordante_add_test(
+    static_map SRCS test_static_map.cpp LIBS ${DESBORDANTE_PREFIX}::testlib::common
+)
+
 # --- UCC ---
 desbordante_add_test(
     ucc.algos
