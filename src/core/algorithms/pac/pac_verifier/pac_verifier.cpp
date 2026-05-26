@@ -168,10 +168,11 @@ PACVerifier::EpsilonDelta PACVerifier::FindEpsilonDelta(
         begin = std::ranges::upper_bound(begin, end, min_epsilon_, {}, Epsilon);
         auto eps_delta_pair = GetEpsilonDeltaForEpsilon(min_epsilon_);
         if (max_epsilon_ > 0 && Epsilon(eps_delta_pair) > max_epsilon_) {
-            // No pairs between min_eps and max_eps -- should take a pair before min_eps
+            LOG_DEBUG("No pairs between min eps and max eps. Taking a pair before min eps");
             if (begin == empirical_probabilities.begin()) {
                 // No pair before min_eps. It is only possible in "Warning" case -- if concrete
                 // algorithm has violated the contract
+                LOG_WARN("All pairs have their epsilon > min epsilon");
                 return {0, 0};
             }
             // Take eps < min_eps, refine it, and then clamp to max_epsilon (we already know that
