@@ -37,9 +37,18 @@ private:
 
     unsigned long long ExecuteInternal() final;
 
+    /// @brief Remove extra pairs from empirical_probabilities
+    std::ranges::subrange<std::vector<std::pair<double, double>>::const_iterator> BuildECDF(
+            std::vector<std::pair<double, double>>& empirical_probabilities) const;
+
     /// @brief Check if user requested "validation" (finding one parameter by given value of another
     /// one) and "validate" if needed
     std::optional<EpsilonDelta> TryValidatePAC(
+            std::vector<EpsilonDelta> const& empirical_probabilities) const;
+
+    /// @brief Check if there are pairs between min epsilon and max epsilon, and select proper (eps,
+    /// delta) if needed
+    std::optional<EpsilonDelta> CheckPairsBetweenMinMaxEpsilon(
             std::vector<EpsilonDelta> const& empirical_probabilities) const;
 
 protected:
