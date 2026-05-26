@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -12,6 +13,8 @@ namespace algos::pac_verifier {
 /// @brief Base class for Probabilistic Approximate Constraints verifiers
 class PACVerifier : public Algorithm {
 private:
+    using EpsilonDelta = std::pair<double, double>;
+
     constexpr static double kDefaultMinDelta = 0.9;
     // Diagonal threshold is the maximum slope coefficient of a segment on the ECDF, that is still
     // considered horizontal during verifying PAC via elbow method
@@ -33,6 +36,11 @@ private:
     void ProcessCommonExecuteOpts();
 
     unsigned long long ExecuteInternal() final;
+
+    /// @brief Check if user requested "validation" (finding one parameter by given value of another
+    /// one) and "validate" if needed
+    std::optional<EpsilonDelta> TryValidatePAC(
+            std::vector<EpsilonDelta> const& empirical_probabilities) const;
 
 protected:
     // Input table must be registered in concrete classes to allow setting conditional options on it
