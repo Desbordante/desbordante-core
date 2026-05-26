@@ -7,5 +7,5 @@ target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::config
            ${DESBORDANTE_PREFIX}::model::table
-    PRIVATE Boost::headers better-enums spdlog::spdlog_header_only
+    PRIVATE Boost::headers magic_enum::magic_enum spdlog::spdlog_header_only
 )

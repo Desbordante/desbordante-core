@@ -615,7 +615,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::pac::verifier::domain_pac_verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    better-enums
+    magic_enum::magic_enum
     gmock
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types

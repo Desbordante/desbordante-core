@@ -67,7 +67,7 @@ TEST_P(TestDomainPACVerifier, DefaultTest) {
 inline bool IsNull(Tuple const& value) {
     auto const* real_value = model::MixedType::RetrieveValue(value[0]);
     auto const type_id = model::MixedType::RetrieveTypeId(value[0]);
-    return type_id == +model::TypeId::kNull || real_value == nullptr;
+    return type_id == model::TypeId::kNull || real_value == nullptr;
 }
 
 /// @brief x in D iff x is not null.

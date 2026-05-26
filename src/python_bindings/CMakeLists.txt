@@ -35,7 +35,7 @@ target_link_libraries(
 set(NAME bindlib.data)
 desbordante_add_lib(NAME OBJECT)
 target_sources(${NAME} PRIVATE data/bind_data_types.cpp data/py_custom_metrics.cpp)
-target_link_libraries(${NAME} PRIVATE pybind11::pybind11 better-enums Boost::headers)
+target_link_libraries(${NAME} PRIVATE pybind11::pybind11 magic_enum::magic_enum Boost::headers)
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
 set(NAME bindlib.util)
@@ -284,7 +284,7 @@ desbordante_add_bind(
     LIBS
     Desbordante::pac::verifier::domain_pac_verifier
     Desbordante::pac::verifier
-    better-enums
+    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
