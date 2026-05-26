@@ -129,9 +129,12 @@ void DomainPACVerifier::PACTypeExecuteInternal() {
 }
 
 std::pair<double, double> DomainPACVerifier::GetEpsilonDeltaForEpsilon(double epsilon) const {
-    auto it = std::ranges::lower_bound(
+    auto it = std::ranges::upper_bound(
             dists_from_domain_, epsilon, {},
             [](std::pair<TuplesIter, double> const& pair) { return pair.second; });
+    if (it != dists_from_domain_.begin()) {
+        std::advance(it, -1);
+    }
     // Refine delta
     auto eps = it->second;
     while (it != dists_from_domain_.end() && it->second - eps < PACVerifier::kDistThreshold) {
