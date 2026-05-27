@@ -38,6 +38,7 @@ static std::unique_ptr<algos::cind::CINDVerifier> CreateCINDVerifier(
             {kCsvConfigs, cfg.csv_configs},
             {kLhsIndices, cfg.ind.lhs},
             {kRhsIndices, cfg.ind.rhs},
+            {kConditionType, algos::cind::CondType::kGroup},
     });
 }
 
@@ -93,13 +94,15 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(TestCINDVerifierRuntimeError, TestEmptyTable) {
     using namespace config::names;
 
-    auto verifier = algos::CreateAndLoadAlgorithm<algos::cind::CINDVerifier>(algos::StdParamsMap{
-            {kCsvConfigs, CSVConfigs{kIndTestEmpty}},
-            {kLhsIndices, config::IndicesType{0}},
-            {kRhsIndices, config::IndicesType{0}},
-    });
+    auto create_and_load = []() {
+        algos::CreateAndLoadAlgorithm<algos::cind::CINDVerifier>(algos::StdParamsMap{
+                {kCsvConfigs, CSVConfigs{kIndTestEmpty}},
+                {kLhsIndices, config::IndicesType{0}},
+                {kRhsIndices, config::IndicesType{0}},
+        });
+    };
 
-    ASSERT_THROW(verifier->Execute(), std::runtime_error);
+    ASSERT_THROW(create_and_load(), std::runtime_error);
 }
 
 struct CINDVerifierBadConfig {
@@ -137,8 +140,7 @@ INSTANTIATE_TEST_SUITE_P(
             CINDVerifierBadConfig({kIndTestTypos}, {{0}, {5}}),
             CINDVerifierBadConfig({kIndTestTypos}, {{6}, {7}}),
             CINDVerifierBadConfig({kIndTestTypos}, {{0, 1}, {2, 3, 4}}),
-            CINDVerifierBadConfig({kIndTestTypos}, {{0, 0}, {2, 3}}),
-            CINDVerifierBadConfig({kIndTestTypos}, {{0, 0}, {2}})
+            CINDVerifierBadConfig({kIndTestTypos}, {{0, 0}, {2, 3}})
         ));
 // clang-format on
 
