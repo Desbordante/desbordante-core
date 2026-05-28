@@ -50,6 +50,18 @@ desbordante_add_test(
     gmock
     Boost::headers
 )
+# --- CMSPADE ---
+desbordante_add_test(
+    cmspade
+    SRCS
+    test_cmspade.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cmspade
+    ${DESBORDANTE_PREFIX}::testlib::common
+    magic_enum::magic_enum
+    gmock
+    Boost::headers
+)
 
 # --- CFD ---
 desbordante_add_test(

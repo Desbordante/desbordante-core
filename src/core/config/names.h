@@ -38,6 +38,9 @@ constexpr auto kCFDRuleLeft = "cfd_rule_left";
 constexpr auto kCFDRuleRight = "cfd_rule_right";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
 constexpr auto kCfdTuplesNumber = "tuples_number";
+//CM-SPADE
+constexpr auto kSequenceDatabase = "sequence_database";
+constexpr auto kCMSpadeMinimumSupport = "minsup";
 // CORDS
 constexpr auto kDelta = "delta";
 constexpr auto kFixedSample = "fixed_sample";

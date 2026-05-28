@@ -3,6 +3,7 @@ set(SUBDIRS
     ar
     cfd
     cind
+    cmspade
     dc
     dd
     fd
@@ -39,6 +40,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::cfd
               ${DESBORDANTE_PREFIX}::cfd::verifier
               ${DESBORDANTE_PREFIX}::cind::verifier
+              ${DESBORDANTE_PREFIX}::cmspade
               ${DESBORDANTE_PREFIX}::datastats
               ${DESBORDANTE_PREFIX}::dd::split
               ${DESBORDANTE_PREFIX}::fd::aid
