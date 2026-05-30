@@ -96,20 +96,13 @@ std::optional<PACVerifier::EpsilonDelta> PACVerifier::CheckPairsBetweenMinMaxEps
     if (max_epsilon_ >= 0 && min_epsilon_ >= 0) {
         auto after_min_epsilon =
                 std::ranges::upper_bound(empirical_probabilities, min_epsilon_, {}, GetEpsilon);
-        auto eps_delta_pair = GetEpsilonDeltaForEpsilon(min_epsilon_);
-        if (eps_delta_pair.epsilon > max_epsilon_) {
-            // No pair before min_eps. It is only possible in "Warning" case (see `LOG_ERROR`s in
-            // `BuildECDF`) -- if concrete algorithm has violated the contract
-            assert(after_min_epsilon != empirical_probabilities.begin());
-
-            LOG_INFO("No pairs between min eps and max eps. Taking a pair before min eps");
-            // Take eps < min_eps, refine it, and then clamp to max_epsilon (we already know
-            // that refine(min_eps) > max_eps, so no explicit refinement needed)
-            // TODO: This needs more thought with reversed refinement direction
-            // (RefinementDirection()? -- should be avoided at all costs)
-            auto eps = std::prev(after_min_epsilon)->epsilon;
-            auto [epsilon, delta] = GetEpsilonDeltaForEpsilon(eps);
-            return EpsilonDelta{std::min(epsilon, max_epsilon_), delta};
+        if (after_min_epsilon->epsilon >= max_epsilon_) {
+            LOG_INFO("No pairs between min eps and max eps. Taking a pair after max eps");
+            auto eps_delta_pair = GetEpsilonDeltaForEpsilon(min_epsilon_);
+            // Either `GetEpsilonDeltaForEpsilon` will produce a valid pair with eps <= max_eps,
+            // or it will take the least epsilon possible
+            return EpsilonDelta{std::max(min_epsilon_, eps_delta_pair.epsilon),
+                                eps_delta_pair.delta};
         }
     }
     if (min_epsilon_ >= 0) {

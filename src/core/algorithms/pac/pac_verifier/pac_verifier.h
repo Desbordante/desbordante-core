@@ -102,6 +102,8 @@ protected:
     EpsilonDelta FindEpsilonDelta(std::vector<EpsilonDelta>&& empirical_probabilities) const;
 
     /// @brief Get (refined) epsilon-delta pair with specific epsilon
+    /// Must return the minimal possible epsilon when the requested @c epsilon is too small to get
+    /// epsilon-delta for it
     virtual EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const = 0;
 
 public:

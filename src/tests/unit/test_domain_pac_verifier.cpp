@@ -108,6 +108,20 @@ DomainPACVerifyingParams CustomMetricBallsIntervalsParams(double min_eps, double
             delta_steps};
 }
 
+DomainPACVerifyingParams SimpleTyposParallelepipedIntervalsParams(
+        double lower_bound, double upper_bound, double min_eps, double max_eps, double expected_eps,
+        double expected_delta, double min_delta = -1) {
+    return {kSimpleTypos,
+            {1},
+            std::make_shared<Parallelepiped>(std::to_string(lower_bound),
+                                             std::to_string(upper_bound)),
+            expected_eps,
+            expected_delta,
+            min_delta,
+            min_eps,
+            max_eps};
+}
+
 INSTANTIATE_TEST_SUITE_P(
         DomainPACVerifierTests, TestDomainPACVerifier,
         ::testing::Values(
@@ -179,7 +193,25 @@ INSTANTIATE_TEST_SUITE_P(
                 // Epsilon validation
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
                 // Delta validation
-                CustomMetricBallsIntervalsParams(0, 0, 2.605, 0.9, 0.9)));
+                CustomMetricBallsIntervalsParams(0, 0, 2.605, 0.9, 0.9),
+                // -- No pairs between min_eps and max_eps --
+                // Each test has it's "validation" counterpart
+                // #22
+                // No pairs between min_eps and max_eps, should take a pair before min_eps and
+                // promote the epsilon
+                SimpleTyposParallelepipedIntervalsParams(0, 3, 3, 4, 3, 0.9),
+                // Validation here returns the exact epsilon, without promotion
+                SimpleTyposParallelepipedIntervalsParams(0, 3, 3, 3, 1, 0.9),
+                // No pairs between min_eps and max_eps, and no values before min_eps, but (0, 0.9)
+                // is a pair too
+                SimpleTyposParallelepipedIntervalsParams(0, 5, 3, 4, 3, 0.9),
+                SimpleTyposParallelepipedIntervalsParams(0, 5, 3, 3, 0, 0.9),
+                // No pairs after min_eps, should return the greatest epsilon possible
+                SimpleTyposParallelepipedIntervalsParams(0, 5, 6, -1, 5, 1),
+                SimpleTyposParallelepipedIntervalsParams(0, 5, 6, 6, 5, 1),
+                // No pairs before max_eps, should return (0, xx)
+                SimpleTyposParallelepipedIntervalsParams(0, 5, -1, 2, 0, 0.9),
+                SimpleTyposParallelepipedIntervalsParams(0, 5, 2, 2, 0, 0.9)));
 
 using Epsilons = std::pair<double, double>;
 using HighlightValues = std::vector<std::string>;
