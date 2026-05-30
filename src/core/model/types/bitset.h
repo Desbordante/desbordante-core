@@ -81,8 +81,6 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "core/util/logger.h"
-
 namespace model {
 
 namespace bitset_impl {
@@ -148,6 +146,15 @@ public:
         return words_[NumWords - 1];
     }
 
+    bool DoIsSubsetOf(BaseBitset<NumWords> const& x) const noexcept {
+        for (size_t i{0}; i < NumWords; ++i) {
+            if (words_[i] & ~x.words_[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     void DoAnd(BaseBitset<NumWords> const& x) noexcept {
         for (size_t i{0}; i < NumWords; ++i) {
             words_[i] &= x.words_[i];
@@ -205,6 +212,21 @@ public:
             return true;
         }
         return !std::memcmp(words_, x.words_, NumWords * sizeof(WordT));
+    }
+
+    constexpr bool IsLess(BaseBitset<NumWords> const& x) const noexcept {
+        // if (std::is_constant_evaluated()) {
+        for (size_t i{NumWords}; i > 0; --i) {
+            if (words_[i - 1] < x.words_[i - 1]) {
+                return true;
+            }
+            if (words_[i - 1] > x.words_[i - 1]) {
+                return false;
+            }
+        }
+        return false;
+        //}
+        // return std::memcmp(words_, x.words_, NumWords * sizeof(WordT)) < 0;
     }
 
     template <size_t NumBits>
@@ -418,6 +440,10 @@ public:
         return word_;
     }
 
+    constexpr bool DoIsSubsetOf(BaseBitset<1> const& x) const noexcept {
+        return !(word_ & ~x.word_);
+    }
+
     constexpr void DoAnd(BaseBitset<1> const& x) noexcept {
         word_ &= x.word_;
     }
@@ -452,6 +478,10 @@ public:
 
     constexpr bool IsEqual(BaseBitset<1> const& x) const noexcept {
         return word_ == x.word_;
+    }
+
+    constexpr bool IsLess(BaseBitset<1> const& x) const noexcept {
+        return word_ < x.word_;
     }
 
     template <size_t NumBits>
@@ -534,10 +564,8 @@ public:
 
     // Here's the only place where users of zero-length bitsets are penalized
     // This function is unreachable until _Unchecked methods are used
-    [[noreturn]] WordT& GetWord([[maybe_unused]] size_t) noexcept {
-        // Originally, here is `throw` statement, but it violates `noexcept` specification
-        // throw std::out_of_range("BaseBitset::GetWord");
-        LOG_INFO("Out of range in BaseBitset::GetWord (zero-length bitset).");
+    [[noreturn]] WordT& GetWord([[maybe_unused]] size_t) {
+        throw std::out_of_range("BaseBitset::GetWord");
         __builtin_unreachable();
     }
 
@@ -547,6 +575,10 @@ public:
 
     constexpr WordT HiWord() const noexcept {
         return 0;
+    }
+
+    constexpr bool DoIsSubsetOf([[maybe_unused]] BaseBitset<0> const&) const noexcept {
+        return true;
     }
 
     constexpr void DoAnd([[maybe_unused]] BaseBitset<0> const&) noexcept {}
@@ -567,6 +599,10 @@ public:
 
     constexpr bool IsEqual([[maybe_unused]] BaseBitset<0> const&) const noexcept {
         return true;
+    }
+
+    constexpr bool IsLess([[maybe_unused]] BaseBitset<0> const&) const noexcept {
+        return false;
     }
 
     template <size_t NumBits>
@@ -747,6 +783,10 @@ public:
         CopyFromPtr<CharT, Traits>(str, n, 0, n, zero, one);
     }
 
+    bool is_subset_of(BitsetImpl<NumBits> const& rhs) const noexcept {
+        return this->DoIsSubsetOf(rhs);
+    }
+
     BitsetImpl<NumBits>& operator&=(BitsetImpl<NumBits> const& rhs) noexcept {
         this->DoAnd(rhs);
         return *this;
@@ -916,6 +956,10 @@ public:
 
     bool operator==(BitsetImpl<NumBits> const& rhs) const noexcept {
         return this->IsEqual(rhs);
+    }
+
+    bool operator<(BitsetImpl<NumBits> const& rhs) const noexcept {
+        return this->IsLess(rhs);
     }
 
     bool test(size_t position) const {

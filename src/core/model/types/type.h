@@ -74,12 +74,27 @@ public:
         }
     };
 
+    class Equal {
+        Type const* type_;
+
+    public:
+        explicit Equal(Type const* type) noexcept : type_(type) {}
+
+        size_t operator()(std::byte const* a, std::byte const* b) const {
+            return (type_->Compare(a, b) == CompareResult::kEqual);
+        }
+    };
+
     Comparator GetComparator() const noexcept {
         return Comparator(this);
     }
 
     Hasher GetHasher() const noexcept {
         return Hasher(this);
+    }
+
+    Equal GetEqual() const noexcept {
+        return Equal(this);
     }
 
     void Print(std::byte const* value, std::ostream& os) const {
@@ -128,6 +143,11 @@ public:
     static bool IsOrdered(TypeId const& type_id) {
         return !(type_id == TypeId::kEmpty || type_id == TypeId::kNull ||
                  type_id == TypeId::kUndefined || type_id == TypeId::kMixed);
+    }
+
+    // t1 <= t2 <= t3 => dist(t1,t2) <= dist(t1,t3)
+    static bool IsDistanceOrdered(TypeId const& type_id) {
+        return type_id == TypeId::kInt || type_id == TypeId::kDouble || type_id == TypeId::kDate;
     }
 
     virtual Destructor GetDestructor() const {
