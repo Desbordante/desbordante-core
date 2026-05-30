@@ -5090,14 +5090,14 @@ Algorithm result: \x1b[33mDomain PAC Pr(x ∈ [85, 95]±7) ≥ 0.954545 on colum
 This result is not directly informative for our goal. Since both ε and δ exceed the required values,
 we cannot determine whether the constraint holds for ε=\x1b[34m5\x1b[0m and δ=\x1b[34m0.9\x1b[0m.
 
-The algorithm provides a special function \x1b[1;37mverify\x1b[0m, which gives the exact ε for given δ
-and vice versa. Let's call \x1b[1;37mverify\x1b[0m with epsilon=\x1b[34m5\x1b[0m.
+The algorithm provides two special functions: \x1b[1;37mfind_epsilon\x1b[0m and \x1b[1;37mfind_delta\x1b[0m, which give the exact ε for given δ
+and vice versa. Let's call \x1b[1;37mfind_delta\x1b[0m with epsilon=\x1b[34m5\x1b[0m.
 
 Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.681818 on columns [t]\x1b[0m.
 
 This PAC shows that only \x1b[34m68.2%\x1b[0m of the values fall into \x1b[34m[85, 95]±5\x1b[0m, while we require \x1b[34m90%\x1b[0m.
 
-Also, let's check which ε is needed to satisfy δ=\x1b[34m0.9\x1b[0m by calling \x1b[1;37mverify\x1b[0m with delta=\x1b[34m0.9\x1b[0m.
+Also, let's check which ε is needed to satisfy δ=\x1b[34m0.9\x1b[0m by calling \x1b[1;37mfind_epsilon\x1b[0m with delta=\x1b[34m0.9\x1b[0m.
 
 Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [85, 95]±7) ≥ 0.954545 on columns [t]\x1b[0m.
 
