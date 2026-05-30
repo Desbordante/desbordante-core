@@ -1,13 +1,13 @@
 #pragma once
 
-#include <algorithm>
+#include <cstddef>
 #include <cstdlib>
-#include <functional>
-#include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "core/algorithms/pac/util/columns_utils.h"
+#include "core/config/column_index/type.h"
 #include "core/model/table/vertical.h"
 
 namespace model {
@@ -18,7 +18,9 @@ private:
     double epsilon_;
     double delta_;
     std::string domain_name_;
-    Vertical columns_;
+
+    std::vector<config::IndexType> column_indices_;
+    std::vector<std::string> column_names_;
 
     std::string StringStem(std::string const& arg) const {
         std::ostringstream oss;
@@ -27,8 +29,18 @@ private:
     }
 
 public:
+    DomainPAC(double epsilon, double delta, std::string const& domain_name,
+              std::vector<config::IndexType>&& column_indices,
+              std::vector<std::string>&& column_names)
+        : epsilon_(epsilon),
+          delta_(delta),
+          domain_name_(domain_name),
+          column_indices_(std::move(column_indices)),
+          column_names_(std::move(column_names)) {}
+
     DomainPAC(double epsilon, double delta, std::string const& domain_name, Vertical const& columns)
-        : epsilon_(epsilon), delta_(delta), domain_name_(domain_name), columns_(columns) {}
+        : DomainPAC(epsilon, delta, domain_name, columns.GetColumnIndicesAsVector(),
+                    pac::util::GetColumnNames(columns)) {}
 
     DomainPAC(DomainPAC const&) = default;
     DomainPAC(DomainPAC&&) = default;
@@ -43,16 +55,12 @@ public:
         return delta_;
     }
 
-    Vertical const& GetColumns() const {
-        return columns_;
+    std::vector<config::IndexType> const& GetColumnIndices() const {
+        return column_indices_;
     }
 
-    std::vector<std::string> GetColumnNames() const {
-        std::vector<std::string> result;
-        result.reserve(columns_.GetArity());
-        std::ranges::transform(columns_.GetColumns(), std::back_inserter(result),
-                               std::mem_fn(&Column::GetName));
-        return result;
+    std::vector<std::string> const& GetColumnNames() const {
+        return column_names_;
     }
 
     std::string const& GetDomainName() const {
@@ -60,12 +68,13 @@ public:
     }
 
     std::string ToShortString() const {
-        return StringStem(columns_.ToString());
+        return StringStem(pac::util::ColumnNamesToString(column_names_));
     }
 
     std::string ToLongString() const {
         std::ostringstream oss;
-        oss << "Domain PAC " << StringStem("x") << " on columns " << columns_.ToString();
+        oss << "Domain PAC " << StringStem("x") << " on columns "
+            << pac::util::ColumnNamesToString(column_names_);
         return oss.str();
     }
 
@@ -74,7 +83,7 @@ public:
 
         return std::abs(epsilon_ - other.epsilon_) < kThreshold &&
                std::abs(delta_ - other.delta_) < kThreshold && domain_name_ == other.domain_name_ &&
-               columns_ == other.columns_;
+               column_indices_ == other.column_indices_;
     }
 };
 }  // namespace model

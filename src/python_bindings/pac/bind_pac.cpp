@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <pybind11/cast.h>
 #include <pybind11/detail/common.h>
@@ -14,8 +15,8 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/pac/domain_pac.h"
+#include "core/config/column_index/type.h"
 #include "python_bindings/pac/bind_domains.h"
-#include "python_bindings/py_util/table_serialization.h"
 
 namespace py = pybind11;
 
@@ -24,7 +25,7 @@ namespace {
 /// Domain, then follow column indices.
 /// Epsilon and delta are not included in tuple, because there's no proper way to hash doubles
 py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
-    auto const column_indices = d_pac.GetColumns().GetColumnIndicesAsVector();
+    auto const column_indices = d_pac.GetColumnIndices();
     py::tuple result(column_indices.size() + 1);
     // It's unlikely that set of Domain PACs will contain PACs on different domains, so using
     // Domain's string representation shouldn't lead to a lot of collisions.
@@ -41,7 +42,6 @@ namespace python_bindings {
 void BindPAC(py::module& main_module) {
     using namespace model;
     using namespace pybind11::literals;
-    using namespace table_serialization;
 
     auto pac_module = main_module.def_submodule("pac");
 
@@ -50,10 +50,7 @@ void BindPAC(py::module& main_module) {
             .def_property_readonly("epsilon", &DomainPAC::GetEpsilon)
             .def_property_readonly("delta", &DomainPAC::GetDelta)
             .def_property_readonly("domain", &DomainPAC::GetDomainName)
-            .def_property_readonly("column_indices",
-                                   [](model::DomainPAC const& d_pac) {
-                                       return d_pac.GetColumns().GetColumnIndicesAsVector();
-                                   })
+            .def_property_readonly("column_indices", &model::DomainPAC::GetColumnIndices)
             .def_property_readonly("column_names", &model::DomainPAC::GetColumnNames)
             .def("to_short_string", &DomainPAC::ToShortString)
             .def("to_long_string", &DomainPAC::ToLongString)
@@ -63,10 +60,7 @@ void BindPAC(py::module& main_module) {
                  [](DomainPAC const& d_pac) { return py::hash(DomainPACToTuple(d_pac)); })
             .def(py::pickle(
                     [](DomainPAC const& d_pac) {
-                        auto const* schema = d_pac.GetColumns().GetSchema();
-                        auto schema_state = SerializeRelationalSchema(schema);
-                        auto columns_state = SerializeVertical(d_pac.GetColumns());
-                        return py::make_tuple(std::move(schema_state), std::move(columns_state),
+                        return py::make_tuple(d_pac.GetColumnIndices(), d_pac.GetColumnNames(),
                                               d_pac.GetDomainName(), d_pac.GetEpsilon(),
                                               d_pac.GetDelta());
                     },
@@ -74,12 +68,13 @@ void BindPAC(py::module& main_module) {
                         if (t.size() != 5) {
                             throw std::runtime_error("Invalid state for Domain PAC pickle");
                         }
-                        auto schema = DeserializeRelationalSchema(t[0].cast<py::tuple>());
-                        auto columns = DeserializeVertical(t[1].cast<py::tuple>(), schema.get());
+                        auto column_indices = t[0].cast<std::vector<config::IndexType>>();
+                        auto column_names = t[1].cast<std::vector<std::string>>();
                         auto domain_name = t[2].cast<std::string>();
                         auto epsilon = t[3].cast<double>();
                         auto delta = t[4].cast<double>();
-                        return DomainPAC(epsilon, delta, domain_name, std::move(columns));
+                        return DomainPAC(epsilon, delta, domain_name, std::move(column_indices),
+                                         std::move(column_names));
                     }));
 
     BindDomains(pac_module);
