@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 #include <stdexcept>
-#include <vector>
+#include <string>
 
 #include <pybind11/cast.h>
 #include <pybind11/detail/common.h>

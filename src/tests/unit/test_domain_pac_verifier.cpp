@@ -171,7 +171,7 @@ INSTANTIATE_TEST_SUITE_P(
                 //   b. Only max epsilon
                 CustomMetricBallsIntervalsParams(-1, 1, 0.631, 0.625),
                 //   c. Min epsilon and min delta
-                CustomMetricBallsIntervalsParams(2, -1, 6.217, 0.999),
+                CustomMetricBallsIntervalsParams(2, -1, 6.217, 0.999, 0.95),
                 //   d. Max epsilon and min delta
                 CustomMetricBallsIntervalsParams(-1, 1.3, 1.074, 0.705, 0.68),
                 // -- Validation --

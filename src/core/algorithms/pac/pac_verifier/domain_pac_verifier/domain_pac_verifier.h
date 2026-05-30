@@ -42,7 +42,7 @@ private:
     /// Pr(eps < eps_i) >= delta_i
     /// Also refine deltas, i. e. find max acceptable delta_i
     /// @return (eps_i, refined delta_i) pairs
-    std::vector<std::pair<double, double>> FindEpsilons() const;
+    std::vector<EpsilonDelta> FindEpsilons() const;
 
 protected:
     std::shared_ptr<pac::model::IDomain> domain_;
@@ -50,7 +50,7 @@ protected:
     virtual void ProcessPACTypeOptions() override;
     virtual void PreparePACTypeData() override;
     void PACTypeExecuteInternal() override;
-    std::pair<double, double> GetEpsilonDeltaForEpsilon(double epsilon) const override;
+    EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const override;
 
     void ResetState() override {
         pac_ = std::nullopt;

@@ -37,7 +37,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [verifying_md.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_md.py) — a scenario showing how to verify a matching dependency.
 + [verifying_nd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_nd) — a scenario showing how to verify a numerical dependency.
 + [verifying_mfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_mfd.py) — a scenario showing how to verify metric functional dependencies.
-+ [verifyind_pac](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_pac) - scenarios showing how to verify different kinds of probabilistic approximate constraints.
++ [verifyind_pac](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_pac) — scenarios showing how to verify different kinds of probabilistic approximate constraints.
 + [verifying_pfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_pfd.py) — a scenario showing how to verify probabilistic functional dependency.
 + [verifying_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_ucc.py) — a scenario showing how to verify a unique column combination.
 

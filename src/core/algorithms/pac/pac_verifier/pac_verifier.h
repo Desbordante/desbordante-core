@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <optional>
-#include <utility>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
@@ -12,9 +11,13 @@
 namespace algos::pac_verifier {
 /// @brief Base class for Probabilistic Approximate Constraints verifiers
 class PACVerifier : public Algorithm {
-private:
-    using EpsilonDelta = std::pair<double, double>;
+protected:
+    struct EpsilonDelta {
+        double epsilon;
+        double delta;
+    };
 
+private:
     constexpr static double kDefaultMinDelta = 0.9;
     // Diagonal threshold is the maximum slope coefficient of a segment on the ECDF, that is still
     // considered horizontal during verifying PAC via elbow method
@@ -38,8 +41,8 @@ private:
     unsigned long long ExecuteInternal() final;
 
     /// @brief Remove extra pairs from empirical_probabilities
-    std::ranges::subrange<std::vector<std::pair<double, double>>::const_iterator> BuildECDF(
-            std::vector<std::pair<double, double>>& empirical_probabilities) const;
+    std::ranges::subrange<std::vector<EpsilonDelta>::const_iterator> BuildECDF(
+            std::vector<EpsilonDelta>& empirical_probabilities) const;
 
     /// @brief Check if user requested "validation" (finding one parameter by given value of another
     /// one) and "validate" if needed
@@ -50,6 +53,15 @@ private:
     /// delta) if needed
     std::optional<EpsilonDelta> CheckPairsBetweenMinMaxEpsilon(
             std::vector<EpsilonDelta> const& empirical_probabilities) const;
+
+    // Trivial getters intended to be used with STL algorithms
+    static double GetEpsilon(EpsilonDelta const& eps_delta) {
+        return eps_delta.epsilon;
+    }
+
+    static double GetDelta(EpsilonDelta const& eps_delta) {
+        return eps_delta.delta;
+    }
 
 protected:
     // Input table must be registered in concrete classes to allow setting conditional options on it
@@ -87,11 +99,10 @@ protected:
     /// @brief Find PAC's epsilon and delta using elbow method on ECDF defined by @c
     /// empirical_probabilities (epsilon-delta pairs)
     /// @return epsilon, delta
-    std::pair<double, double> FindEpsilonDelta(
-            std::vector<std::pair<double, double>>&& empirical_probabilities) const;
+    EpsilonDelta FindEpsilonDelta(std::vector<EpsilonDelta>&& empirical_probabilities) const;
 
     /// @brief Get (refined) epsilon-delta pair with specific epsilon
-    virtual std::pair<double, double> GetEpsilonDeltaForEpsilon(double epsilon) const = 0;
+    virtual EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const = 0;
 
 public:
     PACVerifier() : Algorithm() {

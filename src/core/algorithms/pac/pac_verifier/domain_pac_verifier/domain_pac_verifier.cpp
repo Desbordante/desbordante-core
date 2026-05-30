@@ -11,6 +11,7 @@
 
 #include "core/algorithms/pac/domain_pac.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
+#include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
 #include "core/util/bitset_utils.h"
 #include "core/util/logger.h"
@@ -40,7 +41,7 @@ void DomainPACVerifier::PreparePACTypeData() {
     std::ranges::sort(dists_from_domain_, {}, [](auto const& p) { return p.second; });
 }
 
-std::vector<std::pair<double, double>> DomainPACVerifier::FindEpsilons() const {
+std::vector<PACVerifier::EpsilonDelta> DomainPACVerifier::FindEpsilons() const {
     auto total_tuples_num = original_value_tuples_->size();
     // Tuples number needed to satisfy min_delta
     std::size_t min_tuples_num = std::ceil(MinDelta() * total_tuples_num);
@@ -59,7 +60,7 @@ std::vector<std::pair<double, double>> DomainPACVerifier::FindEpsilons() const {
 
     auto end = domain_end_;
     auto domain_size = std::distance(dists_from_domain_.begin(), end);
-    std::vector<std::pair<double, double>> result;
+    std::vector<EpsilonDelta> result;
     std::size_t curr_size = domain_size;
 
     result.emplace_back(0, static_cast<double>(domain_size) / total_tuples_num);
@@ -93,6 +94,7 @@ std::vector<std::pair<double, double>> DomainPACVerifier::FindEpsilons() const {
 
         result.emplace_back(eps_i, delta_i);
     }
+    result.emplace_back(dists_from_domain_.back().second, 1);
     return result;
 }
 
@@ -128,7 +130,7 @@ void DomainPACVerifier::PACTypeExecuteInternal() {
     LOG_INFO("Result: {}", pac_->ToLongString());
 }
 
-std::pair<double, double> DomainPACVerifier::GetEpsilonDeltaForEpsilon(double epsilon) const {
+PACVerifier::EpsilonDelta DomainPACVerifier::GetEpsilonDeltaForEpsilon(double epsilon) const {
     auto it = std::ranges::upper_bound(
             dists_from_domain_, epsilon, {},
             [](std::pair<TuplesIter, double> const& pair) { return pair.second; });
