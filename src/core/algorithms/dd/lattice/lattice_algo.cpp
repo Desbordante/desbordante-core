@@ -329,10 +329,9 @@ void LatticeAlgorithm::BuildFirstLevel() {
         auto const& column_partitions = base_partitions_[column_index];
         for (std::size_t partition_index = 0; partition_index < column_partitions.size();
              ++partition_index) {
-            auto new_node = std::make_unique<LatticeNode>();
-            resize(new_node->df_, df_num_);
+            auto new_node =
+                    std::make_unique<LatticeNode>(df_num_, column_partitions[partition_index]);
             set(new_node->df_, df_index);
-            new_node->partition_ = column_partitions[partition_index];
             current_level_.push_back(std::move(new_node));
             ++df_index;
         }
@@ -369,8 +368,8 @@ void LatticeAlgorithm::BuildNextLevel() {
                         }
                     if (node_reducible) continue;
 
-                    auto new_node =
-                            std::make_unique<LatticeNode>(union_bits, new_partition, new_dds);
+                    auto new_node = std::make_unique<LatticeNode>(
+                            std::move(union_bits), std::move(new_partition), std::move(new_dds));
                     next_level_.push_back(std::move(new_node));
                 }
             }

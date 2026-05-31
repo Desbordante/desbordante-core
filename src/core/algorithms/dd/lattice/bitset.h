@@ -18,7 +18,6 @@ constexpr int NPOS = -1;
 enum class BitsetType { Small, Medium, Dynamic };
 
 struct Bitset {
-    BitsetType type;
     std::variant<SmallBits, MediumBits, DynamicBits> data;
     std::size_t size;
 };
@@ -35,14 +34,14 @@ inline auto visit_bits(Bitset const& b, F&& f) {
 
 inline Bitset make_bitset(std::size_t size) {
     if (size <= 64) {
-        return Bitset{BitsetType::Small, SmallBits(0), size};
+        return Bitset{SmallBits(0), size};
     }
 
     if (size <= 256) {
-        return Bitset{BitsetType::Medium, MediumBits(), size};
+        return Bitset{MediumBits(), size};
     }
 
-    return Bitset{BitsetType::Dynamic, DynamicBits(size), size};
+    return Bitset{DynamicBits(size), size};
 }
 
 inline void set(Bitset& b, std::size_t i) {
@@ -190,21 +189,8 @@ inline int find_next(Bitset const& b, int pos) {
     });
 }
 
-inline void resize(Bitset& b, std::size_t new_size) {
-    b.size = new_size;
-
-    visit_bits(b, [&](auto& x) {
-        using T = std::decay_t<decltype(x)>;
-
-        if constexpr (std::is_same_v<T, DynamicBits>) {
-            x.resize(new_size);
-        }
-    });
-}
-
 inline bool operator==(Bitset const& a, Bitset const& b) {
-    if (a.type != b.type || a.size != b.size) return false;
-
+    if (a.data.index() != b.data.index() || a.size != b.size) return false;
     return visit_bits(a, [&](auto const& x) {
         using T = std::decay_t<decltype(x)>;
         return x == std::get<T>(b.data);

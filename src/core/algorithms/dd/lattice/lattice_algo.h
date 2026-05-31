@@ -98,13 +98,13 @@ private:
         Bitset partition_;
         DDSet dds_;
 
-        LatticeNode()
-            : df_(std::move(make_bitset(0))),
-              partition_(std::move(make_bitset(0))),
+        LatticeNode(std::size_t df_size, Bitset const& partition)
+            : df_(make_bitset(df_size)),
+              partition_(partition),
               dds_(std::make_shared<std::unordered_set<Bitset, BitsetHash>>()) {}
 
         LatticeNode(Bitset v, Bitset Fv, DDSet dds)
-            : df_(std::move(v)), partition_(std::move(Fv)), dds_(dds) {}
+            : df_(std::move(v)), partition_(std::move(Fv)), dds_(std::move(dds)) {}
     };
 
     std::vector<std::unique_ptr<LatticeNode>> current_level_;
