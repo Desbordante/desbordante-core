@@ -30,13 +30,14 @@ void AFDMetricCalculator::RegisterOptions() {
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
     RegisterOption(Option{&metric_, kMetric, kDAFDMetric});
+    RegisterOption(config::kUsePliwsOpt(&use_pliws_));
 }
 
 void AFDMetricCalculator::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable(
-            {kMetric, config::kLhsIndicesOpt.GetName(), config::kRhsIndicesOpt.GetName()});
+    MakeOptionsAvailable({kMetric, config::kLhsIndicesOpt.GetName(),
+                          config::kRhsIndicesOpt.GetName(), config::kUsePliwsOpt.GetName()});
 }
 
 void AFDMetricCalculator::LoadDataInternal() {
@@ -54,26 +55,46 @@ unsigned long long AFDMetricCalculator::ExecuteInternal() {
     return elapsed_milliseconds;
 }
 
+namespace {
+
+template <typename PLIT>
+auto CalculateMetric(PLIT&& lhs_ptr, PLIT&& rhs_ptr, AFDMetric metric, size_t num_rows) {
+    auto* lhs_raw = lhs_ptr.get();
+    auto* rhs_raw = rhs_ptr.get();
+
+    switch (metric) {
+        case AFDMetric::kG2:
+            return AFDMetricCalculator::CalculateG2(lhs_raw, rhs_raw, num_rows);
+        case AFDMetric::kTau: {
+            auto joint = lhs_raw->Intersect(rhs_raw);
+            return AFDMetricCalculator::CalculateTau(lhs_raw, rhs_raw, joint.get());
+        }
+        case AFDMetric::kMuPlus: {
+            auto joint = lhs_raw->Intersect(rhs_raw);
+            return AFDMetricCalculator::CalculateMuPlus(lhs_raw, rhs_raw, joint.get());
+        }
+        case AFDMetric::kFi:
+            return AFDMetricCalculator::CalculateFI(lhs_raw, rhs_raw, num_rows);
+    }
+
+    assert(false);
+    __builtin_unreachable();
+}
+}  // namespace
+
 void AFDMetricCalculator::CalculateMetric() {
     auto num_rows = relation_->GetNumRows();
-    auto lhs_pli = relation_->CalculatePLIWS(lhs_indices_);
-    auto rhs_pli = relation_->CalculatePLIWS(rhs_indices_);
 
-    switch (metric_) {
-        case AFDMetric::kG2:
-            result_ = CalculateG2(lhs_pli.get(), rhs_pli.get(), num_rows);
-            break;
-        case AFDMetric::kTau:
-            result_ = CalculateTau(lhs_pli.get(), rhs_pli.get(),
-                                   lhs_pli->Intersect(rhs_pli.get()).get());
-            break;
-        case AFDMetric::kMuPlus:
-            result_ = CalculateMuPlus(lhs_pli.get(), rhs_pli.get(),
-                                      lhs_pli->Intersect(rhs_pli.get()).get());
-            break;
-        case AFDMetric::kFi:
-            result_ = CalculateFI(lhs_pli.get(), rhs_pli.get(), num_rows);
-            break;
+    if (use_pliws_) {
+        auto lhs_pli = relation_->CalculatePLIWS(lhs_indices_);
+        auto rhs_pli = relation_->CalculatePLIWS(rhs_indices_);
+        result_ = ::algos::afd_metric_calculator::CalculateMetric(lhs_pli, rhs_pli, metric_,
+                                                                  num_rows);
+    } else {
+        auto lhs_pli = relation_->CalculatePLI(lhs_indices_);
+        auto rhs_pli = relation_->CalculatePLI(rhs_indices_);
+        result_ = ::algos::afd_metric_calculator::CalculateMetric(lhs_pli, rhs_pli, metric_,
+                                                                  num_rows);
     }
 }
 
@@ -95,7 +116,7 @@ long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::P
     return num_error_rows / num_rows;
 }
 
-long double AFDMetricCalculator::CalculatePdepSelf(model::PLIWithSingletons const* x_pli) {
+long double AFDMetricCalculator::CalculatePdepSelf(model::PLI const* x_pli) {
     size_t n = x_pli->GetRelationSize();
     config::ErrorType sum = 0;
     std::size_t cluster_rows_count = 0;
@@ -150,9 +171,58 @@ long double AFDMetricCalculator::CalculatePdepMeasure(model::PLIWithSingletons c
     return (sum / static_cast<config::ErrorType>(n));
 }
 
+long double AFDMetricCalculator::CalculatePdepMeasure(model::PositionListIndex const* x_pli,
+                                                      model::PositionListIndex const* xa_pli) {
+    std::deque<Cluster> xa_index = xa_pli->GetIndex();
+    std::deque<Cluster> x_index = x_pli->GetIndex();
+    size_t n = x_pli->GetRelationSize();
+
+    config::ErrorType sum = 0;
+
+    std::unordered_map<int, size_t> x_frequencies;
+
+    int x_value_id = 1;
+    for (Cluster const& x_cluster : x_index) {
+        x_frequencies[x_value_id++] = x_cluster.size();
+    }
+
+    x_frequencies[model::PositionListIndex::kSingletonValueId] = 1;
+
+    auto x_prob = x_pli->CalculateAndGetProbingTable();
+
+    auto get_x_freq_by_tuple_ind{[&x_prob, &x_frequencies](int tuple_ind) {
+        int value_id = x_prob->at(tuple_ind);
+        return static_cast<config::ErrorType>(x_frequencies[value_id]);
+    }};
+
+    for (Cluster const& xa_cluster : xa_index) {
+        config::ErrorType num = xa_cluster.size() * xa_cluster.size();
+        config::ErrorType denum = get_x_freq_by_tuple_ind(xa_cluster.front());
+        sum += num / denum;
+    }
+
+    auto xa_prob = xa_pli->CalculateAndGetProbingTable();
+    for (size_t i = 0; i < xa_prob->size(); i++) {
+        if (xa_prob->at(i) == 0) {
+            sum += 1 / get_x_freq_by_tuple_ind(i);
+        }
+    }
+    return (sum / static_cast<config::ErrorType>(n));
+}
+
 long double AFDMetricCalculator::CalculateTau(model::PLIWS const* lhs_pli,
                                               model::PLIWS const* rhs_pli,
                                               model::PLIWS const* joint_pli) {
+    auto p1 = CalculatePdepSelf(rhs_pli);
+    if (p1 == 1) return 1;
+
+    auto p2 = CalculatePdepMeasure(lhs_pli, joint_pli);
+
+    return (p2 - p1) / (1 - p1);
+}
+
+long double AFDMetricCalculator::CalculateTau(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                              model::PLI const* joint_pli) {
     auto p1 = CalculatePdepSelf(rhs_pli);
     if (p1 == 1) return 1;
 
@@ -186,6 +256,33 @@ long double AFDMetricCalculator::CalculateMuPlus(model::PLIWS const* lhs_pli,
     return std::max(mu, 0.L);
 }
 
+long double AFDMetricCalculator::CalculateMuPlus(model::PositionListIndex const* x_pli,
+                                                 model::PositionListIndex const* a_pli,
+                                                 model::PositionListIndex const* xa_pli) {
+    config::ErrorType pdep_y = CalculatePdepSelf(a_pli);
+    if (pdep_y == 1) return 1;
+
+    config::ErrorType pdep_xy = CalculatePdepMeasure(x_pli, xa_pli);
+
+    size_t n = x_pli->GetRelationSize();
+    std::size_t cluster_rows_count = 0;
+    std::deque<Cluster> const& x_index = x_pli->GetIndex();
+    size_t k = x_index.size();
+
+    for (Cluster const& x_cluster : x_index) {
+        cluster_rows_count += x_cluster.size();
+    }
+
+    std::size_t unique_rows = x_pli->GetRelationSize() - cluster_rows_count;
+    k += unique_rows;
+
+    if (k == n) return 1;
+
+    config::ErrorType mu = 1 - (1 - pdep_xy) / (1 - pdep_y) * (n - 1) / (n - k);
+    config::ErrorType mu_plus = std::max(0., mu);
+    return mu_plus;
+}
+
 long double AFDMetricCalculator::CalculateFI(model::PLIWS const* lhs_pli,
                                              model::PLIWS const* rhs_pli, size_t num_rows) {
     if (num_rows <= 0) throw std::invalid_argument("received unpositive number of rows");
@@ -213,6 +310,44 @@ long double AFDMetricCalculator::CalculateFI(model::PLIWS const* lhs_pli,
             if (size == 0.L) continue;
             conditional_entropy -= size * (std::log(size) - log_x);
         }
+    }
+    conditional_entropy /= num_rows;
+    auto mutual_information = entropy - conditional_entropy;
+    return mutual_information / entropy;
+}
+
+long double AFDMetricCalculator::CalculateFI(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                             size_t num_rows) {
+    if (num_rows <= 0) throw std::invalid_argument("received unpositive number of rows");
+
+    if (rhs_pli->GetNumCluster() < 2) {
+        return 0.L;
+    }
+
+    auto entropy = rhs_pli->GetEntropy();
+
+    std::deque<Cluster> rhs_clusters{rhs_pli->GetIndex()};
+    for (auto& y : rhs_clusters) {
+        std::sort(y.begin(), y.end());
+    }
+
+    auto conditional_entropy = 0.L;
+    for (auto& x : std::deque<Cluster>{lhs_pli->GetIndex()}) {
+        std::sort(x.begin(), x.end());
+        auto log_x = std::log(x.size());
+
+        size_t xy_calc_cnt = 0;
+        for (auto const& y : rhs_clusters) {
+            model::PositionListIndex::Cluster xy;
+            std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::back_inserter(xy));
+
+            auto size = (long double)xy.size();
+            if (size == 0.L) continue;
+            xy_calc_cnt += size;
+            conditional_entropy -= size * (std::log(size) - log_x);
+        }
+
+        conditional_entropy -= (long double)(x.size() - xy_calc_cnt) * (-log_x);
     }
     conditional_entropy /= num_rows;
     auto mutual_information = entropy - conditional_entropy;

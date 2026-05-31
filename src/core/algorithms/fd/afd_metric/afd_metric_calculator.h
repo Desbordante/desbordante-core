@@ -9,6 +9,7 @@
 #include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/config/use_pliws/option.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/table/position_list_index_with_singletons.h"
@@ -20,6 +21,7 @@ private:
     config::InputTable input_table_;
 
     AFDMetric metric_ = magic_enum::enum_values<AFDMetric>().front();
+    bool use_pliws_ = false;
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
 
@@ -45,10 +47,13 @@ public:
             size_t num_rows, std::deque<model::PositionListIndex::Cluster>&& lhs_clusters,
             std::deque<model::PositionListIndex::Cluster>&& rhs_clusters);
 
-    static long double CalculatePdepSelf(model::PLIWithSingletons const* x_pli);
+    static long double CalculatePdepSelf(model::PLI const* x_pli);
 
     static long double CalculatePdepMeasure(model::PLIWithSingletons const* x_pli,
                                             model::PLIWithSingletons const* xa_pli);
+
+    static long double CalculatePdepMeasure(model::PositionListIndex const* x_pli,
+                                            model::PositionListIndex const* xa_pli);
 
     static long double CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                    size_t num_rows);
@@ -56,10 +61,19 @@ public:
     static long double CalculateTau(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
                                     model::PLIWS const* joint_pli);
 
+    static long double CalculateTau(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                    model::PLI const* joint_pli);
+
     static long double CalculateMuPlus(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
                                        model::PLIWS const* joint_pli);
 
+    static long double CalculateMuPlus(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                       model::PLI const* joint_pli);
+
     static long double CalculateFI(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
+                                   size_t num_rows);
+
+    static long double CalculateFI(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                    size_t num_rows);
 
     long double GetResult() const {
