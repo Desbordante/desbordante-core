@@ -217,6 +217,11 @@ auto const kDMetricAlgorithm = details::kDMetricAlgorithmString.c_str();
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
 // ND
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+// AFD metric calculator
+constexpr auto kDUsePliws =
+        "Whether to use PLIs with singletons for error calculation. Using PLIWS "
+        "can reduce the runtime for discovering approximate FDs, but "
+        "also significantly increase memory usage.";
 // Pyro
 constexpr auto kDCustomRandom =
         "seed for the custom random generator. Used for consistency of results across platforms.";

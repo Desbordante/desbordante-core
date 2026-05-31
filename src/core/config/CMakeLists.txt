@@ -25,5 +25,6 @@ target_sources(
             thread_number/option.cpp
             time_limit/option.cpp
             transactional_data/option.cpp
+            use_pliws/option.cpp
 )
 target_link_libraries(${NAME} PRIVATE magic_enum::magic_enum Boost::headers)

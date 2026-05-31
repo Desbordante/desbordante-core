@@ -112,6 +112,8 @@ constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
+// AFD metric calculator
+constexpr auto kUsePliws = "use_pliws";
 // Pyro
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider
