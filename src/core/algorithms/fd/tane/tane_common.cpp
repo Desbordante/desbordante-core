@@ -4,11 +4,14 @@
 #include <iomanip>
 #include <list>
 #include <memory>
+#include <variant>
 
 #include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/algorithms/fd/tane/model/lattice_level.h"
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 #include "core/config/error/option.h"
+#include "core/config/option.h"
+#include "core/config/use_pliws/option.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/relational_schema.h"
@@ -21,6 +24,7 @@ namespace tane {
 
 TaneCommon::TaneCommon() : PliBasedFDAlgorithm() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
+    RegisterOption(config::kUsePliwsOpt(&use_pliws_));
 }
 
 double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
@@ -93,14 +97,27 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
         Vertical xa = xa_vertex->GetVertical();
         // Calculate XA PLI
         if (xa_vertex->GetPositionListIndex() == nullptr) {
-            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndexWithSingletons();
-            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndexWithSingletons();
-            xa_vertex->AcquirePLIWithSingletons(parent_pli_1->Intersect(parent_pli_2));
+            if (use_pliws_) {
+                auto parent_pli_1 =
+                        xa_vertex->GetParents()[0]->GetPositionListIndexWithSingletons();
+                auto parent_pli_2 =
+                        xa_vertex->GetParents()[1]->GetPositionListIndexWithSingletons();
+                xa_vertex->AcquirePLIWithSingletons(parent_pli_1->Intersect(parent_pli_2));
+            } else {
+                auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndex();
+                auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndex();
+                xa_vertex->AcquirePositionListIndex(parent_pli_1->Intersect(parent_pli_2));
+            }
         }
 
         dynamic_bitset<> xa_indices = xa.GetColumnIndices();
         dynamic_bitset<> a_candidates = xa_vertex->GetRhsCandidates();
-        auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
+        std::variant<model::PLI const*, model::PLIWS const*> xa_pli;
+        if (use_pliws_) {
+            xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
+        } else {
+            xa_pli = xa_vertex->GetPositionListIndex();
+        }
         for (auto const& x_vertex : xa_vertex->GetParents()) {
             Vertical const& lhs = x_vertex->GetVertical();
 
@@ -110,10 +127,18 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             if (!a_candidates[a_index]) {
                 continue;
             }
-            auto x_pli = x_vertex->GetPositionListIndexWithSingletons();
-            auto a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
+
+            config::ErrorType error;
+            if (use_pliws_) {
+                model::PLIWS const* x_pli = x_vertex->GetPositionListIndexWithSingletons();
+                model::PLIWS const* a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
+                error = CalculateFdError(x_pli, a_pli, std::get<model::PLIWS const*>(xa_pli));
+            } else {
+                model::PLI const* x_pli = x_vertex->GetPositionListIndex();
+                model::PLI const* a_pli = relation_->GetColumnData(a_index).GetPositionListIndex();
+                error = CalculateFdError(x_pli, a_pli, std::get<model::PLI const*>(xa_pli));
+            }
             // Check X -> A
-            config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
             if (error <= max_fd_error_) {
                 Column const* rhs = schema->GetColumns()[a_index].get();
 

@@ -33,6 +33,12 @@ config::ErrorType PFDTane::CalculateFdError(model::PLIWS const* lhs_pli,
     return CalculatePFDError(lhs_pli, joint_pli, pfd_error_measure_);
 }
 
+config::ErrorType PFDTane::CalculateFdError(model::PLI const* lhs_pli,
+                                            [[maybe_unused]] model::PLI const* rhs_pli,
+                                            model::PLI const* joint_pli) {
+    return CalculatePFDError(lhs_pli, joint_pli, pfd_error_measure_);
+}
+
 config::ErrorType PFDTane::CalculateZeroAryPFDError(ColumnData const* rhs) {
     std::size_t max = 1;
     model::PositionListIndex const* x_pli = rhs->GetPositionListIndex();

@@ -15,7 +15,11 @@ private:
     void RegisterOptions();
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) override;
-    config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
+    config::ErrorType CalculateFdError(model::PLI const* lhs_pli,
+                                       [[maybe_unused]] model::PLI const* rhs_pli,
+                                       model::PLI const* joint_pli) override;
+    config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli,
+                                       [[maybe_unused]] model::PLIWS const* rhs_pli,
                                        model::PLIWS const* joint_pli) override;
 
 public:
