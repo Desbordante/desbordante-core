@@ -179,6 +179,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::gdd::validator
     magic_enum::magic_enum
     Boost::headers
+    spdlog::spdlog_header_only
 )
 
 desbordante_add_bind(
