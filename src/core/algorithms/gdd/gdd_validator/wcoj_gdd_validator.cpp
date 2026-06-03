@@ -1,7 +1,6 @@
 #include "wcoj_gdd_validator.h"
 
 #include <algorithm>
-#include <deque>
 #include <ranges>
 #include <stdexcept>
 #include <unordered_map>
@@ -12,153 +11,22 @@
 
 namespace algos {
 
-namespace {
-
-// boost::breadth_first_search goes through out_edges only, and there is no
-// way to pass directed graph as undirected without making a copy of it (as far as I know)
-class BfsQueryVertexOrder {
-private:
-    using GraphT = model::gdd::graph_t;
-    using VertexT = model::gdd::vertex_t;
-    using DomainT = std::unordered_map<VertexT, std::vector<VertexT>>;
-
-    GraphT const& pattern_;
-    DomainT const& domain_;
-
-    std::vector<VertexT> qvo_;
-    std::unordered_set<VertexT> visited_;
-    std::unordered_set<VertexT> queued_;
-    std::deque<VertexT> queue_;
-
-    std::size_t GetDomainSize(VertexT pattern_vertex) const {
-        auto const it = domain_.find(pattern_vertex);
-        if (it == domain_.end()) {
-            return 0;
-        }
-        return it->second.size();
-    }
-
-    std::size_t GetPatternDegree(VertexT vertex) const {
-        return boost::out_degree(vertex, pattern_) + boost::in_degree(vertex, pattern_);
-    }
-
-    bool IsBetterRoot(VertexT lhs, VertexT rhs) const {
-        std::size_t const lhs_domain_size = GetDomainSize(lhs);
-        std::size_t const rhs_domain_size = GetDomainSize(rhs);
-
-        if (lhs_domain_size != rhs_domain_size) {
-            return lhs_domain_size < rhs_domain_size;
-        }
-
-        std::size_t const lhs_degree = GetPatternDegree(lhs);
-        std::size_t const rhs_degree = GetPatternDegree(rhs);
-
-        if (lhs_degree != rhs_degree) {
-            return lhs_degree > rhs_degree;
-        }
-
-        return pattern_[lhs].id < pattern_[rhs].id;
-    }
-
-    VertexT ChooseNextRoot() const {
-        bool found = false;
-        VertexT best{};
-
-        for (auto const vertex : boost::make_iterator_range(boost::vertices(pattern_))) {
-            if (visited_.contains(vertex)) {
-                continue;
-            }
-
-            if (!found || IsBetterRoot(vertex, best)) {
-                best = vertex;
-                found = true;
-            }
-        }
-
-        if (!found) {
-            throw std::logic_error("BuildQueryVertexOrder called with no unvisited vertices left");
-        }
-
-        return best;
-    }
-
-    void EnqueueIfNeeded(VertexT vertex) {
-        if (!visited_.contains(vertex) && queued_.emplace(vertex).second) {
-            queue_.push_back(vertex);
-        }
-    }
-
-    void EnqueueUndirectedNeighbors(VertexT vertex) {
-        for (auto const edge : boost::make_iterator_range(boost::out_edges(vertex, pattern_))) {
-            EnqueueIfNeeded(boost::target(edge, pattern_));
-        }
-
-        for (auto const edge : boost::make_iterator_range(boost::in_edges(vertex, pattern_))) {
-            EnqueueIfNeeded(boost::source(edge, pattern_));
-        }
-    }
-
-    void VisitNext() {
-        VertexT const current = queue_.front();
-        queue_.pop_front();
-        queued_.erase(current);
-
-        if (!visited_.emplace(current).second) {
-            return;
-        }
-
-        qvo_.push_back(current);
-        EnqueueUndirectedNeighbors(current);
-    }
-
-public:
-    BfsQueryVertexOrder(GraphT const& pattern, DomainT const& domain)
-        : pattern_(pattern), domain_(domain) {}
-
-    std::vector<VertexT> Build() {
-        qvo_.clear();
-        visited_.clear();
-        queued_.clear();
-        queue_.clear();
-
-        std::size_t const vertex_count = boost::num_vertices(pattern_);
-        qvo_.reserve(vertex_count);
-
-        while (qvo_.size() != vertex_count) {
-            if (queue_.empty()) {
-                EnqueueIfNeeded(ChooseNextRoot());
-            }
-
-            VisitNext();
-        }
-
-        return qvo_;
-    }
-};
-
-}  // namespace
-
 void WcojGddValidator::Prepare(model::Gdd const& gdd, model::gdd::graph_t const& graph) {
     gdd_ = &gdd;
     graph_ = &graph;
     pattern_ = &gdd.GetPattern();
 
-    match_levels_.clear();
+    cur_level_.clear();
+    next_level_.clear();
+    level_count_ = 0;
     adjacency_index_.clear();
-
-    match_levels_.reserve(boost::num_vertices(*pattern_));
 
     domain_ = BuildDomain(*pattern_, *graph_);
     for (auto& set : domain_ | std::views::values) {
         std::ranges::sort(set);
     }
-    qvo_ = BuildQueryVertexOrder();
-}
 
-std::vector<GddValidator::VertexT> WcojGddValidator::BuildQueryVertexOrder() const {
-    // base implementation, does not use graph statistics and does not compute
-    // cost of QVO plan
-    return BfsQueryVertexOrder(*pattern_, domain_).Build();
+    qvo_ = BuildQueryVertexOrder<CostBasedQvoStrategy>();
 }
 
 std::optional<model::GddCounterexample> WcojGddValidator::Holds(model::Gdd const& gdd,
@@ -176,7 +44,16 @@ std::optional<model::GddCounterexample> WcojGddValidator::Holds(model::Gdd const
         }
     }
 
-    for (MappingT const& full_match : match_levels_.back()) {
+    std::size_t const count = cur_level_.count();
+    std::size_t const width = cur_level_.width;
+    MappingT full_match;
+    for (std::size_t i = 0; i < count; ++i) {
+        VertexT const* row = cur_level_.row(i);
+        full_match.clear();
+        for (std::size_t j = 0; j < width; ++j) {
+            full_match.emplace(qvo_[j], row[j]);
+        }
+
         if (!gdd_->Satisfies(graph, full_match)) {
             return model::BuildCounterexample(gdd_->GetPattern(), *graph_, full_match);
         }
@@ -199,54 +76,50 @@ WcojGddValidator::OperationResult WcojGddValidator::Scan() {
 
     auto const& candidates = domain_it->second;
 
-    MatchLevelT level;
-    for (auto const gv : candidates) {
-        level.emplace_back(MappingT{{first_pv, gv}});
-    }
+    cur_level_.reset(1);
+    cur_level_.data.assign(candidates.begin(), candidates.end());
 
-    match_levels_.emplace_back(std::move(level));
+    level_count_ = 1;
     return OperationResult::kProduced;
 }
 
 WcojGddValidator::OperationResult WcojGddValidator::ExtendIntersect() {
-    std::size_t const match_level = match_levels_.size();
+    intersection_cache_.last_isect_valid = false;
 
-    if (match_level == 0) {
+    if (level_count_ == 0) {
         throw std::logic_error("Scan call is required before ExtendIntersect call");
     }
-    if (match_level >= qvo_.size()) {
+    if (level_count_ >= qvo_.size()) {
         return OperationResult::kFinished;
     }
 
-    auto const new_pv = qvo_[match_level];
-    MatchLevelT const& prev_level = match_levels_[match_level - 1];
-    MatchLevelT next_level;
+    auto const new_pv = qvo_[level_count_];
+    std::size_t const parent_width = cur_level_.width;
+    std::size_t const parent_count = cur_level_.count();
 
-    auto const& descriptors = BuildDescriptorsFor(new_pv, match_level);
-    for (MappingT const& partial_match : prev_level) {
-        std::vector<VertexT> const extension_set =
-                ComputeExtensionSet(partial_match, new_pv, descriptors);
+    next_level_.reset(level_count_ + 1);
+    // at least one child per parent
+    next_level_.data.reserve(cur_level_.data.size() + parent_count);
 
-        for (VertexT graph_vertex : extension_set) {
-            MappingT extended_match = partial_match;
+    auto const& descriptors = BuildDescriptorsFor(new_pv, level_count_);
+    for (std::size_t i = 0; i < parent_count; ++i) {
+        VertexT const* parent = cur_level_.row(i);
+        std::vector<VertexT> const& extension_set =
+                ComputeExtensionSet(parent, new_pv, descriptors);
 
-            if (auto const [_, inserted] = extended_match.emplace(new_pv, graph_vertex);
-                !inserted) {
-                throw std::logic_error("New pattern vertex is already present in partial match");
-            }
-
-            next_level.emplace_back(std::move(extended_match));
+        for (VertexT const graph_vertex : extension_set) {
+            next_level_.push_row(parent, parent_width, graph_vertex);
         }
     }
 
-    if (next_level.empty()) {
+    if (next_level_.count() == 0) {
         return OperationResult::kEmpty;
     }
 
-    match_levels_.emplace_back(std::move(next_level));
+    std::swap(cur_level_, next_level_);
+    ++level_count_;
 
-    return match_levels_.size() == qvo_.size() ? OperationResult::kFinished
-                                               : OperationResult::kProduced;
+    return level_count_ == qvo_.size() ? OperationResult::kFinished : OperationResult::kProduced;
 }
 
 std::vector<WcojGddValidator::AdjacencyDescriptor> WcojGddValidator::BuildDescriptorsFor(
@@ -263,6 +136,7 @@ std::vector<WcojGddValidator::AdjacencyDescriptor> WcojGddValidator::BuildDescri
             if (boost::target(edge, *pattern_) == new_pv) {
                 descriptors.push_back(AdjacencyDescriptor{
                         .pattern_vertex = old_pv,
+                        .qvo_index = i,
                         .direction = Direction::kOut,
                         .edge_label = (*pattern_)[edge].label,
                 });
@@ -273,6 +147,7 @@ std::vector<WcojGddValidator::AdjacencyDescriptor> WcojGddValidator::BuildDescri
             if (boost::source(edge, *pattern_) == new_pv) {
                 descriptors.push_back(AdjacencyDescriptor{
                         .pattern_vertex = old_pv,
+                        .qvo_index = i,
                         .direction = Direction::kIn,
                         .edge_label = (*pattern_)[edge].label,
                 });
@@ -323,58 +198,85 @@ std::vector<GddValidator::VertexT> const& WcojGddValidator::GetNeighbors(
     return neighbors;
 }
 
-std::vector<GddValidator::VertexT> WcojGddValidator::ComputeExtensionSet(
-        MappingT const& partial_match, VertexT new_pv,
+std::vector<GddValidator::VertexT> const& WcojGddValidator::ComputeExtensionSet(
+        VertexT const* partial_match, VertexT new_pv,
         std::vector<AdjacencyDescriptor> const& descriptors) {
     auto const domain_it = domain_.find(new_pv);
     if (domain_it == domain_.end() || domain_it->second.empty()) {
-        return {};
+        intersection_cache_.last_isect_valid = false;
+        intersection_cache_.last_isect_key.clear();
+        intersection_cache_.last_isect_set.clear();
+        return intersection_cache_.last_isect_set;
     }
 
     std::vector<VertexT> const& domain = domain_it->second;
 
     if (descriptors.empty()) {
+        intersection_cache_.last_isect_valid = false;
         return domain;
+    }
+
+    // lookup intersection cache
+    std::vector<VertexT> key;
+    key.reserve(descriptors.size());
+    for (auto const& d : descriptors) {
+        key.push_back(partial_match[d.qvo_index]);
+    }
+
+    if (intersection_cache_.last_isect_valid && intersection_cache_.last_isect_key == key) {
+        return intersection_cache_.last_isect_set;
     }
 
     std::vector<std::vector<VertexT> const*> lists;
     lists.reserve(descriptors.size() + 1);
     lists.push_back(&domain);
 
-    for (auto const& [pattern_vertex, direction, edge_label] : descriptors) {
-        auto const mapped_it = partial_match.find(pattern_vertex);
-        if (mapped_it == partial_match.end()) {
-            throw std::logic_error(
-                    "Descriptor references a pattern vertex absent from partial match");
-        }
-
-        std::vector<VertexT> const& neighbors =
-                GetNeighbors(mapped_it->second, direction, edge_label);
+    for (auto const& d : descriptors) {
+        VertexT const mapped = partial_match[d.qvo_index];
+        std::vector<VertexT> const& neighbors = GetNeighbors(mapped, d.direction, d.edge_label);
 
         if (neighbors.empty()) {
-            return {};
+            intersection_cache_.last_isect_valid = true;
+            intersection_cache_.last_isect_key.assign(key.begin(), key.end());
+            intersection_cache_.last_isect_set.clear();
+            return intersection_cache_.last_isect_set;
         }
 
         // neighbors are cached in adjacency_index_, so the pointer lives
         lists.push_back(&neighbors);
     }
 
+    intersection_cache_.last_isect_key.assign(key.begin(), key.end());
+    IntersectSorted(lists, intersection_cache_.last_isect_set);
+    intersection_cache_.last_isect_valid = true;
+    return intersection_cache_.last_isect_set;
+}
+
+void WcojGddValidator::IntersectSorted(std::vector<std::vector<VertexT> const*>& lists,
+                                       std::vector<VertexT>& out) {
     // for faster intersections, |A \cap B| <= max(|A|, |B|)
     std::ranges::sort(lists, [](auto const* a, auto const* b) { return a->size() < b->size(); });
 
-    std::vector<VertexT> acc = IntersectSorted(*lists[0], *lists[1]);
-    for (std::size_t i = 2; i < lists.size() && !acc.empty(); ++i) {
-        acc = IntersectSorted(acc, *lists[i]);
-    }
-    return acc;
-}
+    out.clear();
+    std::ranges::set_intersection(*lists[0], *lists[1], std::back_inserter(out));
 
-std::vector<GddValidator::VertexT> WcojGddValidator::IntersectSorted(
-        std::vector<VertexT> const& lhs, std::vector<VertexT> const& rhs) {
-    std::vector<VertexT> result;
-    result.reserve(std::min(lhs.size(), rhs.size()));
-    std::ranges::set_intersection(lhs, rhs, std::back_inserter(result));
-    return result;
+    if (lists.size() == 2) {
+        return;
+    }
+
+    scratch_.clear();
+    std::vector<VertexT>* cur = &out;
+    std::vector<VertexT>* tmp = &scratch_;
+
+    for (std::size_t i = 2; i < lists.size() && !cur->empty(); ++i) {
+        tmp->clear();
+        std::ranges::set_intersection(*cur, *lists[i], std::back_inserter(*tmp));
+        std::swap(cur, tmp);
+    }
+
+    if (cur != &out) {
+        std::swap(out, *cur);
+    }
 }
 
 }  // namespace algos

@@ -526,12 +526,11 @@ void BindGddVerification(pybind11::module_& main_module) {
 
     auto const gdd_algos_module = gdd_module.def_submodule("algorithms");
 
-    detail::RegisterAlgorithm<NaiveGddValidator, GddValidator>(gdd_algos_module,
-                                                               "NaiveGddValidator");
-    auto wcoj_cls = detail::RegisterAlgorithm<WcojGddValidator, GddValidator>(gdd_algos_module,
-                                                                              "WcojGddValidator");
+    auto default_cls = detail::RegisterAlgorithm<NaiveGddValidator, GddValidator>(
+            gdd_algos_module, "NaiveGddValidator");
+    detail::RegisterAlgorithm<WcojGddValidator, GddValidator>(gdd_algos_module, "WcojGddValidator");
 
-    gdd_algos_module.attr("Default") = wcoj_cls;
+    gdd_algos_module.attr("Default") = default_cls;
     gdd_module.attr("Default") = gdd_algos_module.attr("Default");
 }
 

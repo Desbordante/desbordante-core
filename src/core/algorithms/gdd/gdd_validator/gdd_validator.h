@@ -30,10 +30,10 @@ private:
     virtual void LoadDataInternal() final;
 
 protected:
-    using VertexT = model::gdd::vertex_t;
-    using EdgeT = model::gdd::edge_t;
-    using DomainT = std::unordered_map<VertexT, std::vector<VertexT>>;
-    using MappingT = std::unordered_map<VertexT, VertexT>;
+    using VertexT = model::gdd::detail::VertexT;
+    using EdgeT = model::gdd::detail::EdgeT;
+    using DomainT = model::gdd::detail::DomainT;
+    using MappingT = model::gdd::detail::MappingT;
 
     static DomainT BuildDomain(model::gdd::graph_t const& pattern,
                                model::gdd::graph_t const& graph);
