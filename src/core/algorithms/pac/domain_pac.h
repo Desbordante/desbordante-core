@@ -8,6 +8,7 @@
 
 #include "core/algorithms/pac/util/columns_utils.h"
 #include "core/config/column_index/type.h"
+#include "core/config/indices/type.h"
 #include "core/model/table/vertical.h"
 
 namespace model {
@@ -19,7 +20,7 @@ private:
     double delta_;
     std::string domain_name_;
 
-    std::vector<config::IndexType> column_indices_;
+    config::IndicesType column_indices_;
     std::vector<std::string> column_names_;
 
     std::string StringStem(std::string const& arg) const {
@@ -55,7 +56,7 @@ public:
         return delta_;
     }
 
-    std::vector<config::IndexType> const& GetColumnIndices() const {
+    config::IndicesType const& GetColumnIndices() const {
         return column_indices_;
     }
 

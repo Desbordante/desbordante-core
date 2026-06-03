@@ -8,6 +8,7 @@
 #include "core/model/table/vertical.h"
 
 namespace pac::util {
+/// @brief Format a vector of column names in the same manner as Vertical::ToString does
 inline std::string ColumnNamesToString(std::vector<std::string> const& column_names) {
     std::ostringstream oss;
     oss << '[';
