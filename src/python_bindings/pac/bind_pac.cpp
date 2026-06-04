@@ -45,7 +45,6 @@ void BindPAC(py::module& main_module) {
 
     auto pac_module = main_module.def_submodule("pac");
 
-    // Domain PACs cannot be pickled, because they contain user-defined metrics
     py::class_<DomainPAC>(pac_module, "DomainPAC")
             .def_property_readonly("epsilon", &DomainPAC::GetEpsilon)
             .def_property_readonly("delta", &DomainPAC::GetDelta)
