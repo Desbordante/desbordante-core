@@ -10,9 +10,9 @@ namespace algos {
 
 template <typename T>
 concept QvoStrategy = requires(T strategy) {
-    requires std::constructible_from<T, model::gdd::graph_t const & /*graph*/,
-                                     model::gdd::graph_t const & /*pattern*/,
-                                     model::gdd::detail::DomainT const &> /*domain*/;
+    requires std::constructible_from<T, model::gdd::graph_t const& /*graph*/,
+                                     model::gdd::graph_t const& /*pattern*/,
+                                     model::gdd::detail::DomainT const&> /*domain*/;
 
     { strategy.Order() } -> std::convertible_to<std::vector<model::gdd::vertex_t>>;
 };
@@ -23,8 +23,8 @@ private:
     using VertexT = model::gdd::vertex_t;
     using DomainT = model::gdd::detail::DomainT;
 
-    GraphT const &pattern_;
-    DomainT const &domain_;
+    GraphT const& pattern_;
+    DomainT const& domain_;
 
     std::vector<VertexT> qvo_;
     std::unordered_set<VertexT> visited_;
@@ -40,7 +40,7 @@ private:
     void VisitNext();
 
 public:
-    BfsQvoStrategy(GraphT const & /*graph*/, GraphT const &pattern, DomainT const &domain)
+    BfsQvoStrategy(GraphT const& /*graph*/, GraphT const& pattern, DomainT const& domain)
         : pattern_(pattern), domain_(domain) {}
 
     std::vector<VertexT> Order();
@@ -62,30 +62,30 @@ private:
 
     static constexpr std::size_t kExhaustiveLimit = 7;
 
-    GraphT const &graph_;
-    GraphT const &pattern_;
-    DomainT const &domain_;
+    GraphT const& graph_;
+    GraphT const& pattern_;
+    DomainT const& domain_;
 
     std::unordered_map<std::string, double> avg_out_size_;
     std::unordered_map<std::string, double> avg_in_size_;
     void ComputeAvgListSizes();
 
     std::size_t VertexDomainSize(VertexT pattern_vertex) const;
-    double AvgListSize(std::string const &edge_label, Direction direction) const;
+    double AvgListSize(std::string const& edge_label, Direction direction) const;
 
     bool ConnectsToPlaced(VertexT vertex,
-                          std::unordered_map<VertexT, std::size_t> const &placed) const;
+                          std::unordered_map<VertexT, std::size_t> const& placed) const;
     std::vector<ExtensionListDescriptor> ExtensionListsFor(
-            VertexT to, std::unordered_map<VertexT, std::size_t> const &placed) const;
+            VertexT to, std::unordered_map<VertexT, std::size_t> const& placed) const;
     double StepCost(VertexT next, std::size_t level,
-                    std::unordered_map<VertexT, std::size_t> const &placed,
-                    std::vector<double> const &card_by_level, double &match_estimate) const;
+                    std::unordered_map<VertexT, std::size_t> const& placed,
+                    std::vector<double> const& card_by_level, double& match_estimate) const;
 
     std::vector<VertexT> OrderExhaustive() const;
     std::vector<VertexT> OrderGreedy() const;
 
     struct PatternVerticesIdComparator {
-        GraphT const &pattern;
+        GraphT const& pattern;
 
         bool operator()(VertexT a, VertexT b) const noexcept {
             return pattern[a].id < pattern[b].id;
@@ -93,7 +93,7 @@ private:
     } pattern_vertices_comparator_{pattern_};
 
 public:
-    CostBasedQvoStrategy(GraphT const &graph, GraphT const &pattern, DomainT const &domain)
+    CostBasedQvoStrategy(GraphT const& graph, GraphT const& pattern, DomainT const& domain)
         : graph_(graph), pattern_(pattern), domain_(domain) {
         ComputeAvgListSizes();
     }
