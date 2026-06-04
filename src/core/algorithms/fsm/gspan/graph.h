@@ -13,6 +13,7 @@ struct Vertex {
 };
 
 struct Edge {
+    int id = 0;
     int label = 0;
 };
 

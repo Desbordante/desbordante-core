@@ -19,11 +19,6 @@ public:
         rightmost_ = -1;
     }
 
-    bool NotPreOfRM(int vertex) const {
-        if (rightmost_path_.size() <= 1) return true;
-        return vertex != rightmost_path_[rightmost_path_.size() - 2];
-    }
-
     std::vector<int> GetVertexLabels() const {
         std::vector<int> result;
         std::unordered_map<int, int> id_to_label;
@@ -42,19 +37,20 @@ public:
     }
 
     void Add(ExtendedEdge const& edge) {
+        int edge_idx = extended_edges_.size();
         if (extended_edges_.empty()) {
             rightmost_ = 1;
             rightmost_path_.push_back(0);
-            rightmost_path_.push_back(1);
         } else {
             int id1 = edge.vertex1.id;
             int id2 = edge.vertex2.id;
             if (id1 < id2) {
                 rightmost_ = id2;
-                while (!rightmost_path_.empty() && rightmost_path_.back() > id1) {
+                while (!rightmost_path_.empty() &&
+                       extended_edges_[rightmost_path_.back()].vertex2.id > id1) {
                     rightmost_path_.pop_back();
                 }
-                rightmost_path_.push_back(id2);
+                rightmost_path_.push_back(edge_idx);
             }
         }
         extended_edges_.push_back(edge);
@@ -69,7 +65,20 @@ public:
     }
 
     bool OnRightMostPath(int vertex_id) const {
-        return std::ranges::find(rightmost_path_, vertex_id) != rightmost_path_.end();
+        if (vertex_id == 0) return true;
+        for (int idx : rightmost_path_) {
+            if (extended_edges_[idx].vertex2.id == vertex_id) return true;
+        }
+        return false;
+    }
+
+    ExtendedEdge const& GetEdgeFromRightMostPath(size_t i) const {
+        auto id = rightmost_path_[i];
+        return extended_edges_[id];
+    }
+
+    ExtendedEdge const& GetRightMostEdge() const {
+        return extended_edges_[rightmost_path_.back()];
     }
 
     bool ContainEdge(int v1, int v2) const {

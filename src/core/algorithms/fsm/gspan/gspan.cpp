@@ -17,6 +17,7 @@ namespace algos {
 
 namespace {
 
+<<<<<<< HEAD
 void BuildIsomFromHistory(HistoryNode const* leaf, size_t num_vertices,
                           std::vector<vertex_t>& out_isom) {
     out_isom.assign(num_vertices, (vertex_t)-1);
@@ -47,6 +48,10 @@ void PrecalculateLabelsToVertices(graph_t& graph) {
 
 graph_t CreateGraphFromDFSCode(DFSCode const& code) {
     graph_t result;
+=======
+void CreateGraphFromDFSCode(DFSCode const& code, graph_t& result) {
+    result.clear();
+>>>>>>> 281e3d80 (Implement features from gbolt)
     boost::unordered_flat_map<int, vertex_t> id_to_desc;
     for (auto const& ee : code.GetExtendedEdges()) {
         vertex_t vertex1;
@@ -71,12 +76,11 @@ graph_t CreateGraphFromDFSCode(DFSCode const& code) {
         result[vertex2].id = ee.vertex2.id;
         result[vertex2].label = ee.vertex2.label;
         auto edge = boost::add_edge(vertex1, vertex2, result);
+        result[edge.first].id = static_cast<int>(boost::num_edges(result)) - 1;
         result[edge.first].label = ee.label;
     }
 
     result[boost::graph_bundle].original_id = -1;
-    PrecalculateLabelsToVertices(result);
-    return result;
 }
 
 boost::unordered_flat_set<int> TranslateToOriginalIds(
@@ -87,6 +91,124 @@ boost::unordered_flat_set<int> TranslateToOriginalIds(
         original_ids.insert(graph_db[id][boost::graph_bundle].original_id);
     }
     return original_ids;
+}
+
+int CountSupport(Projection const& projection) {
+    int prev_id = -1;
+    int support = 0;
+
+    for (auto const& entry : projection) {
+        if (prev_id != entry.graph_id) {
+            prev_id = entry.graph_id;
+            support++;
+        }
+    }
+
+    return support;
+}
+
+vertex_t GetVertexByInternalId(edge_t edge, graph_t const& graph, int id) {
+    vertex_t u = boost::source(edge, graph);
+    if (graph[u].id == id) return u;
+    return boost::target(edge, graph);
+}
+
+void GetBackward(ProjectionEntry const& entry, History const& history, graph_t const& graph,
+                 DFSCode const& code, ProjectionMapBackward& backward_pmap) {
+    auto const& rightmost_path = code.GetRightMostPath();
+    edge_t last_edge = history.GetEdge(rightmost_path.back());
+    auto rm_vertex_id = code.GetRightMostEdge().vertex2.id;
+    vertex_t last_node = GetVertexByInternalId(last_edge, graph, rm_vertex_id);
+
+    for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
+        if (history.HasEdge(graph[ln_edge].id)) {
+            continue;
+        }
+
+        vertex_t ln_edge_to = (last_node == boost::source(ln_edge, graph))
+                                      ? boost::target(ln_edge, graph)
+                                      : boost::source(ln_edge, graph);
+        for (size_t i = 0; i < rightmost_path.size() - 1; i++) {
+            edge_t edge = history.GetEdge(rightmost_path[i]);
+
+            ExtendedEdge const& path_ee = code.GetEdgeFromRightMostPath(i);
+            vertex_t from_node = GetVertexByInternalId(edge, graph, path_ee.vertex1.id);
+            vertex_t to_node = GetVertexByInternalId(edge, graph, path_ee.vertex2.id);
+
+            if (graph[ln_edge_to].id != graph[from_node].id) {
+                continue;
+            }
+
+            if (std::tuple{graph[edge].label, graph[to_node].label} <=
+                std::tuple{graph[ln_edge].label, graph[last_node].label}) {
+                ExtendedEdge ee(Vertex{rm_vertex_id, graph[last_node].label},
+                                Vertex{path_ee.vertex1.id, graph[from_node].label},
+                                graph[ln_edge].label);
+                backward_pmap[ee].emplace_back(entry.graph_id, ln_edge, &entry);
+            }
+
+            break;
+        }
+    }
+}
+
+void GetFirstForward(ProjectionEntry const& entry, History const& history, graph_t const& graph,
+                     DFSCode const& code, ProjectionMapForward& forward_pmap) {
+    int min_label = code[0].vertex1.label;
+    auto const& rightmost_path = code.GetRightMostPath();
+    edge_t last_edge = history.GetEdge(rightmost_path.back());
+    auto rm_vertex_id = code.GetRightMostEdge().vertex2.id;
+    vertex_t last_node = GetVertexByInternalId(last_edge, graph, rm_vertex_id);
+
+    for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
+        vertex_t ln_edge_to = (last_node == boost::source(ln_edge, graph))
+                                      ? boost::target(ln_edge, graph)
+                                      : boost::source(ln_edge, graph);
+        // Partial pruning: if this label is less than the minimum label, then there
+        // should exist another lexicographical order which renders the same letters, but
+        // in the asecending order.
+        // Could we perform the same partial pruning as other extending methods?
+        // No, we cannot, for this time, the extending id is greater the the last node
+        if (history.HasVertex(graph[ln_edge_to].id) || graph[ln_edge_to].label < min_label) {
+            continue;
+        }
+
+        ExtendedEdge ee(Vertex{rm_vertex_id, graph[last_node].label},
+                        Vertex{rm_vertex_id + 1, graph[ln_edge_to].label}, graph[ln_edge].label);
+        forward_pmap[ee].emplace_back(entry.graph_id, ln_edge, &entry);
+    }
+}
+
+void GetOtherForward(ProjectionEntry const& entry, History const& history, graph_t const& graph,
+                     DFSCode const& code, ProjectionMapForward& forward_pmap) {
+    int min_label = code[0].vertex1.label;
+    auto const& rightmost_path = code.GetRightMostPath();
+    auto to_id = code.GetRightMostEdge().vertex2.id;
+    for (auto it = rightmost_path.rbegin(); it != rightmost_path.rend(); it++) {
+        auto i = *it;
+        int from_id = code[i].vertex1.id;
+
+        edge_t current_edge = history.GetEdge(i);
+        vertex_t current_node = GetVertexByInternalId(current_edge, graph, from_id);
+        vertex_t node_neighbor = (current_node == boost::source(current_edge, graph))
+                                         ? boost::target(current_edge, graph)
+                                         : boost::source(current_edge, graph);
+
+        for (auto cn_edge : boost::make_iterator_range(boost::out_edges(current_node, graph))) {
+            vertex_t to_node = (current_node == boost::source(cn_edge, graph))
+                                       ? boost::target(cn_edge, graph)
+                                       : boost::source(cn_edge, graph);
+            if (history.HasVertex(graph[to_node].id) || graph[to_node].label < min_label) {
+                continue;
+            }
+            if (std::tuple{graph[current_edge].label, graph[node_neighbor].label} <=
+                std::tuple{graph[cn_edge].label, graph[to_node].label}) {
+                ExtendedEdge ee(Vertex{from_id, graph[current_node].label},
+                                Vertex{to_id + 1, graph[to_node].label}, graph[cn_edge].label);
+                forward_pmap[ee].emplace_back(entry.graph_id, cn_edge, &entry);
+            }
+        }
+    }
 }
 
 }  // namespace
@@ -150,7 +272,7 @@ void GSpan::ResetState() {
 unsigned long long GSpan::ExecuteInternal() {
     min_sup_ = static_cast<int>(std::ceil(min_frequency_ * raw_dataset_.size()));
 
-    std::size_t elapsed_time = util::TimedInvoke(&GSpan::MineSubgraphs, this);
+    std::size_t elapsed_time = util::TimedInvoke(&GSpan::Launch, this);
     LOG_DEBUG("Mining complete: {} frequent subgraphs found", frequent_subgraphs_.size());
 
     if (!output_path_.empty()) {
@@ -162,7 +284,8 @@ unsigned long long GSpan::ExecuteInternal() {
     return elapsed_time;
 }
 
-void GSpan::MineSubgraphs() {
+// TODO: rename to 'PrepareData'
+void GSpan::Launch() {
     LOG_INFO("Starting GSpan algorithm: {} graphs, min_sup_={}", raw_dataset_.size(), min_sup_);
 
     LOG_DEBUG("Searching for frequent vertex labels");
@@ -173,27 +296,330 @@ void GSpan::MineSubgraphs() {
     RemoveInfrequentVertexPairs();
     LOG_DEBUG("Pruning complete");
 
-    // Set with all the graph ids
-    LOG_DEBUG("Building active graph set");
-    Projection embeddings;
+    int max_edges = 0;
+    int max_vertices = 0;
     for (size_t i = 0; i < pruned_graphs_.size(); i++) {
         graph_t& graph = pruned_graphs_[i];
-        if (boost::num_vertices(graph) != 0) {
-            embeddings.push_back({(int)i, {}});
-            PrecalculateLabelsToVertices(graph);
-        } else {
-            empty_graphs_removed_++;
-        }
+        max_edges = std::max(max_edges, static_cast<int>(boost::num_edges(graph)));
+        max_vertices = std::max(max_vertices, static_cast<int>(boost::num_vertices(graph)));
     }
-    LOG_DEBUG("Active graphs: {}, empty graphs removed: {}", embeddings.size(),
-              empty_graphs_removed_);
 
-    if (frequent_vertex_labels_.size() != 0) {
-        LOG_DEBUG("Starting DFS search with {} graphs", embeddings.size());
-        GSpanDFS(DFSCode(), std::move(embeddings));
+    history_.Reset(max_edges, max_vertices);
+    ProjectionMap embeddings = GetInitialEdges();
+    for (auto const& [ee, proj] : embeddings) {
+        MineChild(proj, ee, DFSCode());
     }
 
     LOG_INFO("GSpan complete: {} frequent subgraphs found", frequent_subgraphs_.size());
+}
+
+ProjectionMap GSpan::GetInitialEdges() {
+    ProjectionMap result;
+    for (size_t i = 0; i < pruned_graphs_.size(); i++) {
+        graph_t& graph = pruned_graphs_[i];
+        for (auto edge : boost::make_iterator_range(boost::edges(graph))) {
+            vertex_t source_label = graph[boost::source(edge, graph)].label;
+            vertex_t target_label = graph[boost::target(edge, graph)].label;
+            ExtendedEdge ee = (source_label <= target_label)
+                                      ? ExtendedEdge(Vertex(0, source_label),
+                                                     Vertex(1, target_label), graph[edge].label)
+                                      : ExtendedEdge(Vertex(0, target_label),
+                                                     Vertex(1, source_label), graph[edge].label);
+            result[ee].emplace_back(i, edge, nullptr);
+        }
+    }
+
+    return result;
+}
+
+void GSpan::MineChild(Projection const& projection, ExtendedEdge const& new_edge,
+                      DFSCode const& code) {
+    int support = CountSupport(projection);
+    if (support < min_sup_) {
+        return;
+    }
+
+    // Create the new DFS code of this graph
+    DFSCode new_code = code;
+    new_code.Add(new_edge);
+
+    // If the resulting graph is canonical (it means that the graph is non redundant)
+    if (IsCanonical(new_code)) {
+        LOG_TRACE("New frequent subgraph: size={}, support={}", new_code.Size(), support);
+        boost::unordered::unordered_flat_set<int> new_graph_ids;
+        for (auto const& proj_entry : projection) new_graph_ids.insert(proj_entry.graph_id);
+
+        frequent_subgraphs_.emplace_back(frequent_subgraphs_.size(), new_code,
+                                         TranslateToOriginalIds(new_graph_ids, pruned_graphs_),
+                                         support);
+        MineSubgraph(projection, new_code);
+    }
+}
+
+void GSpan::MineSubgraph(Projection const& projection, DFSCode& code) {
+    ProjectionMapBackward backward_pmap;
+    ProjectionMapForward forward_pmap;
+
+    Enumerate(code, projection, backward_pmap, forward_pmap);
+    for (auto const& [ee, proj] : backward_pmap) {
+        MineChild(proj, ee, code);
+    }
+    for (auto const& [ee, proj] : forward_pmap) {
+        MineChild(proj, ee, code);
+    }
+}
+
+void GSpan::Enumerate(DFSCode const& code, Projection const& projection,
+                      ProjectionMapBackward& backward_pmap, ProjectionMapForward& forward_pmap) {
+    for (auto const& entry : projection) {
+        graph_t const& graph = pruned_graphs_[entry.graph_id];
+        history_.Reconstruct(entry, graph);
+
+        GetBackward(entry, history_, graph, code, backward_pmap);
+        GetFirstForward(entry, history_, graph, code, forward_pmap);
+        GetOtherForward(entry, history_, graph, code, forward_pmap);
+    }
+    history_.Clear();
+}
+
+bool GSpan::IsCanonical(DFSCode const& code) {
+    LOG_TRACE("Checking canonicity: pattern size={}", code.Size());
+    CreateGraphFromDFSCode(code, min_graph_);
+
+    min_projection_.clear();
+
+    // The first code in the sequence must be the
+    // smallest if the sequence itself is minimal.
+    ExtendedEdge const& min_ee = code[0];
+
+    for (auto edge : boost::make_iterator_range(boost::edges(min_graph_))) {
+        auto source = boost::source(edge, min_graph_);
+        auto target = boost::target(edge, min_graph_);
+        int source_label = min_graph_[source].label;
+        int target_label = min_graph_[target].label;
+
+        ExtendedEdge ee = (source_label <= target_label)
+                                  ? ExtendedEdge(Vertex(0, source_label), Vertex(1, target_label),
+                                                 min_graph_[edge].label)
+                                  : ExtendedEdge(Vertex(0, target_label), Vertex(1, source_label),
+                                                 min_graph_[edge].label);
+
+        if (ExtendedEdgeProjectCompare{}(ee, min_ee)) {
+            return false;
+        }
+
+        if (ee == min_ee) {
+            min_projection_.emplace_back(edge, -1);
+        }
+    }
+
+    return IsProjectionMin(code);
+}
+
+bool GSpan::IsProjectionMin(DFSCode const& code) {
+    size_t projection_start_index = 0;
+
+    // index 0 was already validated on previous step
+    for (size_t i = 1; i < code.Size(); i++) {
+        ExtendedEdge const& ee = code[i];
+        size_t projection_end_index = min_projection_.size();
+
+        // If a forward and a backward edge can be both be used to extend
+        // the code, then the backward edge must be smaller.
+        if (ee.vertex1.id > ee.vertex2.id) {
+            // edge is backward, ensure it is minimal.
+            if (!IsBackwardMin(code, ee, projection_start_index)) {
+                return false;
+            }
+
+        } else {
+            // edge is forward, so ensure no backward edges exist,
+            // then ensure the edge is minimal.
+            if (ExistsBackwards(code, projection_start_index) ||
+                !IsForwardMin(code, ee, projection_start_index)) {
+                return false;
+            }
+        }
+
+        projection_start_index = projection_end_index;
+    }
+
+    LOG_TRACE("Pattern is canonical");
+    return true;
+}
+
+bool GSpan::IsBackwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
+                          size_t projection_start_index) {
+    size_t projection_end_index = min_projection_.size();
+
+    auto const& rightmost_path = code.GetRightMostPath();
+    auto rmpath_size = rightmost_path.size();
+    ExtendedEdge const& rightmost_edge = code.GetEdgeFromRightMostPath(rmpath_size - 1);
+
+    int from_id = rightmost_edge.vertex2.id;
+    for (size_t j = projection_start_index; j < projection_end_index; j++) {
+        history_.ReconstructEdges(min_projection_, min_graph_, j);
+
+        edge_t last_edge = history_.GetEdge(code.GetRightMostPath().back());
+        auto rm_vertex_id = rightmost_edge.vertex2.id;
+        vertex_t last_node = GetVertexByInternalId(last_edge, min_graph_, rm_vertex_id);
+        for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, min_graph_))) {
+            if (history_.HasEdge(min_graph_[ln_edge].id)) {
+                continue;
+            }
+
+            vertex_t ln_edge_to = (last_node == boost::source(ln_edge, min_graph_))
+                                          ? boost::target(ln_edge, min_graph_)
+                                          : boost::source(ln_edge, min_graph_);
+            for (size_t i = 0; i < rmpath_size - 1; i++) {
+                ExtendedEdge const& path_ee = code.GetEdgeFromRightMostPath(i);
+                int to_id = path_ee.vertex1.id;
+                edge_t edge = history_.GetEdge(rightmost_path[i]);
+                vertex_t from_node = GetVertexByInternalId(edge, min_graph_, path_ee.vertex1.id);
+                vertex_t to_node = GetVertexByInternalId(edge, min_graph_, path_ee.vertex2.id);
+
+                if (min_graph_[ln_edge_to].id == min_graph_[from_node].id &&
+                    std::tuple{min_graph_[edge].label, min_graph_[to_node].label} <=
+                            std::tuple{min_graph_[ln_edge].label, min_graph_[last_node].label}) {
+                    ExtendedEdge min_ee(Vertex{from_id, min_graph_[last_node].label},
+                                        Vertex{to_id, min_graph_[from_node].label},
+                                        min_graph_[ln_edge].label);
+                    // A smaller edge was found, so the given edge is not minimal.
+                    if (ExtendedEdgeBackwardCompare{}(min_ee, ee)) {
+                        return false;
+                    }
+                    if (min_ee == ee) {
+                        min_projection_.emplace_back(ln_edge, j);
+                    }
+                }
+
+                if (to_id == ee.vertex2.id) break;
+            }
+        }
+    }
+    return true;
+}
+
+bool GSpan::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
+                         size_t projection_start_index) {
+    size_t projection_end_index = min_projection_.size();
+    int min_label = code[0].vertex1.label;
+    auto const& rightmost_path = code.GetRightMostPath();
+    ExtendedEdge const& rightmost_edge = code.GetEdgeFromRightMostPath(rightmost_path.size() - 1);
+
+    int max_id = code[rightmost_path.back()].vertex2.id;
+    for (size_t i = projection_start_index; i < projection_end_index; i++) {
+        history_.ReconstructVertices(min_projection_, min_graph_, i);
+
+        edge_t last_edge = history_.GetEdge(code.GetRightMostPath().back());
+        auto rm_vertex_id = rightmost_edge.vertex2.id;
+        vertex_t last_node = GetVertexByInternalId(last_edge, min_graph_, rm_vertex_id);
+
+        for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, min_graph_))) {
+            vertex_t ln_edge_to = (last_node == boost::source(ln_edge, min_graph_))
+                                          ? boost::target(ln_edge, min_graph_)
+                                          : boost::source(ln_edge, min_graph_);
+            auto const& to_node = min_graph_[ln_edge_to];
+            if (history_.HasVertex(to_node.id) || to_node.label < min_label) {
+                continue;
+            }
+
+            ExtendedEdge min_ee(Vertex{max_id, min_graph_[last_node].label},
+                                Vertex{max_id + 1, to_node.label}, min_graph_[ln_edge].label);
+            // A smaller edge was found, so the given edge is not minimal
+            if (ExtendedEdgeForwardCompare{}(min_ee, ee)) {
+                return false;
+            }
+
+            if (min_ee == ee) {
+                min_projection_.emplace_back(ln_edge, i);
+            }
+        }
+
+        // If ee is an extension from the rightmost vertex, we only
+        // need to continue looking at similar extensions (i.e. the block above)
+
+        if (max_id == ee.vertex1.id) {
+            continue;
+        }
+
+        for (auto it = rightmost_path.rbegin(); it != rightmost_path.rend(); it++) {
+            auto j = *it;
+            int from_id = code[j].vertex1.id;
+
+            edge_t current_edge = history_.GetEdge(j);
+            vertex_t current_node = GetVertexByInternalId(current_edge, min_graph_, from_id);
+            vertex_t node_neighbor = (current_node == boost::source(current_edge, min_graph_))
+                                             ? boost::target(current_edge, min_graph_)
+                                             : boost::source(current_edge, min_graph_);
+
+            for (auto cn_edge :
+                 boost::make_iterator_range(boost::out_edges(current_node, min_graph_))) {
+                vertex_t to_node = (current_node == boost::source(cn_edge, min_graph_))
+                                           ? boost::target(cn_edge, min_graph_)
+                                           : boost::source(cn_edge, min_graph_);
+                if (history_.HasVertex(min_graph_[to_node].id) ||
+                    min_graph_[to_node].label < min_label) {
+                    continue;
+                }
+                if (std::tuple{min_graph_[current_edge].label, min_graph_[node_neighbor].label} <=
+                    std::tuple{min_graph_[cn_edge].label, min_graph_[to_node].label}) {
+                    ExtendedEdge min_ee(Vertex{from_id, min_graph_[current_node].label},
+                                        Vertex{max_id + 1, min_graph_[to_node].label},
+                                        min_graph_[cn_edge].label);
+                    // A smaller edge was found, so the given edge is not minimal
+                    if (ExtendedEdgeForwardCompare{}(min_ee, ee)) {
+                        return false;
+                    }
+                    if (min_ee == ee) {
+                        min_projection_.emplace_back(cn_edge, i);
+                    }
+                }
+            }
+            // Every member of the RMP after this one will produce larger DFS codes,
+            // so they don't need to be checked against the minimum.
+            if (from_id == ee.vertex1.id) {
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+bool GSpan::ExistsBackwards(DFSCode const& code, size_t projection_start_index) {
+    size_t projection_end_index = min_projection_.size();
+    auto const& rightmost_path = code.GetRightMostPath();
+
+    for (auto j = projection_start_index; j < projection_end_index; j++) {
+        history_.ReconstructEdges(min_projection_, min_graph_, j);
+        edge_t last_edge = history_.GetEdge(rightmost_path.back());
+        auto rm_vertex_id = code.GetRightMostEdge().vertex2.id;
+        vertex_t last_node = GetVertexByInternalId(last_edge, min_graph_, rm_vertex_id);
+        for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, min_graph_))) {
+            if (history_.HasEdge(min_graph_[ln_edge].id)) {
+                continue;
+            }
+
+            vertex_t ln_edge_to = (last_node == boost::source(ln_edge, min_graph_))
+                                          ? boost::target(ln_edge, min_graph_)
+                                          : boost::source(ln_edge, min_graph_);
+            for (size_t i = 0; i < rightmost_path.size() - 1; i++) {
+                edge_t edge = history_.GetEdge(rightmost_path[i]);
+                vertex_t to_node = GetVertexByInternalId(
+                        edge, min_graph_, code.GetEdgeFromRightMostPath(i).vertex2.id);
+                vertex_t from_node = GetVertexByInternalId(
+                        edge, min_graph_, code.GetEdgeFromRightMostPath(i).vertex1.id);
+
+                if (min_graph_[ln_edge_to].id == min_graph_[from_node].id &&
+                    std::tuple{min_graph_[edge].label, min_graph_[to_node].label} <=
+                            std::tuple{min_graph_[ln_edge].label, min_graph_[last_node].label}) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 void GSpan::RemoveInfrequentLabel(gspan::graph_t& graph, int label) {
@@ -284,227 +710,6 @@ void GSpan::RemoveInfrequentVertexPairs() {
             boost::remove_vertex(vertex, graph);
         }
     }
-}
-
-void GSpan::GSpanDFS(gspan::DFSCode const& code, Projection embeddings) {
-    LOG_TRACE("DFS step: pattern size={}, candidate graphs={}, patterns found={}", code.Size(),
-              embeddings.size(), frequent_subgraphs_.size());
-
-    size_t pool_size_before_extensions = history_pool_.size();
-
-    // If we have reached the maximum size, we do not need to extend this graph
-    if (code.Size() == static_cast<size_t>(max_number_of_edges_)) {
-        LOG_TRACE("Maximum pattern size reached, backtracking");
-        return;
-    }
-
-    // Find all the extensions of this graph, with their support values.
-    // They are stored in a map where the key is an extended edge, and the value
-    // is the list of graph ids where this edge extends the current subgraph.
-    auto extensions = RightMostPathExtensions(code, std::move(embeddings));
-    LOG_TRACE("Found {} candidate extensions", extensions.size());
-
-    for (auto& [extension, projection] : extensions) {
-        int sup = projection.size();
-
-        // If the support is enough
-        if (sup >= min_sup_) {
-            // Create the new DFS code of this graph
-            DFSCode new_code = code;
-            new_code.Add(extension);
-
-            // If the resulting graph is canonical (it means that the graph is non redundant)
-            if (IsCanonical(new_code)) {
-                LOG_TRACE("New frequent subgraph: size={}, support={}", new_code.Size(), sup);
-                boost::unordered::unordered_flat_set<int> new_graph_ids;
-                for (auto const& proj_entry : projection) new_graph_ids.insert(proj_entry.graph_id);
-
-                frequent_subgraphs_.emplace_back(
-                        frequent_subgraphs_.size(), new_code,
-                        TranslateToOriginalIds(new_graph_ids, pruned_graphs_), sup);
-                GSpanDFS(new_code, std::move(projection));
-            }
-        }
-    }
-    history_pool_.resize(pool_size_before_extensions);
-}
-
-template <class Emit>
-void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph,
-                                  std::vector<HistoryNode const*> const& current_leaves,
-                                  Emit&& emit) {
-    LOG_TRACE("Computing sgraph extensions: pattern size={}, vertices={}", code.Size(),
-              boost::num_vertices(graph));
-
-    if (code.Empty()) {
-        LOG_TRACE("Empty pattern, collecting initial edges");
-        for (auto edge : boost::make_iterator_range(boost::edges(graph))) {
-            auto v1 = boost::source(edge, graph);
-            auto v2 = boost::target(edge, graph);
-            int l1 = graph[v1].label;
-            int l2 = graph[v2].label;
-
-            if (l1 <= l2) {
-                ExtendedEdge ee(Vertex(0, l1), Vertex(1, l2), graph[edge].label);
-                emit(ee, nullptr, v1, v2);
-            }
-            if (l1 >= l2) {
-                ExtendedEdge ee(Vertex(0, l2), Vertex(1, l1), graph[edge].label);
-                emit(ee, nullptr, v2, v1);
-            }
-        }
-    } else {
-        auto rightmost = code.GetRightMost();
-        size_t n = boost::num_vertices(graph);
-        thread_local std::vector<int> inverted_isom;
-        thread_local std::vector<vertex_t> current_isom;
-
-        if (inverted_isom.size() < n) {
-            inverted_isom.resize(n, -1);
-        }
-
-        LOG_TRACE("Found {} embeddings for extension", current_leaves.size());
-        for (auto leaf : current_leaves) {
-            BuildIsomFromHistory(leaf, code.GetNumVertices(), current_isom);
-
-            // Backward extensions from rightmost child
-            for (size_t dfs_id = 0; dfs_id < current_isom.size(); ++dfs_id) {
-                inverted_isom[current_isom[dfs_id]] = dfs_id;
-            }
-
-            auto mapped_rightmost = current_isom[rightmost];
-            int mapped_rightmost_label = graph[mapped_rightmost].label;
-            for (auto edge :
-                 boost::make_iterator_range(boost::out_edges(mapped_rightmost, graph))) {
-                vertex_t neighbor = (boost::source(edge, graph) == mapped_rightmost)
-                                            ? boost::target(edge, graph)
-                                            : boost::source(edge, graph);
-                if (inverted_isom[neighbor] == -1) {
-                    continue;
-                }
-
-                auto inverted = inverted_isom[neighbor];
-                if (code.OnRightMostPath(inverted) && code.NotPreOfRM(inverted) &&
-                    !code.ContainEdge(rightmost, inverted)) {
-                    int edge_label = graph[edge].label;
-                    ExtendedEdge ee(Vertex(rightmost, mapped_rightmost_label),
-                                    Vertex(inverted, graph[neighbor].label), edge_label);
-                    emit(ee, leaf, (vertex_t)-1, (vertex_t)-1);
-                }
-            }
-
-            // Forward extensions from nodes on rightmost path
-            for (auto vertex : code.GetRightMostPath()) {
-                auto mapped_vertex = current_isom[vertex];
-                int mapped_vertex_label = graph[mapped_vertex].label;
-                for (auto edge :
-                     boost::make_iterator_range(boost::out_edges(mapped_vertex, graph))) {
-                    vertex_t neighbor = (boost::source(edge, graph) == mapped_vertex)
-                                                ? boost::target(edge, graph)
-                                                : boost::source(edge, graph);
-                    if (inverted_isom[neighbor] == -1) {
-                        int edge_label = graph[edge].label;
-                        ExtendedEdge ee(Vertex(vertex, mapped_vertex_label),
-                                        Vertex(rightmost + 1, graph[neighbor].label), edge_label);
-                        emit(ee, leaf, neighbor, (vertex_t)-1);
-                    }
-                }
-            }
-            for (size_t dfs_id = 0; dfs_id < current_isom.size(); ++dfs_id) {
-                inverted_isom[current_isom[dfs_id]] = -1;
-            }
-        }
-    }
-}
-
-projection_map_t GSpan::RightMostPathExtensions(DFSCode const& code, Projection const& projection) {
-    projection_map_t out;
-
-    for (auto const& proj : projection) {
-        int graph_id = proj.graph_id;
-        auto const& graph = pruned_graphs_[graph_id];
-
-        EnumerateRightMostExtensions(
-                code, graph, proj.history_leaves,
-                [&](ExtendedEdge const& ee, HistoryNode const* old_leaf, vertex_t v1, vertex_t v2) {
-                    HistoryNode const* new_leaf = old_leaf;
-                    if (v1 != (vertex_t)-1) {
-                        history_pool_.push_back(HistoryNode{new_leaf, v1});
-                        new_leaf = &history_pool_.back();
-                    }
-                    if (v2 != (vertex_t)-1) {
-                        history_pool_.push_back(HistoryNode{new_leaf, v2});
-                        new_leaf = &history_pool_.back();
-                    }
-
-                    auto& proj_entries = out[ee];
-                    if (proj_entries.empty() || proj_entries.back().graph_id != graph_id) {
-                        proj_entries.push_back({graph_id});
-                    }
-                    proj_entries.back().history_leaves.push_back(new_leaf);
-                });
-    }
-    return out;
-}
-
-boost::unordered_flat_map<ExtendedEdge, std::vector<HistoryNode const*>, ExtendedEdge::Hash>
-GSpan::RightMostPathExtensionsFromSingle(DFSCode const& code, graph_t const& graph,
-                                         std::vector<HistoryNode const*> const& current_leaves) {
-    boost::unordered_flat_map<ExtendedEdge, std::vector<HistoryNode const*>, ExtendedEdge::Hash>
-            out;
-
-    EnumerateRightMostExtensions(
-            code, graph, current_leaves,
-            [&](ExtendedEdge const& ee, HistoryNode const* old_leaf, vertex_t v1, vertex_t v2) {
-                HistoryNode const* new_leaf = old_leaf;
-                if (v1 != (vertex_t)-1) {
-                    history_pool_.push_back(HistoryNode{new_leaf, v1});
-                    new_leaf = &history_pool_.back();
-                }
-                if (v2 != (vertex_t)-1) {
-                    history_pool_.push_back(HistoryNode{new_leaf, v2});
-                    new_leaf = &history_pool_.back();
-                }
-                out[ee].push_back(new_leaf);
-            });
-
-    return out;
-}
-
-bool GSpan::IsCanonical(DFSCode const& code) {
-    LOG_TRACE("Checking canonicity: pattern size={}", code.Size());
-    DFSCode canon;
-    graph_t canon_graph = CreateGraphFromDFSCode(code);
-    std::vector<HistoryNode const*> isoms;
-
-    size_t initial_pool_size = history_pool_.size();
-
-    for (size_t i = 0; i < code.Size(); i++) {
-        auto extensions = RightMostPathExtensionsFromSingle(canon, canon_graph, isoms);
-
-        if (extensions.empty()) {
-            history_pool_.resize(initial_pool_size);
-            return false;
-        }
-
-        ExtendedEdge min_ee = extensions.begin()->first;
-        for (auto const& [ee, new_isoms] : extensions) {
-            if (ee.SmallerThan(min_ee)) min_ee = ee;
-        }
-
-        if (min_ee.SmallerThan(code[i])) {
-            LOG_TRACE("Non-canonical at edge {}", i);
-            history_pool_.resize(initial_pool_size);
-            return false;
-        }
-
-        canon.Add(min_ee);
-        isoms = std::move(extensions[min_ee]);
-    }
-
-    LOG_TRACE("Pattern is canonical");
-    history_pool_.resize(initial_pool_size);
-    return true;
 }
 
 // This method finds all frequent vertex labels from a graph database.

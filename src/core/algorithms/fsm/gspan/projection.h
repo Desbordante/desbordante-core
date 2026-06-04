@@ -1,29 +1,32 @@
 #pragma once
 
-#include <deque>
-#include <span>
 #include <vector>
-
-#include <boost/unordered/unordered_flat_map.hpp>
 
 #include "extended_edge.h"
 #include "graph.h"
 
 namespace gspan {
 
-struct HistoryNode {
-    HistoryNode const* prev;
-    vertex_t added_vertex;
-};
-
+// Represents an embedding of subgraph edge in real graph
 struct ProjectionEntry {
-    int graph_id;
-    std::vector<HistoryNode const*> history_leaves;
+    size_t graph_id;
+    edge_t edge;
+    ProjectionEntry const* prev;
 };
 
 // A projection is a collection of entries across multiple graphs
 using Projection = std::vector<ProjectionEntry>;
 
-using projection_map_t = boost::unordered_flat_map<ExtendedEdge, Projection, ExtendedEdge::Hash>;
+struct MinProjectionEntry {
+    edge_t edge;
+    int prev;
+};
+
+// Used for minimality check in single graph
+using MinProjection = std::vector<MinProjectionEntry>;
+
+using ProjectionMap = std::map<ExtendedEdge, Projection, ExtendedEdgeProjectCompare>;
+using ProjectionMapBackward = std::map<ExtendedEdge, Projection, ExtendedEdgeBackwardCompare>;
+using ProjectionMapForward = std::map<ExtendedEdge, Projection, ExtendedEdgeForwardCompare>;
 
 }  // namespace gspan
