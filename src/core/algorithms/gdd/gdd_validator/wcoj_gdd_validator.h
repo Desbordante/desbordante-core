@@ -46,7 +46,7 @@ private:
         }
     };
 
-    // wcoj matching is iterative proccess - match is built vertex-by-vertex.
+    // wcoj matching is iterative process - match is built vertex-by-vertex.
     // level is a partial mapping of first k pattern vertices to graph vertices.
     // keys may be dropped: it is a prefix of QVO array (prefix size is a
     // number of level). hence, we can store all matches as matrix (flat array
@@ -94,6 +94,7 @@ private:
     OperationResult ExtendIntersect();
 
     void Prepare(model::Gdd const& gdd, model::gdd::graph_t const& graph);
+    bool IsPatternWeaklyConnected() const;
 
     template <QvoStrategy Strategy>
     std::vector<VertexT> BuildQueryVertexOrder() const {

@@ -147,8 +147,7 @@ public:
                gdd::detail::IsSubgraph(other.pattern_, pattern_);
     }
 
-    bool Satisfies(gdd::graph_t const& graph,
-                   gdd::detail::MappingT const& map) const {
+    bool Satisfies(gdd::graph_t const& graph, gdd::detail::MappingT const& map) const {
         if (SatisfiesPhi(graph, map, lhs_)) {
             return SatisfiesPhi(graph, map, rhs_);
         }

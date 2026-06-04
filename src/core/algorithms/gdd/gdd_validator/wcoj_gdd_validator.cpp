@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
 #include <boost/range/iterator_range.hpp>
 
 namespace algos {
@@ -26,7 +28,31 @@ void WcojGddValidator::Prepare(model::Gdd const& gdd, model::gdd::graph_t const&
         std::ranges::sort(set);
     }
 
-    qvo_ = BuildQueryVertexOrder<CostBasedQvoStrategy>();
+    if (IsPatternWeaklyConnected()) {
+        qvo_ = BuildQueryVertexOrder<CostBasedQvoStrategy>();
+    } else {
+        qvo_ = BuildQueryVertexOrder<BfsQvoStrategy>();
+    }
+}
+
+bool WcojGddValidator::IsPatternWeaklyConnected() const {
+    if (pattern_ == nullptr) {
+        return false;
+    }
+
+    std::size_t const n = boost::num_vertices(*pattern_);
+    if (n == 0) {
+        return true;
+    }
+
+    using UndirectedGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS>;
+    UndirectedGraph undirected(n);
+    for (auto const e : boost::make_iterator_range(boost::edges(*pattern_))) {
+        boost::add_edge(boost::source(e, *pattern_), boost::target(e, *pattern_), undirected);
+    }
+
+    std::vector<int> component(n);
+    return boost::connected_components(undirected, component.data()) == 1;
 }
 
 std::optional<model::GddCounterexample> WcojGddValidator::Holds(model::Gdd const& gdd,

@@ -23,22 +23,22 @@ void CostBasedQvoStrategy::ComputeAvgListSizes() {
             ++in_by_label[graph_[edge].label];
         }
 
-        for (auto const &[label, n] : out_by_label) {
-            auto &[sum, count] = out_acc[label];
+        for (auto const& [label, n] : out_by_label) {
+            auto& [sum, count] = out_acc[label];
             sum += n;
             ++count;
         }
-        for (auto const &[label, n] : in_by_label) {
-            auto &[sum, count] = in_acc[label];
+        for (auto const& [label, n] : in_by_label) {
+            auto& [sum, count] = in_acc[label];
             sum += n;
             ++count;
         }
     }
 
-    for (auto const &[label, a] : out_acc) {
+    for (auto const& [label, a] : out_acc) {
         avg_out_size_[label] = a.count ? a.sum / static_cast<double>(a.count) : 1.0;
     }
-    for (auto const &[label, a] : in_acc) {
+    for (auto const& [label, a] : in_acc) {
         avg_in_size_[label] = a.count ? a.sum / static_cast<double>(a.count) : 1.0;
     }
 }
@@ -48,14 +48,14 @@ std::size_t CostBasedQvoStrategy::VertexDomainSize(VertexT pattern_vertex) const
     return it == domain_.end() ? 0 : it->second.size();
 }
 
-double CostBasedQvoStrategy::AvgListSize(std::string const &edge_label, Direction direction) const {
-    auto const &table = direction == Direction::kIn ? avg_in_size_ : avg_out_size_;
+double CostBasedQvoStrategy::AvgListSize(std::string const& edge_label, Direction direction) const {
+    auto const& table = direction == Direction::kIn ? avg_in_size_ : avg_out_size_;
     auto const it = table.find(edge_label);
     return it == table.end() ? 1.0 : it->second;
 }
 
 bool CostBasedQvoStrategy::ConnectsToPlaced(
-        VertexT vertex, std::unordered_map<VertexT, std::size_t> const &placed) const {
+        VertexT vertex, std::unordered_map<VertexT, std::size_t> const& placed) const {
     for (auto const edge : boost::make_iterator_range(boost::out_edges(vertex, pattern_))) {
         if (placed.contains(boost::target(edge, pattern_))) {
             return true;
@@ -70,7 +70,7 @@ bool CostBasedQvoStrategy::ConnectsToPlaced(
 }
 
 std::vector<CostBasedQvoStrategy::ExtensionListDescriptor> CostBasedQvoStrategy::ExtensionListsFor(
-        VertexT to, std::unordered_map<VertexT, std::size_t> const &placed) const {
+        VertexT to, std::unordered_map<VertexT, std::size_t> const& placed) const {
     std::vector<ExtensionListDescriptor> lists;
 
     for (auto const edge : boost::make_iterator_range(boost::in_edges(to, pattern_))) {
@@ -96,10 +96,10 @@ std::vector<CostBasedQvoStrategy::ExtensionListDescriptor> CostBasedQvoStrategy:
 }
 
 double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
-                                      std::unordered_map<VertexT, std::size_t> const &placed,
-                                      std::vector<double> const &card_by_level,
-                                      double &match_estimate) const {
-    std::vector<ExtensionListDescriptor> const &lists = ExtensionListsFor(next, placed);
+                                      std::unordered_map<VertexT, std::size_t> const& placed,
+                                      std::vector<double> const& card_by_level,
+                                      double& match_estimate) const {
+    std::vector<ExtensionListDescriptor> const& lists = ExtensionListsFor(next, placed);
 
     double const domain_size = static_cast<double>(VertexDomainSize(next));
 
@@ -111,7 +111,7 @@ double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
     double min_list = std::numeric_limits<double>::infinity();
 
     std::size_t earliest_pos = level;  // nothing earlier than level
-    for (auto const &[from, direction, edge_label] : lists) {
+    for (auto const& [from, direction, edge_label] : lists) {
         earliest_pos = std::min(earliest_pos, placed.at(from));
     }
     bool const cache_usable = lists.size() >= 2 && earliest_pos < level - 1;
@@ -121,7 +121,7 @@ double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
                                       : match_estimate;
 
     double cost = 0.0;
-    for (auto const &[from, direction, edge_label] : lists) {
+    for (auto const& [from, direction, edge_label] : lists) {
         double const list_size = AvgListSize(edge_label, direction);
         min_list = std::min(min_list, list_size);
 
