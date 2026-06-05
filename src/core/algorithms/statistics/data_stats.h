@@ -87,23 +87,20 @@ protected:
     Statistic GetOrCalcCorrelation(size_t i1, size_t i2,
                                    std::map<std::pair<size_t, size_t>, Statistic>& cache,
                                    bool numeric_only, CalcFunc calc_func) const {
-        auto key = std::make_pair(std::min(i1, i2), std::max(i1, i2));
-
-        if (auto it = cache.find(key); it != cache.end()) {
-            return it->second;
-        }
-
         if (numeric_only) {
             if (!col_data_[i1].GetType().IsNumeric() || !col_data_[i2].GetType().IsNumeric()) {
                 return {};
             }
         }
 
+        auto key = std::make_pair(std::min(i1, i2), std::max(i1, i2));
+        if (auto it = cache.find(key); it != cache.end()) {
+            return it->second;
+        }
+
         if (i1 == i2) {
-            mo::DoubleType double_type;
-            Statistic unit_result(double_type.MakeValue(1.0), &double_type, false);
-            cache[key] = unit_result;
-            return unit_result;
+        mo::DoubleType double_type;
+        return Statistic(double_type.MakeValue(1.0), &double_type, false);
         }
 
         Statistic result = calc_func(i1, i2);
