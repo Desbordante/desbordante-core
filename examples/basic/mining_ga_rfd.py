@@ -133,8 +133,8 @@ banner("Introduction", num=1)
 printlns(
     "  In this example we will learn the basics of RFD mining from tables. " +
     "RFD (Relaxed Functional Dependency) is a pattern that captures " +
-    "the rule: «if two tuples are similar on a set of attributes X, " +
-    "then they are likely similar on attribute Y». Similarity is defined " +
+    "the rule: 'if two tuples are similar on a set of attributes X, " +
+    "then they are likely similar on attribute Y'. Similarity is defined " +
     "via configurable metrics and thresholds, making RFD more flexible " +
     "than classical functional dependencies."
 )
@@ -147,7 +147,7 @@ printlns(
 prints(
     f"  This pattern is formally defined in the paper: " +
     f"{BOLD}L. Caruccio, V. Deufemia, G. Polese. " +
-    "«A genetic algorithm to discover relaxed functional dependencies from data». " +
+    "'A genetic algorithm to discover relaxed functional dependencies from data'. " +
     f"SEBD 2017{RESET}.", end=' '
 )
 print('(', end='')
@@ -158,7 +158,7 @@ print("\n")
 printlns(
     f"{YELLOW}!?{RESET}  It is important not to confuse RFD as a general term for 'approximate FD'. " + 
     "Here RFD refers to a concrete pattern defined by Caruccio et al. that " + 
-    "combines similarity metric for each column global coverage threshold."
+    "combines similarity metric for each column with a global coverage threshold."
 )
 
 # ------------------------------------------------------------
@@ -166,7 +166,7 @@ printlns(
 # ------------------------------------------------------------
 banner("What is an RFD?", num=2)
 
-print(f"{YELLOW}>>> 2.1. Pattern definition{RESET}")
+print(f"{YELLOW}2.1. Pattern definition{RESET}")
 printlns(
     "A Relaxed Functional Dependency (RFD) is a specific pattern of the form"
 )
@@ -185,7 +185,7 @@ printlns(
     "* Lowering confidence gives us AFDs."
 )
 
-print(f"{YELLOW}>>> 2.2. Confidence and support{RESET}")
+print(f"{YELLOW}2.2. Confidence and support{RESET}")
 printlns("Two numbers describe an RFD.")
 printlns(
     f"  {BOLD}Confidence{RESET} tells us how reliable the rule is. " +
@@ -205,7 +205,7 @@ printlns(
 # ------------------------------------------------------------
 banner("Dataset", num=3)
 
-DATA_PATH = "examples/datasets/sample_height_weight.csv"
+DATA_PATH = "examples/datasets/sample_original_from_paper.csv"
 COL_NAMES = ["height_cm", "weight_kg", "shoe_size_eu"]
 
 df = pd.read_csv(DATA_PATH, header=0)
@@ -262,7 +262,7 @@ printlns(
     "reproducible results."
 )
 
-print(f"{YELLOW}>>> Where are similarity metrics defined?{RESET}")
+print(f"{YELLOW}Where are similarity metrics defined?{RESET}")
 printlns(
     f"  Similarity metrics are set using the {BOLD}set_metrics(){RESET} method, which takes " +
     "a list of metric functions (one per column). For example:"
@@ -342,16 +342,18 @@ printlns(
 banner("Verifying hypothesis", num=7)
 
 printlns(
-    f"  {YELLOW}Here we set:{RESET} height <= 1 cm, weight <= 10 kg, shoe size <= 1. " +
-    f"This models {BOLD}'people of practically the same height and roughly the same " +
-    f"weight should have almost the same shoe size'{RESET}. " +
-    "Since the metric returns 0 or 1, we set min_similarity=1.0 to accept only exact " +
-    "matches according to these thresholds. "
-)
-printlns(
     f"  {GREEN}Recall our hypothesis from Section 3:{RESET} we expect that similar height and " +
     "weight imply similar shoe size. The absolute metric lets us define " +
     "'similar' in concrete, measurable terms."
+)
+
+printlns(
+    f"  {YELLOW}To check it we set the following attribute difference thresholds:{RESET} " +
+    "height <= 1 cm, weight <= 10 kg, shoe size <= 1. " +
+    f"This models {BOLD}'people of practically the same height and roughly the same " +
+    f"weight should have almost the same shoe size'{RESET}. " +
+    "Since the used abs_threshold_metric returns 0 or 1, we set min_similarity=1.0 to accept only exact " +
+    "matches according to these thresholds. "
 )
 
 print_table(df)
@@ -385,8 +387,8 @@ printlns(
 )
 
 prints(
-    "  Because the thresholds are strict, only a few pairs match - hence the " +
-    "support is low, but the confidence can still be high. " +
+    "  Because the thresholds are strict, only a few pairs have similar lhs and similar " +
+    "rhs - hence the support is low, but the confidence can still be high. " +
     "The absolute metric makes the similarity definition completely transparent."
 )
 
@@ -436,8 +438,8 @@ print_rfds_table(eq_rfds, COL_NAMES_STR,
                  title="RFDs with exact equality on all columns")
 printlns(
     "  Without fuzzy matching, the only dependencies found involve cuisine " +
-    "and district because they have exact duplicates. Restaurant names, " +
-    "which are all unique due to typos, never appear in any rule."
+    "and district because they contain exact duplicates. On the other hand, restaurant names, " +
+    "which are all unique due to typos, never appear in any found RFD."
 )
 
 algo_jac = desbordante.rfd.algorithms.GaRfd()
@@ -512,89 +514,12 @@ print_rfds_table(discovered_rfds, COL_NAMES_STR,
                  title=f"Found {len(discovered_rfds)} RFD(s) on dirty data",
                  highlight={highlight_key})
 
-printlns(f"{YELLOW}>>> Why do the RFD sets differ, and how to find out if there is an error?{RESET}")
+printlns(f"{YELLOW}Why do the RFD sets differ, and how to find out if there is an error?{RESET}")
 printlns(
     "  On clean data, [cuisine] -> [district] holds with confidence 1.0 " +
     "because every cuisine appears in only one district. " +
     "After adding rows 10-11 (Italian in Uptown), the confidence drops to 0.6. " +
     "This change signals a potential inconsistency."
-)
-
-def extract_violations_for_garfd_rfds(df, rfds, metrics, thresholds):
-    from collections import defaultdict
-    import itertools
-
-    violation_reports = []
-    n = len(df)
-
-    for rfd in rfds:
-        lhs_indices = [i for i in range(len(df.columns)) if rfd.lhs_mask & (1 << i)]
-        rhs_idx = rfd.rhs_index
-
-        if not lhs_indices or rhs_idx >= len(df.columns):
-            continue
-
-        violation_count = defaultdict(int)
-        for i, j in itertools.combinations(range(n), 2):
-            lhs_sim = all(
-                metrics[col](str(df.iloc[i, col]), str(df.iloc[j, col])) >= thresholds[col]
-                for col in lhs_indices
-            )
-            if not lhs_sim:
-                continue
-
-            rhs_sim = metrics[rhs_idx](str(df.iloc[i, rhs_idx]), str(df.iloc[j, rhs_idx])) >= thresholds[rhs_idx]
-
-            if not rhs_sim:
-                violation_count[i] += 1
-                violation_count[j] += 1
-
-        violation_reports.append({
-            "rfd": rfd,
-            "violations": sorted(violation_count.items(), key=lambda x: x[1], reverse=True)
-        })
-    return violation_reports
-
-reports = extract_violations_for_garfd_rfds(
-    dirty_df,
-    discovered_rfds,
-    metrics=[jaccard_2gram, eq, eq],
-    thresholds=[0.3, 1.0, 1.0]
-)
-
-print("="*80)
-printlns("  Errors detected:")
-for report in reports:
-    rfd = report["rfd"]
-    lhs_names = [COL_NAMES_STR[i] for i in range(len(COL_NAMES_STR)) if rfd.lhs_mask & (1 << i)]
-    rhs_name = COL_NAMES_STR[rfd.rhs_index]
-    rule_str = f"[{', '.join(lhs_names)}] -> [{rhs_name}] (conf={rfd.confidence:.3f}, supp={rfd.support:.3f})"
-    if len(report["violations"]):
-        prints(f"{RED}Rule: {rule_str}{RESET}")
-
-    top_violations = report["violations"][:3]  # show only top 3
-    for j, (idx, count) in enumerate(top_violations):
-        prints(f"  Tuple #{idx+1} | Violating pairs: {count} | ")
-        prints(f"  Data: {dirty_df.iloc[idx].to_dict()}")
-        
-        if j < len(top_violations) - 1:
-            print("-" * 80)
-    print()
-
-printlns(
-    f"{GREEN}Note{RESET} that Bella Napoli (row #4) is flagged because it violates the rule " +
-    "when paired with the two erroneous Italian rows - it is an innocent bystander " +
-    "that helps locate the true errors."
-)
-
-printlns(f"{YELLOW}>>> How we spot errors?{RESET}")
-printlns(
-    "  For each RFD discovered on the dirty dataset we count how many times " +
-    "a tuple violates the rule (LHS similar, RHS dissimilar). Tuples with " +
-    "the highest violation counts are the best candidates for manual review. " +
-    "In our example, rows 10 and 11 are flagged precisely because they " +
-    "introduced Italian cuisine into Uptown, breaking the previously clean " +
-    "pattern."
 )
 
 # ------------------------------------------------------------
@@ -633,7 +558,7 @@ printlns(
 # ------------------------------------------------------------
 banner("See also")
 
-print("Related primitives in Desbordante:")
+print("Related patterns in Desbordante:")
 print("  * FD mining                -  examples/basic/mining_fd.py")
 print("  * AFD mining               -  examples/basic/mining_afd.py")
 print("  * MFD verifying            -  examples/basic/verifying_mfd.py") 
