@@ -130,7 +130,7 @@ banner("Introduction", num=1)
 
 printlns(
     "  This example is intended for users who want to dive deeper into the " + 
-    "algorithm. We strongly recommend going through the basic GA-RFD " + 
+    "GA-RFD. We strongly recommend going through the basic GA-RFD " + 
     "example first to become familiar with the core concepts and API. " + 
     "Here we move on to exact FDs and approximate FDs, and we show how to " +
     "validate AFDs using the built-in verifier that computes the g₁ error."
@@ -184,7 +184,7 @@ highlight_fd = make_rfd_key(COL_NAMES, ["weight_kg"], "height_cm")
 print_rfds_table(fds, COL_NAMES, title=f"Found {len(fds)} exact FD(s) with minconf=1.0",
                  highlight={highlight_fd})
 
-printlns(f"{YELLOW}>>> Why does [weight_kg] -> [height_cm] have conf=1.000 and supp=0.071?{RESET}")
+printlns(f"{YELLOW}Why does [weight_kg] -> [height_cm] have conf=1.000 and supp=0.071?{RESET}")
 printlns(
     "  There are 8 rows, therefore 8*7/2 = 28 tuple pairs. " + 
     "Only two pairs share the same weight: (row 1, row 2) with weight 70, " + 
@@ -219,7 +219,7 @@ highlight_afd = make_rfd_key(COL_NAMES, ["height_cm"], "shoe_size_eu")
 print_rfds_table(afds, COL_NAMES, title=f"Found {len(afds)} AFD(s) with minconf>=0.6",
                  highlight={highlight_afd})
 
-printlns(f"{YELLOW}>>> Why does [height_cm] -> [shoe_size_eu] have conf=0.750 and supp=0.107?{RESET}")
+printlns(f"{YELLOW}Why does [height_cm] -> [shoe_size_eu] have conf=0.750 and supp=0.107?{RESET}")
 printlns(
     "  There are 4 pairs with identical height: (1,2), (1,3), (2,3) from height 175 " + 
     "and (5,6) from height 178. Among them, the first three also share the same shoe size (40), " + 
@@ -254,6 +254,7 @@ for rfd in sorted(afds, key=lambda r: (r.rhs_index, r.lhs_mask)):
     verifier.execute(lhs_indices=lhs_indices, rhs_indices=[rhs_index])
     g1_error = verifier.get_error()
     confidence = rfd.confidence
+    support = rfd.support
 
     lhs_names = [COL_NAMES[i] for i in lhs_indices]
     rhs_name = COL_NAMES[rhs_index]
@@ -262,17 +263,18 @@ for rfd in sorted(afds, key=lambda r: (r.rhs_index, r.lhs_mask)):
     table_data.append([
         rule_str,
         f"{confidence:.3f}",
+        f"{support:.3f}",
         f"{g1_error:.3f}",
         f"{1 - confidence:.3f}"
     ])
 
 print(f"\n{YELLOW}Verification results:{RESET}\n")
-headers = ["Rule", "Confidence", "g₁ error", "1 - Confidence"]
+headers = ["rule", "conf", "supp", "g₁ error", "1 - conf"]
 print(tabulate(table_data, headers=headers, tablefmt="psql",
-               colalign=("left", "right", "right", "right")))
+               colalign=("center", "left", "left", "left", "left")))
 print()
 
-printlns(f"{YELLOW}>>> Observations{RESET}")
+printlns(f"{YELLOW}Observations{RESET}")
 printlns(
     "  The table compares the confidence reported by GA-RFD with the g₁ error " +
     "from the verifier. Confidence is defined as the fraction of pairs with " +
@@ -321,7 +323,7 @@ prints(
 # ------------------------------------------------------------
 banner("See also")
 
-print("Related primitives in Desbordante:")
+print("Related patterns in Desbordante:")
 print("  * FD mining     -  examples/basic/mining_fd.py")
 print("  * AFD mining    -  examples/basic/mining_afd.py")
 print("  * MFD verifying -  examples/basic/verifying_mfd.py") 
