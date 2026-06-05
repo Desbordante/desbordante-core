@@ -1552,7 +1552,8 @@ Statistic DataStats::GetCramersVCorrelation(size_t index1, size_t index2) const 
                 double chi2 = 0.0;
                 for (size_t i = 0; i < r; ++i) {
                     for (size_t j = 0; j < c; ++j) {
-                        double expected = static_cast<double>(row_sums[i]) * static_cast<double>(col_sums[j]) / n;
+                        double expected = static_cast<double>(row_sums[i]) *
+                                          static_cast<double>(col_sums[j]) / n;
                         if (expected > 0) {
                             double observed = contingency[i * c + j];
                             double diff = observed - expected;

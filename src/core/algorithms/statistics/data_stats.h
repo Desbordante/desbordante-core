@@ -99,8 +99,8 @@ protected:
         }
 
         if (i1 == i2) {
-        mo::DoubleType double_type;
-        return Statistic(double_type.MakeValue(1.0), &double_type, false);
+            mo::DoubleType double_type;
+            return Statistic(double_type.MakeValue(1.0), &double_type, false);
         }
 
         Statistic result = calc_func(i1, i2);
