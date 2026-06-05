@@ -405,7 +405,10 @@ class GddValidatorCasesTest : public ::testing::TestWithParam<ValidatorCase> {
 protected:
     static std::filesystem::path WriteTempDotFile(std::string const& dot,
                                                   std::string const& file_name) {
-        auto const path = std::filesystem::temp_directory_path() / file_name;
+        auto const path =
+                std::filesystem::temp_directory_path() /
+                (std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) +
+                 file_name);
         std::ofstream out(path);
         out << dot;
         out.close();
@@ -438,6 +441,10 @@ protected:
 
         EXPECT_THAT(actual_counterexample_indices,
                     testing::UnorderedElementsAreArray(tc.expected_counterexample_gdd_indices));
+
+        if (std::filesystem::exists(graph_path)) {
+            std::filesystem::remove(graph_path);
+        }
     }
 };
 
