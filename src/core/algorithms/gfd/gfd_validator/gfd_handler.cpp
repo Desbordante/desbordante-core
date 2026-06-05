@@ -34,12 +34,12 @@ void GfdHandler::RegisterOptions() {
 
 void GfdHandler::LoadDataInternal() {
     std::ifstream f(graph_path_);
-    graph_ = parser::graph_parser::ReadGraph(f);
+    graph_ = parser::graph_parser::gfd::ReadGraph(f);
     f.close();
     for (auto const& path : gfd_paths_) {
         auto gfd_path = path;
         f.open(gfd_path);
-        model::Gfd gfd = parser::graph_parser::ReadGfd(f);
+        model::Gfd gfd = parser::graph_parser::gfd::ReadGfd(f);
         f.close();
         gfds_.push_back(gfd);
     }

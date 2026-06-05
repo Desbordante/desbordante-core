@@ -35,7 +35,7 @@ std::string CanonicalOD<Ordering>::ToString() const {
     std::stringstream result;
 
     result << context_.ToString() << " : " << ap_.left + 1
-           << ((Ordering == +od::Ordering::ascending) ? "<=" : ">=") << " ~ " << ap_.right + 1
+           << ((Ordering == od::Ordering::kAscending) ? "<=" : ">=") << " ~ " << ap_.right + 1
            << "<=";
 
     return result.str();
@@ -68,18 +68,18 @@ std::string SimpleCanonicalOD::ToString() const {
     return result.str();
 }
 
-bool operator==(CanonicalOD<od::Ordering::ascending> const& x,
-                CanonicalOD<od::Ordering::ascending> const& y) {
+bool operator==(CanonicalOD<od::Ordering::kAscending> const& x,
+                CanonicalOD<od::Ordering::kAscending> const& y) {
     return x.context_ == y.context_ && x.ap_ == y.ap_;
 }
 
-bool operator!=(CanonicalOD<od::Ordering::ascending> const& x,
-                CanonicalOD<od::Ordering::ascending> const& y) {
+bool operator!=(CanonicalOD<od::Ordering::kAscending> const& x,
+                CanonicalOD<od::Ordering::kAscending> const& y) {
     return !(x == y);
 }
 
-bool operator<(CanonicalOD<od::Ordering::ascending> const& x,
-               CanonicalOD<od::Ordering::ascending> const& y) {
+bool operator<(CanonicalOD<od::Ordering::kAscending> const& x,
+               CanonicalOD<od::Ordering::kAscending> const& y) {
     if (x.ap_ != y.ap_) {
         return x.ap_ < y.ap_;
     }
@@ -87,18 +87,18 @@ bool operator<(CanonicalOD<od::Ordering::ascending> const& x,
     return x.context_ < y.context_;
 }
 
-bool operator==(CanonicalOD<od::Ordering::descending> const& x,
-                CanonicalOD<od::Ordering::descending> const& y) {
+bool operator==(CanonicalOD<od::Ordering::kDescending> const& x,
+                CanonicalOD<od::Ordering::kDescending> const& y) {
     return x.context_ == y.context_ && x.ap_ == y.ap_;
 }
 
-bool operator!=(CanonicalOD<od::Ordering::descending> const& x,
-                CanonicalOD<od::Ordering::descending> const& y) {
+bool operator!=(CanonicalOD<od::Ordering::kDescending> const& x,
+                CanonicalOD<od::Ordering::kDescending> const& y) {
     return !(x == y);
 }
 
-bool operator<(CanonicalOD<od::Ordering::descending> const& x,
-               CanonicalOD<od::Ordering::descending> const& y) {
+bool operator<(CanonicalOD<od::Ordering::kDescending> const& x,
+               CanonicalOD<od::Ordering::kDescending> const& y) {
     if (x.ap_ != y.ap_) {
         return x.ap_ < y.ap_;
     }
@@ -122,7 +122,7 @@ bool operator<(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y) {
     return x.context_ < y.context_;
 }
 
-template class CanonicalOD<od::Ordering::ascending>;
-template class CanonicalOD<od::Ordering::descending>;
+template class CanonicalOD<od::Ordering::kAscending>;
+template class CanonicalOD<od::Ordering::kDescending>;
 
 }  // namespace algos::fastod

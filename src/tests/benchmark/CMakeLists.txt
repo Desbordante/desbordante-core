@@ -18,8 +18,7 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::md::hy::preprocessing
             ${DESBORDANTE_PREFIX}::nar::des
             Boost::program_options
-            better-enums
-            frozen
+            magic_enum::magic_enum
             spdlog::spdlog_header_only
 )
 add_dependencies(

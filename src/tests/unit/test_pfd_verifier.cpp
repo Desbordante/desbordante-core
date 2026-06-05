@@ -53,23 +53,21 @@ TEST_P(TestPFDVerifying, DefaultTest) {
 
 INSTANTIATE_TEST_SUITE_P(
         PFDVerifierTestSuite, TestPFDVerifying,
-        ::testing::Values(PFDVerifyingParams({2}, {3}, +algos::PfdErrorMeasure::per_value, 0.0625,
-                                             1, 1, {{0, 1}}, kTestFD),
-                          PFDVerifyingParams({0, 1}, {4}, +algos::PfdErrorMeasure::per_value,
+        ::testing::Values(PFDVerifyingParams({2}, {3}, algos::PfdErrorMeasure::kPerValue, 0.0625, 1,
+                                             1, {{0, 1}}, kTestFD),
+                          PFDVerifyingParams({0, 1}, {4}, algos::PfdErrorMeasure::kPerValue,
                                              0.166667, 2, 2, {{0, 1, 2}, {6, 7, 8}}, kTestFD),
-                          PFDVerifyingParams({4}, {5}, +algos::PfdErrorMeasure::per_value, 0.3334,
-                                             4, 4, {{0, 8}, {1, 2}, {3, 4, 5}, {9, 10, 11}},
-                                             kTestFD),
-                          PFDVerifyingParams({5}, {1}, +algos::PfdErrorMeasure::per_value, 0.0, 0,
-                                             0, {}, kTestFD),
-                          PFDVerifyingParams({2}, {3}, +algos::PfdErrorMeasure::per_tuple, 0.0834,
-                                             1, 1, {{0, 1}}, kTestFD),
-                          PFDVerifyingParams({0, 1}, {4}, +algos::PfdErrorMeasure::per_tuple,
-                                             0.1667, 2, 2, {{0, 1, 2}, {6, 7, 8}}, kTestFD),
-                          PFDVerifyingParams({4}, {5}, +algos::PfdErrorMeasure::per_tuple, 0.3334,
-                                             4, 4, {{0, 8}, {1, 2}, {3, 4, 5}, {9, 10, 11}},
-                                             kTestFD),
-                          PFDVerifyingParams({5}, {1}, +algos::PfdErrorMeasure::per_tuple, 0.0, 0,
-                                             0, {}, kTestFD)));
+                          PFDVerifyingParams({4}, {5}, algos::PfdErrorMeasure::kPerValue, 0.3334, 4,
+                                             4, {{0, 8}, {1, 2}, {3, 4, 5}, {9, 10, 11}}, kTestFD),
+                          PFDVerifyingParams({5}, {1}, algos::PfdErrorMeasure::kPerValue, 0.0, 0, 0,
+                                             {}, kTestFD),
+                          PFDVerifyingParams({2}, {3}, algos::PfdErrorMeasure::kPerTuple, 0.0834, 1,
+                                             1, {{0, 1}}, kTestFD),
+                          PFDVerifyingParams({0, 1}, {4}, algos::PfdErrorMeasure::kPerTuple, 0.1667,
+                                             2, 2, {{0, 1, 2}, {6, 7, 8}}, kTestFD),
+                          PFDVerifyingParams({4}, {5}, algos::PfdErrorMeasure::kPerTuple, 0.3334, 4,
+                                             4, {{0, 8}, {1, 2}, {3, 4, 5}, {9, 10, 11}}, kTestFD),
+                          PFDVerifyingParams({5}, {1}, algos::PfdErrorMeasure::kPerTuple, 0.0, 0, 0,
+                                             {}, kTestFD)));
 
 }  // namespace tests

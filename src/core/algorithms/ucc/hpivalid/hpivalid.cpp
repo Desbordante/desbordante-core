@@ -23,9 +23,7 @@ void HPIValid::LoadDataInternal() {
     }
 }
 
-hpiv::PLITable HPIValid::Preprocess(hpiv::ResultCollector& rc) {
-    rc.StartTimer(hpiv::timer::TimerName::construct_clusters);
-
+hpiv::PLITable HPIValid::Preprocess() {
     hpiv::PLITable tab;
 
     tab.nr_rows = relation_->GetNumRows();
@@ -39,7 +37,6 @@ hpiv::PLITable HPIValid::Preprocess(hpiv::ResultCollector& rc) {
     }
     tab.inverse_mapping = hy::util::BuildInvertedPlis(plis);
 
-    rc.StopTimer(hpiv::timer::TimerName::construct_clusters);
     return tab;
 }
 
@@ -47,24 +44,17 @@ unsigned long long HPIValid::ExecuteInternal() {
     hpiv::Config cfg;
     hpiv::ResultCollector rc(3600);
 
-    rc.StartTimer(hpiv::timer::TimerName::total);
-    hpiv::PLITable tab = Preprocess(rc);
-
-    rc.StartTimer(hpiv::timer::TimerName::total_enum_algo);
+    rc.SetStartTime();
+    hpiv::PLITable tab = Preprocess();
 
     hpiv::TreeSearch tree_search(tab, cfg, rc);
     tree_search.Run();
-
-    rc.StopTimer(hpiv::timer::TimerName::total_enum_algo);
 
     RegisterUCCs(rc);
 
     PrintInfo(rc);
 
-    rc.StopTimer(hpiv::timer::TimerName::total);
-    LOG_INFO("Elapsed time: {}", rc.Time(hpiv::timer::TimerName::total));
-
-    return rc.Time(hpiv::timer::TimerName::total);
+    return rc.GetTimeSinceStart();
 }
 
 void HPIValid::RegisterUCCs(hpiv::ResultCollector const& rc) {

@@ -32,7 +32,8 @@ protected:
 
     std::filesystem::path graph_database_path_;
     std::filesystem::path output_path_;
-    std::vector<gspan::graph_t> graph_database_;
+    std::vector<gspan::graph_t> raw_dataset_;
+    std::vector<gspan::graph_t> pruned_graphs_;
 
     void FindAllOnlyOneVertex();
     void RemoveInfrequentLabel(gspan::graph_t& graph, int label);
@@ -62,10 +63,6 @@ public:
 
     std::vector<gspan::FrequentSubgraph> const& GetFrequentSubgraphs() const {
         return frequent_subgraphs_;
-    }
-
-    std::vector<gspan::graph_t> const& GetGraphDatabase() const {
-        return graph_database_;
     }
 
     int GetMinSup() const {

@@ -9,8 +9,8 @@
 #include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
-#include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
@@ -20,6 +20,8 @@
 #include "core/config/indices/type.h"
 #include "core/config/max_lhs/type.h"
 #include "core/config/thread_number/type.h"
+#include "core/model/transaction/input_format_type.h"
+#include "core/util/enum_to_str.h"
 
 namespace {
 namespace py = pybind11;
@@ -33,22 +35,24 @@ std::pair<std::type_index, ConvFunction> normal_conv_pair{
 template <typename T>
 std::pair<std::type_index, ConvFunction> enum_conv_pair{
         std::type_index(typeid(T)),
-        [](boost::any value) { return py::cast(boost::any_cast<T>(value)._to_string()); }};
+        [](boost::any value) { return py::cast(util::EnumToStr(boost::any_cast<T>(value))); }};
 std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<int>,
         normal_conv_pair<double>,
         normal_conv_pair<long double>,
         normal_conv_pair<unsigned int>,
         normal_conv_pair<bool>,
+        normal_conv_pair<std::vector<std::string>>,
         normal_conv_pair<config::ThreadNumType>,
         normal_conv_pair<config::CustomRandomSeedType>,
         normal_conv_pair<config::MaxLhsType>,
         normal_conv_pair<config::ErrorType>,
         normal_conv_pair<config::IndicesType>,
         normal_conv_pair<model::DDString>,
+        normal_conv_pair<model::Gdd>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
-        enum_conv_pair<algos::InputFormat>,
+        enum_conv_pair<model::InputFormatType>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
         enum_conv_pair<algos::od::Ordering>};
 }  // namespace

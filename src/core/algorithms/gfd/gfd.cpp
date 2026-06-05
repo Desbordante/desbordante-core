@@ -13,7 +13,7 @@ namespace model {
 
 std::string model::Gfd::ToString() const {
     std::stringstream gfd_stream;
-    parser::graph_parser::WriteGfd(gfd_stream, *this);
+    parser::graph_parser::gfd::WriteGfd(gfd_stream, *this);
     return gfd_stream.str();
 }
 

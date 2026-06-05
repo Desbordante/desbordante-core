@@ -1,9 +1,11 @@
 #pragma once
 
 #include "core/algorithms/algebraic_constraints/mining_algorithms.h"
-#include "core/algorithms/association_rules/mining_algorithms.h"
+#include "core/algorithms/ar/mining_algorithms.h"
+#include "core/algorithms/ar/verification_algorithms.h"
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "core/algorithms/cfd/mining_algorithms.h"
+#include "core/algorithms/cind/verification_algorithms.h"
 #include "core/algorithms/dd/mining_algorithms.h"
 #include "core/algorithms/fd/mining_algorithms.h"
 #include "core/algorithms/fd/sfd/cords.h"

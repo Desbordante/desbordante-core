@@ -2,9 +2,11 @@
 
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
-#include <frozen/string.h>
-#include <frozen/unordered_map.h>
+#include <magic_enum/magic_enum.hpp>
+
+#include "core/util/static_map.h"
 
 namespace algos::dc {
 
@@ -17,16 +19,18 @@ private:
 public:
     constexpr Operator(OperatorType type) noexcept : op_(type) {}
 
-    Operator(std::string str_op) {
-        frozen::string s = {str_op.data(), str_op.size()};
-        auto it = kStringToOperatorType.find(s);
-        if (it == kStringToOperatorType.end()) throw std::invalid_argument("Unknown operator");
-        op_ = it->second;
+    Operator(std::string_view str_op) {
+        OperatorType const* op_ptr = kStringToOperatorType.Find(str_op);
+        if (op_ptr == nullptr) {
+            throw std::invalid_argument("Unknown operator: " + std::string(str_op));
+        }
+
+        op_ = *op_ptr;
     }
 
     std::string ToString() const {
-        frozen::string str = kOperatorTypeToString.at(op_);
-        return str.data();
+        std::string_view sv = kOperatorTypeToString.At(op_);
+        return std::string(sv);
     }
 
     bool operator==(Operator const& rhs) const noexcept {
@@ -41,15 +45,21 @@ public:
         return op_;
     }
 
-    static constexpr frozen::unordered_map<OperatorType, frozen::string, 6> kOperatorTypeToString{
-            {OperatorType::kEqual, "=="},        {OperatorType::kUnequal, "!="},
-            {OperatorType::kGreater, ">"},       {OperatorType::kLess, "<"},
-            {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};
+    static constexpr util::StaticMap<OperatorType, std::string_view, 6> kOperatorTypeToString{
+            {{{OperatorType::kEqual, "=="},
+              {OperatorType::kUnequal, "!="},
+              {OperatorType::kGreater, ">"},
+              {OperatorType::kLess, "<"},
+              {OperatorType::kGreaterEqual, ">="},
+              {OperatorType::kLessEqual, "<="}}}};
 
-    static constexpr frozen::unordered_map<frozen::string, OperatorType, 6> kStringToOperatorType{
-            {"==", OperatorType::kEqual},        {"!=", OperatorType::kUnequal},
-            {">", OperatorType::kGreater},       {"<", OperatorType::kLess},
-            {">=", OperatorType::kGreaterEqual}, {"<=", OperatorType::kLessEqual}};
+    static constexpr util::StaticMap<std::string_view, OperatorType, 6> kStringToOperatorType{
+            {{{"==", OperatorType::kEqual},
+              {"!=", OperatorType::kUnequal},
+              {">", OperatorType::kGreater},
+              {"<", OperatorType::kLess},
+              {">=", OperatorType::kGreaterEqual},
+              {"<=", OperatorType::kLessEqual}}}};
 };
 
 }  // namespace algos::dc

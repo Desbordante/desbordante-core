@@ -109,7 +109,7 @@ void BindMainClasses(py::module_& main_module) {
                     "execute",
                     [](Algorithm& algo, py::kwargs const& kwargs) {
                         ConfigureAlgo(algo, kwargs);
-                        algo.Execute();
+                        return algo.Execute();
                     },
                     "Process data.");
 #undef CERTAIN_SCRIPTS_ONLY

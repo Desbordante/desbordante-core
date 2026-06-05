@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/od/fastod/model/removal_set.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
@@ -21,7 +23,7 @@ private:
         config::IndicesType context;
         config::IndexType left;
         config::IndexType right;
-        Ordering left_ordering = Ordering::_values()[0];
+        Ordering left_ordering = magic_enum::enum_values<Ordering>().front();
     };
 
     struct OFD {

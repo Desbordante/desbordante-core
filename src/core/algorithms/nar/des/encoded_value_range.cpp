@@ -75,7 +75,7 @@ std::shared_ptr<model::ValueRange> EncodedValueRange::Decode(
             return DecodeTypedValueRange<Int, NumericValueRange<Int>>(domain);
         default:
             throw std::invalid_argument(std::string("ValueRange has invalid type_id: ") +
-                                        domain_type_id._to_string() +
+                                        std::string(magic_enum::enum_name(domain_type_id)) +
                                         std::string(" in function: ") + __func__);
     }
 }

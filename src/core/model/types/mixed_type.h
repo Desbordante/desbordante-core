@@ -32,7 +32,7 @@ private:
         return alignment;
     }
 
-    static constexpr size_t kTypeIdSize = sizeof(TypeId::_integral);
+    static constexpr size_t kTypeIdSize = sizeof(std::underlying_type_t<TypeId>);
 
 public:
     explicit MixedType(bool is_null_eq_null) noexcept
@@ -68,10 +68,10 @@ public:
 
     void Free(std::byte const* value) const noexcept override {
         TypeId const type_id = RetrieveTypeId(value);
-        if (type_id == +TypeId::kString || type_id == +TypeId::kBigInt) {
+        if (type_id == TypeId::kString || type_id == TypeId::kBigInt) {
             StringType::Destruct(RetrieveValue(value));
         }
-        if (type_id == +TypeId::kDate) {
+        if (type_id == TypeId::kDate) {
             DateType::Destruct(RetrieveValue(value));
         }
         Type::Free(value);
@@ -127,7 +127,7 @@ public:
                 {TypeId::kNull, alignof(Null)},     {TypeId::kEmpty, alignof(Empty)},
                 {TypeId::kInt, alignof(Int)},       {TypeId::kDouble, alignof(Double)},
                 {TypeId::kString, alignof(String)}, {TypeId::kBigInt, alignof(BigInt)},
-                {TypeId::kDate, alignof(Date)}};
+                {TypeId::kDate, alignof(Date)},     {TypeId::kBool, alignof(bool)}};
         assert(type_to_alignment.find(type_id) != type_to_alignment.end());
         return type_to_alignment.at(type_id);
     }

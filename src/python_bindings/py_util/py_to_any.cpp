@@ -3,6 +3,7 @@
 #include <functional>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <unordered_map>
 
 #include <boost/any.hpp>
@@ -11,10 +12,12 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
-#include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
+#include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -25,8 +28,10 @@
 #include "core/config/exceptions.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/transaction/input_format_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "core/util/enum_to_available_values.h"
+#include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
 
 namespace {
@@ -70,39 +75,59 @@ std::pair<std::type_index, ConvFunc> const kNormalConvPair{
         }};
 
 template <typename EnumType>
+    requires magic_enum::is_scoped_enum_v<EnumType> || magic_enum::is_unscoped_enum_v<EnumType>
 std::pair<std::type_index, ConvFunc> const kEnumConvPair{
-        std::type_index(typeid(EnumType)), [](std::string_view option_name, py::handle value) {
-            auto string = CastAndReplaceCastError<std::string>(option_name, value);
-            better_enums::optional<EnumType> enum_holder =
-                    EnumType::_from_string_nocase_nothrow(string.data());
-            if (enum_holder) return *enum_holder;
+        std::type_index(typeid(EnumType)),
+        [](std::string_view option_name, py::handle value) -> boost::any {
+            auto user_str = CastAndReplaceCastError<std::string>(option_name, value);
+            auto enum_optional = util::EnumFromStr<EnumType>(user_str);
+
+            if (enum_optional) return *enum_optional;
 
             std::stringstream error_message;
-            error_message << "Incorrect value for option \"" << option_name
-                          << "\". Possible values: " << util::EnumToAvailableValues<EnumType>();
+            std::stringstream possible_values;
+
+            possible_values << "[";
+            constexpr auto& values = magic_enum::enum_values<EnumType>();
+            for (size_t i = 0; i < values.size(); ++i) {
+                possible_values << util::EnumToStr(values[i]);
+                if (i < values.size() - 1) {
+                    possible_values << "|";
+                }
+            }
+            possible_values << "]";
+
+            error_message << "Incorrect value '" << user_str << "' for option \"" << option_name
+                          << "\". Possible values: " << possible_values.str();
+
             throw config::ConfigurationError(error_message.str());
         }};
 
 template <typename EnumType>
+    requires magic_enum::is_scoped_enum_v<EnumType> || magic_enum::is_unscoped_enum_v<EnumType>
 std::pair<std::type_index, ConvFunc> const kCharEnumConvPair{
-        std::type_index(typeid(EnumType)), [](std::string_view option_name, py::handle value) {
-            using EnumValueType = typename EnumType::_integral;
-            // May be applicable to other types.
-            static_assert(std::is_same_v<EnumValueType, char>);
-            auto char_value = CastAndReplaceCastError<char>(option_name, value);
-            better_enums::optional<EnumType> enum_holder =
-                    EnumType::_from_integral_nothrow(char_value);
-            if (enum_holder) return *enum_holder;
+        std::type_index(typeid(EnumType)),
+        [](std::string_view option_name, py::handle value) -> boost::any {
+            using UnderlyingType = magic_enum::underlying_type_t<EnumType>;
+            static_assert(std::is_same_v<UnderlyingType, char>,
+                          "This converter is for char-based enums only.");
+
+            auto char_value = CastAndReplaceCastError<UnderlyingType>(option_name, value);
+            auto enum_optional = magic_enum::enum_cast<EnumType>(char_value);
+
+            if (enum_optional) return *enum_optional;
 
             std::stringstream error_message;
-            error_message << "Incorrect value for option \"" << option_name
-                          << "\". Possible values: ";
+            error_message << "Incorrect integral value '" << static_cast<int>(char_value)
+                          << "' for option \"" << option_name << "\". Possible values are: [";
 
-            error_message << '[';
-            for (auto const& val : EnumType::_values()) {
-                error_message << val._to_integral() << '|';
+            constexpr auto& enum_values = magic_enum::enum_values<EnumType>();
+            for (size_t i = 0; i < enum_values.size(); ++i) {
+                error_message << static_cast<int>(magic_enum::enum_integer(enum_values[i]));
+                if (i < enum_values.size() - 1) {
+                    error_message << '|';
+                }
             }
-            error_message.seekp(-1, std::stringstream::cur);
             error_message << ']';
 
             throw config::ConfigurationError(error_message.str());
@@ -117,6 +142,26 @@ boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     std::vector<config::InputTable> parsers;
     for (auto const& table : tables) parsers.push_back(PythonObjToInputTable(option_name, table));
     return parsers;
+}
+
+boost::any StringVectorToAny(std::string_view option_name, py::handle obj) {
+    if (obj.is_none()) {
+        return std::vector<std::string>{};
+    }
+
+    if (!py::isinstance<py::sequence>(obj) || py::isinstance<py::str>(obj)) {
+        throw config::ConfigurationError("Option \"" + std::string(option_name) +
+                                         "\" must be a list of strings");
+    }
+
+    std::vector<std::string> out;
+    auto seq = py::reinterpret_borrow<py::sequence>(obj);
+    out.reserve(py::len(seq));
+
+    for (py::handle item : seq) {
+        out.push_back(py::cast<std::string>(py::str(item)));
+    }
+    return out;
 }
 
 std::unordered_map<std::type_index, ConvFunc> const kConverters{
@@ -137,20 +182,29 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<config::PfdErrorMeasureType>,
         kEnumConvPair<config::AfdErrorMeasureType>,
         kEnumConvPair<algos::afd_metric_calculator::AFDMetric>,
-        kEnumConvPair<algos::InputFormat>,
+        kEnumConvPair<model::InputFormatType>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::od::Ordering>,
+        kEnumConvPair<algos::cind::CondType>,
+        kEnumConvPair<algos::cind::AlgoType>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(config::InputTables), InputTablesToAny},
+        {typeid(std::vector<std::string>), StringVectorToAny},
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
         kNormalConvPair<std::unordered_set<size_t>>,
         kNormalConvPair<model::DDString>,
+        kNormalConvPair<std::unordered_map<std::string, std::shared_ptr<Metric>>>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
-        kNormalConvPair<std::pair<std::string, std::string>>};
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        kNormalConvPair<std::vector<model::Gdd>>,
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        kNormalConvPair<std::vector<std::string>>,
+        kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
+};
 
 }  // namespace
 

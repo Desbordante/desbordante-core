@@ -1,14 +1,13 @@
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 
-#include <assert.h>
-#include <stddef.h>
+#include <cassert>
+#include <cstddef>
+#include <stdexcept>
 
 #include "core/algorithms/dc/FastADC/model/predicate.h"
-#include "core/util/logger.h"
 
 namespace algos::fastadc {
 
-// TODO: no, just accept lambda by typaname Func with &&, cast to std::function is costly
 void EvidenceAuxStructuresBuilder::BuildAll(PredicatesVector const& predicates, size_t group_size,
                                             PackAction action) {
     assert(predicates.size() % group_size == 0);
@@ -17,7 +16,6 @@ void EvidenceAuxStructuresBuilder::BuildAll(PredicatesVector const& predicates, 
     for (size_t i = 0; i < num_groups; ++i) {
         size_t base_index = i * group_size;
         PredicatesSpan group_span(predicates.begin() + base_index, group_size);
-
         action(group_span);
     }
 }
@@ -87,6 +85,7 @@ void EvidenceAuxStructuresBuilder::BuildAll() {
             kNumBitsPerNumericGroup * (num_single_.size() / kNumericPredicateGroupSize);
     size_t num_num_cross_bits =
             kNumBitsPerNumericGroup * (num_cross_.size() / kNumericPredicateGroupSize);
+
     correction_map_.resize(num_str_single_bits + num_str_cross_bits + num_num_single_bits +
                            num_num_cross_bits);
 
@@ -95,8 +94,11 @@ void EvidenceAuxStructuresBuilder::BuildAll() {
     ProcessNumPredicates(num_single_, packs_.num_single, count);
     ProcessNumPredicates(num_cross_, packs_.num_cross, count);
 
-    LOG_DEBUG("  [CLUE] # of bits in clue: {}", count);
-    assert(count <= kPredicateBits);
+    LOG_DEBUG("[CLUE] # of bits in clue: {}", count);
+    if (count > kMaxPredicateBits) {
+        throw std::invalid_argument(
+                "FastADC: predicate space is too large (clue bits exceed maximum supported).");
+    }
 }
 
 }  // namespace algos::fastadc

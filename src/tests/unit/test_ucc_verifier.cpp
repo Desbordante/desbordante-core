@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/ucc.h"
 #include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
+#include "core/config/thread_number/type.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {
@@ -52,6 +55,7 @@ public:
     double GetExpectedError() const {
         return expected_error_;
     }
+
     std::vector<model::PLI::Cluster> const& GetExpectedClustersViolatingUCC() const {
         return clusters_violating_ucc_;
     }

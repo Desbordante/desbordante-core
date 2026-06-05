@@ -4,6 +4,7 @@
 #include <string>
 
 #include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cind/types.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -36,6 +37,10 @@ std::string const kDDifferentialStrategyString =
         util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
 std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
                                      util::EnumToAvailableValues<algos::od::Ordering>();
+std::string const kDConditionTypeString =
+        "CIND condition types to use\n" + util::EnumToAvailableValues<algos::cind::CondType>();
+std::string const kDAlgoTypeString =
+        "CIND algorithm types to use\n" + util::EnumToAvailableValues<algos::cind::AlgoType>();
 }  // namespace details
 
 // Common
@@ -65,8 +70,10 @@ constexpr auto kDWeight =
 constexpr auto kDFirstColumnTId = "indicates that the first column contains the transaction IDs";
 constexpr auto kDInputFormat = "format of the input dataset for AR mining\n[singular|tabular]";
 constexpr auto kDItemColumnIndex = "index of the column where an item name is stored";
-constexpr auto kDMinimumConfidence = "minimum confidence value (between 0 and 1)";
-constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
+constexpr auto kDArMinimumConfidence = "Ar minimum confidence value (between 0 and 1)";
+constexpr auto kDArMinimumSupport = "Ar minimum support value (between 0 and 1)";
+constexpr auto kDArLhsRule = "left part of association rule to verify";
+constexpr auto kDArRhsRule = "right part of association rule to verify";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 // CFD
 constexpr auto kDCfdColumnsNumber =
@@ -122,6 +129,7 @@ constexpr auto kDOnlySFD = "Don't mine correlations";
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
 // DD verifier
 constexpr auto kDDDString = "Differential dependency that needs to be verified";
+constexpr auto kDDDudm = "map, that contains udm for verifying dd";
 // DES
 constexpr auto kDCrossoverProbability = "probability of a gene getting mutated in a new individual";
 constexpr auto kDDifferentialScale = "the magnitude of mutations";
@@ -183,6 +191,8 @@ constexpr auto kDMaxNumberOfEdges =
 constexpr auto kDOutputGraphIds = "output the ids of graph containing each frequent subgraph";
 constexpr auto kDGSpanOutputPath =
         "path to output file for frequent subgraphs (if empty, no file is written)";
+// GDD
+constexpr auto kDGddData = "List of GDD objects";
 // HyMD
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDLeftTable = "first table processed by the algorithm";
@@ -243,4 +253,15 @@ constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verif
 auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
 constexpr auto kDOFDContext = "Context of the OFD to verify";
 constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
+
+// CIND
+constexpr auto kDValidity =
+        "Percentage of rows/groups that form IND when the pattern tuple is satisfied";
+constexpr auto kDCompleteness =
+        "Percentage of rows/groups from IND that satisfies the pattern tuple";
+auto const kDConditionType = details::kDConditionTypeString.c_str();
+auto const kDAlgoType = details::kDAlgoTypeString.c_str();
+constexpr auto kDCindCondValues =
+        "Condition values aligned with conditional attributes order. "
+        "Use '-' or '_' as wildcard. If empty => all wildcards.";
 }  // namespace config::descriptions

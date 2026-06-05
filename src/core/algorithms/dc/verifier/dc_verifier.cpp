@@ -110,7 +110,7 @@ bool DCVerifier::Verify(dc::DC dc) {
     if (dc_type == dc::DCType::kOneInequality and do_collect_violations_ == true)
         dc_type = dc::DCType::kTwoTuples;
 
-    auto check = kDCTypeToVerificationMethod.at(dc_type);
+    auto check = kDCTypeToVerificationMethod.At(dc_type);
 
     // TODO: check the article for optimization 2^l -> 2^(l-1) dc's
 
@@ -428,7 +428,7 @@ std::pair<util::Rect<Point>, util::Rect<Point>> DCVerifier::SearchRanges(
 
 bool DCVerifier::Eval(std::vector<std::byte const*> row, std::vector<dc::Predicate> preds) const {
     dc::Component left_comp, right_comp;
-    std::byte const* left_val;
+    std::byte const* left_val = nullptr;
     std::byte const* right_val;
     for (auto const& pred : preds) {
         dc::ColumnOperand left_op = pred.GetLeftOperand();

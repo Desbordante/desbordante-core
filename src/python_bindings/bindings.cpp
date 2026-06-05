@@ -6,9 +6,12 @@
 #include "python_bindings/ac/bind_ac.h"
 #include "python_bindings/afd_metric/bind_afd_metric_calculation.h"
 #include "python_bindings/ar/bind_ar.h"
+#include "python_bindings/ar/bind_ar_verification.h"
 #include "python_bindings/bind_main_classes.h"
 #include "python_bindings/cfd/bind_cfd.h"
 #include "python_bindings/cfd/bind_cfd_verification.h"
+#include "python_bindings/cind/bind_cind.h"
+#include "python_bindings/cind/bind_cind_verification.h"
 #include "python_bindings/data/bind_data_types.h"
 #include "python_bindings/dc/bind_dc_verification.h"
 #include "python_bindings/dc/bind_fastadc.h"
@@ -17,6 +20,7 @@
 #include "python_bindings/dynamic/bind_dynamic_fd_verification.h"
 #include "python_bindings/fd/bind_fd.h"
 #include "python_bindings/fd/bind_fd_verification.h"
+#include "python_bindings/gdd/bind_gdd_verification.h"
 #include "python_bindings/gfd/bind_gfd.h"
 #include "python_bindings/gfd/bind_gfd_verification.h"
 #include "python_bindings/gspan/bind_gspan.h"
@@ -58,7 +62,10 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindStatistics,
                            BindInd,
                            BindIndVerification,
+                           BindCind,
+                           BindCindVerification,
                            BindGfdVerification,
+                           BindGddVerification,
                            BindSplit,
                            BindDynamicFdVerification,
                            BindNdVerification,
@@ -67,6 +74,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindMDVerification,
                            BindDCVerification,
                            BindPfdVerification,
+                           BindARVerification,
                            BindFastADC,
                            BindGfd,
                            BindGSpan,

@@ -1,5 +1,6 @@
+#pragma once
+
 #include "core/algorithms/dc/FastADC/model/predicate.h"
-#include "core/algorithms/dc/FastADC/util/common_clue_set_builder.h"
 
 namespace algos::fastadc {
 
@@ -7,21 +8,20 @@ struct Evidence {
     int64_t count;
     PredicateBitset evidence;
 
-    Evidence(Clue satisfied, int64_t count, PredicateBitset const& cardinalityMask,
-             std::vector<PredicateBitset> const& correctionMap)
+    Evidence(PredicateBitset const& satisfied, int64_t count,
+             PredicateBitset const& cardinality_mask,
+             std::vector<PredicateBitset> const& correction_map)
         : count(count) {
-        evidence = cardinalityMask;
+        evidence = cardinality_mask;
 
-        Clue tmp = satisfied;
-        for (size_t pos = 0; tmp.any(); ++pos) {
-            if (tmp.test(0)) {
-                evidence ^= correctionMap[pos];
+        for (size_t pos = 0; pos < satisfied.size(); ++pos) {
+            if (satisfied.test(pos)) {
+                evidence ^= correction_map[pos];
             }
-            tmp >>= 1;
         }
     }
 
-    Evidence(Clue bitSet, int64_t count) : count(count), evidence(bitSet) {}
+    Evidence(PredicateBitset bit_set, int64_t count) : count(count), evidence(bit_set) {}
 };
 
 }  // namespace algos::fastadc

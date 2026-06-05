@@ -30,8 +30,8 @@ std::vector<DCCandidate> DCCandidateTrie::GetAndRemoveGeneralizations(
         PredicateBitset const& superset) {
     std::vector<DCCandidate> removed;
 
-    boost::dynamic_bitset<> dynamic_superset(kPredicateBits);
-    for (size_t i = 0; i < kPredicateBits; ++i) {
+    boost::dynamic_bitset<> dynamic_superset(kMaxPredicateBits);
+    for (size_t i = 0; i < kMaxPredicateBits; ++i) {
         if (superset.test(i)) {
             dynamic_superset.set(i);
         }

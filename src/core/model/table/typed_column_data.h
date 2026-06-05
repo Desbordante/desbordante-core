@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <boost/regex.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include "core/model/table/abstract_column_data.h"
 #include "core/model/table/idataset_stream.h"
@@ -54,10 +55,10 @@ public:
 
         MixedType const* mixed = GetIfMixed();
         for (size_t i = 0; i != data_.size(); ++i) {
-            if (GetValueTypeId(i) == +TypeId::kString || GetValueTypeId(i) == +TypeId::kBigInt ||
-                GetValueTypeId(i) == +TypeId::kDate) {
+            if (GetValueTypeId(i) == TypeId::kString || GetValueTypeId(i) == TypeId::kBigInt ||
+                GetValueTypeId(i) == TypeId::kDate) {
                 std::byte const* value = (mixed) ? mixed->RetrieveValue(data_[i]) : data_[i];
-                if (GetValueTypeId(i) == +TypeId::kDate) {
+                if (GetValueTypeId(i) == TypeId::kDate) {
                     DateType::Destruct(value);
                 } else {
                     StringType::Destruct(value);
@@ -109,7 +110,7 @@ public:
     bool IsNull(size_t index) const noexcept {
         MixedType const* mixed = GetIfMixed();
         if (mixed != nullptr) {
-            return mixed->RetrieveTypeId(data_[index]) == +TypeId::kNull;
+            return mixed->RetrieveTypeId(data_[index]) == TypeId::kNull;
         } else {
             return nulls_.find(index) != nulls_.end();
         }
@@ -118,7 +119,7 @@ public:
     bool IsEmpty(size_t index) const noexcept {
         MixedType const* mixed = GetIfMixed();
         if (mixed != nullptr) {
-            return mixed->RetrieveTypeId(data_[index]) == +TypeId::kEmpty;
+            return mixed->RetrieveTypeId(data_[index]) == TypeId::kEmpty;
         } else {
             return empties_.find(index) != empties_.end();
         }
@@ -130,7 +131,7 @@ public:
 
     TypeId GetValueTypeId(size_t index) const noexcept {
         TypeId const type_id = type_->GetTypeId();
-        if (type_id == +TypeId::kMixed) {
+        if (type_id == TypeId::kMixed) {
             return static_cast<MixedType const*>(type_.get())->RetrieveTypeId(data_[index]);
         }
 
@@ -146,12 +147,12 @@ public:
 
     bool IsNumeric() const noexcept {
         TypeId type_id = GetTypeId();
-        return type_id == +TypeId::kInt || /* type_id == +ColumnTypeId::kBigInt || */
-               type_id == +TypeId::kDouble;
+        return type_id == TypeId::kInt || /* type_id == ColumnTypeId::kBigInt || */
+               type_id == TypeId::kDouble;
     }
 
     bool IsMixed() const noexcept {
-        return GetTypeId() == +TypeId::kMixed;
+        return GetTypeId() == TypeId::kMixed;
     }
 
     MixedType const* GetIfMixed() const noexcept {
@@ -159,7 +160,8 @@ public:
     }
 
     std::string ToString() const final {
-        return "Data for column " + column_->ToString() + " of type " + GetTypeId()._to_string();
+        return "Data for column " + column_->ToString() + " of type " +
+               std::string(magic_enum::enum_name(GetTypeId()));
     }
 };
 
@@ -173,26 +175,29 @@ private:
     bool is_null_equal_null_;
     bool treat_mixed_as_string_;
 
-    inline static std::vector<TypeId> const kAllCandidateTypes = {
-            +TypeId::kDate, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
+    inline static std::vector<TypeId> const kAllCandidateTypes = {TypeId::kDate,   TypeId::kInt,
+                                                                  TypeId::kBigInt, TypeId::kDouble,
+                                                                  TypeId::kBool,   TypeId::kString};
     inline static std::unordered_map<TypeId, boost::regex> const kTypeIdToRegex = {
             {TypeId::kDate,
              boost::regex(
                      R"(^(\d{4})([-.\/]?)(1[0-2]|0[1-9]|[1-9])\2(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
+            {TypeId::kBool,
+             boost::regex(R"(^\s*(true|false|0|1)\s*$)", boost::regex_constants::icase)},
             {TypeId::kDouble,
              boost::regex(
                      R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
                      R"(^[+-]?(?i)(inf|nan)(?-i)$|)"
                      R"(^[+-]?0[xX](((\d|[a-f]|[A-F]))+(\.(\d|[a-f]|[A-F])*)?|\.(\d|[a-f]|[A-F])+)([pP][+-]?\d+)?$)")},
-            {+TypeId::kBigInt, boost::regex(R"(^(\+|-)?\d{20,}$)")},
-            {+TypeId::kInt, boost::regex(R"(^(\+|-)?\d{1,19}$)")},
-            {+TypeId::kNull, boost::regex(Null::kValue.data())},
-            {+TypeId::kEmpty, boost::regex(R"(^$)")}};
+            {TypeId::kBigInt, boost::regex(R"(^(\+|-)?\d{20,}$)")},
+            {TypeId::kInt, boost::regex(R"(^(\+|-)?\d{1,19}$)")},
+            {TypeId::kNull, boost::regex(Null::kValue.data())},
+            {TypeId::kEmpty, boost::regex(R"(^$)")}};
     inline static auto const kNullCheck = [](std::string const& val) {
-        return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kNull));
+        return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kNull));
     };
     inline static auto const kEmptyCheck = [](std::string const& val) {
-        return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kEmpty));
+        return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kEmpty));
     };
     inline static std::function<bool(std::string const&)> const kUndelimitedDateCheck =
             [](std::string const& val) {
@@ -214,31 +219,36 @@ private:
                 }
                 return is_simple_date;
             };
-    inline static std::unordered_map<TypeId, std::function<bool(std::string const&)>> const
+    inline static std::vector<std::pair<TypeId, std::function<bool(std::string const&)>>> const
             kTypeIdToChecker = {
-                    {TypeId::kDouble,
+                    {TypeId::kDate,
                      [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble));
-                     }},
-                    {TypeId::kBigInt,
-                     [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBigInt));
+                         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kDate)) &&
+                                (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
                      }},
                     {TypeId::kInt,
                      [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
+                         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kInt));
                      }},
-                    {TypeId::kDate, [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
-                                (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
+                    {TypeId::kBigInt,
+                     [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kBigInt));
+                     }},
+                    {TypeId::kDouble,
+                     [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kDouble));
+                     }},
+                    {TypeId::kBool, [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kBool));
                      }}};
     // each 1 represents a possible type from kAllCandidateTypes
-    inline static std::unordered_map<TypeId, std::bitset<5>> const kTypeIdToBitset = {
-            {+TypeId::kDate, std::bitset<5>("00001")},  // bitset for delimited dates
-            {+TypeId::kInt, std::bitset<5>("01110")},
-            {+TypeId::kBigInt, std::bitset<5>("01100")},
-            {+TypeId::kDouble, std::bitset<5>("01000")},
-            {+TypeId::kString, std::bitset<5>("10000")}};
+    inline static std::unordered_map<TypeId, std::bitset<6>> const kTypeIdToBitset = {
+            {TypeId::kDate, std::bitset<6>("000001")},  // bitset for delimited dates
+            {TypeId::kInt, std::bitset<6>("011110")},
+            {TypeId::kBigInt, std::bitset<6>("011100")},
+            {TypeId::kDouble, std::bitset<6>("011000")},
+            {TypeId::kBool, std::bitset<6>("010000")},
+            {TypeId::kString, std::bitset<6>("100000")}};
 
     size_t CalculateMixedBufSize(std::vector<TypeId> const& types_layout,
                                  TypeIdToType const& type_id_to_type) const noexcept;

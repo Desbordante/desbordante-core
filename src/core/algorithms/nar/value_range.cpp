@@ -41,6 +41,8 @@ std::shared_ptr<ValueRange> CreateValueRange(model::TypedColumnData const& colum
             return std::make_shared<NumericValueRange<Double>>(column);
         case TypeId::kInt:
             return std::make_shared<NumericValueRange<Int>>(column);
+        case TypeId::kBool:
+            return std::make_shared<BoolValueRange>(column);
         default:
             throw std::invalid_argument(std::string("Column has invalid type_id in function: ") +
                                         __func__);

@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "Metric.h"
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/dd_verifier/highlight.h"
@@ -26,7 +27,7 @@ private:
     double error_ = 0.;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::vector<Highlight> highlights_;
-
+    std::unordered_map<std::string, std::shared_ptr<Metric>> metrics_;
     void RegisterOptions();
 
     void VisualizeHighlights() const;
@@ -36,9 +37,9 @@ private:
     std::vector<std::pair<std::size_t, std::size_t>> GetRowsWhereLhsHolds() const;
 
     double CalculateDistance(model::ColumnIndex column_index,
-                             std::pair<std::size_t, std::size_t> const &tuple_pair) const;
+                             std::pair<std::size_t, std::size_t> const& tuple_pair) const;
 
-    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const &lhs);
+    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs);
 
     void VerifyDD();
 
@@ -70,6 +71,6 @@ public:
 
     bool DDHolds() const;
 
-    std::vector<Highlight> const &GetHighlights() const;
+    std::vector<Highlight> const& GetHighlights() const;
 };
 }  // namespace algos::dd

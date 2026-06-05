@@ -49,7 +49,7 @@ void ACExceptionFinder::CollectColumnPairExceptions(std::vector<model::TypedColu
         }
         auto res = std::unique_ptr<std::byte[]>(num_type->Allocate());
         num_type->ValueFromStr(res.get(), "0");
-        if (ac_alg_->GetBinOperation() == +Binop::Division &&
+        if (ac_alg_->GetBinOperation() == Binop::kDivision &&
             num_type->Compare(r, res.get()) == model::CompareResult::kEqual) {
             continue;
         }

@@ -24,9 +24,11 @@ constexpr auto kWeight = "weight";
 constexpr auto kFirstColumnTId = "has_tid";
 constexpr auto kInputFormat = "input_format";
 constexpr auto kItemColumnIndex = "item_column_index";
-constexpr auto kMinimumConfidence = "minconf";
-constexpr auto kMinimumSupport = "minsup";
+constexpr auto kArMinimumConfidence = "minconf";
+constexpr auto kArMinimumSupport = "minsup";
 constexpr auto kTIdColumnIndex = "tid_column_index";
+constexpr auto kArLhsRule = "lhs_rule";
+constexpr auto kArRhsRule = "rhs_rule";
 // CFD
 constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
@@ -51,6 +53,7 @@ constexpr auto kOnlySFD = "only_sfd";
 constexpr auto kDenialConstraint = "denial_constraint";
 // DD verifier
 constexpr auto kDDString = "dd";
+constexpr auto kDDudm = "metrics_map";
 // DES
 constexpr auto kCrossoverProbability = "crossover_probability";
 constexpr auto kDifferentialScale = "differential_scale";
@@ -90,6 +93,8 @@ constexpr auto kGSpanOutputPath = "output_path";
 constexpr auto kDoCollectViolations = "do_collect_violations";
 constexpr auto kGfdK = "gfd_k";
 constexpr auto kGfdSigma = "gfd_sigma";
+// GDD
+constexpr auto kGddData = "gdd";
 // HyMD
 constexpr auto kColumnMatches = "column_matches";
 constexpr auto kLeftTable = "left_table";
@@ -136,4 +141,12 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
+
+// CIND
+constexpr auto kValidity = "validity";
+constexpr auto kCompleteness = "completeness";
+constexpr auto kConditionType = "condition_type";
+constexpr auto kAlgoType = "algo_type";
+constexpr auto kCindCondValues = "cind_condition_values";
+
 }  // namespace config::names

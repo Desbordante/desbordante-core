@@ -1,5 +1,6 @@
 #include "core/algorithms/dc/FastADC/fastadc.h"
 
+#include <chrono>
 #include <stdexcept>
 #include <vector>
 
@@ -35,13 +36,26 @@ void FastADC::RegisterOptions() {
     RegisterOption(
             Option{&comparable_threshold_, kComparableThreshold, kDComparableThreshold, 0.1});
     RegisterOption(Option{&evidence_threshold_, kEvidenceThreshold, kDEvidenceThreshold, 0.01});
+    RegisterOption(Option{&threads_, kThreads, kDThreads, 1U});
 }
 
 void FastADC::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
     MakeOptionsAvailable({kShardLength, kAllowCrossColumns, kMinimumSharedValue,
-                          kComparableThreshold, kEvidenceThreshold});
+                          kComparableThreshold, kEvidenceThreshold, kThreads});
+}
+
+util::WorkerThreadPool* FastADC::GetThreadPool() {
+    if (threads_ <= 1) {
+        thread_pool_.reset();
+        return nullptr;
+    }
+
+    if (!thread_pool_ || thread_pool_->ThreadNum() != threads_) {
+        thread_pool_.emplace(threads_);
+    }
+    return &*thread_pool_;
 }
 
 void FastADC::LoadDataInternal() {
@@ -74,13 +88,13 @@ void FastADC::CheckTypes() {
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
         model::TypeId type_id = column.GetTypeId();
 
-        if (type_id == +model::TypeId::kMixed) {
+        if (type_id == model::TypeId::kMixed) {
             LOG_WARN(
                     "Column with index \"{}\" contains values of different types. Those values "
                     "will be "
                     "treated as strings.",
                     column_index);
-        } else if (!column.IsNumeric() && type_id != +model::TypeId::kString) {
+        } else if (!column.IsNumeric() && type_id != model::TypeId::kString) {
             throw std::invalid_argument(
                     "Column with index \"" + std::to_string(column_index) +
                     "\" is of unsupported type. Only numeric and string types are supported.");
@@ -117,8 +131,10 @@ unsigned long long FastADC::ExecuteInternal() {
     EvidenceAuxStructuresBuilder evidence_aux_structures_builder(predicate_builder);
     evidence_aux_structures_builder.BuildAll();
 
-    EvidenceSetBuilder evidence_set_builder(pli_shard_builder.pli_shards,
-                                            evidence_aux_structures_builder.GetPredicatePacks());
+    util::WorkerThreadPool* thread_pool = GetThreadPool();
+    EvidenceSetBuilder evidence_set_builder(
+            pli_shard_builder.pli_shards, evidence_aux_structures_builder.GetPredicatePacks(),
+            evidence_aux_structures_builder.GetNumberOfBitsInClue(), thread_pool);
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 

@@ -1,11 +1,13 @@
 set(SUBDIRS
     algebraic_constraints
-    association_rules
+    ar
     cfd
+    cind
     dc
     dd
     fd
     fsm
+    gdd
     gfd
     ind
     md
@@ -32,8 +34,11 @@ target_link_libraries(
     ${NAME}
     INTERFACE ${DESBORDANTE_PREFIX}::ac
               ${DESBORDANTE_PREFIX}::ar
+              ${DESBORDANTE_PREFIX}::ar::apriori
+              ${DESBORDANTE_PREFIX}::ar::verifier
               ${DESBORDANTE_PREFIX}::cfd
               ${DESBORDANTE_PREFIX}::cfd::verifier
+              ${DESBORDANTE_PREFIX}::cind::verifier
               ${DESBORDANTE_PREFIX}::datastats
               ${DESBORDANTE_PREFIX}::dd::split
               ${DESBORDANTE_PREFIX}::fd::aid
@@ -70,9 +75,10 @@ target_link_libraries(
 set(NAME algos)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
+target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
     ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::model::types
     PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
-            ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only better-enums
-            Boost::headers
+            ${DESBORDANTE_PREFIX}::parser::csv spdlog::spdlog_header_only Boost::headers
 )
