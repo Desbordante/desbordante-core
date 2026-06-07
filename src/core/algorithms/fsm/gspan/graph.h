@@ -22,7 +22,7 @@ struct GraphProps {
     std::unordered_map<int, std::vector<size_t>> label_to_vertices;
 };
 
-using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, Vertex, Edge,
+using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, Vertex, Edge,
                                       GraphProps>;
 
 using vertex_t = boost::graph_traits<graph_t>::vertex_descriptor;
