@@ -71,6 +71,7 @@ TEST_F(DFSCodeTest, RightMostPath) {
     gspan::DFSCode code;
     code.Add(gspan::ExtendedEdge(gspan::Vertex{0, 1}, gspan::Vertex{1, 2}, 1));
     code.Add(gspan::ExtendedEdge(gspan::Vertex{1, 2}, gspan::Vertex{2, 3}, 1));
+    code.UpdateRightmostPath(2);
 
     auto const& path = code.GetRightMostPath();
     EXPECT_FALSE(path.empty());

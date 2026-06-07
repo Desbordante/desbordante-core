@@ -372,7 +372,8 @@ void GSpan::MineSubgraph(Projection const& projection, DFSCode& code) {
     for (auto const& [ee, proj] : backward_pmap) {
         MineChild(proj, ee, code);
     }
-    for (auto const& [ee, proj] : forward_pmap) {
+    for (auto it = forward_pmap.rbegin(); it != forward_pmap.rend(); it++) {
+        auto [ee, proj] = *it;
         MineChild(proj, ee, code);
     }
 }
