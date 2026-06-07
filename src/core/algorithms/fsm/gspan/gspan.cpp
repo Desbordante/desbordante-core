@@ -108,18 +108,14 @@ int CountSupport(Projection const& projection) {
     return support;
 }
 
-vertex_t GetVertexByInternalId(edge_t edge, graph_t const& graph, int id) {
-    vertex_t u = boost::source(edge, graph);
-    if (graph[u].id == id) return u;
-    return boost::target(edge, graph);
-}
-
 void GetBackward(ProjectionEntry const& entry, History const& history, graph_t const& graph,
                  DFSCode const& code, ProjectionMapBackward& backward_pmap) {
     auto const& rightmost_path = code.GetRightMostPath();
     auto rm_vertex_id = code.GetRightMostEdge().vertex2.id;
-    edge_t last_edge = history.GetEdge(rightmost_path[0]);
-    vertex_t last_node = GetVertexByInternalId(last_edge, graph, rm_vertex_id);
+    auto [last_edge_source, last_edge] = history.GetEdge(rightmost_path[0]);
+    vertex_t last_node = (last_edge_source == boost::source(last_edge, graph))
+                                 ? boost::target(last_edge, graph)
+                                 : boost::source(last_edge, graph);
 
     for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
         if (history.HasEdge(graph[ln_edge].id)) {
@@ -130,21 +126,22 @@ void GetBackward(ProjectionEntry const& entry, History const& history, graph_t c
                                       ? boost::target(ln_edge, graph)
                                       : boost::source(ln_edge, graph);
         for (size_t i = rightmost_path.size() - 1; i > 0; i--) {
-            edge_t edge = history.GetEdge(rightmost_path[i]);
             ExtendedEdge const& path_ee = code.GetEdgeFromRightMostPath(i);
-            vertex_t from_node = GetVertexByInternalId(edge, graph, path_ee.vertex1.id);
-            vertex_t to_node = GetVertexByInternalId(edge, graph, path_ee.vertex2.id);
+            auto [edge_source, edge] = history.GetEdge(rightmost_path[i]);
+            vertex_t edge_target = (edge_source == boost::source(edge, graph))
+                                           ? boost::target(edge, graph)
+                                           : boost::source(edge, graph);
 
-            if (graph[ln_edge_to].id != graph[from_node].id) {
+            if (graph[ln_edge_to].id != graph[edge_source].id) {
                 continue;
             }
 
-            if (std::tuple{graph[edge].label, graph[to_node].label} <=
+            if (std::tuple{graph[edge].label, graph[edge_target].label} <=
                 std::tuple{graph[ln_edge].label, graph[last_node].label}) {
                 ExtendedEdge ee(Vertex{rm_vertex_id, graph[last_node].label},
-                                Vertex{path_ee.vertex1.id, graph[from_node].label},
+                                Vertex{path_ee.vertex1.id, graph[edge_source].label},
                                 graph[ln_edge].label);
-                backward_pmap[ee].emplace_back(entry.graph_id, ln_edge, &entry);
+                backward_pmap[ee].emplace_back(entry.graph_id, last_node, ln_edge, &entry);  // ???
             }
 
             break;
@@ -155,10 +152,12 @@ void GetBackward(ProjectionEntry const& entry, History const& history, graph_t c
 void GetFirstForward(ProjectionEntry const& entry, History const& history, graph_t const& graph,
                      DFSCode const& code, ProjectionMapForward& forward_pmap) {
     int min_label = code[0].vertex1.label;
-    auto const& rightmost_path = code.GetRightMostPath();
-    edge_t last_edge = history.GetEdge(rightmost_path[0]);
     auto rm_vertex_id = code.GetRightMostEdge().vertex2.id;
-    vertex_t last_node = GetVertexByInternalId(last_edge, graph, rm_vertex_id);
+    auto const& rightmost_path = code.GetRightMostPath();
+    auto [last_edge_source, last_edge] = history.GetEdge(rightmost_path[0]);
+    vertex_t last_node = (last_edge_source == boost::source(last_edge, graph))
+                                 ? boost::target(last_edge, graph)
+                                 : boost::source(last_edge, graph);
 
     for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
         vertex_t ln_edge_to = (last_node == boost::source(ln_edge, graph))
@@ -175,7 +174,7 @@ void GetFirstForward(ProjectionEntry const& entry, History const& history, graph
 
         ExtendedEdge ee(Vertex{rm_vertex_id, graph[last_node].label},
                         Vertex{rm_vertex_id + 1, graph[ln_edge_to].label}, graph[ln_edge].label);
-        forward_pmap[ee].emplace_back(entry.graph_id, ln_edge, &entry);
+        forward_pmap[ee].emplace_back(entry.graph_id, last_node, ln_edge, &entry);  // ???
     }
 }
 
@@ -187,8 +186,7 @@ void GetOtherForward(ProjectionEntry const& entry, History const& history, graph
     for (auto i : rightmost_path) {
         int from_id = code[i].vertex1.id;
 
-        edge_t current_edge = history.GetEdge(i);
-        vertex_t current_node = GetVertexByInternalId(current_edge, graph, from_id);
+        auto [current_node, current_edge] = history.GetEdge(i);
         vertex_t node_neighbor = (current_node == boost::source(current_edge, graph))
                                          ? boost::target(current_edge, graph)
                                          : boost::source(current_edge, graph);
@@ -204,7 +202,8 @@ void GetOtherForward(ProjectionEntry const& entry, History const& history, graph
                 std::tuple{graph[cn_edge].label, graph[to_node].label}) {
                 ExtendedEdge ee(Vertex{from_id, graph[current_node].label},
                                 Vertex{to_id + 1, graph[to_node].label}, graph[cn_edge].label);
-                forward_pmap[ee].emplace_back(entry.graph_id, cn_edge, &entry);
+                forward_pmap[ee].emplace_back(entry.graph_id, current_node, cn_edge,
+                                              &entry);  // ???
             }
         }
     }
@@ -317,14 +316,19 @@ ProjectionMap GSpan::GetInitialEdges() {
     for (size_t i = 0; i < pruned_graphs_.size(); i++) {
         graph_t& graph = pruned_graphs_[i];
         for (auto edge : boost::make_iterator_range(boost::edges(graph))) {
-            vertex_t source_label = graph[boost::source(edge, graph)].label;
-            vertex_t target_label = graph[boost::target(edge, graph)].label;
-            ExtendedEdge ee = (source_label <= target_label)
-                                      ? ExtendedEdge(Vertex(0, source_label),
-                                                     Vertex(1, target_label), graph[edge].label)
-                                      : ExtendedEdge(Vertex(0, target_label),
-                                                     Vertex(1, source_label), graph[edge].label);
-            result[ee].emplace_back(i, edge, nullptr);
+            vertex_t source = boost::source(edge, graph);
+            vertex_t target = boost::target(edge, graph);
+            int source_label = graph[source].label;
+            int target_label = graph[target].label;
+            if (source_label <= target_label) {
+                ExtendedEdge ee = ExtendedEdge(Vertex(0, source_label), Vertex(1, target_label),
+                                               graph[edge].label);
+                result[ee].emplace_back(i, source, edge, nullptr);
+            } else {
+                ExtendedEdge ee = ExtendedEdge(Vertex(0, target_label), Vertex(1, source_label),
+                                               graph[edge].label);
+                result[ee].emplace_back(i, target, edge, nullptr);
+            }
         }
     }
 
@@ -356,6 +360,11 @@ void GSpan::MineChild(Projection const& projection, ExtendedEdge const& new_edge
 }
 
 void GSpan::MineSubgraph(Projection const& projection, DFSCode& code) {
+    if (code.Size() == static_cast<size_t>(max_number_of_edges_)) {
+        LOG_TRACE("Maximum pattern size reached, backtracking");
+        return;
+    }
+
     ProjectionMapBackward backward_pmap;
     ProjectionMapForward forward_pmap;
 
@@ -397,23 +406,29 @@ bool GSpan::IsCanonical(DFSCode const& code) {
     ExtendedEdge const& min_ee = code[0];
 
     for (auto edge : boost::make_iterator_range(boost::edges(min_graph_))) {
-        auto source = boost::source(edge, min_graph_);
-        auto target = boost::target(edge, min_graph_);
+        vertex_t source = boost::source(edge, min_graph_);
+        vertex_t target = boost::target(edge, min_graph_);
         int source_label = min_graph_[source].label;
         int target_label = min_graph_[target].label;
 
-        ExtendedEdge ee = (source_label <= target_label)
-                                  ? ExtendedEdge(Vertex(0, source_label), Vertex(1, target_label),
-                                                 min_graph_[edge].label)
-                                  : ExtendedEdge(Vertex(0, target_label), Vertex(1, source_label),
-                                                 min_graph_[edge].label);
+        vertex_t proj_src;
+        ExtendedEdge ee;
+        if (source_label <= target_label) {
+            ee = ExtendedEdge(Vertex(0, source_label), Vertex(1, target_label),
+                              min_graph_[edge].label);
+            proj_src = source;
+        } else {
+            ee = ExtendedEdge(Vertex(0, target_label), Vertex(1, source_label),
+                              min_graph_[edge].label);
+            proj_src = target;
+        }
 
         if (ExtendedEdgeProjectCompare{}(ee, min_ee)) {
             return false;
         }
 
         if (ee == min_ee) {
-            min_projection_.emplace_back(edge, -1);
+            min_projection_.emplace_back(proj_src, edge, -1);
         }
     }
 
@@ -466,9 +481,11 @@ bool GSpan::IsBackwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
     for (size_t j = projection_start_index; j < projection_end_index; j++) {
         history_.ReconstructEdges(min_projection_, min_graph_, j);
 
-        edge_t last_edge = history_.GetEdge(rightmost_path[0]);
-        auto rm_vertex_id = rightmost_edge.vertex2.id;
-        vertex_t last_node = GetVertexByInternalId(last_edge, min_graph_, rm_vertex_id);
+        auto [last_edge_source, last_edge] = history_.GetEdge(rightmost_path[0]);
+        vertex_t last_node = (last_edge_source == boost::source(last_edge, min_graph_))
+                                     ? boost::target(last_edge, min_graph_)
+                                     : boost::source(last_edge, min_graph_);
+        ;
         for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, min_graph_))) {
             if (history_.HasEdge(min_graph_[ln_edge].id)) {
                 continue;
@@ -480,22 +497,23 @@ bool GSpan::IsBackwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
             for (size_t i = rightmost_path.size() - 1; i > 0; i--) {
                 ExtendedEdge const& path_ee = code.GetEdgeFromRightMostPath(i);
                 int to_id = path_ee.vertex1.id;
-                edge_t edge = history_.GetEdge(rightmost_path[i]);
-                vertex_t from_node = GetVertexByInternalId(edge, min_graph_, path_ee.vertex1.id);
-                vertex_t to_node = GetVertexByInternalId(edge, min_graph_, path_ee.vertex2.id);
+                auto [edge_source, edge] = history_.GetEdge(rightmost_path[i]);
+                vertex_t edge_target = (edge_source == boost::source(edge, min_graph_))
+                                               ? boost::target(edge, min_graph_)
+                                               : boost::source(edge, min_graph_);
 
-                if (min_graph_[ln_edge_to].id == min_graph_[from_node].id &&
-                    std::tuple{min_graph_[edge].label, min_graph_[to_node].label} <=
+                if (min_graph_[ln_edge_to].id == min_graph_[edge_source].id &&
+                    std::tuple{min_graph_[edge].label, min_graph_[edge_target].label} <=
                             std::tuple{min_graph_[ln_edge].label, min_graph_[last_node].label}) {
                     ExtendedEdge min_ee(Vertex{from_id, min_graph_[last_node].label},
-                                        Vertex{to_id, min_graph_[from_node].label},
+                                        Vertex{to_id, min_graph_[edge_source].label},
                                         min_graph_[ln_edge].label);
                     // A smaller edge was found, so the given edge is not minimal.
                     if (ExtendedEdgeBackwardCompare{}(min_ee, ee)) {
                         return false;
                     }
                     if (min_ee == ee) {
-                        min_projection_.emplace_back(ln_edge, j);
+                        min_projection_.emplace_back(last_node, ln_edge, j);  // ???
                     }
                 }
 
@@ -517,9 +535,10 @@ bool GSpan::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
     for (size_t i = projection_start_index; i < projection_end_index; i++) {
         history_.ReconstructVertices(min_projection_, min_graph_, i);
 
-        edge_t last_edge = history_.GetEdge(rightmost_path[0]);
-        auto rm_vertex_id = rightmost_edge.vertex2.id;
-        vertex_t last_node = GetVertexByInternalId(last_edge, min_graph_, rm_vertex_id);
+        auto [last_edge_source, last_edge] = history_.GetEdge(rightmost_path[0]);
+        vertex_t last_node = (last_edge_source == boost::source(last_edge, min_graph_))
+                                     ? boost::target(last_edge, min_graph_)
+                                     : boost::source(last_edge, min_graph_);
 
         for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, min_graph_))) {
             vertex_t ln_edge_to = (last_node == boost::source(ln_edge, min_graph_))
@@ -538,7 +557,7 @@ bool GSpan::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
             }
 
             if (min_ee == ee) {
-                min_projection_.emplace_back(ln_edge, i);
+                min_projection_.emplace_back(last_node, ln_edge, i);  // ???
             }
         }
 
@@ -552,8 +571,7 @@ bool GSpan::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
         for (auto j : rightmost_path) {
             int from_id = code[j].vertex1.id;
 
-            edge_t current_edge = history_.GetEdge(j);
-            vertex_t current_node = GetVertexByInternalId(current_edge, min_graph_, from_id);
+            auto [current_node, current_edge] = history_.GetEdge(j);
             vertex_t node_neighbor = (current_node == boost::source(current_edge, min_graph_))
                                              ? boost::target(current_edge, min_graph_)
                                              : boost::source(current_edge, min_graph_);
@@ -577,7 +595,7 @@ bool GSpan::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
                         return false;
                     }
                     if (min_ee == ee) {
-                        min_projection_.emplace_back(cn_edge, i);
+                        min_projection_.emplace_back(current_node, cn_edge, i);  // ???
                     }
                 }
             }
@@ -597,9 +615,10 @@ bool GSpan::ExistsBackwards(DFSCode const& code, size_t projection_start_index) 
 
     for (auto j = projection_start_index; j < projection_end_index; j++) {
         history_.ReconstructEdges(min_projection_, min_graph_, j);
-        edge_t last_edge = history_.GetEdge(rightmost_path[0]);
-        auto rm_vertex_id = code.GetRightMostEdge().vertex2.id;
-        vertex_t last_node = GetVertexByInternalId(last_edge, min_graph_, rm_vertex_id);
+        auto [last_edge_source, last_edge] = history_.GetEdge(rightmost_path[0]);
+        vertex_t last_node = (last_edge_source == boost::source(last_edge, min_graph_))
+                                     ? boost::target(last_edge, min_graph_)
+                                     : boost::source(last_edge, min_graph_);
         for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, min_graph_))) {
             if (history_.HasEdge(min_graph_[ln_edge].id)) {
                 continue;
@@ -610,14 +629,13 @@ bool GSpan::ExistsBackwards(DFSCode const& code, size_t projection_start_index) 
                                           : boost::source(ln_edge, min_graph_);
             // i > 0 since a backward edge cannot go to the last vertex.
             for (size_t i = rightmost_path.size() - 1; i > 0; i--) {
-                edge_t edge = history_.GetEdge(rightmost_path[i]);
-                vertex_t to_node = GetVertexByInternalId(
-                        edge, min_graph_, code.GetEdgeFromRightMostPath(i).vertex2.id);
-                vertex_t from_node = GetVertexByInternalId(
-                        edge, min_graph_, code.GetEdgeFromRightMostPath(i).vertex1.id);
+                auto [edge_source, edge] = history_.GetEdge(rightmost_path[i]);
+                vertex_t edge_target = (edge_source == boost::source(edge, min_graph_))
+                                               ? boost::target(edge, min_graph_)
+                                               : boost::source(edge, min_graph_);
 
-                if (min_graph_[ln_edge_to].id == min_graph_[from_node].id &&
-                    std::tuple{min_graph_[edge].label, min_graph_[to_node].label} <=
+                if (min_graph_[ln_edge_to].id == min_graph_[edge_source].id &&
+                    std::tuple{min_graph_[edge].label, min_graph_[edge_target].label} <=
                             std::tuple{min_graph_[ln_edge].label, min_graph_[last_node].label}) {
                     return true;
                 }

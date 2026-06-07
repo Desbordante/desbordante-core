@@ -43,7 +43,7 @@ public:
     //   list. The path is stored such that the first item in right_most_path is the
     //   index of the edge 'discovering' the rightmost vertex, the second is the index
     //   of the edge discovering the 'from' vertex of the first edge, and so on.
-    //   Dfs_codes is treated as if it is truncated to the given size.
+    //   DFSCode is treated as if it is truncated to the given size.
     void UpdateRightmostPath(size_t size) const {
         rightmost_path_.clear();
         int prev_id = -1;
@@ -53,7 +53,7 @@ public:
         for (auto i = size; i > 0; --i) {
             // Only consider forward edges (as by definition the rightmost path only
             // consists of edges 'discovering' new nodes). The first forward edge (or
-            // equivalently, the last forward edge in dfs_codes) is the edge discovering
+            // equivalently, the last forward edge in DFSCode) is the edge discovering
             // the rightmost vertex. After that, each new edge is the edge discovering
             // the 'from' of the previous one.
             if (extended_edges_[i - 1].vertex1.id < extended_edges_[i - 1].vertex2.id &&

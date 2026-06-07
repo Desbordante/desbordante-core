@@ -1,12 +1,14 @@
 #pragma once
 
+#include <tuple>
+
 #include "graph.h"
 #include "projection.h"
 
 namespace gspan {
 
 class History {
-    std::vector<edge_t> edges_;
+    std::vector<std::pair<vertex_t, edge_t>> edges_;
     std::vector<bool> edge_visited_;
     std::vector<int> vertex_counts_;
     size_t edge_size_;
@@ -46,9 +48,8 @@ public:
         return edge_visited_[index];
     }
 
-    edge_t GetEdge(size_t index) const {
+    std::pair<vertex_t, edge_t> GetEdge(size_t index) const {
         return edges_[edge_size_ - index - 1];
-        // return edges_[index];
     }
 
     void Clear() {
