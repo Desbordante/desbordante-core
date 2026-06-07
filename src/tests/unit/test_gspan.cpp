@@ -48,7 +48,6 @@ TEST_F(DFSCodeTest, EmptyCode) {
     gspan::DFSCode code;
     EXPECT_TRUE(code.Empty());
     EXPECT_EQ(code.Size(), 0);
-    EXPECT_EQ(code.GetRightMost(), -1);
 }
 
 TEST_F(DFSCodeTest, AddSingleEdge) {
@@ -58,7 +57,6 @@ TEST_F(DFSCodeTest, AddSingleEdge) {
 
     EXPECT_FALSE(code.Empty());
     EXPECT_EQ(code.Size(), 1);
-    EXPECT_EQ(code.GetRightMost(), 1);
 }
 
 TEST_F(DFSCodeTest, AddMultipleEdges) {
@@ -67,7 +65,6 @@ TEST_F(DFSCodeTest, AddMultipleEdges) {
     code.Add(gspan::ExtendedEdge(gspan::Vertex{1, 2}, gspan::Vertex{2, 3}, 1));
 
     EXPECT_EQ(code.Size(), 2);
-    EXPECT_EQ(code.GetRightMost(), 2);
 }
 
 TEST_F(DFSCodeTest, RightMostPath) {

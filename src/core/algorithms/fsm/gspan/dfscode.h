@@ -10,15 +10,10 @@
 namespace gspan {
 
 class DFSCode {
-    int rightmost_;
-    std::vector<int> rightmost_path_;
+    mutable std::vector<int> rightmost_path_;
     std::vector<ExtendedEdge> extended_edges_;
 
 public:
-    DFSCode() {
-        rightmost_ = -1;
-    }
-
     std::vector<int> GetVertexLabels() const {
         std::vector<int> result;
         std::unordered_map<int, int> id_to_label;
@@ -37,23 +32,36 @@ public:
     }
 
     void Add(ExtendedEdge const& edge) {
-        int edge_idx = extended_edges_.size();
-        if (extended_edges_.empty()) {
-            rightmost_ = 1;
-            rightmost_path_.push_back(0);
-        } else {
-            int id1 = edge.vertex1.id;
-            int id2 = edge.vertex2.id;
-            if (id1 < id2) {
-                rightmost_ = id2;
-                while (!rightmost_path_.empty() &&
-                       extended_edges_[rightmost_path_.back()].vertex2.id > id1) {
-                    rightmost_path_.pop_back();
-                }
-                rightmost_path_.push_back(edge_idx);
+        extended_edges_.push_back(edge);
+    }
+
+    void ResetRightmostPath() const {
+        rightmost_path_ = {0};
+    }
+
+    //   Clears right_most_path, then stores into it the rightmost path of the dfs code
+    //   list. The path is stored such that the first item in right_most_path is the
+    //   index of the edge 'discovering' the rightmost vertex, the second is the index
+    //   of the edge discovering the 'from' vertex of the first edge, and so on.
+    //   Dfs_codes is treated as if it is truncated to the given size.
+    void UpdateRightmostPath(size_t size) const {
+        rightmost_path_.clear();
+        int prev_id = -1;
+
+        // Go in reverse, since we need to first look for the edge that discovered
+        // the rightmost vertex
+        for (auto i = size; i > 0; --i) {
+            // Only consider forward edges (as by definition the rightmost path only
+            // consists of edges 'discovering' new nodes). The first forward edge (or
+            // equivalently, the last forward edge in dfs_codes) is the edge discovering
+            // the rightmost vertex. After that, each new edge is the edge discovering
+            // the 'from' of the previous one.
+            if (extended_edges_[i - 1].vertex1.id < extended_edges_[i - 1].vertex2.id &&
+                (rightmost_path_.empty() || prev_id == extended_edges_[i - 1].vertex2.id)) {
+                prev_id = extended_edges_[i - 1].vertex1.id;
+                rightmost_path_.push_back(i - 1);
             }
         }
-        extended_edges_.push_back(edge);
     }
 
     ExtendedEdge const& operator[](size_t i) const {
@@ -78,7 +86,7 @@ public:
     }
 
     ExtendedEdge const& GetRightMostEdge() const {
-        return extended_edges_[rightmost_path_.back()];
+        return extended_edges_[rightmost_path_.front()];
     }
 
     bool ContainEdge(int v1, int v2) const {
@@ -96,14 +104,6 @@ public:
 
     bool Empty() const {
         return extended_edges_.empty();
-    }
-
-    int GetRightMost() const {
-        return rightmost_;
-    }
-
-    size_t GetNumVertices() const {
-        return static_cast<size_t>(rightmost_ + 1);
     }
 
     std::vector<int> const& GetRightMostPath() const {
