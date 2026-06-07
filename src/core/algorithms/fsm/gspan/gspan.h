@@ -47,6 +47,7 @@ protected:
     void FindAllOnlyOneVertex();
     void RemoveInfrequentLabel(gspan::graph_t& graph, int label);
     void RemoveInfrequentVertexPairs();
+    void CompactIds();
 
     gspan::ProjectionMap GetInitialEdges();
     void MineChild(gspan::Projection const& projection, gspan::ExtendedEdge const& new_edge,

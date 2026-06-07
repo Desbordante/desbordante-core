@@ -289,6 +289,7 @@ void GSpan::Launch() {
     LOG_DEBUG("Pruning infrequent vertex pairs and edge labels");
     RemoveInfrequentVertexPairs();
     LOG_DEBUG("Pruning complete");
+    CompactIds();
 
     int max_edges = 0;
     int max_vertices = 0;
@@ -305,6 +306,37 @@ void GSpan::Launch() {
     }
 
     LOG_INFO("GSpan complete: {} frequent subgraphs found", frequent_subgraphs_.size());
+}
+
+void GSpan::CompactIds() {
+    for (auto& graph : graph_database_) {
+        int vertex_id = 0;
+        for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
+            graph[vertex].id = vertex_id;
+            vertex_id++;
+        }
+
+        int edge_id = 0;
+        boost::unordered_flat_set<int> processed;
+
+        for (auto edge : boost::make_iterator_range(boost::edges(graph))) {
+            int orig_id = graph[edge].id;
+            if (processed.contains(orig_id)) {
+                continue;
+            }
+
+            processed.insert(orig_id);
+
+            vertex_t source = boost::source(edge, graph);
+            vertex_t target = boost::target(edge, graph);
+
+            graph[edge].id = edge_id;
+
+            auto [twin, _] = boost::edge(target, source, graph);
+            graph[twin].id = edge_id;
+            edge_id++;
+        }
+    }
 }
 
 ProjectionMap GSpan::GetInitialEdges() {
