@@ -301,8 +301,9 @@ void GSpan::Launch() {
 
     history_.Reset(max_edges, max_vertices);
     ProjectionMap embeddings = GetInitialEdges();
+    DFSCode code;
     for (auto const& [ee, proj] : embeddings) {
-        MineChild(proj, ee, DFSCode());
+        MineChild(proj, ee, code);
     }
 
     LOG_INFO("GSpan complete: {} frequent subgraphs found", frequent_subgraphs_.size());
@@ -363,27 +364,30 @@ ProjectionMap GSpan::GetInitialEdges() {
 }
 
 void GSpan::MineChild(Projection const& projection, ExtendedEdge const& new_edge,
-                      DFSCode const& code) {
+                      DFSCode& code) {
     int support = CountSupport(projection);
     if (support < min_sup_) {
         return;
     }
 
     // Create the new DFS code of this graph
-    DFSCode new_code = code;
-    new_code.Add(new_edge);
+    // DFSCode new_code = code;
+    // new_code.Add(new_edge);
+    code.Add(new_edge);
 
     // If the resulting graph is canonical (it means that the graph is non redundant)
-    if (IsCanonical(new_code)) {
-        LOG_TRACE("New frequent subgraph: size={}, support={}", new_code.Size(), support);
+    if (IsCanonical(code)) {
+        LOG_TRACE("New frequent subgraph: size={}, support={}", code.Size(), support);
         boost::unordered::unordered_flat_set<int> new_graph_ids;
         for (auto const& proj_entry : projection) new_graph_ids.insert(proj_entry.graph_id);
 
-        frequent_subgraphs_.emplace_back(frequent_subgraphs_.size(), new_code,
+        frequent_subgraphs_.emplace_back(frequent_subgraphs_.size(), code,
                                          TranslateToOriginalIds(new_graph_ids, pruned_graphs_),
                                          support);
-        MineSubgraph(projection, new_code);
+        MineSubgraph(projection, code);
     }
+
+    code.Pop();
 }
 
 void GSpan::MineSubgraph(Projection const& projection, DFSCode& code) {
@@ -400,7 +404,7 @@ void GSpan::MineSubgraph(Projection const& projection, DFSCode& code) {
         MineChild(proj, ee, code);
     }
     for (auto it = forward_pmap.rbegin(); it != forward_pmap.rend(); it++) {
-        auto [ee, proj] = *it;
+        auto const& [ee, proj] = *it;
         MineChild(proj, ee, code);
     }
 }

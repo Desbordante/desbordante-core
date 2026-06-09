@@ -51,7 +51,7 @@ protected:
 
     gspan::ProjectionMap GetInitialEdges();
     void MineChild(gspan::Projection const& projection, gspan::ExtendedEdge const& new_edge,
-                   gspan::DFSCode const& code);
+                   gspan::DFSCode& code);
     void MineSubgraph(gspan::Projection const& projection, gspan::DFSCode& code);
 
     void GSpanDFS(gspan::DFSCode const& code, gspan::Projection const& embeddings);

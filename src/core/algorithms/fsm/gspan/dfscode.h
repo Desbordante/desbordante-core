@@ -35,6 +35,10 @@ public:
         extended_edges_.push_back(edge);
     }
 
+    void Pop(){
+        extended_edges_.pop_back();
+    }
+
     void ResetRightmostPath() const {
         rightmost_path_ = {0};
     }
