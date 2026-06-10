@@ -8,13 +8,13 @@
 namespace gspan {
 
 class History {
-    std::vector<edge_t> edges_;
+    std::vector<csr_edge_t> edges_;
     std::vector<bool> edge_visited_;
     std::vector<int> vertex_counts_;
     size_t edge_size_;
 
     ProjectionEntry const* current_ = nullptr;
-    graph_t const* current_graph_ = nullptr;
+    csr_graph_t const* current_graph_ = nullptr;
 
 public:
     History() = default;
@@ -34,11 +34,11 @@ public:
         current_graph_ = nullptr;
     }
 
-    void Reconstruct(ProjectionEntry const& start, graph_t const& graph);
+    void Reconstruct(ProjectionEntry const& start, csr_graph_t const& graph);
 
-    void ReconstructEdges(MinProjection const& projection, graph_t const& graph, int start);
+    void ReconstructEdges(MinProjection const& projection, csr_graph_t const& graph, int start);
 
-    void ReconstructVertices(MinProjection const& projection, graph_t const& graph, int start);
+    void ReconstructVertices(MinProjection const& projection, csr_graph_t const& graph, int start);
 
     bool HasVertex(size_t index) const {
         return vertex_counts_[index] != 0;
@@ -48,7 +48,7 @@ public:
         return edge_visited_[index];
     }
 
-    edge_t GetEdge(size_t index) const {
+    csr_edge_t GetEdge(size_t index) const {
         return edges_[edge_size_ - index - 1];
     }
 

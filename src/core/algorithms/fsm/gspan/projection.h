@@ -9,8 +9,8 @@ namespace gspan {
 
 // Represents an embedding of subgraph edge in real graph
 struct ProjectionEntry {
-    size_t graph_id;
-    edge_t edge;
+    int graph_id;
+    csr_edge_t edge;
     ProjectionEntry const* prev;
 };
 
@@ -18,7 +18,7 @@ struct ProjectionEntry {
 using Projection = std::vector<ProjectionEntry>;
 
 struct MinProjectionEntry {
-    edge_t edge;
+    csr_edge_t edge;
     int prev;
 };
 

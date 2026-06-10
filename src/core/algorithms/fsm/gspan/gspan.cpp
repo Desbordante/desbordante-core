@@ -17,41 +17,8 @@ namespace algos {
 
 namespace {
 
-<<<<<<< HEAD
-void BuildIsomFromHistory(HistoryNode const* leaf, size_t num_vertices,
-                          std::vector<vertex_t>& out_isom) {
-    out_isom.assign(num_vertices, (vertex_t)-1);
-
-    HistoryNode const* curr = leaf;
-    int current_dfs_id = num_vertices - 1;
-    while (curr != nullptr) {
-        if (curr->added_vertex != (vertex_t)-1) {
-            out_isom[current_dfs_id] = curr->added_vertex;
-            current_dfs_id--;
-        }
-        curr = curr->prev;
-    }
-}
-
-// Get all vertex descriptors having a given label (with bounds checking)
-std::vector<vertex_t> const& FindAllWithLabel(int target_label, graph_t const& graph) {
-    return graph[boost::graph_bundle].label_to_vertices.at(target_label);
-}
-
-// Precalculate the list of vertices having each label
-void PrecalculateLabelsToVertices(graph_t& graph) {
-    auto& label_to_verts = graph[boost::graph_bundle].label_to_vertices;
-    for (auto v : boost::make_iterator_range(boost::vertices(graph))) {
-        label_to_verts[graph[v].label].push_back(v);
-    }
-}
-
-graph_t CreateGraphFromDFSCode(DFSCode const& code) {
-    graph_t result;
-=======
 void CreateGraphFromDFSCode(DFSCode const& code, graph_t& result) {
     result.clear();
->>>>>>> 281e3d80 (Implement features from gbolt)
     boost::unordered_flat_map<int, vertex_t> id_to_desc;
     int edge_id = 0;
     for (auto const& ee : code.GetExtendedEdges()) {

@@ -37,11 +37,13 @@ protected:
 
     std::filesystem::path graph_database_path_;
     std::filesystem::path output_path_;
+    
     std::vector<gspan::graph_t> raw_dataset_;
     std::vector<gspan::graph_t> pruned_graphs_;
+    std::vector<gspan::csr_graph_t> pruned_csr_graphs_;
 
     gspan::History history_;
-    gspan::graph_t min_graph_;
+    gspan::csr_graph_t min_graph_;
     gspan::MinProjection min_projection_;
 
     void FindAllOnlyOneVertex();
@@ -54,17 +56,11 @@ protected:
                    gspan::DFSCode& code);
     void MineSubgraph(gspan::Projection const& projection, gspan::DFSCode& code);
 
-    void GSpanDFS(gspan::DFSCode const& code, gspan::Projection const& embeddings);
 
     void Enumerate(gspan::DFSCode const& code, gspan::Projection const& projection,
                    gspan::ProjectionMapBackward& backward_pmap,
                    gspan::ProjectionMapForward& forward_pmap);
 
-    gspan::ProjectionMap RightMostPathExtensions(gspan::DFSCode const& code,
-                                                 gspan::Projection const& embeddings);
-
-    boost::unordered_flat_map<gspan::ExtendedEdge, gspan::MinProjection, gspan::ExtendedEdge::Hash>
-    RightMostPathExtensionsFromSingle(gspan::DFSCode const& code, gspan::graph_t const& graph);
 
     bool IsCanonical(gspan::DFSCode const& code);
     bool IsProjectionMin(gspan::DFSCode const& code);
