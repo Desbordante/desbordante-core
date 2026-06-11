@@ -62,6 +62,9 @@ private:
     std::size_t num_rows_ = 0;
     std::size_t total_pairs_ = 0;
 
+    mutable std::vector<uint64_t> compute_buffer_;
+    uint32_t full_mask_;
+
     // separate bin column on chunk of 64 bit
     std::vector<std::vector<uint64_t>> attr_similarity_bits_;
 
@@ -88,14 +91,13 @@ private:
 
     // helper methods
     void BuildSimilarityBitsets();
-    [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const noexcept;
+    [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const;
     // Computes conf and supp for a single individual
-    [[nodiscard]] Individual Evaluate(Individual const& ind) const noexcept;
+    [[nodiscard]] Individual Evaluate(Individual const& ind) const;
     // Computes conf and supp for all individuals
-    void EvaluatePopulation(std::unordered_set<Individual, IndividualHash>& pop) const noexcept;
+    void EvaluatePopulation(std::unordered_set<Individual, IndividualHash>& pop) const;
     // Checks each individual threshold satisfies conf
-    [[nodiscard]] bool AllOf(
-            std::unordered_set<Individual, IndividualHash> const& pop) const noexcept;
+    [[nodiscard]] bool AllOf(std::unordered_set<Individual, IndividualHash> const& pop) const;
     // Computes fitness from conf: 1.0 if confidence >= beta, else confidence / beta.
     [[nodiscard]] double Fitness(double confidence) const noexcept;
 

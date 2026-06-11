@@ -262,6 +262,7 @@ constexpr auto kDSdG1 = "Lower bound of the sequential interval (inclusive).";
 constexpr auto kDSdG2 = "Upper bound of the sequential interval (inclusive). Set -1 for Infinity.";
 constexpr auto kDSdIndices = "Subset of row indices to validate the SD on.";
 // GA-RFD
+constexpr auto kDRfdMetrics = "List of similarity metrics";
 constexpr auto kDRfdMinSimilarity =
         "minimum similarity in [0, 1] for two values to be considered similar";
 constexpr auto kDRfdMinimumConfidence =
