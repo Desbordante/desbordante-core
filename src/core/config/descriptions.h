@@ -253,7 +253,6 @@ constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verif
 auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
 constexpr auto kDOFDContext = "Context of the OFD to verify";
 constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
-
 // CIND
 constexpr auto kDValidity =
         "Percentage of rows/groups that form IND when the pattern tuple is satisfied";
@@ -264,4 +263,14 @@ auto const kDAlgoType = details::kDAlgoTypeString.c_str();
 constexpr auto kDCindCondValues =
         "Condition values aligned with conditional attributes order. "
         "Use '-' or '_' as wildcard. If empty => all wildcards.";
+// GA-RFD
+constexpr auto kDRfdMetrics = "List of similarity metrics";
+constexpr auto kDRfdMinSimilarity =
+        "minimum similarity in [0, 1] for two values to be considered similar";
+constexpr auto kDRfdMinimumConfidence =
+        "minimum confidence in [0, 1] describes the coverage percentage";
+constexpr auto kDRfdCrossoverProbability = "probability of applying crossover between individuals";
+constexpr auto kDRfdMutationProbability = "probability of mutating an individual";
+constexpr auto kDRfdMaxGenerations = "maximum number of genetic algorithm generations";
+constexpr auto kDCacheMaxSize = "maximum size of the support cache";
 }  // namespace config::descriptions

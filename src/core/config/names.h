@@ -141,12 +141,18 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
-
 // CIND
 constexpr auto kValidity = "validity";
 constexpr auto kCompleteness = "completeness";
 constexpr auto kConditionType = "condition_type";
 constexpr auto kAlgoType = "algo_type";
 constexpr auto kCindCondValues = "cind_condition_values";
-
+// GA-RFD
+constexpr auto kMetrics = "metrics";
+constexpr auto kRfdMinSimilarity = "min_similarity";
+constexpr auto kRfdMinimumConfidence = "minconf";
+constexpr auto kRfdCrossoverProbability = "crossover_probability";
+constexpr auto kRfdMutationProbability = "mutation_probability";
+constexpr auto kRfdMaxGenerations = "max_generations";
+constexpr auto kCacheMaxSize = "cache_size";
 }  // namespace config::names
