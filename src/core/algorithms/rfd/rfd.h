@@ -15,6 +15,8 @@ struct RFD {
     double confidence = 0.0;
 
     bool operator==(const RFD& other) const {
+        // Identity is defined only by (lhs_mask, rhs_index);
+        // conf/supp are derived values and may differ
         return lhs_mask == other.lhs_mask && rhs_index == other.rhs_index;
     }
 

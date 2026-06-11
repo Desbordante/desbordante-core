@@ -264,6 +264,7 @@ constexpr auto kDCindCondValues =
         "Condition values aligned with conditional attributes order. "
         "Use '-' or '_' as wildcard. If empty => all wildcards.";
 // GA-RFD
+constexpr auto kDRfdMetrics = "List of similarity metrics";
 constexpr auto kDRfdMinSimilarity =
         "minimum similarity in [0, 1] for two values to be considered similar";
 constexpr auto kDRfdMinimumConfidence =

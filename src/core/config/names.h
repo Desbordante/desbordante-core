@@ -148,6 +148,7 @@ constexpr auto kConditionType = "condition_type";
 constexpr auto kAlgoType = "algo_type";
 constexpr auto kCindCondValues = "cind_condition_values";
 // GA-RFD
+constexpr auto kMetrics = "metrics";
 constexpr auto kRfdMinSimilarity = "min_similarity";
 constexpr auto kRfdMinimumConfidence = "minconf";
 constexpr auto kRfdCrossoverProbability = "crossover_probability";
