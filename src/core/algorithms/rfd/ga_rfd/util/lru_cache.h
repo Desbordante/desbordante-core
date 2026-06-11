@@ -29,6 +29,8 @@ public:
     }
 
     void put(K const& key, V const& value) {
+        if (max_size_ == 0) return;
+
         auto it = map_.find(key);
         if (it != map_.end()) {
             it->second.value = value;
