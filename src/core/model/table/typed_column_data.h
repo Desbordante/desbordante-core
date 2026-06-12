@@ -183,7 +183,7 @@ private:
              boost::regex(
                      R"(^(\d{4})([-.\/]?)(1[0-2]|0[1-9]|[1-9])\2(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
             {TypeId::kBool,
-             boost::regex(R"(^\s*(true|false|0|1)\s*$)", boost::regex_constants::icase)},
+             boost::regex(R"(^\s*(true|false|t|f|0|1)\s*$)", boost::regex_constants::icase)},
             {TypeId::kDouble,
              boost::regex(
                      R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
@@ -219,6 +219,13 @@ private:
                 }
                 return is_simple_date;
             };
+    inline static boost::regex const kIntegerBoolRegex = boost::regex(R"(^\s*(0|1)\s*$)");
+    inline static std::function<bool(std::string const&)> const kIntegerBoolCheck =
+            [](std::string const& val) { return boost::regex_match(val, kIntegerBoolRegex); };
+    inline static boost::regex const kStringBoolRegex =
+            boost::regex(R"(^\s*(t|f)\s*$)", boost::regex_constants::icase);
+    inline static std::function<bool(std::string const&)> const kStringBoolCheck =
+            [](std::string const& val) { return boost::regex_match(val, kStringBoolRegex); };
     inline static std::vector<std::pair<TypeId, std::function<bool(std::string const&)>>> const
             kTypeIdToChecker = {
                     {TypeId::kDate,
@@ -244,9 +251,9 @@ private:
     // each 1 represents a possible type from kAllCandidateTypes
     inline static std::unordered_map<TypeId, std::bitset<6>> const kTypeIdToBitset = {
             {TypeId::kDate, std::bitset<6>("000001")},  // bitset for delimited dates
-            {TypeId::kInt, std::bitset<6>("011110")},
-            {TypeId::kBigInt, std::bitset<6>("011100")},
-            {TypeId::kDouble, std::bitset<6>("011000")},
+            {TypeId::kInt, std::bitset<6>("001110")},
+            {TypeId::kBigInt, std::bitset<6>("001100")},
+            {TypeId::kDouble, std::bitset<6>("001000")},
             {TypeId::kBool, std::bitset<6>("010000")},
             {TypeId::kString, std::bitset<6>("100000")}};
 
