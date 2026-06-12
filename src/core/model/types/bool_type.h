@@ -4,13 +4,14 @@
 #include <cstring>
 #include <vector>
 
+#include "core/model/types/imetrizable_type.h"
 #include "core/model/types/type.h"
 
 namespace model {
 
-class BoolType final : public Type {
+class BoolType final : public IMetrizableType {
 public:
-    BoolType() noexcept : Type(TypeId::kBool) {}
+    BoolType() noexcept : IMetrizableType(TypeId::kBool) {}
 
     std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<BoolType>();
@@ -48,6 +49,10 @@ public:
         Bool v;
         std::memcpy(&v, value, sizeof(v));
         return std::hash<Bool>{}(v);
+    }
+
+    double Dist(std::byte const* l, std::byte const* r) const override {
+        return (GetValue<Bool>(l) == GetValue<Bool>(r)) ? 0 : 1;
     }
 };
 
