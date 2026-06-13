@@ -83,6 +83,7 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::cfd::cfdfinder::util
     ${DESBORDANTE_PREFIX}::cfd::cfdfinder::model
+    ${DESBORDANTE_PREFIX}::cfd::cfdfinder::types
     ${DESBORDANTE_PREFIX}::cfd::cfdfinder
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
@@ -92,6 +93,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     Boost::headers
 )
+
 # --- CIND ---
 desbordante_add_test(
     cind.verifier

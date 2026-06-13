@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstddef>
-#include <unordered_set>
+
+#include <boost/unordered/unordered_flat_set.hpp>
 
 #include "core/algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
 
@@ -11,33 +12,23 @@ class LegacyPruning : public PruningStrategy {
 private:
     double min_support_;
     double min_confidence_;
-    double cumulative_support_;
-    size_t num_tuples_;
-    std::unordered_set<Pattern> visited_;
+    double cumulative_support_ = 0;
+    size_t num_rows_;
+    boost::unordered_flat_set<Entries, std::hash<Entries>> visited_;
 
 public:
-    LegacyPruning(double min_support, double min_confidence, size_t num_tuples)
-        : min_support_(min_support),
-          min_confidence_(min_confidence),
-          cumulative_support_(0),
-          num_tuples_(num_tuples) {}
+    LegacyPruning(double min_support, double min_confidence, size_t num_rows)
+        : min_support_(min_support), min_confidence_(min_confidence), num_rows_(num_rows) {}
 
     void StartNewTableau([[maybe_unused]] Candidate const& candidate) override;
-
-    void AddPattern(Pattern const& pattern) override;
-
-    void ExpandPattern(Pattern const& pattern) override;
-
-    void ProcessChild([[maybe_unused]] Pattern& child) override {}
-
     bool HasEnoughPatterns([[maybe_unused]] std::vector<Pattern> const& tableau) override;
-
-    bool IsPatternWorthConsidering(Pattern const& pattern) override;
-
-    bool IsPatternWorthAdding(Pattern const& pattern) override;
-
-    bool ValidForProcessing(Pattern const& child) override;
-
+    bool IsPatternWorthConsidering(double new_support) const override;
+    bool TryAdding(Pattern& pattern) override;
+    bool ValidForProcessing(Entries const& entries) override;
     bool ContinueGeneration(PatternTableau const& currentTableau) override;
+
+    std::shared_ptr<PruningStrategy> Clone() const override {
+        return std::make_shared<LegacyPruning>(*this);
+    }
 };
 }  // namespace algos::cfdfinder

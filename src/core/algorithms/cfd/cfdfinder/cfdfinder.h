@@ -32,16 +32,16 @@ private:
     using Level = std::set<Candidate>;
     using Lattice = std::vector<Level>;
 
-    config::MaxLhsType max_lhs_;
-    config::ThreadNumType threads_num_ = 1;
     config::EqNullsType is_null_equal_null_ = true;
     config::InputTable input_table_;
+
+    config::MaxLhsType max_lhs_;
+    config::ThreadNumType threads_num_ = 1;
     config::IndicesType rhs_filter_;
 
     Expansion expansion_strategy_ = Expansion::kConstant;
     Pruning pruning_strategy_ = Pruning::kLegacy;
     Result result_strategy_ = Result::kLattice;
-
     double min_confidence_;
     double min_support_;
     double max_g1_;
@@ -53,30 +53,35 @@ private:
     std::list<CFD> cfd_collection_;
     std::shared_ptr<RelationalSchema const> schema_;
     std::unique_ptr<CFDFinderRelationData> relation_;
-
     PLIsPtr plis_;
     ColumnsPtr inverted_plis_;
     RowsPtr compressed_records_;
 
-    void RegisterOptions();
-    void ResetState() final;
-
     Lattice GetLattice();
     void EnrichCompressedRecords(EnrichedPLIs enriched_plis) const;
+    InvertedClusterMaps BuildEnrichedStructures() const;
 
-    std::vector<Cluster> EnrichPLI(model::PLI const& pli, int num_tuples) const;
+    std::list<Candidate> RunHyFdPhase() const;
 
     PatternTableau GenerateTableau(boost::dynamic_bitset<> const& lhs_attributes,
                                    model::PLI const* lhs_pli, Row const& inverted_pli_rhs,
                                    std::shared_ptr<ExpansionStrategy> expansion_strategy,
                                    std::shared_ptr<PruningStrategy> pruning_strategy);
+    void RegisterResults(std::list<RawCFD> results, InvertedClusterMaps inverted_cluster_maps);
 
-    std::list<Cluster> DetermineCover(Pattern const& child_pattern, Pattern const& current_pattern,
-                                      Rows const& pli_records) const;
+    void TraverseLatticeSeq(InvertedClusterMaps inverted_cluster_maps, Lattice&& levels,
+                            PLICache& pli_cache);
+    void TraverseLatticePar(InvertedClusterMaps inverted_cluster_maps, Lattice&& levels,
+                            PLICache& pli_cache);
 
-    InvertedClusterMaps BuildEnrichedStructures() const;
-    void RegisterResults(std::shared_ptr<ResultStrategy> result_receiver,
-                         InvertedClusterMaps inverted_cluster_maps);
+    void RegisterOptions();
+
+    void ResetState() final {
+        cfd_collection_.clear();
+        plis_.reset();
+        inverted_plis_.reset();
+        compressed_records_.reset();
+    };
 
 protected:
     void MakeExecuteOptsAvailable() override;

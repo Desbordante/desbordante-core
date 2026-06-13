@@ -20,7 +20,8 @@ std::shared_ptr<ExpansionStrategy> CreateExpansionStrategy(
         case Expansion::kConstant:
             return std::make_shared<ConstantExpansion>(std::move(pli_records));
         case Expansion::kRange:
-            return std::make_shared<RangePatternExpansion>(inverted_cluster_maps);
+            return std::make_shared<RangePatternExpansion>(inverted_cluster_maps,
+                                                           std::move(pli_records));
         case Expansion::kNegativeConstant:
             return std::make_shared<PositiveNegativeConstantExpansion>(std::move(pli_records));
         default:
@@ -38,7 +39,7 @@ std::shared_ptr<PruningStrategy> CreatePruningStrategy(Pruning strategy,
         case Pruning::kSupportIndependent:
             return std::make_shared<SupportIndependentPruning>(
                     config.max_patterns, config.min_support_gain, config.max_level_support_drop,
-                    config.min_confidence);
+                    config.min_confidence, config.thread_num);
         case Pruning::kPartialFd:
             return std::make_shared<PartialFdPruning>(config.num_rows, config.max_g1,
                                                       std::move(inverted_plis));

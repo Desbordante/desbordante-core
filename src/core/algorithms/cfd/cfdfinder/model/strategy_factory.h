@@ -9,6 +9,7 @@
 #include "core/algorithms/cfd/cfdfinder/model/result/result_strategy.h"
 #include "core/algorithms/cfd/cfdfinder/types/hyfd_types.h"
 #include "core/algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
+#include "core/config/thread_number/type.h"
 
 namespace algos::cfdfinder {
 
@@ -20,6 +21,7 @@ struct PruningStrategyConfig {
     size_t max_patterns;
     double min_support_gain;
     double max_level_support_drop;
+    config::ThreadNumType thread_num;
 };
 
 std::shared_ptr<ExpansionStrategy> CreateExpansionStrategy(

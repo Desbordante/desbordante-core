@@ -46,12 +46,11 @@ private:
     config::ThreadNumType threads_num_ = 1;
 
 public:
-    Validator(std::shared_ptr<hyfd::fd_tree::FDTree> fds, PLIsPtr plis, RowsPtr compressed_records,
-              config::ThreadNumType threads_num) noexcept
+    Validator(std::shared_ptr<hyfd::fd_tree::FDTree> fds, PLIsPtr plis,
+              RowsPtr compressed_records) noexcept
         : fds_(std::move(fds)),
           plis_(std::move(plis)),
-          compressed_records_(std::move(compressed_records)),
-          threads_num_(threads_num) {}
+          compressed_records_(std::move(compressed_records)) {}
 
     hy::IdPairs ValidateAndExtendCandidates();
 

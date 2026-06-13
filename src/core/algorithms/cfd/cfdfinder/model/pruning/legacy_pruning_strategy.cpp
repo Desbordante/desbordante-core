@@ -1,6 +1,5 @@
 #include "core/algorithms/cfd/cfdfinder/model/pruning/legacy_pruning_strategy.h"
 
-#include <list>
 #include <memory>
 #include <ranges>
 
@@ -16,39 +15,41 @@ void LegacyPruning::StartNewTableau([[maybe_unused]] Candidate const& candidate)
     visited_.clear();
 }
 
-void LegacyPruning::AddPattern(Pattern const& pattern) {
-    cumulative_support_ += pattern.GetSupport();
-}
-
-void LegacyPruning::ExpandPattern(Pattern const& pattern) {
-    visited_.insert(pattern);
-}
-
 bool LegacyPruning::HasEnoughPatterns([[maybe_unused]] std::vector<Pattern> const& tableau) {
-    return cumulative_support_ >= min_support_ * num_tuples_;
+    return cumulative_support_ >= min_support_ * num_rows_;
 }
 
-bool LegacyPruning::IsPatternWorthConsidering(Pattern const& pattern) {
-    return pattern.GetSupport() > 0;
+bool LegacyPruning::IsPatternWorthConsidering(double new_support) const {
+    return new_support > 0;
 }
 
-bool LegacyPruning::IsPatternWorthAdding(Pattern const& pattern) {
-    return pattern.GetConfidence() >= min_confidence_;
-}
-
-bool LegacyPruning::ValidForProcessing(Pattern const& child) {
-    std::list<Pattern> parent_patterns;
-    auto const& entries = child.GetEntries();
-    for (size_t i = 0; i < entries.size(); ++i) {
-        if (entries[i].entry->IsConstant()) {
-            auto new_entries = entries;
-            new_entries[i].entry = std::make_shared<VariableEntry>();
-            parent_patterns.emplace_back(std::move(new_entries));
-        }
+bool LegacyPruning::TryAdding(Pattern& pattern) {
+    if (pattern.GetConfidence() >= min_confidence_) {
+        cumulative_support_ += pattern.GetSupport();
+        return true;
     }
 
-    return std::ranges::all_of(parent_patterns,
-                               [this](auto const& parent) { return visited_.contains(parent); });
+    visited_.insert(pattern.GetEntries());
+    return false;
+}
+
+bool LegacyPruning::ValidForProcessing(Entries const& entries) {
+    auto buffer_entries = entries;
+    std::shared_ptr<Entry> buff_entry = std::make_shared<VariableEntry>();
+
+    auto is_visited = [&](std::shared_ptr<Entry> entry) -> bool {
+        std::swap(entry, buff_entry);
+        bool is_visit = visited_.contains(buffer_entries);
+        std::swap(entry, buff_entry);
+        return is_visit;
+    };
+
+    for (auto& [_, entry] : buffer_entries) {
+        if (entry->IsConstantType() && is_visited(entry)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool LegacyPruning::ContinueGeneration(PatternTableau const& currentTableau) {
