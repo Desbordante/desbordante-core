@@ -11,16 +11,25 @@
 
 namespace algos::cfdfinder {
 class RangeEntry final : public Entry {
-    std::shared_ptr<std::vector<size_t>> sorted_cluster_ids_;
+private:
+    std::shared_ptr<std::vector<size_t> const> sorted_cluster_ids_;
     size_t min_cluster_;
     size_t max_cluster_;
 
 public:
-    RangeEntry(std::shared_ptr<std::vector<size_t>> sorted_clusters, size_t min_cluster,
+    RangeEntry(std::shared_ptr<std::vector<size_t> const> sorted_clusters, size_t min_cluster,
                size_t max_cluster)
         : sorted_cluster_ids_(std::move(sorted_clusters)),
           min_cluster_(min_cluster),
           max_cluster_(max_cluster) {}
+
+    size_t GetLowerBound() const noexcept {
+        return min_cluster_;
+    }
+
+    size_t GetUpperBound() const noexcept {
+        return max_cluster_;
+    }
 
     bool IncreaseLowerBound() {
         ++min_cluster_;
@@ -39,11 +48,7 @@ public:
         return std::make_shared<RangeEntry>(*this);
     }
 
-    inline bool Matches(size_t value) const final override {
-        return value >= min_cluster_ && value <= max_cluster_;
-    }
-
-    bool IsConstant() const override {
+    bool IsConstantType() const override {
         return false;
     }
 
@@ -59,6 +64,14 @@ public:
         return !(*this == other);
     }
 
+    bool operator<(Entry const& other) const override {
+        if (GetOrderRank() != other.GetOrderRank()) return GetOrderRank() < other.GetOrderRank();
+
+        auto const& other_range = static_cast<RangeEntry const&>(other);
+        return std::tie(min_cluster_, max_cluster_) <
+               std::tie(other_range.min_cluster_, other_range.max_cluster_);
+    }
+
     size_t Hash() const override {
         size_t hash = 0;
 
@@ -70,18 +83,16 @@ public:
     }
 
     std::string ToString(InvertedClusterMap const& cluster_map) const override {
-        if (min_cluster_ == 0 && max_cluster_ + 1 == sorted_cluster_ids_->size()) {
-            return std::string(kWildCard);
-        }
         std::string lower_bound = cluster_map.at((*sorted_cluster_ids_)[min_cluster_]);
 
-        if (min_cluster_ == max_cluster_) {
-            return lower_bound;
-        }
         std::string upper_bound = cluster_map.at((*sorted_cluster_ids_)[max_cluster_]);
         return "[" + (!lower_bound.empty() ? lower_bound : std::string(kNullRepresentation)) +
                " - " + (!upper_bound.empty() ? upper_bound : std::string(kNullRepresentation)) +
                "]";
+    }
+
+    inline int GetOrderRank() const override {
+        return 3;
     }
 };
 }  // namespace algos::cfdfinder

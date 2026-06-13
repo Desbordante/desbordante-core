@@ -23,7 +23,7 @@ def explain_cfd_concept():
     """Explain what CFDs are with a real-world example."""
     print(f"{Colors.BLUE_FG}=== Explain Conditional Functional Dependencies ==={Colors.RESET}\n")
     
-    print("Conditional Functional Dependencies (CFD) generalize traditional functional dependencies (FD)")
+    print("Conditional Functional Dependencies (CFD) generalize traditional Functional Dependencies (FD)")
     print("by adding conditions to attribute values via the pattern tableau.")
     print("This allows you to find dependencies that are not performed for the entire table,")
     print("but only for a subset of rows that meet certain conditions in the data.")
@@ -84,6 +84,10 @@ def demonstrate_basic_parameters():
     print("  - Range: from 1 to infinity (if memory permits)")
     print()
 
+    print("* rhs_indices: the indexes of the attributes we are interested in for the RHS.")
+    print("  - Example: [1,3,5]")
+    print()
+
     print(f"* expansion_strategy: Defines which types of conditions can be used in the pattern tuple.")
     print("  - 'constant': Only constants and wildcard are used as conditions for attributes.")
     print()
@@ -110,7 +114,7 @@ def demonstrate_basic_parameters():
     print()
 
     print(f"* pruning_strategy: Defines the various use cases of the algorithm that will be discussed further.")
-    print("   - Possible values: ['legacy', 'support_independent', 'rhs_filter', 'partial_fd']")
+    print("   - Possible values: ['legacy', 'support_independent', 'partial_fd']")
     print()
 
 
@@ -216,7 +220,7 @@ def demonstrate_legacy_strategy():
 
 def demonstrate_support_independent_strategy():
     """Show how CFDFinder mining partial FDs."""
-    print(f"{Colors.BLUE_FG}=== Support Independent and RHS Filter Strategies ==={Colors.RESET}\n")
+    print(f"{Colors.BLUE_FG}=== Support Independent Strategy ==={Colors.RESET}\n")
     
     print("Sometimes it is still useful to look for low-support dependencies, as they can")
     print("identify rare but interesting dependencies that are performed on a small group of records.")
@@ -240,15 +244,6 @@ def demonstrate_support_independent_strategy():
     print()
     print("* max_patterns: maximum number of rows in the pattern tableau.")
     print("  - Range: from 1 to number of rows")
-    print()
-
-    print("If we are only interested in those rules that express dependence for certain")
-    print("attributes, then to reduce the running time of the algorithm, we can use the")
-    print("'rhs_filter' strategy, which is an extension of the previous strategy and")
-    print("adds another one to all previous parameters:")
-    print()
-    print("* rhs_indices: the indexes of the attributes we are interested in for the RHS.")
-    print("  - Example: [1,3,5]")
     print()
 
     print("Let's run the algorithm with the following parameters:")

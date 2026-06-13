@@ -94,6 +94,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cfd
     ${DESBORDANTE_PREFIX}::cfd::verifier
+    ${DESBORDANTE_PREFIX}::cfd::cfdfinder
     magic_enum::magic_enum
     Boost::headers
 )

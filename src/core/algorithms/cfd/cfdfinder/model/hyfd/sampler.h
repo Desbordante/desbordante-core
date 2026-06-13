@@ -14,7 +14,7 @@ public:
     Sampler(PLIsPtr plis, RowsPtr pli_records, config::ThreadNumType threads_num = 1)
         : sampler_(std::move(plis), std::move(pli_records), threads_num) {}
 
-    hyfd::NonFDList GetNonFDs(hy::IdPairs const& comparison_suggestions) {
+    hy::ColumnCombinationList GetNonFDs(hy::IdPairs const& comparison_suggestions) {
         return sampler_.GetAgreeSets(comparison_suggestions);
     }
 };

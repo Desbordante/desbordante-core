@@ -1,43 +1,26 @@
 #pragma once
 
-#include <queue>
-#include <unordered_set>
+#include <set>
+#include <utility>
 
 #include "core/algorithms/cfd/cfdfinder/model/pattern/pattern.h"
+#include "core/algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
 
 namespace algos::cfdfinder {
 
 class Frontier {
 private:
-    std::priority_queue<Pattern> sorted_index_;
-    std::unordered_set<Entries> search_index_;
+    std::multiset<Pattern, std::greater<Pattern>> container_;
 
 public:
-    Frontier() = default;
+    void Emplace(Pattern&& pattern);
 
-    void Emplace(Pattern&& pattern) {
-        search_index_.emplace(pattern.GetEntries());
-        sorted_index_.emplace(std::move(pattern));
-    }
+    Pattern Poll();
 
-    Pattern Poll() {
-        auto pattern(sorted_index_.top());
-        sorted_index_.pop();
-        search_index_.erase(pattern.GetEntries());
-        return pattern;
-    }
+    bool Empty() const;
 
-    bool Contains(Pattern const& pattern) const {
-        return search_index_.contains(pattern.GetEntries());
-    }
-
-    bool Empty() const {
-        return sorted_index_.empty();
-    }
-
-    void Swap(Frontier& other) {
-        sorted_index_.swap(other.sorted_index_);
-        search_index_.swap(other.search_index_);
-    }
+    void Rebuild(boost::dynamic_bitset<> const& used_rows_mask, Row const& inverted_pli_rhs,
+                 PruningStrategy const& pruning_strategy);
 };
+
 }  // namespace algos::cfdfinder

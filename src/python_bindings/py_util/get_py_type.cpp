@@ -1,3 +1,5 @@
+#include "python_bindings/py_util/get_py_type.h"
+
 #include <Python.h>
 
 #include <functional>
@@ -25,7 +27,6 @@
 #include "core/config/tabular_data/input_tables_type.h"
 #include "core/model/table/column_combination.h"
 #include "core/model/transaction/input_format_type.h"
-#include "python_bindings/py_util/get_py_type.h"
 
 namespace py = pybind11;
 

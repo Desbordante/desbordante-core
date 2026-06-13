@@ -2,69 +2,51 @@
 
 #include <algorithm>
 #include <numeric>
-#include <tuple>
-#include <unordered_set>
 
-#include "core/algorithms/cfd/cfdfinder/util/violations_util.h"
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
 
 namespace algos::cfdfinder {
-bool Pattern::Matches(Row const& tuple) const {
-    for (auto const& [id, entry] : entries_) {
-        if (!entry->Matches(tuple[id])) {
-            return false;
-        }
-    }
-    return true;
-}
 
-void Pattern::UpdateCover(Pattern const& pattern) {
-    std::unordered_set<int> clusters_elements;
-    clusters_elements.reserve(pattern.GetNumCover());
-
-    for (auto const& pcluster : pattern.GetCover()) {
-        clusters_elements.insert(pcluster.begin(), pcluster.end());
-    }
-
+void Pattern::UpdateCover(boost::dynamic_bitset<> const& used_rows) {
     for (auto& cluster : cover_) {
-        std::erase_if(cluster, [&clusters_elements](int element) {
-            return clusters_elements.contains(element);
-        });
-
-        if (PatternDebugController::IsDebugEnabled()) {
-            std::ranges::sort(cluster);
-        }
+        std::erase_if(cluster, [&used_rows](int row) { return used_rows.test(row); });
     }
 
-    std::erase_if(cover_, [](auto const& c) { return c.empty(); });
-    if (PatternDebugController::IsDebugEnabled()) {
-        cover_.sort([](auto const& a, auto const& b) { return a.front() < b.front(); });
-    }
+    std::erase_if(cover_, [](auto const& cluster) { return cluster.empty(); });
 
     support_ = static_cast<double>(GetNumCover());
 }
 
 void Pattern::UpdateKeepers(Row const& inverted_pli_rhs) {
-    auto sum_violations_in_cluster = [&inverted_pli_rhs](size_t sum, Cluster const& cluster) {
-        return sum + algos::cfdfinder::utils::CalculateViolations(cluster, inverted_pli_rhs);
-    };
-
-    size_t child_violations =
-            std::accumulate(cover_.begin(), cover_.end(), 0u, sum_violations_in_cluster);
-
-    num_keepers_ = GetNumCover() - child_violations;
+    num_keepers_ = support_ - CalculateViolations(inverted_pli_rhs);
 }
 
 size_t Pattern::GetNumCover() const {
     return std::accumulate(cover_.begin(), cover_.end(), 0u,
-                           [](size_t sum, Cluster const& cluster) { return sum + cluster.size(); });
+                           [](size_t sum, auto const& cluster) { return sum + cluster.size(); });
 }
 
-bool Pattern::operator<(Pattern const& other) const noexcept {
-    if (PatternDebugController::IsDebugEnabled()) {
-        return std::tie(support_, num_keepers_, number_) <
-               std::tie(other.support_, other.num_keepers_, other.number_);
-    } else {
-        return std::tie(support_, num_keepers_) < std::tie(other.support_, other.num_keepers_);
+size_t Pattern::CalculateViolations(Row const& inverted_rhs_pli) const {
+    size_t violations = 0;
+    std::unordered_map<size_t, size_t> rhs_cluster_counts;
+    for (auto const& cluster : cover_) {
+        size_t max_cluster_size = 0;
+
+        for (auto tuple : cluster) {
+            auto cluster_id = inverted_rhs_pli[tuple];
+
+            if (hy::PLIUtil::IsSingletonCluster(cluster_id)) continue;
+
+            max_cluster_size = std::max(max_cluster_size, ++rhs_cluster_counts[cluster_id]);
+        }
+        violations +=
+                (max_cluster_size > 0) ? (cluster.size() - max_cluster_size) : (cluster.size() - 1);
+        rhs_cluster_counts.clear();
     }
+
+    return violations;
 }
+
 }  // namespace algos::cfdfinder

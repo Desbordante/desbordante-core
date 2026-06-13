@@ -105,7 +105,7 @@ constexpr auto kDLimitPliCache = "limit for the number of PLIs in the cache";
 constexpr auto kDMaxLevelSupportDrop = "maximum support drop for the algorithm.";
 constexpr auto kDMaximumG1 = "maximum G1 value for the algorithm";
 constexpr auto kDMinSupportGain = "minimum support gain for the algorithm.";
-constexpr auto kDPatternTreshold = "minimum number of patterns in the tableau";
+constexpr auto kDMaxPatterns = "minimum number of patterns in the tableau";
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "

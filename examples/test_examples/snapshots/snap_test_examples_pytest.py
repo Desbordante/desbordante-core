@@ -1755,25 +1755,25 @@ confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
 '''
 
 snapshots['test_example[basic/mining_cfdfinder.py-None-mining_cfdfinder_output] mining_cfdfinder_output'] = '''
-CFDFinder Mining Example - Desbordante
+\033[1;34mCFDFinder Mining Example - Desbordante\033[0m
 
-=== Note ===
+\033[1;32m=== Note ===
 CFD is a unique pattern for which there are several search algorithms,
 each of which defines CFD in its own way.
 Therefore, we suggest that you review all the examples of the CFD pattern
 and choose your appropriate option depending on your task:
 
 1. verifying_cfd.py
-2. mining_cfd.py
+2. mining_cfd.py\033[0m
 
-=== Explain Conditional Functional Dependencies ===
+\033[1;34m=== Explain Conditional Functional Dependencies ===\033[0m
 
-Conditional Functional Dependencies (CFD) generalize traditional functional dependencies (FD)
+Conditional Functional Dependencies (CFD) generalize traditional Functional Dependencies (FD)
 by adding conditions to attribute values via the pattern tableau.
 This allows you to find dependencies that are not performed for the entire table,
 but only for a subset of rows that meet certain conditions in the data.
 
-=== Formal Definition ===
+\033[1;32m=== Formal Definition ===\033[0m
 
 This example examines the CFDFinder algorithm, which uses the following definition of CFD:
 
@@ -1797,17 +1797,17 @@ Genetic_Marker, Blood_Type:
      tableau {(Cancer|_), (Diabetes|_)} clarifies that the previous rule applies only
      when Cancer and Diabetes are diagnosed.
 
-=== Note ===
+\033[1;32m=== Note ===
 CFDFinder searches for CFDs, where for RHS there is always a '_' in the condition,
 that is, the wildcard symbol will always be in the pattern tableau for attribute A
-(therefore, the pattern tableau does not contain attribute A).
+(therefore, the pattern tableau does not contain attribute A).\033[0m
 
-=== Key Quality Measures for CFD ===
+\033[1;32m=== Key Quality Measures for CFD ===\033[0m
 
 Support: The fraction of records satisfying the condition LHS
 Confidence: The fraction of records where RHS occurs given LHS
 
-=== Algorithm Basic Parameters ===
+\033[1;34m=== Algorithm Basic Parameters ===\033[0m
 
 The CFDFinder algorithm supports several use cases, and each of them has its own parameters.
 To begin with, we will describe the parameters common to all scenarios.
@@ -1845,7 +1845,7 @@ To begin with, we will describe the parameters common to all scenarios.
 * pruning_strategy: Defines the various use cases of the algorithm that will be discussed further.
    - Possible values: ['legacy', 'support_independent', 'rhs_filter', 'partial_fd']
 
-=== Bacteria Dataset Explanation ===
+\033[1;34m=== Bacteria Dataset Explanation ===\033[0m
 
 Let's look at an example of a dataset containing the results of experiments on
 growing a strain of bacteria:
@@ -1884,7 +1884,7 @@ For example, we may be interested in the following:
 
 Let's try to answer these questions using the CFD mining.
 
-=== Legacy Strategy ===
+\033[1;34m=== Legacy Strategy ===\033[0m
 
 One of the possible scenarios for using the algorithm is to search for CFDs with
 minimal support and confidence thresholds. To do this, you can use the 'legacy'
@@ -1925,7 +1925,7 @@ This dependence may indicate an error in the design of the experiments,
 since temperature is not an independent variable.
 It may be worth conducting additional experiments with more random parameters.
 
-=== Support Independent and RHS Filter Strategies ===
+\033[1;34m=== Support Independent and RHS Filter Strategies ===\033[0m
 
 Sometimes it is still useful to look for low-support dependencies, as they can
 identify rare but interesting dependencies that are performed on a small group of records.
@@ -2002,12 +2002,12 @@ temperature zone 35-40 degrees where the system becomes as predictable as possib
 and where you can focus on one key parameter oxygen level or pH instead of
 controlling all factors at the same time.
 
-=== Partial FD Strategy ===
+\033[1;34m=== Partial FD Strategy ===\033[0m
 
 In addition to searching for common CFDs, the CFDFinder algorithm can be used
 to mine partial FDs.
 
-=== Formal Definition ===
+\033[1;32m=== Formal Definition ===\033[0m
 
 Partial FD is a CFD covering the entire relation instance, i.e. those that
 have a support of 1, but do have a confidence of less than 1.
@@ -2062,11 +2062,11 @@ or similar information regarding Growth_Rate.
 In any case, the analysis helped us to draw some conclusions about our data
 and direct it to further experiments.
 
-=== Note ===
+\033[1;32m=== Note ===
 For more information about mining partial fd with the g1 metric, we recommend
-reading the example 'mining_afd.py'.
+reading the example 'mining_afd.py'.\033[0m
 
-=== Experimentation Workflow ===
+\033[1;34m=== Experimentation Workflow ===\033[0m
 
 When searching for CFDs, it is usually necessary to experiment with the algorithm
 parameters, since it is quite difficult to immediately get the right set for you.
@@ -2095,7 +2095,7 @@ Such experiments on your data will help you discover:
   * data quality issues
   * patterns useful for decision making
 
-CFD mining example completed!
+\033[1;34mCFD mining example completed!\033[0m
 
 '''
 

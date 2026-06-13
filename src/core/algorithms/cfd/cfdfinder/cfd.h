@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "core/algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
@@ -33,13 +34,13 @@ public:
 
     std::string ToString() const;
 
-    bool operator==(CFD const& other) const {
+    bool operator==(CFD const& other) const noexcept {
         return support_ == other.support_ && confidence_ == other.confidence_ &&
                patterns_ == other.patterns_ &&
                embedded_fd_.ToNameTuple() == other.embedded_fd_.ToNameTuple();
     }
 
-    bool operator!=(CFD const& other) const {
+    bool operator!=(CFD const& other) const noexcept {
         return !(*this == other);
     }
 

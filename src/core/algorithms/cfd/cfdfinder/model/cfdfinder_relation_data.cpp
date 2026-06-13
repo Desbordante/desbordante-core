@@ -1,5 +1,6 @@
 #include "core/algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
 
+#include <cstddef>
 #include <deque>
 #include <ranges>
 #include <string>
@@ -10,17 +11,11 @@ namespace {
 std::unique_ptr<model::PositionListIndex> FetchPLI(algos::cfdfinder::ClusterMap& cluster_map,
                                                    bool is_null_equal_null) {
     std::deque<std::vector<int>> clusters;
-    std::vector<int> null_cluster;
     unsigned int size = 0;
-    unsigned int relation_size = 0;
     static std::string const kNullValue = "";
 
-    if (cluster_map.contains(kNullValue)) {
-        null_cluster = cluster_map[kNullValue];
-    }
     if (!is_null_equal_null) {
         cluster_map.erase(kNullValue);
-        relation_size += null_cluster.size();
     }
     for (auto& iter : cluster_map) {
         size += iter.second.size();
@@ -29,11 +24,9 @@ std::unique_ptr<model::PositionListIndex> FetchPLI(algos::cfdfinder::ClusterMap&
         }
         clusters.push_back(iter.second);
     }
-    relation_size += size;
     std::ranges::sort(clusters, {}, [](std::vector<int> const& a) { return a[0]; });
 
-    return std::make_unique<model::PositionListIndex>(std::move(clusters), std::move(null_cluster),
-                                                      size, 0, 0, relation_size, relation_size, 0);
+    return std::make_unique<model::PositionListIndex>(std::move(clusters), size, 0, 0, size, 0);
 }
 }  // namespace
 
@@ -56,7 +49,7 @@ std::unique_ptr<CFDFinderRelationData> CFDFinderRelationData::CreateFrom(
             continue;
         }
 
-        int attribute_id = 0;
+        size_t attribute_id = 0;
         for (auto&& field : row) {
             auto& cluster_map = cluster_maps[attribute_id++];
             if (!cluster_map.contains(field)) {

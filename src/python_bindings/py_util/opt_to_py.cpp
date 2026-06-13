@@ -1,3 +1,5 @@
+#include "python_bindings/py_util/opt_to_py.h"
+
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -21,7 +23,6 @@
 #include "core/config/thread_number/type.h"
 #include "core/model/transaction/input_format_type.h"
 #include "core/util/enum_to_str.h"
-#include "python_bindings/py_util/opt_to_py.h"
 
 namespace {
 namespace py = pybind11;

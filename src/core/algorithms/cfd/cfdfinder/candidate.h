@@ -1,5 +1,9 @@
 #pragma once
+
 #include <cstddef>
+#include <functional>
+#include <tuple>
+#include <utility>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/functional/hash.hpp>
@@ -14,10 +18,7 @@ struct Candidate {
     Candidate(boost::dynamic_bitset<> lhs, size_t rhs) noexcept : lhs_(std::move(lhs)), rhs_(rhs) {}
 
     bool operator<(Candidate const& other) const noexcept {
-        if (rhs_ != other.rhs_) {
-            return rhs_ < other.rhs_;
-        }
-        return lhs_ < other.lhs_;
+        return std::tie(rhs_, lhs_) < std::tie(other.rhs_, other.lhs_);
     }
 
     bool operator==(Candidate const& other) const noexcept {
@@ -28,7 +29,7 @@ struct Candidate {
 
 template <>
 struct std::hash<algos::cfdfinder::Candidate> {
-    size_t operator()(algos::cfdfinder::Candidate const& candidate) const {
+    size_t operator()(algos::cfdfinder::Candidate const& candidate) const noexcept {
         size_t seed = 0;
         boost::hash_combine(seed, candidate.lhs_);
         boost::hash_combine(seed, candidate.rhs_);

@@ -32,16 +32,16 @@ private:
     using Level = std::set<Candidate>;
     using Lattice = std::vector<Level>;
 
-    config::MaxLhsType max_lhs_;
-    config::ThreadNumType threads_num_ = 1;
     config::EqNullsType is_null_equal_null_ = true;
     config::InputTable input_table_;
+
+    config::MaxLhsType max_lhs_;
+    config::ThreadNumType threads_num_ = 1;
     config::IndicesType rhs_filter_;
 
-    Expansion expansion_strategy_ = Expansion::constant;
-    Pruning pruning_strategy_ = Pruning::legacy;
-    Result result_strategy_ = Result::lattice;
-
+    Expansion expansion_strategy_ = Expansion::kConstant;
+    Pruning pruning_strategy_ = Pruning::kLegacy;
+    Result result_strategy_ = Result::kLattice;
     double min_confidence_;
     double min_support_;
     double max_g1_;
@@ -53,35 +53,34 @@ private:
     std::list<CFD> cfd_collection_;
     std::unique_ptr<CFDFinderRelationData> relation_;
 
-    void RegisterOptions();
-    void ResetState() final;
-
-    Lattice GetLattice(PLIsPtr plis, RowsPtr compressed_records);
-    void EnrichCompressedRecords(RowsPtr compressed_records, EnrichedPLIs enriched_plis) const;
-
-    std::vector<Cluster> EnrichPLI(model::PLI const* pli, int num_tuples) const;
-
-    std::shared_ptr<model::PLI const> GetLhsPli(PLICache& pli_cache,
-                                                boost::dynamic_bitset<> const& lhs,
-                                                PLIs const& plis);
-
-    PatternTableau GenerateTableau(boost::dynamic_bitset<> const& lhs_attributes,
-                                   model::PLI const* lhs_pli, Row const& inverted_pli_rhs,
-                                   RowsPtr compressed_records_shared,
-                                   std::shared_ptr<ExpansionStrategy> expansion_strategy,
-                                   std::shared_ptr<PruningStrategy> pruning_strategy);
-
-    std::list<Cluster> DetermineCover(Pattern const& child_pattern, Pattern const& current_pattern,
-                                      Rows const& pli_records) const;
-
     std::shared_ptr<ExpansionStrategy> InitExpansionStrategy(
             RowsPtr pli_records, InvertedClusterMaps const& inverted_cluster_maps);
     std::shared_ptr<PruningStrategy> InitPruningStrategy(ColumnsPtr inverted_plis);
     std::shared_ptr<ResultStrategy> InitResultStrategy();
+
+    Lattice GetLattice(PLIsPtr plis, RowsPtr compressed_records);
+    void EnrichCompressedRecords(RowsPtr compressed_records, EnrichedPLIs enriched_plis) const;
     InvertedClusterMaps BuildEnrichedStructures(PLIsPtr plis_shared,
                                                 RowsPtr compressed_records_shared) const;
-    void RegisterResults(std::shared_ptr<ResultStrategy> result_receiver,
-                         InvertedClusterMaps inverted_cluster_maps);
+
+    std::list<Candidate> RunHyFdPhase(PLIsPtr plis, RowsPtr compressed_records) const;
+
+    PatternTableau GenerateTableau(boost::dynamic_bitset<> const& lhs_attributes,
+                                   model::PLI const* lhs_pli, Row const& inverted_pli_rhs,
+                                   std::shared_ptr<ExpansionStrategy> expansion_strategy,
+                                   std::shared_ptr<PruningStrategy> pruning_strategy);
+    void RegisterResults(std::list<RawCFD> results, InvertedClusterMaps inverted_cluster_maps);
+
+    void TraverseLatticeSeq(RowsPtr compressed_records, InvertedClusterMaps inverted_cluster_maps,
+                            ColumnsPtr inverted_plis, Lattice&& levels, PLICache& pli_cache);
+    void TraverseLatticePar(RowsPtr compressed_records, InvertedClusterMaps inverted_cluster_maps,
+                            ColumnsPtr inverted_plis, Lattice&& levels, PLICache& pli_cache);
+
+    void RegisterOptions();
+
+    void ResetState() final {
+        cfd_collection_.clear();
+    };
 
 protected:
     void MakeExecuteOptsAvailable() override;

@@ -1,13 +1,13 @@
 #include "python_bindings/cfd/bind_cfd.h"
 
+#include <pybind11/pybind11.h>
+
 #include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
-
 #include <pybind11/stl.h>
 
 #include "core/algorithms/cfd/mining_algorithms.h"

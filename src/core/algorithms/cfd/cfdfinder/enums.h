@@ -1,11 +1,10 @@
 #pragma once
 
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
 namespace algos::cfdfinder {
-
-BETTER_ENUM(Pruning, char, legacy = 0, support_independent, partial_fd, rhs_filter);
-BETTER_ENUM(Expansion, char, constant = 0, range, negative_constant);
-BETTER_ENUM(Result, char, direct = 0, lattice, tree);
+enum class Pruning : char { kLegacy = 0, kSupportIndependent, kPartialFd };
+enum class Expansion : char { kConstant = 0, kRange, kNegativeConstant };
+enum class Result : char { kDirect = 0, kLattice, kTree };
 
 }  // namespace algos::cfdfinder
