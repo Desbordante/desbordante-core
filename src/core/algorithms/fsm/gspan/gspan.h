@@ -64,7 +64,7 @@ protected:
 
     std::filesystem::path graph_database_path_;
     std::filesystem::path output_path_;
-    
+
     std::vector<gspan::graph_t> raw_dataset_;
     std::vector<gspan::graph_t> pruned_graphs_;
     std::vector<gspan::csr_graph_t> pruned_csr_graphs_;
@@ -83,11 +83,9 @@ protected:
                    gspan::DFSCode& code);
     void MineSubgraph(gspan::Projection const& projection, gspan::DFSCode& code);
 
-
     void Enumerate(gspan::DFSCode const& code, gspan::Projection const& projection,
                    gspan::ProjectionMapBackward& backward_pmap,
                    gspan::ProjectionMapForward& forward_pmap);
-
 
     bool IsCanonical(gspan::DFSCode const& code);
     bool IsProjectionMin(gspan::DFSCode const& code);
@@ -95,7 +93,7 @@ protected:
                        size_t projection_start_index);
     bool IsForwardMin(gspan::DFSCode const& code, gspan::ExtendedEdge const& ee,
                       size_t projection_start_index);
-    bool ExistsBackwards(gspan::DFSCode const& code, size_t projection_start_index);
+    bool ExistsBackwards(size_t projection_start_index);
 
     unsigned long long ExecuteInternal();
 

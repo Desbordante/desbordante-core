@@ -480,7 +480,7 @@ bool GSpan::IsProjectionMin(DFSCode const& code) {
         } else {
             // edge is forward, so ensure no backward edges exist,
             // then ensure the edge is minimal.
-            if (ExistsBackwards(code, projection_start_index) ||
+            if (ExistsBackwards(projection_start_index) ||
                 !IsForwardMin(code, ee, projection_start_index)) {
                 return false;
             }
@@ -620,7 +620,7 @@ bool GSpan::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
     return true;
 }
 
-bool GSpan::ExistsBackwards(DFSCode const& code, size_t projection_start_index) {
+bool GSpan::ExistsBackwards(size_t projection_start_index) {
     size_t projection_end_index = min_projection_.size();
 
     for (auto j = projection_start_index; j < projection_end_index; j++) {

@@ -49,7 +49,8 @@ void History::Reconstruct(ProjectionEntry const& start, csr_graph_t const& graph
     current_ = &start;
 }
 
-void History::ReconstructEdges(MinProjection const& projection, csr_graph_t const& graph, int start) {
+void History::ReconstructEdges(MinProjection const& projection, csr_graph_t const& graph,
+                               int start) {
     std::fill_n(edge_visited_.begin(), boost::num_edges(graph), false);
     edge_size_ = 0;
 

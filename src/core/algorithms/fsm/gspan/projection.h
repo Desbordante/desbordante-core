@@ -11,7 +11,7 @@ namespace gspan {
 
 // Represents an embedding of subgraph edge in real graph
 struct ProjectionEntry {
-    size_t graph_id;
+    int graph_id;
     csr_edge_t edge;
     ProjectionEntry const* prev;
 };
