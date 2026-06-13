@@ -19,8 +19,10 @@ struct ProjectionEntry {
 // A projection is a collection of entries across multiple graphs
 using Projection = std::vector<ProjectionEntry>;
 
+struct MinEdge;
+
 struct MinProjectionEntry {
-    csr_edge_t edge;
+    MinEdge const* edge;
     int prev;
 };
 

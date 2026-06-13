@@ -3,12 +3,18 @@
 #include <tuple>
 
 #include "graph.h"
+#include "min_graph.h"
 #include "projection.h"
 
 namespace gspan {
 
 class History {
+    // Used for main mining (CSR graph projections)
     std::vector<csr_edge_t> edges_;
+
+    // Used for minimality checking (MinGraph projections)
+    std::vector<MinEdge const*> min_edges_;
+
     std::vector<bool> edge_visited_;
     std::vector<int> vertex_counts_;
     size_t edge_size_;
@@ -36,9 +42,8 @@ public:
 
     void Reconstruct(ProjectionEntry const& start, csr_graph_t const& graph);
 
-    void ReconstructEdges(MinProjection const& projection, csr_graph_t const& graph, int start);
-
-    void ReconstructVertices(MinProjection const& projection, csr_graph_t const& graph, int start);
+    void ReconstructEdges(MinProjection const& projection, MinGraph const& graph, int start);
+    void ReconstructVertices(MinProjection const& projection, MinGraph const& graph, int start);
 
     bool HasVertex(size_t index) const {
         return vertex_counts_[index] != 0;
@@ -50,6 +55,10 @@ public:
 
     csr_edge_t GetEdge(size_t index) const {
         return edges_[edge_size_ - index - 1];
+    }
+
+    MinEdge const& GetMinEdge(size_t index) const {
+        return *min_edges_[edge_size_ - index - 1];
     }
 
     void Clear() {
