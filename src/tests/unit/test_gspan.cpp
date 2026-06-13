@@ -9,11 +9,12 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
-#include "core/algorithms/fsm/gspan/dfscode.h"
-#include "core/algorithms/fsm/gspan/extended_edge.h"
-#include "core/algorithms/fsm/gspan/graph_parser.h"
 #include "core/algorithms/fsm/gspan/gspan.h"
+#include "core/algorithms/fsm/gspan/parser/graph_parser.h"
+#include "core/algorithms/fsm/gspan/types/dfscode.h"
+#include "core/algorithms/fsm/gspan/types/extended_edge.h"
 #include "core/config/names.h"
+#include "core/config/thread_number/type.h"
 #include "tests/common/csv_config_util.h"
 
 namespace tests {
@@ -31,13 +32,15 @@ std::filesystem::path const kGSpanLargeGraph = kGraphDataDir / "gspan_mutag_grap
 
 algos::StdParamsMap CreateGSpanParams(std::filesystem::path const& graph_path, double min_support,
                                       bool output_single_vertices = true, int max_edges = INT_MAX,
-                                      bool output_graph_ids = true) {
+                                      bool output_graph_ids = true,
+                                      config::ThreadNumType threads_num = 0) {
     using namespace config::names;
     return {{kGraphDatabase, graph_path},
             {kGSpanMinimumSupport, min_support},
             {kOutputSingleVertices, output_single_vertices},
             {kMaxNumberOfEdges, max_edges},
-            {kOutputGraphIds, output_graph_ids}};
+            {kOutputGraphIds, output_graph_ids},
+            {kThreads, threads_num}};
 }
 
 }  // namespace
@@ -256,11 +259,14 @@ protected:
 };
 
 TEST_F(GSpanTest, LargeGraph) {
+    size_t expected_subgraphs_count = 682;  // on mutag dataset with minsup 0.5
+
     auto algorithm = CreateAlgorithmInstance(kGSpanLargeGraph, 0.5);
     algorithm->Execute();
-
     auto const& subgraphs = algorithm->GetFrequentSubgraphs();
-    EXPECT_GE(subgraphs.size(), 1);
+    size_t actual_subgraphs_count = subgraphs.size();
+
+    EXPECT_EQ(actual_subgraphs_count, expected_subgraphs_count);
     for (auto const& sg : subgraphs) {
         EXPECT_GE(sg.support, algorithm->GetMinSup());
     }

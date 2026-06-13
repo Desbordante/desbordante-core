@@ -23,7 +23,6 @@ void History::Reconstruct(ProjectionEntry const& start, csr_graph_t const& graph
     } else {
         // Has an encoded projection, assume it is the same size and distinct.
         // (allows the do-while)
-        // Reuse as much of this as possible.
 
         ProjectionEntry const* new_entry = &start;
         ProjectionEntry const* old_entry = current_;
@@ -49,31 +48,30 @@ void History::Reconstruct(ProjectionEntry const& start, csr_graph_t const& graph
     current_ = &start;
 }
 
-void History::ReconstructEdges(MinProjection const& projection, csr_graph_t const& graph,
-                               int start) {
-    std::fill_n(edge_visited_.begin(), boost::num_edges(graph), false);
+void History::ReconstructEdges(MinProjection const& projection, MinGraph const& graph, int start) {
+    std::fill_n(edge_visited_.begin(), graph.NumEdges(), false);
     edge_size_ = 0;
 
+    min_edges_.resize(std::max(min_edges_.size(), projection.size()));
     do {
         auto const& current_entry = projection[start];
-        auto edge = current_entry.edge;
-        edges_[edge_size_++] = edge;
-        edge_visited_[graph[edge].id] = 1;
+        min_edges_[edge_size_++] = current_entry.edge;
+        edge_visited_[current_entry.edge->id] = true;
         start = current_entry.prev;
     } while (start != -1);
 }
 
-void History::ReconstructVertices(MinProjection const& projection, csr_graph_t const& graph,
+void History::ReconstructVertices(MinProjection const& projection, MinGraph const& graph,
                                   int start) {
-    std::fill_n(vertex_counts_.begin(), boost::num_vertices(graph), 0);
+    std::fill_n(vertex_counts_.begin(), graph.NumVertices(), 0);
     edge_size_ = 0;
 
+    min_edges_.resize(std::max(min_edges_.size(), projection.size()));
     do {
         auto const& current_entry = projection[start];
-        auto edge = current_entry.edge;
-        edges_[edge_size_++] = edge;
-        vertex_counts_[graph[boost::source(edge, graph)].id] = 1;
-        vertex_counts_[graph[boost::target(edge, graph)].id] = 1;
+        min_edges_[edge_size_++] = current_entry.edge;
+        vertex_counts_[current_entry.edge->from] = 1;
+        vertex_counts_[current_entry.edge->to] = 1;
         start = current_entry.prev;
     } while (start != -1);
 }

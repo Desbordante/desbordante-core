@@ -123,11 +123,11 @@ def visualize_demo_graphs():
 
     # Frequent patterns at minsup=0.9
     R1 = nx.Graph()
-    R1.add_node(0, label='11')
+    R1.add_node(0, label='10')
     R1.name = "Pattern #1"
 
     R2 = nx.Graph()
-    R2.add_node(0, label='10')
+    R2.add_node(0, label='11')
     R2.name = "Pattern #2"
 
     R3 = nx.Graph()

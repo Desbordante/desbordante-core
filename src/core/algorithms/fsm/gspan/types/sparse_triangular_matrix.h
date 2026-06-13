@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include <boost/container_hash/hash.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 namespace gspan {
 
@@ -10,17 +12,7 @@ namespace gspan {
 // and the value is the count of the pair {I, J}.
 class SparseTriangularMatrix {
     using Key = std::pair<int, int>;
-
-    struct KeyHash {
-        std::size_t operator()(Key const& k) const noexcept {
-            std::size_t seed = 0;
-            boost::hash_combine(seed, k.first);
-            boost::hash_combine(seed, k.second);
-            return seed;
-        }
-    };
-
-    std::unordered_map<Key, int, KeyHash> matrix_;
+    boost::unordered_flat_map<Key, int, boost::hash<Key>> matrix_;
 
     static Key Normalize(int i, int j) noexcept {
         return std::minmax(i, j);
@@ -43,7 +35,7 @@ public:
     }
 
     void RemoveInfrequent(int minsup) {
-        std::erase_if(matrix_, [&](auto const& kv) { return kv.second < minsup; });
+        boost::unordered::erase_if(matrix_, [&](auto const& kv) { return kv.second < minsup; });
     }
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <algorithm>
 #include <ranges>
 #include <sstream>
 #include <vector>
@@ -14,19 +14,16 @@ class DFSCode {
 
 public:
     std::vector<int> GetVertexLabels() const {
-        std::vector<int> result;
-        std::unordered_map<int, int> id_to_label;
-        for (ExtendedEdge const& ee : extended_edges_) {
-            id_to_label[ee.vertex1.id] = ee.vertex1.label;
-            id_to_label[ee.vertex2.id] = ee.vertex2.label;
+        if (extended_edges_.empty()) return {};
+        int max_id = 0;
+        for (auto const& ee : extended_edges_) {
+            max_id = std::max({max_id, ee.vertex1.id, ee.vertex2.id});
         }
-
-        size_t count = 0;
-        while (id_to_label.find(count) != id_to_label.end()) {
-            result.push_back(id_to_label[count]);
-            count++;
+        std::vector<int> result(max_id + 1);
+        for (auto const& ee : extended_edges_) {
+            result[ee.vertex1.id] = ee.vertex1.label;
+            result[ee.vertex2.id] = ee.vertex2.label;
         }
-
         return result;
     }
 
