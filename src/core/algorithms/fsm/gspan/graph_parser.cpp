@@ -67,7 +67,7 @@ std::vector<gspan::graph_t> ReadGraphs(std::istream& stream) {
                     auto edge2 = boost::add_edge(vertex2, vertex1, graph);
                     graph[edge2.first].label = edge_label;
                     graph[edge2.first].id = edge_id;
-                    
+
                     edge_id++;
                 }
             }

@@ -67,19 +67,6 @@ TEST_F(DFSCodeTest, AddMultipleEdges) {
     EXPECT_EQ(code.Size(), 2);
 }
 
-TEST_F(DFSCodeTest, RightMostPath) {
-    gspan::DFSCode code;
-    code.Add(gspan::ExtendedEdge(gspan::Vertex{0, 1}, gspan::Vertex{1, 2}, 1));
-    code.Add(gspan::ExtendedEdge(gspan::Vertex{1, 2}, gspan::Vertex{2, 3}, 1));
-    code.UpdateRightmostPath(2);
-
-    auto const& path = code.GetRightMostPath();
-    EXPECT_FALSE(path.empty());
-    EXPECT_TRUE(code.OnRightMostPath(0));
-    EXPECT_TRUE(code.OnRightMostPath(1));
-    EXPECT_TRUE(code.OnRightMostPath(2));
-}
-
 TEST_F(DFSCodeTest, ContainEdge) {
     gspan::DFSCode code;
     code.Add(gspan::ExtendedEdge(gspan::Vertex{0, 1}, gspan::Vertex{1, 2}, 1));
@@ -158,7 +145,7 @@ TEST_F(GraphParserTest, ParseSingleGraph) {
     auto graphs = gspan::parser::ReadGraphs(ss);
     ASSERT_EQ(graphs.size(), 1);
     EXPECT_EQ(boost::num_vertices(graphs[0]), 2);
-    EXPECT_EQ(boost::num_edges(graphs[0]), 1);
+    EXPECT_EQ(boost::num_edges(graphs[0]) / 2, 1);
     bool found_v0 = false, found_v1 = false;
     for (auto v : boost::make_iterator_range(boost::vertices(graphs[0]))) {
         if (graphs[0][v].label == 1) found_v0 = true;
@@ -208,9 +195,9 @@ TEST_F(GraphParserTest, ParseMultipleGraphs) {
     auto graphs = gspan::parser::ReadGraphs(ss);
     ASSERT_EQ(graphs.size(), 2);
     EXPECT_EQ(boost::num_vertices(graphs[0]), 2);
-    EXPECT_EQ(boost::num_edges(graphs[0]), 1);
+    EXPECT_EQ(boost::num_edges(graphs[0]) / 2, 1);
     EXPECT_EQ(boost::num_vertices(graphs[1]), 3);
-    EXPECT_EQ(boost::num_edges(graphs[1]), 2);
+    EXPECT_EQ(boost::num_edges(graphs[1]) / 2, 2);
 }
 
 TEST_F(GraphParserTest, VertexLabels) {

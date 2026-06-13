@@ -54,7 +54,7 @@ void History::ReconstructEdges(MinProjection const& projection, csr_graph_t cons
     edge_size_ = 0;
 
     do {
-        auto& current_entry = projection[start];
+        auto const& current_entry = projection[start];
         auto edge = current_entry.edge;
         edges_[edge_size_++] = edge;
         edge_visited_[graph[edge].id] = 1;
@@ -68,7 +68,7 @@ void History::ReconstructVertices(MinProjection const& projection, csr_graph_t c
     edge_size_ = 0;
 
     do {
-        auto& current_entry = projection[start];
+        auto const& current_entry = projection[start];
         auto edge = current_entry.edge;
         edges_[edge_size_++] = edge;
         vertex_counts_[graph[boost::source(edge, graph)].id] = 1;

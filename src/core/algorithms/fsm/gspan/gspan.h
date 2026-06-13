@@ -22,6 +22,33 @@ protected:
     // The minimum support represented as a frequency (a value between 0 and 1)
     double min_frequency_;
 
+    std::vector<int> rightmost_path_;
+
+    //   Clears right_most_path, then stores into it the rightmost path of the dfs code
+    //   list. The path is stored such that the first item in right_most_path is the
+    //   index of the edge 'discovering' the rightmost vertex, the second is the index
+    //   of the edge discovering the 'from' vertex of the first edge, and so on.
+    //   DFSCode is treated as if it is truncated to the given size.
+    void UpdateRightmostPath(gspan::DFSCode const& code, size_t size) {
+        rightmost_path_.clear();
+        int prev_id = -1;
+
+        // Go in reverse, since we need to first look for the edge that discovered
+        // the rightmost vertex
+        for (auto i = size; i > 0; --i) {
+            // Only consider forward edges (as by definition the rightmost path only
+            // consists of edges 'discovering' new nodes). The first forward edge (or
+            // equivalently, the last forward edge in DFSCode) is the edge discovering
+            // the rightmost vertex. After that, each new edge is the edge discovering
+            // the 'from' of the previous one.
+            if (code[i - 1].vertex1.id < code[i - 1].vertex2.id &&
+                (rightmost_path_.empty() || prev_id == code[i - 1].vertex2.id)) {
+                prev_id = code[i - 1].vertex1.id;
+                rightmost_path_.push_back(i - 1);
+            }
+        }
+    }
+
     // The vector of frequent subgraphs found by the last execution
     std::vector<gspan::FrequentSubgraph> frequent_subgraphs_;
 
