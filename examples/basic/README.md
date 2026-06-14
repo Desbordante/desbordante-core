@@ -1,5 +1,5 @@
 
-## Basic
+# Basic
 
 These scenarios showcase a single pattern by discussing its definition and providing a brief introduction through simple examples. Furthermore, they briefly describe how to use it — how to discover or validate it in Python code. It's usually a good idea to first skim through the corresponding paper, which is listed in the main readme file.
 
@@ -26,7 +26,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_sfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_sfd.py) — a scenario showing how to discover soft functional dependencies.
 + [mining_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ucc.py) — a scenario showing how to discover exact unique column combinations.
 
-# Verification
+## Verification
 + [verifying_aucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_aucc.py) — a scenario showing how to verify an approximate unique column combination.
 + [verifying_cfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_cfd.py) — a scenario showing how to verify a conditional functional dependency.
 + [verifying_dc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_dc.py) — a scenario showing how to verify a denial constraint.
@@ -37,9 +37,10 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [verifying_md.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_md.py) — a scenario showing how to verify a matching dependency.
 + [verifying_nd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_nd) — a scenario showing how to verify a numerical dependency.
 + [verifying_mfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_mfd.py) — a scenario showing how to verify metric functional dependencies.
++ [verifyind_pac](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_pac) — scenarios showing how to verify different kinds of probabilistic approximate constraints.
 + [verifying_pfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_pfd.py) — a scenario showing how to verify probabilistic functional dependency.
 + [verifying_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_ucc.py) — a scenario showing how to verify a unique column combination.
 
-# Dynamic verification
+## Dynamic verification
 + [dynamic_verifying_afd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/dynamic_verifying_afd.py) — a scenario showing how to verify an approximate functional dependency in a dynamic setting.
 + [dynamic_verifying_fd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/dynamic_verifying_fd.py) — a scenario showing how to verify a functional dependency in a dynamic setting.
