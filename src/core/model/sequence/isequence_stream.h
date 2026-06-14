@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include <cstddef>
 
 #include "core/model/sequence/timed_event_set.h"

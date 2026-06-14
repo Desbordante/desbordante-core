@@ -11,15 +11,27 @@ CompositeEpisode::CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>>
 }
 
 void CompositeEpisode::CountDataForEventSet(model::EventSet const& event_set, bool add) {
-    int sign = add ? 1 : -1;
     for (model::Event event : event_set) {
+        model::Event val = event + 1;
         if (event % 2 == 0) {
-            sum_of_even_items_ += sign * (event + 1);
+            if (add) {
+                sum_of_even_items_ += val;
+            } else {
+                sum_of_even_items_ -= val;
+            }
         } else {
-            sum_of_odd_items_ += sign * (event + 1);
+            if (add) {
+                sum_of_odd_items_ += val;
+            } else {
+                sum_of_odd_items_ -= val;
+            }
         }
     }
-    events_count_ += sign * event_set.GetSize();
+    if (add) {
+        events_count_ += event_set.GetSize();
+    } else {
+        events_count_ -= event_set.GetSize();
+    }
 }
 
 void CompositeEpisode::Extend(ParallelEpisode const& parallel_episode, size_t new_support) {
@@ -73,20 +85,6 @@ CompositeEpisode::RawEpisode CompositeEpisode::GetRaw() const {
     }
     result.second = support_;
     return result;
-}
-
-bool CompositeEpisodeComparator::operator()(std::unique_ptr<CompositeEpisode> const& lhs,
-                                            std::unique_ptr<CompositeEpisode> const& rhs) const {
-    if (lhs->GetEventsSum() != rhs->GetEventsSum()) {
-        return lhs->GetEventsSum() < rhs->GetEventsSum();
-    }
-    return lhs < rhs;
-}
-
-bool DescendingCompositeEpisodeComparator::operator()(
-        std::unique_ptr<CompositeEpisode> const& lhs,
-        std::unique_ptr<CompositeEpisode> const& rhs) const {
-    return comparator(rhs, lhs);
 }
 
 }  // namespace algos::maxfem

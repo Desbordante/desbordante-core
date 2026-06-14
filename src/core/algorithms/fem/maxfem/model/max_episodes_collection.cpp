@@ -5,26 +5,12 @@
 
 namespace algos::maxfem {
 
-void MaxEpisodesCollection::Add(CompositeEpisode const& episode) {
-    size_t length = episode.GetLength();
-
-    if (CheckForSuperEpisode(episode, length)) {
-        return;
-    }
-    while (length >= max_episodes_.size()) {
-        max_episodes_.emplace_back();
-    }
-    RemoveSubEpisodes(episode, length);
-
-    max_episodes_[length].insert(std::make_unique<CompositeEpisode>(episode));
-}
-
 void MaxEpisodesCollection::SimpleAdd(CompositeEpisode const& episode) {
     size_t length = episode.GetLength();
     while (length >= max_episodes_.size()) {
         max_episodes_.emplace_back();
     }
-    max_episodes_[length].insert(std::make_unique<CompositeEpisode>(episode));
+    max_episodes_[length].insert(episode);
 }
 
 void MaxEpisodesCollection::BatchFill(std::vector<MaxEpisodesCollection>& collections) {
@@ -41,7 +27,7 @@ void MaxEpisodesCollection::BatchFill(std::vector<MaxEpisodesCollection>& collec
         max_episodes_.emplace_back();
     }
 
-    std::vector<std::unique_ptr<CompositeEpisode>> bucket_buffer;
+    std::vector<EpisodeSet::node_type> bucket_buffer;
 
     for (int len = static_cast<int>(global_max_len); len >= 0; --len) {
         size_t length = static_cast<size_t>(len);
@@ -53,10 +39,7 @@ void MaxEpisodesCollection::BatchFill(std::vector<MaxEpisodesCollection>& collec
             auto& source_set = collection.max_episodes_[length];
             auto iter = source_set.begin();
             while (iter != source_set.end()) {
-                auto node = source_set.extract(iter++);
-                if (!node.empty()) {
-                    bucket_buffer.push_back(std::move(node.value()));
-                }
+                bucket_buffer.push_back(source_set.extract(iter++));
             }
         }
 
@@ -65,13 +48,15 @@ void MaxEpisodesCollection::BatchFill(std::vector<MaxEpisodesCollection>& collec
         }
 
         std::sort(bucket_buffer.begin(), bucket_buffer.end(),
-                  DescendingCompositeEpisodeComparator{});
+                  [](EpisodeSet::node_type const& a, EpisodeSet::node_type const& b) {
+                      return a.value().GetEventsSum() > b.value().GetEventsSum();
+                  });
 
-        for (auto& ep_ptr : bucket_buffer) {
-            if (CheckForSuperEpisode(*ep_ptr, length)) {
+        for (auto& node : bucket_buffer) {
+            if (CheckForSuperEpisode(node.value(), length)) {
                 continue;
             }
-            max_episodes_[length].insert(std::move(ep_ptr));
+            max_episodes_[length].insert(std::move(node));
         }
 
         bucket_buffer.clear();
@@ -98,10 +83,8 @@ std::vector<CompositeEpisode::RawEpisode> MaxEpisodesCollection::GetResult(
     }
 
     for (auto& episodes_set : max_episodes_) {
-        for (auto const& ep_ptr : episodes_set) {
-            if (ep_ptr) {
-                result.push_back(ep_ptr->GetRaw());
-            }
+        for (auto const& ep : episodes_set) {
+            result.push_back(ep.GetRaw());
         }
         episodes_set.clear();
     }
@@ -112,47 +95,24 @@ std::vector<CompositeEpisode::RawEpisode> MaxEpisodesCollection::GetResult(
 
 bool MaxEpisodesCollection::CheckForSuperEpisode(CompositeEpisode const& episode,
                                                  size_t length) const {
-    for (int index = max_episodes_.size() - 1; index >= static_cast<int>(length); --index) {
+    for (size_t index = max_episodes_.size(); index-- > length;) {
         auto& max_episodes_set = max_episodes_[index];
         for (auto iter = max_episodes_set.rbegin(); iter != max_episodes_set.rend(); ++iter) {
             auto const& max_episode = *iter;
 
-            if (max_episode->GetEventsSum() < episode.GetEventsSum()) {
+            if (max_episode.GetEventsSum() < episode.GetEventsSum()) {
                 break;
             }
 
-            if (episode.GetEvenEventsSum() <= max_episode->GetEvenEventsSum() &&
-                episode.GetOddEventsSum() <= max_episode->GetOddEventsSum() &&
-                max_episode->StrictlyContains(episode)) {
+            if (episode.GetEvenEventsSum() <= max_episode.GetEvenEventsSum() &&
+                episode.GetOddEventsSum() <= max_episode.GetOddEventsSum() &&
+                max_episode.StrictlyContains(episode)) {
                 return true;
             }
         }
     }
 
     return false;
-}
-
-void MaxEpisodesCollection::RemoveSubEpisodes(CompositeEpisode const& episode, size_t length) {
-    for (size_t index = 1; index <= length; ++index) {
-        auto& max_episodes_set = max_episodes_[index];
-        auto iter = max_episodes_set.begin();
-
-        while (iter != max_episodes_set.end()) {
-            auto const& max_episode = *iter;
-
-            if (max_episode->GetEvenEventsSum() >= episode.GetEventsSum()) {
-                break;
-            }
-
-            if (episode.GetEvenEventsSum() >= max_episode->GetEvenEventsSum() &&
-                episode.GetOddEventsSum() >= max_episode->GetOddEventsSum() &&
-                episode.StrictlyContains(*max_episode)) {
-                iter = max_episodes_set.erase(iter);
-            } else {
-                iter++;
-            }
-        }
-    }
 }
 
 }  // namespace algos::maxfem

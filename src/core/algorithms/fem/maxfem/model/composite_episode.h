@@ -43,14 +43,9 @@ public:
 };
 
 struct CompositeEpisodeComparator {
-    bool operator()(std::unique_ptr<CompositeEpisode> const& lhs,
-                    std::unique_ptr<CompositeEpisode> const& rhs) const;
-};
-
-struct DescendingCompositeEpisodeComparator {
-    CompositeEpisodeComparator comparator;
-    bool operator()(std::unique_ptr<CompositeEpisode> const& lhs,
-                    std::unique_ptr<CompositeEpisode> const& rhs) const;
+    bool operator()(CompositeEpisode const& lhs, CompositeEpisode const& rhs) const {
+        return lhs.GetEventsSum() < rhs.GetEventsSum();
+    }
 };
 
 }  // namespace algos::maxfem
