@@ -72,8 +72,7 @@ class HEIBitSetTrie {
     // Profiling: heap-allocated children caused ~16% of inversion CPU in cache misses.
     // Most nodes have few children, so inline storage lands them on the same cache line.
     static constexpr size_t kInlineChildren = 4;
-    using ChildrenT = boost::container::small_vector<std::pair<uint8_t, uint32_t>,
-                                                     kInlineChildren>;
+    using ChildrenT = boost::container::small_vector<std::pair<uint8_t, uint32_t>, kInlineChildren>;
 
     // Node fits in one 64-byte cache line. small_vector<4> is 56 bytes plus the
     // 1-byte flag = 64 bytes. DBitset lives in a parallel vector (cold path only).
@@ -252,7 +251,9 @@ public:
         stored_values_.emplace_back();
     }
 
-    void Insert(DBitset const& bs) { DoInsert(kRoot, bs, 0); }
+    void Insert(DBitset const& bs) {
+        DoInsert(kRoot, bs, 0);
+    }
 
     bool ContainsSubset(DBitset const& query) const {
         return DoContainsSubset(kRoot, query, 0);
@@ -274,7 +275,9 @@ public:
         return result;
     }
 
-    void Remove(DBitset const& bs) { DoRemove(kRoot, bs, 0); }
+    void Remove(DBitset const& bs) {
+        DoRemove(kRoot, bs, 0);
+    }
 
     void ForEach(std::function<void(DBitset const&)> const& fn) const {
         DoForEach(kRoot, fn);
@@ -326,7 +329,7 @@ class HEIInverter {
     }
 
     static void HandleInvalid(HEIBitSetTrie& pos_cover, DBitset const& invalid_ev,
-                               std::vector<DBitset> const& groups) {
+                              std::vector<DBitset> const& groups) {
         std::vector<DBitset> removed = pos_cover.GetAndRemoveSubsets(invalid_ev);
 
         for (DBitset const& removed_dc : removed) {
@@ -380,7 +383,7 @@ public:
 
     std::vector<DenialConstraint> Run(EvidenceSet const& evidence_set) {
         FILE* log = nullptr;
-        if (const char* path = std::getenv("ITER_LOG")) {
+        if (char const* path = std::getenv("ITER_LOG")) {
             log = fopen(path, "w");
         }
 
@@ -426,8 +429,7 @@ public:
 
         if (log) {
             fprintf(log, "SORTED_PREDS:");
-            for (size_t i = 0; i < n_predicates_; ++i)
-                fprintf(log, " %zu", sorted_preds[i]);
+            for (size_t i = 0; i < n_predicates_; ++i) fprintf(log, " %zu", sorted_preds[i]);
             fprintf(log, "\n");
         }
 
@@ -440,7 +442,9 @@ public:
                 DBitset dc;
                 dc.set(pid);
                 std::lock_guard<std::mutex> lock(covers_mutex);
-                if (log) fprintf(log, "ITER %zu pid=%zu evi=0 modulo=0 inner_grps=0 partial=1\n", i, pid);
+                if (log)
+                    fprintf(log, "ITER %zu pid=%zu evi=0 modulo=0 inner_grps=0 partial=1\n", i,
+                            pid);
                 all_covers_raw.push_back(std::move(dc));
                 return;
             }
@@ -480,11 +484,8 @@ public:
 
             std::lock_guard<std::mutex> lock(covers_mutex);
             if (log) {
-                fprintf(log, "ITER %zu pid=%zu evi=%zu modulo=%zu inner_grps=%zu partial=%zu\n",
-                        i, pid,
-                        pred2evi[pid].size(),
-                        modulo_evs.size(),
-                        inner_groups.size(),
+                fprintf(log, "ITER %zu pid=%zu evi=%zu modulo=%zu inner_grps=%zu partial=%zu\n", i,
+                        pid, pred2evi[pid].size(), modulo_evs.size(), inner_groups.size(),
                         partial_dcs.size());
             }
             for (DBitset& dc : partial_dcs) {
@@ -564,8 +565,8 @@ public:
             for (size_t i = idx; i < end; ++i) {
                 if (is_minimal[i - idx]) {
                     nt.Insert(all_covers_raw[i]);
-                    result.emplace_back(ToBoostBitset(all_covers_raw[i]),
-                                        pred_index_provider_, schema_);
+                    result.emplace_back(ToBoostBitset(all_covers_raw[i]), pred_index_provider_,
+                                        schema_);
                 } else {
                     ++non_minimal_count;
                 }
@@ -574,8 +575,8 @@ public:
         }
 
         if (log) {
-            fprintf(log, "FINAL raw=%zu non_minimal=%zu result=%zu\n",
-                    all_covers_raw.size(), non_minimal_count, result.size());
+            fprintf(log, "FINAL raw=%zu non_minimal=%zu result=%zu\n", all_covers_raw.size(),
+                    non_minimal_count, result.size());
             fclose(log);
         }
 

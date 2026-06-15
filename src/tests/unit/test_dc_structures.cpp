@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/dc/FastADC/fastadc.h"
-#include "core/algorithms/dc/HybridDC/hybrid_dc.h"
 #include "core/algorithms/dc/FastADC/misc/misc.h"
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"
@@ -16,6 +15,7 @@
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_organizer.h"
+#include "core/algorithms/dc/HybridDC/hybrid_dc.h"
 #include "core/config/names.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_typed_relation_data.h"

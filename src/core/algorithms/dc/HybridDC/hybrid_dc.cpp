@@ -7,10 +7,10 @@
 #include <vector>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
+#include "core/algorithms/dc/FastADC/util/approximate_evidence_inverter.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
-#include "core/algorithms/dc/FastADC/util/approximate_evidence_inverter.h"
 #include "core/algorithms/dc/HybridDC/hei_inverter.h"
 #include "core/config/descriptions.h"
 #include "core/config/names.h"
@@ -137,10 +137,11 @@ unsigned long long HybridDC::ExecuteInternal() {
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
     auto const evi_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - evi_start).count();
+                                std::chrono::system_clock::now() - evi_start)
+                                .count();
     fprintf(stderr, "[HybridDC] Evidence time: %ldms\n", evi_ms);
 
-    if (const char* dump = std::getenv("PREDICATE_DUMP")) {
+    if (char const* dump = std::getenv("PREDICATE_DUMP")) {
         FILE* f = fopen(dump, "w");
         if (f) {
             auto const& objects = pred_index_provider_->GetObjects();
@@ -151,7 +152,7 @@ unsigned long long HybridDC::ExecuteInternal() {
         }
     }
 
-    if (const char* dump = std::getenv("EVIDENCE_DUMP")) {
+    if (char const* dump = std::getenv("EVIDENCE_DUMP")) {
         FILE* f = fopen(dump, "w");
         if (f) {
             for (auto const& ev : evidence_set_builder.evidence_set) {
@@ -174,7 +175,7 @@ unsigned long long HybridDC::ExecuteInternal() {
         size_t n_predicates = predicate_builder.PredicateCount();
         auto mutex_map = predicate_builder.TakeMutexMap();
         HEIInverter hei_inverter(n_predicates, mutex_map, pred_index_provider_,
-                                  typed_relation_->GetSharedPtrSchema(), threads_);
+                                 typed_relation_->GetSharedPtrSchema(), threads_);
         dcs_ = hei_inverter.Run(evidence_set_builder.evidence_set);
     } else {
         ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
@@ -184,7 +185,8 @@ unsigned long long HybridDC::ExecuteInternal() {
     }
 
     auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - inv_start).count();
+                                std::chrono::system_clock::now() - inv_start)
+                                .count();
     fprintf(stderr, "[HybridDC] Inversion time: %ldms\n", inv_ms);
     fprintf(stderr, "[HybridDC] Total computing time: %ldms\n", evi_ms + inv_ms);
     return evi_ms + inv_ms;
