@@ -58,7 +58,7 @@ We have two parameters in Desbordante's DC mining algorithm:
     print(f"""{YELLOW}Mining exact DCs (evidence_threshold=0) on TABLE_1{ENDC}""")
 
     # Exact DC mining on TABLE_1
-    algo = db.dc.algorithms.Default()
+    algo = db.dc.algorithms.FastADC()
     algo.load_data(table=(TABLE_1, ',', True))
     algo.execute(evidence_threshold=0, shard_length=0)
     dcs_table1_exact = algo.get_dcs()
@@ -80,7 +80,7 @@ This means we only require that at least half of all row pairs satisfy each DC (
     print(f"""{YELLOW}Mining ADCs (evidence_threshold=0.5) on TABLE_1{ENDC}""")
 
     # Approximate DC mining on TABLE_1
-    algo = db.dc.algorithms.Default()
+    algo = db.dc.algorithms.FastADC()
     algo.load_data(table=(TABLE_1, ',', True))
     algo.execute(evidence_threshold=0.5, shard_length=0)
     dcs_table1_approx = algo.get_dcs()
@@ -136,7 +136,7 @@ Let's see how the exact DC mining changes due to this additional record.
     print(f"""{YELLOW}Mining exact DCs (evidence_threshold=0) on TABLE_2{ENDC}""")
 
     # Exact DC mining on TABLE_2
-    algo = db.dc.algorithms.Default()
+    algo = db.dc.algorithms.FastADC()
     algo.load_data(table=(TABLE_2, ',', True))
     algo.execute(evidence_threshold=0, shard_length=0)
     dcs_table2_exact = algo.get_dcs()

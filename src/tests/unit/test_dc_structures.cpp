@@ -595,6 +595,7 @@ TEST(HybridDCTest, TestDC2Exact) {
     algo.Execute();
 
     EXPECT_EQ(algo.GetDCs().size(), 603u);
+    std::cout << "HybridDC(HEI-P) found " << algo.GetDCs().size() << " denial constraints\n";
 }
 
 TEST(HybridDCTest, TestDC2Approx) {
@@ -613,6 +614,7 @@ TEST(HybridDCTest, TestDC2Approx) {
     algo.SetOption(kThreads, 4U);
     algo.Execute();
 
+    EXPECT_EQ(algo.GetDCs().size(), 345u);
     std::cout << "HybridDC(AEI, threshold=0.01) found " << algo.GetDCs().size()
               << " denial constraints\n";
 }

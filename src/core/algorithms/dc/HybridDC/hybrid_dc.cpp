@@ -188,7 +188,8 @@ unsigned long long HybridDC::ExecuteInternal() {
                                 std::chrono::system_clock::now() - inv_start)
                                 .count();
     fprintf(stderr, "[HybridDC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
-    fprintf(stderr, "[HybridDC] Total computing time: %lldms\n", static_cast<long long>(evi_ms + inv_ms));
+    fprintf(stderr, "[HybridDC] Total computing time: %lldms\n",
+            static_cast<long long>(evi_ms + inv_ms));
     return evi_ms + inv_ms;
 }
 

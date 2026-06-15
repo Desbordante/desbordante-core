@@ -157,7 +157,8 @@ unsigned long long FastADC::ExecuteInternal() {
                                 std::chrono::system_clock::now() - inv_start)
                                 .count();
     fprintf(stderr, "[FastADC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
-    fprintf(stderr, "[FastADC] Total computing time: %lldms\n", static_cast<long long>(evi_ms + inv_ms));
+    fprintf(stderr, "[FastADC] Total computing time: %lldms\n",
+            static_cast<long long>(evi_ms + inv_ms));
 
     PrintResults();
 
