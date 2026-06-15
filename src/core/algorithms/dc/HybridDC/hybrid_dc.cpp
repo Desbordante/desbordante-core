@@ -139,7 +139,7 @@ unsigned long long HybridDC::ExecuteInternal() {
     auto const evi_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::system_clock::now() - evi_start)
                                 .count();
-    fprintf(stderr, "[HybridDC] Evidence time: %ldms\n", evi_ms);
+    fprintf(stderr, "[HybridDC] Evidence time: %lldms\n", static_cast<long long>(evi_ms));
 
     if (char const* dump = std::getenv("PREDICATE_DUMP")) {
         FILE* f = fopen(dump, "w");
@@ -187,8 +187,8 @@ unsigned long long HybridDC::ExecuteInternal() {
     auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::system_clock::now() - inv_start)
                                 .count();
-    fprintf(stderr, "[HybridDC] Inversion time: %ldms\n", inv_ms);
-    fprintf(stderr, "[HybridDC] Total computing time: %ldms\n", evi_ms + inv_ms);
+    fprintf(stderr, "[HybridDC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
+    fprintf(stderr, "[HybridDC] Total computing time: %lldms\n", static_cast<long long>(evi_ms + inv_ms));
     return evi_ms + inv_ms;
 }
 

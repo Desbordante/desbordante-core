@@ -143,7 +143,7 @@ unsigned long long FastADC::ExecuteInternal() {
     auto const evi_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::system_clock::now() - evi_start)
                                 .count();
-    fprintf(stderr, "[FastADC] Evidence time: %ldms\n", evi_ms);
+    fprintf(stderr, "[FastADC] Evidence time: %lldms\n", static_cast<long long>(evi_ms));
 
     auto const inv_start = std::chrono::system_clock::now();
 
@@ -156,8 +156,8 @@ unsigned long long FastADC::ExecuteInternal() {
     auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::system_clock::now() - inv_start)
                                 .count();
-    fprintf(stderr, "[FastADC] Inversion time: %ldms\n", inv_ms);
-    fprintf(stderr, "[FastADC] Total computing time: %ldms\n", evi_ms + inv_ms);
+    fprintf(stderr, "[FastADC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
+    fprintf(stderr, "[FastADC] Total computing time: %lldms\n", static_cast<long long>(evi_ms + inv_ms));
 
     PrintResults();
 
