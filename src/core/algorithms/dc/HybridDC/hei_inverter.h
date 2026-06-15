@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -47,35 +46,20 @@ static bool BsLess(DBitset const& a, DBitset const& b) noexcept {
     return ai >= kNpos && bi < kNpos;  // a exhausted first, so a is "less"
 }
 
-// Fast total order for dedup — only consistency matters, not which specific order.
-// libstdc++ bitset<128> stores bits 0..63 in word 0 and 64..127 in word 1, so
-// memcpy into __int128 gives a valid integer compare. Two compares vs bit-scan.
-static bool BsLessRaw(DBitset const& a, DBitset const& b) noexcept {
-    unsigned __int128 av, bv;
-    std::memcpy(&av, &a, sizeof(av));
-    std::memcpy(&bv, &b, sizeof(bv));
-    return av < bv;
-}
-
 // Prefix trie over DBitset. Supports subset queries and get-and-remove-subsets.
 // Based on Java NTreeSearch from HEI-P.
 //
-// Nodes stored in a flat arena vector, referenced by index. unique_ptr layout
-// caused one cache miss per step; on Adult that was ~34% of CPU. Arena keeps
-// nodes contiguous so traversal is cache-friendly.
+// Nodes stored in a flat arena vector, referenced by index.
 //
 // Children are sorted by bit for binary search and merge iteration against the
-// query. Pruned nodes stay in the arena (trie is short-lived, no freelist).
+// query.
 class HEIBitSetTrie {
     static constexpr uint32_t kRoot = 0;
 
-    // Profiling: heap-allocated children caused ~16% of inversion CPU in cache misses.
     // Most nodes have few children, so inline storage lands them on the same cache line.
     static constexpr size_t kInlineChildren = 4;
     using ChildrenT = boost::container::small_vector<std::pair<uint8_t, uint32_t>, kInlineChildren>;
 
-    // Node fits in one 64-byte cache line. small_vector<4> is 56 bytes plus the
-    // 1-byte flag = 64 bytes. DBitset lives in a parallel vector (cold path only).
     struct Node {
         bool has_stored;
         ChildrenT children;
@@ -158,8 +142,8 @@ class HEIBitSetTrie {
         Node const& node = nodes_[node_idx];
 
         if (q_idx == q_count) {
-            // All query bits consumed — any stored node is a superset.
-            if (node.stored.has_value()) return true;
+            // All query bits consumed so any stored node is a superset.
+            if (node.has_stored) return true;
             for (auto const& [bit, child_idx] : node.children) {
                 (void)bit;
                 if (DoSubtreeHasAnyStored(child_idx)) return true;
@@ -170,7 +154,7 @@ class HEIBitSetTrie {
         uint8_t next_q = q_bits[q_idx];
         for (auto const& [bit, child_idx] : node.children) {
             if (bit < next_q) {
-                // Extra bit — keep looking for next_q deeper.
+                // Extra bit - keep looking for next_q deeper.
                 if (DoContainsSuperset(child_idx, q_bits, q_idx, q_count)) return true;
             } else if (bit == next_q) {
                 if (DoContainsSuperset(child_idx, q_bits, q_idx + 1, q_count)) return true;
@@ -301,19 +285,17 @@ class HEIInverter {
         return db;
     }
 
-    // Convert to boost::dynamic_bitset for DenialConstraint construction (not in hot path).
+    // Convert to boost::dynamic_bitset for DenialConstraint construction.
     static boost::dynamic_bitset<> ToBoostBitset(DBitset const& bs) {
         boost::dynamic_bitset<> bdb(bs.size());
         for (size_t i = bs._Find_first(); i < kNpos; i = bs._Find_next(i)) bdb.set(i);
         return bdb;
     }
 
-    // Keep only maximal evidences; subsets are dominated and redundant.
-    // Brute-force O(N^2) was ~15% of CPU on Adult. Trie reduces to O(N * depth).
     static std::vector<DBitset> Minimize(std::vector<DBitset> evs) {
         std::sort(evs.begin(), evs.end(), [](DBitset const& a, DBitset const& b) {
             if (a.count() != b.count()) return a.count() > b.count();
-            return BsLessRaw(a, b);  // any total order works here, not the lex one
+            return BsLess(a, b);
         });
 
         HEIBitSetTrie kept_trie;
@@ -395,7 +377,6 @@ public:
         all_evs = Minimize(all_evs);
 
         size_t n_evs = all_evs.size();
-        // List, not bitset — evidence IDs are not bounded by 128.
         std::vector<std::vector<size_t>> pred2evi(n_predicates_);
         for (size_t eid = 0; eid < n_evs; ++eid) {
             for (size_t pid = all_evs[eid]._Find_first(); pid < kNpos;
@@ -420,7 +401,7 @@ public:
         std::sort(sorted_preds.begin(), sorted_preds.end(), [&](size_t a, size_t b) {
             size_t ea = pred2evi[a].size(), eb = pred2evi[b].size();
             if (ea != eb) return ea < eb;
-            // Same evidence count: single-column before cross-column (matches Java fdcd order).
+            // Same evidence count: single-column before cross-column (matches Java order).
             bool ca = pred_objects[a]->IsCrossColumn();
             bool cb = pred_objects[b]->IsCrossColumn();
             if (ca != cb) return !ca;
@@ -452,8 +433,6 @@ public:
             DBitset pid_group = ToDBitset(mutex_map_[pid], n_predicates_);
             DBitset preds_to_remove = pid_group;
             for (size_t j = 0; j < i; ++j) preds_to_remove.set(sorted_preds[j]);
-            // Compiler can't prove ~preds_to_remove is loop-invariant (std::bitset<128>),
-            // so hoist it. Was ~5% of CPU on Adult from repeated _M_do_flip calls.
             DBitset const keep_mask = ~preds_to_remove;
 
             std::vector<DBitset> modulo_evs;
@@ -464,18 +443,16 @@ public:
                 modulo_evs.push_back(std::move(ev));
             }
 
-            // Dedup needs only a total order. InnerSearch re-sorts before use,
-            // so use the fast __int128 compare.
-            std::sort(modulo_evs.begin(), modulo_evs.end(), BsLessRaw);
+            std::sort(modulo_evs.begin(), modulo_evs.end(), BsLess);
             modulo_evs.erase(std::unique(modulo_evs.begin(), modulo_evs.end()), modulo_evs.end());
 
             std::vector<DBitset> inner_groups;
             inner_groups.reserve(unique_groups.size());
             for (DBitset const& grp : unique_groups) {
                 if ((grp & pid_group).any()) continue;
-                // Inner EI uses only single-column groups (matches Java fdcd behavior).
-                size_t first = grp.find_first();
-                if (first != DBitset::npos && pred_objects[first]->IsCrossColumn()) continue;
+                // Inner EI uses only single-column groups (matches Java behavior).
+                size_t first = grp._Find_first();
+                if (first < kNpos && pred_objects[first]->IsCrossColumn()) continue;
                 DBitset inner_grp = grp & ~preds_to_remove;
                 if (inner_grp.any()) inner_groups.push_back(std::move(inner_grp));
             }
@@ -512,17 +489,17 @@ public:
             for (auto& th : worker_threads) th.join();
         }
 
-        // Dedup, then sort by cardinality ASC. Process one cardinality level at a time:
+        // Dedup, then sort by cardinality. Process one cardinality level at a time:
         // trie holds only smaller DCs, so same-level checks are read-only and parallel
         // (two equal-size DCs can't be subsets of each other).
-        std::sort(all_covers_raw.begin(), all_covers_raw.end(), BsLessRaw);
+        std::sort(all_covers_raw.begin(), all_covers_raw.end(), BsLess);
         all_covers_raw.erase(std::unique(all_covers_raw.begin(), all_covers_raw.end()),
                              all_covers_raw.end());
         std::sort(all_covers_raw.begin(), all_covers_raw.end(),
                   [](DBitset const& a, DBitset const& b) {
                       size_t ca = a.count(), cb = b.count();
                       if (ca != cb) return ca < cb;
-                      return BsLessRaw(a, b);
+                      return BsLess(a, b);
                   });
 
         HEIBitSetTrie nt;
@@ -532,7 +509,7 @@ public:
 
         size_t const total = all_covers_raw.size();
         size_t idx = 0;
-        std::vector<uint8_t> is_minimal;  // reused across levels
+        std::vector<uint8_t> is_minimal;
         while (idx < total) {
             size_t card = all_covers_raw[idx].count();
             size_t end = idx;
@@ -540,7 +517,7 @@ public:
             size_t batch = end - idx;
             is_minimal.assign(batch, 0);
 
-            // Threshold: parallelism overhead dominates for very small batches.
+            // Threshold as parallelism overhead dominates for very small batches.
             if (threads_ > 1 && batch >= 64 && !log) {
                 std::atomic<size_t> next{idx};
                 std::vector<std::thread> workers;
@@ -561,7 +538,6 @@ public:
                 }
             }
 
-            // Serial: trie writes can't race with the next level's reads.
             for (size_t i = idx; i < end; ++i) {
                 if (is_minimal[i - idx]) {
                     nt.Insert(all_covers_raw[i]);
