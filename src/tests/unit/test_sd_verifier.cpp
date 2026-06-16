@@ -28,16 +28,16 @@ struct SDVerifierParams {
     std::optional<std::string> custom_csv_content;
     bool expect_exception;
 
-    SDVerifierParams(std::string name, config::IndicesType lhs, config::IndicesType rhs, double g1,
-                     double g2, long ops, double conf, bool check_violations = false,
+    SDVerifierParams(std::string test_name, config::IndicesType lhs, config::IndicesType rhs,
+                     double g1, double g2, long ops, double conf, bool check_violations = false,
                      std::vector<size_t> deletions = {},
                      std::vector<std::pair<size_t, size_t>> insertions = {},
                      std::optional<config::IndicesType> indices = std::nullopt,
                      std::optional<std::string> csv_filename = std::nullopt,
                      std::optional<std::string> csv_content = std::nullopt,
                      bool expect_exception = false)
-        : name(std::move(name)),
-          active_csv_filename(csv_filename.value_or("sd_test_gen_")),
+        : name(std::move(test_name)),
+          active_csv_filename(csv_filename.value_or("sd_test_gen_" + name)),
           params({{config::names::kCsvConfig, CSVConfig{active_csv_filename.c_str(), ',', true}},
                   {config::names::kLhsIndices, lhs},
                   {config::names::kRhsIndices, rhs},
