@@ -191,8 +191,6 @@ private:
                      R"(^[+-]?0[xX](((\d|[a-f]|[A-F]))+(\.(\d|[a-f]|[A-F])*)?|\.(\d|[a-f]|[A-F])+)([pP][+-]?\d+)?$)")},
             {TypeId::kBigInt, boost::regex(R"(^(\+|-)?\d{20,}$)")},
             {TypeId::kInt, boost::regex(R"(^(\+|-)?\d{1,19}$)")},
-            {TypeId::kNull, boost::regex(Null::kValue.data())},
-            {TypeId::kEmpty, boost::regex(R"(^$)")},
             /* The following regex is matched if a string contains any character apart from
             characters present in any other regexes. If this regex is matched, then the value has
             only the string type, otherwise it could be a value of another type, so the
@@ -200,11 +198,9 @@ private:
             {TypeId::kString, boost::regex(R"(^(.*[^\d\sa-filnprstux.\-\\\/+].*)$)",
                                            boost::regex_constants::icase)}};
     inline static auto const kNullCheck = [](std::string const& val) {
-        return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kNull));
+        return val == Null::kValue.data();
     };
-    inline static auto const kEmptyCheck = [](std::string const& val) {
-        return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kEmpty));
-    };
+    inline static auto const kEmptyCheck = [](std::string const& val) { return val.empty(); };
     inline static std::function<bool(std::string const&)> const kUndelimitedDateCheck =
             [](std::string const& val) {
                 bool is_undelimited_date = false;
