@@ -82,6 +82,9 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                 }
             }
             if (!matched) {
+                if (first_type_id == TypeId::kUndefined) {
+                    first_type_id = TypeId::kString;
+                }
                 new_candidate_types_bitset = kTypeIdToBitset.at(TypeId::kString);
             }
 
