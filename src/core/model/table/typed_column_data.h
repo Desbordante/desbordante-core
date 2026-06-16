@@ -192,7 +192,9 @@ private:
             {TypeId::kBigInt, boost::regex(R"(^(\+|-)?\d{20,}$)")},
             {TypeId::kInt, boost::regex(R"(^(\+|-)?\d{1,19}$)")},
             {TypeId::kNull, boost::regex(Null::kValue.data())},
-            {TypeId::kEmpty, boost::regex(R"(^$)")}};
+            {TypeId::kEmpty, boost::regex(R"(^$)")},
+            {TypeId::kString, boost::regex(R"(^(.*[^\d|\s|a-f|ilnprstux\.\-\\\/\+].*)$)",
+                                           boost::regex_constants::icase)}};
     inline static auto const kNullCheck = [](std::string const& val) {
         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kNull));
     };
@@ -228,6 +230,10 @@ private:
             [](std::string const& val) { return boost::regex_match(val, kStringBoolRegex); };
     inline static std::vector<std::pair<TypeId, std::function<bool(std::string const&)>>> const
             kTypeIdToChecker = {
+                    {TypeId::kString,
+                     [](std::string const& val) {
+                         return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kString));
+                     }},
                     {TypeId::kDate,
                      [](std::string const& val) {
                          return boost::regex_match(val, kTypeIdToRegex.at(TypeId::kDate)) &&
