@@ -27,6 +27,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
     std::bitset<6> candidate_types_bitset("111111");
     TypeId first_type_id = TypeId::kUndefined;
     auto matcher_map_iter = kTypeIdToChecker.begin();
+    bool reduced_candidates = false;
     for (std::size_t i = 0; i != unparsed_.size(); ++i) {
         if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
             is_undefined = false;
@@ -36,15 +37,20 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                                      [&](auto const& pair) { return pair.first == first_type_id; });
                 auto& type_check = it->second;
                 if (type_check(unparsed_[i])) {
-                    // undelimited and delimited dates have different bitsets
-                    // t/f and other representations of bools also have different bitsets
-                    if ((first_type_id == TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) ||
-                        (first_type_id == TypeId::kBool && !kStringBoolCheck(unparsed_[i]))) {
-                        candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
-                    }
-                    // integer and non-integer representations of bools also have different bitsets
-                    if (first_type_id == TypeId::kInt && !kIntegerBoolCheck(unparsed_[i])) {
-                        candidate_types_bitset &= kTypeIdToBitset.at(TypeId::kInt);
+                    if (!reduced_candidates) {
+                        // undelimited and delimited dates have different bitsets
+                        // t/f and other representations of bools also have different bitsets
+                        if ((first_type_id == TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) ||
+                            (first_type_id == TypeId::kBool && !kStringBoolCheck(unparsed_[i]))) {
+                            candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
+                            reduced_candidates = true;
+                        }
+                        // integer and non-integer representations of bools also have different
+                        // bitsets
+                        if (first_type_id == TypeId::kInt && !kIntegerBoolCheck(unparsed_[i])) {
+                            candidate_types_bitset &= kTypeIdToBitset.at(TypeId::kInt);
+                            reduced_candidates = true;
+                        }
                     }
                     continue;
                 }
