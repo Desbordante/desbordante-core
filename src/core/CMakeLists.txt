@@ -1,5 +1,6 @@
 # ---- Core Library Configuration ----
 
+add_subdirectory(model/sequence)
 add_subdirectory(model/table)
 add_subdirectory(model/transaction)
 add_subdirectory(model/types)
@@ -7,6 +8,7 @@ add_subdirectory(algorithms)
 add_subdirectory(config)
 add_subdirectory(parser/csv_parser)
 add_subdirectory(parser/graph_parser)
+add_subdirectory(parser/sequence_parser)
 add_subdirectory(util)
 
 # Configure threading support with pthread preference
