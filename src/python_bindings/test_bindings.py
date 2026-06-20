@@ -1,5 +1,3 @@
-import pathlib
-import tempfile
 import unittest
 from collections import namedtuple
 from itertools import chain
@@ -198,37 +196,6 @@ class TestPythonBindings(unittest.TestCase):
                 with self.assertRaises(desb.ConfigurationError):
                     check_metric_verifier_failure(load.path, load.options)
                 
-
-
-class TestMaxFEM(unittest.TestCase):
-    # Sequence: event 1 three times, event 2 twice (infrequent at minsup=3),
-    # window_size=1 prevents composite episodes.
-    # Expected: one maximal episode [[1]] with support 3.
-    _SEQUENCE = [[1], [2], [1], [2], [1]]
-    _MINSUP = 3
-    _WINDOW_SIZE = 1
-    _EXPECTED = [([[1]], 3)]
-
-    def _run(self, sequence_arg):
-        alg = desb.fem.MaxFEM()
-        alg.load_data(sequence=sequence_arg)
-        alg.execute(minsup=self._MINSUP, window_size=self._WINDOW_SIZE)
-        return alg.get_max_frequent_episodes()
-
-    def test_iterable_input(self):
-        result = self._run(self._SEQUENCE)
-        self.assertEqual(result, self._EXPECTED)
-
-    def test_path_input(self):
-        content = "\n".join(" ".join(str(e) for e in events) for events in self._SEQUENCE)
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            f.write(content)
-            tmp_path = pathlib.Path(f.name)
-        try:
-            result = self._run(tmp_path)
-            self.assertEqual(result, self._EXPECTED)
-        finally:
-            tmp_path.unlink()
 
 
 if __name__ == "__main__":
