@@ -82,19 +82,19 @@ for i in "$@"; do
             ;;
         # Forward option to CMake, long option
         --cmake-opt=*)
-            CMAKE_OPTS="$CMAKE_OPTS ${i#*=}"
+            CMAKE_OPTS+=("${i#*=}")
             ;;
         # Forward option to CMake, short option
         -C*)
-            CMAKE_OPTS="$CMAKE_OPTS ${i#*C}"
+            CMAKE_OPTS+=("${i#*C}")
             ;;
         # Forward option to build system, long option
         --build-opt=*)
-            BUILD_OPTS="$BUILD_OPTS ${i#*=}"
+            BUILD_OPTS+=("${i#*=}")
             ;;
         # Forward option to build system, short option
         -B*)
-            BUILD_OPTS="$BUILD_OPTS ${i#*B}"
+            BUILD_OPTS+=("${i#*B}")
             ;;
         # Display help
         -h | --help | *)
@@ -104,43 +104,43 @@ for i in "$@"; do
     esac
 done
 
-CMAKE_OPTS="$CMAKE_OPTS -G Ninja"
+CMAKE_OPTS+=("-G Ninja")
 
 if [[ $NO_TESTS == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BUILD_TESTS=OFF"
+    CMAKE_OPTS+=("-D DESBORDANTE_BUILD_TESTS=OFF")
 fi
 
 if [[ $BENCHMARK == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BUILD_BENCHMARKS=ON"
+    CMAKE_OPTS+=("-D DESBORDANTE_BUILD_BENCHMARKS=ON")
 fi
 
 if [[ $PYBIND == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BINDINGS=BUILD"
+    CMAKE_OPTS+=("-D DESBORDANTE_BINDINGS=BUILD")
 fi
 
 if [[ $LTO == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_USE_LTO=ON"
+    CMAKE_OPTS+=("-D DESBORDANTE_USE_LTO=ON")
 fi
 
 if [[ $GDB_DEBUG == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_GDB_SYMBOLS=ON"
+    CMAKE_OPTS+=("-D DESBORDANTE_GDB_SYMBOLS=ON")
 fi
 
 if [[ $NO_FETCH_DATASETS == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_FETCH_DATASETS=OFF"
+    CMAKE_OPTS+=("-D DESBORDANTE_FETCH_DATASETS=OFF")
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D CMAKE_BUILD_TYPE=Release"
+    CMAKE_OPTS+=("-D CMAKE_BUILD_TYPE=Release")
 fi
 
 if [[ -n $SANITIZER ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_SANITIZER=${SANITIZER}"
+    CMAKE_OPTS+=("-D DESBORDANTE_SANITIZER=${SANITIZER}")
 fi
 
 if [[ -n $LOG_LEVEL ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_LOG_LEVEL=${LOG_LEVEL}"
+    CMAKE_OPTS+=("-D DESBORDANTE_LOG_LEVEL=${LOG_LEVEL}")
 fi
 
 rm -f build/CMakeCache.txt
-cmake -S . -B build $CMAKE_OPTS && cmake --build build $BUILD_OPTS
+cmake -S . -B build "${CMAKE_OPTS[@]}" && cmake --build build "${BUILD_OPTS[@]}"
