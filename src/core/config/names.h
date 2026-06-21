@@ -115,6 +115,14 @@ constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
+// PAC
+constexpr auto kColumnIndices = "column_indices";
+constexpr auto kDeltaSteps = "delta_steps";
+constexpr auto kDiagonalThreshold = "diagonal_threshold";
+constexpr auto kDomain = "domain";
+constexpr auto kMinDelta = "min_delta";
+constexpr auto kMaxEpsilon = "max_epsilon";
+constexpr auto kMinEpsilon = "min_epsilon";
 // Pyro
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider
