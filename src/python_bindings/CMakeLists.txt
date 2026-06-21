@@ -34,8 +34,8 @@ target_link_libraries(
 
 set(NAME bindlib.data)
 desbordante_add_lib(NAME OBJECT)
-target_sources(${NAME} PRIVATE data/bind_data_types.cpp)
-target_link_libraries(${NAME} PRIVATE pybind11::pybind11)
+target_sources(${NAME} PRIVATE data/bind_data_types.cpp data/py_custom_metrics.cpp)
+target_link_libraries(${NAME} PRIVATE pybind11::pybind11 magic_enum::magic_enum Boost::headers)
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
 set(NAME bindlib.util)
@@ -53,8 +53,9 @@ target_sources(
             py_util/value_to_py.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE magic_enum::magic_enum spdlog::spdlog_header_only Boost::headers
-                    pybind11::pybind11
+    ${NAME}
+    PRIVATE magic_enum::magic_enum spdlog::spdlog_header_only Boost::headers pybind11::pybind11
+    PUBLIC ${DESBORDANTE_PREFIX}::bindlib::data
 )
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
@@ -284,6 +285,21 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::od::fast
     ${DESBORDANTE_PREFIX}::od::order
     ${DESBORDANTE_PREFIX}::od::set_based_aod_verifier
+    magic_enum::magic_enum
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+
+desbordante_add_bind(
+    pac
+    SRCS
+    pac/bind_domains.cpp
+    pac/bind_pac.cpp
+    pac/bind_pac_verification.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::pac::verifier::domain_pac_verifier
+    ${DESBORDANTE_PREFIX}::pac::verifier::fd_pac_verifier
+    ${DESBORDANTE_PREFIX}::pac::verifier
     magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers

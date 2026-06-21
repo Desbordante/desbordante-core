@@ -2,6 +2,7 @@
 
 #include <Python.h>
 
+#include <cstddef>
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -10,6 +11,9 @@
 #include <vector>
 
 #include <boost/core/demangle.hpp>
+#include <pybind11/functional.h>
+#include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/cfd/enums.h"
@@ -20,6 +24,10 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/config/custom_metric/custom_metric/type.h"
+#include "core/config/custom_metric/custom_metrics/type.h"
+#include "core/config/custom_metric/custom_vector_metric/type.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -39,6 +47,7 @@ constexpr PyTypeObject* const kPyList = &PyList_Type;
 constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 constexpr PyTypeObject* const kPySet = &PySet_Type;
 constexpr PyTypeObject* const kPyDict = &PyDict_Type;
+constexpr PyTypeObject* const kPyFunc = &PyFunction_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -127,9 +136,20 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
-            PyTypePair<std::vector<std::string>, kPyList, kPyStr>,
             PyTypePair<std::unordered_map<std::string, std::vector<unsigned int>>, kPyDict, kPyStr,
                        kPyList, kPyInt>,
+            PyTypePair<config::CustomMetricType, kPyFunc>,
+            PyTypePair<config::CustomMetricsType, kPyList, kPyFunc>,
+            PyTypePair<config::CustomVectorMetricType, kPyFunc>,
+            PyTypePair<std::vector<double>, kPyList, kPyFloat>,
+            {typeid(std::shared_ptr<pac::model::IDomain>),
+             []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
+            PyTypePair<config::CustomMetricType, kPyFunc>,
+            PyTypePair<config::CustomMetricsType, kPyList, kPyFunc>,
+            PyTypePair<config::CustomVectorMetricType, kPyFunc>,
+            PyTypePair<std::vector<double>, kPyList, kPyFloat>,
+            {typeid(std::shared_ptr<pac::model::IDomain>),
+             []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
     };
 
     auto const it = type_map.find(type_index);
