@@ -211,6 +211,26 @@ auto const kDMetricAlgorithm = details::kDMetricAlgorithmString.c_str();
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
 // ND
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+// PAC
+constexpr auto kDColumnIndices = "Column indices.";
+constexpr auto kDDeltaSteps =
+        "Select how many delta values to check while verifying PAC. "
+        "0 has special meaning: make (1 - min_delta) * 1000 steps, i. e. 10 steps per cent. "
+        "Default is 0.";
+constexpr auto kDDiagonalThreshold =
+        "Maximal k such that diagonal segment of ECDF with slope coefficient of k is considered "
+        "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
+        "containing N rows is not considered a change (default is 1e-5).";
+constexpr auto kDDomain = "Ordered domain for Domain PAC.";
+constexpr auto kDMaxEpsilon =
+        "Maximal value of epsilon, which shows how much values deviate from exact dependency "
+        "(default is +infinity).";
+constexpr auto kDMinEpsilon =
+        "Minimal value of epsilon, which shows how much values deviate from exact dependency "
+        "(default is 0).";
+constexpr auto kDMinDelta =
+        "Minimal value of delta, which is a probability at which values satisfy the dependency "
+        "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";
 // Pyro
 constexpr auto kDCustomRandom =
         "seed for the custom random generator. Used for consistency of results across platforms.";
