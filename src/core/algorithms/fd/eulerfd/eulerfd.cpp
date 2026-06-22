@@ -1,10 +1,12 @@
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 
+#include "core/algorithms/fd/make_reordering_lhs_lim_lhs_mask_adder.h"
+#include "core/config/max_lhs/option.h"
 #include "core/util/logger.h"
 
-namespace algos {
+namespace algos::fd {
 
-EulerFD::EulerFD() : FDAlgorithm(), mlfq_(kQueuesNumber) {
+EulerFD::EulerFD() : Algorithm(), mlfq_(kQueuesNumber) {
     last_ncover_ratios_.fill(1);
     last_pcover_ratios_.fill(1);
     RegisterOption(config::kCustomRandomFlagOpt(&custom_random_opt_));
@@ -14,11 +16,11 @@ EulerFD::EulerFD() : FDAlgorithm(), mlfq_(kQueuesNumber) {
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 
-    max_lhs_ = std::numeric_limits<unsigned int>::max();
+    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
 }
 
 void EulerFD::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::kCustomRandomFlagOpt.GetName()});
+    MakeOptionsAvailable({config::kCustomRandomFlagOpt.GetName(), config::kMaxLhsOpt.GetName()});
 }
 
 void EulerFD::LoadDataInternal() {
@@ -27,7 +29,7 @@ void EulerFD::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = RelationalSchema::CreateFrom(*input_table_);
+    table_header_ = model::TableHeader::FromDatasetStream(*input_table_);
 
     // In each column mapping string values into integer values.
     // Using only hash isn't good idea because collisions don't processing.
@@ -57,7 +59,9 @@ void EulerFD::LoadDataInternal() {
     number_of_tuples_ = tuples_.size();
 }
 
-void EulerFD::ResetStateFd() {
+void EulerFD::ResetState() {
+    fd_view_ = nullptr;
+
     // Data from sampling module
     clusters_.clear();
     constant_columns_.clear();
@@ -94,16 +98,20 @@ void EulerFD::SaveAnswer() {
         inv_indexes[attribute_indexes_[i]] = i;
     }
 
+    LhsMaskFdView::Storage storage;
+    storage.reserve(number_of_attributes_);
     for (size_t rhs_attr = 0; rhs_attr < number_of_attributes_; rhs_attr++) {
+        // The function that actually determines what the result is (tree.ForEach) looks through one
+        // SearchTreeEulerFD in positive_cover_ for each RHS, so it's only reporting the LHSs.
+        auto report_fd = MakeReorderingLhsLimLhsMaskAdder(storage.emplace_back(),
+                                                          attribute_indexes_, max_lhs_);
         // Then tree filling we use inverse indexes, so to get correct tree we inverse again
         size_t inv_rhs_attr = inv_indexes[rhs_attr];
         auto& tree = positive_cover_[inv_rhs_attr];
-        auto rhs = *schema_->GetColumn(rhs_attr);
-        tree.ForEach([&](Bitset const& lhs_attr) {
-            auto lhs = schema_->GetVertical(ChangeAttributesOrder(lhs_attr, attribute_indexes_));
-            RegisterFd(lhs, rhs, schema_);
-        });
+        tree.ForEach(report_fd);
     }
+
+    fd_view_ = std::make_shared<LhsMaskFdView>(table_header_, std::move(storage));
 }
 
 void EulerFD::InitCovers() {
@@ -146,7 +154,7 @@ void EulerFD::BuildPartition() {
             constant_columns_[attr_num] = true;
             continue;
         } else if (values.size() == number_of_tuples_) {
-            // This means that the sizes of all clusters are 1, so we can pass the cycle below
+            // This means that the sizes of all clusters are 1, so we can skip the loop below
             continue;
         } else {
             for (auto&& [_, cluster] : values) {
@@ -371,6 +379,8 @@ size_t EulerFD::GenerateResults() {
 
 void EulerFD::ExecuteInternal() {
     if (number_of_attributes_ == 1) {
+        fd_view_ = std::make_shared<LhsMaskFdView>(table_header_,
+                                                   LhsMaskFdView::Storage(number_of_attributes_));
         return;
     }
 
@@ -387,6 +397,8 @@ void EulerFD::ExecuteInternal() {
     if (clusters_.empty()) {
         // In small datasets sometimes after clusters stripping there are no clusters for sampling
         LOG_INFO("number of clusters is 0*");
+        fd_view_ = std::make_shared<LhsMaskFdView>(table_header_,
+                                                   LhsMaskFdView::Storage(number_of_attributes_));
         return;
     }
 
@@ -416,4 +428,4 @@ void EulerFD::ExecuteInternal() {
     // Convert answer from pcover trees to list of fd
     SaveAnswer();
 }
-}  // namespace algos
+}  // namespace algos::fd
