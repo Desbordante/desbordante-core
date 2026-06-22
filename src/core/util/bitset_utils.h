@@ -37,4 +37,10 @@ std::vector<Index> BitsetToIndices(boost::dynamic_bitset<> const& bitset) {
     return indices;
 }
 
+boost::dynamic_bitset<> ReorderBitset(boost::dynamic_bitset<> const& bs, auto const& mapping) {
+    boost::dynamic_bitset<> mapped_bs(bs.size());
+    util::ForEachIndex(bs, [&](std::size_t i) { mapped_bs.set(mapping[i]); });
+    return mapped_bs;
+}
+
 }  // namespace util
