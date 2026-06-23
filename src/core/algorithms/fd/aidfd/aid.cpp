@@ -130,14 +130,15 @@ void Aid::CreateNegativeCover() {
 void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
         size_t value = tuples_[tuple_num][attr_num];
-        Cluster const& cluster = clusters_[attr_num].at(value);
+        assert(clusters_[attr_num].find(value) != clusters_[attr_num].end());
+        Cluster const& cluster = clusters_[attr_num].find(value)->second;
         size_t index_in_cluster = indices_in_clusters_[attr_num][tuple_num];
         if (iteration_num <= index_in_cluster) {
             size_t another_index_in_cluster =
                     GenerateSecondClusterIndex(index_in_cluster, iteration_num);
             size_t another_tuple_num = cluster[another_index_in_cluster];
             auto tuples_agree_set = BuildAgreeSet(tuple_num, another_tuple_num);
-            neg_cover_.insert(tuples_agree_set);
+            neg_cover_.insert(std::move(tuples_agree_set));
         }
     }
 }
