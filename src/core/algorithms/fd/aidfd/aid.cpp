@@ -177,6 +177,9 @@ void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTre
     }
 
     for (auto& subset : subsets) {
+        if (subset.count() == max_lhs_) continue;
+        assert(subset.count() < max_lhs_);
+
         for (size_t add_attr = 0; add_attr < number_of_attributes_; ++add_attr) {
             if (add_attr == rhs || neg_cover_el[add_attr] || constant_columns_[add_attr]) {
                 continue;
@@ -186,7 +189,6 @@ void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTre
             if (!pos_cover_tree.ContainsAnySubsetOf(subset)) {
                 pos_cover_tree.Add(subset);
             }
-
             subset[add_attr] = false;
         }
     }
