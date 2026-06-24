@@ -76,9 +76,6 @@ constexpr auto kDArLhsRule = "left part of association rule to verify";
 constexpr auto kDArRhsRule = "right part of association rule to verify";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 // CFD
-constexpr auto kDCfdColumnsNumber =
-        "Number of columns in the part of the dataset if you "
-        "want to use algo not on the full dataset, but on its part";
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
 constexpr auto kDCfdMinimumSupport =
@@ -87,9 +84,6 @@ constexpr auto kDCfdMinimumSupport =
 constexpr auto kDCFDRuleLeft = "CFD left rule";
 constexpr auto kDCFDRuleRight = "CFD right rule";
 auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
-constexpr auto kDCfdTuplesNumber =
-        "Number of tuples in the part of the dataset if you "
-        "want to use algo not on the full dataset, but on its part";
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "

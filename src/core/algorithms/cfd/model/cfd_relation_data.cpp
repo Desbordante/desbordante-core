@@ -6,6 +6,7 @@
 #include <random>
 
 #include "core/algorithms/cfd/util/set_util.h"
+#include "core/util/logger.h"
 
 // see algorithms/cfd/LICENSE
 
@@ -15,148 +16,54 @@ size_t CFDRelationData::GetNumRows() const {
     return data_rows_.size();
 }
 
-void CFDRelationData::AddNewItemsInFullTable(ItemDictionary& item_dictionary,
-                                             ColumnsValuesDict& columns_values_dict,
-                                             std::vector<ItemInfo>& items,
-                                             std::vector<std::string> const& string_row,
-                                             std::vector<int>& int_row,
-                                             std::vector<Transaction>& data_rows,
-                                             int& unique_elems_number, unsigned num_columns) {
-    int it;
-    for (size_t i = 0; i < num_columns; i++) {
-        auto ptr = item_dictionary.find(std::make_pair(i, string_row[i]));
-        if (ptr != item_dictionary.end()) {
-            it = ptr->second;
-        } else {
-            items.emplace_back(string_row[i], i);
-            columns_values_dict[static_cast<AttributeIndex>(i)].push_back(unique_elems_number);
-            item_dictionary[std::make_pair(i, string_row[i])] = unique_elems_number;
-            it = unique_elems_number++;
-        }
-        int_row[i] = it;
-        items[it - 1].frequency++;
-    }
-    data_rows.push_back(int_row);
-}
+std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStream& data_stream) {
+    auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
+    size_t num_columns = data_stream.GetNumberOfColumns();
+    std::vector<CFDColumnData::ItemDictionary> item_dictionaries(num_columns);
+    std::vector<std::vector<int>> columns_values(num_columns);
 
-std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStream& parser,
-                                                             unsigned columns_number,
-                                                             unsigned tuples_number,
-                                                             double c_sample, double r_sample) {
-    if (columns_number == 0 || tuples_number == 0) {
-        return CFDRelationData::CreateFrom(parser, c_sample, r_sample);
-    }
-
-    // Fields of CFDRelationData class
-    auto schema = std::make_unique<RelationalSchema>(parser.GetRelationName());
     std::vector<Transaction> data_rows;
-    ItemDictionary item_dictionary;
     std::vector<ItemInfo> items;
-    ColumnsValuesDict columns_values_dict;
-    int unique_elems_number = 1;
 
-    unsigned num_columns = parser.GetNumberOfColumns();
-    std::vector<std::string> line;
-    num_columns = std::min(num_columns, columns_number);
-    std::vector<std::string> string_row(num_columns);
-    while (parser.HasNextRow() && data_rows.size() < tuples_number) {
-        line = parser.GetNextRow();
-        std::vector<int> int_row(num_columns);
-        for (size_t k = 0; k < num_columns; k++) {
-            string_row[k] = line[k];
+    std::vector<std::string> row;
+    int next_value_id = 1;
+
+    while (data_stream.HasNextRow()) {
+        row = data_stream.GetNextRow();
+
+        if (row.size() != num_columns) {
+            LOG_WARN(
+                    "Unexpected number of columns for a row, "
+                    "skipping (expected {}, got {})",
+                    num_columns, row.size());
+            continue;
         }
 
-        AddNewItemsInFullTable(item_dictionary, columns_values_dict, items, string_row, int_row,
-                               data_rows, unique_elems_number, num_columns);
+        std::vector<int> row_data(num_columns);
+
+        for (size_t index = 0; index < num_columns; ++index) {
+            auto [it, inserted] = item_dictionaries[index].try_emplace(row[index], next_value_id);
+
+            if (inserted) {
+                items.emplace_back(std::move(row[index]), index);
+                columns_values[index].push_back(next_value_id++);
+            }
+
+            row_data[index] = it->second;
+            items[it->second - 1].frequency++;
+        }
+        data_rows.push_back(std::move(row_data));
     }
 
     std::vector<CFDColumnData> column_data;
-    for (AttributeIndex i = 0; static_cast<size_t>(i) < num_columns; ++i) {
-        auto column = Column(schema.get(), parser.GetColumnName(i), i);
+    for (size_t i = 0; i < num_columns; ++i) {
+        auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
-        column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
-    }
-
-    return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data),
-                                             std::move(data_rows), std::move(item_dictionary),
-                                             std::move(items));
-}
-
-void CFDRelationData::AddNewItemsInPartialTable(ItemDictionary& item_dictionary,
-                                                ColumnsValuesDict& columns_values_dict,
-                                                std::vector<ItemInfo>& items,
-                                                std::vector<std::string> const& string_row,
-                                                std::vector<int> const& columns_numbers_list,
-                                                std::vector<Transaction>& data_rows,
-                                                int& unique_elems_number, int size) {
-    std::vector<int> int_row(size);
-    AttributeIndex j = 0;
-    int it;
-    for (size_t i = 0; i < string_row.size(); i++) {
-        if (!std::binary_search(columns_numbers_list.begin(), columns_numbers_list.end(), i)) {
-            continue;
-        }
-        auto ptr = item_dictionary.find(std::make_pair(j, string_row[i]));
-        if (ptr != item_dictionary.end()) {
-            it = ptr->second;
-        } else {
-            items.emplace_back(string_row[i], j);
-            columns_values_dict[j].push_back(unique_elems_number);
-            item_dictionary[std::make_pair(j, string_row[i])] = unique_elems_number;
-            it = unique_elems_number++;
-        }
-        items[it - 1].frequency++;
-        int_row[j] = it;
-        j++;
-    }
-    if (j > 0) {
-        data_rows.push_back(int_row);
-    }
-}
-
-std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStream& file_input,
-                                                             double c_sample, double r_sample) {
-    // Fields of CFDRelationData class
-    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName());
-    std::vector<Transaction> data_rows;
-    ItemDictionary item_dictionary;
-    std::vector<ItemInfo> items;
-    ColumnsValuesDict columns_values_dict;
-    int unique_elems_number = 1;
-    std::random_device rd;   // only used once to initialise (seed) engine
-    std::mt19937 rng(rd());  // random-number engine used (Mersenne-Twister in this case)
-    std::uniform_real_distribution<double> uni(0.0, 1.0);  // guaranteed unbiased
-    int num_columns = static_cast<int>(file_input.GetNumberOfColumns());
-    std::vector<std::string> line;
-    std::vector<int> columns_numbers_list = Range(0, num_columns);
-    int size = static_cast<int>(static_cast<double>(columns_numbers_list.size()) * c_sample);
-    Shuffle(columns_numbers_list);
-    columns_numbers_list =
-            std::vector<int>(columns_numbers_list.begin(), columns_numbers_list.begin() + size);
-    std::sort(columns_numbers_list.begin(), columns_numbers_list.end());
-    while (file_input.HasNextRow()) {
-        if (uni(rng) >= r_sample) {
-            continue;
-        }
-        line = file_input.GetNextRow();
-
-        AddNewItemsInPartialTable(item_dictionary, columns_values_dict, items, line,
-                                  columns_numbers_list, data_rows, unique_elems_number, size);
-    }
-
-    std::vector<CFDColumnData> column_data;
-    for (AttributeIndex i = 0; i < num_columns; ++i) {
-        auto column = Column(schema.get(), file_input.GetColumnName(i), i);
-        schema->AppendColumn(std::move(column));
-        column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
+        column_data.emplace_back(schema->GetColumn(i), std::move(columns_values[i]),
+                                 std::move(item_dictionaries[i]));
     }
     return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data),
-                                             std::move(data_rows), std::move(item_dictionary),
-                                             std::move(items));
-}
-
-unsigned CFDRelationData::Size() const {
-    return data_rows_.size();
+                                             std::move(data_rows), std::move(items));
 }
 
 unsigned CFDRelationData::GetAttrsNumber() const {
@@ -204,25 +111,10 @@ int CFDRelationData::GetAttr(std::string const& s) const {
 }
 
 int CFDRelationData::GetItem(int attr, std::string const& str_value) const {
-    auto it = item_dictionary_.find(std::make_pair(attr, str_value));
-    if (it != item_dictionary_.end()) {
-        return it->second;
-    } else {
-        return -1;
-    }
-}
+    auto const& item_dict = column_data_.at(attr).GetValueDict();
+    auto it = item_dict.find(str_value);
 
-void CFDRelationData::Sort() {
-    std::sort(data_rows_.begin(), data_rows_.end(),
-              [](std::vector<int> const& a, std::vector<int> const& b) {
-                  return std::lexicographical_compare(a.begin(), b.begin(), a.end(), b.end());
-              });
-}
-
-void CFDRelationData::ToFront(SimpleTIdList const& tids) {
-    for (size_t i = 0; i < tids.size(); i++) {
-        std::swap(data_rows_[i], data_rows_[tids[i]]);
-    }
+    return it != item_dict.end() ? it->second : -1;
 }
 
 unsigned CFDRelationData::Frequency(int i) const {

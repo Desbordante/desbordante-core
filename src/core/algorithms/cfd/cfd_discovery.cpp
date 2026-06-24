@@ -17,11 +17,11 @@ namespace algos::cfd {
 CFDDiscovery::CFDDiscovery() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kTable, kCfdColumnsNumber, kCfdTuplesNumber});
+    MakeOptionsAvailable({kTable});
 }
 
 void CFDDiscovery::LoadDataInternal() {
-    relation_ = CFDRelationData::CreateFrom(*input_table_, columns_number_, tuples_number_);
+    relation_ = CFDRelationData::CreateFrom(*input_table_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty .csv file: CFD mining is meaningless.");
@@ -37,12 +37,6 @@ void CFDDiscovery::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&columns_number_, kCfdColumnsNumber, kDCfdColumnsNumber, 0u});
-    RegisterOption(Option{&tuples_number_, kCfdTuplesNumber, kDCfdTuplesNumber, 0u});
-}
-
-int CFDDiscovery::NrCfds() const {
-    return (int)cfd_list_.size();
 }
 
 ItemsetCFDList const& CFDDiscovery::GetItemsetCfds() const {
