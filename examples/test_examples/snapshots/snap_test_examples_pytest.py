@@ -1754,6 +1754,199 @@ confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
 
 
 '''
+snapshots['test_example[basic/mining_cfun.py-None-mining_cfun_output] mining_cfun_output'] = '''================================================================================
+\x1b[1;36mDiscovering Frequent Constant CFDs with CFUN\x1b[0m
+================================================================================
+This example demonstrates how to discover constant conditional functional
+dependencies in data using the CFUN algorithm from the paper T. Diallo,
+N.Novelli, J.-M. Petit. Discovering (frequent) constant conditional
+functionaldependencies. Int. J. Data Mining, Modelling and Management, 2010. It
+also shows canonical-cover intuition and a simple data-quality application.
+
+\x1b[1;33m>>> Definition (FD).\x1b[0m
+A functional dependency (FD) X -> A is defined on table attributes, where X is a
+set of attribute(s) and A is an attribute. It means: if two rows agree on X,
+they must agree on A.
+
+Example: Disease -> Department
+Meaning: if two rows have the same Disease, they must have the same Department.
+
+\x1b[1;33m>>> Definition (constant CFD).\x1b[0m
+A constant CFD is a FD rule X -> A and a pattern tableau (table of patterns).
+Each pattern row contains values of the attributes from X and A. This tableau
+defines where the FD is applied: among rows matching a pattern on X, the value
+of A is fixed.
+
+Example: [Disease] -> Department with patterns
+  .Flu.| (Therapy)
+  .Fracture.| (Orthopedics)
+Meaning: for rows with Disease=Flu, Department should be Therapy; for rows with
+Disease=Fracture, Department should be Orthopedics.
+
+\x1b[1;33m>>> CFD metrics: support (or frequency).\x1b[0m
+For a constant CFD, support is the number of tuples that match all constants in
+its pattern. CFUN returns only dependencies whose patterns satisfy the support
+threshold cfd_minsup.
+
+\x1b[1;33m>>> Canonical cover.\x1b[0m
+A canonical cover is a compact equivalent set of dependencies: rules are non-
+redundant and left-reduced, but together they preserve the same implications on
+the data. In practice this means we expect minimal rules and no obvious
+supersets with the same meaning. CFUN targets this frequent constant CFD cover,
+i.e., the most general and frequent rules in the data.
+
+Simple example: if the algorithm finds [Contract Region] -> Queue,
+it marks [Segment Contract Region] -> Queue as redundant and drops it.
+
+\x1b[1;33m>>> Dataset description.\x1b[0m
+Consider synthetic queue-routing log with 12 tickets. Each row is one support
+request. Segment is customer type (Retail/Enterprise), Contract is billing cycle
+(Monthly/Annual), Region is geography (EU/US), SLA is service tier
+(Standard/Premium), Queue is the team that handled the ticket (Queue-A/Queue-B).
+
+Training dataset:
++------------+------------+----------+----------+---------+
+| Segment    | Contract   | Region   | SLA      | Queue   |
+|------------+------------+----------+----------+---------|
+| Retail     | Monthly    | EU       | Standard | Queue-A |
+| Retail     | Monthly    | EU       | Standard | Queue-A |
+| Retail     | Monthly    | US       | Premium  | Queue-B |
+| Retail     | Monthly    | US       | Standard | Queue-B |
+| Enterprise | Annual     | EU       | Premium  | Queue-A |
+| Enterprise | Annual     | EU       | Premium  | Queue-A |
+| Enterprise | Annual     | US       | Premium  | Queue-B |
+| Enterprise | Annual     | US       | Premium  | Queue-B |
+| Retail     | Annual     | EU       | Premium  | Queu-A  |
+| Retail     | Annual     | US       | Standard | Queue-A |
+| Enterprise | Monthly    | EU       | Premium  | Queue-A |
+| Enterprise | Monthly    | US       | Premium  | Queue-B |
++------------+------------+----------+----------+---------+
+
+================================================================================
+\x1b[1;36mScenario 1. Mining a canonical cover with low support threshold\x1b[0m
+================================================================================
+At a relatively low support threshold (cfd_minsup = 2), the algorithm finds 20
+CFDs. Below are a few examples:
+
+CFD #1: [Contract Region] -> Queue
+Pattern tableau:
++------------+----------+---------+-----------+
+| Contract   | Region   | Queue   |   support |
+|------------+----------+---------+-----------|
+| Monthly    | EU       | Queue-A |         3 |
+| Monthly    | US       | Queue-B |         3 |
++------------+----------+---------+-----------+
+
+This CFD reflects a stable routing policy: once contract type and region are
+fixed, the ticket should consistently go to a single operational queue. In the
+mined patterns here, Monthly+EU routes to Queue-A and Monthly+US routes to
+Queue-B. In practice, this rule helps detect misrouted requests and drift in
+triage logic.
+
+
+CFD #2: [Contract Queue] -> Segment
+Pattern tableau:
++------------+---------+------------+-----------+
+| Contract   | Queue   | Segment    |   support |
+|------------+---------+------------+-----------|
+| Annual     | Queue-B | Enterprise |         2 |
++------------+---------+------------+-----------+
+
+This CFD shows a conditional customer-mix pattern: for specific contract and
+queue combinations, the segment is fixed. In the mined patterns here,
+Annual+Queue-B maps to Enterprise. This can help detect when requests arrive in
+a queue with an unexpected segment.
+
+
+CFD #3: [Segment] -> SLA
+Pattern tableau:
++------------+---------+-----------+
+| Segment    | SLA     |   support |
+|------------+---------+-----------|
+| Enterprise | Premium |         6 |
++------------+---------+-----------+
+
+This CFD expresses a service-policy pattern: customer segment is associated with
+a consistent SLA tier. In the mined patterns here, Enterprise maps to Premium.
+It helps verify whether prioritization rules are applied uniformly and can
+highlight records where support level assignment looks suspicious.
+
+
+================================================================================
+\x1b[1;36mScenario 2. Increasing support threshold\x1b[0m
+================================================================================
+The number of discovered dependencies strongly depends on cfd_minsup. With a
+smaller support threshold, the algorithm tends to find more weak local rules. As
+the threshold increases, fewer CFDs pass support, so the output becomes smaller
+and keeps mostly stronger, more frequent patterns.
+
+Support threshold impact:
++--------------+-------------------+---------------+
+|   cfd_minsup |   discovered_cfds |   avg_support |
+|--------------+-------------------+---------------|
+|            1 |                35 |          2.54 |
+|            2 |                20 |          3.35 |
+|            3 |                12 |          4.08 |
+|            4 |                 4 |          4.75 |
++--------------+-------------------+---------------+
+
+================================================================================
+\x1b[1;36mScenario 3. Missing expected business CFD and typo discovery\x1b[0m
+================================================================================
+Assume we expect the following business rule to hold in your dataset: routing
+should be region-specific, i.e., EU tickets should go to Queue-A and US tickets
+should go to Queue-B. This rule can be expressed as the CFD rule
+
+CFD: [Region] -> Queue
+
+Pattern tableau:
++----------+------------------+
+| Region   | Expected_Queue   |
+|----------+------------------|
+| EU       | Queue-A          |
+| US       | Queue-B          |
++----------+------------------+
+
+We mine CFDs with cfd_minsup=2 and check whether this rule appears in the
+discovered set.
+
+Mined CFDs at cfd_minsup=2 do not contain [Region] -> Queue.
+
+To detect violating rows, we validate concrete CFD rules with the
+cfd_verification module.
+
+CFD verification results:
++--------------------------------------------+---------+-----------+------------------+
+| rule                                       | holds   |   support |   violating_rows |
+|--------------------------------------------+---------+-----------+------------------|
+| [('Region', 'EU')] -> ('Queue', 'Queue-A') | False   |         6 |                1 |
+| [('Region', 'US')] -> ('Queue', 'Queue-B') | False   |         6 |                1 |
++--------------------------------------------+---------+-----------+------------------+
+
+Rows violating expected CFD:
++-------+----------+---------+
+|   Row | Region   | Queue   |
+|-------+----------+---------|
+|     9 | EU       | Queu-A  |
+|    10 | US       | Queue-A |
++-------+----------+---------+
+
+Explanation:
+
+Row 9: Likely typo: expected Queue-A, got Queu-A (missing letter 'e').
+
+Row 10: Different routing direction: for US expected Queue-B, but got Queue-A.
+This can be a typo or an upstream routing error.
+
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+  * examples/basic/mining_cfd.py
+  * examples/basic/verifying_cfd.py
+  * examples/basic/mining_cind.py
+  * examples/basic/verifying_cind.py
+'''
 
 snapshots['test_example[basic/mining_cind_1.py-None-mining_cind_1_output] mining_cind_1_output'] = '''================================================================================
 \x1b[1;36mDiscovering Conditional Inclusion Dependencies (CINDs)\x1b[0m
