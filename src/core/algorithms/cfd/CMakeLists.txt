@@ -15,7 +15,7 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::cfd::util ${DESBORDANTE_PREFIX}::model::table
-                    Boost::headers
+                    spdlog::spdlog_header_only Boost::headers
 )
 
 set(NAME cfd)

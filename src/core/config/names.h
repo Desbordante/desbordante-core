@@ -32,14 +32,12 @@ constexpr auto kTIdColumnIndex = "tid_column_index";
 constexpr auto kArLhsRule = "lhs_rule";
 constexpr auto kArRhsRule = "rhs_rule";
 // CFD
-constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
 constexpr auto kCfdMinimumConfidence = "cfd_minconf";
 constexpr auto kCfdMinimumSupport = "cfd_minsup";
 constexpr auto kCFDRuleLeft = "cfd_rule_left";
 constexpr auto kCFDRuleRight = "cfd_rule_right";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
-constexpr auto kCfdTuplesNumber = "tuples_number";
 // CORDS
 constexpr auto kDelta = "delta";
 constexpr auto kFixedSample = "fixed_sample";
