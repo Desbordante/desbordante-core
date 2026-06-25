@@ -21,10 +21,12 @@ struct PFDTaneMiningParams {
     unsigned int result_hash;
 
     PFDTaneMiningParams(unsigned int result_hash, config::ErrorType error,
-                        algos::PfdErrorMeasure error_measure, CSVConfig const& csv_config)
+                        algos::PfdErrorMeasure error_measure, CSVConfig const& csv_config,
+                        bool use_pliws = false)
         : params({{onam::kCsvConfig, csv_config},
                   {onam::kError, error},
-                  {onam::kPfdErrorMeasure, error_measure}}),
+                  {onam::kPfdErrorMeasure, error_measure},
+                  {onam::kUsePliws, use_pliws}}),
           result_hash(result_hash) {}
 };
 
@@ -64,11 +66,17 @@ INSTANTIATE_TEST_SUITE_P(
         PFDTaneTestMiningSuite, TestPFDTaneMining,
         ::testing::Values(
                 PFDTaneMiningParams(44381, 0.3, algos::PfdErrorMeasure::kPerValue, kTestFD),
+                PFDTaneMiningParams(44381, 0.3, algos::PfdErrorMeasure::kPerValue, kTestFD, true),
                 PFDTaneMiningParams(19266, 0.1, algos::PfdErrorMeasure::kPerValue, kIris),
+                PFDTaneMiningParams(19266, 0.1, algos::PfdErrorMeasure::kPerValue, kIris, true),
                 PFDTaneMiningParams(10695, 0.01, algos::PfdErrorMeasure::kPerValue, kIris),
+                PFDTaneMiningParams(10695, 0.01, algos::PfdErrorMeasure::kPerValue, kIris, true),
                 PFDTaneMiningParams(44088, 0.1, algos::PfdErrorMeasure::kPerValue, kNeighbors10k),
-                PFDTaneMiningParams(41837, 0.01, algos::PfdErrorMeasure::kPerValue,
-                                    kNeighbors10k)));
+                PFDTaneMiningParams(44088, 0.1, algos::PfdErrorMeasure::kPerValue, kNeighbors10k,
+                                    true),
+                PFDTaneMiningParams(41837, 0.01, algos::PfdErrorMeasure::kPerValue, kNeighbors10k),
+                PFDTaneMiningParams(41837, 0.01, algos::PfdErrorMeasure::kPerValue, kNeighbors10k,
+                                    true)));
 
 INSTANTIATE_TEST_SUITE_P(
         PFDTaneTestValidationSuite, TestPFDTaneValidation,

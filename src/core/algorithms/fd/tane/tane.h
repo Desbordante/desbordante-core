@@ -13,9 +13,10 @@ private:
     AfdErrorMeasure afd_error_measure_ = AfdErrorMeasure::kG1;
     void MakeExecuteOptsAvailableFDInternal() override final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) override;
-    config::ErrorType CalculateFdError(model::PLIWithSingletons const* lhs_pli,
-                                       model::PLIWithSingletons const* rhs_pli,
-                                       model::PLIWithSingletons const* joint_pli) override;
+    config::ErrorType CalculateFdError(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                       model::PLI const* joint_pli) override;
+    config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
+                                       model::PLIWS const* joint_pli) override;
 
 public:
     Tane();

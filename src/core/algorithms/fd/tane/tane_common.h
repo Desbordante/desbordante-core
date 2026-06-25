@@ -13,6 +13,7 @@ class TaneCommon : public PliBasedFDAlgorithm {
 protected:
     config::ErrorType max_fd_error_;
     config::ErrorType max_ucc_error_;
+    bool use_pliws_ = false;
 
 private:
     void ResetStateFd() final {}
@@ -21,6 +22,9 @@ private:
     void ComputeDependencies(model::LatticeLevel* level);
     unsigned long long ExecuteInternal() final;
     virtual config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) = 0;
+    virtual config::ErrorType CalculateFdError(model::PLI const* lhs_pli,
+                                               [[maybe_unused]] model::PLI const* rhs_pli,
+                                               model::PLI const* joint_pli) = 0;
     virtual config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli,
                                                [[maybe_unused]] model::PLIWS const* rhs_pli,
                                                model::PLIWS const* joint_pli) = 0;

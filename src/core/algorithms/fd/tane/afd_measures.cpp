@@ -8,7 +8,7 @@ config::ErrorType CalculateZeroAryG1(ColumnData const* rhs, unsigned long long n
                        static_cast<config::ErrorType>(num_tuple_pairs);
 }
 
-config::ErrorType CalculateG1Error(model::PLIWS const* lhs_pli, model::PLIWS const* joint_pli,
+config::ErrorType CalculateG1Error(model::PLI const* lhs_pli, model::PLI const* joint_pli,
                                    unsigned long long num_tuple_pairs) {
     return static_cast<config::ErrorType>((lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
                                           static_cast<config::ErrorType>(num_tuple_pairs));
@@ -102,7 +102,7 @@ config::ErrorType CalculateMuPlusMeasure(model::PLIWS const* x_pli, model::PLIWS
     return mu_plus;
 }
 
-config::ErrorType CalculateRhoMeasure(model::PLIWS const* x_pli, model::PLIWS const* xa_pli) {
+config::ErrorType CalculateRhoMeasure(model::PLI const* x_pli, model::PLI const* xa_pli) {
     auto calculate_dom = [](model::PositionListIndex const* pli) {
         auto index = pli->GetIndex();
         size_t dom = index.size();
