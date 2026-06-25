@@ -26,25 +26,26 @@ void FDFirstAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     auto check_conf = [](double val) {
-        if (val <= 0 || val > 1) {
+        if (val < 0 || val > 1) {
             throw config::ConfigurationError("Minimum confidence must be a value between (0,1].");
         }
     };
     auto check_supp = [this](unsigned int val) {
         if (val == 0) {
-            throw config::ConfigurationError("Minimum support must be more than 0.");
+            throw config::ConfigurationError("Minimum support must be greater than 0.");
         } else if (val > relation_->GetNumRows()) {
             throw config::ConfigurationError(
-                    "Minimum support must be less than or equal to the number of tuples.");
+                    "Minimum support must be less than or equal to the number of tuples (" +
+                    std::to_string(relation_->GetNumRows()) + ").");
         }
     };
     auto check_lhs = [](unsigned int val) {
         if (val == 0) {
-            throw config::ConfigurationError("Maximum LHS size must be more than 0.");
+            throw config::ConfigurationError("Maximum LHS size must be greater than 0.");
         }
     };
 
-    RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u}.SetValueCheck(
+    RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 1u}.SetValueCheck(
             std::move(check_supp)));
     RegisterOption(
             Option{&min_conf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0}.SetValueCheck(

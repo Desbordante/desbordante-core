@@ -111,7 +111,7 @@ int CFDRelationData::GetAttr(std::string const& s) const {
 }
 
 int CFDRelationData::GetItem(int attr, std::string const& str_value) const {
-    auto const& item_dict = column_data_.at(attr).GetValueDict();
+    auto const& item_dict = column_data_[attr].GetValueDict();
     auto it = item_dict.find(str_value);
 
     return it != item_dict.end() ? it->second : -1;
