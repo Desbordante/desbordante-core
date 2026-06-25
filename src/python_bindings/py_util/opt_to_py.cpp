@@ -13,6 +13,7 @@
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
+#include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/type.h"
@@ -54,6 +55,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<model::InputFormatType>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
+        enum_conv_pair<algos::des::DifferentialStrategy>,
         enum_conv_pair<algos::od::Ordering>};
 }  // namespace
 
