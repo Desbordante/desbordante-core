@@ -80,7 +80,7 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
 }
 
 TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
-    auto algorithm = CreateAlgorithmInstance(kMushroom, 4, 0.9, algos::cfd::Substrategy::kDfs, 4);
+    auto algorithm = CreateAlgorithmInstance(kMushroom50, 4, 0.9, algos::cfd::Substrategy::kDfs, 4);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
     for (auto const& cfd : algorithm->GetItemsetCfds()) {
