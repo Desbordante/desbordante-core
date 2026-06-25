@@ -19,6 +19,7 @@
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
+#include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
@@ -97,6 +98,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<algos::hymd::LevelDefinition, kPyStr>,
             PyTypePair<algos::od::Ordering, kPyStr>,
+            PyTypePair<algos::des::DifferentialStrategy, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
             {typeid(algos::hymd::HyMD::ColumnMatches),
              []() {

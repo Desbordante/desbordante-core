@@ -22,6 +22,7 @@
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
+#include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -217,6 +218,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::od::Ordering>,
         kEnumConvPair<algos::cind::CondType>,
         kEnumConvPair<algos::cind::AlgoType>,
+        kEnumConvPair<algos::des::DifferentialStrategy>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(std::shared_ptr<model::ISequenceStream>), SequenceStreamToAny},
