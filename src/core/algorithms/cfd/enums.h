@@ -2,9 +2,11 @@
 
 #include <magic_enum/magic_enum.hpp>
 
+#include "core/util/export.h"
+
 namespace algos::cfd {
 
-enum class Substrategy : char {
+enum class DESBORDANTE_EXPORT Substrategy : char {
     kDfs = 0,  // dfs lattice traversal
     kBfs       // bfs lattice traversal
 };

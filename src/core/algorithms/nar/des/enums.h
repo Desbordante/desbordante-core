@@ -2,8 +2,10 @@
 
 #include <magic_enum/magic_enum.hpp>
 
+#include "core/util/export.h"
+
 namespace algos::des {
-enum class DifferentialStrategy : char {
+enum class DESBORDANTE_EXPORT DifferentialStrategy : char {
     kRand1Bin = 0,
     kRand1Exp,
     kRandToBest1Exp,

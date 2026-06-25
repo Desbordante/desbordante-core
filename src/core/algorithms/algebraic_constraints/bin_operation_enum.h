@@ -2,9 +2,11 @@
 
 #include <magic_enum/magic_enum.hpp>
 
+#include "core/util/export.h"
+
 namespace algos {
 
-enum class Binop : char {
+enum class DESBORDANTE_EXPORT Binop : char {
     kAddition = '+',
     kSubtraction = '-',
     kMultiplication = '*',

@@ -2,9 +2,11 @@
 
 #include <magic_enum/magic_enum.hpp>
 
+#include "core/util/export.h"
+
 namespace algos::metric {
 
-enum class Metric : char {
+enum class DESBORDANTE_EXPORT Metric : char {
     kEuclidean = 0, /* Standard metric for calculating the distance between
                      * numeric values */
     kLevenshtein,   /* Levenshtein distance between strings */
@@ -13,7 +15,7 @@ enum class Metric : char {
 
 };
 
-enum class MetricAlgo : char {
+enum class DESBORDANTE_EXPORT MetricAlgo : char {
     kBrute = 0, /* Brute force algorithm. Calculates distance between all possible pairs
                  * of values and compares them with parameter */
     kApprox,    /* 2-approximation linear time algorithm, which makes a prediction
