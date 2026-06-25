@@ -4,6 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "core/algorithms/dc/FastADC/fastadc.h"
 #include "core/algorithms/dc/FastADC/misc/misc.h"
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"
@@ -14,6 +15,9 @@
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_organizer.h"
+#include "core/algorithms/dc/HybridDC/hybrid_dc.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/create_type.h"
 #include "core/model/types/int_type.h"
@@ -572,6 +576,47 @@ TEST_F(FastADC, DenialConstraints) {
         std::string dc = std::next(ordered_result.begin(), i)->ToString();
         EXPECT_EQ(dc, expected_denial_constraints[i]) << "Unexpected denial constraint: " << dc;
     }
+}
+
+TEST(HybridDCTest, TestDC2Exact) {
+    auto table_stream = std::make_shared<CSVParser>(kTestDC2);
+
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.0);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+
+    EXPECT_EQ(algo.GetDCs().size(), 603u);
+    std::cout << "HybridDC(HEI-P) found " << algo.GetDCs().size() << " denial constraints\n";
+}
+
+TEST(HybridDCTest, TestDC2Approx) {
+    auto table_stream = std::make_shared<CSVParser>(kTestDC2);
+
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.01);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+
+    EXPECT_EQ(algo.GetDCs().size(), 345u);
+    std::cout << "HybridDC(AEI, threshold=0.01) found " << algo.GetDCs().size()
+              << " denial constraints\n";
 }
 
 }  // namespace tests

@@ -1,7 +1,8 @@
-#include "core/algorithms/dc/FastADC/fastadc.h"
+#include "core/algorithms/dc/HybridDC/hybrid_dc.h"
 
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <stdexcept>
 #include <vector>
 
@@ -10,7 +11,9 @@
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
-#include "core/config/names_and_descriptions.h"
+#include "core/algorithms/dc/HybridDC/hei_inverter.h"
+#include "core/config/descriptions.h"
+#include "core/config/names.h"
 #include "core/config/option.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -19,13 +22,13 @@
 
 namespace algos::dc {
 
-FastADC::FastADC() : Algorithm() {
+HybridDC::HybridDC() : Algorithm() {
     pred_index_provider_ = std::make_shared<PredicateIndexProvider>();
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
-void FastADC::RegisterOptions() {
+void HybridDC::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     config::InputTable default_table;
@@ -36,18 +39,18 @@ void FastADC::RegisterOptions() {
     RegisterOption(Option{&minimum_shared_value_, kMinimumSharedValue, kDMinimumSharedValue, 0.3});
     RegisterOption(
             Option{&comparable_threshold_, kComparableThreshold, kDComparableThreshold, 0.1});
-    RegisterOption(Option{&evidence_threshold_, kEvidenceThreshold, kDEvidenceThreshold, 0.01});
+    RegisterOption(Option{&evidence_threshold_, kEvidenceThreshold, kDEvidenceThreshold, 0.0});
     RegisterOption(Option{&threads_, kThreads, kDThreads, 1U});
 }
 
-void FastADC::MakeExecuteOptsAvailable() {
+void HybridDC::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
     MakeOptionsAvailable({kShardLength, kAllowCrossColumns, kMinimumSharedValue,
                           kComparableThreshold, kEvidenceThreshold, kThreads});
 }
 
-util::WorkerThreadPool* FastADC::GetThreadPool() {
+util::WorkerThreadPool* HybridDC::GetThreadPool() {
     if (threads_ <= 1) {
         thread_pool_.reset();
         return nullptr;
@@ -59,8 +62,7 @@ util::WorkerThreadPool* FastADC::GetThreadPool() {
     return &*thread_pool_;
 }
 
-void FastADC::LoadDataInternal() {
-    // kMixed type will be treated as a string type
+void HybridDC::LoadDataInternal() {
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, true, true);
 
     if (typed_relation_->GetColumnData().empty()) {
@@ -68,7 +70,7 @@ void FastADC::LoadDataInternal() {
     }
 }
 
-void FastADC::SetLimits() {
+void HybridDC::SetLimits() {
     unsigned all_rows_num = typed_relation_->GetNumRows();
 
     if (shard_length_ > all_rows_num) {
@@ -81,7 +83,7 @@ void FastADC::SetLimits() {
     if (shard_length_ == 0) shard_length_ = all_rows_num;
 }
 
-void FastADC::CheckTypes() {
+void HybridDC::CheckTypes() {
     model::ColumnIndex columns_num = typed_relation_->GetNumColumns();
     unsigned rows_num = typed_relation_->GetNumRows();
 
@@ -109,13 +111,7 @@ void FastADC::CheckTypes() {
     }
 }
 
-void FastADC::PrintResults() {
-    LOG_DEBUG("Total denial constraints: {}", dcs_.TotalDCSize());
-    LOG_DEBUG("Minimal denial constraints: {}", dcs_.MinDCSize());
-    LOG_DEBUG("{}", dcs_.ToString());
-}
-
-unsigned long long FastADC::ExecuteInternal() {
+unsigned long long HybridDC::ExecuteInternal() {
     LOG_DEBUG("Start");
 
     SetLimits();
@@ -143,31 +139,58 @@ unsigned long long FastADC::ExecuteInternal() {
     auto const evi_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::system_clock::now() - evi_start)
                                 .count();
-    fprintf(stderr, "[FastADC] Evidence time: %lldms\n", static_cast<long long>(evi_ms));
+    fprintf(stderr, "[HybridDC] Evidence time: %lldms\n", static_cast<long long>(evi_ms));
+
+    if (char const* dump = std::getenv("PREDICATE_DUMP")) {
+        FILE* f = fopen(dump, "w");
+        if (f) {
+            auto const& objects = pred_index_provider_->GetObjects();
+            for (size_t i = 0; i < objects.size(); ++i) {
+                fprintf(f, "%zu\t%s\n", i, objects[i]->ToString().c_str());
+            }
+            fclose(f);
+        }
+    }
+
+    if (char const* dump = std::getenv("EVIDENCE_DUMP")) {
+        FILE* f = fopen(dump, "w");
+        if (f) {
+            for (auto const& ev : evidence_set_builder.evidence_set) {
+                bool first = true;
+                for (size_t i = ev.evidence._Find_first(); i < ev.evidence.size();
+                     i = ev.evidence._Find_next(i)) {
+                    if (!first) fprintf(f, " ");
+                    fprintf(f, "%zu", i);
+                    first = false;
+                }
+                fprintf(f, "\n");
+            }
+            fclose(f);
+        }
+    }
 
     auto const inv_start = std::chrono::system_clock::now();
 
-    ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
-                                     std::move(evidence_set_builder.evidence_set),
-                                     typed_relation_->GetSharedPtrSchema());
-
-    dcs_ = dcbuilder.BuildDenialConstraints();
+    if (evidence_threshold_ == 0.0) {
+        size_t n_predicates = predicate_builder.PredicateCount();
+        auto mutex_map = predicate_builder.TakeMutexMap();
+        HEIInverter hei_inverter(n_predicates, mutex_map, pred_index_provider_,
+                                 typed_relation_->GetSharedPtrSchema(), threads_);
+        dcs_ = hei_inverter.Run(evidence_set_builder.evidence_set);
+    } else {
+        ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
+                                         std::move(evidence_set_builder.evidence_set),
+                                         typed_relation_->GetSharedPtrSchema());
+        dcs_ = dcbuilder.BuildDenialConstraints().ObtainResult();
+    }
 
     auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::system_clock::now() - inv_start)
                                 .count();
-    fprintf(stderr, "[FastADC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
-    fprintf(stderr, "[FastADC] Total computing time: %lldms\n",
+    fprintf(stderr, "[HybridDC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
+    fprintf(stderr, "[HybridDC] Total computing time: %lldms\n",
             static_cast<long long>(evi_ms + inv_ms));
-
-    PrintResults();
-
     return evi_ms + inv_ms;
-}
-
-// TODO: mb make this a list?
-std::vector<DenialConstraint> const& FastADC::GetDCs() const {
-    return dcs_.GetResult();
 }
 
 }  // namespace algos::dc

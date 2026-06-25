@@ -94,6 +94,9 @@ double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData 
     }
 
     if (avg1 == 0.0 && avg2 == 0.0) {
+        return 1.0;
+    }
+    if (avg1 <= 0.0 || avg2 <= 0.0) {
         return 0.0;
     }
 
