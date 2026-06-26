@@ -1,45 +1,12 @@
 #pragma once
 
-#include "core/model/table/relational_schema.h"
 #include "core/model/table/vertical.h"
-
-class CustomHashing {
-private:
-    enum class BitsetHashingMethod { kTryConvertToUlong, kTrimAndConvertToUlong };
-
-    static constexpr BitsetHashingMethod kDefaultHashingMethod =
-#ifdef DESBORDANTE_SAFE_VERTICAL_HASHING
-            BitsetHashingMethod::kTrimAndConvertToUlong;
-#else
-            BitsetHashingMethod::kTryConvertToUlong;
-#endif
-
-    template <auto BitsetHashingMethod = kDefaultHashingMethod>
-    static size_t BitsetHash(boost::dynamic_bitset<> const& bitset);
-
-    friend std::hash<Vertical>;
-    friend std::hash<Column>;
-};
-
-template <>
-inline size_t CustomHashing::BitsetHash<CustomHashing::BitsetHashingMethod::kTryConvertToUlong>(
-        boost::dynamic_bitset<> const& bitset) {
-    return bitset.to_ulong();
-}
-
-template <>
-inline size_t CustomHashing::BitsetHash<CustomHashing::BitsetHashingMethod::kTrimAndConvertToUlong>(
-        boost::dynamic_bitset<> const& bitset) {
-    boost::dynamic_bitset<> copy_bitset = bitset;
-    copy_bitset.resize(std::numeric_limits<unsigned long>::digits);
-    return copy_bitset.to_ulong();
-}
 
 namespace std {
 template <>
 struct hash<Vertical> {
     size_t operator()(Vertical const& k) const {
-        return CustomHashing::BitsetHash(k.GetColumnIndicesRef());
+        return hash_value(k.GetColumnIndicesRef());
     }
 };
 

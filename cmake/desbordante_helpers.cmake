@@ -8,10 +8,6 @@ set(DESBORDANTE_PREFIX
 set(NAME "${DESBORDANTE_PREFIX}.compile_feats")
 add_library(${NAME} INTERFACE)
 target_compile_features(${NAME} INTERFACE cxx_std_20)
-target_compile_definitions(
-    ${NAME}
-    INTERFACE $<$<BOOL:${DESBORDANTE_SAFE_VERTICAL_HASHING}>:DESBORDANTE_SAFE_VERTICAL_HASHING>
-)
 
 #[=[
     Brief
