@@ -59,14 +59,6 @@ option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
 option(DESBORDANTE_FETCH_DATASETS "Fetch datasets for tests or benchmarks" ON)
 option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
 option(DESBORDANTE_CI_REDUCED_DEBUG_INFO "Use reduced debug info intended for CI builds" OFF)
-# ---- Vertical Hashing Optimization ----
-# Performance/functionality trade-off:
-# - Disabled by default for maximum performance
-# - Enabled for wide datasets (>32 columns) with potential performance penalty
-option(DESBORDANTE_SAFE_VERTICAL_HASHING
-       "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
-       at the cost of reduced performance. Recommended for exploratory data analysis." ON
-)
 option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
 
