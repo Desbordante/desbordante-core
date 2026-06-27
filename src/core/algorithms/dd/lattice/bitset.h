@@ -68,6 +68,30 @@ inline void reset(Bitset& b, std::size_t i) {
     });
 }
 
+inline void clear_bitset(Bitset& b) {
+    visit_bits(b, [](auto& x) {
+        using T = std::decay_t<decltype(x)>;
+
+        if constexpr (std::is_same_v<T, SmallBits>)
+            x = 0;
+        else
+            x.reset();
+    });
+}
+
+inline Bitset bit_and(Bitset&& a, Bitset const& b) {
+    visit_bits(a, [&](auto& x) {
+        using T = std::decay_t<decltype(x)>;
+        if constexpr (std::is_same_v<T, SmallBits>) {
+            x &= std::get<SmallBits>(b.data);
+        } else {
+            x &= std::get<T>(b.data);
+        }
+    });
+
+    return std::move(a);
+}
+
 inline Bitset bit_and(Bitset const& a, Bitset const& b) {
     Bitset res = a;
 
@@ -83,6 +107,19 @@ inline Bitset bit_and(Bitset const& a, Bitset const& b) {
     return res;
 }
 
+inline Bitset bit_or(Bitset&& a, Bitset const& b) {
+    visit_bits(a, [&](auto& x) {
+        using T = std::decay_t<decltype(x)>;
+        if constexpr (std::is_same_v<T, SmallBits>) {
+            x |= std::get<SmallBits>(b.data);
+        } else {
+            x |= std::get<T>(b.data);
+        }
+    });
+
+    return std::move(a);
+}
+
 inline Bitset bit_or(Bitset const& a, Bitset const& b) {
     Bitset res = a;
 
@@ -96,6 +133,19 @@ inline Bitset bit_or(Bitset const& a, Bitset const& b) {
     });
 
     return res;
+}
+
+inline Bitset bit_xor(Bitset&& a, Bitset const& b) {
+    visit_bits(a, [&](auto& x) {
+        using T = std::decay_t<decltype(x)>;
+        if constexpr (std::is_same_v<T, SmallBits>) {
+            x ^= std::get<SmallBits>(b.data);
+        } else {
+            x ^= std::get<T>(b.data);
+        }
+    });
+
+    return std::move(a);
 }
 
 inline Bitset bit_xor(Bitset const& a, Bitset const& b) {
@@ -220,12 +270,17 @@ struct BitsetHash {
 
             else {
                 std::size_t h = 0;
-                size_t const n = x.size();
-                for (size_t i = 0; i < n; ++i) {
-                    if (x.test(i)) {
-                        h ^= std::hash<size_t>()(i + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2));
-                    }
+
+                std::vector<DynamicBits::block_type> blocks;
+                blocks.reserve(x.num_blocks());
+
+                boost::to_block_range(x, std::back_inserter(blocks));
+
+                for (auto block : blocks) {
+                    h ^= std::hash<DynamicBits::block_type>{}(block) + 0x9e3779b97f4a7c15ULL +
+                         (h << 6) + (h >> 2);
                 }
+
                 return h;
             }
         });

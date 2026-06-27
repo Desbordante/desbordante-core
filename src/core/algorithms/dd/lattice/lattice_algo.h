@@ -28,8 +28,8 @@ using DFConstraint = model::DFConstraint;
 using DFStringConstraint = model::DFStringConstraint;
 using DFStringList = std::list<model::DFStringConstraint>;
 using DDString = model::DDString;
-using DFIdx = int;
-using DDSet = std::shared_ptr<std::unordered_set<Bitset, BitsetHash>>;
+using DFIdx = unsigned int;
+using DDSet = std::unordered_set<Bitset, BitsetHash>;
 
 class LatticeAlgorithm : public Algorithm {
 private:
@@ -50,7 +50,6 @@ private:
 
     std::vector<DFConstraint> min_max_dif_;
     std::vector<DistancePositionListIndex> plis_;
-    std::vector<std::vector<std::vector<double>>> distances_;
     std::vector<std::vector<DFConstraint>> index_search_spaces_;
     std::vector<model::ColumnIndex> non_empty_cols_;
     std::list<model::DDString> DDs_;
@@ -71,7 +70,6 @@ private:
 
         min_max_dif_.clear();
         plis_.clear();
-        distances_.clear();
         index_search_spaces_.clear();
         non_empty_cols_.clear();
 
@@ -94,21 +92,16 @@ private:
     void CalculateTuplePairs();
 
     struct LatticeNode {
-        Bitset df_;
         Bitset partition_;
         DDSet dds_;
 
-        LatticeNode(std::size_t df_size, Bitset const& partition)
-            : df_(make_bitset(df_size)),
-              partition_(partition),
-              dds_(std::make_shared<std::unordered_set<Bitset, BitsetHash>>()) {}
+        LatticeNode(Bitset const& partition) : partition_(partition) {}
 
-        LatticeNode(Bitset v, Bitset Fv, DDSet dds)
-            : df_(std::move(v)), partition_(std::move(Fv)), dds_(std::move(dds)) {}
+        LatticeNode(Bitset&& Fv, DDSet&& dds) : partition_(std::move(Fv)), dds_(std::move(dds)) {}
     };
 
-    std::vector<std::unique_ptr<LatticeNode>> current_level_;
-    std::vector<std::unique_ptr<LatticeNode>> next_level_;
+    std::unordered_map<Bitset, LatticeNode, BitsetHash> current_level_;
+    std::unordered_map<Bitset, LatticeNode, BitsetHash> next_level_;
     void BuildFirstLevel();
     void BuildNextLevel();
 
@@ -129,11 +122,11 @@ private:
 
     void minDD();
 
-    std::unordered_map<Bitset, std::unique_ptr<DFTreeNode>, BitsetHash> trees_;
+    std::unordered_map<Bitset, DFTreeNode, BitsetHash> trees_;
 
     DFStringConstraint MakeDF(Bitset const& bitset_df);
     DFStringConstraint MakeDF(DFIdx left_idx, DFIdx right_idx);
-    void TreeNodeDFS(DFTreeNode* node, DFStringList const& rhs, DFStringList& lhs);
+    void TreeNodeDFS(DFTreeNode const* node, DFStringList const& rhs, DFStringList& lhs);
     void CollectPaths();
 
     void PrintResults();

@@ -172,33 +172,25 @@ double LatticeAlgorithm::CalculateDistance(model::ColumnIndex column_index,
 
 void LatticeAlgorithm::CalculateAllDistances() {
     plis_.resize(num_columns_);
-    distances_.reserve(num_columns_);
     min_max_dif_.resize(num_columns_, {0, 0});
 
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
         DistancePositionListIndex pli(typed_relation_->GetColumnData(column_index), num_rows_);
         std::vector<ClusterInfo> const& clusters = pli.GetClusters();
         std::size_t const num_clusters = clusters.size();
-        std::vector<std::vector<double>> cur_column_distances;
-        cur_column_distances.reserve(num_clusters);
 
         double max_dif = 0, min_dif = std::numeric_limits<double>::max();
         for (ClusterIndex i = 0; i < num_clusters; i++) {
-            cur_column_distances.emplace_back();
-            cur_column_distances[i].reserve(num_clusters - i);
-            cur_column_distances[i].push_back(0);
             for (ClusterIndex j = i + 1; j < num_clusters; j++) {
                 std::size_t const first_index = clusters[i].first_tuple_index;
                 std::size_t const second_index = clusters[j].first_tuple_index;
                 double const dif = CalculateDistance(column_index, {first_index, second_index});
                 max_dif = std::max(max_dif, dif);
                 min_dif = std::min(min_dif, dif);
-                cur_column_distances[i].push_back(dif);
             }
             if (clusters[i].size > 1) min_dif = 0;
         }
         min_max_dif_[column_index] = {min_dif, max_dif};
-        distances_.emplace_back(std::move(cur_column_distances));
         plis_[column_index] = std::move(pli);
     }
 }
@@ -247,10 +239,7 @@ std::vector<DFConstraint> LatticeAlgorithm::IndexSearchSpace(model::ColumnIndex 
 
 void LatticeAlgorithm::CalculateIndexSearchSpaces() {
     std::vector<DFConstraint> new_min_max_dif;
-    std::vector<std::vector<std::vector<double>>> new_distances;
     std::vector<DistancePositionListIndex> new_plis;
-    new_min_max_dif.reserve(num_columns_);
-    new_distances.reserve(num_columns_);
     new_plis.reserve(num_columns_);
     for (model::ColumnIndex index = 0; index < num_columns_; index++) {
         std::vector<DFConstraint> cur_index_search_space = IndexSearchSpace(index);
@@ -258,13 +247,11 @@ void LatticeAlgorithm::CalculateIndexSearchSpaces() {
             index_search_spaces_.push_back(std::move(cur_index_search_space));
             non_empty_cols_.push_back(index);
             new_min_max_dif.push_back(min_max_dif_[index]);
-            new_distances.push_back(std::move(distances_[index]));
             new_plis.push_back(std::move(plis_[index]));
         }
     }
     num_columns_ = non_empty_cols_.size();
     min_max_dif_ = std::move(new_min_max_dif);
-    distances_ = std::move(new_distances);
     plis_ = std::move(new_plis);
 }
 
@@ -273,11 +260,15 @@ inline bool LatticeAlgorithm::CheckDFConstraint(DFConstraint const& dif_constrai
                                                 model::ColumnIndex column_index,
                                                 std::pair<std::size_t, std::size_t> tuple_pair) {
     std::vector<ClusterIndex> const& cur_index = plis_[column_index].GetInvertedIndex();
+    std::vector<ClusterInfo> const& clusters = plis_[column_index].GetClusters();
     ClusterIndex const first_cluster = cur_index[tuple_pair.first];
     ClusterIndex const second_cluster = cur_index[tuple_pair.second];
-    ClusterIndex const min_cluster = std::min(first_cluster, second_cluster);
-    ClusterIndex const max_cluster = std::max(first_cluster, second_cluster);
-    double const dif = distances_[column_index][min_cluster][max_cluster - min_cluster];
+
+    if (first_cluster == second_cluster) return 0.0;
+
+    std::size_t const first_index = clusters[first_cluster].first_tuple_index;
+    std::size_t const second_index = clusters[second_cluster].first_tuple_index;
+    double const dif = CalculateDistance(column_index, {first_index, second_index});
 
     if (type_ids_[column_index] == +model::TypeId::kDouble) {
         return dif_constraint.Contains(dif);
@@ -329,10 +320,10 @@ void LatticeAlgorithm::BuildFirstLevel() {
         auto const& column_partitions = base_partitions_[column_index];
         for (std::size_t partition_index = 0; partition_index < column_partitions.size();
              ++partition_index) {
-            auto new_node =
-                    std::make_unique<LatticeNode>(df_num_, column_partitions[partition_index]);
-            set(new_node->df_, df_index);
-            current_level_.push_back(std::move(new_node));
+            auto new_node = LatticeNode(column_partitions[partition_index]);
+            Bitset df = make_bitset(df_num_);
+            set(df, df_index);
+            current_level_.try_emplace(std::move(df), std::move(new_node));
             ++df_index;
         }
     }
@@ -340,41 +331,39 @@ void LatticeAlgorithm::BuildFirstLevel() {
 
 void LatticeAlgorithm::BuildNextLevel() {
     next_level_.clear();
-    std::unordered_set<Bitset, BitsetHash> already_added;
-    for (std::size_t i = 0; i < current_level_.size(); ++i) {
-        for (std::size_t j = i + 1; j < current_level_.size(); ++j) {
-            auto& node1 = *current_level_[i];
-            auto& node2 = *current_level_[j];
+    for (auto it1 = current_level_.begin(); it1 != current_level_.end(); ++it1)
+        for (auto it2 = std::next(it1); it2 != current_level_.end(); ++it2) {
+            auto const& df1 = it1->first;
+            auto const& df2 = it2->first;
+            auto const& node1 = it1->second;
+            auto const& node2 = it2->second;
 
             Bitset new_partition = bit_and(node1.partition_, node2.partition_);
-            if (bit_count(new_partition) < tuple_pair_threshold_) continue;
+            if (bit_count(new_partition) <= tuple_pair_threshold_) continue;
 
-            Bitset diff_bits = bit_xor(node1.df_, node2.df_);
-            Bitset union_bits = bit_or(node1.df_, node2.df_);
-            if (!already_added.insert(union_bits).second) continue;
+            Bitset diff_bits = bit_xor(df1, df2);
+            Bitset union_bits = bit_or(df1, df2);
 
-            if (bit_count(union_bits) == bit_count(node1.df_) + 1) {
+            if (bit_count(union_bits) == bit_count(df1) + 1) {
                 size_t diff_df1 = find_first(diff_bits);
                 size_t diff_df2 = find_next(diff_bits, diff_df1);
                 if (df_column_[diff_df1] != df_column_[diff_df2]) {
                     DDSet new_dds = node1.dds_;
-                    new_dds->insert((node2.dds_)->begin(), (node2.dds_)->end());
+                    new_dds.insert(node2.dds_.begin(), node2.dds_.end());
 
                     bool node_reducible = false;
-                    for (auto const& dd : *new_dds)
+                    for (auto const& dd : new_dds)
                         if (bit_none(bit_and(dd, bit_not(union_bits)))) {
                             node_reducible = true;
                             break;
                         }
                     if (node_reducible) continue;
-
-                    auto new_node = std::make_unique<LatticeNode>(
-                            std::move(union_bits), std::move(new_partition), std::move(new_dds));
-                    next_level_.push_back(std::move(new_node));
+                    next_level_.try_emplace(
+                            std::move(union_bits),
+                            LatticeNode(std::move(new_partition), std::move(new_dds)));
                 }
             }
         }
-    }
     current_level_ = std::move(next_level_);
 }
 
@@ -383,14 +372,14 @@ void LatticeAlgorithm::FindRhs(Bitset const& df_partition, model::ColumnIndex co
     auto const& column_partitions = base_partitions_[col];
     std::size_t const column_partitions_count = column_partitions.size();
     std::size_t const column_begin_idx = column_begin_idx_[col];
-    std::size_t const df_partition_size = bit_count(df_partition);
+    std::size_t const df_threshold = bit_count(df_partition) * satisfaction_threshold_;
 
     double lhs_rhs_df_matches = 0.0;
     for (std::size_t idx = 1; idx <= column_partitions_count; ++idx) {
         lhs_rhs_df_matches +=
                 bit_count(bit_and(df_partition, column_partitions[column_partitions_count - idx]));
 
-        if (lhs_rhs_df_matches >= satisfaction_threshold_ * df_partition_size) break;
+        if (lhs_rhs_df_matches >= df_threshold) break;
         reset(col_intervals, column_begin_idx + column_partitions_count - idx);
     }
 
@@ -426,7 +415,7 @@ void LatticeAlgorithm::Combine(DFTreeNode* root, Bitset const& lhs) {
 
     while (curr_df != NPOS) {
         auto& node_children = curr_node->left_children_;
-        auto it = node_children.lower_bound(curr_df);
+        auto it = node_children.find(curr_df);
 
         if (it != node_children.begin()) {
             auto prev_df = std::prev(it);
@@ -475,19 +464,20 @@ void LatticeAlgorithm::CheckAndCombine(DFTreeNode* root, Bitset const& lhs) {
 void LatticeAlgorithm::minDD() {
     current_level_.reserve(10000);
     next_level_.reserve(10000);
+    Bitset B_interval = make_bitset(df_num_);
     for (std::size_t i = 0; i < num_columns_; ++i) {
         if (i == 0)
             BuildFirstLevel();
         else
             BuildNextLevel();
 
-        for (auto node_iterator = current_level_.begin(); node_iterator != current_level_.end();) {
-            auto const& node_df = (*node_iterator)->df_;
-            auto const& node_partition = (*node_iterator)->partition_;
-            auto& node_dds = (*node_iterator)->dds_;
+        for (auto it = current_level_.begin(); it != current_level_.end(); ++it) {
+            auto const& node_df = it->first;
+            auto const& node_partition = it->second.partition_;
+            auto& node_dds = it->second.dds_;
 
             for (size_t B = 0; B < num_columns_; ++B) {
-                Bitset B_interval = make_bitset(df_num_);
+                clear_bitset(B_interval);
                 std::size_t col_first_df = column_begin_idx_[B];
                 std::size_t col_partition_size = base_partitions_[B].size();
                 for (size_t i = 0; i < col_partition_size; ++i) set(B_interval, col_first_df + i);
@@ -496,13 +486,11 @@ void LatticeAlgorithm::minDD() {
                     FindRhs(node_partition, B, B_interval);
 
                     if (bit_none(B_interval)) continue;
-                    auto* DD_tree = trees_.try_emplace(B_interval, std::make_unique<DFTreeNode>())
-                                            .first->second.get();
+                    auto* DD_tree = &trees_.try_emplace(B_interval).first->second;
                     CheckAndCombine(DD_tree, node_df);
-                    if (bit_count(B_interval) == 1) node_dds->insert(bit_or(B_interval, node_df));
+                    if (bit_count(B_interval) == 1) node_dds.insert(bit_or(B_interval, node_df));
                 }
             }
-            ++node_iterator;
         }
     }
 }
@@ -527,7 +515,8 @@ DFStringConstraint LatticeAlgorithm::MakeDF(Bitset const& bitset_df) {
     return MakeDF(left_idx, right_idx);
 }
 
-void LatticeAlgorithm::TreeNodeDFS(DFTreeNode* node, DFStringList const& rhs, DFStringList& lhs) {
+void LatticeAlgorithm::TreeNodeDFS(DFTreeNode const* node, DFStringList const& rhs,
+                                   DFStringList& lhs) {
     if (node->left_children_.empty()) {
         DDs_.emplace_back(lhs, rhs);
         return;
@@ -545,7 +534,7 @@ void LatticeAlgorithm::CollectPaths() {
     for (auto const& [rhs_bitset, root] : trees_) {
         DFStringList rhs{MakeDF(rhs_bitset)};
         DFStringList lhs;
-        TreeNodeDFS(root.get(), rhs, lhs);
+        TreeNodeDFS(&root, rhs, lhs);
     }
 }
 
