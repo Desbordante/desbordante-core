@@ -35,7 +35,7 @@ class LatticeAlgorithm : public Algorithm {
 private:
     config::InputTable input_table_;
 
-    double satisfaction_threshold_;
+    double rejection_threshold_;
     double support_threshold_;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
@@ -100,8 +100,8 @@ private:
         LatticeNode(Bitset&& Fv, DDSet&& dds) : partition_(std::move(Fv)), dds_(std::move(dds)) {}
     };
 
-    std::unordered_map<Bitset, LatticeNode, BitsetHash> current_level_;
-    std::unordered_map<Bitset, LatticeNode, BitsetHash> next_level_;
+    std::vector<std::pair<Bitset, LatticeNode>> current_level_;
+    std::vector<std::pair<Bitset, LatticeNode>> next_level_;
     void BuildFirstLevel();
     void BuildNextLevel();
 

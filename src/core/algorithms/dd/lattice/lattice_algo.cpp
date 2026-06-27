@@ -38,7 +38,7 @@ void LatticeAlgorithm::RegisterOptions() {
     RegisterOption(Option{&difference_table_, kDifferenceTable, kDDifferenceTable, default_table});
     RegisterOption(Option{&num_rows_, kNumRows, kDNumRows, 0U});
     RegisterOption(Option{&num_columns_, kNumColumns, kDNumColumns, 0U});
-    RegisterOption(Option{&satisfaction_threshold_, kError, kDError, 0.0});
+    RegisterOption(Option{&rejection_threshold_, kError, kDError, 0.0});
     RegisterOption(Option{&support_threshold_, kMinSupport, kDMinSupport, 0.0});
 }
 
@@ -323,7 +323,7 @@ void LatticeAlgorithm::BuildFirstLevel() {
             auto new_node = LatticeNode(column_partitions[partition_index]);
             Bitset df = make_bitset(df_num_);
             set(df, df_index);
-            current_level_.try_emplace(std::move(df), std::move(new_node));
+            current_level_.emplace_back(std::move(df), std::move(new_node));
             ++df_index;
         }
     }
@@ -358,7 +358,7 @@ void LatticeAlgorithm::BuildNextLevel() {
                             break;
                         }
                     if (node_reducible) continue;
-                    next_level_.try_emplace(
+                    next_level_.emplace_back(
                             std::move(union_bits),
                             LatticeNode(std::move(new_partition), std::move(new_dds)));
                 }
@@ -372,14 +372,14 @@ void LatticeAlgorithm::FindRhs(Bitset const& df_partition, model::ColumnIndex co
     auto const& column_partitions = base_partitions_[col];
     std::size_t const column_partitions_count = column_partitions.size();
     std::size_t const column_begin_idx = column_begin_idx_[col];
-    std::size_t const df_threshold = bit_count(df_partition) * satisfaction_threshold_;
+    std::size_t const rejected_dfs = bit_count(df_partition) * rejection_threshold_;
 
     double lhs_rhs_df_matches = 0.0;
     for (std::size_t idx = 1; idx <= column_partitions_count; ++idx) {
         lhs_rhs_df_matches +=
                 bit_count(bit_and(df_partition, column_partitions[column_partitions_count - idx]));
 
-        if (lhs_rhs_df_matches >= df_threshold) break;
+        if (lhs_rhs_df_matches > rejected_dfs) break;
         reset(col_intervals, column_begin_idx + column_partitions_count - idx);
     }
 
@@ -462,8 +462,8 @@ void LatticeAlgorithm::CheckAndCombine(DFTreeNode* root, Bitset const& lhs) {
 }
 
 void LatticeAlgorithm::minDD() {
-    current_level_.reserve(10000);
-    next_level_.reserve(10000);
+    current_level_.reserve(500000);
+    next_level_.reserve(500000);
     Bitset B_interval = make_bitset(df_num_);
     for (std::size_t i = 0; i < num_columns_; ++i) {
         if (i == 0)
