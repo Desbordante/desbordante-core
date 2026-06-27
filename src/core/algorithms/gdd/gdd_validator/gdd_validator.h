@@ -10,12 +10,15 @@ namespace algos {
 
 class GddValidator : public Algorithm {
 private:
-    using GddCounterexample = model::GddCounterexample;
-
     std::filesystem::path graph_path_;
     model::gdd::graph_t graph_;
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
+
+protected:
+    using GddCounterexample = model::GddCounterexample;
+
+private:
     std::vector<GddCounterexample> counterexamples_;
 
     void FilterValidGdds();
@@ -28,6 +31,18 @@ private:
     virtual void LoadDataInternal() final;
 
 protected:
+    using VertexT = model::gdd::detail::VertexT;
+    using EdgeT = model::gdd::detail::EdgeT;
+    using DomainT = model::gdd::detail::DomainT;
+    using MappingT = model::gdd::detail::MappingT;
+
+    static DomainT BuildDomain(model::gdd::graph_t const& pattern,
+                               model::gdd::graph_t const& graph);
+
+    static bool LabelsMatch(std::string const& lhs, std::string const& rhs) noexcept {
+        return lhs == rhs;  // TODO: wildcards
+    }
+
     model::gdd::graph_t const& GetGraph() const noexcept {
         return graph_;
     }

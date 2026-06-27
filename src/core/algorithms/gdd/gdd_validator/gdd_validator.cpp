@@ -51,4 +51,19 @@ void GddValidator::FilterValidGdds() {
                          });
 }
 
+GddValidator::DomainT GddValidator::BuildDomain(model::gdd::graph_t const& pattern,
+                                                model::gdd::graph_t const& graph) {
+    DomainT dom;
+
+    for (auto [pv, pend] = boost::vertices(pattern); pv != pend; ++pv) {
+        for (auto [gv, gend] = boost::vertices(graph); gv != gend; ++gv) {
+            if (LabelsMatch(pattern[*pv].label, graph[*gv].label)) {
+                dom[*pv].emplace_back(*gv);
+            }
+        }
+    }
+
+    return dom;
+}
+
 }  // namespace algos

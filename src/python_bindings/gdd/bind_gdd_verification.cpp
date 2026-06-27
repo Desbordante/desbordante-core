@@ -16,6 +16,7 @@
 #include "core/algorithms/gdd/gdd_graph_description.h"
 #include "core/algorithms/gdd/gdd_validator/gdd_validator.h"
 #include "core/algorithms/gdd/gdd_validator/naive_gdd_validator.h"
+#include "core/algorithms/gdd/gdd_validator/wcoj_gdd_validator.h"
 #include "core/parser/graph_parser/graph_parser.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
@@ -147,6 +148,7 @@ void BindGddVerification(pybind11::module_& main_module) {
     using algos::Algorithm;
     using algos::GddValidator;
     using algos::NaiveGddValidator;
+    using algos::WcojGddValidator;
     using model::Gdd;
     using model::GddCounterexample;
     using model::GddCounterexampleVertex;
@@ -526,6 +528,7 @@ void BindGddVerification(pybind11::module_& main_module) {
 
     auto default_cls = detail::RegisterAlgorithm<NaiveGddValidator, GddValidator>(
             gdd_algos_module, "NaiveGddValidator");
+    detail::RegisterAlgorithm<WcojGddValidator, GddValidator>(gdd_algos_module, "WcojGddValidator");
 
     gdd_algos_module.attr("Default") = default_cls;
     gdd_module.attr("Default") = gdd_algos_module.attr("Default");
