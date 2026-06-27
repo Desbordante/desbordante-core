@@ -50,18 +50,18 @@ jobs:
             env: CC=clang CXX=clang++-20 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
 
           # Uncomment this to enable macOS gcc tests:
-          # - os: macos-latest
-          #   toolset: gcc 
+          # - os: macos-15
+          #   toolset: gcc
           #   env: CXX=g++-14 BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
 
           # Uncomment this to enable macOS llvm-clang tests:
-          # - os: macos-latest
+          # - os: macos-15
           #   toolset: llvm-clang
           #   env: CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
           
-          - os: macos-latest
+          - os: macos-15
             toolset: apple-clang
             env: CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
             
