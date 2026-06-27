@@ -9,6 +9,7 @@
 #include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -54,7 +55,10 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<model::InputFormatType>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
-        enum_conv_pair<algos::od::Ordering>};
+        enum_conv_pair<algos::od::Ordering>,
+        enum_conv_pair<algos::cfdfinder::Expansion>,
+        enum_conv_pair<algos::cfdfinder::Pruning>,
+        enum_conv_pair<algos::cfdfinder::Result>};
 }  // namespace
 
 namespace python_bindings {

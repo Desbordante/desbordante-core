@@ -12,6 +12,7 @@
 #include <boost/core/demangle.hpp>
 #include <pybind11/stl/filesystem.h>
 
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/gdd/gdd.h"
@@ -130,7 +131,9 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::string>, kPyList, kPyStr>,
             PyTypePair<std::unordered_map<std::string, std::vector<unsigned int>>, kPyDict, kPyStr,
                        kPyList, kPyInt>,
-    };
+            PyTypePair<algos::cfdfinder::Expansion, kPyStr>,
+            PyTypePair<algos::cfdfinder::Pruning, kPyStr>,
+            PyTypePair<algos::cfdfinder::Result, kPyStr>};
 
     auto const it = type_map.find(type_index);
     if (it == type_map.end()) [[unlikely]] {
