@@ -28,7 +28,7 @@ private:
     std::map<model::Event, size_t> GetEventsSupports() const;
 
     void RemoveInfrequentEvents(std::map<model::Event, size_t> const& events_supports,
-                                        size_t event_minsup);
+                                size_t event_minsup);
 
     std::vector<std::shared_ptr<LocationList>> BuildEventsLocationLists() const;
 

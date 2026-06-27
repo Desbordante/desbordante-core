@@ -9,8 +9,8 @@ CompositeEpisode::CompositeEpisode(ParallelEpisode const& seed)
 }
 
 std::optional<CompositeEpisode> CompositeEpisode::TryExtend(ParallelEpisode const& ext,
-                                                             size_t min_support,
-                                                             size_t window_length) const {
+                                                            size_t min_support,
+                                                            size_t window_length) const {
     std::optional<BoundList> new_bound =
             bound_list_->Extend(ext.GetLocationList(), min_support, window_length);
     if (!new_bound) return std::nullopt;

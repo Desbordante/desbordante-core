@@ -67,13 +67,13 @@ void TKE::FindFrequentEpisodes() {
 
     RemoveInfrequentEvents(raw_supports, events_minsup);
 
-    ParallelTopKMiner parallel_miner(events_num_, episodes_num_, BuildEventsLocationLists(), threads_num_);
+    ParallelTopKMiner parallel_miner(events_num_, episodes_num_, BuildEventsLocationLists(),
+                                     threads_num_);
     std::vector<ParallelEpisode> parallel_episodes = parallel_miner.Mine();
     LOG_DEBUG("Parallel episodes after top-k mining: {}", parallel_episodes.size());
 
-    size_t const parallel_minsup = (parallel_episodes.size() >= episodes_num_)
-                                           ? parallel_episodes.back().GetSupport()
-                                           : 1;
+    size_t const parallel_minsup =
+            (parallel_episodes.size() >= episodes_num_) ? parallel_episodes.back().GetSupport() : 1;
     LOG_DEBUG("Initial minsup for composite phase (from parallel): {}", parallel_minsup);
 
     CompositeTopKMiner composite_miner(episodes_num_, window_length_, threads_num_);
@@ -92,7 +92,7 @@ std::map<model::Event, size_t> TKE::GetEventsSupports() const {
 }
 
 void TKE::RemoveInfrequentEvents(std::map<model::Event, size_t> const& events_supports,
-                                         size_t event_minsup) {
+                                 size_t event_minsup) {
     model::Event new_events_num = model::kStartEvent;
     reverse_mapping_.clear();
     reverse_mapping_.resize(new_events_num);

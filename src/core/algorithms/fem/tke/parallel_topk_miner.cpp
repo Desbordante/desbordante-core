@@ -1,11 +1,12 @@
 #include "core/algorithms/fem/tke/parallel_topk_miner.h"
 
 #include <atomic>
-#include <boost/lockfree/queue.hpp>
 #include <memory>
-#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <thread>
 #include <vector>
+
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <boost/lockfree/queue.hpp>
 
 namespace algos::tke {
 
@@ -104,13 +105,12 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
 
         while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark &&
                !explore.empty()) {
-            ParallelEpisode parent_ep =
-                    std::move(const_cast<ParallelEpisode&>(explore.top()));
+            ParallelEpisode parent_ep = std::move(const_cast<ParallelEpisode&>(explore.top()));
             explore.pop();
 
             size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
             bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
-                                                     : parent_ep.GetSupport() < minsup_now;
+                                                    : parent_ep.GetSupport() < minsup_now;
             if (stale) continue;
 
             model::Event const start_event = parent_ep.GetLastEvent() + 1;
@@ -151,8 +151,8 @@ void ParallelTopKMiner::ExploreSequential(TopK& top_k, Explore& explore) const {
         explore.pop();
 
         size_t const minsup = (top_k.size() == k_) ? top_k.top().GetSupport() : 1;
-        bool const stale = (top_k.size() == k_) ? item.GetSupport() <= minsup
-                                                 : item.GetSupport() < minsup;
+        bool const stale =
+                (top_k.size() == k_) ? item.GetSupport() <= minsup : item.GetSupport() < minsup;
         if (stale) {
             explore = Explore();
             break;

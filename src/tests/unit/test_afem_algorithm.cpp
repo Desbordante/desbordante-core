@@ -14,8 +14,8 @@
 
 namespace tests {
 
-using ::testing::UnorderedElementsAre;
 using ::testing::IsSupersetOf;
+using ::testing::UnorderedElementsAre;
 using RawEpisode = algos::maxfem::CompositeEpisode::RawEpisode;
 
 class AFEMAlgorithmTest : public ::testing::Test {
@@ -50,16 +50,15 @@ protected:
 TEST_F(AFEMAlgorithmTest, Baseline) {
     auto results = ExecuteAFEM(kMaxFemBaselinePath, 2, 2);
 
-    RawEpisode one      = {{{1}},        5};
-    RawEpisode two      = {{{2}},        3};
-    RawEpisode three    = {{{3}},        2};
-    RawEpisode one_two  = {{{1, 2}},     2};
-    RawEpisode one_one  = {{{1}, {1}},   3};
-    RawEpisode one_2    = {{{1}, {2}},   2};
+    RawEpisode one = {{{1}}, 5};
+    RawEpisode two = {{{2}}, 3};
+    RawEpisode three = {{{3}}, 2};
+    RawEpisode one_two = {{{1, 2}}, 2};
+    RawEpisode one_one = {{{1}, {1}}, 3};
+    RawEpisode one_2 = {{{1}, {2}}, 2};
     RawEpisode one_1two = {{{1}, {1, 2}}, 2};
 
-    EXPECT_THAT(results, UnorderedElementsAre(one, two, three, one_two,
-                                              one_one, one_2, one_1two));
+    EXPECT_THAT(results, UnorderedElementsAre(one, two, three, one_two, one_one, one_2, one_1two));
 }
 
 // Dataset: maxfem_window.txt, minsup=2, window=3
@@ -73,17 +72,16 @@ TEST_F(AFEMAlgorithmTest, Baseline) {
 TEST_F(AFEMAlgorithmTest, Window) {
     auto results = ExecuteAFEM(kMaxFemWindowPath, 2, 3);
 
-    RawEpisode ten              = {{{10}},               4};
-    RawEpisode eleven           = {{{11}},               4};
-    RawEpisode twelve           = {{{12}},               4};
-    RawEpisode ten_eleven       = {{{10}, {11}},         2};
-    RawEpisode ten_twelve       = {{{10}, {12}},         2};
-    RawEpisode eleven_twelve    = {{{11}, {12}},         2};
-    RawEpisode ten_eleven_twelve = {{{10}, {11}, {12}},  2};
+    RawEpisode ten = {{{10}}, 4};
+    RawEpisode eleven = {{{11}}, 4};
+    RawEpisode twelve = {{{12}}, 4};
+    RawEpisode ten_eleven = {{{10}, {11}}, 2};
+    RawEpisode ten_twelve = {{{10}, {12}}, 2};
+    RawEpisode eleven_twelve = {{{11}, {12}}, 2};
+    RawEpisode ten_eleven_twelve = {{{10}, {11}, {12}}, 2};
 
-    EXPECT_THAT(results, UnorderedElementsAre(ten, eleven, twelve,
-                                              ten_eleven, ten_twelve, eleven_twelve,
-                                              ten_eleven_twelve));
+    EXPECT_THAT(results, UnorderedElementsAre(ten, eleven, twelve, ten_eleven, ten_twelve,
+                                              eleven_twelve, ten_eleven_twelve));
 }
 
 // For the parallel and pruning datasets the full enumeration is complex, so we
@@ -94,7 +92,7 @@ TEST_F(AFEMAlgorithmTest, ParallelContainsMaxFEM) {
     auto afem_results = ExecuteAFEM(kMaxFemParallelPath, 2, 5);
 
     RawEpisode aba = {{{10, 11}, {12}, {10, 11}}, 2};
-    RawEpisode bab = {{{12}, {10, 11}, {12}},     2};
+    RawEpisode bab = {{{12}, {10, 11}, {12}}, 2};
 
     EXPECT_THAT(afem_results, IsSupersetOf({aba, bab}));
     EXPECT_GT(afem_results.size(), 2u);
@@ -103,8 +101,8 @@ TEST_F(AFEMAlgorithmTest, ParallelContainsMaxFEM) {
 TEST_F(AFEMAlgorithmTest, PruningContainsMaxFEM) {
     auto afem_results = ExecuteAFEM(kMaxFemPruningPath, 2, 5);
 
-    RawEpisode ep1 = {{{20}, {21}, {22}},             2};
-    RawEpisode ep2 = {{{22}, {10}},                   2};
+    RawEpisode ep1 = {{{20}, {21}, {22}}, 2};
+    RawEpisode ep2 = {{{22}, {10}}, 2};
     RawEpisode ep3 = {{{10}, {11}, {12}, {10}, {11}}, 2};
     RawEpisode ep4 = {{{11}, {12}, {10}, {11}, {12}}, 2};
 

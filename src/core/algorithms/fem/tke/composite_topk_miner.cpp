@@ -1,11 +1,12 @@
 #include "core/algorithms/fem/tke/composite_topk_miner.h"
 
 #include <atomic>
-#include <boost/lockfree/queue.hpp>
 #include <memory>
-#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <thread>
 #include <vector>
+
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
+#include <boost/lockfree/queue.hpp>
 
 namespace algos::tke {
 
@@ -51,7 +52,7 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
     boost::lockfree::queue<CompositeEpisode*> processed(10000);
 
     std::atomic<size_t> atomic_minsup{(top_k.size() == k_) ? top_k.top().GetSupport()
-                                                             : initial_minsup};
+                                                           : initial_minsup};
     std::atomic<bool> terminate_flag{false};
     std::atomic<size_t> tasks_in_flight{0};
     boost::interprocess::interprocess_semaphore tasks_sem{0};
@@ -77,8 +78,7 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
                 size_t const cur_min = atomic_minsup.load(std::memory_order_relaxed);
                 std::optional<CompositeEpisode> child =
                         task.parent->TryExtend(ext, cur_min, window_length_);
-                if (child &&
-                    child->GetSupport() >= atomic_minsup.load(std::memory_order_relaxed)) {
+                if (child && child->GetSupport() >= atomic_minsup.load(std::memory_order_relaxed)) {
                     auto* result = new CompositeEpisode(std::move(*child));
                     while (!processed.push(result)) {
                     }
@@ -109,13 +109,12 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
 
         while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark &&
                !explore.empty()) {
-            CompositeEpisode parent_ep =
-                    std::move(const_cast<CompositeEpisode&>(explore.top()));
+            CompositeEpisode parent_ep = std::move(const_cast<CompositeEpisode&>(explore.top()));
             explore.pop();
 
             size_t const minsup_now = atomic_minsup.load(std::memory_order_relaxed);
             bool const stale = (top_k.size() == k_) ? parent_ep.GetSupport() <= minsup_now
-                                                     : parent_ep.GetSupport() < minsup_now;
+                                                    : parent_ep.GetSupport() < minsup_now;
             if (stale) continue;
 
             size_t valid_n = 0;
@@ -161,8 +160,8 @@ void CompositeTopKMiner::ExploreSequential(std::vector<ParallelEpisode> const& p
         explore.pop();
 
         size_t const minsup = (top_k.size() == k_) ? top_k.top().GetSupport() : initial_minsup;
-        bool const stale = (top_k.size() == k_) ? item.GetSupport() <= minsup
-                                                 : item.GetSupport() < minsup;
+        bool const stale =
+                (top_k.size() == k_) ? item.GetSupport() <= minsup : item.GetSupport() < minsup;
         if (stale) {
             explore = Explore();
             break;

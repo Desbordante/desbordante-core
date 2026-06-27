@@ -82,6 +82,10 @@ extend-ignore-re = [
     "Peter J\\. Hass", # "Hass" is a surname (typo for "Hash")
 ]
 
+[tool.typos.default.extend-words]
+# TKE is the name of the algorithm, considered to be a typo for "take"
+tke = "tke"
+
 [tool.typos.default.extend-identifiers]
 # These are identifiers related to Numerical Dependencies, abbreviated as ND,
 # and "nd" is a common typo for "and", so we chose to explicitly list the identifiers
