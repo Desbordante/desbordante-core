@@ -3,7 +3,7 @@
 #include <atomic>
 #include <boost/lockfree/queue.hpp>
 #include <memory>
-#include <semaphore>
+#include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <thread>
 #include <vector>
 
@@ -52,11 +52,11 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
     std::atomic<size_t> atomic_minsup{(top_k.size() == k_) ? top_k.top().GetSupport() : 1};
     std::atomic<bool> terminate_flag{false};
     std::atomic<size_t> tasks_in_flight{0};
-    std::counting_semaphore<> tasks_sem{0};
+    boost::interprocess::interprocess_semaphore tasks_sem{0};
 
     auto worker_loop = [&]() {
         while (true) {
-            tasks_sem.acquire();
+            tasks_sem.wait();
             if (terminate_flag.load(std::memory_order_relaxed)) break;
 
             Task task;
@@ -123,7 +123,7 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
                 tasks_in_flight.fetch_sub(1, std::memory_order_release);
                 break;
             }
-            tasks_sem.release();
+            tasks_sem.post();
         }
 
         if (explore.empty() && tasks_in_flight.load(std::memory_order_acquire) == 0) {
@@ -141,7 +141,7 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
     }
 
     terminate_flag.store(true, std::memory_order_relaxed);
-    tasks_sem.release(static_cast<std::ptrdiff_t>(threads_num_));
+    for (size_t i = 0; i < threads_num_; ++i) tasks_sem.post();
     for (std::thread& t : workers) t.join();
 }
 
