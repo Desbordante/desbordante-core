@@ -70,7 +70,7 @@ jobs:
   generate-macos-wheels-matrix:
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'python-packaging-risk')
     name: Generate macOS wheel matrix
-    runs-on: macos-latest
+    runs-on: macos-15
     outputs:
       include: ${{ steps.set-matrix.outputs.include }}
     steps:
@@ -84,7 +84,7 @@ jobs:
             | jq -sR 'split("\n") | map(select(length > 0)) | map(
               {
                 "only": ., 
-                "os": (if contains("x86_64") then "macos-15-intel" else "macos-latest" end), 
+                "os": (if contains("x86_64") then "macos-15-intel" else "macos-15" end),
                 "toolset": "apple-clang",
               })' \
             | jq -c
