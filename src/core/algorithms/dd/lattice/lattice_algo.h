@@ -50,6 +50,7 @@ private:
 
     std::vector<DFConstraint> min_max_dif_;
     std::vector<DistancePositionListIndex> plis_;
+    std::vector<std::vector<std::vector<double>>> distances_;
     std::vector<std::vector<DFConstraint>> index_search_spaces_;
     std::vector<model::ColumnIndex> non_empty_cols_;
     std::list<model::DDString> DDs_;
@@ -70,6 +71,7 @@ private:
 
         min_max_dif_.clear();
         plis_.clear();
+        distances_.clear();
         index_search_spaces_.clear();
         non_empty_cols_.clear();
 
@@ -92,16 +94,19 @@ private:
     void CalculateTuplePairs();
 
     struct LatticeNode {
+        Bitset df_;
         Bitset partition_;
         DDSet dds_;
 
-        LatticeNode(Bitset const& partition) : partition_(partition) {}
+        LatticeNode(std::size_t df_size, Bitset const& partition)
+            : df_(make_bitset(df_size)), partition_(partition) {}
 
-        LatticeNode(Bitset&& Fv, DDSet&& dds) : partition_(std::move(Fv)), dds_(std::move(dds)) {}
+        LatticeNode(Bitset&& v, Bitset&& Fv, DDSet&& dds)
+            : df_(std::move(v)), partition_(std::move(Fv)), dds_(std::move(dds)) {}
     };
 
-    std::vector<std::pair<Bitset, LatticeNode>> current_level_;
-    std::vector<std::pair<Bitset, LatticeNode>> next_level_;
+    std::vector<LatticeNode> current_level_;
+    std::vector<LatticeNode> next_level_;
     void BuildFirstLevel();
     void BuildNextLevel();
 
