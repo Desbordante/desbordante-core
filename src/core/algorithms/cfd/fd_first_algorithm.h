@@ -29,7 +29,6 @@ private:
     std::unordered_map<int, std::vector<Itemset>> rules_;
 
     void ResetStateCFD() final;
-    void CheckForIncorrectInput() const;
 
     void FdsFirstDFS();
     void FdsFirstDFS(Itemset const&, std::vector<MinerNode<PartitionTIdList>> const&,
