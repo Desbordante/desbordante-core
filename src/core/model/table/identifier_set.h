@@ -24,7 +24,7 @@ class IdentifierSet {
 public:
     IdentifierSet(IdentifierSet const&) = default;
     IdentifierSet(IdentifierSet&&) = default;
-    IdentifierSet(ColumnLayoutRelationData const* relation, int index);
+    IdentifierSet(LegacyColumnLayoutRelationData const* relation, int index);
 
     std::string ToString() const;
 
@@ -37,7 +37,7 @@ private:
         int cluster_index;
     };
 
-    ColumnLayoutRelationData const* const relation_;
+    LegacyColumnLayoutRelationData const* const relation_;
     std::vector<IdentifierSetValue> data_;
     int const tuple_index_;
 };

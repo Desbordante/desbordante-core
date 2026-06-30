@@ -6,7 +6,7 @@ project(
     DESCRIPTION "Python bindings to the interface of the Desbordante C++ core library"
 )
 
-CPMAddPackage("gh:pybind/pybind11@2.13.4")
+CPMAddPackage("gh:pybind/pybind11@3.0.4")
 
 # ---- Python Bindings Configuration ----
 
@@ -36,7 +36,6 @@ set(NAME bindlib.data)
 desbordante_add_lib(NAME OBJECT)
 target_sources(${NAME} PRIVATE data/bind_data_types.cpp)
 target_link_libraries(${NAME} PRIVATE pybind11::pybind11)
-set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
 set(NAME bindlib.util)
 desbordante_add_lib(NAME OBJECT)
@@ -56,7 +55,6 @@ target_link_libraries(
     ${NAME} PRIVATE magic_enum::magic_enum spdlog::spdlog_header_only Boost::headers
                     pybind11::pybind11
 )
-set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
 desbordante_add_bind(
     ac

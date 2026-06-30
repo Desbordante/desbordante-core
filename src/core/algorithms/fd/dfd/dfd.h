@@ -10,7 +10,7 @@
 
 namespace algos {
 
-class DFD : public PliBasedFDAlgorithm {
+class DFD : public LegacyPliBasedFDAlgorithm {
 private:
     std::vector<Vertical> unique_columns_;
 

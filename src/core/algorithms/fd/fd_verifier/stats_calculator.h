@@ -7,6 +7,7 @@
 
 #include "core/algorithms/fd/fd_verifier/highlight.h"
 #include "core/config/indices/type.h"
+#include "core/model/index.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 
@@ -16,11 +17,11 @@ class StatsCalculator {
 private:
     using ClusterIndex = model::PLI::Cluster::value_type;
 
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
-    config::IndicesType lhs_indices_;
-    config::IndicesType rhs_indices_;
+    std::vector<model::Index> lhs_indices_;
+    std::vector<model::Index> rhs_indices_;
 
     size_t num_error_rows_ = 0;
     long double error_ = 0;
@@ -85,9 +86,10 @@ public:
     HighlightCompareFunction CompareHighlightsByLhsAscending() const;
     HighlightCompareFunction CompareHighlightsByLhsDescending() const;
 
-    explicit StatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
+    explicit StatsCalculator(std::shared_ptr<LegacyColumnLayoutRelationData> relation,
                              std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
-                             config::IndicesType lhs_indices, config::IndicesType rhs_indices)
+                             std::vector<model::Index> lhs_indices,
+                             std::vector<model::Index> rhs_indices)
         : relation_(std::move(relation)),
           typed_relation_(std::move(typed_relation)),
           lhs_indices_(std::move(lhs_indices)),

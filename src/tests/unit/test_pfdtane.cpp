@@ -49,7 +49,7 @@ TEST_P(TestPFDTaneValidation, ErrorCalculationTest) {
     auto const& p = GetParam();
     double eps = 0.00001;
     auto table = std::make_shared<CSVParser>(p.csv_config);
-    auto relation = ColumnLayoutRelationData::CreateFrom(*table);
+    auto relation = LegacyColumnLayoutRelationData::CreateFrom(*table);
 
     for (auto const& [lhs_id, rhs_id, expected_error] : p.fds) {
         auto const& lhs = relation->GetColumnData(lhs_id).GetPositionListIndex();

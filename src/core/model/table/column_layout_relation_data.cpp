@@ -4,23 +4,25 @@
 //
 #include "core/model/table/column_layout_relation_data.h"
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <utility>
 
+#include "core/model/index.h"
 #include "core/util/logger.h"
 
-std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
-    int num_columns = schema_->GetNumColumns();
+std::vector<int> LegacyColumnLayoutRelationData::GetTuple(int tuple_index) const {
+    std::size_t num_columns = column_data_.size();
     std::vector<int> tuple = std::vector<int>(num_columns);
-    for (int column_index = 0; column_index < num_columns; column_index++) {
+    for (model::Index column_index = 0; column_index < num_columns; column_index++) {
         tuple[column_index] = column_data_[column_index].GetProbingTableValue(tuple_index);
     }
     return tuple;
 }
 
-std::shared_ptr<model::PLI const> ColumnLayoutRelationData::CalculatePLI(
-        std::vector<unsigned int> const& indices) const {
+std::shared_ptr<model::PLI const> LegacyColumnLayoutRelationData::CalculatePLI(
+        std::vector<model::Index> const& indices) const {
     if (indices.size() <= 0) throw std::invalid_argument("received unpositive number of indices");
 
     std::shared_ptr<model::PLI const> pli = GetColumnData(indices[0]).GetPliOwnership();
@@ -31,7 +33,7 @@ std::shared_ptr<model::PLI const> ColumnLayoutRelationData::CalculatePLI(
     return pli;
 }
 
-std::shared_ptr<model::PLIWS const> ColumnLayoutRelationData::CalculatePLIWS(
+std::shared_ptr<model::PLIWS const> LegacyColumnLayoutRelationData::CalculatePLIWS(
         std::vector<unsigned int> const& indices) const {
     if (indices.size() <= 0) throw std::invalid_argument("received unpositive number of indices");
 
@@ -43,7 +45,7 @@ std::shared_ptr<model::PLIWS const> ColumnLayoutRelationData::CalculatePLIWS(
     return pliws;
 }
 
-std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
+std::unique_ptr<LegacyColumnLayoutRelationData> LegacyColumnLayoutRelationData::CreateFrom(
         model::IDatasetStream& data_stream) {
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     std::unordered_map<std::string, int> value_dictionary;
@@ -86,5 +88,6 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
 
-    return std::make_unique<ColumnLayoutRelationData>(std::move(schema), std::move(column_data));
+    return std::make_unique<LegacyColumnLayoutRelationData>(std::move(schema),
+                                                            std::move(column_data));
 }

@@ -7,12 +7,6 @@
 #include "core/config/names_and_descriptions.h"
 
 namespace config {
-
-void IndicesOption::NormalizeIndices(IndicesType& indices) {
-    std::sort(indices.begin(), indices.end());
-    indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
-}
-
 IndicesOption::IndicesOption(std::string_view name, std::string_view description,
                              Option<IndicesType>::NormalizeFunc normalize_func,
                              Option<IndicesType>::DefaultFunc calculate_default, bool allow_empty)
@@ -22,7 +16,7 @@ IndicesOption::IndicesOption(std::string_view name, std::string_view description
       allow_empty_(allow_empty) {}
 
 IndicesOption::IndicesOption(std::string_view name, std::string_view description, bool allow_empty)
-    : IndicesOption(name, description, NormalizeIndices, nullptr, allow_empty) {}
+    : IndicesOption(name, description, util::NormalizeIndices<IndicesType>, nullptr, allow_empty) {}
 
 std::string_view IndicesOption::GetName() const {
     return common_option_.GetName();

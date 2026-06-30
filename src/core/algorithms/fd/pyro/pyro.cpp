@@ -13,9 +13,7 @@
 
 namespace algos {
 
-std::mutex search_spaces_mutex;
-
-Pyro::Pyro() : PliBasedFDAlgorithm() {
+Pyro::Pyro() : LegacyPliBasedFDAlgorithm() {
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
@@ -72,13 +70,13 @@ void Pyro::ExecuteInternal() {
 
     unsigned int total_error_calc_count = 0;
 
-    auto const work_on_search_space = [](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
-                                         ProfilingContext* profiling_context,
-                                         [[maybe_unused]] int id) {
+    auto const work_on_search_space = [this](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
+                                             ProfilingContext* profiling_context,
+                                             [[maybe_unused]] int id) {
         while (true) {
             std::unique_ptr<SearchSpace> polled_space;
             {
-                std::scoped_lock<std::mutex> lock(search_spaces_mutex);
+                std::scoped_lock<std::mutex> lock(search_spaces_mutex_);
                 if (search_spaces.empty()) {
                     break;
                 }
@@ -103,7 +101,7 @@ void Pyro::ExecuteInternal() {
     }
 
     LOG_INFO("Error calculation count: {}", total_error_calc_count);
-    LOG_INFO("HASH: {}", PliBasedFDAlgorithm::Fletcher16());
+    LOG_INFO("HASH: {}", LegacyPliBasedFDAlgorithm::Fletcher16());
 }
 
 }  // namespace algos

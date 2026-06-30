@@ -12,7 +12,7 @@
 
 namespace algos {
 
-class FastFDs : public PliBasedFDAlgorithm {
+class FastFDs : public LegacyPliBasedFDAlgorithm {
 public:
     FastFDs();
 

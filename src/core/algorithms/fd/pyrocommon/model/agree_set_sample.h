@@ -39,21 +39,21 @@ public:
     virtual ~AgreeSetSample() = default;
 
 protected:
-    ::ColumnLayoutRelationData const* relation_data_;
+    ::LegacyColumnLayoutRelationData const* relation_data_;
     Vertical focus_;
     unsigned int sample_size_;
     unsigned long long population_size_;
-    AgreeSetSample(ColumnLayoutRelationData const* relation_data, Vertical focus,
+    AgreeSetSample(LegacyColumnLayoutRelationData const* relation_data, Vertical focus,
                    unsigned int sample_size, unsigned long long population_size);
 
     template <typename T>
-    static std::unique_ptr<T> CreateFocusedFor(ColumnLayoutRelationData const* relation,
+    static std::unique_ptr<T> CreateFocusedFor(LegacyColumnLayoutRelationData const* relation,
                                                Vertical const& restriction_vertical,
                                                PositionListIndex const* restriction_pli,
                                                unsigned int sample_size, CustomRandom& random);
 
 private:
-    static double std_dev_smoothing_;
+    static constexpr double kStdDevSmoothing = 1;
 
     double RatioToRelationRatio(double ratio) const {
         return ratio * population_size_ / relation_data_->GetNumTuplePairs();

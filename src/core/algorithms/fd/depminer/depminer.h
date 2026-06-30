@@ -5,7 +5,7 @@
 
 namespace algos {
 
-class Depminer : public PliBasedFDAlgorithm {
+class Depminer : public LegacyPliBasedFDAlgorithm {
 private:
     static CMAXSet GenFirstLevel(std::vector<CMAXSet> const& cmax_sets, Column const& attribute,
                                  std::unordered_set<Vertical>& level);

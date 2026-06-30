@@ -59,7 +59,7 @@ Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_plis) {
     return pli_records;
 }
 
-PLIs BuildPLIs(ColumnLayoutRelationData* relation) {
+PLIs BuildPLIs(LegacyColumnLayoutRelationData* relation) {
     PLIs plis;
     std::transform(relation->GetColumnData().begin(), relation->GetColumnData().end(),
                    std::back_inserter(plis),
@@ -72,7 +72,8 @@ PLIs BuildPLIs(ColumnLayoutRelationData* relation) {
 namespace algos::hy {
 using namespace util;
 
-std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationData* relation) {
+std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(
+        LegacyColumnLayoutRelationData* relation) {
     PLIs plis = BuildPLIs(relation);
 
     auto og_mapping = SortAndGetMapping(plis);

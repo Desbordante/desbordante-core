@@ -2,7 +2,7 @@
 
 namespace model {
 
-IdentifierSet::IdentifierSet(ColumnLayoutRelationData const* const relation, int index)
+IdentifierSet::IdentifierSet(LegacyColumnLayoutRelationData const* const relation, int index)
     : relation_(relation), tuple_index_(index) {
     data_.reserve(relation_->GetNumColumns());
     for (ColumnData const& col : relation_->GetColumnData()) {

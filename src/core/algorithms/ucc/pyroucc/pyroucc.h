@@ -12,7 +12,7 @@ namespace algos {
 
 class PyroUCC : public DependencyConsumer, public UCCAlgorithm {
 private:
-    std::unique_ptr<ColumnLayoutRelationData> relation_;
+    std::unique_ptr<LegacyColumnLayoutRelationData> relation_;
 
     std::unique_ptr<SearchSpace> search_space_;
 

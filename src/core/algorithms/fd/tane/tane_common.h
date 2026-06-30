@@ -9,7 +9,7 @@
 
 namespace algos::tane {
 
-class TaneCommon : public PliBasedFDAlgorithm {
+class TaneCommon : public LegacyPliBasedFDAlgorithm {
 protected:
     config::ErrorType max_fd_error_;
     config::ErrorType max_ucc_error_;
@@ -25,7 +25,7 @@ private:
                                                [[maybe_unused]] model::PLIWS const* rhs_pli,
                                                model::PLIWS const* joint_pli) = 0;
     static double CalculateUccError(model::PositionListIndex const* pli,
-                                    ColumnLayoutRelationData const* relation_data);
+                                    LegacyColumnLayoutRelationData const* relation_data);
     void RegisterAndCountFd(Vertical lhs, Column const* rhs);
 
 public:

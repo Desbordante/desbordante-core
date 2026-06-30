@@ -14,7 +14,7 @@ namespace algos {
 
 class HPIValid : public UCCAlgorithm {
 private:
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<LegacyColumnLayoutRelationData> relation_;
 
     void LoadDataInternal() override;
     void ExecuteInternal() override;

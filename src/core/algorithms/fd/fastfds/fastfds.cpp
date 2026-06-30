@@ -19,7 +19,7 @@ namespace algos {
 
 using std::vector, std::set;
 
-FastFDs::FastFDs() : PliBasedFDAlgorithm() {
+FastFDs::FastFDs() : LegacyPliBasedFDAlgorithm() {
     RegisterOptions();
 }
 

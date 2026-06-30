@@ -11,7 +11,7 @@
 
 #include "core/model/table/column.h"
 
-class ColumnLayoutRelationData;
+class LegacyColumnLayoutRelationData;
 
 namespace model {
 
@@ -30,7 +30,7 @@ protected:
     }
 
     static void SortClusters(std::deque<Cluster>& clusters);
-    static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
+    static bool TakeProbe(int position, LegacyColumnLayoutRelationData& relation_data,
                           Vertical const& probing_columns, std::vector<int>& probe);
 
 private:
@@ -42,13 +42,13 @@ private:
     unsigned int freq_ = 0;
 
 public:
-    static int const kSingletonValueId;
+    static constexpr int kSingletonValueId = 0;
 
     PositionListIndex(std::deque<Cluster> index, unsigned int size, double entropy,
                       unsigned long long nep, unsigned int relation_size,
                       double inverted_entropy = 0, double gini_impurity = 0);
 
-    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data);
+    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int> const& data);
 
     static std::unordered_map<int, unsigned> CreateFrequencies(
             Cluster const& cluster, std::vector<int> const& probing_table);
@@ -146,7 +146,7 @@ public:
     std::unique_ptr<PositionListIndex> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;
     std::unique_ptr<PositionListIndex> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
+                                                LegacyColumnLayoutRelationData& relation_data);
     std::string ToString() const;
 };
 

@@ -82,12 +82,15 @@ target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
 target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
     ${NAME}
-    PUBLIC ${DESBORDANTE_PREFIX}::model::types
-    PRIVATE ${DESBORDANTE_PREFIX}::util
-            ${DESBORDANTE_PREFIX}::config
-            ${DESBORDANTE_PREFIX}::parser::csv
-            ${DESBORDANTE_PREFIX}::parser::sequence
-            ${DESBORDANTE_PREFIX}::model::sequence
-            spdlog::spdlog_header_only
-            Boost::headers
+    PUBLIC ${DESBORDANTE_PREFIX}::model::types Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
+            ${DESBORDANTE_PREFIX}::parser::csv ${DESBORDANTE_PREFIX}::parser::sequence
+            ${DESBORDANTE_PREFIX}::model::sequence spdlog::spdlog_header_only
+)
+
+set(NAME algos.partition_only_algorithm)
+desbordante_add_lib(NAME)
+target_sources(${NAME} PRIVATE partition_only_algorithm.cpp)
+target_link_libraries(
+    ${NAME} PUBLIC ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
 )

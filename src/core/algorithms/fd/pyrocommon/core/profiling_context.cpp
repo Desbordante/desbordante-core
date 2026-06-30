@@ -10,7 +10,7 @@
 using std::shared_ptr;
 
 ProfilingContext::ProfilingContext(algos::pyro::Parameters parameters,
-                                   ColumnLayoutRelationData* relation_data,
+                                   LegacyColumnLayoutRelationData* relation_data,
                                    std::function<void(PartialKey const&)> const& ucc_consumer,
                                    std::function<void(PartialFD const&)> const& fd_consumer,
                                    CachingMethod const& caching_method,
@@ -52,7 +52,7 @@ ProfilingContext::ProfilingContext(algos::pyro::Parameters parameters,
 
 ProfilingContext::~ProfilingContext() = default;
 
-double ProfilingContext::GetMaximumEntropy(ColumnLayoutRelationData const* relation_data) {
+double ProfilingContext::GetMaximumEntropy(LegacyColumnLayoutRelationData const* relation_data) {
     auto& columns = relation_data->GetColumnData();
     auto max_column = std::max_element(columns.begin(), columns.end(), [](auto& cd1, auto& cd2) {
         return cd1.GetPositionListIndex()->GetEntropy() < cd2.GetPositionListIndex()->GetEntropy();
@@ -60,7 +60,7 @@ double ProfilingContext::GetMaximumEntropy(ColumnLayoutRelationData const* relat
     return max_column->GetPositionListIndex()->GetEntropy();
 }
 
-double ProfilingContext::GetMinEntropy(ColumnLayoutRelationData const* relation_data) {
+double ProfilingContext::GetMinEntropy(LegacyColumnLayoutRelationData const* relation_data) {
     auto& columns = relation_data->GetColumnData();
     auto min_column = std::min_element(columns.begin(), columns.end(), [](auto& cd1, auto& cd2) {
         return cd1.GetPositionListIndex()->GetEntropy() < cd2.GetPositionListIndex()->GetEntropy();
@@ -68,7 +68,7 @@ double ProfilingContext::GetMinEntropy(ColumnLayoutRelationData const* relation_
     return min_column->GetPositionListIndex()->GetEntropy();
 }
 
-double ProfilingContext::GetMedianEntropy(ColumnLayoutRelationData const* relation_data) {
+double ProfilingContext::GetMedianEntropy(LegacyColumnLayoutRelationData const* relation_data) {
     std::vector<double> vals;
 
     for (auto& column : relation_data->GetColumnData()) {
@@ -80,7 +80,8 @@ double ProfilingContext::GetMedianEntropy(ColumnLayoutRelationData const* relati
     return GetMedianValue(std::move(vals), "MedianEntropy");
 }
 
-double ProfilingContext::GetMedianInvertedEntropy(ColumnLayoutRelationData const* relation_data) {
+double ProfilingContext::GetMedianInvertedEntropy(
+        LegacyColumnLayoutRelationData const* relation_data) {
     std::vector<double> vals;
 
     for (auto& column : relation_data->GetColumnData()) {
@@ -92,7 +93,7 @@ double ProfilingContext::GetMedianInvertedEntropy(ColumnLayoutRelationData const
     return GetMedianValue(std::move(vals), "MedianInvertedEntropy");
 }
 
-double ProfilingContext::GetMeanEntropy(ColumnLayoutRelationData const* relation_data) {
+double ProfilingContext::GetMeanEntropy(LegacyColumnLayoutRelationData const* relation_data) {
     double e = 0;
 
     for (auto& column : relation_data->GetColumnData()) {
@@ -101,7 +102,7 @@ double ProfilingContext::GetMeanEntropy(ColumnLayoutRelationData const* relation
     return e / relation_data->GetColumnData().size();
 }
 
-double ProfilingContext::GetMedianGini(ColumnLayoutRelationData const* relation_data) {
+double ProfilingContext::GetMedianGini(LegacyColumnLayoutRelationData const* relation_data) {
     std::vector<double> vals;
 
     for (auto& column : relation_data->GetColumnData()) {
@@ -113,7 +114,7 @@ double ProfilingContext::GetMedianGini(ColumnLayoutRelationData const* relation_
     return GetMedianValue(std::move(vals), "MedianGini");
 }
 
-double ProfilingContext::SetMaximumEntropy(ColumnLayoutRelationData const* relation_data,
+double ProfilingContext::SetMaximumEntropy(LegacyColumnLayoutRelationData const* relation_data,
                                            CachingMethod const& caching_method) {
     switch (caching_method) {
         case CachingMethod::kEntropy:
