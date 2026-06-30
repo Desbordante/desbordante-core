@@ -187,6 +187,17 @@ desbordante_add_test(
     Boost::headers
 )
 desbordante_add_test(
+    dd.add_verifier
+    SRCS
+    test_add_verifier.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::dd::add_verifier
+    ${DESBORDANTE_PREFIX}::testlib::common
+    spdlog::spdlog_header_only
+    magic_enum::magic_enum
+    Boost::headers
+)
+desbordante_add_test(
     dd.split
     SRCS
     test_split.cpp
