@@ -18,6 +18,7 @@ set(SUBDIRS
     od/fastod
     od/order
     od/set_based_verifier
+    pac
     statistics
     ucc
     sd
