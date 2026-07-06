@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/functional/hash.hpp>
+
 #include "config/indices/type.h"
 
 namespace algos::pattern_fd {
@@ -29,15 +31,14 @@ private:
     Pos position_;
 
 public:
-    TokenPatternInfo(TokenNGram const& token, Pos position) : token_(token), position_(position) {}
+    TokenPatternInfo(TokenNGram token, Pos position) : token_(std::move(token)), position_(position) {}
 
     std::string Type() const override {
         return "TokenPatternInfo";
     }
 
-    bool operator==(TokenPatternInfo const& other) const {
-        return token_ == other.token_ && position_ == other.position_;
-    }
+    bool operator==(TokenPatternInfo const& other) const = default;
+    bool operator!=(TokenPatternInfo const& other) const = default;
 
     TokenNGram const& Token() const {
         return token_;
@@ -51,18 +52,12 @@ public:
 class RegexPatternInfo : public PatternInfo {
 private:
     std::string regex_;
+    std::regex compiled_regex_;
     std::vector<std::pair<std::string, size_t>> literals_;
     size_t num_constrained_groups_ = 0;
 
-    std::string ToRegex(std::string const& pattern_regex);
-    void ExtractLiterals(std::string const& p);
-    void CountConstrainedGroups(std::string const& pattern_regex);
-
 public:
-    RegexPatternInfo(std::string const& pattern) : regex_(ToRegex(pattern)) {
-        CountConstrainedGroups(pattern);
-        ExtractLiterals(pattern);
-    }
+    explicit RegexPatternInfo(std::string const& pattern);
 
     std::string const& Regex() const {
         return regex_;
@@ -72,7 +67,7 @@ public:
         return "RegexPatternInfo";
     }
 
-    std::vector<std::pair<std::string, size_t>> GetLiterals() const {
+    std::vector<std::pair<std::string, size_t>> const& GetLiterals() const {
         return literals_;
     }
 
@@ -97,13 +92,12 @@ using PatternsTable = std::vector<std::unordered_map<
 
 }  // namespace algos::pattern_fd
 
-namespace std {
 template <>
-struct hash<algos::pattern_fd::TokenPatternInfo> {
+struct std::hash<algos::pattern_fd::TokenPatternInfo> {
     size_t operator()(algos::pattern_fd::TokenPatternInfo const& t) const noexcept {
-        size_t h1 = std::hash<std::string_view>{}(t.Token());
-        size_t h2 = std::hash<algos::pattern_fd::Pos>{}(t.Position());
-        return h1 ^ (h2 << 1);
+        size_t seed = 0;
+        boost::hash_combine(seed, t.Token());
+        boost::hash_combine(seed, t.Position());
+        return seed;
     }
 };
-}  // namespace std

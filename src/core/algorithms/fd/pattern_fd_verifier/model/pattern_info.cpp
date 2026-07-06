@@ -1,73 +1,96 @@
 #include "pattern_info.h"
 
-#include <regex>
+#include <charconv>
+
+namespace {
+
+constexpr bool IsSpecialRegexChar(char c) {
+    return c == '.' || c == '^' || c == '$' || c == '|' || c == '?' || c == '+' ||
+           c == '*' || c == '[' || c == ']' || c == '(' || c == ')';
+}
+
+}  // namespace
 
 namespace algos::pattern_fd {
 
-std::string RegexPatternInfo::ToRegex(std::string const& pattern_regex) {
-    std::string regex_str;
+RegexPatternInfo::RegexPatternInfo(std::string const& pattern) {
+    regex_.reserve(pattern.size() * 2);
+    literals_.reserve(pattern.size() / 2);
+
+    std::string current_literal;
+    size_t pos = 0;
+
+    auto flush_literal = [&]() {
+        if (!current_literal.empty()) {
+            literals_.emplace_back(current_literal, pos - current_literal.size());
+            current_literal.clear();
+        }
+    };
+
+    std::string_view p(pattern);
     size_t i = 0;
 
-    while (i < pattern_regex.size()) {
-        if (pattern_regex[i] == '<') {
-            regex_str += '(';
-            i++;
-            continue;
-        }
-        if (pattern_regex[i] == '>') {
-            regex_str += ')';
-            i++;
-            continue;
-        }
+    while (i < p.size()) {
+        char c = p[i];
 
-        if (pattern_regex[i] == '\\' && i + 1 < pattern_regex.size()) {
-            switch (pattern_regex[i + 1]) {
-                case 'A':
-                    regex_str += ".";
-                    break;
-                case 'D':
-                    regex_str += "\\d";
-                    break;
-                case 'U':
-                    regex_str += "[A-Z]";
-                    break;
-                case 'L':
-                    regex_str += "[a-z]";
-                    break;
-                case 'S':
-                    regex_str += "[^\\w]";
-                    break;
-                default:
-                    throw std::invalid_argument("Invalid escape sequence: \\" +
-                                                std::string(1, pattern_regex[i + 1]));
+        if (c == '<') {
+            flush_literal();
+            regex_ += '(';
+            num_constrained_groups_++;
+            pos += 1;
+            i++;
+        } else if (c == '>') {
+            flush_literal();
+            regex_ += ')';
+            pos += 1;
+            i++;
+        } else if (c == '\\') {
+            flush_literal();
+            if (i + 1 >= p.size()) {
+                throw std::invalid_argument("Invalid escape sequence at end of pattern");
             }
+            char next = p[i + 1];
+            switch (next) {
+                case 'A': regex_ += ".";      break;
+                case 'D': regex_ += "\\d";    break;
+                case 'U': regex_ += "[A-Z]";  break;
+                case 'L': regex_ += "[a-z]";  break;
+                case 'S': regex_ += "[^\\w]"; break;
+                default:
+                    throw std::invalid_argument(std::string("Invalid escape sequence: \\") + next);
+            }
+            pos += 1;
             i += 2;
-        } else if (pattern_regex[i] == '{') {
-            size_t end = pattern_regex.find('}', i);
-            if (end == std::string::npos) {
+        } else if (c == '{') {
+            size_t end = p.find('}', i);
+            if (end == std::string_view::npos) {
                 throw std::invalid_argument("Unclosed quantifier at position " + std::to_string(i));
             }
-            std::string count_str = pattern_regex.substr(i + 1, end - i - 1);
-            regex_str += "{" + count_str + "}";
+            size_t count = 0;
+            auto result = std::from_chars(p.data() + i + 1, p.data() + end, count);
+            if (result.ec != std::errc()) {
+                throw std::invalid_argument("Invalid number in quantifier");
+            }
+            regex_ += '{';
+            regex_.append(p.substr(i + 1, end - i - 1));
+            regex_ += '}';
+            pos += count;
             i = end + 1;
+        } else if (IsSpecialRegexChar(c)) {
+            flush_literal();
+            regex_ += c;
+            pos += 1;
+            i++;
         } else {
-            regex_str += std::string(1, pattern_regex[i]);
+            current_literal += c;
+            regex_ += c;
+            pos += 1;
             i++;
         }
     }
-    return regex_str;
-}
 
-void RegexPatternInfo::CountConstrainedGroups(std::string const& pattern_regex) {
-    size_t i = 0;
-    while (i < pattern_regex.size()) {
-        if (pattern_regex[i] == '<') {
-            this->num_constrained_groups_++;
-            i++;
-        } else {
-            i++;
-        }
-    }
+    flush_literal();
+    compiled_regex_.assign(regex_, std::regex::optimize);
 }
 
 std::vector<std::string> RegexPatternInfo::ExtractConstrainedParts(std::string const& value) const {
@@ -77,9 +100,8 @@ std::vector<std::string> RegexPatternInfo::ExtractConstrainedParts(std::string c
     }
 
     std::smatch match_results;
-    std::regex re(this->regex_);
 
-    if (std::regex_match(value, match_results, re)) {
+    if (std::regex_match(value, match_results, compiled_regex_)) {
         for (size_t group_index = 1; group_index <= num_constrained_groups_; ++group_index) {
             if (group_index < match_results.size()) {
                 parts.push_back(match_results[group_index].str());
@@ -89,67 +111,6 @@ std::vector<std::string> RegexPatternInfo::ExtractConstrainedParts(std::string c
         }
     }
     return parts;
-}
-
-void RegexPatternInfo::ExtractLiterals(std::string const& p) {
-    std::string current;
-    size_t current_pos_in_regex = 0;
-
-    for (size_t i = 0; i < p.size(); ++i) {
-        char c = p[i];
-        if (c == '\\') {
-            if (!current.empty()) {
-                literals_.emplace_back(current, current_pos_in_regex - current.size());
-                current.clear();
-            }
-            if (i + 1 < p.size()) {
-                char next = p[i + 1];
-                switch (next) {
-                    case 'A':
-                        current_pos_in_regex += 1;
-                        break;
-                    case 'D':
-                        current_pos_in_regex += 1;
-                        break;
-                    case 'U':
-                        current_pos_in_regex += 1;
-                        break;
-                    case 'L':
-                        current_pos_in_regex += 1;
-                        break;
-                    case 'S':
-                        current_pos_in_regex += 1;
-                        break;
-                    default:
-                        break;
-                }
-                i++;
-            }
-        } else if (c == '{') {
-            size_t end_brace = p.find('}', i);
-            if (end_brace != std::string::npos) {
-                std::string num_str = p.substr(i + 1, end_brace - i - 1);
-                int count = std::stoi(num_str);
-                current_pos_in_regex += count;
-                i = end_brace;
-            }
-        } else if (c == '.' || c == '^' || c == '$' || c == '|' || c == '?' || c == '+' ||
-                   c == '*' || c == '[' || c == ']' || c == '(' || c == ')' || c == '<' ||
-                   c == '>') {
-            if (!current.empty()) {
-                literals_.emplace_back(current, current_pos_in_regex - current.size());
-                current.clear();
-            }
-            current_pos_in_regex += 1;
-        } else {
-            current += c;
-            current_pos_in_regex += 1;
-        }
-    }
-
-    if (!current.empty()) {
-        literals_.emplace_back(current, current_pos_in_regex - current.size());
-    }
 }
 
 }  // namespace algos::pattern_fd

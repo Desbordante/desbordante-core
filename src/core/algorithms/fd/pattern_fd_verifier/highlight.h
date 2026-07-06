@@ -11,13 +11,13 @@ private:
 
 public:
     Highlight(model::PLI::Cluster cluster, std::vector<size_t> violating_rows)
-        : cluster_(cluster), violating_rows_(violating_rows) {}
+        : cluster_(std::move(cluster)), violating_rows_(std::move(violating_rows)) {}
 
     model::PLI::Cluster const& GetCluster() const {
         return cluster_;
     }
 
-    std::vector<size_t> GetViolatingRows() const {
+    std::vector<size_t> const& GetViolatingRows() const {
         return violating_rows_;
     }
 };

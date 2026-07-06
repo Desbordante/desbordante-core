@@ -10,11 +10,11 @@ TokenNGramType Tokenizer::TokenizeOrNGrams(model::TypedColumnData const& column)
     std::unordered_map<int, int>
             token_counts;  // token number -> number of lines with this token number
     int non_empty_count = 0;
-    config::IndexType rows_num = column.GetNumRows();
+    size_t rows_num = column.GetNumRows();
 
     static std::regex token_regex(R"((\d*\.\d+|\W))");  // split by special symbols
 
-    for (config::IndexType row_index = 0; row_index < rows_num; row_index++) {
+    for (size_t row_index = 0; row_index < rows_num; row_index++) {
         std::string value = column.GetDataAsString(row_index);
         if (value.empty()) continue;
         non_empty_count++;
@@ -65,7 +65,7 @@ void Tokenizer::TokenizeColumn(config::IndexType column_index) {
     int non_empty_count = 0;
     int total_token_count = 0;
 
-    for (config::IndexType row_index = 0; row_index < rows_num; row_index++) {
+    for (size_t row_index = 0; row_index < rows_num; row_index++) {
         values.push_back(column.GetDataAsString(row_index));
         std::string const& value = values.back();
 
@@ -100,7 +100,7 @@ void Tokenizer::TokenizeColumn(config::IndexType column_index) {
 
     double avg_len = (non_empty_count > 0) ? static_cast<double>(total_len) / non_empty_count : 0.0;
 
-    for (config::IndexType row_index = 0; row_index < rows_num; row_index++) {
+    for (size_t row_index = 0; row_index < rows_num; row_index++) {
         std::string const value = column.GetDataAsString(row_index);
         if (value.empty()) continue;
         std::vector<TokenPatternInfo> patterns_info;
@@ -117,8 +117,8 @@ void Tokenizer::TokenizeColumn(config::IndexType column_index) {
 
 bool Tokenizer::OneValueAttribute(model::TypedColumnData const& column) {
     std::set<std::string> values;
-    config::IndexType rows_num = column.GetNumRows();
-    for (config::IndexType row_index = 0; row_index < rows_num; ++row_index) {
+    size_t rows_num = column.GetNumRows();
+    for (size_t row_index = 0; row_index < rows_num; ++row_index) {
         std::string v = column.GetDataAsString(row_index);
         if (v.size() != 0) {
             values.insert(v);

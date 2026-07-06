@@ -20,11 +20,9 @@ private:
     config::IndicesType rhs_indices_;
 
     Tokenizer tokenizer_;
-    std::unordered_map<config::IndexType,
-                       std::unordered_map<TokenPatternInfo, std::vector<size_t>>> const*
-            tokens_map_;  // maps of tokens for each column
+    TokensMap const* tokens_map_;  // maps of tokens for each column
 
-    std::vector<std::unordered_set<config::IndexType>>
+    std::vector<std::unordered_set<size_t>>
             lhs_matched_rows_;  // rows matched for each LHS index
 
     std::vector<model::PLI::Cluster> clusters_;
@@ -38,27 +36,27 @@ private:
 
     void CompareRhsValues();
 
-    std::unordered_set<config::IndexType> FindLhsMatchesForRowPattern(
+    std::unordered_set<size_t> FindLhsMatchesForRowPattern(
             std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
 
-    std::unordered_set<config::IndexType> FindRegexMatches(
+    std::unordered_set<size_t> FindRegexMatches(
             config::IndexType lhs_index,
             std::shared_ptr<RegexPatternInfo> const& regex_pattern_info);
 
-    std::map<std::vector<std::string>, std::vector<config::IndexType>> BuildLhsClusters(
-            std::unordered_set<config::IndexType> const& matched_rows,
+    std::map<std::vector<std::string>, std::vector<size_t>> BuildLhsClusters(
+            std::unordered_set<size_t> const& matched_rows,
             std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
 
     size_t CheckClustersForDeviations(
-            std::map<std::vector<std::string>, std::vector<config::IndexType>> const& lhs_clusters,
+            std::map<std::vector<std::string>, std::vector<size_t>> const& lhs_clusters,
             std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
 
     std::vector<size_t> FindDeviationsByPatternCheck(
-            std::vector<config::IndexType> const& cluster_rows,
+            std::vector<size_t> const& cluster_rows,
             std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
 
     std::vector<size_t> FindDeviationsByComparison(
-            std::vector<config::IndexType> const& cluster_rows,
+            std::vector<size_t> const& cluster_rows,
             std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
 
 public:

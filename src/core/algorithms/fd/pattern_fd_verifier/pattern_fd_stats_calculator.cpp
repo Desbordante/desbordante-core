@@ -21,12 +21,12 @@ std::vector<std::string> ExtractValues(std::shared_ptr<PatternInfo> const& patte
     return {cell_value};
 }
 
-void IntersectRowSets(std::unordered_set<config::IndexType>& main_set,
-                      std::unordered_set<config::IndexType> const& other_set) {
+void IntersectRowSets(std::unordered_set<size_t>& main_set,
+                      std::unordered_set<size_t> const& other_set) {
     if (main_set.empty()) return;
 
     if (main_set.size() > other_set.size()) {
-        std::unordered_set<config::IndexType> intersection;
+        std::unordered_set<size_t> intersection;
         for (auto const& row : other_set) {
             if (main_set.count(row)) {
                 intersection.insert(row);
@@ -45,9 +45,9 @@ void IntersectRowSets(std::unordered_set<config::IndexType>& main_set,
     }
 }
 
-std::unordered_set<config::IndexType> PatternFDStatsCalculator::FindRegexMatches(
+std::unordered_set<size_t> PatternFDStatsCalculator::FindRegexMatches(
         config::IndexType lhs_index, std::shared_ptr<RegexPatternInfo> const& regex_pattern_info) {
-    std::unordered_set<config::IndexType> search_space;
+    std::unordered_set<size_t> search_space;
     auto const& literals = regex_pattern_info->GetLiterals();
 
     if (!literals.empty()) {
@@ -73,12 +73,12 @@ std::unordered_set<config::IndexType> PatternFDStatsCalculator::FindRegexMatches
     } else {
         size_t rows_num = typed_relation_->GetNumRows();
         search_space.reserve(rows_num);
-        for (config::IndexType i = 0; i < rows_num; ++i) {
+        for (size_t i = 0; i < rows_num; ++i) {
             search_space.insert(i);
         }
     }
 
-    std::unordered_set<config::IndexType> regex_matches;
+    std::unordered_set<size_t> regex_matches;
     regex_matches.reserve(search_space.size());
 
     std::regex re(regex_pattern_info->Regex());
@@ -91,9 +91,9 @@ std::unordered_set<config::IndexType> PatternFDStatsCalculator::FindRegexMatches
     return regex_matches;
 }
 
-std::unordered_set<config::IndexType> PatternFDStatsCalculator::FindLhsMatchesForRowPattern(
+std::unordered_set<size_t> PatternFDStatsCalculator::FindLhsMatchesForRowPattern(
         std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns) {
-    std::unordered_set<config::IndexType> matched_rows;
+    std::unordered_set<size_t> matched_rows;
     bool first_lhs = true;
 
     for (auto const& lhs_index : lhs_indices_) {
@@ -102,7 +102,7 @@ std::unordered_set<config::IndexType> PatternFDStatsCalculator::FindLhsMatchesFo
             continue;
         }
 
-        std::unordered_set<config::IndexType> current_attr_matches;
+        std::unordered_set<size_t> current_attr_matches;
         auto const& pattern_info = it->second;
 
         if (pattern_info->Type() == "TokenPatternInfo") {
@@ -131,7 +131,7 @@ std::unordered_set<config::IndexType> PatternFDStatsCalculator::FindLhsMatchesFo
     if (first_lhs) {
         size_t rows_num = typed_relation_->GetNumRows();
         matched_rows.reserve(rows_num);
-        for (config::IndexType i = 0; i < rows_num; ++i) {
+        for (size_t i = 0; i < rows_num; ++i) {
             matched_rows.insert(i);
         }
     }
@@ -146,11 +146,11 @@ void PatternFDStatsCalculator::FindLhsMatches() {
 }
 
 std::vector<size_t> PatternFDStatsCalculator::FindDeviationsByPatternCheck(
-        std::vector<config::IndexType> const& cluster_rows,
+        std::vector<size_t> const& cluster_rows,
         std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns) {
     std::vector<size_t> error_rows;
     error_rows.reserve(cluster_rows.size());
-    for (config::IndexType row_index : cluster_rows) {
+    for (size_t row_index : cluster_rows) {
         for (auto const& rhs_index : rhs_indices_) {
             auto it = patterns.find(rhs_index);
             if (it == patterns.end() || !it->second) continue;
@@ -182,11 +182,11 @@ std::vector<size_t> PatternFDStatsCalculator::FindDeviationsByPatternCheck(
 }
 
 std::vector<size_t> PatternFDStatsCalculator::FindDeviationsByComparison(
-        std::vector<config::IndexType> const& cluster_rows,
+        std::vector<size_t> const& cluster_rows,
         std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns) {
     if (cluster_rows.size() < 2) return {};
 
-    std::map<std::vector<std::string>, std::vector<config::IndexType>> rhs_value_groups;
+    std::map<std::vector<std::string>, std::vector<size_t>> rhs_value_groups;
     std::vector<std::string> rhs_key;
 
     for (auto const& row_index : cluster_rows) {
@@ -231,7 +231,7 @@ std::vector<size_t> PatternFDStatsCalculator::FindDeviationsByComparison(
 }
 
 size_t PatternFDStatsCalculator::CheckClustersForDeviations(
-        std::map<std::vector<std::string>, std::vector<config::IndexType>> const& lhs_clusters,
+        std::map<std::vector<std::string>, std::vector<size_t>> const& lhs_clusters,
         std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns) {
     size_t total_violations = 0;
     for (auto const& [lhs_key, cluster_rows] : lhs_clusters) {
@@ -269,12 +269,12 @@ size_t PatternFDStatsCalculator::CheckClustersForDeviations(
     return total_violations;
 }
 
-std::map<std::vector<std::string>, std::vector<config::IndexType>>
+std::map<std::vector<std::string>, std::vector<size_t>>
 PatternFDStatsCalculator::BuildLhsClusters(
-        std::unordered_set<config::IndexType> const& matched_rows,
+        std::unordered_set<size_t> const& matched_rows,
         std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns) {
-    std::map<std::vector<std::string>, std::vector<config::IndexType>> lhs_clusters;
-    for (config::IndexType row_index : matched_rows) {
+    std::map<std::vector<std::string>, std::vector<size_t>> lhs_clusters;
+    for (size_t row_index : matched_rows) {
         std::vector<std::string> lhs_key;
         lhs_key.reserve(lhs_indices_.size());
         bool key_extraction_failed = false;
