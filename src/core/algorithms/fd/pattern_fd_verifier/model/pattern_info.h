@@ -31,7 +31,8 @@ private:
     Pos position_;
 
 public:
-    TokenPatternInfo(TokenNGram token, Pos position) : token_(std::move(token)), position_(position) {}
+    TokenPatternInfo(TokenNGram token, Pos position)
+        : token_(std::move(token)), position_(position) {}
 
     std::string Type() const override {
         return "TokenPatternInfo";
