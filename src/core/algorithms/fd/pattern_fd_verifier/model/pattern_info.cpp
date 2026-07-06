@@ -5,8 +5,8 @@
 namespace {
 
 constexpr bool IsSpecialRegexChar(char c) {
-    return c == '.' || c == '^' || c == '$' || c == '|' || c == '?' || c == '+' ||
-           c == '*' || c == '[' || c == ']' || c == '(' || c == ')';
+    return c == '.' || c == '^' || c == '$' || c == '|' || c == '?' || c == '+' || c == '*' ||
+           c == '[' || c == ']' || c == '(' || c == ')';
 }
 
 }  // namespace
@@ -51,11 +51,21 @@ RegexPatternInfo::RegexPatternInfo(std::string const& pattern) {
             }
             char next = p[i + 1];
             switch (next) {
-                case 'A': regex_ += ".";      break;
-                case 'D': regex_ += "\\d";    break;
-                case 'U': regex_ += "[A-Z]";  break;
-                case 'L': regex_ += "[a-z]";  break;
-                case 'S': regex_ += "[^\\w]"; break;
+                case 'A': 
+                    regex_ += ".";
+                    break;
+                case 'D':
+                    regex_ += "\\d";
+                    break;
+                case 'U':
+                    regex_ += "[A-Z]";
+                    break;
+                case 'L':
+                    regex_ += "[a-z]";
+                    break;
+                case 'S':
+                    regex_ += "[^\\w]";
+                    break;
                 default:
                     throw std::invalid_argument(std::string("Invalid escape sequence: \\") + next);
             }
