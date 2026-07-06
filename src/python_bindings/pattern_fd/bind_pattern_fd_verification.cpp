@@ -1,6 +1,7 @@
 #include "bind_pattern_fd_verification.h"
 
 #include <pybind11/pybind11.h>
+
 #include <pybind11/stl.h>
 
 #include "algorithms/fd/pattern_fd_verifier/pattern_fd_verifier.h"
@@ -11,7 +12,7 @@ namespace py = pybind11;
 }  // namespace
 
 namespace python_bindings {
-void BindPatternFDVerification(py::module_ &main_module) {
+void BindPatternFDVerification(py::module_& main_module) {
     using namespace algos;
     using namespace algos::pattern_fd;
 
@@ -23,15 +24,15 @@ void BindPatternFDVerification(py::module_ &main_module) {
 
     py::class_<TokenPatternInfo, PatternInfo, std::shared_ptr<TokenPatternInfo>>(
             pattern_fd_verification_module, "Token")
-            .def(py::init<std::string const &, Pos>(), py::arg("token"), py::arg("position"))
+            .def(py::init<std::string const&, Pos>(), py::arg("token"), py::arg("position"))
             .def("type", &TokenPatternInfo::Type)
             .def_property_readonly(
-                    "token", [](TokenPatternInfo const &self) { return std::string(self.Token()); })
+                    "token", [](TokenPatternInfo const& self) { return std::string(self.Token()); })
             .def_property_readonly("position", &TokenPatternInfo::Position);
 
     py::class_<RegexPatternInfo, PatternInfo, std::shared_ptr<RegexPatternInfo>>(
             pattern_fd_verification_module, "Regex")
-            .def(py::init<std::string const &>(), py::arg("pattern"))
+            .def(py::init<std::string const&>(), py::arg("pattern"))
             .def("type", &RegexPatternInfo::Type);
 
     py::class_<WildcardPatternInfo, PatternInfo, std::shared_ptr<WildcardPatternInfo>>(

@@ -1,10 +1,9 @@
 #include "algorithms/fd/pattern_fd_verifier/pattern_fd_verifier.h"
 
+#include <easylogging++.h>
 #include <regex>
 #include <stdexcept>
 #include <string>
-
-#include <easylogging++.h>
 
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
