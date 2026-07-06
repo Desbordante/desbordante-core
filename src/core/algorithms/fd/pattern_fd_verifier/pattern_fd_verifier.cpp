@@ -10,7 +10,7 @@
 
 namespace algos::pattern_fd {
 
-PatternFDVerifier::PatternFDVerifier() : Algorithm({}) {
+PatternFDVerifier::PatternFDVerifier() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kTable, kEqualNulls});
