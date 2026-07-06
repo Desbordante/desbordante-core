@@ -2,12 +2,12 @@
 
 #include <limits>
 
-#include "algorithms/fd/pattern_fd_verifier/highlight.h"
-#include "algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
-#include "algorithms/fd/pattern_fd_verifier/model/tokenizer.h"
-#include "config/indices/type.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/table/position_list_index.h"
+#include "core/algorithms/fd/pattern_fd_verifier/highlight.h"
+#include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
+#include "core/algorithms/fd/pattern_fd_verifier/model/tokenizer.h"
+#include "core/config/indices/type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos::pattern_fd {
 

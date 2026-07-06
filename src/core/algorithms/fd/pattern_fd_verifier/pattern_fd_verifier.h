@@ -5,12 +5,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/fd/pattern_fd_verifier/highlight.h"
-#include "algorithms/fd/pattern_fd_verifier/pattern_fd_stats_calculator.h"
-#include "config/equal_nulls/type.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/fd/pattern_fd_verifier/highlight.h"
+#include "core/algorithms/fd/pattern_fd_verifier/pattern_fd_stats_calculator.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/indices/type.h"
+#include "core/config/tabular_data/input_table_type.h"
 
 namespace algos::pattern_fd {
 

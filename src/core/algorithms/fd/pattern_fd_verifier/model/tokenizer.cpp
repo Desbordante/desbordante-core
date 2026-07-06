@@ -2,7 +2,7 @@
 
 #include <regex>
 
-#include "model/types/type.h"
+#include "core/model/types/type.h"
 
 namespace algos::pattern_fd {
 

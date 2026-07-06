@@ -1,16 +1,16 @@
-#include "algorithms/fd/pattern_fd_verifier/pattern_fd_verifier.h"
+#include "core/algorithms/fd/pattern_fd_verifier/pattern_fd_verifier.h"
 
 #include <easylogging++.h>
 #include <regex>
 #include <stdexcept>
 #include <string>
 
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
-#include "config/names.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "util/timed_invoke.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/indices/option.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::pattern_fd {
 

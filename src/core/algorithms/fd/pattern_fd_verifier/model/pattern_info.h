@@ -8,7 +8,7 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "config/indices/type.h"
+#include "core/config/indices/type.h"
 
 namespace algos::pattern_fd {
 

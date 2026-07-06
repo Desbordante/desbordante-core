@@ -1,7 +1,7 @@
 #pragma once
 
-#include "config/indices/type.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "core/config/indices/type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 #include "pattern_info.h"
 
 namespace algos::pattern_fd {
