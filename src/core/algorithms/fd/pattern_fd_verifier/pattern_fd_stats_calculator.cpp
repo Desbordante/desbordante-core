@@ -269,8 +269,7 @@ size_t PatternFDStatsCalculator::CheckClustersForDeviations(
     return total_violations;
 }
 
-std::map<std::vector<std::string>, std::vector<size_t>>
-PatternFDStatsCalculator::BuildLhsClusters(
+std::map<std::vector<std::string>, std::vector<size_t>> PatternFDStatsCalculator::BuildLhsClusters(
         std::unordered_set<size_t> const& matched_rows,
         std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns) {
     std::map<std::vector<std::string>, std::vector<size_t>> lhs_clusters;
