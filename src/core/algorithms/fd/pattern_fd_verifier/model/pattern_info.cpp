@@ -51,7 +51,7 @@ RegexPatternInfo::RegexPatternInfo(std::string const& pattern) {
             }
             char next = p[i + 1];
             switch (next) {
-                case 'A': 
+                case 'A':
                     regex_ += ".";
                     break;
                 case 'D':
