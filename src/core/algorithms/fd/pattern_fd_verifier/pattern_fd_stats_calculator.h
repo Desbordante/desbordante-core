@@ -78,8 +78,6 @@ public:
         }
     }
 
-    PatternFDStatsCalculator() = default;
-
     void CalculateStatistics();
 
     void ResetState();
