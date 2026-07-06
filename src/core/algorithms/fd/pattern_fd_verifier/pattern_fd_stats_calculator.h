@@ -22,8 +22,7 @@ private:
     Tokenizer tokenizer_;
     TokensMap const* tokens_map_;  // maps of tokens for each column
 
-    std::vector<std::unordered_set<size_t>>
-            lhs_matched_rows_;  // rows matched for each LHS index
+    std::vector<std::unordered_set<size_t>> lhs_matched_rows_;  // rows matched for each LHS index
 
     std::vector<model::PLI::Cluster> clusters_;
     std::vector<Highlight> highlights_;
