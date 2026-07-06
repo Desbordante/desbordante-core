@@ -1,16 +1,13 @@
 #include "core/algorithms/fd/pattern_fd_verifier/pattern_fd_verifier.h"
 
 #include <easylogging++.h>
-#include <regex>
 #include <stdexcept>
-#include <string>
 
 #include "core/config/equal_nulls/option.h"
 #include "core/config/indices/option.h"
 #include "core/config/names.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::pattern_fd {
 
@@ -54,17 +51,9 @@ void PatternFDVerifier::LoadDataInternal() {
     stats_calculator_ = std::make_unique<PatternFDStatsCalculator>(typed_relation_);
 }
 
-unsigned long long PatternFDVerifier::ExecuteInternal() {
-    LOG(DEBUG) << "Starting Pattern FD verification...";
-
-    auto verification_time = ::util::TimedInvoke(&PatternFDVerifier::VerifyPatternFD, this);
-    LOG(DEBUG) << "Pattern FD verification took " << std::to_string(verification_time) << "ms";
-
-    auto stats_calculation_time =
-            ::util::TimedInvoke(&PatternFDVerifier::CalculateStatistics, this);
-    LOG(DEBUG) << "Statistics calculation took " << std::to_string(stats_calculation_time) << "ms";
-
-    return verification_time + stats_calculation_time;
+void PatternFDVerifier::ExecuteInternal() {
+    VerifyPatternFD();
+    CalculateStatistics();
 }
 
 void PatternFDVerifier::VerifyPatternFD() {

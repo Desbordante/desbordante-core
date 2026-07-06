@@ -37,7 +37,7 @@ private:
     void RegisterOptions();
     void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
     void VerifyPatternFD();
 
     void CalculateStatistics() {
