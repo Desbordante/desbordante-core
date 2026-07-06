@@ -1,4 +1,4 @@
-#include "pattern_fd_stats_calculator.h"
+#include "core/algorithms/fd/pattern_fd_verifier/pattern_fd_stats_calculator.h"
 
 #include <map>
 #include <vector>

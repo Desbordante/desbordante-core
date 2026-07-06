@@ -1,6 +1,5 @@
 #include "core/algorithms/fd/pattern_fd_verifier/pattern_fd_verifier.h"
 
-#include <easylogging++.h>
 #include <stdexcept>
 
 #include "core/config/equal_nulls/option.h"

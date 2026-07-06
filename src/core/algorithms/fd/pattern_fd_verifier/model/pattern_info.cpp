@@ -1,4 +1,4 @@
-#include "pattern_info.h"
+#include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 
 #include <charconv>
 

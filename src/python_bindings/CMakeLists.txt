@@ -298,6 +298,16 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    pattern_fd
+    SRCS
+    pattern_fd/bind_pattern_fd_verification.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fd::pattern_fd_verifier
+    magic_enum::magic_enum
+    Boost::headers
+)
+
+desbordante_add_bind(
     sfd
     SRCS
     sfd/bind_sfd.cpp
