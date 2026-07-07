@@ -194,7 +194,7 @@ by following their [official guide](https://apt.kitware.com) to install the late
 Then run the following commands:
 ```sh 
 sudo apt update && sudo apt upgrade
-sudo apt install g++ cmake ninja-build libboost-all-dev python3 python3-venv
+sudo apt install g++ cmake ninja-build libboost-all-dev python3 python3-venv libicu-dev
 export CXX=g++
 ```
 The last line sets g++ as CMake compiler in your terminal session.
@@ -217,10 +217,10 @@ xcode-select --install
 ```
 Follow the prompts to continue.
 
-To install CMake and Boost on macOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
+To install the build dependencies on macOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
 installed, run the following commands:
 ```sh
-brew install cmake boost
+brew install cmake boost icu4c
 ```
 After installation, check `cmake --version`. If command is not found, then you need to add to environment path to
 homebrew installed packages. To do this open `~/.zprofile` (for Zsh) or
