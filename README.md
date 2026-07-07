@@ -1,8 +1,9 @@
 [![Downloads](https://static.pepy.tech/badge/desbordante)](https://pepy.tech/project/desbordante)
 [![Downloads](https://static.pepy.tech/badge/desbordante/month)](https://pepy.tech/project/desbordante)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 <p>
-   <img src="https://github.com/Desbordante/desbordante-core/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
+   <img src="https://github.com/Desbordante/desbordante-core/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a" alt="Desbordante logo"/>
 </p>
 
 # General
@@ -29,24 +30,30 @@ The currently supported data patterns are:
 * Numerical dependencies (validation)
 * Graph functional dependencies (discovery and validation)
 * Conditional functional dependencies (discovery and validation)
+* Conditional inclusion dependencies (discovery and validation)
 * Inclusion dependencies
    - Exact inclusion dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Inclusion_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
    - Approximate inclusion dependencies, with $g^{'}_{3}$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Inclusion_Dependencies%20Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
 * Order dependencies:
    - set-based axiomatization (discovery and validation including approximate)
    - list-based axiomatization (discovery)
+   - Approximate order dependencies (validation)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Algebraic_Constraints.ipynb))
 * Differential Dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Differential_Dependencies.ipynb) and validation)
+* Graph differential dependencies (validation)
 * Unique column combinations:
    - Exact unique column combination ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Unique_Column_Combinations_Mining.ipynb) and validation)
    - Approximate unique column combination, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Unique_Column_Combinations_Mining.ipynb) and validation)
-* Association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Association_Rules.ipynb))
+* Association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Association_Rules.ipynb) and [validation](https://github.com/Desbordante/desbordante-core/blob/main/examples/basic/verifying_ar.py))
 * Numerical association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Numerical_Association_Rules.ipynb))
 * Matching dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Matching_Dependencies.ipynb) and validation)
 * Denial constraints
    - Exact denial constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
-   - Approximate denial constraints, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
+    - Approximate denial constraints, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
+* Sequential dependencies (validation)
+* Frequent subgraphs (discovery)
+* Relaxed functional dependencies (discovery)
 
 The discovered patterns can have many uses:
 * For scientific data, especially those obtained experimentally, an interesting pattern allows to formulate a hypothesis that could lead to a scientific discovery. In some cases it even allows to draw conclusions immediately, if there is enough data. At the very least, the found pattern can provide a direction for further study. 
@@ -59,7 +66,21 @@ Desbordante can be used via three interfaces:
 * **Python bindings.** Desbordante functionality can be accessed from within Python programs by employing the Desbordante Python library. This interface offers everything that is currently provided by the console version and allows advanced use, such as building interactive applications and designing scenarios for solving a particular real-life task. Relational data processing algorithms accept pandas DataFrames as input, allowing the user to conveniently preprocess the data before mining patterns.
 * **Web application.** There is a web application that provides discovery and validation tasks with a rich interactive interface where results can be conveniently visualized. However, currently it supports a limited number of patterns and should be considered more as an interactive demo.
 
-A brief introduction to the tool and its use cases can be found [here](https://medium.com/@chernishev/exploratory-data-analysis-with-desbordante-4b97299cce07) (in English) and [here](https://habr.com/ru/company/unidata/blog/667636/) (in Russian). Next, a list of various articles and guides can be found [here](https://desbordante.unidata-platform.ru/papers). Finally, an extensive list of tutorial examples that cover each supported pattern is available [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
+A brief introduction to the tool and its use cases can be found [here](https://medium.com/@chernishev/exploratory-data-analysis-with-desbordante-4b97299cce07) (in English) and [here](https://habr.com/ru/company/unidata/blog/667636/) (in Russian). Next, a list of various articles and guides can be found [here](https://desbordante.unidata-platform.ru/papers) <!-- currently unreachable -->. Finally, an extensive list of tutorial examples that cover each supported pattern is available [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
+
+## Table of Contents
+
+- [General](#general)
+- [Console](#console)
+- [Python bindings](#python-bindings)
+- [Web interface](#web-interface)
+- [I still don't understand how to use Desbordante and patterns :(](#i-still-dont-understand-how-to-use-desbordante-and-patterns-)
+- [Papers about patterns](#papers-about-patterns)
+- [Installation](#installation)
+- [Build instructions](#build-instructions)
+- [Troubleshooting](#troubleshooting)
+- [Cite](#cite)
+- [Contacts and Q&A](#contacts-and-qa)
 
 ## Console
 
@@ -79,7 +100,7 @@ The rule can be interpreted as follows: 1) the supp share of rows in the dataset
 A live Python example that provides insight into the definition and demonstrates how to use this pattern in Desbordante is available [here](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Numerical_Association_Rules.ipynb).
 3) Matching Dependencies (MD). MD is a statement of the form X -> Y, where X and Y are sets of so-called column matches. Each column match includes: 1) a metric (e.g., Levenshtein distance, Jaccard similarity, etc.), 2) a left column, and 3) a right column. Note that this pattern may involve two tables in its column matches. Finally, each match has its own threshold, which is applied to the corresponding metric and lies in the $[0; 1]$ range. The dependency can be interpreted as follows: any two records that satisfy X will also satisfy Y.
 A live Python example that provides insight into the definition and demonstrates how to use this pattern in Desbordante is available [here](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Matching_Dependencies.ipynb).
-4) Denial Constraints (DC). A denial constraint is a statement that says: "For all pairs of rows in a table, it should never happen that some condition is true". Formally, DC $\varphi$ is a conjunction of predicates of the following form: $\forall s,t \in R, s \neq t: \textlnot (p_1 \wedge \ldots \wedge p_m)$. Each $p_k$ has the form $column_i$ $op$ $column_j$, where $op \in {>, <, \leq, \geq, =, \neq}$.
+4) Denial Constraints (DC). A denial constraint is a statement that says: "For all pairs of rows in a table, it should never happen that some condition is true". Formally, DC $\varphi$ is a conjunction of predicates of the following form: $\forall s,t \in R, s \neq t: \lnot (p_1 \wedge \ldots \wedge p_m)$. Each $p_k$ has the form $column_i$ $op$ $column_j$, where $op \in {>, <, \leq, \geq, =, \neq}$.
 A live Python example that provides insight into the definition and demonstrates how to use this pattern in Desbordante is available [here](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb)
 
 Desbordante offers examples for each supported pattern, sometimes several if the pattern is complex or needs to highlight its unique characteristics compared to others in the same family. We have mentioned only a small portion here, which is available in Colab. The rest can be found in our example [folder](https://github.com/Desbordante/desbordante-core/tree/main/examples).
@@ -90,20 +111,20 @@ Finally, Desbordante allows end users to solve various data quality problems by 
 2) [Data deduplication](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Desbordante_demo_scenario_2_deduplication.ipynb)
 3) [Anomaly detection](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Desbordante_demo_scenario_3_anomaly_detection.ipynb)
 
-[There is](https://desbordante.streamlit.app/) also an interactive demo for all of them, and all of these python scripts are [here](https://github.com/Desbordante/desbordante-core/tree/main/examples/expert). The ideas behind them are briefly discussed in this [preprint](https://arxiv.org/abs/2307.14935) (Section 3).
+[There is](https://desbordante.streamlit.app/) also an interactive demo for all of them <!-- currently unreachable -->, and all of these python scripts are [here](https://github.com/Desbordante/desbordante-core/tree/main/examples/expert). The ideas behind them are briefly discussed in this [preprint](https://arxiv.org/abs/2307.14935) (Section 3).
 
 
 ## Web interface
 
 While the Python interface makes building interactive applications possible, Desbordante also offers a web interface which is aimed specifically for interactive tasks. Such tasks typically involve multiple steps and require substantial user input on each of them. Interactive tasks usually originate from Python scenarios, i.e. we select the most interesting ones and implement them in the web version. Currently, only the typo detection scenario is implemented. The web interface is also useful for pattern discovery and validation tasks: a user may specify parameters, browse results, employ advanced visualizations and filters, all in a convenient way.
 
-You can try the deployed web version [here](https://desbordante.unidata-platform.ru/). You have to register in order to process your own datasets. Keep in mind that due to high demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/Desbordante/desbordante-server-node).
+You can try the deployed web version [here](https://desbordante.unidata-platform.ru/) <!-- currently unreachable -->. You have to register in order to process your own datasets. Keep in mind that due to high demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/Desbordante/desbordante-web).
 
 ## I still don't understand how to use Desbordante and patterns :(
 
 No worries! Desbordante offers a novel type of data profiling, which may require that you first familiarize yourself with its concepts and usage. The most challenging part of Desbordante are the primitives: their definitions and applications in practice. To help you get started, here’s a step-by-step guide:
 
-1) First of all, explore the guides on our [website](https://desbordante.unidata-platform.ru/papers). Since our team currently does not include technical writers, it's possible that some guides may be missing.
+1) First of all, explore the guides on our [website](https://desbordante.unidata-platform.ru/papers) <!-- currently unreachable -->. Since our team currently does not include technical writers, it's possible that some guides may be missing.
 2) To compensate for the lack of guides, we provide several examples for each supported pattern. These examples illustrate both the pattern itself and how to use it in Python. You can check them out [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
 3) Each of our patterns was introduced in a research paper. These papers typically provide a formal definition of the pattern, examples of use, and its application scope. We recommend at least skimming through them. Don't be discouraged by the complexity of the papers! To effectively use the patterns, you only need to read the more accessible parts, such as the introduction and the example sections.
 4) Finally, do not hesitate to ask questions in the mailing list (link below) or create an issue.
@@ -170,7 +191,7 @@ To install Desbordante type:
 $ pip install desbordante
 ```
 
-However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) and macOS 15.0+ (arm64, x86_64) is supported. If the above does not work for you consider building from sources.
+However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) and macOS 11.0+ (arm64, x86_64) is supported. If the above does not work for you consider building from sources.
 
 ## Build instructions
 
@@ -335,6 +356,6 @@ or cite one of our papers, if you use a particular part:
 5) I. Barutkin, M. Fofanov, S. Belokonny, V. Makeev and G. Chernishev, "Extending Desbordante with Probabilistic Functional Dependency Discovery Support," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 158-169.
 6) A. Shlyonskikh, M. Sinelnikov, D. Nikolaev, Y. Litvinov and G. Chernishev, "Lightning Fast Matching Dependency Discovery with Desbordante," 2024 36th Conference of Open Innovations Association (FRUCT), Lappeenranta, Finland, 2024, pp. 729-740.
 
-# Contacts and Q&A
+## Contacts and Q&A
 
 If you have any questions regarding the tool usage you can ask it in our [google group](https://groups.google.com/g/desbordante). To contact dev team email George Chernishev, Maxim Strutovsky or Nikita Bobrov.
