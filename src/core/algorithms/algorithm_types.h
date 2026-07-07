@@ -12,7 +12,7 @@ using AlgorithmTypes =
                    fd_verifier::FDVerifier, HyUCC, PyroUCC, HPIValid, cfd::FDFirstAlgorithm,
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, cind::CINDVerifier,
                    Fastod, GfdValidator, EGfdValidator, NaiveGfdValidator, order::Order, dd::Split,
-                   Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier, rfd::GaRfd
+                   Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier, rfd::GaRfd,
                    ar_verifier::ARVerifier, GSpan, sd_verifier::SDVerifier, maxfem::MaxFEM>;
 
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new

@@ -86,7 +86,7 @@ private:
     void RegisterOptions();
     void MakeExecuteOptsAvailable() final;
     void LoadDataInternal() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetState() final;
 
     // helper methods
