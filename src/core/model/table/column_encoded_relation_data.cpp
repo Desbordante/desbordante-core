@@ -25,11 +25,7 @@ std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom
         }
         size_t index = 0;
         for (auto&& field : row) {
-            if (field.empty()) {
-                column_vectors[index].push_back(kNullValueId);
-            } else {
-                column_vectors[index].push_back(value_dictionary->ToInt(field));
-            }
+            column_vectors[index].push_back(value_dictionary->ToInt(field));
             unique_values[index].insert(std::move(field));
             ++index;
         }
