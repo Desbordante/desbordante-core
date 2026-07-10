@@ -5,10 +5,6 @@
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/types/bitset.h"
 
-// #ifndef PRINT_FDS
-// #define PRINT_FDS
-// #endif
-
 namespace algos {
 
 FDep::FDep() : FDAlgorithm() {
@@ -25,13 +21,10 @@ void FDep::LoadDataInternal() {
     if (number_attributes_ == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
-    column_names_.resize(number_attributes_);
 
     schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-
     for (size_t i = 0; i < number_attributes_; ++i) {
-        column_names_[i] = input_table_->GetColumnName(static_cast<int>(i));
-        schema_->AppendColumn(column_names_[i]);
+        schema_->AppendColumn(input_table_->GetColumnName(static_cast<int>(i)));
     }
 
     std::vector<std::string> next_line;
@@ -63,10 +56,6 @@ void FDep::ExecuteInternal() {
     CalculatePositiveCover(*this->neg_cover_tree_, active_path);
 
     pos_cover_tree_->FillFdCollection(this->schema_, FdList(), max_lhs_);
-
-#ifdef PRINT_FDS
-    pos_cover_tree_->printDep("recent_call_result.txt", this->column_names_);
-#endif
 }
 
 void FDep::BuildNegativeCover() {
