@@ -157,7 +157,7 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             MaxLHSOptionWork);
 
 using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
-                                    algos::Depminer, algos::FUN, algos::hyfd::HyFD, algos::PFDTane>;
+                                    algos::Depminer, algos::FUN, algos::PFDTane>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
@@ -246,7 +246,7 @@ REGISTER_TYPED_TEST_SUITE_P(FdDiscoveryTest, ThrowsOnEmpty, ReturnsEmptyOnSingle
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using AlgorithmsNew = ::testing::Types<algos::fd::FDep>;
+using AlgorithmsNew = ::testing::Types<algos::fd::FDep, algos::fd::hyfd::HyFD>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(FdDiscoveryTest, FdDiscoveryTest, AlgorithmsNew);
 

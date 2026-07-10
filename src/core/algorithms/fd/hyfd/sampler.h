@@ -2,7 +2,7 @@
 #include "core/algorithms/fd/hycommon/sampler.h"
 #include "core/algorithms/fd/hyfd/model/non_fd_list.h"
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
 class Sampler {
 private:
@@ -17,4 +17,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd

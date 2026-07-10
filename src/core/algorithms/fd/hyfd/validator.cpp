@@ -108,8 +108,8 @@ boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
     return util::IndicesToBitset(valid_rhs_ids, rhs.size());
 }
 
-size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_level,
-                                        algos::hyfd::fd_tree::FDTree& fds_tree,
+size_t AddExtendedCandidatesFromInvalid(std::vector<algos::fd::hyfd::LhsPair>& next_level,
+                                        algos::fd::hyfd::fd_tree::FDTree& fds_tree,
                                         std::vector<RawFD> const& invalid_fds,
                                         size_t num_attributes) {
     size_t candidates = 0;
@@ -141,7 +141,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_
 
 }  // namespace
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
 Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
     FDValidations result;
@@ -324,4 +324,4 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
     return {};
 }
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd

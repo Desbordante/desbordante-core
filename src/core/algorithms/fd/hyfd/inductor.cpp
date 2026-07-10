@@ -4,11 +4,13 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
 void Inductor::UpdateFdTree(NonFDList&& non_fds) {
     unsigned const max_level = non_fds.GetDepth();
 
+    // This is not an error, tree_->GetFdAndGenerals relies on at least one bit being set.
+    // Idk whether it's totally sensible, though, looks like iteration that was not thought through.
     for (unsigned level = max_level; level != 0; level--) {
         for (auto const& lhs_bits : non_fds.GetLevel(level)) {
             auto rhs_bits = lhs_bits;
@@ -48,4 +50,4 @@ void Inductor::SpecializeTreeForNonFd(boost::dynamic_bitset<> const& lhs_bits, s
     }
 }
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd
