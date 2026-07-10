@@ -13,11 +13,7 @@ INDAlgorithm::INDAlgorithm() : Algorithm() {
 void INDAlgorithm::LoadDataInternal() {
     schemas_ = std::make_shared<std::vector<std::unique_ptr<RelationalSchema>>>();
     for (auto const& input_table : input_tables_) {
-        auto schema = std::make_unique<RelationalSchema>(input_table->GetRelationName());
-        for (size_t i{0}; i < input_table->GetNumberOfColumns(); ++i) {
-            schema->AppendColumn(input_table->GetColumnName(i));
-        }
-        schemas_->push_back(std::move(schema));
+        schemas_->push_back(RelationalSchema::CreateFrom(*input_table));
     }
 
     LoadINDAlgorithmDataInternal();

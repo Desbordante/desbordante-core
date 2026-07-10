@@ -45,7 +45,6 @@ std::shared_ptr<model::PLIWS const> ColumnLayoutRelationData::CalculatePLIWS(
 
 std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         model::IDatasetStream& data_stream) {
-    auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     std::unordered_map<std::string, int> value_dictionary;
     int next_value_id = 0;
     size_t const num_columns = data_stream.GetNumberOfColumns();
@@ -78,10 +77,9 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         }
     }
 
+    auto schema = RelationalSchema::CreateFrom(data_stream);
     std::vector<ColumnData> column_data;
     for (size_t i = 0; i < num_columns; ++i) {
-        auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
-        schema->AppendColumn(std::move(column));
         auto pli = model::PLIWithSingletons::CreateFor(column_vectors[i]);
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
