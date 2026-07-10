@@ -5,7 +5,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace algos::hyfd::fd_tree {
+namespace algos::fd::hyfd::fd_tree {
 
 void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
                                      boost::dynamic_bitset<> lhs, std::vector<LhsPair>& vertices) {
@@ -118,10 +118,10 @@ std::shared_ptr<FDTreeVertex> FDTreeVertex::GetChildIfExists(size_t pos) const {
     return children_[pos];
 }
 
-void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs) const {
-    for (size_t rhs = fds_.find_first(); rhs != boost::dynamic_bitset<>::npos;
-         rhs = fds_.find_next(rhs)) {
-        fds.emplace_back(lhs, rhs);
+void FDTreeVertex::FillFDs(BitsetPairResultReporter const& report_fd,
+                           boost::dynamic_bitset<>& lhs) const {
+    if (fds_.any()) {
+        report_fd(lhs, fds_);
     }
 
     if (!HasChildren()) {
@@ -134,9 +134,9 @@ void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs
         }
 
         lhs.set(i);
-        GetChild(i)->FillFDs(fds, lhs);
+        GetChild(i)->FillFDs(report_fd, lhs);
         lhs.reset(i);
     }
 }
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace algos::fd::hyfd::fd_tree

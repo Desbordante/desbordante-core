@@ -13,26 +13,33 @@
 #include "core/algorithms/fd/hyfd/inductor.h"
 #include "core/algorithms/fd/hyfd/sampler.h"
 #include "core/algorithms/fd/hyfd/validator.h"
+#include "core/algorithms/fd/make_reordering_table_mask_pair_adder.h"
+#include "core/config/max_lhs/option.h"
 #include "core/config/names.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
-HyFD::HyFD() : FDAlgorithm() {
+HyFD::HyFD() : Algorithm() {
     RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
 
     MakeOptionsAvailable({config::names::kTable});
 }
 
-void HyFD::MakeExecuteOptsAvailableFDInternal() {
-    MakeOptionsAvailable({config::names::kThreads});
+void HyFD::ResetState() {
+    fd_view_ = nullptr;
+}
+
+void HyFD::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable({config::names::kThreads, config::names::kMaximumLhs});
 }
 
 void HyFD::LoadDataInternal() {
-    schema_ = RelationalSchema::CreateFrom(*input_table_);
+    table_header_ = model::TableHeader::FromDatasetStream(*input_table_);
 
     std::tie(plis_, pli_records_, og_mapping_) = hy::Preprocess(*input_table_);
     if (plis_->empty()) {
@@ -46,7 +53,8 @@ void HyFD::ExecuteInternal() {
 
     Sampler sampler(plis_, pli_records_, threads_num_);
 
-    auto const positive_cover_tree = std::make_shared<fd_tree::FDTree>(schema_->GetNumColumns());
+    auto const positive_cover_tree =
+            std::make_shared<fd_tree::FDTree>(table_header_.column_names.size());
     Inductor inductor(positive_cover_tree, max_lhs_);
     Validator validator(positive_cover_tree, plis_, pli_records_, threads_num_, max_lhs_);
 
@@ -66,21 +74,9 @@ void HyFD::ExecuteInternal() {
         LOG_TRACE("Cycle done");
     }
 
-    auto fds = positive_cover_tree->FillFDs();
-    RegisterFDs(std::move(fds), og_mapping_);
+    TableMaskPairFdView::Storage storage;
+    positive_cover_tree->FillFDs(MakeReorderingTableMaskPairAdder(storage, og_mapping_));
+    fd_view_ = std::make_shared<TableMaskPairFdView>(table_header_, std::move(storage));
 }
 
-void HyFD::RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> const& og_mapping) {
-    for (auto&& [lhs, rhs] : fds) {
-        boost::dynamic_bitset<> mapped_lhs =
-                hy::RestoreAgreeSet(lhs, og_mapping, schema_->GetNumColumns());
-        Vertical lhs_v(schema_.get(), std::move(mapped_lhs));
-
-        auto const mapped_rhs = og_mapping[rhs];
-        Column rhs_c(schema_.get(), schema_->GetColumn(mapped_rhs)->GetName(), mapped_rhs);
-
-        RegisterFd(std::move(lhs_v), std::move(rhs_c), schema_);
-    }
-}
-
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd

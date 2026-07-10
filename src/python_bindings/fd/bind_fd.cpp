@@ -451,12 +451,13 @@ void BindFd(py::module_& main_module) {
                  "table_name"_a, "column_names"_a, "lhs_mask_lists"_a);
 
     static constexpr auto kPyroName = "Pyro";
-    auto fd_algos_module = BindPrimitive<hyfd::HyFD, Depminer, DFD, FastFDs, FUN, Pyro>(
+    auto fd_algos_module = BindPrimitive<Depminer, DFD, FastFDs, FUN, Pyro>(
             fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
-            {"HyFD", "Depminer", "DFD", "FastFDs", "FUN", kPyroName});
+            {"Depminer", "DFD", "FastFDs", "FUN", kPyroName});
     BindFdAlgorithm<FDep>(fd_algos_module, "FDep");
     BindFdAlgorithm<Aid>(fd_algos_module, "Aid");
     BindFdAlgorithm<EulerFD>(fd_algos_module, "EulerFD");
     BindFdAlgorithm<FdMine>(fd_algos_module, "FdMine");
+    BindFdAlgorithm<hyfd::HyFD>(fd_algos_module, "HyFD");
 }
 }  // namespace python_bindings
