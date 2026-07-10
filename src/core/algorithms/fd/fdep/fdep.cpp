@@ -22,10 +22,7 @@ void FDep::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-    for (size_t i = 0; i < number_attributes_; ++i) {
-        schema_->AppendColumn(input_table_->GetColumnName(static_cast<int>(i)));
-    }
+    schema_ = RelationalSchema::CreateFrom(*input_table_);
 
     std::vector<std::string> next_line;
     while (input_table_->HasNextRow()) {

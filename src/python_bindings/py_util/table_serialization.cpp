@@ -25,12 +25,8 @@ std::shared_ptr<RelationalSchema const> DeserializeRelationalSchema(py::tuple t)
         throw std::runtime_error("Invalid state for RelationalSchema pickle!");
     }
     auto schema_name = t[0].cast<std::string>();
-    auto col_data = t[1].cast<std::vector<std::string>>();
-    auto schema = std::make_shared<RelationalSchema>(std::move(schema_name));
-    for (std::string& col_name : col_data) {
-        schema->AppendColumn(std::move(col_name));
-    }
-    return schema;
+    auto column_names = t[1].cast<std::vector<std::string>>();
+    return std::make_shared<RelationalSchema>(std::move(schema_name), std::move(column_names));
 }
 
 // relational schema conversion suitable for py::hash

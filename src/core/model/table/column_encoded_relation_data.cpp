@@ -10,7 +10,6 @@ namespace model {
 std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom(
         config::InputTable& data_stream, TableIndex table_id,
         ValueDictionaryType value_dictionary) {
-    auto schema = std::make_unique<RelationalSchema>(data_stream->GetRelationName());
     size_t const num_columns = data_stream->GetNumberOfColumns();
     std::vector<std::vector<int>> column_vectors = std::vector<std::vector<int>>(num_columns);
     std::vector<std::string> row;
@@ -35,10 +34,9 @@ std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom
         }
     }
 
+    std::unique_ptr<RelationalSchema> schema = RelationalSchema::CreateFrom(*data_stream);
     std::vector<EncodedColumnData> column_data;
     for (size_t i = 0; i < num_columns; ++i) {
-        auto column = Column(schema.get(), data_stream->GetColumnName(i), i);
-        schema->AppendColumn(std::move(column));
         column_data.emplace_back(table_id, schema->GetColumn(i), std::move(column_vectors[i]),
                                  std::move(unique_values[i]), value_dictionary);
     }

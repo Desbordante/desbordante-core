@@ -89,10 +89,7 @@ IND DeserializeInd(py::tuple t) {
     for (py::tuple const& s_state : schemas_state) {
         std::string s_name = s_state[0].cast<std::string>();
         std::vector<std::string> s_col_names = s_state[1].cast<std::vector<std::string>>();
-        auto schema = std::make_unique<RelationalSchema>(std::move(s_name));
-        for (std::string const& col_name : s_col_names) {
-            schema->AppendColumn(col_name);
-        }
+        auto schema = std::make_unique<RelationalSchema>(std::move(s_name), std::move(s_col_names));
         schemas.push_back(std::move(schema));
     }
     auto schemas_ptr =
