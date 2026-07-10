@@ -17,7 +17,6 @@ size_t CFDRelationData::GetNumRows() const {
 }
 
 std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStream& data_stream) {
-    auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     size_t num_columns = data_stream.GetNumberOfColumns();
     std::vector<CFDColumnData::ItemDictionary> item_dictionaries(num_columns);
     std::vector<std::vector<int>> columns_values(num_columns);
@@ -55,10 +54,9 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
         data_rows.push_back(std::move(row_data));
     }
 
+    auto schema = RelationalSchema::CreateFrom(data_stream);
     std::vector<CFDColumnData> column_data;
     for (size_t i = 0; i < num_columns; ++i) {
-        auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
-        schema->AppendColumn(std::move(column));
         column_data.emplace_back(schema->GetColumn(i), std::move(columns_values[i]),
                                  std::move(item_dictionaries[i]));
     }

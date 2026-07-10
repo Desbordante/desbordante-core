@@ -32,15 +32,6 @@ public:
         return pool_ptr_;
     }
 };
-
-auto CreateSchema(config::InputTable const& table) {
-    auto schema = std::make_shared<RelationalSchema>(table->GetRelationName());
-    std::size_t const cols = table->GetNumberOfColumns();
-    for (model::Index i : algos::hymd::utility::IndexRange(cols)) {
-        schema->AppendColumn(table->GetColumnName(i));
-    }
-    return schema;
-}
 }  // namespace
 
 namespace algos::md {
@@ -55,8 +46,8 @@ void MDVerifier::ResetState() {
 }
 
 void MDVerifier::LoadDataInternal() {
-    left_schema_ = CreateSchema(left_table_);
-    right_schema_ = right_table_ ? CreateSchema(right_table_) : left_schema_;
+    left_schema_ = RelationalSchema::CreateFrom(*left_table_);
+    right_schema_ = right_table_ ? RelationalSchema::CreateFrom(*right_table_) : left_schema_;
 }
 
 void MDVerifier::RegisterOptions() {
