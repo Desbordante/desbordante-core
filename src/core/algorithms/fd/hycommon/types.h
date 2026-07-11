@@ -5,12 +5,7 @@
 #include <vector>
 
 #include "core/model/table/column_index.h"
-
-namespace model {
-
-class PositionListIndex;
-
-}
+#include "core/model/table/position_list_index.h"
 
 namespace algos::hy {
 
@@ -20,7 +15,7 @@ using ClusterId = unsigned int;
 
 // Represents a relation as a list of position list indexes. i-th PLI is a PLI built on i-th column
 // of the relation
-using PLIs = std::vector<model::PositionListIndex*>;
+using PLIs = std::vector<model::PositionListIndex>;
 using PLIsPtr = std::shared_ptr<PLIs>;
 using Row = std::vector<TablePos>;
 // Represents a relation as a list of rows where each row is a list of row values
