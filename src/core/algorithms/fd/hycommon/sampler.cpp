@@ -136,12 +136,12 @@ void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions
 void Sampler::SortClustersParallel() {
     ColumnSlider column_slider(plis_->size());
     std::vector<boost::unique_future<void>> sort_futures;
-    for (model::PLI* pli : *plis_) {
+    for (model::PLI& pli : *plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
                                              column_slider.GetLeftNeighbor(),
                                              column_slider.GetRightNeighbor());
-        auto sort = [pli, cluster_comparator]() {
-            for (model::PLI::Cluster& cluster : pli->GetIndex()) {
+        auto sort = [&pli, cluster_comparator]() {
+            for (model::PLI::Cluster& cluster : pli.GetIndex()) {
                 std::sort(cluster.begin(), cluster.end(), cluster_comparator);
             }
         };
@@ -155,11 +155,11 @@ void Sampler::SortClustersParallel() {
 
 void Sampler::SortClustersSeq() {
     ColumnSlider column_slider(plis_->size());
-    for (model::PLI* pli : *plis_) {
+    for (model::PLI& pli : *plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
                                              column_slider.GetLeftNeighbor(),
                                              column_slider.GetRightNeighbor());
-        for (model::PLI::Cluster& cluster : pli->GetIndex()) {
+        for (model::PLI::Cluster& cluster : pli.GetIndex()) {
             std::sort(cluster.begin(), cluster.end(), cluster_comparator);
         }
         column_slider.ToNextColumn();
@@ -181,7 +181,7 @@ void Sampler::InitializeEfficiencyQueueParallel() {
     for (size_t attr = 0; attr < plis_->size(); ++attr) {
         auto run_window = [attr, this]() {
             Efficiency efficiency(attr);
-            return std::make_pair(efficiency, RunWindowRet(efficiency, *(*plis_)[attr]));
+            return std::make_pair(efficiency, RunWindowRet(efficiency, (*plis_)[attr]));
         };
         boost::packaged_task<EfficiencyAndMatches> task(std::move(run_window));
         futures.push_back(task.get_future());
@@ -212,7 +212,7 @@ void Sampler::InitializeEfficiencyQueueParallel() {
 void Sampler::InitializeEfficiencyQueueSeq() {
     for (size_t attr = 0; attr < plis_->size(); ++attr) {
         Efficiency efficiency(attr);
-        RunWindow(efficiency, *(*plis_)[attr]);
+        RunWindow(efficiency, (*plis_)[attr]);
 
         if (efficiency.CalcEfficiency() > 0) {
             efficiency_queue_.push(efficiency);
@@ -265,7 +265,7 @@ ColumnCombinationList Sampler::GetAgreeSets(IdPairs const& comparison_suggestion
         Efficiency best_efficiency = efficiency_queue_.top();
         efficiency_queue_.pop();
 
-        RunWindow(best_efficiency, *(*plis_)[best_efficiency.GetAttr()]);
+        RunWindow(best_efficiency, (*plis_)[best_efficiency.GetAttr()]);
 
         if (best_efficiency.CalcEfficiency() > 0) {
             efficiency_queue_.push(best_efficiency);

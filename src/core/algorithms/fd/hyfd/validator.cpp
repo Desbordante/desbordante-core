@@ -82,7 +82,7 @@ boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
     auto const lhs_column_ids = util::BitsetToIndices<algos::hy::ClusterId>(lhs);
     auto const [rhs_column_ids, rhs_ranks] = BuildRhsMappings(rhs, compressed_records);
 
-    for (auto const& cluster : plis[firstAttr]->GetIndex()) {
+    for (auto const& cluster : plis[firstAttr].GetIndex()) {
         auto lhs_rhs_map = algos::hy::MakeClusterIdentifierToTMap<RhsRowId>(cluster.size());
 
         for (size_t row : cluster) {
@@ -155,7 +155,7 @@ Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
-        if (!(*plis_)[attr]->IsConstant()) {
+        if (!(*plis_)[attr].IsConstant()) {
             vertex->RemoveFd(attr);
             result.InvalidInstances().emplace_back(lhs, attr);
         }
@@ -181,7 +181,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
-        for (auto const& cluster : (*plis_)[lhs_attr]->GetIndex()) {
+        for (auto const& cluster : (*plis_)[lhs_attr].GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
                 std::any_of(cluster.cbegin(), cluster.cend(), [this, attr, cluster_id](int id) {
