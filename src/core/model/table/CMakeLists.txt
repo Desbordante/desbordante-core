@@ -16,6 +16,7 @@ target_sources(
             position_list_index.cpp
             position_list_index_with_singletons.cpp
             relational_schema.cpp
+            to_value_id_mapped_columns.cpp
             typed_column_data.cpp
             vertical.cpp
             vertical_map.cpp
