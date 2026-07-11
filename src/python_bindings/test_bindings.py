@@ -28,7 +28,7 @@ def check_metric_verifier_failure(dataset, options) -> bool:
     alg = desb.mfd_verification.algorithms.MetricVerifier()
     alg.load_data(table=(dataset, ",", True))
     for opt_name in options:
-        alg.set_option(opt_name, options[opt_name])
+        alg._set_option(opt_name, options[opt_name])
 
 
 ALGO_CORRECT_OPTIONS_INFO = [
@@ -177,7 +177,7 @@ class TestPythonBindings(unittest.TestCase):
         testing_algo = algo()
         testing_algo.load_data(table=(path, separator, has_header), **options.load_options)
         for name, value in options.execute_options.items():
-            testing_algo.set_option(name, value)
+            testing_algo._set_option(name, value)
 
         algo_option_values = testing_algo.get_opts()
         for name, value in chain(options.execute_options.items(),
