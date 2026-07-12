@@ -96,7 +96,7 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
         workers.emplace_back(worker_loop);
     }
 
-    size_t const high_watermark = threads_num_ * 4;
+    size_t const tasks_threshold = threads_num_ * 4;
 
     while (true) {
         CompositeEpisode* ep_ptr = nullptr;
@@ -107,7 +107,7 @@ void CompositeTopKMiner::ExploreParallel(std::vector<ParallelEpisode> const& par
             }
         }
 
-        while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark &&
+        while (tasks_in_flight.load(std::memory_order_relaxed) < tasks_threshold &&
                !explore.empty()) {
             CompositeEpisode parent_ep = std::move(const_cast<CompositeEpisode&>(explore.top()));
             explore.pop();

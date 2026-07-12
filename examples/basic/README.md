@@ -8,6 +8,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_ac.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ac.py) — a scenario showing the discovery of algebraic constraints.
 + [mining_adc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_adc.py) — a scenario showing how to discover approximate denial constraints.
 + [mining_afd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_afd.py) — a scenario showing how to discover approximate functional dependencies.
++ [mining_afem.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_afem.py) — a scenario showing how to discover all frequent episodes in a sequence of events.
 + [mining_aind.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_aind.py) — a scenario showing how to discover approximate inclusion dependencies.
 + [mining_ar.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ar.py) — a scenario showing how to discover association rules.
 + [mining_aucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_aucc.py) — a scenario showing how to discover approximate unique column combinations.
@@ -18,12 +19,14 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_gfd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_gfd) — scenarios showing how to discover graph functional dependencies.
 + [mining_ind.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ind.py) — a scenario showing how to discover inclusion dependencies.
 + [mining_list_od.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_list_od.py) — a scenario showing how to discover order dependencies based on list axiomatization.
++ [mining_maxfem.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_maxfem.py) — a scenario showing how to discover maximal frequent episodes in a sequence of events.
 + [mining_md.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_md.py) — a scenario showing how to discover matching dependencies.
 + [mining_nar.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_nar.py) — a scenario showing how to discover numerical association rules.
 + [mining_pfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_pfd.py) — a scenario showing how to discover probabilistic functional dependencies.
 + [mining_set_od_1.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_set_od_1.py) — a scenario showing how to discover order dependencies based on set axiomatization, part 1.
 + [mining_set_od_2.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_set_od_2.py) — a scenario showing how to discover order dependencies based on set axiomatization, part 2.
 + [mining_sfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_sfd.py) — a scenario showing how to discover soft functional dependencies.
++ [mining_tke.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_tke.py) — a scenario showing how to discover the top-k frequent episodes in a sequence of events.
 + [mining_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ucc.py) — a scenario showing how to discover exact unique column combinations.
 
 # Verification

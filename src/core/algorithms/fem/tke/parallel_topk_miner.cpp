@@ -92,7 +92,7 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
         workers.emplace_back(worker_loop);
     }
 
-    size_t const high_watermark = threads_num_ * 4;
+    size_t const tasks_threshold = threads_num_ * 4;
 
     while (true) {
         ParallelEpisode* ep_ptr = nullptr;
@@ -103,7 +103,7 @@ void ParallelTopKMiner::ExploreParallel(TopK& top_k, Explore& explore) const {
             }
         }
 
-        while (tasks_in_flight.load(std::memory_order_relaxed) < high_watermark &&
+        while (tasks_in_flight.load(std::memory_order_relaxed) < tasks_threshold &&
                !explore.empty()) {
             ParallelEpisode parent_ep = std::move(const_cast<ParallelEpisode&>(explore.top()));
             explore.pop();
