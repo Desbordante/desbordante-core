@@ -39,10 +39,6 @@ void CFDDiscovery::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
 }
 
-int CFDDiscovery::NrCfds() const {
-    return (int)cfd_list_.size();
-}
-
 ItemsetCFDList const& CFDDiscovery::GetItemsetCfds() const {
     return cfd_list_;
 }

@@ -161,7 +161,7 @@ void FDFirstAlgorithm::FdsFirstDFS() {
         free_itemsets_.insert(Itemset{a.item});
     }
     cand_store_ = PrefixTree<Itemset, Itemset>();
-    store_[Itemset()] = PartitionTIdList(Iota(relation_->Size()));
+    store_[Itemset()] = PartitionTIdList(Iota(relation_->GetNumRows()));
     cand_store_.Insert(Itemset(), all_attrs_);
     FdsFirstDFS(Itemset(), items, substrategy_);
 }
@@ -523,7 +523,7 @@ FDFirstAlgorithm::PIdListMiners FDFirstAlgorithm::GetPartitionSingletons() {
             attr_indices[dom[i]] = std::make_pair(a, i);
         }
     }
-    for (size_t row = 0; row < relation_->Size(); row++) {
+    for (size_t row = 0; row < relation_->GetNumRows(); row++) {
         auto const& tup = relation_->GetRow(row);
         for (int item : tup) {
             auto const& attr_node_ix = attr_indices.at(item);
@@ -536,7 +536,7 @@ FDFirstAlgorithm::PIdListMiners FDFirstAlgorithm::GetPartitionSingletons() {
         int attr_item = -1 - static_cast<int>(a);
         auto new_node = MinerNode<PartitionTIdList>(attr_item);
         auto const& dom = relation_->GetDomain(a);
-        new_node.tids.tids.reserve(relation_->Size() + dom.size() - 1);
+        new_node.tids.tids.reserve(relation_->GetNumRows() + dom.size() - 1);
         new_node.tids.sets_number = dom.size();
         for (unsigned i = 0; i < dom.size(); i++) {
             auto& ts = new_node.tids.tids;
