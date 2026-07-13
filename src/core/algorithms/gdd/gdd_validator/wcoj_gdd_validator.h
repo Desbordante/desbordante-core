@@ -1,5 +1,6 @@
 #pragma once
 
+#include <span>
 #include <type_traits>
 
 #include <boost/container_hash/hash.hpp>
@@ -57,25 +58,25 @@ private:
         std::vector<VertexT> data;
         std::size_t width = 0;
 
-        void clear() noexcept {
+        void Clear() noexcept {
             data.clear();
             width = 0;
         }
 
-        void reset(std::size_t w) {
+        void Reset(std::size_t w) {
             data.clear();
             width = w;
         }
 
-        std::size_t count() const noexcept {
+        std::size_t Count() const noexcept {
             return width != 0 ? data.size() / width : 0;
         }
 
-        VertexT const* row(std::size_t i) const noexcept {
+        VertexT const* Row(std::size_t i) const noexcept {
             return data.data() + i * width;
         }
 
-        void push_row(VertexT const* parent, std::size_t parent_width, VertexT appended) {
+        void PushRow(VertexT const* parent, std::size_t parent_width, VertexT appended) {
             data.insert(data.end(), parent, parent + parent_width);
             data.push_back(appended);
         }
@@ -86,14 +87,13 @@ private:
     MatchLevel next_level_;
     std::size_t level_count_ = 0;  // == cur_level_.width
     std::vector<VertexT> qvo_;
-    model::Gdd const* gdd_ = nullptr;
     model::gdd::graph_t const* pattern_ = nullptr;
     model::gdd::graph_t const* graph_ = nullptr;
 
     OperationResult Scan();  // differs from paper - builds 1-match, not 2-match.
     OperationResult ExtendIntersect();
 
-    void Prepare(model::Gdd const& gdd, model::gdd::graph_t const& graph);
+    void Prepare(model::gdd::graph_t const& pattern, model::gdd::graph_t const& graph);
     bool IsPatternWeaklyConnected() const;
 
     template <QvoStrategy Strategy>
@@ -132,10 +132,12 @@ private:
         bool last_isect_valid = false;
     } intersection_cache_;
 
-    std::size_t match_count_;
-
 protected:
-    virtual GddHoldsResult Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) final;
+    virtual void HoldsGroup(std::span<model::Gdd const* const> group,
+                            model::gdd::graph_t const& graph,
+                            std::span<GddHoldsResult> output) final;
+
+    virtual std::unique_ptr<GddValidator> CreateWorker() const final;
 
 public:
     WcojGddValidator() = default;

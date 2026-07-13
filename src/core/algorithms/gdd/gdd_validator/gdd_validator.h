@@ -1,10 +1,13 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
+#include <span>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/gdd/gdd_graph_description.h"
+#include "core/config/thread_number/type.h"
 
 namespace algos {
 
@@ -15,6 +18,12 @@ private:
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
     std::vector<std::size_t> matches_count_;
+    config::ThreadNumType threads_ = 1;
+
+    struct PatternGrouping;
+    struct ValidationExecutor;
+    struct SequentialValidationExecutor;
+    struct ParallelValidationExecutor;
 
 protected:
     using GddCounterexample = model::GddCounterexample;
@@ -30,6 +39,8 @@ private:
 
     virtual void LoadDataInternal() final;
 
+    virtual void MakeExecuteOptsAvailable() final;
+
 protected:
     using VertexT = model::gdd::detail::VertexT;
     using EdgeT = model::gdd::detail::EdgeT;
@@ -43,20 +54,17 @@ protected:
         return lhs == rhs;  // TODO: wildcards
     }
 
-    model::gdd::graph_t const& GetGraph() const noexcept {
-        return graph_;
-    }
-
-    std::vector<model::Gdd> const& GetGdds() const noexcept {
-        return gdds_;
-    }
-
     struct GddHoldsResult {
         std::optional<GddCounterexample> ce;
-        std::size_t match_count;
+        std::size_t match_count = 0;
     };
 
-    virtual GddHoldsResult Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) = 0;
+    // every GDD in a group shares the same pattern, so we want to match it once if it
+    // is possible
+    virtual void HoldsGroup(std::span<model::Gdd const* const> group,
+                            model::gdd::graph_t const& graph, std::span<GddHoldsResult> output) = 0;
+
+    virtual std::unique_ptr<GddValidator> CreateWorker() const = 0;
 
 public:
     GddValidator();
