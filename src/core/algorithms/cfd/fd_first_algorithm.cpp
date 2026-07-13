@@ -25,11 +25,33 @@ FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery() {
 void FDFirstAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    Substrategy default_val = Substrategy::kDfs;
-    RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u});
-    RegisterOption(Option{&min_conf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0});
-    RegisterOption(Option{&max_lhs_, kCfdMaximumLhs, kDCfdMaximumLhs, 0u});
-    RegisterOption(Option{&substrategy_, kCfdSubstrategy, kDCfdSubstrategy, default_val});
+    auto check_conf = [](double val) {
+        if (val < 0 || val > 1) {
+            throw config::ConfigurationError("Minimum confidence must be a value between (0,1].");
+        }
+    };
+    auto check_supp = [this](unsigned int val) {
+        if (val == 0) {
+            throw config::ConfigurationError("Minimum support must be greater than 0.");
+        } else if (val > relation_->GetNumRows()) {
+            throw config::ConfigurationError(
+                    "Minimum support must be less than or equal to the number of tuples.");
+        }
+    };
+    auto check_lhs = [](unsigned int val) {
+        if (val == 0) {
+            throw config::ConfigurationError("Maximum LHS size must be greater than 0.");
+        }
+    };
+
+    RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 1u}.SetValueCheck(
+            std::move(check_supp)));
+    RegisterOption(
+            Option{&min_conf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0}.SetValueCheck(
+                    std::move(check_conf)));
+    RegisterOption(Option{&max_lhs_, kCfdMaximumLhs, kDCfdMaximumLhs, 1u}.SetValueCheck(
+            std::move(check_lhs)));
+    RegisterOption(Option{&substrategy_, kCfdSubstrategy, kDCfdSubstrategy, Substrategy::kDfs});
 }
 
 void FDFirstAlgorithm::ResetStateCFD() {
@@ -43,28 +65,9 @@ void FDFirstAlgorithm::ResetStateCFD() {
 
 void FDFirstAlgorithm::ExecuteInternal() {
     max_cfd_size_ = max_lhs_ + 1;
-    CheckForIncorrectInput();
+
     FdsFirstDFS();
     LOG_INFO("> CFD COUNT: {}", cfd_list_.size());
-}
-
-void FDFirstAlgorithm::CheckForIncorrectInput() const {
-    // TODO: should be checked by Option
-    if (min_supp_ < 1 || min_supp_ > relation_->GetNumRows()) {
-        throw config::ConfigurationError(
-                "[ERROR] Illegal Support value : " + std::to_string(min_supp_) + " is not in [1, " +
-                std::to_string(relation_->GetNumRows()) + "]");
-    }
-
-    if (min_conf_ < 0 || min_conf_ > 1) {
-        throw config::ConfigurationError("[ERROR] Illegal Confidence value: \"" +
-                                         std::to_string(min_conf_) + "\"" + " not in [0,1]");
-    }
-
-    if (max_cfd_size_ < 2) {
-        throw config::ConfigurationError("[ERROR] Illegal Max size value: \"" +
-                                         std::to_string(max_cfd_size_) + "\"" + " is less than 1");
-    }
 }
 
 void FDFirstAlgorithm::MakeExecuteOptsAvailable() {
