@@ -14,6 +14,7 @@
 #include "core/algorithms/gdd/gdd_validator/naive_gdd_validator.h"
 #include "core/algorithms/gdd/gdd_validator/wcoj_gdd_validator.h"
 #include "core/config/names.h"
+#include "core/config/thread_number/type.h"
 #include "tests/unit/test_gdd_utils.h"
 
 using model::Gdd;
@@ -53,6 +54,17 @@ struct ValidatorCase {
 
 std::vector<ValidatorCase> GetValidatorCases() {
     return {[] {
+                return ValidatorCase{
+                        .case_name = "EmptyGddInput",
+                        .temp_file_name = "gdd_empty_input.dot",
+                        .graph_dot = R"(digraph G {
+                            1 [label = "X"];
+                        })",
+                        .input_gdds = {},
+                        .expected_valid_gdds = {},
+                };
+            }(),
+            [] {
                 auto const pattern = tests::gdd::utils::MakeSingleVertexPattern(0, "City");
 
                 Gdd const gdd(pattern, Gdd::Phi{},
@@ -403,6 +415,12 @@ std::vector<ValidatorCase> GetValidatorCases() {
 template <class T>
 class GddValidatorCasesTest : public ::testing::TestWithParam<ValidatorCase> {
 protected:
+    struct ValidatorOutput {
+        std::vector<Gdd> valid_gdds;
+        std::vector<model::GddCounterexample> counterexamples;
+        std::vector<std::size_t> matches_count;
+    };
+
     static std::filesystem::path WriteTempDotFile(std::string const& dot,
                                                   std::string const& file_name) {
         auto const path =
@@ -416,31 +434,79 @@ protected:
     }
 
     static std::unique_ptr<algos::GddValidator> CreateGddValidatorInstance(
-            std::filesystem::path const& graph_path, std::vector<Gdd> const& gdds) {
+            std::filesystem::path const& graph_path, std::vector<Gdd> const& gdds,
+            config::ThreadNumType threads) {
         algos::StdParamsMap const option_map = {
                 {config::names::kGraphData, graph_path},
                 {config::names::kGddData, gdds},
+                {config::names::kThreads, threads},
         };
         return algos::CreateAndLoadAlgorithm<T>(option_map);
     }
 
-    static void CheckCase(ValidatorCase const& tc) {
-        auto const graph_path = WriteTempDotFile(tc.graph_dot, tc.temp_file_name);
-        auto const validator = CreateGddValidatorInstance(graph_path, tc.input_gdds);
+    static ValidatorOutput CaptureOutput(algos::GddValidator const& validator) {
+        return {
+                .valid_gdds = validator.GetResult(),
+                .counterexamples = validator.GetCounterexamples(),
+                .matches_count = validator.GetMatchesCount(),
+        };
+    }
 
-        validator->Execute();
-        auto const out = validator->GetResult();
+    static void ExpectCounterexamplesEqual(std::vector<model::GddCounterexample> const& actual,
+                                           std::vector<model::GddCounterexample> const& expected) {
+        ASSERT_EQ(actual.size(), expected.size());
+        for (std::size_t ce_index = 0; ce_index < actual.size(); ++ce_index) {
+            SCOPED_TRACE(ce_index);
+            EXPECT_EQ(actual[ce_index].gdd_index, expected[ce_index].gdd_index);
+            ASSERT_EQ(actual[ce_index].match.size(), expected[ce_index].match.size());
+            for (std::size_t match_index = 0; match_index < actual[ce_index].match.size();
+                 ++match_index) {
+                auto const& actual_vertex = actual[ce_index].match[match_index];
+                auto const& expected_vertex = expected[ce_index].match[match_index];
+                EXPECT_EQ(actual_vertex.pattern_vertex_id, expected_vertex.pattern_vertex_id);
+                EXPECT_EQ(actual_vertex.pattern_vertex_label, expected_vertex.pattern_vertex_label);
+                EXPECT_EQ(actual_vertex.graph_vertex_id, expected_vertex.graph_vertex_id);
+                EXPECT_EQ(actual_vertex.graph_vertex_label, expected_vertex.graph_vertex_label);
+                EXPECT_EQ(actual_vertex.graph_vertex_attributes,
+                          expected_vertex.graph_vertex_attributes);
+            }
+        }
+    }
 
-        EXPECT_THAT(out, testing::UnorderedElementsAreArray(tc.expected_valid_gdds));
+    static void ExpectCaseResult(ValidatorOutput const& output, ValidatorCase const& tc) {
+        EXPECT_EQ(output.valid_gdds, tc.expected_valid_gdds);
 
         std::vector<std::size_t> actual_counterexample_indices;
-        actual_counterexample_indices.reserve(validator->GetCounterexamples().size());
-        for (auto const& [gdd_index, match] : validator->GetCounterexamples()) {
+        actual_counterexample_indices.reserve(output.counterexamples.size());
+        for (auto const& [gdd_index, match] : output.counterexamples) {
             actual_counterexample_indices.push_back(gdd_index);
         }
+        EXPECT_EQ(actual_counterexample_indices, tc.expected_counterexample_gdd_indices);
+        EXPECT_EQ(output.matches_count.size(), tc.input_gdds.size());
+    }
 
-        EXPECT_THAT(actual_counterexample_indices,
-                    testing::UnorderedElementsAreArray(tc.expected_counterexample_gdd_indices));
+    static void CheckCase(ValidatorCase const& tc) {
+        auto const graph_path = WriteTempDotFile(tc.graph_dot, tc.temp_file_name);
+        auto const validator =
+                CreateGddValidatorInstance(graph_path, tc.input_gdds, config::ThreadNumType{1});
+        validator->Execute();
+        ValidatorOutput const sequential = CaptureOutput(*validator);
+        ExpectCaseResult(sequential, tc);
+
+        validator->SetOption(config::names::kThreads, config::ThreadNumType{4});
+        validator->Execute();
+        ValidatorOutput const parallel = CaptureOutput(*validator);
+        ExpectCaseResult(parallel, tc);
+        EXPECT_EQ(parallel.valid_gdds, sequential.valid_gdds);
+        ExpectCounterexamplesEqual(parallel.counterexamples, sequential.counterexamples);
+        EXPECT_EQ(parallel.matches_count, sequential.matches_count);
+
+        validator->SetOption(config::names::kThreads, config::ThreadNumType{1});
+        validator->Execute();
+        ValidatorOutput const sequential_again = CaptureOutput(*validator);
+        EXPECT_EQ(sequential_again.valid_gdds, sequential.valid_gdds);
+        ExpectCounterexamplesEqual(sequential_again.counterexamples, sequential.counterexamples);
+        EXPECT_EQ(sequential_again.matches_count, sequential.matches_count);
 
         if (std::filesystem::exists(graph_path)) {
             std::filesystem::remove(graph_path);
@@ -457,7 +523,61 @@ TYPED_TEST_P(GddValidatorCasesTest, ReturnsExpectedValidGdds) {
     }
 }
 
-REGISTER_TYPED_TEST_SUITE_P(GddValidatorCasesTest, ReturnsExpectedValidGdds);
+TYPED_TEST_P(GddValidatorCasesTest, MatchCountIsPerGddAndStopsAtFirstCounterexample) {
+    auto const pattern = tests::gdd::utils::MakeSingleVertexPattern(0, "X");
+    Gdd const invalid_gdd(pattern, Gdd::Phi{}, Gdd::Phi{EqStrAttrToConst(0, "name", "Impossible")});
+    std::vector const gdds{invalid_gdd, invalid_gdd};
+    auto const graph_path = TestFixture::WriteTempDotFile(
+            R"(digraph G {
+                1 [label = "X", name = "First"];
+                2 [label = "X", name = "Second"];
+            })",
+            "gdd_match_count_stops_at_ce.dot");
+
+    auto const validator =
+            TestFixture::CreateGddValidatorInstance(graph_path, gdds, config::ThreadNumType{1});
+    validator->Execute();
+    EXPECT_EQ(validator->GetMatchesCount(), (std::vector<std::size_t>{1, 1}));
+
+    validator->SetOption(config::names::kThreads, config::ThreadNumType{2});
+    validator->Execute();
+    EXPECT_EQ(validator->GetMatchesCount(), (std::vector<std::size_t>{1, 1}));
+
+    if (std::filesystem::exists(graph_path)) {
+        std::filesystem::remove(graph_path);
+    }
+}
+
+TYPED_TEST_P(GddValidatorCasesTest, ParallelWorkerExceptionLeavesResultsEmpty) {
+    auto const pattern = tests::gdd::utils::MakeSingleVertexPattern(0, "A");
+    Gdd const valid_gdd(pattern, Gdd::Phi{}, Gdd::Phi{});
+    auto const invalid_constraint = tests::gdd::utils::RelConst(
+            0, "knows", model::gdd::detail::ConstValue{std::string{"not-an-id"}});
+    Gdd const throwing_gdd(pattern, Gdd::Phi{invalid_constraint}, Gdd::Phi{});
+    std::vector const gdds{valid_gdd, throwing_gdd};
+    auto const graph_path = TestFixture::WriteTempDotFile(
+            R"(digraph G {
+                1 [label = "A"];
+                2 [label = "B"];
+                1 -> 2 [label = "knows"];
+            })",
+            "gdd_parallel_worker_exception.dot");
+
+    auto const validator =
+            TestFixture::CreateGddValidatorInstance(graph_path, gdds, config::ThreadNumType{2});
+    EXPECT_THROW(validator->Execute(), std::logic_error);
+    EXPECT_TRUE(validator->GetResult().empty());
+    EXPECT_TRUE(validator->GetCounterexamples().empty());
+    EXPECT_TRUE(validator->GetMatchesCount().empty());
+
+    if (std::filesystem::exists(graph_path)) {
+        std::filesystem::remove(graph_path);
+    }
+}
+
+REGISTER_TYPED_TEST_SUITE_P(GddValidatorCasesTest, ReturnsExpectedValidGdds,
+                            MatchCountIsPerGddAndStopsAtFirstCounterexample,
+                            ParallelWorkerExceptionLeavesResultsEmpty);
 
 using GddValidatorAlgorithms = ::testing::Types<algos::NaiveGddValidator, algos::WcojGddValidator>;
 

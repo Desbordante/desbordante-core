@@ -57,6 +57,7 @@ bool WcojGddValidator::IsPatternWeaklyConnected() const {
 
 GddValidator::GddHoldsResult WcojGddValidator::Holds(model::Gdd const& gdd,
                                                      model::gdd::graph_t const& graph) {
+    match_count_ = 0;
     Prepare(gdd, graph);
 
     OperationResult result = Scan();
@@ -72,16 +73,17 @@ GddValidator::GddHoldsResult WcojGddValidator::Holds(model::Gdd const& gdd,
         }
     }
 
-    match_count_ = cur_level_.count();
+    std::size_t const matches_size = cur_level_.count();
     std::size_t const width = cur_level_.width;
     MappingT full_match;
-    for (std::size_t i = 0; i < match_count_; ++i) {
+    for (std::size_t i = 0; i < matches_size; ++i) {
         VertexT const* row = cur_level_.row(i);
         full_match.clear();
         for (std::size_t j = 0; j < width; ++j) {
             full_match.emplace(qvo_[j], row[j]);
         }
 
+        ++match_count_;
         if (!gdd_->Satisfies(graph, full_match)) {
             return {model::BuildCounterexample(gdd_->GetPattern(), *graph_, full_match),
                     match_count_};
@@ -89,6 +91,10 @@ GddValidator::GddHoldsResult WcojGddValidator::Holds(model::Gdd const& gdd,
     }
 
     return {std::nullopt, match_count_};
+}
+
+std::unique_ptr<GddValidator> WcojGddValidator::CreateWorker() const {
+    return std::make_unique<WcojGddValidator>();
 }
 
 WcojGddValidator::OperationResult WcojGddValidator::Scan() {
