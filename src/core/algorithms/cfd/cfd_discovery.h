@@ -32,7 +32,6 @@ protected:
 public:
     explicit CFDDiscovery();
     void LoadDataInternal() final;
-    int NrCfds() const;
     ItemsetCFDList const& GetItemsetCfds() const;
     CFDList GetCfds() const;
     std::string GetRelationString(char delim = ' ') const;

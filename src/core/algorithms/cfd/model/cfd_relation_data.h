@@ -3,9 +3,6 @@
 #include <cstddef>
 #include <utility>
 
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
-
 #include "core/algorithms/cfd/model/cfd_column_data.h"
 #include "core/algorithms/cfd/model/cfd_types.h"
 #include "core/model/table/idataset_stream.h"
@@ -18,9 +15,6 @@ namespace algos::cfd {
 // Data presentation class that CFDDiscovery uses.
 class CFDRelationData : public AbstractRelationData<CFDColumnData> {
 private:
-    using ItemDictionary = boost::unordered_map<std::pair<int, std::string>, int, PairHash>;
-    using ColumnsValuesDict = std::unordered_map<AttributeIndex, std::vector<int>>;
-
     // ItemInfo contains info about one elem in the table.
     struct ItemInfo {
         ItemInfo() = default;
@@ -35,26 +29,14 @@ private:
 
     // array of data represented as rows of integers
     std::vector<Transaction> data_rows_;
-    // maps a value string for the given attribute index to corresponding item id
-    boost::unordered_map<std::pair<int, std::string>, int, PairHash> item_dictionary_;
     std::vector<ItemInfo> items_;
 
-    static void AddNewItemsInPartialTable(ItemDictionary&, ColumnsValuesDict&,
-                                          std::vector<ItemInfo>&, std::vector<std::string> const&,
-                                          std::vector<int> const&, std::vector<Transaction>&, int&,
-                                          int);
-
 public:
-    unsigned Size() const;
     unsigned GetAttrsNumber() const;
-    unsigned GetItemsNumber() const;
     size_t GetNumRows() const override;
     Transaction const& GetRow(unsigned) const;
     std::string GetStringFormat(char delim = ' ') const;
     std::string GetStringFormat(SimpleTIdList const& subset, char delim = ' ') const;
-    void Sort();
-    void ToFront(SimpleTIdList const&);
-    void SetRow(int row_index, Transaction const& row);
     AttributeIndex GetAttrIndex(int item_index) const;
     unsigned Frequency(int i) const;
     std::string const& GetValue(int i) const;
@@ -66,16 +48,13 @@ public:
     int GetAttr(std::string const&) const;
     int GetItem(int, std::string const&) const;
 
-    static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream& file_input,
-                                                       double c_sample = 1, double r_sample = 1);
+    static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream& data_stream);
 
     CFDRelationData(std::unique_ptr<RelationalSchema> schema,
                     std::vector<CFDColumnData> column_data, std::vector<Transaction> data,
-                    boost::unordered_map<std::pair<int, std::string>, int, PairHash> item_dict,
                     std::vector<ItemInfo> items)
         : AbstractRelationData(std::move(schema), std::move(column_data)),
           data_rows_(std::move(data)),
-          item_dictionary_(std::move(item_dict)),
           items_(std::move(items)) {}
 };
 }  // namespace algos::cfd
