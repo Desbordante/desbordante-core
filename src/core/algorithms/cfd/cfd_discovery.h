@@ -26,8 +26,6 @@ private:
 protected:
     config::InputTable input_table_;
 
-    unsigned columns_number_;
-    unsigned tuples_number_;
     ItemsetCFDList cfd_list_;
     std::shared_ptr<CFDRelationData> relation_;
 
