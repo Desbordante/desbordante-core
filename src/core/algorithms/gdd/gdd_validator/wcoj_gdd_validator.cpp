@@ -1,7 +1,9 @@
 #include "wcoj_gdd_validator.h"
 
 #include <algorithm>
+#include <cassert>
 #include <ranges>
+#include <span>
 #include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
@@ -13,13 +15,13 @@
 
 namespace algos {
 
-void WcojGddValidator::Prepare(model::Gdd const& gdd, model::gdd::graph_t const& graph) {
-    gdd_ = &gdd;
+void WcojGddValidator::Prepare(model::gdd::graph_t const& pattern,
+                               model::gdd::graph_t const& graph) {
     graph_ = &graph;
-    pattern_ = &gdd.GetPattern();
+    pattern_ = &pattern;
 
-    cur_level_.clear();
-    next_level_.clear();
+    cur_level_.Clear();
+    next_level_.Clear();
     level_count_ = 0;
     adjacency_index_.clear();
 
@@ -55,40 +57,61 @@ bool WcojGddValidator::IsPatternWeaklyConnected() const {
     return boost::connected_components(undirected, component.data()) == 1;
 }
 
-GddValidator::GddHoldsResult WcojGddValidator::Holds(model::Gdd const& gdd,
-                                                     model::gdd::graph_t const& graph) {
-    Prepare(gdd, graph);
+void WcojGddValidator::HoldsGroup(std::span<model::Gdd const* const> group,
+                                  model::gdd::graph_t const& graph,
+                                  std::span<GddHoldsResult> output) {
+    assert(group.size() == output.size());
+    std::ranges::fill(output, GddHoldsResult{});
+
+    if (group.empty()) {
+        return;
+    }
+
+    // matching runs once for the pattern shared by the group
+    Prepare(group.front()->GetPattern(), graph);
 
     OperationResult result = Scan();
     if (result == OperationResult::kEmpty) {
-        match_count_ = 0;
-        return {std::nullopt, match_count_};
+        return;
     }
 
     while (result != OperationResult::kFinished) {
         if (result = ExtendIntersect(); result == OperationResult::kEmpty) {
-            match_count_ = 0;
-            return {std::nullopt, match_count_};
+            return;
         }
     }
 
-    match_count_ = cur_level_.count();
+    std::size_t const matches_size = cur_level_.Count();
     std::size_t const width = cur_level_.width;
+
+    std::vector<bool> finished(group.size(), false);
+    std::size_t remaining = group.size();
     MappingT full_match;
-    for (std::size_t i = 0; i < match_count_; ++i) {
-        VertexT const* row = cur_level_.row(i);
+
+    for (std::size_t i = 0; i < matches_size && remaining != 0; ++i) {
+        VertexT const* row = cur_level_.Row(i);
         full_match.clear();
         for (std::size_t j = 0; j < width; ++j) {
             full_match.emplace(qvo_[j], row[j]);
         }
 
-        if (!gdd_->Satisfies(graph, full_match)) {
-            return {model::BuildCounterexample(gdd_->GetPattern(), *graph_, full_match),
-                    match_count_};
+        for (std::size_t gdd_index = 0; gdd_index < group.size(); ++gdd_index) {
+            if (finished[gdd_index]) {
+                continue;
+            }
+
+            ++output[gdd_index].match_count;
+            if (!group[gdd_index]->Satisfies(graph, full_match)) {
+                output[gdd_index].ce = model::BuildCounterexample(*pattern_, *graph_, full_match);
+                finished[gdd_index] = true;
+                --remaining;
+            }
         }
     }
+}
 
-    return {std::nullopt, match_count_};
+std::unique_ptr<GddValidator> WcojGddValidator::CreateWorker() const {
+    return std::make_unique<WcojGddValidator>();
 }
 
 WcojGddValidator::OperationResult WcojGddValidator::Scan() {
@@ -105,7 +128,7 @@ WcojGddValidator::OperationResult WcojGddValidator::Scan() {
 
     auto const& candidates = domain_it->second;
 
-    cur_level_.reset(1);
+    cur_level_.Reset(1);
     cur_level_.data.assign(candidates.begin(), candidates.end());
 
     level_count_ = 1;
@@ -124,24 +147,24 @@ WcojGddValidator::OperationResult WcojGddValidator::ExtendIntersect() {
 
     auto const new_pv = qvo_[level_count_];
     std::size_t const parent_width = cur_level_.width;
-    std::size_t const parent_count = cur_level_.count();
+    std::size_t const parent_count = cur_level_.Count();
 
-    next_level_.reset(level_count_ + 1);
+    next_level_.Reset(level_count_ + 1);
     // at least one child per parent
     next_level_.data.reserve(cur_level_.data.size() + parent_count);
 
     auto const& descriptors = BuildDescriptorsFor(new_pv, level_count_);
     for (std::size_t i = 0; i < parent_count; ++i) {
-        VertexT const* parent = cur_level_.row(i);
+        VertexT const* parent = cur_level_.Row(i);
         std::vector<VertexT> const& extension_set =
                 ComputeExtensionSet(parent, new_pv, descriptors);
 
         for (VertexT const graph_vertex : extension_set) {
-            next_level_.push_row(parent, parent_width, graph_vertex);
+            next_level_.PushRow(parent, parent_width, graph_vertex);
         }
     }
 
-    if (next_level_.count() == 0) {
+    if (next_level_.Count() == 0) {
         return OperationResult::kEmpty;
     }
 
