@@ -25,11 +25,34 @@ FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery() {
 void FDFirstAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    Substrategy default_val = Substrategy::kDfs;
-    RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u});
-    RegisterOption(Option{&min_conf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0});
-    RegisterOption(Option{&max_lhs_, kCfdMaximumLhs, kDCfdMaximumLhs, 0u});
-    RegisterOption(Option{&substrategy_, kCfdSubstrategy, kDCfdSubstrategy, default_val});
+    auto check_conf = [](double val) {
+        if (val < 0 || val > 1) {
+            throw config::ConfigurationError("Minimum confidence must be a value between (0,1].");
+        }
+    };
+    auto check_supp = [this](unsigned int val) {
+        if (val == 0) {
+            throw config::ConfigurationError("Minimum support must be greater than 0.");
+        } else if (val > relation_->GetNumRows()) {
+            throw config::ConfigurationError(
+                    "Minimum support must be less than or equal to the number of tuples (" +
+                    std::to_string(relation_->GetNumRows()) + ").");
+        }
+    };
+    auto check_lhs = [](unsigned int val) {
+        if (val == 0) {
+            throw config::ConfigurationError("Maximum LHS size must be greater than 0.");
+        }
+    };
+
+    RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 1u}.SetValueCheck(
+            std::move(check_supp)));
+    RegisterOption(
+            Option{&min_conf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0}.SetValueCheck(
+                    std::move(check_conf)));
+    RegisterOption(Option{&max_lhs_, kCfdMaximumLhs, kDCfdMaximumLhs, 1u}.SetValueCheck(
+            std::move(check_lhs)));
+    RegisterOption(Option{&substrategy_, kCfdSubstrategy, kDCfdSubstrategy, Substrategy::kDfs});
 }
 
 void FDFirstAlgorithm::ResetStateCFD() {
@@ -43,45 +66,8 @@ void FDFirstAlgorithm::ResetStateCFD() {
 
 void FDFirstAlgorithm::ExecuteInternal() {
     max_cfd_size_ = max_lhs_ + 1;
-    CheckForIncorrectInput();
     FdsFirstDFS();
     LOG_INFO("> CFD COUNT: {}", cfd_list_.size());
-}
-
-void FDFirstAlgorithm::CheckForIncorrectInput() const {
-    // TODO: should be checked by Option
-    if (min_supp_ < 1) {
-        throw config::ConfigurationError("[ERROR] Illegal Support value: \"" +
-                                         std::to_string(min_supp_) + "\"" + " is less than 1");
-    }
-
-    if (min_conf_ < 0 || min_conf_ > 1) {
-        throw config::ConfigurationError("[ERROR] Illegal Confidence value: \"" +
-                                         std::to_string(min_conf_) + "\"" + " not in [0,1]");
-    }
-
-    if (max_cfd_size_ < 2) {
-        throw config::ConfigurationError("[ERROR] Illegal Max size value: \"" +
-                                         std::to_string(max_cfd_size_) + "\"" + " is less than 1");
-    }
-
-    if (columns_number_ != 0 && tuples_number_ == 0) {
-        throw config::ConfigurationError(
-                "[ERROR] Illegal columns_number and tuples_number values: columns_number is " +
-                std::to_string(columns_number_) + " while tuples_number is 0");
-    }
-
-    if (tuples_number_ != 0 && columns_number_ == 0) {
-        throw config::ConfigurationError(
-                "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " +
-                std::to_string(tuples_number_) + " while columns_number is 0");
-    }
-
-    if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
-        throw config::ConfigurationError(
-                "[ERROR] Illegal Support value : " + std::to_string(min_supp_) + " is not in [1, " +
-                std::to_string(tuples_number_) + "]");
-    }
 }
 
 void FDFirstAlgorithm::MakeExecuteOptsAvailable() {
@@ -175,7 +161,7 @@ void FDFirstAlgorithm::FdsFirstDFS() {
         free_itemsets_.insert(Itemset{a.item});
     }
     cand_store_ = PrefixTree<Itemset, Itemset>();
-    store_[Itemset()] = PartitionTIdList(Iota(relation_->Size()));
+    store_[Itemset()] = PartitionTIdList(Iota(relation_->GetNumRows()));
     cand_store_.Insert(Itemset(), all_attrs_);
     FdsFirstDFS(Itemset(), items, substrategy_);
 }
@@ -537,7 +523,7 @@ FDFirstAlgorithm::PIdListMiners FDFirstAlgorithm::GetPartitionSingletons() {
             attr_indices[dom[i]] = std::make_pair(a, i);
         }
     }
-    for (size_t row = 0; row < relation_->Size(); row++) {
+    for (size_t row = 0; row < relation_->GetNumRows(); row++) {
         auto const& tup = relation_->GetRow(row);
         for (int item : tup) {
             auto const& attr_node_ix = attr_indices.at(item);
@@ -550,7 +536,7 @@ FDFirstAlgorithm::PIdListMiners FDFirstAlgorithm::GetPartitionSingletons() {
         int attr_item = -1 - static_cast<int>(a);
         auto new_node = MinerNode<PartitionTIdList>(attr_item);
         auto const& dom = relation_->GetDomain(a);
-        new_node.tids.tids.reserve(relation_->Size() + dom.size() - 1);
+        new_node.tids.tids.reserve(relation_->GetNumRows() + dom.size() - 1);
         new_node.tids.sets_number = dom.size();
         for (unsigned i = 0; i < dom.size(); i++) {
             auto& ts = new_node.tids.tids;

@@ -14,33 +14,41 @@
 #include "core/algorithms/fd/hyfd/sampler.h"
 #include "core/algorithms/fd/hyfd/validator.h"
 #include "core/config/names.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
 
 namespace algos::hyfd {
 
-HyFD::HyFD() : PliBasedFDAlgorithm() {
+HyFD::HyFD() : FDAlgorithm() {
+    RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
+
+    MakeOptionsAvailable({config::names::kTable});
 }
 
 void HyFD::MakeExecuteOptsAvailableFDInternal() {
     MakeOptionsAvailable({config::names::kThreads});
 }
 
+void HyFD::LoadDataInternal() {
+    schema_ = RelationalSchema::CreateFrom(*input_table_);
+
+    std::tie(plis_, pli_records_, og_mapping_) = hy::Preprocess(*input_table_);
+    if (plis_->empty()) {
+        throw std::runtime_error("Got an empty dataset: UCC mining is meaningless.");
+    }
+}
+
 void HyFD::ExecuteInternal() {
     using namespace hy;
     LOG_TRACE("Executing");
 
-    auto [plis, pli_records, og_mapping] = Preprocess(relation_.get());
-    auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
-    auto const pli_records_shared = std::make_shared<Rows>(std::move(pli_records));
+    Sampler sampler(plis_, pli_records_, threads_num_);
 
-    Sampler sampler(plis_shared, pli_records_shared, threads_num_);
-
-    auto const positive_cover_tree =
-            std::make_shared<fd_tree::FDTree>(GetRelation().GetNumColumns());
-    Inductor inductor(positive_cover_tree);
-    Validator validator(positive_cover_tree, plis_shared, pli_records_shared, threads_num_);
+    auto const positive_cover_tree = std::make_shared<fd_tree::FDTree>(schema_->GetNumColumns());
+    Inductor inductor(positive_cover_tree, max_lhs_);
+    Validator validator(positive_cover_tree, plis_, pli_records_, threads_num_, max_lhs_);
 
     IdPairs comparison_suggestions;
 
@@ -59,20 +67,19 @@ void HyFD::ExecuteInternal() {
     }
 
     auto fds = positive_cover_tree->FillFDs();
-    RegisterFDs(std::move(fds), og_mapping);
+    RegisterFDs(std::move(fds), og_mapping_);
 }
 
 void HyFD::RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> const& og_mapping) {
-    auto const* const schema = GetRelation().GetSchema();
     for (auto&& [lhs, rhs] : fds) {
         boost::dynamic_bitset<> mapped_lhs =
-                hy::RestoreAgreeSet(lhs, og_mapping, schema->GetNumColumns());
-        Vertical lhs_v(schema, std::move(mapped_lhs));
+                hy::RestoreAgreeSet(lhs, og_mapping, schema_->GetNumColumns());
+        Vertical lhs_v(schema_.get(), std::move(mapped_lhs));
 
         auto const mapped_rhs = og_mapping[rhs];
-        Column rhs_c(schema, schema->GetColumn(mapped_rhs)->GetName(), mapped_rhs);
+        Column rhs_c(schema_.get(), schema_->GetColumn(mapped_rhs)->GetName(), mapped_rhs);
 
-        RegisterFd(std::move(lhs_v), std::move(rhs_c), relation_->GetSharedPtrSchema());
+        RegisterFd(std::move(lhs_v), std::move(rhs_c), schema_);
     }
 }
 

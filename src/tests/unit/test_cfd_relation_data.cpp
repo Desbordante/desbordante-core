@@ -13,7 +13,7 @@ class TestCFDRelationData : public ::testing::Test {};
 TEST(TestCFDRelationData, TennisDataSet) {
     auto input_table = MakeInputTable(kTennis);
     std::shared_ptr<algos::cfd::CFDRelationData> relation =
-            algos::cfd::CFDRelationData::CreateFrom(*input_table, 0, 0, 1, 1);
+            algos::cfd::CFDRelationData::CreateFrom(*input_table);
 
     std::string tennis_string =
             "outlook temp humidity windy play\n"
@@ -42,19 +42,6 @@ TEST(TestCFDRelationData, TennisDataSet) {
     ASSERT_EQ(relation->GetNumRows(), 14);
     ASSERT_EQ(relation->GetStringFormat(), tennis_string);
     ASSERT_EQ(relation->GetStringFormat(my_tidlist), tennis_partial_string);
-
-    auto new_input_table = MakeInputTable(kTennis);
-    std::shared_ptr<algos::cfd::CFDRelationData> new_relation =
-            algos::cfd::CFDRelationData::CreateFrom(*new_input_table, 3, 4, 1, 1);
-
-    tennis_string =
-            "outlook temp humidity\n"
-            "sunny hot high\n"
-            "sunny hot high\n"
-            "overcast hot high\n"
-            "rainy mild high\n";
-    ASSERT_EQ(new_relation->GetNumRows(), 4);
-    ASSERT_EQ(new_relation->GetStringFormat(), tennis_string);
 }
 
 }  // namespace tests

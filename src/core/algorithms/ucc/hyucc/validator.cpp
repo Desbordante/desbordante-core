@@ -85,13 +85,13 @@ Validator::UCCValidations Validator::GetValidations(LhsPair const& vertex_and_uc
     bool is_unique;
     if (current_level_number_ == 1) {
         assert(ucc_attr != boost::dynamic_bitset<>::npos);
-        is_unique = (*plis_)[ucc_attr]->AllValuesAreUnique();
+        is_unique = (*plis_)[ucc_attr].AllValuesAreUnique();
     } else {
         ucc.reset(ucc_attr);
         // It's guaranteed that the first cluster has the fewest records because of sorting
         // in the Sampler
-        model::PLI const* pivot_pli = (*plis_)[ucc_attr];
-        is_unique = IsUnique(*pivot_pli, ucc, validations.ComparisonSuggestions());
+        model::PLI const& pivot_pli = (*plis_)[ucc_attr];
+        is_unique = IsUnique(pivot_pli, ucc, validations.ComparisonSuggestions());
         ucc.set(ucc_attr);
     }
 

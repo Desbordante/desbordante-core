@@ -27,7 +27,7 @@ algos::Correlation DeserializeCorrelation(py::tuple t) {
         throw std::runtime_error("Invalid state for Correlation pickle!");
     }
     std::shared_ptr<RelationalSchema> dummy_schema =
-            std::make_shared<RelationalSchema>("__dummy__");
+            std::make_shared<RelationalSchema>("__dummy__", std::vector<std::string>{});
     Column lhs_col =
             table_serialization::DeserializeColumn(t[0].cast<py::tuple>(), dummy_schema.get());
     Column rhs_col =
