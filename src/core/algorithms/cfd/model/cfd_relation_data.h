@@ -39,10 +39,6 @@ private:
     boost::unordered_map<std::pair<int, std::string>, int, PairHash> item_dictionary_;
     std::vector<ItemInfo> items_;
 
-    static void AddNewItemsInFullTable(ItemDictionary&, ColumnsValuesDict&, std::vector<ItemInfo>&,
-                                       std::vector<std::string> const&, std::vector<int>&,
-                                       std::vector<Transaction>&, int&, unsigned);
-
     static void AddNewItemsInPartialTable(ItemDictionary&, ColumnsValuesDict&,
                                           std::vector<ItemInfo>&, std::vector<std::string> const&,
                                           std::vector<int> const&, std::vector<Transaction>&, int&,
@@ -72,10 +68,6 @@ public:
 
     static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream& file_input,
                                                        double c_sample = 1, double r_sample = 1);
-    static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream& file_input,
-                                                       unsigned columns_number,
-                                                       unsigned tuples_number, double c_sample = 1,
-                                                       double r_sample = 1);
 
     CFDRelationData(std::unique_ptr<RelationalSchema> schema,
                     std::vector<CFDColumnData> column_data, std::vector<Transaction> data,
