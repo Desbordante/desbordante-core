@@ -64,6 +64,7 @@ extend-ignore-re = [
     # but they are not typos in the context here, they're just used as dummy strings.
     '"(ba|helo|abd)"', # typos for "by/be", "hello", "and/bad"
     "// Частоты: abc:2, abd:1", # "abd" is a typo for "and/bad"
+    "Queu", # "Queu" is a typo for "Queue"
 
     # "nd" is a common typo for "and", but Numerical Dependency, abbreviated as "ND",
     # is a legitimate pattern type. These are the strings referring to it.
