@@ -126,11 +126,13 @@ desbordante_add_bind(
     dd
     SRCS
     dd/bind_dd_verification.cpp
+    dd/bind_add_verification.cpp
     dd/bind_split.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dd::verifier
     ${DESBORDANTE_PREFIX}::dd::split
     magic_enum::magic_enum
+    ${DESBORDANTE_PREFIX}::dd::add_verifier
     Boost::headers
 )
 

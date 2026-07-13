@@ -10,7 +10,6 @@
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/model/table/vertical.h"
 #include "core/util/logger.h"
 
 namespace algos::dd {
@@ -146,6 +145,7 @@ void DDVerifier::CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> c
             ++num_error_rhs_;
         }
     }
+    error_ = lhs.empty() ? 0 : static_cast<double>(num_error_rhs_) / lhs.size();
 }
 
 void DDVerifier::VerifyDD() {
@@ -176,7 +176,6 @@ void DDVerifier::VerifyDD() {
 
     std::vector<std::pair<std::size_t, std::size_t>> const lhs = GetRowsWhereLhsHolds();
     CheckDFOnRhs(lhs);
-    error_ = lhs.empty() ? 0 : static_cast<double>(num_error_rhs_) / lhs.size();
 }
 
 std::vector<Highlight> const& DDVerifier::GetHighlights() const {

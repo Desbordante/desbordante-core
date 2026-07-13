@@ -130,6 +130,8 @@ constexpr auto kDDenialConstraint = "String representation of a Denial Constrain
 // DD verifier
 constexpr auto kDDDString = "Differential dependency that needs to be verified";
 constexpr auto kDDDudm = "map, that contains udm for verifying dd";
+constexpr auto kDSatisfactionThreshold =
+        "error threshold value for Approximate DD algorithms (between 0 and 1)";
 // DES
 constexpr auto kDCrossoverProbability = "probability of a gene getting mutated in a new individual";
 constexpr auto kDDifferentialScale = "the magnitude of mutations";
