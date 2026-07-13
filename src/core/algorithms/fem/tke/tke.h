@@ -21,9 +21,7 @@ private:
 
     void ResetState() override;
 
-    unsigned long long ExecuteInternal() override;
-
-    void FindFrequentEpisodes();
+    void ExecuteInternal() override;
 
     std::map<model::Event, size_t> GetEventsSupports() const;
 

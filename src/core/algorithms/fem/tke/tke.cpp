@@ -10,7 +10,6 @@
 #include "core/config/thread_number/option.h"
 #include "core/model/sequence/timed_event_set.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::tke {
 
@@ -41,11 +40,7 @@ void TKE::MakeExecuteOptsAvailable() {
 
 void TKE::ResetState() {}
 
-unsigned long long TKE::ExecuteInternal() {
-    return util::TimedInvoke(&TKE::FindFrequentEpisodes, this);
-}
-
-void TKE::FindFrequentEpisodes() {
+void TKE::ExecuteInternal() {
     LOG_DEBUG("Episodes num: {}. Window length: {}", episodes_num_, window_length_);
     LOG_DEBUG("Threads num: {}", threads_num_);
     LOG_DEBUG("Sequence length: {}", event_sequence_->Size());

@@ -11,7 +11,6 @@
 #include "core/config/option.h"
 #include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::afem {
 
@@ -49,11 +48,7 @@ void AFEM::MakeExecuteOptsAvailable() {
 
 void AFEM::ResetState() {}
 
-unsigned long long AFEM::ExecuteInternal() {
-    return util::TimedInvoke(&AFEM::FindFrequentEpisodes, this);
-}
-
-void AFEM::FindFrequentEpisodes() {
+void AFEM::ExecuteInternal() {
     LOG_DEBUG("Min support: {}. Window length: {}", min_support_, window_length_);
     LOG_DEBUG("Threads num: {}", threads_num_);
     LOG_DEBUG("Sequence length: {}", event_sequence_->Size());
