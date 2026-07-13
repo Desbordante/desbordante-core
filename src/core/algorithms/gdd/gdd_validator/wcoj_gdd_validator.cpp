@@ -55,25 +55,27 @@ bool WcojGddValidator::IsPatternWeaklyConnected() const {
     return boost::connected_components(undirected, component.data()) == 1;
 }
 
-std::optional<model::GddCounterexample> WcojGddValidator::Holds(model::Gdd const& gdd,
-                                                                model::gdd::graph_t const& graph) {
+GddValidator::GddHoldsResult WcojGddValidator::Holds(model::Gdd const& gdd,
+                                                     model::gdd::graph_t const& graph) {
     Prepare(gdd, graph);
 
     OperationResult result = Scan();
     if (result == OperationResult::kEmpty) {
-        return std::nullopt;
+        match_count_ = 0;
+        return {std::nullopt, match_count_};
     }
 
     while (result != OperationResult::kFinished) {
         if (result = ExtendIntersect(); result == OperationResult::kEmpty) {
-            return std::nullopt;
+            match_count_ = 0;
+            return {std::nullopt, match_count_};
         }
     }
 
-    std::size_t const count = cur_level_.count();
+    match_count_ = cur_level_.count();
     std::size_t const width = cur_level_.width;
     MappingT full_match;
-    for (std::size_t i = 0; i < count; ++i) {
+    for (std::size_t i = 0; i < match_count_; ++i) {
         VertexT const* row = cur_level_.row(i);
         full_match.clear();
         for (std::size_t j = 0; j < width; ++j) {
@@ -81,11 +83,12 @@ std::optional<model::GddCounterexample> WcojGddValidator::Holds(model::Gdd const
         }
 
         if (!gdd_->Satisfies(graph, full_match)) {
-            return model::BuildCounterexample(gdd_->GetPattern(), *graph_, full_match);
+            return {model::BuildCounterexample(gdd_->GetPattern(), *graph_, full_match),
+                    match_count_};
         }
     }
 
-    return std::nullopt;
+    return {std::nullopt, match_count_};
 }
 
 WcojGddValidator::OperationResult WcojGddValidator::Scan() {

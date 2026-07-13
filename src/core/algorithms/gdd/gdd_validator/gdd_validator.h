@@ -14,6 +14,7 @@ private:
     model::gdd::graph_t graph_;
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
+    std::vector<std::size_t> matches_count_;
 
 protected:
     using GddCounterexample = model::GddCounterexample;
@@ -50,8 +51,12 @@ protected:
         return gdds_;
     }
 
-    virtual std::optional<GddCounterexample> Holds(model::Gdd const& gdd,
-                                                   model::gdd::graph_t const& graph) = 0;
+    struct GddHoldsResult {
+        std::optional<GddCounterexample> ce;
+        std::size_t match_count;
+    };
+
+    virtual GddHoldsResult Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) = 0;
 
 public:
     GddValidator();
@@ -62,6 +67,10 @@ public:
 
     std::vector<GddCounterexample> const& GetCounterexamples() const noexcept {
         return counterexamples_;
+    }
+
+    std::vector<std::size_t> GetMatchesCount() const {
+        return matches_count_;
     }
 
     GddValidator(GddValidator const&) = delete;

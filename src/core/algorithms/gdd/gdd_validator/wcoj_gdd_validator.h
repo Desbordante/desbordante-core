@@ -132,9 +132,10 @@ private:
         bool last_isect_valid = false;
     } intersection_cache_;
 
+    std::size_t match_count_;
+
 protected:
-    virtual std::optional<GddCounterexample> Holds(model::Gdd const& gdd,
-                                                   model::gdd::graph_t const& graph) final;
+    virtual GddHoldsResult Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) final;
 
 public:
     WcojGddValidator() = default;

@@ -2,19 +2,19 @@
 
 namespace algos {
 
-std::optional<model::GddCounterexample> NaiveGddValidator::Holds(model::Gdd const& gdd,
-                                                                 model::gdd::graph_t const& graph) {
+GddValidator::GddHoldsResult NaiveGddValidator::Holds(model::Gdd const& gdd,
+                                                      model::gdd::graph_t const& graph) {
     model::gdd::graph_t const& pattern = gdd.GetPattern();
     if (domain_ = BuildDomain(pattern, graph); domain_.size() == boost::num_vertices(pattern)) {
         MappingT partial_map;
         partial_map.reserve(boost::num_vertices(pattern));
         if (GddCounterexample counterexample{};
             ExistsCounterexample(gdd, graph, partial_map, counterexample)) {
-            return counterexample;
+            return {counterexample, match_count_};
         }
     }
 
-    return std::nullopt;
+    return {std::nullopt, match_count_};
 }
 
 bool NaiveGddValidator::GraphHasCompatibleEdge(VertexT graph_src, VertexT graph_dst,
@@ -69,6 +69,7 @@ bool NaiveGddValidator::ExistsCounterexample(model::Gdd const& gdd,
                                              MappingT& partial_map,
                                              GddCounterexample& counterexample) {
     if (partial_map.size() == domain_.size()) {
+        ++match_count_;
         bool const sat = gdd.Satisfies(graph, partial_map);
 
         if (!sat) {

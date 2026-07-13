@@ -522,6 +522,7 @@ void BindGddVerification(pybind11::module_& main_module) {
 
     py::class_<GddValidator, Algorithm>(gdd_module, "GddValidator")
             .def("get_result", &GddValidator::GetResult)
+            .def("get_matches_count", &GddValidator::GetMatchesCount)
             .def("get_counterexamples", &GddValidator::GetCounterexamples);
 
     auto const gdd_algos_module = gdd_module.def_submodule("algorithms");

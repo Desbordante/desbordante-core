@@ -19,9 +19,11 @@ private:
     bool CanExtendMapping(MappingT const& partial_map, model::gdd::graph_t const& pattern,
                           VertexT pattern_var, VertexT graph_vertex) const;
 
+    std::size_t match_count_ = 0;
+
 protected:
-    virtual std::optional<GddCounterexample> Holds(model::Gdd const& gdd,
-                                                   model::gdd::graph_t const& graph) final;
+
+    virtual GddHoldsResult Holds(model::Gdd const& gdd, model::gdd::graph_t const& graph) final;
 
 public:
     NaiveGddValidator() = default;
