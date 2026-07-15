@@ -10,6 +10,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
@@ -57,7 +58,8 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kEnumConvPair<model::InputFormatType>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::des::DifferentialStrategy>,
-        kEnumConvPair<algos::od::Ordering>};
+        kEnumConvPair<algos::od::Ordering>,
+        kEnumConvPair<algos::AfdErrorMeasure>};
 }  // namespace
 
 namespace python_bindings {
