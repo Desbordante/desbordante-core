@@ -170,14 +170,22 @@ METRIC_VERIFIER_FAILURE_CASES = [
 
 
 class TestPythonBindings(unittest.TestCase):
+    def _configure_and_verify_no_extras(self, testing_algo, params):
+        while option_names := testing_algo._get_needed_options():
+            for option_name in option_names:
+                testing_algo._set_option(option_name, params.pop(option_name, None))
+
+        self.assertEqual(params, {})
 
     def _test_correct_option_setting(
         self, algo, path, separator, has_header, options: dict
     ):
         testing_algo = algo()
-        testing_algo.load_data(table=(path, separator, has_header), **options.load_options)
-        for name, value in options.execute_options.items():
-            testing_algo._set_option(name, value)
+        self._configure_and_verify_no_extras(
+                testing_algo,  {'table': (path, separator, has_header)} | options.load_options)
+        testing_algo.load_data()
+
+        self._configure_and_verify_no_extras(testing_algo, options.execute_options)
 
         algo_option_values = testing_algo.get_opts()
         for name, value in chain(options.execute_options.items(),
