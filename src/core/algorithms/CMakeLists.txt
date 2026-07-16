@@ -52,6 +52,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::fd::fun
               ${DESBORDANTE_PREFIX}::fd::hy
               ${DESBORDANTE_PREFIX}::fd::mine
+              ${DESBORDANTE_PREFIX}::fd::pattern_fd_verifier
               ${DESBORDANTE_PREFIX}::fd::pfd_verifier
               ${DESBORDANTE_PREFIX}::fd::pyro
               ${DESBORDANTE_PREFIX}::fd::sfd::cords

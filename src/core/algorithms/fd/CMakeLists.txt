@@ -11,6 +11,7 @@ set(SUBDIRS
     fun
     hycommon
     hyfd
+    pattern_fd_verifier
     pfd_verifier
     pyro
     pyrocommon
