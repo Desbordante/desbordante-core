@@ -72,12 +72,4 @@ CFDList CFDDiscovery::GetCfds() const {
 std::string CFDDiscovery::GetCfdString(ItemsetCFD const& cfd) const {
     return Output::CFDToString(cfd, relation_);
 }
-
-std::string CFDDiscovery::GetRelationString(char delim) const {
-    return relation_->GetStringFormat(delim);
-}
-
-std::string CFDDiscovery::GetRelationString(SimpleTIdList const& subset, char delim) const {
-    return relation_->GetStringFormat(subset, delim);
-}
 }  // namespace algos::cfd

@@ -34,8 +34,6 @@ public:
     void LoadDataInternal() final;
     ItemsetCFDList const& GetItemsetCfds() const;
     CFDList GetCfds() const;
-    std::string GetRelationString(char delim = ' ') const;
-    std::string GetRelationString(SimpleTIdList const& subset, char delim = ' ') const;
     std::string GetCfdString(ItemsetCFD const& cfd) const;
 };
 }  // namespace algos::cfd

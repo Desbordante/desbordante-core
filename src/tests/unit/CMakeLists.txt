@@ -68,19 +68,6 @@ desbordante_add_test(
 )
 
 desbordante_add_test(
-    cfd.relation_data
-    SRCS
-    test_cfd_relation_data.cpp
-    LIBS
-    ${DESBORDANTE_PREFIX}::model::types
-    ${DESBORDANTE_PREFIX}::model::table
-    ${DESBORDANTE_PREFIX}::testlib::common
-    ${DESBORDANTE_PREFIX}::parser::csv
-    ${DESBORDANTE_PREFIX}::cfd::util
-    ${DESBORDANTE_PREFIX}::cfd::model
-    Boost::headers
-)
-desbordante_add_test(
     cfd.verifier
     SRCS
     test_cfd_verifier.cpp

@@ -41,17 +41,6 @@ protected:
     }
 };
 
-TEST_F(CFDAlgorithmTest, CfdRelationDataPartialStringFormatTest) {
-    auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kDfs, 3);
-    algorithm->Execute();
-    std::vector<int> tids = {0, 2, 4, 6};
-    std::string expected_data =
-            "outlook temp humidity windy play\nsunny hot high false no\novercast hot high false "
-            "yes\n";
-    expected_data += "rainy cool normal false yes\novercast cool normal true yes\n";
-    ASSERT_EQ(algorithm->GetRelationString(tids), expected_data);
-}
-
 TEST_F(CFDAlgorithmTest, FullTennisDataset) {
     auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kDfs, 3);
     algorithm->Execute();

@@ -35,8 +35,6 @@ public:
     unsigned GetAttrsNumber() const;
     size_t GetNumRows() const override;
     Transaction const& GetRow(unsigned) const;
-    std::string GetStringFormat(char delim = ' ') const;
-    std::string GetStringFormat(SimpleTIdList const& subset, char delim = ' ') const;
     AttributeIndex GetAttrIndex(int item_index) const;
     unsigned Frequency(int i) const;
     std::string const& GetValue(int i) const;

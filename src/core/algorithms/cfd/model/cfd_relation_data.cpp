@@ -109,57 +109,6 @@ int CFDRelationData::GetAttrIndex(int item_index) const {
     return (item_index > 0) ? items_[item_index - 1].attribute : -1 - item_index;
 }
 
-std::string CFDRelationData::GetStringFormat(char delim) const {
-    std::string file;
-    for (size_t ai = 0; ai < GetNumColumns(); ai++) {
-        std::string const attr = GetAttrName(static_cast<int>(ai));
-        file += attr;
-        if (ai < GetNumColumns() - 1) {
-            file += delim;
-        } else {
-            file += '\n';
-        }
-    }
-    for (auto const& row : data_rows_) {
-        for (size_t ri = 0; ri < row.size(); ri++) {
-            auto const& item = row[ri];
-            file += items_[item - 1].value;
-            if (ri < row.size() - 1) {
-                file += delim;
-            } else {
-                file += '\n';
-            }
-        }
-    }
-    return file;
-}
-
-std::string CFDRelationData::GetStringFormat(SimpleTIdList const& subset, char delim) const {
-    std::string result;
-    for (size_t ai = 0; ai < GetNumColumns(); ai++) {
-        auto const& attr = GetAttrName(static_cast<AttributeIndex>(ai));
-        result += attr;
-        if (ai < GetNumColumns() - 1) {
-            result += delim;
-        } else {
-            result += '\n';
-        }
-    }
-    for (int i : subset) {
-        auto& row = data_rows_[i];
-        for (size_t ri = 0; ri < row.size(); ri++) {
-            auto const& item = row[ri];
-            result += items_[item - 1].value;
-            if (ri < row.size() - 1) {
-                result += delim;
-            } else {
-                result += '\n';
-            }
-        }
-    }
-    return result;
-}
-
 std::string const& CFDRelationData::GetValue(int i) const {
     return items_[i - 1].value;
 }
