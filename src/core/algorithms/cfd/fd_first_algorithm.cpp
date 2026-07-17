@@ -5,7 +5,6 @@
 
 #include <boost/unordered_map.hpp>
 
-#include "core/algorithms/cfd/util/partition_tidlist_util.h"
 #include "core/algorithms/cfd/util/partition_util.h"
 #include "core/algorithms/cfd/util/set_util.h"
 #include "core/algorithms/cfd/util/tidlist_util.h"
@@ -225,7 +224,7 @@ void FDFirstAlgorithm::FdsFirstDFS(Itemset const& prefix, PIdListMiners const& i
 
         auto const [expands, tmp_suffix] = ExpandMiningFd(inode, ix, iset, items);
 
-        auto const exps = PartitionTIdListUtil::ConstructIntersection(items[ix].tids, expands);
+        auto const exps = items[ix].tids.Intersection(expands);
         PIdListMiners suffix;
         for (size_t e = 0; e < exps.size(); e++) {
             bool gen = true;

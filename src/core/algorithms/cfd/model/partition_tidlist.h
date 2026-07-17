@@ -31,6 +31,8 @@ struct PartitionTIdList {
     SimpleTIdList Convert() const;
 
     PartitionTIdList Intersection(PartitionTIdList const& rhs) const;
+    std::vector<PartitionTIdList> Intersection(
+            std::vector<PartitionTIdList const*> const& rhses) const;
 
     int PartitionError(PartitionTIdList const&) const;
 };
