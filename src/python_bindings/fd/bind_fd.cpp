@@ -446,14 +446,15 @@ void BindFd(py::module_& main_module) {
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";
     static constexpr auto kPFDTaneName = "PFDTane";
-    auto fd_algos_module = BindPrimitive<Depminer, DFD, FastFDs, FUN, Pyro, Tane, PFDTane>(
+    auto fd_algos_module = BindPrimitive<DFD, FastFDs, FUN, Pyro, Tane, PFDTane>(
             fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
-            {"Depminer", "DFD", "FastFDs", "FUN", kPyroName, kTaneName, kPFDTaneName});
+            {"DFD", "FastFDs", "FUN", kPyroName, kTaneName, kPFDTaneName});
     BindFdAlgorithm<FDep>(fd_algos_module, "FDep");
     BindFdAlgorithm<Aid>(fd_algos_module, "Aid");
     BindFdAlgorithm<EulerFD>(fd_algos_module, "EulerFD");
     BindFdAlgorithm<FdMine>(fd_algos_module, "FdMine");
     BindFdAlgorithm<hyfd::HyFD>(fd_algos_module, "HyFD");
+    BindFdAlgorithm<Depminer>(fd_algos_module, "Depminer");
 
     auto define_submodule = [&fd_algos_module, &main_module](char const* name,
                                                              std::vector<char const*> algorithms) {

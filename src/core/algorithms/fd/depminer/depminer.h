@@ -1,26 +1,50 @@
 #pragma once
 
-#include "core/algorithms/fd/depminer/cmax_set.h"
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/fd/bitset_and_index_result_reporter.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/stripped_partitions.h"
+#include "core/model/table/table_header.h"
 
-namespace algos {
+namespace algos::fd {
 
-class Depminer : public PliBasedFDAlgorithm {
+class Depminer : public Algorithm {
 private:
-    static CMAXSet GenFirstLevel(std::vector<CMAXSet> const& cmax_sets, Column const& attribute,
-                                 std::unordered_set<Vertical>& level);
-    static std::unordered_set<Vertical> GenNextLevel(
-            std::unordered_set<Vertical> const& prev_level);
-    static bool CheckJoin(Vertical const& _p, Vertical const& _q);
+    using ColumnCombinations = std::unordered_set<boost::dynamic_bitset<>>;
 
-    void LhsForColumn(std::unique_ptr<Column> const& column, std::vector<CMAXSet> const& cmax_sets);
-    std::vector<CMAXSet> GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets);
+    config::InputTable input_table_;
+    config::MaxLhsType max_lhs_;
 
-    RelationalSchema const* schema_ = nullptr;
+    model::TableHeader table_header_;
+    model::StrippedPartitions plis_;
 
-    void ResetStateFd() final {}
+    LhsMaskFdView::OwningPointer fd_view_;
+
+    static ColumnCombinations GenFirstLevel(ColumnCombinations const& cmax_set);
+    static ColumnCombinations GenNextLevel(ColumnCombinations const& prev_level);
+    static bool CheckJoin(boost::dynamic_bitset<> const& p, boost::dynamic_bitset<> const& q);
+
+    void LhsForColumn(model::Index column, BitsetAndIndexResultReporter const& report_fd,
+                      ColumnCombinations const& cmax_set);
+    std::vector<ColumnCombinations> GenerateCmaxSets(ColumnCombinations const& agree_sets);
+
+    void RegisterOptions();
+
+    void LoadDataInternal() final;
+
+    void MakeExecuteOptsAvailable() final;
+    void ResetState() final;
 
     void ExecuteInternal() final;
+
+public:
+    Depminer();
+
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
+    }
 };
 
-}  // namespace algos
+}  // namespace algos::fd

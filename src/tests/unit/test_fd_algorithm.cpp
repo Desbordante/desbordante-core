@@ -157,7 +157,7 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             MaxLHSOptionWork);
 
 using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
-                                    algos::Depminer, algos::FUN, algos::PFDTane>;
+                                    algos::FUN, algos::PFDTane>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
@@ -227,6 +227,25 @@ void MaxLhsTestFun(CSVConfig config, algos::fd::TableMaskPairFdView const& fd_st
         ASSERT_TRUE(fd.lhs.count() <= max_lhs);
     }
 }
+
+void MaxLhsTestFun(CSVConfig config, algos::fd::LhsMaskFdView const& fd_storage,
+                   config::MaxLhsType max_lhs) {
+    using namespace config::names;
+    algos::StdParamsMap verify_params = {
+            {kCsvConfig, config},
+            {kError, config::ErrorType{0.0}},
+            {kMaximumLhs, max_lhs},
+    };
+    auto verify_algo = algos::CreateAndLoadAlgorithm<algos::Pyro>(verify_params);
+    verify_algo->Execute();
+    auto verify_list = FDsToSet(verify_algo->FdList());
+    ASSERT_TRUE(CheckFdCollectionEquality(verify_list, fd_storage));
+    for (std::deque<algos::fd::LhsTableMask> const& attr_fds : fd_storage.GetLhsMasks()) {
+        for (algos::fd::LhsTableMask const& lhs_table_mask : attr_fds) {
+            ASSERT_TRUE(lhs_table_mask.lhs.count() <= max_lhs);
+        }
+    }
+}
 }  // namespace
 
 TYPED_TEST_P(FdDiscoveryTest, MaxLHSOptionWork) {
@@ -246,7 +265,7 @@ REGISTER_TYPED_TEST_SUITE_P(FdDiscoveryTest, ThrowsOnEmpty, ReturnsEmptyOnSingle
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using AlgorithmsNew = ::testing::Types<algos::fd::FDep, algos::fd::hyfd::HyFD>;
+using AlgorithmsNew = ::testing::Types<algos::fd::FDep, algos::fd::hyfd::HyFD, algos::fd::Depminer>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(FdDiscoveryTest, FdDiscoveryTest, AlgorithmsNew);
 
