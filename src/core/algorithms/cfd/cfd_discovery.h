@@ -26,14 +26,13 @@ private:
 protected:
     config::InputTable input_table_;
 
-    ItemsetCFDList cfd_list_;
+    CFDList cfd_list_;
     std::shared_ptr<CFDRelationData> relation_;
 
 public:
     explicit CFDDiscovery();
     void LoadDataInternal() final;
-    ItemsetCFDList const& GetItemsetCfds() const;
-    CFDList GetCfds() const;
+    CFDList const& GetCfds() const;
     std::string GetCfdString(ItemsetCFD const& cfd) const;
 };
 }  // namespace algos::cfd

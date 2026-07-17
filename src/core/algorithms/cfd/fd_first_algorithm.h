@@ -27,6 +27,7 @@ private:
     std::set<Itemset> free_itemsets_;
     std::unordered_map<int, std::vector<Itemset>> rules_;
 
+    void RegisterCfd(Itemset const& lhs, Item rhs);
     void ResetStateCFD() final;
 
     void FdsFirstDFS();
@@ -49,8 +50,8 @@ private:
     void FillMinePatternsVars(PartitionList&, RhsesPair2DList&, RuleIxs&, std::vector<int>&,
                               Itemset const&, int, PartitionTIdList const&) const;
 
-    void AddCFDToCFDList(std::vector<int> const& sub, int out,
-                         MinerNode<SimpleTIdList> const& inode, PartitionList const& partitions);
+    void AddCFDToCFDList(Itemset const& sub, int out, MinerNode<SimpleTIdList> const& inode,
+                         PartitionList const& partitions);
 
     void AnalyzeCFDFromPIdList(std::pair<int, SimpleTIdList> const&, PartitionList const&,
                                std::vector<unsigned> const&, std::vector<MinerNode<SimpleTIdList>>&,

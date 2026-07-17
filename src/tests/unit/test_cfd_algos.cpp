@@ -45,22 +45,22 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
     auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kDfs, 3);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
-    for (auto const& cfd : algorithm->GetItemsetCfds()) {
-        actual_cfds.insert(algorithm->GetCfdString(cfd));
+    for (auto const& cfd : algorithm->GetCfds()) {
+        actual_cfds.insert(cfd.ToString());
     }
-    std::set<std::string> expected_cfds = {"(windy, temp, outlook) => humidity",
-                                           "(windy, humidity, outlook) => temp",
-                                           "(windy, outlook) => play",
-                                           "(outlook, windy=false) => play",
-                                           "(windy, temp, outlook) => play",
-                                           "(play, temp, outlook) => windy",
-                                           "(temp, outlook, play=yes) => windy",
-                                           "(play, windy, temp) => outlook",
-                                           "(play, temp, windy=false) => outlook",
-                                           "(humidity, outlook) => play",
-                                           "(humidity, temp, outlook) => play",
-                                           "(play, temp, outlook) => humidity",
-                                           "(windy, humidity, outlook) => play"};
+    std::set<std::string> expected_cfds = {"{(3, _),(1, _),(0, _)} -> (2, _)",
+                                           "{(3, _),(2, _),(0, _)} -> (1, _)",
+                                           "{(3, _),(0, _)} -> (4, _)",
+                                           "{(0, _),(3, false)} -> (4, _)",
+                                           "{(3, _),(1, _),(0, _)} -> (4, _)",
+                                           "{(4, _),(1, _),(0, _)} -> (3, _)",
+                                           "{(1, _),(0, _),(4, yes)} -> (3, _)",
+                                           "{(4, _),(3, _),(1, _)} -> (0, _)",
+                                           "{(4, _),(1, _),(3, false)} -> (0, _)",
+                                           "{(2, _),(0, _)} -> (4, _)",
+                                           "{(2, _),(1, _),(0, _)} -> (4, _)",
+                                           "{(4, _),(1, _),(0, _)} -> (2, _)",
+                                           "{(3, _),(2, _),(0, _)} -> (4, _)"};
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 
     algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kBfs, 3);
@@ -72,27 +72,27 @@ TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
     auto algorithm = CreateAlgorithmInstance(kMushroom50, 4, 0.9, algos::cfd::Substrategy::kDfs, 4);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
-    for (auto const& cfd : algorithm->GetItemsetCfds()) {
-        actual_cfds.insert(algorithm->GetCfdString(cfd));
+    for (auto const& cfd : algorithm->GetCfds()) {
+        actual_cfds.insert(cfd.ToString());
     }
-    std::set<std::string> expected_cfds = {"(edible=p) => cap-shape=x",
-                                           "(cap-shape=b) => edible=e",
-                                           "(cap-color=y) => edible=e",
-                                           "(cap-color, edible=p) => cap-shape",
-                                           "(edible=p, cap-color=n) => cap-shape=x",
-                                           "(cap-surface=f) => edible=e",
-                                           "(cap-color, cap-surface=s) => edible",
-                                           "(cap-surface, edible=p) => cap-shape",
-                                           "(edible=p, cap-surface=y) => cap-shape=x",
-                                           "(cap-surface, cap-shape=f) => edible",
-                                           "(cap-shape, edible=p, cap-surface=s) => cap-color",
-                                           "(cap-color, edible, cap-shape=f) => cap-surface",
-                                           "(cap-shape, edible=p, cap-color=w) => cap-surface",
-                                           "(edible=p, cap-shape=x, cap-color=w) => cap-surface=y",
-                                           "(cap-color, cap-surface, edible=p) => cap-shape",
-                                           "(cap-color, cap-surface, cap-shape) => edible",
-                                           "(cap-color, cap-shape, cap-surface=s) => edible",
-                                           "(cap-color, cap-surface, cap-shape=x) => edible"};
+    std::set<std::string> expected_cfds = {"{(0, p)} -> (1, x)",
+                                           "{(1, b)} -> (0, e)",
+                                           "{(3, y)} -> (0, e)",
+                                           "{(3, _),(0, p)} -> (1, _)",
+                                           "{(0, p),(3, n)} -> (1, x)",
+                                           "{(2, f)} -> (0, e)",
+                                           "{(3, _),(2, s)} -> (0, _)",
+                                           "{(2, _),(0, p)} -> (1, _)",
+                                           "{(0, p),(2, y)} -> (1, x)",
+                                           "{(2, _),(1, f)} -> (0, _)",
+                                           "{(1, _),(0, p),(2, s)} -> (3, _)",
+                                           "{(3, _),(0, _),(1, f)} -> (2, _)",
+                                           "{(1, _),(0, p),(3, w)} -> (2, _)",
+                                           "{(0, p),(1, x),(3, w)} -> (2, y)",
+                                           "{(3, _),(2, _),(0, p)} -> (1, _)",
+                                           "{(3, _),(2, _),(1, _)} -> (0, _)",
+                                           "{(3, _),(1, _),(2, s)} -> (0, _)",
+                                           "{(3, _),(2, _),(1, x)} -> (0, _)"};
 
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }

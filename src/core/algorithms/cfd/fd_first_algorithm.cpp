@@ -1,7 +1,9 @@
 #include "core/algorithms/cfd/fd_first_algorithm.h"
 
+#include <algorithm>
 #include <iterator>
 #include <numeric>
+#include <optional>
 
 #include <boost/unordered_map.hpp>
 
@@ -19,6 +21,23 @@ namespace algos::cfd {
 
 FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery() {
     RegisterOptions();
+}
+
+void FDFirstAlgorithm::RegisterCfd(Itemset const& lhs, Item rhs) {
+    auto const get_raw_item = [this](Item const& item) -> RawCFD::RawItem {
+        AttributeIndex attr_index = relation_->GetAttrIndex(item);
+        return item < 0 ? RawCFD::RawItem{.attribute = attr_index, .value = std::nullopt}
+                        : RawCFD::RawItem{
+                                  .attribute = attr_index,
+                                  .value = std::optional<std::string>{relation_->GetValue(item)}};
+    };
+
+    RawCFD::RawItems raw_lhs;
+    raw_lhs.reserve(lhs.size());
+    std::transform(lhs.begin(), lhs.end(), std::back_inserter(raw_lhs), get_raw_item);
+
+    RawCFD::RawItem raw_rhs = get_raw_item(rhs);
+    cfd_list_.emplace_back(std::move(raw_lhs), raw_rhs);
 }
 
 void FDFirstAlgorithm::RegisterOptions() {
@@ -140,7 +159,7 @@ void FDFirstAlgorithm::MineFD(MinerNode<PartitionTIdList> const& inode, Itemset 
         double e = stored_sub->second.PartitionError(inode.tids);
         double conf = 1 - (e / stored_sub->second.Support());
         if (conf >= min_conf_) {
-            cfd_list_.emplace_back(lhs, rhs);
+            RegisterCfd(lhs, rhs);
         }
         if (conf >= 1) {
             rules_[rhs].push_back(lhs);
@@ -288,7 +307,7 @@ void FDFirstAlgorithm::FillMinePatternsVars(PartitionList& partitions, RhsesPair
     }
 }
 
-void FDFirstAlgorithm::AddCFDToCFDList(std::vector<int> const& sub, int out,
+void FDFirstAlgorithm::AddCFDToCFDList(Itemset const& sub, int out,
                                        MinerNode<SimpleTIdList> const& inode,
                                        PartitionList const& partitions) {
     bool lhs_gen = true;
@@ -308,7 +327,7 @@ void FDFirstAlgorithm::AddCFDToCFDList(std::vector<int> const& sub, int out,
         unsigned e = PartitionUtil::GetPartitionError(inode.tids, partitions);
         double conf = 1.0 - (static_cast<double>(e) / static_cast<double>(inode.node_supp));
         if (conf >= min_conf_) {
-            cfd_list_.emplace_back(sub, out);
+            RegisterCfd(sub, out);
         }
         if (conf >= 1) {
             rules_[out].push_back(sub);
