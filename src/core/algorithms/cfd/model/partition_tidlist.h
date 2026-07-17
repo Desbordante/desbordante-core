@@ -30,6 +30,10 @@ struct PartitionTIdList {
     bool operator<(PartitionTIdList const&) const;
     SimpleTIdList Convert() const;
 
+    int Support() const noexcept {
+        return tids.empty() ? 0 : static_cast<int>(tids.size()) + 1 - sets_number;
+    }
+
     PartitionTIdList Intersection(PartitionTIdList const& rhs) const;
     std::vector<PartitionTIdList> Intersection(
             std::vector<PartitionTIdList const*> const& rhses) const;

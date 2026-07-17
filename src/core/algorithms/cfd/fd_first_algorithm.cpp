@@ -7,7 +7,6 @@
 
 #include "core/algorithms/cfd/util/partition_util.h"
 #include "core/algorithms/cfd/util/set_util.h"
-#include "core/algorithms/cfd/util/tidlist_util.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
@@ -139,7 +138,7 @@ void FDFirstAlgorithm::MineFD(MinerNode<PartitionTIdList> const& inode, Itemset 
     if (lhs_gen) {
         // Here the confidence computing method from the paper is used
         double e = stored_sub->second.PartitionError(inode.tids);
-        double conf = 1 - (e / TIdUtil::Support(stored_sub->second));
+        double conf = 1 - (e / stored_sub->second.Support());
         if (conf >= min_conf_) {
             cfd_list_.emplace_back(lhs, rhs);
         }
@@ -157,8 +156,7 @@ void FDFirstAlgorithm::FdsFirstDFS() {
     PIdListMiners items = GetPartitionSingletons();
     for (auto& a : items) {
         a.candidates = all_attrs;
-        free_map_[std::make_pair(TIdUtil::Support(a.tids), a.tids.sets_number)].push_back(
-                Itemset{a.item});
+        free_map_[std::make_pair(a.tids.Support(), a.tids.sets_number)].push_back(Itemset{a.item});
         free_itemsets_.insert(Itemset{a.item});
     }
     store_[Itemset()] = PartitionTIdList(relation_->GetNumRows());
@@ -229,7 +227,7 @@ void FDFirstAlgorithm::FdsFirstDFS(Itemset const& prefix, PIdListMiners const& i
         for (size_t e = 0; e < exps.size(); e++) {
             bool gen = true;
             auto const new_set = Join(tmp_suffix[e].prefix, tmp_suffix[e].item);
-            auto const sp = std::make_pair(TIdUtil::Support(exps[e]), exps[e].sets_number);
+            auto const sp = std::make_pair(exps[e].Support(), exps[e].sets_number);
             auto const free_map_elem = free_map_.find(sp);
             if (free_map_elem != free_map_.end()) {
                 auto const free_cands = free_map_elem->second;
@@ -244,7 +242,8 @@ void FDFirstAlgorithm::FdsFirstDFS(Itemset const& prefix, PIdListMiners const& i
                 free_map_[sp].push_back(new_set);
                 free_itemsets_.insert(new_set);
             }
-            auto new_node = MinerNode<PartitionTIdList>(tmp_suffix[e].item, exps[e]);
+            auto new_node =
+                    MinerNode<PartitionTIdList>(tmp_suffix[e].item, exps[e], exps[e].Support());
             new_node.candidates = tmp_suffix[e].candidates;
             new_node.prefix = tmp_suffix[e].prefix;
             suffix.push_back(std::move(new_node));
@@ -502,9 +501,8 @@ void FDFirstAlgorithm::MinePatternsDFS(Itemset const& prefix, TIdListMiners& ite
             suffix.emplace_back(jnode.item, ij_tids, ij_supp);
         }
         if (!suffix.empty()) {
-            std::sort(suffix.begin(), suffix.end(), [](auto const& a, auto const& b) {
-                return TIdUtil::Support(a.tids) < TIdUtil::Support(b.tids);
-            });
+            std::sort(suffix.begin(), suffix.end(),
+                      [](auto const& a, auto const& b) { return a.tids.size() < b.tids.size(); });
             MinePatternsDFS(iset, suffix, lhs, rhs, rhses_pair, partitions, psupps);
         }
     }
