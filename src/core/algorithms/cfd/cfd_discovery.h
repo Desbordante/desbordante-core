@@ -33,6 +33,5 @@ public:
     explicit CFDDiscovery();
     void LoadDataInternal() final;
     CFDList const& GetCfds() const;
-    std::string GetCfdString(ItemsetCFD const& cfd) const;
 };
 }  // namespace algos::cfd

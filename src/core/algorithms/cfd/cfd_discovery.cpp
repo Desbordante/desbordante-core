@@ -1,6 +1,5 @@
 #include "core/algorithms/cfd/cfd_discovery.h"
 
-#include "core/algorithms/cfd/util/cfd_output_util.h"
 #include "core/algorithms/cfd/util/set_util.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/names_and_descriptions.h"
@@ -38,9 +37,5 @@ void CFDDiscovery::RegisterOptions() {
 
 CFDList const& CFDDiscovery::GetCfds() const {
     return cfd_list_;
-}
-
-std::string CFDDiscovery::GetCfdString(ItemsetCFD const& cfd) const {
-    return Output::CFDToString(cfd, relation_);
 }
 }  // namespace algos::cfd

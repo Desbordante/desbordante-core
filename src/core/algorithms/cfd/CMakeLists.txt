@@ -2,7 +2,7 @@ add_subdirectory(cfd_verifier)
 
 set(NAME cfd.util)
 desbordante_add_lib(NAME OBJECT)
-target_sources(${NAME} PRIVATE util/cfd_output_util.cpp util/partition_util.cpp)
+target_sources(${NAME} PRIVATE util/partition_util.cpp)
 target_link_libraries(${NAME} PRIVATE Boost::headers)
 
 set(NAME cfd.model)

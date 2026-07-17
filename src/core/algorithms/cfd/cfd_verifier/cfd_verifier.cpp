@@ -1,7 +1,6 @@
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 
 #include "core/algorithms/cfd/model/cfd_relation_data.h"
-#include "core/algorithms/cfd/util/cfd_output_util.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -89,7 +88,6 @@ void CFDVerifier::ExecuteInternal() {
     cfd_ = {build_item_ids(string_rule_left_), build_item_ids({string_rule_right_}).front()};
 
     LOG_DEBUG("Starting CFD verification...");
-    LOG_DEBUG("\tRule to verify: {}", cfd::Output::CFDToString(cfd_, relation_));
 
     VerifyCFD();
 

@@ -3,7 +3,6 @@
 #include <ranges>
 
 #include "core/algorithms/cfd/model/cfd_types.h"
-#include "core/algorithms/cfd/util/cfd_output_util.h"
 
 namespace algos::cfd_verifier {
 void CFDStatsCalculator::CreateSupportMask() {
