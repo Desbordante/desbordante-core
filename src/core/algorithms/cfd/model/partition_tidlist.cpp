@@ -23,48 +23,6 @@ SimpleTIdList PartitionTIdList::Convert() const {
     return res;
 }
 
-PartitionTIdList PartitionTIdList::Intersection(PartitionTIdList const& rhs) const {
-    std::unordered_map<int, int> eq_indices;
-    eq_indices.reserve(this->tids.size() + 1 - this->sets_number);
-    std::vector<std::vector<int> > eq_classes(this->sets_number);
-
-    int eix = 0;
-    int count = 0;
-    for (unsigned ix = 0; ix <= this->tids.size(); ix++) {
-        count++;
-        if (ix == this->tids.size() || this->tids[ix] == PartitionTIdList::kSep) {
-            eq_classes[eix].reserve(count);
-            count = 0;
-            eix++;
-        } else {
-            eq_indices[this->tids[ix]] = eix + 1;
-        }
-    }
-    PartitionTIdList res;
-    res.sets_number = 0;
-    for (unsigned ix = 0; ix <= rhs.tids.size(); ix++) {
-        if (ix == rhs.tids.size() || rhs.tids[ix] == PartitionTIdList::kSep) {
-            for (auto& eqcl : eq_classes) {
-                if (!eqcl.empty()) {
-                    res.tids.insert(res.tids.end(), eqcl.begin(), eqcl.end());
-                    res.tids.push_back(PartitionTIdList::kSep);
-                    res.sets_number++;
-                    eqcl.clear();
-                }
-            }
-        } else {
-            int const jt = rhs.tids[ix];
-            if (eq_indices[jt]) {
-                eq_classes[eq_indices[jt] - 1].push_back(jt);
-            }
-        }
-    }
-    if (!res.tids.empty() && res.tids.back() == PartitionTIdList::kSep) {
-        res.tids.pop_back();
-    }
-    return res;
-}
-
 std::vector<PartitionTIdList> PartitionTIdList::Intersection(
         std::vector<PartitionTIdList const*> const& rhses) const {
     std::unordered_map<int, int> eq_indices(tids.size());

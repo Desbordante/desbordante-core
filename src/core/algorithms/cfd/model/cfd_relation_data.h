@@ -38,7 +38,6 @@ public:
     AttributeIndex GetAttrIndex(int item_index) const;
     unsigned Frequency(int i) const;
     std::string const& GetValue(int i) const;
-    std::vector<int> const& GetDomainOfItem(int) const;
     std::vector<int> const& GetDomain(unsigned attr) const;
     std::vector<int> GetAttrVector(Itemset const&) const;
     std::vector<int> GetAttrVectorItems(Itemset const&) const;

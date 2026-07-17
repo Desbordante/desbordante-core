@@ -72,10 +72,6 @@ Transaction const& CFDRelationData::GetRow(unsigned row) const {
     return data_rows_.at(row);
 }
 
-std::vector<int> const& CFDRelationData::GetDomainOfItem(int item) const {
-    return column_data_.at(items_[item - 1].attribute).GetValues();
-}
-
 std::vector<int> const& CFDRelationData::GetDomain(unsigned attr) const {
     return column_data_.at(attr).GetValues();
 }

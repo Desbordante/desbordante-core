@@ -33,8 +33,6 @@ private:
 public:
     explicit RawCFD(RawItems lhs, RawItem rhs) : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
-    std::string ToJSON() const;
-
     std::string ToString() const;
 
     RawItems const& GetLhs() const {

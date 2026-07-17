@@ -28,8 +28,6 @@ public:
           values_(std::move(col_values)),
           values_dict_(std::move(values_dict)) {}
 
-    explicit CFDColumnData(Column const* col) : AbstractColumnData(col) {}
-
     std::vector<NumToken> const& GetValues() const {
         return values_;
     }
