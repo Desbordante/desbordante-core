@@ -1,26 +1,36 @@
 #pragma once
 
-#include "core/algorithms/fd/depminer/cmax_set.h"
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include <vector>
 
-namespace algos {
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
+#include "core/algorithms/fd/probing_tables_load_data.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/table_header.h"
 
-class Depminer : public PliBasedFDAlgorithm {
-private:
-    static CMAXSet GenFirstLevel(std::vector<CMAXSet> const& cmax_sets, Column const& attribute,
-                                 std::unordered_set<Vertical>& level);
-    static std::unordered_set<Vertical> GenNextLevel(
-            std::unordered_set<Vertical> const& prev_level);
-    static bool CheckJoin(Vertical const& _p, Vertical const& _q);
+namespace algos::fd {
 
-    void LhsForColumn(std::unique_ptr<Column> const& column, std::vector<CMAXSet> const& cmax_sets);
-    std::vector<CMAXSet> GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets);
+class Depminer : public ProbingTablesLoadData {
+    config::InputTable input_table_;
+    config::MaxLhsType max_lhs_;
 
-    RelationalSchema const* schema_ = nullptr;
+    model::TableHeader table_header_;
 
-    void ResetStateFd() final {}
+    LhsMaskFdView::OwningPointer fd_view_;
+
+    void RegisterOptions();
+
+    void MakeExecuteOptsAvailable() final;
+    void ResetState() final;
 
     void ExecuteInternal() final;
+
+public:
+    Depminer();
+
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
+    }
 };
 
-}  // namespace algos
+}  // namespace algos::fd
