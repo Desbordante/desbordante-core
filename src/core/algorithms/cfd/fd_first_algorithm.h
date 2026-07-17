@@ -23,7 +23,6 @@ private:
 
     std::map<Itemset, PartitionTIdList> store_;
     PrefixTree<Itemset, Itemset> cand_store_;
-    Itemset all_attrs_;
     std::map<std::pair<int, int>, std::vector<Itemset>> free_map_;
     std::set<Itemset> free_itemsets_;
     std::unordered_map<int, std::vector<Itemset>> rules_;

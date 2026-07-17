@@ -16,9 +16,6 @@
 
 namespace algos::cfd {
 
-std::vector<int> Range(int, int, int = 1);
-std::vector<int> Iota(unsigned);
-
 template <typename T>
 bool IsSubsetOf(T const& sub, T const& super) {
     return std::includes(super.begin(), super.end(), sub.begin(), sub.end());

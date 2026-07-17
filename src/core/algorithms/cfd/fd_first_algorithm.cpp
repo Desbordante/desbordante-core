@@ -1,6 +1,7 @@
 #include "core/algorithms/cfd/fd_first_algorithm.h"
 
 #include <iterator>
+#include <numeric>
 
 #include <boost/unordered_map.hpp>
 
@@ -56,8 +57,7 @@ void FDFirstAlgorithm::RegisterOptions() {
 
 void FDFirstAlgorithm::ResetStateCFD() {
     store_.clear();
-    // cand_store_ does not have clear method
-    all_attrs_.clear();
+    cand_store_ = PrefixTree<Itemset, Itemset>();
     free_map_.clear();
     free_itemsets_.clear();
     rules_.clear();
@@ -152,17 +152,18 @@ void FDFirstAlgorithm::MineFD(MinerNode<PartitionTIdList> const& inode, Itemset 
 
 // Initializing all objects that will be used in algorithm
 void FDFirstAlgorithm::FdsFirstDFS() {
-    all_attrs_ = Range(-static_cast<int>(relation_->GetAttrsNumber()), 0);
+    Itemset all_attrs(relation_->GetNumColumns());
+    std::iota(all_attrs.begin(), all_attrs.end(), -static_cast<int>(relation_->GetNumColumns()));
+
     PIdListMiners items = GetPartitionSingletons();
     for (auto& a : items) {
-        a.candidates = all_attrs_;
+        a.candidates = all_attrs;
         free_map_[std::make_pair(TIdUtil::Support(a.tids), a.tids.sets_number)].push_back(
                 Itemset{a.item});
         free_itemsets_.insert(Itemset{a.item});
     }
-    cand_store_ = PrefixTree<Itemset, Itemset>();
-    store_[Itemset()] = PartitionTIdList(Iota(relation_->GetNumRows()));
-    cand_store_.Insert(Itemset(), all_attrs_);
+    store_[Itemset()] = PartitionTIdList(relation_->GetNumRows());
+    cand_store_.Insert(Itemset(), all_attrs);
     FdsFirstDFS(Itemset(), items, substrategy_);
 }
 

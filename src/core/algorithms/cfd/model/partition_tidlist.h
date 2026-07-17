@@ -1,5 +1,7 @@
 #pragma once
 
+#include <numeric>
+
 #include "core/algorithms/cfd/model/cfd_types.h"
 
 namespace algos::cfd {
@@ -10,6 +12,10 @@ struct PartitionTIdList {
     PartitionTIdList() : sets_number(0) {}
 
     PartitionTIdList(SimpleTIdList tids, int nrSets) : tids(std::move(tids)), sets_number(nrSets) {}
+
+    explicit PartitionTIdList(std::size_t num_rows) : tids(num_rows), sets_number(1) {
+        std::iota(tids.begin(), tids.end(), 0);
+    }
 
     explicit PartitionTIdList(SimpleTIdList const& tidList) {
         tids = tidList;
