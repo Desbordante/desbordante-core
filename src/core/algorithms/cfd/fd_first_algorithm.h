@@ -22,7 +22,7 @@ private:
     Substrategy substrategy_ = Substrategy::kDfs;
 
     std::map<Itemset, PartitionTIdList> store_;
-    PrefixTree<Itemset, Itemset> cand_store_;
+    PrefixTree cand_store_;
     std::map<std::pair<int, int>, std::vector<Itemset>> free_map_;
     std::set<Itemset> free_itemsets_;
     std::unordered_map<int, std::vector<Itemset>> rules_;

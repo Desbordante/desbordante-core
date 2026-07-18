@@ -74,7 +74,7 @@ void FDFirstAlgorithm::RegisterOptions() {
 
 void FDFirstAlgorithm::ResetStateCFD() {
     store_.clear();
-    cand_store_ = PrefixTree<Itemset, Itemset>();
+    cand_store_ = PrefixTree();
     free_map_.clear();
     free_itemsets_.clear();
     rules_.clear();
