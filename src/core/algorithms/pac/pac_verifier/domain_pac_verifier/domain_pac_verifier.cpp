@@ -65,7 +65,10 @@ std::vector<PACVerifier::EpsilonDelta> DomainPACVerifier::FindEpsilons() const {
     std::vector<EpsilonDelta> result;
     std::size_t curr_size = domain_size;
 
-    result.emplace_back(0, static_cast<double>(domain_size) / total_tuples_num);
+    auto domain_only_delta = static_cast<double>(domain_size) / total_tuples_num;
+    if (domain_only_delta > MinDelta() - kDistThreshold) {
+        result.emplace_back(0, domain_only_delta);
+    }
 
     for (auto needed_tuples_num = min_tuples_num; needed_tuples_num <= total_tuples_num;
          needed_tuples_num += tuples_step) {

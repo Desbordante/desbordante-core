@@ -95,8 +95,6 @@ std::optional<PACVerifier::EpsilonDelta> PACVerifier::TryValidatePAC(
 
 std::optional<PACVerifier::EpsilonDelta> PACVerifier::CheckPairsBetweenMinMaxEpsilon(
         std::vector<EpsilonDelta> const& empirical_probabilities) const {
-    assert(empirical_probabilities.size() >= 2);
-
     if (max_epsilon_ >= 0 && min_epsilon_ > 0) {
         auto after_min_epsilon =
                 std::ranges::upper_bound(empirical_probabilities, min_epsilon_, {}, GetEpsilon);
@@ -116,12 +114,6 @@ std::optional<PACVerifier::EpsilonDelta> PACVerifier::CheckPairsBetweenMinMaxEps
             // Let `GetEpsilonDeltaForEpsilon` select delta here
             return eps_delta_pair;
         }
-    }
-    if (max_epsilon_ >= 0) {
-        auto after_max_epsilon =
-                std::ranges::upper_bound(empirical_probabilities, max_epsilon_, {}, GetEpsilon);
-        // By "first pairs invariant", first epsilon must be 0
-        assert(after_max_epsilon != empirical_probabilities.begin());
     }
     return std::nullopt;
 }
@@ -146,18 +138,6 @@ std::ranges::subrange<std::vector<PACVerifier::EpsilonDelta>::const_iterator>
 PACVerifier::BuildECDF(std::vector<EpsilonDelta>& empirical_probabilities) const {
     auto begin = empirical_probabilities.begin();
     auto end = empirical_probabilities.end();
-
-    // First pair is always (0, ??), others have their delta >= min delta...
-    assert(begin->epsilon < kDistThreshold &&
-           std::next(begin)->delta > MinDelta() - kDistThreshold);
-    // ...but there is a corner case: ?? >= min_delta
-    if (begin->delta < MinDelta() - kDistThreshold) {
-        std::advance(begin, 1);
-    }
-
-    // And the last pair is always (??, 1)
-    auto const& back = *std::prev(end);
-    assert(std::abs(back.delta - 1) < kDistThreshold);
 
     if (min_epsilon_ > 0) {
         // Take all values that have eps > min_eps, and add (min_eps, delta_{j - 1}) to beginning
@@ -204,6 +184,8 @@ PACVerifier::BuildECDF(std::vector<EpsilonDelta>& empirical_probabilities) const
 PACVerifier::EpsilonDelta PACVerifier::FindEpsilonDelta(
         std::vector<EpsilonDelta>&& empirical_probabilities) const {
     assert(!empirical_probabilities.empty());
+    assert(empirical_probabilities.front().delta > MinDelta() - kDistThreshold);
+    assert(empirical_probabilities.back().delta < 1 + kDistThreshold);
 
     LOG_TRACE("Empirical probabilities:");
     for ([[maybe_unused]] auto const& [eps, delta] : empirical_probabilities) {
