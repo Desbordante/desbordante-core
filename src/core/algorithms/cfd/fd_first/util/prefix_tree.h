@@ -7,7 +7,7 @@
 
 #include "core/algorithms/cfd/model/cfd_types.h"
 
-// see algorithms/cfd/LICENSE
+// see algorithms/cfd/fd_first/LICENSE
 
 namespace algos::cfd {
 

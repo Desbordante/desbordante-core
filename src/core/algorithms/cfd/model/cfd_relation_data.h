@@ -8,8 +8,6 @@
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/relation_data.h"
 
-// see algorithms/cfd/LICENSE
-
 namespace algos::cfd {
 
 // Data presentation class that CFDDiscovery uses.

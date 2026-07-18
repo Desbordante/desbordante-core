@@ -1,8 +1,8 @@
-#include "core/algorithms/cfd/util/prefix_tree.h"
+#include "core/algorithms/cfd/fd_first/util/prefix_tree.h"
 
 #include <boost/functional/hash.hpp>
 
-// see algorithms/cfd/LICENSE
+// see algorithms/cfd/fd_first/LICENSE
 
 namespace {
 

@@ -1,8 +1,9 @@
-#include "core/algorithms/cfd/util/partition_util.h"
+#include "core/algorithms/cfd/fd_first/util/partition_util.h"
 
+#include <algorithm>
 #include <numeric>
 
-// see algorithms/cfd/LICENSE
+// see algorithms/cfd/fd_first/LICENSE
 
 namespace algos::cfd {
 

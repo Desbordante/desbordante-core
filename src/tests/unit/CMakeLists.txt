@@ -53,15 +53,14 @@ desbordante_add_test(
 
 # --- CFD ---
 desbordante_add_test(
-    cfd.algos
+    cfd.fdfirst
     SRCS
-    test_cfd_algos.cpp
+    test_fdfirst.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::cfd
+    ${DESBORDANTE_PREFIX}::cfd::fdfirst
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::testlib::common
-    ${DESBORDANTE_PREFIX}::cfd::model
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers

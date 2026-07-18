@@ -7,8 +7,6 @@
 
 #include "core/model/table/abstract_column_data.h"
 
-// see algorithms/cfd/LICENSE
-
 namespace algos::cfd {
 
 // Column presentation class for CFDRelationData.

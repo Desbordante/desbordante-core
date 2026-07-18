@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/algorithms/cfd/model/cfd_types.h"
+#include "core/algorithms/cfd/fd_first/model/types.h"
 
-// see algorithms/cfd/LICENSE
+// see algorithms/cfd/fd_first/LICENSE
 
 namespace algos::cfd {
 

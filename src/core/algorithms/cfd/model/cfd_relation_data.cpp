@@ -5,10 +5,7 @@
 #include <iostream>
 #include <random>
 
-#include "core/algorithms/cfd/util/set_util.h"
 #include "core/util/logger.h"
-
-// see algorithms/cfd/LICENSE
 
 namespace algos::cfd {
 

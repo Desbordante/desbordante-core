@@ -1,4 +1,9 @@
-#include "core/algorithms/cfd/model/partition_tidlist.h"
+#include "core/algorithms/cfd/fd_first/model/partition_tidlist.h"
+
+#include <algorithm>
+#include <map>
+#include <unordered_map>
+#include <vector>
 
 namespace algos::cfd {
 
@@ -12,15 +17,6 @@ bool PartitionTIdList::operator!=(PartitionTIdList const& b) const {
 
 bool PartitionTIdList::operator<(PartitionTIdList const& b) const {
     return sets_number < b.sets_number || (sets_number == b.sets_number && tids < b.tids);
-}
-
-SimpleTIdList PartitionTIdList::Convert() const {
-    auto res = tids;
-    if (sets_number > 1) {
-        std::sort(res.begin(), res.end());
-        res.erase(res.begin(), res.begin() + sets_number - 1);
-    }
-    return res;
 }
 
 std::vector<PartitionTIdList> PartitionTIdList::Intersection(

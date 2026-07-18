@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-#include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/tane/enums.h"

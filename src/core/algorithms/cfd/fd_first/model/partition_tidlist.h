@@ -2,7 +2,7 @@
 
 #include <numeric>
 
-#include "core/algorithms/cfd/model/cfd_types.h"
+#include "core/algorithms/cfd/fd_first/model/types.h"
 
 namespace algos::cfd {
 
@@ -28,7 +28,6 @@ struct PartitionTIdList {
     bool operator==(PartitionTIdList const&) const;
     bool operator!=(PartitionTIdList const&) const;
     bool operator<(PartitionTIdList const&) const;
-    SimpleTIdList Convert() const;
 
     int Support() const noexcept {
         return tids.empty() ? 0 : static_cast<int>(tids.size()) + 1 - sets_number;

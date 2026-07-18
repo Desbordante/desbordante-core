@@ -13,8 +13,6 @@
 #include "core/algorithms/cfd/model/cfd_types.h"
 #include "core/config/tabular_data/input_table_type.h"
 
-// see algorithms/cfd/LICENSE
-
 namespace algos::cfd {
 
 class CFDDiscovery : public Algorithm {
