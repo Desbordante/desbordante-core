@@ -12,7 +12,6 @@ target_sources(
             similarity_data.cpp
             validator.cpp
 )
-target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::md::hy::preprocessing ${DESBORDANTE_PREFIX}::md
                     spdlog::spdlog_header_only Boost::headers
@@ -35,6 +34,5 @@ target_sources(
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
-    PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only magic_enum::magic_enum
-            Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only Boost::headers
 )

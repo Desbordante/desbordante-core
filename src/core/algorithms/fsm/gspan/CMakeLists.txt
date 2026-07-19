@@ -6,7 +6,6 @@ target_sources(
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
-    ${NAME}
-    PRIVATE ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::config ${DESBORDANTE_PREFIX}::util
-            spdlog::spdlog_header_only magic_enum::magic_enum Boost::headers
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::config
+                    ${DESBORDANTE_PREFIX}::util spdlog::spdlog_header_only Boost::headers
 )

@@ -10,5 +10,5 @@ target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
     PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
-            ${DESBORDANTE_PREFIX}::util magic_enum::magic_enum Boost::headers
+            ${DESBORDANTE_PREFIX}::util Boost::headers
 )

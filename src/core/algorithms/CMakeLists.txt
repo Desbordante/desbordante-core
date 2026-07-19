@@ -31,7 +31,6 @@ endforeach()
 set(NAME algos)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
-target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::model::types
