@@ -127,6 +127,7 @@ desbordante_add_bind(
     SRCS
     dd/bind_dd_verification.cpp
     dd/bind_split.cpp
+    dd/create_dd.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dd::verifier
     ${DESBORDANTE_PREFIX}::dd::split
