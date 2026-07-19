@@ -67,7 +67,7 @@ jobs:
 
           - os: macos-15
             toolset: apple-clang
-            env: CXX=clang++
+            env: CXX=clang++ ICU_ROOT=$(brew --prefix icu4c)
 
         cfg:
           - { BUILD_TYPE: Release }
