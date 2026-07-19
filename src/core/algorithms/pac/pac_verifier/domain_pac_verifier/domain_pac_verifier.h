@@ -55,8 +55,10 @@ private:
     }
 
 public:
-    DomainPACVerifier() : PACVerifier() {
+    DomainPACVerifier() {
         DESBORDANTE_OPTION_USING;
+
+        RegisterCommonOptions(true, false);
 
         RegisterOption(
                 config::kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices}}}));
