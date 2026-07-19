@@ -151,10 +151,12 @@ jobs:
             export BOOST_ROOT=/usr &&
             export CXX=g++-10 
           CIBW_BEFORE_ALL_MACOS: >
+            brew install icu4c &&
             cd lib/boost &&
             ./bootstrap.sh --with-libraries=container,thread,graph &&
             sudo ./b2 install -j3 --prefix=/usr/local cxxflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET} -std=c++20" linkflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" &&
             export BOOST_ROOT=/usr/local &&
+            export ICU_ROOT=$(brew --prefix icu4c) &&
             export CXX=clang++ &&
             export DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} 
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
