@@ -19,6 +19,7 @@ protected:
 
 private:
     constexpr static double kDefaultMinDelta = 0.9;
+    constexpr static double kDefaultMaxDelta = 0.2;
     // Diagonal threshold is the maximum slope coefficient of a segment on the ECDF, that is still
     // considered horizontal during verifying PAC via elbow method
     // See https://colab.research.google.com/drive/1t2i-BgzRaL3VSzL0Q0izR1RbgE1i0Ohu?usp=sharing
@@ -27,13 +28,12 @@ private:
 
     double min_epsilon_;
     double max_epsilon_;
-    double min_delta_;
+    double min_delta_ = 0;
+    double max_delta_ = 1;
     double diagonal_threshold_;
     unsigned long delta_steps_;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-
-    void RegisterOptions();
 
     /// @brief Remove extra pairs from empirical_probabilities
     std::ranges::subrange<std::vector<EpsilonDelta>::const_iterator> BuildECDF(
@@ -70,6 +70,10 @@ protected:
         return min_delta_;
     }
 
+    double MaxDelta() const {
+        return max_delta_;
+    }
+
     std::size_t DeltaSteps() const {
         return delta_steps_;
     }
@@ -79,6 +83,7 @@ protected:
     }
 
     virtual void LoadDataInternal() override;
+    void RegisterCommonOptions(bool has_min_delta_option, bool has_max_delta_option);
     virtual void MakeExecuteOptsAvailable() override;
 
     /// @brief Prepare data for validating concrete PAC type.
@@ -96,12 +101,5 @@ protected:
     /// Must return the minimal possible epsilon when the requested @c epsilon is too small to get
     /// epsilon-delta for it
     virtual EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const = 0;
-
-public:
-    PACVerifier() : Algorithm() {
-        RegisterOptions();
-    }
-
-    virtual ~PACVerifier() = default;
 };
 }  // namespace algos::pac_verifier
