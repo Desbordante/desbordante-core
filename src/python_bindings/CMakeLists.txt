@@ -121,7 +121,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::dd::verifier
     ${DESBORDANTE_PREFIX}::dd::split
-    magic_enum::magic_enum
+    ${DESBORDANTE_PREFIX}::dd
     Boost::headers
 )
 
