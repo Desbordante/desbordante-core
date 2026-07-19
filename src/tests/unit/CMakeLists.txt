@@ -702,3 +702,18 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
 )
+# GA-RFD
+desbordante_add_test(
+    rfd.ga
+    SRCS
+    test_ga_rfd_support.cpp
+    test_ga_rfd.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    spdlog::spdlog_header_only
+    magic_enum::magic_enum
+    Boost::headers
+)

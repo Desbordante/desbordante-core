@@ -24,6 +24,8 @@
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/rfd/similarity_metric.h"
+#include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -35,6 +37,7 @@
 #include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
 #include "python_bindings/py_util/iterable_sequence_stream.h"
+#include "python_bindings/rfd/py_similarity_metric.h"
 
 namespace {
 
@@ -236,6 +239,13 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::pair<std::string, std::string>>,
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
+        {typeid(std::shared_ptr<algos::rfd::SimilarityMetric>),
+         [](std::string_view, py::handle obj) {
+             return std::shared_ptr<algos::rfd::SimilarityMetric>(
+                     new python_bindings::PySimilarityMetric(
+                             py::reinterpret_borrow<py::object>(obj)));
+         }},
+        kNormalConvPair<std::vector<double>>,
 };
 
 }  // namespace

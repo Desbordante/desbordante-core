@@ -12,7 +12,7 @@ using AlgorithmTypes =
                    fd_verifier::FDVerifier, HyUCC, PyroUCC, HPIValid, cfd::FDFirstAlgorithm,
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, cind::CINDVerifier,
                    Fastod, GfdValidator, EGfdValidator, NaiveGfdValidator, order::Order, dd::Split,
-                   Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier,
+                   Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier, rfd::GaRfd,
                    ar_verifier::ARVerifier, GSpan, sd_verifier::SDVerifier, maxfem::MaxFEM>;
 
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
@@ -105,14 +105,17 @@ enum class AlgorithmType : char {
     /* AR verifier algorithm */
     kArVerifier,
 
-    /* Frequent subgraph mining algorithms*/
+    /* Frequent subgraph mining algorithms */
     kGspan,
 
     /* SD verifier algorithm */
     kSdVerifier,
 
     /* Frequent episode mining algorithms*/
-    kMaxfem
+    kMaxfem,
+
+    /* GA-RFD mining algorithms */
+    kGarfd
 };
 
 static_assert(std::tuple_size_v<AlgorithmTypes> == magic_enum::enum_count<AlgorithmType>(),

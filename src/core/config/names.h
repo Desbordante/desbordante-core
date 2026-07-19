@@ -154,4 +154,12 @@ constexpr auto kCindCondValues = "cind_condition_values";
 constexpr auto kSdG1 = "g1";
 constexpr auto kSdG2 = "g2";
 constexpr auto kSdIndices = "indices";
+// GA-RFD
+constexpr auto kMetrics = "metrics";
+constexpr auto kRfdMinSimilarity = "min_similarity";
+constexpr auto kRfdMinimumConfidence = "minconf";
+constexpr auto kRfdCrossoverProbability = "crossover_probability";
+constexpr auto kRfdMutationProbability = "mutation_probability";
+constexpr auto kRfdMaxGenerations = "max_generations";
+constexpr auto kCacheMaxSize = "cache_size";
 }  // namespace config::names
