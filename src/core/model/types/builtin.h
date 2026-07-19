@@ -5,9 +5,6 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/serialization/strong_typedef.hpp>
 
-#define MAGIC_ENUM_ENABLE_HASH
-#include <magic_enum/magic_enum.hpp>
-
 namespace model {
 
 /* Aliases below are used to describe types containing in ColumnData and a ColumnData type itself.
