@@ -18,7 +18,7 @@ private:
     double confidence_ = 0.0;
     size_t num_transactions_violating_ar_ = 0;
     std::unordered_map<size_t, model::RuleCoverage> rule_coverage_coefficients_;
-    std::unordered_map<std::string, ::model::PLI::Cluster> clusters_violating_ar_;
+    std::unordered_map<std::string_view, ::model::PLI::Cluster> clusters_violating_ar_;
 
     static ClusterPriority CalculateClusterPriority(model::RuleCoverage const& coverage);
     void CalculateRuleCoverageCoefficients();
@@ -51,7 +51,8 @@ public:
     }
 
     /* Returns clusters where the AR is violated. */
-    std::unordered_map<std::string, ::model::PLI::Cluster> const& GetClustersViolatingAR() const {
+    std::unordered_map<std::string_view, ::model::PLI::Cluster> const& GetClustersViolatingAR()
+            const {
         return clusters_violating_ar_;
     }
 
