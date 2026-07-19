@@ -1,4 +1,6 @@
+add_subdirectory(afem)
 add_subdirectory(maxfem)
+add_subdirectory(tke)
 
 set(NAME fem)
 desbordante_add_lib(NAME OBJECT)

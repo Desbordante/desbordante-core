@@ -60,6 +60,8 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::fd::tane::pfd
               ${DESBORDANTE_PREFIX}::fd::verifier
               ${DESBORDANTE_PREFIX}::fem::maxfem
+              ${DESBORDANTE_PREFIX}::fem::afem
+              ${DESBORDANTE_PREFIX}::fem::tke
               ${DESBORDANTE_PREFIX}::fsm::gspan
               ${DESBORDANTE_PREFIX}::gfd::validator
               ${DESBORDANTE_PREFIX}::ind::faida
