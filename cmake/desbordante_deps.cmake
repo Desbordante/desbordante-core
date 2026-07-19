@@ -78,3 +78,4 @@ if(DESBORDANTE_BUILD_BENCHMARKS)
 endif()
 
 find_package(Boost 1.85.0 REQUIRED COMPONENTS ${boost_libraries})
+find_package(ICU REQUIRED COMPONENTS uc i18n)
