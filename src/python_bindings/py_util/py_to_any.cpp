@@ -25,6 +25,7 @@
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/config/enum_members_string.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -32,7 +33,6 @@
 #include "core/model/transaction/input_format_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "core/parser/sequence_parser/file_sequence_parser.h"
-#include "core/util/enum_to_available_values.h"
 #include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
 #include "python_bindings/py_util/iterable_sequence_stream.h"
@@ -88,20 +88,12 @@ std::pair<std::type_index, ConvFunc> const kEnumConvPair{
             if (enum_optional) return *enum_optional;
 
             std::stringstream error_message;
-            std::stringstream possible_values;
-
-            possible_values << "[";
-            constexpr auto& values = magic_enum::enum_values<EnumType>();
-            for (size_t i = 0; i < values.size(); ++i) {
-                possible_values << util::EnumToStr(values[i]);
-                if (i < values.size() - 1) {
-                    possible_values << "|";
-                }
-            }
-            possible_values << "]";
+            constexpr auto& values_cstr_chars = util::kEnumValuesCStrBuffer<EnumType>;
+            std::string_view possible_values{values_cstr_chars.data(),
+                                             values_cstr_chars.size() - 1};
 
             error_message << "Incorrect value '" << user_str << "' for option \"" << option_name
-                          << "\". Possible values: " << possible_values.str();
+                          << "\". Possible values: " << possible_values;
 
             throw config::ConfigurationError(error_message.str());
         }};

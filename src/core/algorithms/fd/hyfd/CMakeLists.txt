@@ -10,6 +10,6 @@ target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
     PRIVATE ${DESBORDANTE_PREFIX}::fd::hy::common ${DESBORDANTE_PREFIX}::fd::hy::model
-            ${DESBORDANTE_PREFIX}::fd::pli spdlog::spdlog_header_only magic_enum::magic_enum
-            Boost::headers
+            ${DESBORDANTE_PREFIX}::fd::pli spdlog::spdlog_header_only
+            ${DESBORDANTE_PREFIX}::model::types Boost::headers
 )

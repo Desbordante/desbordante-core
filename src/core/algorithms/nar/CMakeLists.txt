@@ -6,5 +6,5 @@ target_sources(${NAME} PRIVATE nar.cpp nar_algorithm.cpp value_range.cpp)
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
-    PRIVATE ${DESBORDANTE_PREFIX}::model::table magic_enum::magic_enum Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::model::table Boost::headers
 )

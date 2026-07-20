@@ -2,7 +2,6 @@
 // see input_data/cfd_data/LICENSE
 
 #include <gtest/gtest.h>
-#include <magic_enum/magic_enum.hpp>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/cfd/enums.h"

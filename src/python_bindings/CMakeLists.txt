@@ -19,14 +19,8 @@ set(MODULE_NAME
 
 pybind11_add_module(${MODULE_NAME} bind_main_classes.cpp bindings.cpp)
 target_link_libraries(
-    ${MODULE_NAME}
-    PRIVATE pybind11::module
-            Desbordante::algos
-            magic_enum::magic_enum
-            spdlog::spdlog_header_only
-            Boost::headers
-            Desbordante.bindlib.util
-            Desbordante.bindlib.data
+    ${MODULE_NAME} PRIVATE pybind11::module Desbordante::algos spdlog::spdlog_header_only
+                           Boost::headers Desbordante.bindlib.util Desbordante.bindlib.data
 )
 
 # Uncomment to debug linker issues
@@ -52,8 +46,8 @@ target_sources(
             py_util/value_to_py.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE magic_enum::magic_enum spdlog::spdlog_header_only Boost::headers
-                    pybind11::pybind11
+    ${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers pybind11::pybind11
+                    ${DESBORDANTE_PREFIX}::config::enum_members_string
 )
 
 desbordante_add_bind(
@@ -80,7 +74,6 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::ar
     ${DESBORDANTE_PREFIX}::ar::apriori
     ${DESBORDANTE_PREFIX}::ar::verifier
-    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -92,7 +85,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cfd
     ${DESBORDANTE_PREFIX}::cfd::verifier
-    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -104,7 +96,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cind
     ${DESBORDANTE_PREFIX}::cind::verifier
-    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -116,7 +107,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::dc::verifier
     ${DESBORDANTE_PREFIX}::dc::fastadc
-    magic_enum::magic_enum
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers
@@ -127,10 +117,11 @@ desbordante_add_bind(
     SRCS
     dd/bind_dd_verification.cpp
     dd/bind_split.cpp
+    dd/create_dd.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dd::verifier
     ${DESBORDANTE_PREFIX}::dd::split
-    magic_enum::magic_enum
+    ${DESBORDANTE_PREFIX}::dd
     Boost::headers
 )
 
@@ -177,7 +168,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::fem::maxfem
     ${DESBORDANTE_PREFIX}::bindlib::util
-    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
@@ -189,7 +179,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::gdd
     ${DESBORDANTE_PREFIX}::gdd::validator
-    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -201,18 +190,11 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::gfd::miner
     ${DESBORDANTE_PREFIX}::gfd::validator
-    magic_enum::magic_enum
     Boost::headers
 )
 
 desbordante_add_bind(
-    gspan
-    SRCS
-    gspan/bind_gspan.cpp
-    LIBS
-    ${DESBORDANTE_PREFIX}::fsm::gspan
-    magic_enum::magic_enum
-    Boost::headers
+    gspan SRCS gspan/bind_gspan.cpp LIBS ${DESBORDANTE_PREFIX}::fsm::gspan Boost::headers
 )
 
 desbordante_add_bind(
@@ -269,7 +251,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::nd::verifier
     ${DESBORDANTE_PREFIX}::nd
-    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -296,18 +277,12 @@ desbordante_add_bind(
     LIBS
     Desbordante::pac::verifier::domain_pac_verifier
     Desbordante::pac::verifier
-    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
 
 desbordante_add_bind(
-    pfd
-    SRCS
-    pfd/bind_pfd_verification.cpp
-    LIBS
-    ${DESBORDANTE_PREFIX}::fd::pfd_verifier
-    magic_enum::magic_enum
+    pfd SRCS pfd/bind_pfd_verification.cpp LIBS ${DESBORDANTE_PREFIX}::fd::pfd_verifier
     Boost::headers
 )
 
@@ -318,7 +293,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::fd::sfd::cords
     ${DESBORDANTE_PREFIX}::bindlib::util
-    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -343,18 +317,11 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::ucc::pyro
     ${DESBORDANTE_PREFIX}::ucc::verifier
     ${DESBORDANTE_PREFIX}::bindlib::util
-    magic_enum::magic_enum
     Boost::headers
 )
 
 desbordante_add_bind(
-    sd
-    SRCS
-    sd/bind_sd_verification.cpp
-    LIBS
-    ${DESBORDANTE_PREFIX}::sd::verifier
-    magic_enum::magic_enum
-    Boost::headers
+    sd SRCS sd/bind_sd_verification.cpp LIBS ${DESBORDANTE_PREFIX}::sd::verifier Boost::headers
 )
 
 # ---- Installation Setup ----
