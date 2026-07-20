@@ -252,8 +252,9 @@ Run the following commands:
 ```sh
 export CXX=clang++
 export BOOST_ROOT=$(brew --prefix boost)
+export ICU_ROOT=$(brew --prefix icu4c)
 ```
-These commands set Apple Clang and Homebrew Boost as default in CMake in your terminal session.
+These commands set Apple Clang, Homebrew Boost, and Homebrew ICU as default in CMake in your terminal session.
 You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
 ### Building the project
