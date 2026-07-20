@@ -1,0 +1,100 @@
+#include "core/algorithms/cfd/fd_first/model/partition_tidlist.h"
+
+#include <algorithm>
+#include <map>
+#include <unordered_map>
+#include <vector>
+
+namespace algos::cfd {
+
+bool PartitionTIdList::operator==(PartitionTIdList const& b) const {
+    return sets_number == b.sets_number && tids == b.tids;
+}
+
+bool PartitionTIdList::operator!=(PartitionTIdList const& b) const {
+    return sets_number != b.sets_number || tids != b.tids;
+}
+
+bool PartitionTIdList::operator<(PartitionTIdList const& b) const {
+    return sets_number < b.sets_number || (sets_number == b.sets_number && tids < b.tids);
+}
+
+std::vector<PartitionTIdList> PartitionTIdList::Intersection(
+        std::vector<PartitionTIdList const*> const& rhses) const {
+    std::unordered_map<int, int> eq_indices(tids.size());
+    std::vector<std::vector<int> > eq_classes(sets_number);
+    // Construct a lookup from tid to equivalence class
+    int eix = 0;
+    int count = 0;
+    for (unsigned ix = 0; ix <= tids.size(); ix++) {
+        count++;
+        if (ix == tids.size() || tids[ix] == PartitionTIdList::kSep) {
+            eq_classes[eix++].reserve(count);
+            count = 0;
+        } else {
+            eq_indices[tids[ix]] = eix + 1;
+        }
+    }
+    std::vector<PartitionTIdList> res;
+    for (PartitionTIdList const* rhs : rhses) {
+        PartitionTIdList p_tid_list = PartitionTIdList();
+        p_tid_list.sets_number = 0;
+        p_tid_list.tids.reserve(tids.size());
+        for (unsigned ix = 0; ix <= rhs->tids.size(); ix++) {
+            if (ix == rhs->tids.size() || rhs->tids[ix] == PartitionTIdList::kSep) {
+                for (auto& eqcl : eq_classes) {
+                    if (!eqcl.empty()) {
+                        p_tid_list.tids.insert(p_tid_list.tids.end(), eqcl.begin(), eqcl.end());
+                        p_tid_list.tids.push_back(PartitionTIdList::kSep);
+                        p_tid_list.sets_number++;
+                        eqcl.clear();
+                    }
+                }
+            } else {
+                int jt = rhs->tids[ix];
+                if (eq_indices.count(jt)) {
+                    eq_classes[eq_indices[jt] - 1].push_back(jt);
+                }
+            }
+        }
+
+        if (!p_tid_list.tids.empty() && p_tid_list.tids.back() == PartitionTIdList::kSep) {
+            p_tid_list.tids.pop_back();
+        }
+        res.push_back(p_tid_list);
+    }
+    return res;
+}
+
+int PartitionTIdList::PartitionError(PartitionTIdList const& xa) const {
+    int e = 0;
+
+    std::map<int, int> bigt;
+    int count = 0;
+    for (unsigned pi = 0; pi <= xa.tids.size(); pi++) {
+        if (pi == xa.tids.size() || xa.tids[pi] == PartitionTIdList::kSep) {
+            bigt[xa.tids[pi - 1]] = count;
+            count = 0;
+        } else {
+            count++;
+        }
+    }
+
+    count = 0;
+    int m = 0;
+    for (unsigned cix = 0; cix <= this->tids.size(); cix++) {
+        if (cix == this->tids.size() || this->tids[cix] == PartitionTIdList::kSep) {
+            e += count - m;
+            m = 0;
+            count = 0;
+        } else {
+            count++;
+            int t = this->tids[cix];
+            if (bigt.count(t) && bigt[t] > m) {
+                m = bigt[t];
+            }
+        }
+    }
+    return e;
+}
+}  // namespace algos::cfd

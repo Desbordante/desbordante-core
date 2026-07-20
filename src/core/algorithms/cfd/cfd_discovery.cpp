@@ -1,16 +1,9 @@
 #include "core/algorithms/cfd/cfd_discovery.h"
 
-#include <iterator>
-#include <thread>
-
-#include "core/algorithms/cfd/util/cfd_output_util.h"
-#include "core/algorithms/cfd/util/set_util.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-
-// see algorithms/cfd/LICENSE
 
 namespace algos::cfd {
 
@@ -39,45 +32,7 @@ void CFDDiscovery::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
 }
 
-ItemsetCFDList const& CFDDiscovery::GetItemsetCfds() const {
+CFDList const& CFDDiscovery::GetCfds() const {
     return cfd_list_;
-}
-
-CFDList CFDDiscovery::GetCfds() const {
-    CFDList list;
-
-    auto to_cfd = [&rel = *relation_](ItemsetCFD const& dep) -> RawCFD {
-        auto& [lhs, rhs] = dep;
-
-        RawCFD::RawItems cfd_lhs;
-        for (unsigned int i = 0; i < lhs.size(); i++) {
-            Item item = lhs[i];
-            AttributeIndex attr = (item == 0) ? static_cast<AttributeIndex>(i)
-                                              : Output::ItemToAttrIndex(item, rel);
-            std::optional<std::string> pattern_opt = Output::ItemToPatternOpt(item, rel);
-            cfd_lhs.push_back({.attribute = attr, .value = pattern_opt});
-        }
-
-        RawCFD::RawItem cfd_rhs = {.attribute = Output::ItemToAttrIndex(rhs, rel),
-                                   .value = Output::ItemToPatternOpt(rhs, rel)};
-        return RawCFD{cfd_lhs, cfd_rhs};
-    };
-
-    for (ItemsetCFD const& dep : GetItemsetCfds()) {
-        list.push_back(to_cfd(dep));
-    }
-    return list;
-}
-
-std::string CFDDiscovery::GetCfdString(ItemsetCFD const& cfd) const {
-    return Output::CFDToString(cfd, relation_);
-}
-
-std::string CFDDiscovery::GetRelationString(char delim) const {
-    return relation_->GetStringFormat(delim);
-}
-
-std::string CFDDiscovery::GetRelationString(SimpleTIdList const& subset, char delim) const {
-    return relation_->GetStringFormat(subset, delim);
 }
 }  // namespace algos::cfd

@@ -1,23 +1,13 @@
 #pragma once
 
 #include <algorithm>
-#include <bitset>
 #include <cmath>
-#include <concepts>
-#include <ctime>
 #include <functional>
-#include <iostream>
-#include <map>
-#include <random>
-#include <ranges>
 #include <vector>
 
-// see algorithms/cfd/LICENSE
+// see algorithms/cfd/fd_first/LICENSE
 
 namespace algos::cfd {
-
-std::vector<int> Range(int, int, int = 1);
-std::vector<int> Iota(unsigned);
 
 template <typename T>
 bool IsSubsetOf(T const& sub, T const& super) {
@@ -70,14 +60,6 @@ T SetDiff(T const& lhs, T const& rhs) {
 }
 
 template <typename T>
-T* Join(T const* lhs, T const* rhs) {
-    T* uni = new T(lhs->size() + rhs->size());
-    auto it = std::set_union(lhs->begin(), lhs->end(), rhs->begin(), rhs->end(), uni->begin());
-    uni->resize(static_cast<int>(it - uni->begin()));
-    return uni;
-}
-
-template <typename T>
 T Join(T const& lhs, T const& rhs) {
     T uni(lhs.size() + rhs.size());
     auto it = std::set_union(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), uni.begin());
@@ -93,49 +75,12 @@ T Join(T const& lhs, typename T::value_type const& rhs) {
     return res;
 }
 
-template <typename T>
-T* Join(T const* lhs, typename T::value_type const& rhs_item) {
-    T* res = new T();
-    res->reserve(lhs->size() + 1);
-    InsertSorted(*lhs, rhs_item, *res);
-    return res;
-}
-
-template <typename T>
-T Remove(T const& lhs, typename T::value_type const& rhs_item) {
-    T res;
-    res.reserve(lhs.size() - 1);
-    auto const& lower = std::lower_bound(lhs.begin(), lhs.end(), rhs_item);
-    res.insert(res.begin(), lhs.begin(), lower);
-    res.insert(res.begin() + (lower - lhs.begin()), lower + 1, lhs.end());
-    return res;
-}
-
-template <typename T>
-bool Contains(T const& collection, typename T::value_type const& item) {
-    return std::find(collection.begin(), collection.end(), item) != collection.end();
-}
-
 template <typename T, typename S>
 T ConstructProjection(T const& collection, S const& indices) {
     T res;
     for (int i : indices) {
         res.push_back(collection[i]);
     }
-    return res;
-}
-
-template <typename T>
-std::vector<T> Split(T const& collection, typename T::value_type const& spl) {
-    std::vector<T> res(1);
-    for (int i : collection) {
-        if (i == spl) {
-            res.push_back(T());
-        } else {
-            res.back().push_back(i);
-        }
-    }
-    res.pop_back();
     return res;
 }
 
@@ -151,11 +96,5 @@ T GetMaxElem(std::vector<std::pair<T, int>> const& collection) {
     auto result = std::max_element(collection.begin(), collection.end(), comparator_less);
     size_t max_element_index = std::distance(collection.begin(), result);
     return collection[max_element_index].first;
-}
-
-template <typename T>
-void Shuffle(T& collection) {
-    std::mt19937 gen(time(nullptr));
-    std::shuffle(collection.begin(), collection.end(), gen);
 }
 }  // namespace algos::cfd

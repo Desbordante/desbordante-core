@@ -90,7 +90,7 @@ desbordante_add_bind(
     cfd/bind_cfd.cpp
     cfd/bind_cfd_verification.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::cfd
+    ${DESBORDANTE_PREFIX}::cfd::fdfirst
     ${DESBORDANTE_PREFIX}::cfd::verifier
     magic_enum::magic_enum
     Boost::headers

@@ -13,8 +13,6 @@
 #include "core/algorithms/cfd/model/cfd_types.h"
 #include "core/config/tabular_data/input_table_type.h"
 
-// see algorithms/cfd/LICENSE
-
 namespace algos::cfd {
 
 class CFDDiscovery : public Algorithm {
@@ -26,16 +24,12 @@ private:
 protected:
     config::InputTable input_table_;
 
-    ItemsetCFDList cfd_list_;
+    CFDList cfd_list_;
     std::shared_ptr<CFDRelationData> relation_;
 
 public:
     explicit CFDDiscovery();
     void LoadDataInternal() final;
-    ItemsetCFDList const& GetItemsetCfds() const;
-    CFDList GetCfds() const;
-    std::string GetRelationString(char delim = ' ') const;
-    std::string GetRelationString(SimpleTIdList const& subset, char delim = ' ') const;
-    std::string GetCfdString(ItemsetCFD const& cfd) const;
+    CFDList const& GetCfds() const;
 };
 }  // namespace algos::cfd

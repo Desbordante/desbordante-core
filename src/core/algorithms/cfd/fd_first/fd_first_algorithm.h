@@ -1,12 +1,17 @@
 #pragma once
 
-#include "core/algorithms/cfd/cfd_discovery.h"
-#include "core/algorithms/cfd/enums.h"
-#include "core/algorithms/cfd/miner_node.h"
-#include "core/algorithms/cfd/model/partition_tidlist.h"
-#include "core/algorithms/cfd/util/prefix_tree.h"
+#include <map>
+#include <set>
+#include <unordered_map>
 
-// see algorithms/cfd/LICENSE
+#include "core/algorithms/cfd/cfd_discovery.h"
+#include "core/algorithms/cfd/fd_first/enums.h"
+#include "core/algorithms/cfd/fd_first/miner_node.h"
+#include "core/algorithms/cfd/fd_first/model/partition_tidlist.h"
+#include "core/algorithms/cfd/fd_first/model/types.h"
+#include "core/algorithms/cfd/fd_first/util/prefix_tree.h"
+
+// see algorithms/cfd/fd_first/LICENSE
 
 namespace algos::cfd {
 
@@ -22,12 +27,12 @@ private:
     Substrategy substrategy_ = Substrategy::kDfs;
 
     std::map<Itemset, PartitionTIdList> store_;
-    PrefixTree<Itemset, Itemset> cand_store_;
-    Itemset all_attrs_;
+    PrefixTree cand_store_;
     std::map<std::pair<int, int>, std::vector<Itemset>> free_map_;
     std::set<Itemset> free_itemsets_;
     std::unordered_map<int, std::vector<Itemset>> rules_;
 
+    void RegisterCfd(Itemset const& lhs, Item rhs);
     void ResetStateCFD() final;
 
     void FdsFirstDFS();
@@ -50,8 +55,8 @@ private:
     void FillMinePatternsVars(PartitionList&, RhsesPair2DList&, RuleIxs&, std::vector<int>&,
                               Itemset const&, int, PartitionTIdList const&) const;
 
-    void AddCFDToCFDList(std::vector<int> const& sub, int out,
-                         MinerNode<SimpleTIdList> const& inode, PartitionList const& partitions);
+    void AddCFDToCFDList(Itemset const& sub, int out, MinerNode<SimpleTIdList> const& inode,
+                         PartitionList const& partitions);
 
     void AnalyzeCFDFromPIdList(std::pair<int, SimpleTIdList> const&, PartitionList const&,
                                std::vector<unsigned> const&, std::vector<MinerNode<SimpleTIdList>>&,

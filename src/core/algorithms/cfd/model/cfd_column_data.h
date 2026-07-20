@@ -7,8 +7,6 @@
 
 #include "core/model/table/abstract_column_data.h"
 
-// see algorithms/cfd/LICENSE
-
 namespace algos::cfd {
 
 // Column presentation class for CFDRelationData.
@@ -27,8 +25,6 @@ public:
         : AbstractColumnData(col),
           values_(std::move(col_values)),
           values_dict_(std::move(values_dict)) {}
-
-    explicit CFDColumnData(Column const* col) : AbstractColumnData(col) {}
 
     std::vector<NumToken> const& GetValues() const {
         return values_;

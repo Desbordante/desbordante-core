@@ -8,8 +8,6 @@
 #include "core/model/table/idataset_stream.h"
 #include "core/model/table/relation_data.h"
 
-// see algorithms/cfd/LICENSE
-
 namespace algos::cfd {
 
 // Data presentation class that CFDDiscovery uses.
@@ -35,12 +33,9 @@ public:
     unsigned GetAttrsNumber() const;
     size_t GetNumRows() const override;
     Transaction const& GetRow(unsigned) const;
-    std::string GetStringFormat(char delim = ' ') const;
-    std::string GetStringFormat(SimpleTIdList const& subset, char delim = ' ') const;
     AttributeIndex GetAttrIndex(int item_index) const;
     unsigned Frequency(int i) const;
     std::string const& GetValue(int i) const;
-    std::vector<int> const& GetDomainOfItem(int) const;
     std::vector<int> const& GetDomain(unsigned attr) const;
     std::vector<int> GetAttrVector(Itemset const&) const;
     std::vector<int> GetAttrVectorItems(Itemset const&) const;
