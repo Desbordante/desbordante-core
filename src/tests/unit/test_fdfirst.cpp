@@ -42,12 +42,6 @@ protected:
 };
 
 TEST_F(CFDAlgorithmTest, FullTennisDataset) {
-    auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kDfs, 3);
-    algorithm->Execute();
-    std::set<std::string> actual_cfds;
-    for (auto const& cfd : algorithm->GetCfds()) {
-        actual_cfds.insert(cfd.ToString());
-    }
     std::set<std::string> expected_cfds = {"{(3, _),(1, _),(0, _)} -> (2, _)",
                                            "{(3, _),(2, _),(0, _)} -> (1, _)",
                                            "{(3, _),(0, _)} -> (4, _)",
@@ -61,20 +55,26 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
                                            "{(2, _),(1, _),(0, _)} -> (4, _)",
                                            "{(4, _),(1, _),(0, _)} -> (2, _)",
                                            "{(3, _),(2, _),(0, _)} -> (4, _)"};
-    CheckCfdSetsEquality(actual_cfds, expected_cfds);
 
-    algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kBfs, 3);
-    algorithm->Execute();
-    CheckCfdSetsEquality(actual_cfds, expected_cfds);
-}
-
-TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
-    auto algorithm = CreateAlgorithmInstance(kMushroom50, 4, 0.9, algos::cfd::Substrategy::kDfs, 4);
+    auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kDfs, 3);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
     for (auto const& cfd : algorithm->GetCfds()) {
         actual_cfds.insert(cfd.ToString());
     }
+    CheckCfdSetsEquality(actual_cfds, expected_cfds);
+
+    actual_cfds.clear();
+
+    algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, algos::cfd::Substrategy::kBfs, 3);
+    algorithm->Execute();
+    for (auto const& cfd : algorithm->GetCfds()) {
+        actual_cfds.insert(cfd.ToString());
+    }
+    CheckCfdSetsEquality(actual_cfds, expected_cfds);
+}
+
+TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
     std::set<std::string> expected_cfds = {"{(0, p)} -> (1, x)",
                                            "{(1, b)} -> (0, e)",
                                            "{(3, y)} -> (0, e)",
@@ -93,7 +93,22 @@ TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
                                            "{(3, _),(2, _),(1, _)} -> (0, _)",
                                            "{(3, _),(1, _),(2, s)} -> (0, _)",
                                            "{(3, _),(2, _),(1, x)} -> (0, _)"};
+    std::set<std::string> actual_cfds;
 
+    auto algorithm = CreateAlgorithmInstance(kMushroom50, 4, 0.9, algos::cfd::Substrategy::kDfs, 4);
+    algorithm->Execute();
+    for (auto const& cfd : algorithm->GetCfds()) {
+        actual_cfds.insert(cfd.ToString());
+    }
+    CheckCfdSetsEquality(actual_cfds, expected_cfds);
+
+    actual_cfds.clear();
+
+    algorithm = CreateAlgorithmInstance(kMushroom50, 4, 0.9, algos::cfd::Substrategy::kBfs, 4);
+    algorithm->Execute();
+    for (auto const& cfd : algorithm->GetCfds()) {
+        actual_cfds.insert(cfd.ToString());
+    }
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }
 }  // namespace tests
