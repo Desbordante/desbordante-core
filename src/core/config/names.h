@@ -3,6 +3,8 @@
 namespace config::names {
 // Common
 constexpr auto kCsvConfig = "csv_config";
+constexpr auto kCustomMetric = "metric";
+constexpr auto kCustomMetrics = "metrics";
 constexpr auto kEqualNulls = "is_null_equal_null";
 constexpr auto kError = "error";
 constexpr auto kLhsIndices = "lhs_indices";
@@ -120,6 +122,10 @@ constexpr auto kColumnIndices = "column_indices";
 constexpr auto kDeltaSteps = "delta_steps";
 constexpr auto kDiagonalThreshold = "diagonal_threshold";
 constexpr auto kDomain = "domain";
+constexpr auto kLhsDeltas = "lhs_deltas";
+constexpr auto kLhsMetrics = "lhs_metrics";
+constexpr auto kRhsMetrics = "rhs_metrics";
+constexpr auto kMaxDelta = "max_delta";
 constexpr auto kMinDelta = "min_delta";
 constexpr auto kMaxEpsilon = "max_epsilon";
 constexpr auto kMinEpsilon = "min_epsilon";

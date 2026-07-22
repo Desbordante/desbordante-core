@@ -41,9 +41,14 @@ std::string const kDConditionTypeString =
         "CIND condition types to use\n" + util::EnumToAvailableValues<algos::cind::CondType>();
 std::string const kDAlgoTypeString =
         "CIND algorithm types to use\n" + util::EnumToAvailableValues<algos::cind::AlgoType>();
+std::string const kDDefaultPACMetricsNote =
+        "You can pass nullptr for some columns or leave the entire list empty to use default "
+        "metrics, deduced from column type.";
 }  // namespace details
 
 // Common
+constexpr auto kDCustomMetric = "user-defined metric";
+constexpr auto kDCustomMetrics = "user-defined metrics";
 constexpr auto kDEqualNulls = "specify whether two NULLs should be considered equal";
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
 constexpr auto kDLhsIndices = "LHS column indices";
@@ -222,12 +227,21 @@ constexpr auto kDDiagonalThreshold =
         "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
         "containing N rows is not considered a change (default is 1e-5).";
 constexpr auto kDDomain = "Ordered domain for Domain PAC.";
+constexpr auto kDLhsDeltas =
+        "Maximum distances between values in left-hand side of FD PAC. "
+        "If a single value is passed, it is used for all columns.";
+auto const kDLhsMetrics = "Metrics for left-hand side columns. " + details::kDDefaultPACMetricsNote;
+auto const kDRhsMetrics =
+        "Metrics for right-hand side columns. " + details::kDDefaultPACMetricsNote;
 constexpr auto kDMaxEpsilon =
         "Maximal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is +infinity).";
 constexpr auto kDMinEpsilon =
         "Minimal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is 0).";
+constexpr auto kDMaxDelta =
+        "Maximal value of delta, which is a probability at which values satisfy the dependency "
+        "(default is 1 if min_eps or max_eps is passed, 0.2 otherwise).";
 constexpr auto kDMinDelta =
         "Minimal value of delta, which is a probability at which values satisfy the dependency "
         "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";

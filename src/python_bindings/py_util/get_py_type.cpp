@@ -2,6 +2,7 @@
 
 #include <Python.h>
 
+#include <cstddef>
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -10,7 +11,9 @@
 #include <vector>
 
 #include <boost/core/demangle.hpp>
+#include <pybind11/functional.h>
 #include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/cfd/enums.h"
@@ -23,6 +26,9 @@
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/config/custom_metric/custom_metric/type.h"
+#include "core/config/custom_metric/custom_metrics/type.h"
+#include "core/config/custom_metric/custom_vector_metric/type.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -43,6 +49,7 @@ namespace {
 // tuple -> PyTuple_Type
 // set -> PySet_Type
 // dict -> PyDict_Type
+// function -> PyFunction_Type
 
 py::handle MakeType(py::type type) {
     return type;
@@ -140,6 +147,9 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<std::vector<double>, &PyList_Type, &PyFloat_Type>,
             {typeid(std::shared_ptr<pac::model::IDomain>),
              []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
+            kPyTypePair<config::CustomMetricType, &PyFunction_Type>,
+            kPyTypePair<config::CustomMetricsType, &PyList_Type, &PyFunction_Type>,
+            kPyTypePair<config::CustomVectorMetricType, &PyFunction_Type>,
     };
 
     auto const it = type_map.find(type_index);
