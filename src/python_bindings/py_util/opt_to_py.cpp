@@ -9,6 +9,7 @@
 #include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
+#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/gdd/gdd.h"
@@ -56,6 +57,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kNormalConvPair<config::IndicesType>,
         kNormalConvPair<model::DDString>,
         kNormalConvPair<model::Gdd>,
+        kNormalConvPair<algos::cfd::RawCFD>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<algos::metric::Metric>,

@@ -1,5 +1,8 @@
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 
+#include <algorithm>
+#include <iterator>
+
 #include "core/algorithms/cfd/model/cfd_relation_data.h"
 #include "core/algorithms/cfd/util/cfd_output_util.h"
 #include "core/config/names_and_descriptions.h"
@@ -17,38 +20,25 @@ CFDVerifier::CFDVerifier() : Algorithm() {
 void CFDVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    auto check_item_ids = [this](std::vector<CFDAttributeValuePair> const& rule_part) {
-        auto get_attr_id = [this](std::string const& attr_name) -> cfd::AttributeIndex {
-            cfd::AttributeIndex attr_id = relation_->GetAttr(attr_name);
-            if (attr_id == -1) {
-                throw config::ConfigurationError("Attribute not found: " + attr_name);
-            }
-            return attr_id;
-        };
-
-        for (auto const& [attr_name, item_name] : rule_part) {
-            cfd::Item item_id = relation_->GetItem(get_attr_id(attr_name), item_name);
-            if (item_id == -1 && item_name != "_") {
-                throw config::ConfigurationError("Item not found in item universe: " + item_name);
+    auto check_item = [this](cfd::RawCFD::RawItem const& item) {
+        if (item.GetValue().has_value() && item.GetValue().value() != "_") {
+            cfd::Item item_id = relation_->GetItem(item.GetAttribute(), item.GetValue().value());
+            if (item_id == -1) {
+                throw config::ConfigurationError(
+                        "Value '" + item.GetValue().value() + "' for attribute " +
+                        std::to_string(item.GetAttribute()) + " not found in dataset.");
             }
         }
     };
 
-    auto validate_rule_part = [check_item_ids](std::vector<CFDAttributeValuePair> const& part) {
-        check_item_ids(part);
-    };
-
-    auto validate_single_pair = [check_item_ids](CFDAttributeValuePair const& pair) {
-        check_item_ids({pair});
+    auto validate_rule = [check_item](cfd::RawCFD const& rule) {
+        std::ranges::for_each(rule.GetLhs(), check_item);
+        check_item(rule.GetRhs());
     };
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&string_rule_left_, kCFDRuleLeft, kDCFDRuleLeft,
-                          std::vector<CFDAttributeValuePair>{}}
-                           .SetValueCheck(validate_rule_part));
-    RegisterOption(
-            Option{&string_rule_right_, kCFDRuleRight, kDCFDRuleRight, CFDAttributeValuePair{}}
-                    .SetValueCheck(validate_single_pair));
+    RegisterOption(Option{&raw_cfd_rule_, kCFDRule, kDCFDRule, cfd::RawCFD{}}.SetValueCheck(
+            validate_rule));
     RegisterOption(Option{&minconf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0});
     RegisterOption(Option{&minsup_, kCfdMinimumSupport, kDCfdMinimumSupport, 0});
 }
@@ -63,30 +53,29 @@ void CFDVerifier::LoadDataInternal() {
 
 void CFDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kCFDRuleLeft, kCFDRuleRight, kCfdMinimumSupport, kCfdMinimumConfidence});
+    MakeOptionsAvailable({kCFDRule, kCfdMinimumSupport, kCfdMinimumConfidence});
 }
 
 void CFDVerifier::ExecuteInternal() {
-    auto build_item_ids =
-            [this](std::vector<CFDAttributeValuePair> const& rule_part) -> cfd::Itemset {
+    auto build_item_id = [this](cfd::RawCFD::RawItem const& item) -> cfd::Item {
+        auto const& [attr_id, item_name] = item;
+        if (item_name.has_value() && item_name.value() != "_") {
+            return relation_->GetItem(attr_id, item_name.value());
+        } else {
+            // Negative values (-1 - attr_id) are used to represent wildcards,
+            // indicating that the rule applies to any value in this column
+            return -1 - attr_id;
+        }
+    };
+
+    auto build_item_ids = [&build_item_id](cfd::RawCFD::RawItems const& rule_part) -> cfd::Itemset {
         cfd::Itemset item_ids;
         item_ids.reserve(rule_part.size());
-
-        for (auto const& [attr_name, item_name] : rule_part) {
-            cfd::AttributeIndex attr_id = relation_->GetAttr(attr_name);
-            if (item_name != "_") {
-                item_ids.push_back(relation_->GetItem(attr_id, item_name));
-            } else {
-                // Negative values (-1 - attr_id) are used to represent wildcards,
-                // indicating that the rule applies to any value in this column
-                item_ids.push_back(-1 - attr_id);
-            }
-        }
-
+        std::ranges::transform(rule_part, std::back_inserter(item_ids), build_item_id);
         return item_ids;
     };
 
-    cfd_ = {build_item_ids(string_rule_left_), build_item_ids({string_rule_right_}).front()};
+    cfd_ = {build_item_ids(raw_cfd_rule_.GetLhs()), build_item_id(raw_cfd_rule_.GetRhs())};
 
     LOG_DEBUG("Starting CFD verification...");
     LOG_DEBUG("\tRule to verify: {}", cfd::Output::CFDToString(cfd_, relation_));
