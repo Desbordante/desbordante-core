@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/regex.hpp>
 #include <boost/serialization/strong_typedef.hpp>
 
 #define MAGIC_ENUM_ENABLE_HASH
@@ -26,6 +27,7 @@ using Double = double; /* Fixed-precision floating point value; also we need typ
                         * with arbitrary precision analogous to BigInt */
 using String = std::string;
 using Date = boost::gregorian::date; /* Date in the range from 1400-Jan-01 to 9999-Dec-31 */
+using Bool = bool;
 
 static_assert(sizeof(Int) == sizeof(Double));
 
@@ -42,7 +44,7 @@ class Empty {}; /* Empty value */
 class Mixed {}; /* Dummy type only to describe columns with more than one type */
 
 /* All types that ColumnData can contain */
-using AllValueTypes = std::tuple<Int, Double, BigInt, String, Null, Empty>;
+using AllValueTypes = std::tuple<Int, Double, BigInt, String, Date, Bool, Null, Empty>;
 
 /* Describes the type of ColumnData in a runtime and types of values hold by it.
  * Maybe we need to use separate enums to describe column types and value types to
@@ -119,6 +121,27 @@ struct TypeConverter<Date> {
         } catch (...) {
             return Date(boost::gregorian::from_undelimited_string(v));
         }
+    };
+};
+
+template <>
+struct TypeConverter<Bool> {
+    inline static constexpr auto kConvert = [](std::string& v) {
+        static boost::regex const kTrueRegex(R"(^\s*(true|t|1)\s*$)",
+                                             boost::regex_constants::icase);
+        static boost::regex const kFalseRegex(R"(^\s*(false|f|0)\s*$)",
+                                              boost::regex_constants::icase);
+
+        Bool value;
+        if (boost::regex_match(v, kTrueRegex)) {
+            value = true;
+        } else if (boost::regex_match(v, kFalseRegex)) {
+            value = false;
+        } else {
+            throw std::invalid_argument("Invalid bool literal: " + v);
+        }
+
+        return value;
     };
 };
 

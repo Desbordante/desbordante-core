@@ -27,6 +27,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
     std::bitset<6> candidate_types_bitset("111111");
     TypeId first_type_id = TypeId::kUndefined;
     auto matcher_map_iter = kTypeIdToChecker.begin();
+    bool reduced_candidates = false;
     for (std::size_t i = 0; i != unparsed_.size(); ++i) {
         if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
             is_undefined = false;
@@ -36,9 +37,20 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                                      [&](auto const& pair) { return pair.first == first_type_id; });
                 auto& type_check = it->second;
                 if (type_check(unparsed_[i])) {
-                    // undelimited and delimited dates have different bitsets
-                    if (first_type_id == TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) {
-                        candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
+                    if (!reduced_candidates) {
+                        // undelimited and delimited dates have different bitsets
+                        // t/f and other representations of bools also have different bitsets
+                        if ((first_type_id == TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) ||
+                            (first_type_id == TypeId::kBool && !kStringBoolCheck(unparsed_[i]))) {
+                            candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
+                            reduced_candidates = true;
+                        }
+                        // integer and non-integer representations of bools also have different
+                        // bitsets
+                        if (first_type_id == TypeId::kInt && !kIntegerBoolCheck(unparsed_[i])) {
+                            candidate_types_bitset &= kTypeIdToBitset.at(TypeId::kInt);
+                            reduced_candidates = true;
+                        }
                     }
                     continue;
                 }
@@ -53,15 +65,26 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                     }
                     matched = true;
                     new_candidate_types_bitset |= kTypeIdToBitset.at(type_id);
-                    // possible value types are known at the first match except for dates
-                    // (undelimited dates could be ints or doubles and delimited couldn't)
+                    // possible value types are known at the first match except for dates and bools:
+                    // undelimited dates could be ints or doubles and delimited couldn't
                     if (type_id == TypeId::kDate && kUndelimitedDateCheck(unparsed_[i])) {
                         new_candidate_types_bitset |= kTypeIdToBitset.at(TypeId::kInt);
+                    }
+                    // 0 or 1 could be ints or doubles and other bool representations couldn't
+                    if (type_id == TypeId::kInt && kIntegerBoolCheck(unparsed_[i])) {
+                        new_candidate_types_bitset |= kTypeIdToBitset.at(TypeId::kBool);
+                    }
+                    // t or f could be strings and other bool representations couldn't
+                    if (type_id == TypeId::kBool && kStringBoolCheck(unparsed_[i])) {
+                        new_candidate_types_bitset |= kTypeIdToBitset.at(TypeId::kString);
                     }
                     break;
                 }
             }
             if (!matched) {
+                if (first_type_id == TypeId::kUndefined) {
+                    first_type_id = TypeId::kString;
+                }
                 new_candidate_types_bitset = kTypeIdToBitset.at(TypeId::kString);
             }
 
