@@ -3,182 +3,204 @@
 #include <list>
 #include <memory>
 
-#include "core/model/table/agree_set_factory.h"
-#include "core/model/table/relational_schema.h"
+#include "core/algorithms/fd/make_lhslim_lhs_mask_adder.h"
+#include "core/config/max_lhs/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/compute_agree_sets.h"
+#include "core/model/table/create_stripped_partitions.h"
+#include "core/util/bitset_utils.h"
 #include "core/util/logger.h"
 
-namespace algos {
+namespace algos::fd {
 
 using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::vector, std::list,
         std::dynamic_pointer_cast;
 
-void Depminer::ExecuteInternal() {
-    schema_ = relation_->GetSchema();
+Depminer::Depminer() {
+    RegisterOptions();
 
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
+}
+
+void Depminer::RegisterOptions() {
+    DESBORDANTE_OPTION_USING;
+
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
+}
+
+void Depminer::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName()});
+}
+
+void Depminer::ResetState() {
+    fd_view_ = nullptr;
+}
+
+void Depminer::LoadDataInternal() {
+    std::vector<model::PositionListIndex> plis = model::CreateStrippedPartitions(*input_table_);
+    if (plis.empty() || plis.front().GetRelationSize() == 0) {
+        throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
+    }
+    plis_ = {std::move(plis)};
+
+    table_header_ = model::TableHeader::FromDatasetStream(*input_table_);
+}
+
+void Depminer::ExecuteInternal() {
     // Agree sets
-    model::AgreeSetFactory const agree_set_factory =
-            model::AgreeSetFactory(relation_.get(), model::AgreeSetFactory::Configuration());
-    auto const agree_sets = agree_set_factory.GenAgreeSets();
+    ColumnCombinations const agree_sets = model::ComputeAgreeSets(plis_);
 
     // maximal sets
-    std::vector<CMAXSet> const c_max_cets = GenerateCmaxSets(agree_sets);
+    std::vector<ColumnCombinations> const c_max_sets = GenerateCmaxSets(agree_sets);
 
+    std::size_t const column_num = plis_.GetStrippedPartitions().size();
+    LhsMaskFdView::Storage lhs_masks(column_num);
+    auto report_fd = MakeLhsLimLhsMaskAdder(lhs_masks, max_lhs_);
     // LHS
-    // 1
-    for (auto const& column : schema_->GetColumns()) {
-        LhsForColumn(column, c_max_cets);
+    for (model::Index column_index = 0; column_index != column_num; ++column_index) {
+        LhsForColumn(column_index, report_fd, c_max_sets[column_index]);
     }
 
-    LOG_INFO("> FD COUNT: {}", this->fd_collection_.Size());
+    fd_view_ = std::make_shared<LhsMaskFdView>(table_header_, std::move(lhs_masks));
 }
 
-std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets) {
-    std::vector<CMAXSet> c_max_cets;
+auto Depminer::GenerateCmaxSets(ColumnCombinations const& agree_sets)
+        -> std::vector<ColumnCombinations> {
+    std::size_t const column_number = table_header_.column_names.size();
+    std::vector<ColumnCombinations> c_max_sets;
+    c_max_sets.reserve(column_number);
 
-    for (auto const& column : this->schema_->GetColumns()) {
-        CMAXSet result(*column);
-
-        // finding all sets, which doesn't contain column
-        for (auto const& ag : agree_sets) {
-            if (!ag.Contains(*column)) {
-                result.AddCombination(ag);
-            }
-        }
-
+    for (model::Index column_index = 0; column_index != column_number; ++column_index) {
         // finding max sets
-        std::unordered_set<Vertical> super_sets;
-        std::unordered_set<Vertical> sets_delete;
-        bool to_add = true;
+        ColumnCombinations maximal_sets;
 
-        for (auto const& set : result.GetCombinations()) {
-            for (auto const& super_set : super_sets) {
-                if (set.Contains(super_set)) {
-                    sets_delete.insert(super_set);
+        for (boost::dynamic_bitset<> const& agree_set : agree_sets) {
+            // A maximal set is an attribute set X which, for some attribute A, is the largest
+            // possible set not determining A.
+            if (agree_set.test(column_index)) continue;
+            // There is a pair where the values at the current column are not equal.
+
+            bool is_maximal = true;
+            for (auto it = maximal_sets.begin(); it != maximal_sets.end();) {
+                boost::dynamic_bitset<> const& super_set_candidate = *it;
+                if (is_maximal && agree_set.is_subset_of(super_set_candidate)) {
+                    is_maximal = false;
                 }
-                if (to_add) {
-                    to_add = !super_set.Contains(set);
+                if (super_set_candidate.is_subset_of(agree_set)) {
+                    maximal_sets.erase(it++);
+                } else {
+                    ++it;
                 }
             }
-            for (auto const& to_delete : sets_delete) {
-                super_sets.erase(to_delete);
+            if (is_maximal) {
+                maximal_sets.insert(agree_set);
             }
-            if (to_add) {
-                super_sets.insert(set);
-            } else {
-                to_add = true;
-            }
-            sets_delete.clear();
         }
 
-        // Inverting MaxSet
-        std::unordered_set<Vertical> result_super_sets;
-        for (auto const& combination : super_sets) {
-            result_super_sets.insert(combination.Invert());
+        // "The collection cmax(dep(r), A) of complements of maximal sets max(dep(r), A) is a simple
+        // hypergraph."
+        ColumnCombinations& max_set_complements = c_max_sets.emplace_back();
+        for (auto it = maximal_sets.begin(); it != maximal_sets.end();) {
+            ColumnCombinations::node_type node = maximal_sets.extract(it++);
+            node.value().flip();
+            // "A collection H of subsets of R is a simple hypergraph if \forall X \in H, X !=
+            // \emptyset and ..."
+            assert(node.value().any());
+            max_set_complements.insert(std::move(node));
         }
-        result.MakeNewCombinations(std::move(result_super_sets));
-        c_max_cets.push_back(result);
     }
 
-    LOG_INFO("> CMAX SETS COUNT: {}", c_max_cets.size());
-
-    return c_max_cets;
+    return c_max_sets;
 }
 
-void Depminer::LhsForColumn(std::unique_ptr<Column> const& column,
-                            std::vector<CMAXSet> const& c_max_cets) {
-    std::unordered_set<Vertical> level;
-    // 3
-    CMAXSet correct = GenFirstLevel(c_max_cets, *column, level);
-
-    auto const pli = relation_->GetColumnData(column->GetIndex()).GetPositionListIndex();
-    bool column_contains_only_equal_values = pli->IsConstant();
+void Depminer::LhsForColumn(model::Index column, BitsetAndIndexResultReporter const& report_fd,
+                            ColumnCombinations const& c_max_set) {
+    auto const& pli = plis_.GetStrippedPartition(column);
+    bool column_contains_only_equal_values = pli.IsConstant();
     if (column_contains_only_equal_values) {
-        RegisterFd(Vertical(), *column, relation_->GetSharedPtrSchema());
+        report_fd(boost::dynamic_bitset<>(table_header_.column_names.size()), column);
         return;
     }
 
-    // 4
+    ColumnCombinations level = GenFirstLevel(c_max_set);
+
     while (!level.empty()) {
-        std::unordered_set<Vertical> level_copy = level;
-        // 5
-        for (auto const& l : level) {
+        for (auto it = level.begin(); it != level.end();) {
+            boost::dynamic_bitset<> const& cur_level_column_combination = *it;
             bool is_fd = true;
-            for (auto const& combination : correct.GetCombinations()) {
-                if (!l.Intersects(combination)) {
+            for (auto const& combination : c_max_set) {
+                if (!cur_level_column_combination.intersects(combination)) {
                     is_fd = false;
                     break;
                 }
             }
-            // 6
             if (is_fd) {
-                if (!l.Contains(*column)) {
-                    this->RegisterFd(l, *column, relation_->GetSharedPtrSchema());
+                if (!cur_level_column_combination.test(column)) {
+                    report_fd(cur_level_column_combination, column);
                 }
-                level_copy.erase(l);
-            }
-            if (level_copy.empty()) {
-                break;
+                it = level.erase(it);
+            } else {
+                ++it;
             }
         }
-        // 7
-        level = GenNextLevel(level_copy);
+        level = GenNextLevel(level);
     }
 }
 
-CMAXSet Depminer::GenFirstLevel(std::vector<CMAXSet> const& c_max_cets, Column const& attribute,
-                                std::unordered_set<Vertical>& level) {
-    CMAXSet correct_set(attribute);
-    for (auto const& set : c_max_cets) {
-        if (!(set.GetColumn() == attribute)) {
-            continue;
-        }
-        correct_set = set;
-        for (auto const& combination : correct_set.GetCombinations()) {
-            for (auto const& column : combination.GetColumns()) {
-                if (level.count(Vertical(*column)) == 0) level.insert(Vertical(*column));
-            }
-        }
-        break;
+auto Depminer::GenFirstLevel(ColumnCombinations const& cmax_set) -> ColumnCombinations {
+    if (cmax_set.empty()) return {};
+    ColumnCombinations level;
+    // The name should be something like ???_columns, but I don't get what this is doing for now.
+    boost::dynamic_bitset<> set_bits(cmax_set.begin()->size());
+    for (boost::dynamic_bitset<> const& combination : cmax_set) {
+        set_bits |= combination;
     }
-    return correct_set;
+    boost::dynamic_bitset<> single_column_scratch(cmax_set.begin()->size());
+    util::ForEachIndex(set_bits, [&](model::Index i) {
+        single_column_scratch.set(i);
+        level.insert(single_column_scratch);
+        single_column_scratch.reset(i);
+    });
+    return level;
 }
 
 // Apriori-gen function
-std::unordered_set<Vertical> Depminer::GenNextLevel(
-        std::unordered_set<Vertical> const& prev_level) {
-    std::unordered_set<Vertical> candidates;
+auto Depminer::GenNextLevel(ColumnCombinations const& prev_level) -> ColumnCombinations {
+    ColumnCombinations candidates;
     for (auto const& p : prev_level) {
         for (auto const& q : prev_level) {
-            if (!CheckJoin(p, q)) {
+            if (!CheckJoin(p, q) /* Tries to avoid some extra additions? */) {
                 continue;
             }
-            Vertical candidate(p);
-            candidate = candidate.Union(q);
-            candidates.insert(candidate);
+            candidates.insert(p | q);
         }
     }
-    std::unordered_set<Vertical> result;
-    for (Vertical candidate : candidates) {
-        bool prune = false;
-        for (auto const& column : candidate.GetColumns()) {
-            candidate = candidate.Invert(Vertical(*column));
-            if (prev_level.count(candidate) == 0) {
-                prune = true;
+
+    ColumnCombinations next_level;
+    for (auto it = candidates.begin(); it != candidates.end();) {
+        auto node = candidates.extract(it++);
+        boost::dynamic_bitset<>& candidate = node.value();
+        bool keep = true;
+        for (auto index = candidate.find_first(); index != boost::dynamic_bitset<>::npos;
+             index = candidate.find_next(index)) {
+            candidate.reset(index);
+            if (!prev_level.contains(candidate)) {
+                keep = false;
                 break;
             }
-            candidate = candidate.Invert(Vertical(*column));
+            candidate.set(index);
         }
-        if (!prune) {
-            result.insert(candidate);
+        if (keep) {
+            next_level.insert(std::move(candidate));
         }
     }
-    return result;
+    return next_level;
 }
 
-bool Depminer::CheckJoin(Vertical const& _p, Vertical const& _q) {
-    dynamic_bitset<> p = _p.GetColumnIndices();
-    dynamic_bitset<> q = _q.GetColumnIndices();
-
+bool Depminer::CheckJoin(boost::dynamic_bitset<> const& p, boost::dynamic_bitset<> const& q) {
     size_t p_last = -1, q_last = -1;
 
     for (size_t i = 0; i < p.size(); i++) {
@@ -186,9 +208,14 @@ bool Depminer::CheckJoin(Vertical const& _p, Vertical const& _q) {
         q_last = q[i] ? i : q_last;
     }
     if (p_last >= q_last) return false;
+    /* The above part avoids processing the same pair in a different order? But [1 2 5], [2 3 5] are
+     * not let through? */
+    // This works because the previous level will hold a different decomposition of [1 2 3 5], since
+    // all the new element's subsets of len - 1 have to be in the previous level.
+    // What? This reduces to p.count() == q.count(), which always holds.
     dynamic_bitset<> intersection = p;
     intersection.intersects(q);
     return p.count() == intersection.count() && q.count() == intersection.count();
 }
 
-}  // namespace algos
+}  // namespace algos::fd

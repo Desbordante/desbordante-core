@@ -62,7 +62,7 @@ public:
     }
 
     std::string ToString() const {
-        return util::EnumToStr(tuple_) + "." + column_->GetName();
+        return std::string(util::EnumToStr(tuple_)) + "." + column_->GetName();
     }
 };
 

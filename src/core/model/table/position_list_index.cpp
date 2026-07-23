@@ -33,7 +33,7 @@ PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigne
       nep_(nep),
       probing_table_cache_() {}
 
-std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>& data) {
+std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int> const& data) {
     std::unordered_map<int, std::vector<int>> index;
     for (unsigned long position = 0; position < data.size(); ++position) {
         int value_id = data[position];
@@ -151,13 +151,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
 
     for (auto& positions : index_) {
         for (int position : positions) {
-            if (probing_table == nullptr) LOG_DEBUG("NULLPTR");
-            if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {
-                LOG_DEBUG("position: {} size: {}", position, probing_table->size());
-                for (size_t i = 0; i < positions.size(); ++i) {
-                    LOG_DEBUG("Position {}", positions[i]);
-                }
-            }
             int probing_table_value_id = (*probing_table)[position];
             if (probing_table_value_id == kSingletonValueId) continue;
             partial_index[probing_table_value_id].push_back(position);

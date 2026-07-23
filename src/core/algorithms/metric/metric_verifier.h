@@ -29,8 +29,8 @@ class MetricVerifier : public Algorithm {
 private:
     config::InputTable input_table_;
 
-    Metric metric_ = magic_enum::enum_values<Metric>().front();
-    MetricAlgo algo_ = magic_enum::enum_values<MetricAlgo>().front();
+    Metric metric_;
+    MetricAlgo algo_;
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
     long double parameter_;

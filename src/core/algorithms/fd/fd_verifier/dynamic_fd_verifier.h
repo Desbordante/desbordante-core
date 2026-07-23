@@ -35,7 +35,6 @@ private:
 
     std::unordered_map<std::string, int> value_dictionary_{};
     int next_value_id_ = 1;
-    static constexpr int kNullValueId = -1;
 
     void VerifyFD() const;
     void CreateFD();

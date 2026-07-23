@@ -4,8 +4,6 @@
 #include <string>
 #include <string_view>
 
-#include <magic_enum/magic_enum.hpp>
-
 #include "core/util/static_map.h"
 
 namespace algos::dc {

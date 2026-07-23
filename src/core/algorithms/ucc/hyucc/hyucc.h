@@ -6,15 +6,19 @@
 #include "core/algorithms/ucc/ucc_algorithm.h"
 #include "core/config/thread_number/option.h"
 #include "core/config/thread_number/type.h"
-#include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/idataset_stream.h"
+#include "core/model/table/relational_schema.h"
 
 namespace algos {
 
 class HyUCC : public UCCAlgorithm {
 private:
-    std::unique_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<RelationalSchema const> schema_;
     config::ThreadNumType threads_num_ = 1;
+
+    hy::PLIsPtr plis_;
+    hy::RowsPtr pli_records_;
+    std::vector<hy::ClusterId> og_mapping_;
 
     void LoadDataInternal() override;
     void ExecuteInternal() override;

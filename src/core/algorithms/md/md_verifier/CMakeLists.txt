@@ -5,5 +5,5 @@ target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
     PRIVATE ${DESBORDANTE_PREFIX}::md::hy ${DESBORDANTE_PREFIX}::md ${DESBORDANTE_PREFIX}::util
-            spdlog::spdlog_header_only magic_enum::magic_enum Boost::headers
+            spdlog::spdlog_header_only Boost::headers
 )

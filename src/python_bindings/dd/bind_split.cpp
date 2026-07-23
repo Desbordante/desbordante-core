@@ -7,7 +7,7 @@
 
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/mining_algorithms.h"
-#include "core/util/create_dd.h"
+#include "python_bindings/dd/create_dd.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
