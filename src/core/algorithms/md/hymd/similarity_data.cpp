@@ -8,7 +8,6 @@
 #include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
 #include "core/algorithms/md/hymd/lowest_cc_value_id.h"
 #include "core/algorithms/md/hymd/utility/index_range.h"
-#include "core/algorithms/md/hymd/utility/make_unique_for_overwrite.h"
 #include "core/model/index.h"
 #include "core/util/get_preallocated_vector.h"
 
@@ -51,7 +50,7 @@ class SimilarityData::Creator {
     std::unique_ptr<model::Index[]> CreateArrangement(
             std::vector<LhsCCVIdsInfo> const& all_lhs_ccv_ids_info) {
         std::size_t const non_trivial_number = all_lhs_ccv_ids_info.size();
-        auto arrangement_ptr = utility::MakeUniqueForOverwrite<model::Index[]>(non_trivial_number);
+        auto arrangement_ptr = std::make_unique_for_overwrite<model::Index[]>(non_trivial_number);
         auto start = arrangement_ptr.get(), end = start + non_trivial_number;
         std::iota(start, end, 0);
         // Sort based on the number of LHS CCV IDs. This should help reduce lattice memory use by
