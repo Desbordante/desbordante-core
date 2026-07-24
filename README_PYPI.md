@@ -160,7 +160,7 @@ Here is a list of papers about patterns, organized in the recommended reading or
 
 The source code is currently hosted on GitHub at https://github.com/Desbordante/desbordante-core
 
-Wheels for all released version are available at the Python Package Index (PyPI) for  **manylinux2014** (Ubuntu 20.04+, or any other linux distribution with gcc 10+) and **macOS 11.0+**.
+Wheels for all released version are available at the Python Package Index (PyPI) for  **manylinux_2_28** (Ubuntu 21.04+) and **macOS 15.0+**.
 
 ```bash
 $ pip install desbordante
