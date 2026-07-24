@@ -18,8 +18,12 @@ inline constexpr auto kEnumMembersCStrBuffer = []() {
 
     constexpr auto make_string = []() {
         constexpr auto enum_names =
-                std::views::transform(magic_enum::enum_values<EnumType>(),
-                                      [](EnumType v) { return std::string(util::EnumToStr(v)); });
+                std::views::transform(magic_enum::enum_values<EnumType>(), [](EnumType v) {
+                    // Workaround for being unable to use std::string(util::EnumToStr(v)) directly
+                    // with UBSan + GCC
+                    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71962
+                    return std::string(util::EnumToStr(v).begin(), util::EnumToStr(v).end());
+                });
         static_assert(!magic_enum::enum_values<EnumType>().empty());
         return "["s +
                std::accumulate(
