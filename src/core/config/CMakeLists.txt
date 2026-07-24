@@ -1,5 +1,10 @@
 file(GLOB_RECURSE CONDITIONS_SRCS conditions/*.cpp)
 
+set(NAME config.enum_members_string)
+desbordante_add_lib(NAME INTERFACE)
+target_sources(${NAME} INTERFACE FILE_SET HEADERS FILES enum_members_string.h)
+target_link_libraries(${NAME} INTERFACE magic_enum::magic_enum)
+
 set(NAME config)
 desbordante_add_lib(NAME OBJECT)
 target_sources(
@@ -10,6 +15,7 @@ target_sources(
             column_index/option.cpp
             column_index/validate_index.cpp
             custom_random_seed/option.cpp
+            descriptions.cpp
             equal_nulls/option.cpp
             error/option.cpp
             error_measure/option.cpp
@@ -26,4 +32,7 @@ target_sources(
             time_limit/option.cpp
             transactional_data/option.cpp
 )
-target_link_libraries(${NAME} PRIVATE magic_enum::magic_enum Boost::headers)
+target_link_libraries(
+    ${NAME} PRIVATE magic_enum::magic_enum Boost::headers
+                    ${DESBORDANTE_PREFIX}::config::enum_members_string
+)

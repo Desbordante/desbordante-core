@@ -52,8 +52,8 @@ target_sources(
             py_util/value_to_py.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE magic_enum::magic_enum spdlog::spdlog_header_only Boost::headers
-                    pybind11::pybind11
+    ${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers pybind11::pybind11
+                    ${DESBORDANTE_PREFIX}::config::enum_members_string
 )
 
 desbordante_add_bind(
