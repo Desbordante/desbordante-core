@@ -46,7 +46,7 @@ jobs:
         system:
           - os: ubuntu-latest
             toolset: gcc
-            env: CXX=g++-10
+            env: CXX=g++-14
 
           - os: ubuntu-latest
             toolset: llvm-clang
