@@ -75,7 +75,7 @@ runs:
 
     - name: Install GCC toolset (on Ubuntu)
       run: |
-        sudo apt-get install gcc-10 g++-10 -y
+        sudo apt-get install gcc-14 g++-14 -y
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
     - name: Install Clang toolset (on Ubuntu)

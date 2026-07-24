@@ -33,7 +33,7 @@ jobs:
           boost-libraries: 'container,thread,graph,program_options'
       - name: Build
         run: |
-          export CXX=g++-10
+          export CXX=g++-14
           ./build.sh --benchmark --no-tests
 
       - name: Get previous results

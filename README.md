@@ -191,16 +191,16 @@ To install Desbordante type:
 $ pip install desbordante
 ```
 
-However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) and macOS 11.0+ (arm64, x86_64) is supported. If the above does not work for you consider building from sources.
+However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux_2_39 (Ubuntu 21.04+) and macOS 15.0+ (arm64, x86_64) is supported. If the above does not work for you consider building from sources.
 
 ## Build instructions
 
 ### Ubuntu and macOS
-The following instructions were tested on Ubuntu 20.04+ LTS and macOS Sequoia 15.0+ (Apple Silicon).
+The following instructions are expected to work for Ubuntu 21.04+ LTS and macOS Sequoia 15.0+ (Apple Silicon).
 ### Dependencies
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
-- GNU GCC, version 10+, LLVM Clang, version 16+, or Apple Clang, version 16+
+- GNU GCC, version 14+, LLVM Clang, version 16+, or Apple Clang, version 16+
 - CMake, version 3.25+
 - Boost library built with compiler you're going to use (GCC or Clang), version 1.85-1.86, 1.88+
 
