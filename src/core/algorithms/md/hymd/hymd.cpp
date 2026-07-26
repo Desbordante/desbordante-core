@@ -14,7 +14,6 @@
 #include "core/algorithms/md/hymd/record_pair_inferrer.h"
 #include "core/algorithms/md/hymd/similarity_data.h"
 #include "core/algorithms/md/hymd/utility/index_range.h"
-#include "core/algorithms/md/hymd/utility/inverse_permutation.h"
 #include "core/algorithms/md/hymd/utility/md_less.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
@@ -22,6 +21,7 @@
 #include "core/model/index.h"
 #include "core/model/table/column.h"
 #include "core/util/get_preallocated_vector.h"
+#include "core/util/undo_permutation.h"
 #include "core/util/worker_thread_pool.h"
 
 namespace {
@@ -263,7 +263,7 @@ private:
         for (auto const& [_, cm_index] : similarity_data_.GetTrivialInfo()) {
             lhs.emplace_back(std::nullopt, cm_index, kLowestBound);
         }
-        utility::InversePermutation(
+        util::UndoPermutation(
                 total_column_matches_, [&](model::Index i) { return lhs[i].GetColumnMatchIndex(); },
                 [&](model::Index i, model::Index j) { std::swap(lhs[i], lhs[j]); });
         return lhs;
