@@ -7505,3 +7505,484 @@ Typo candidates and context:
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
 '''
+
+snapshots['test_example[basic/mining_cfdfinder.py-None-mining_cfdfinder_output] mining_cfdfinder_output'] = '''================================================================================
+\x1b[1;36mDiscovering Conditional Functional Dependencies with CFDFinder\x1b[0m
+================================================================================
+This example demonstrates how to discover conditional functional dependencies
+(CFDs) with CFDFinder, the algorithm described in [1]. It also presents several
+types of conditions in CFDs and usage scenarios for the algorithm.
+
+\x1b[1;36mNote:\x1b[0m
+There are several definitions of CFDs, and different algorithms are designed for
+different definitions. Here we focus on CFDFinder. Links to examples for other
+CFD algorithms are listed at the end.
+
+================================================================================
+\x1b[1;36mBasic definitions\x1b[0m
+================================================================================
+Consider a small employee dataset:
++-----+--------------+-------------------+-----------------+--------------------+
+|   # | Department   | Employment_Type   | Work_Schedule   |   Experience_Years |
+|-----+--------------+-------------------+-----------------+--------------------|
+|   1 | IT           | Full-time         | Flexible        |                  1 |
+|   2 | IT           | Full-time         | Flexible        |                  1 |
+|   3 | IT           | Part-time         | Remote          |                  3 |
+|   4 | Support      | Part-time         | Shifts          |                  5 |
+|   5 | Support      | Part-time         | Shifts          |                  5 |
+|   6 | Support      | Full-time         | Office          |                  6 |
+|   7 | Sales        | Full-time         | Office          |                  7 |
+|   8 | Support      | Full-time         | Remote          |                  6 |
++-----+--------------+-------------------+-----------------+--------------------+
+
+\x1b[1;33m>>> Definition (FD).\x1b[0m
+A functional dependency (FD) X -> A is defined on table attributes, where X is a
+set of attributes and A is an attribute. It holds on a table if every two rows
+that agree on X also agree on A.
+
+Example: [Department, Employment_Type] -> Work_Schedule
+This FD does not hold on the whole dataset. Rows #6 and #8 have the same
+Department=Support and Employment_Type=Full-time, but their Work_Schedule values
+differ.
+
+\x1b[1;33m>>> Definition (CFD).\x1b[0m
+A conditional functional dependency (CFD) combines an embedded FD X -> A with a
+pattern tableau. For every attribute, a pattern-tableau row contains either a
+restriction on its value or the wildcard '_', which matches any value. A data
+row is covered by a pattern when it satisfies all restrictions in that pattern.
+
+A CFD holds if, for each pattern, the embedded FD holds on the rows covered by
+that pattern.
+
+Example:
+Embedded FD: [Department, Employment_Type] -> Work_Schedule
+Pattern tableau:
++-----+--------------+-------------------+-----------------+
+|   # | Department   | Employment_Type   | Work_Schedule   |
+|-----+--------------+-------------------+-----------------|
+|   1 | IT           | _                 | _               |
+|   2 | Support      | Part-time         | _               |
++-----+--------------+-------------------+-----------------+
+
+This CFD holds. Pattern #1 covers the IT employees in rows #1-#3, and pattern #2
+covers the part-time Support employees in rows #4-#5. The full-time Support
+employees in rows #6 and #8 do not match pattern #2, and the Sales employee in
+row #7 matches neither pattern. Within the rows covered by the same pattern,
+every equal pair of Department and Employment_Type values has one Work_Schedule.
+Thus, the conflicting rows #6 and #8 are outside both contexts and do not
+violate the CFD.
+
+\x1b[1;36mNote:\x1b[0m
+CFDFinder discovers only CFDs whose patterns have '_' on the RHS.
+
+\x1b[1;33m>>> Quality measures.\x1b[0m
+In real-world data, CFDs rarely hold exactly. Support and confidence describe
+how much data a CFD covers and how closely the covered rows follow its embedded
+FD.
+
+\x1b[1;36mExample.\x1b[0m
+Embedded FD: [Department, Employment_Type] -> Work_Schedule
+Pattern tableau:
++-----+--------------+-------------------+-----------------+
+|   # | Department   | Employment_Type   | Work_Schedule   |
+|-----+--------------+-------------------+-----------------|
+|   1 | IT           | _                 | _               |
+|   2 | Support      | _                 | _               |
++-----+--------------+-------------------+-----------------+
+
+Pattern #1 covers the IT employees in rows #1-#3. Pattern #2 covers the Support
+employees in rows #4-#6 and #8.
+
+\x1b[1;36m1. Support.\x1b[0m
+Support is the fraction of all input rows covered by at least one pattern in the
+tableau. The example CFD covers seven of the eight input rows, so its support is
+7/8=0.875.
+
+\x1b[1;36m2. Confidence.\x1b[0m
+Confidence is the fraction of covered rows that can be kept without violating
+the embedded FD. The IT and part-time Support rows satisfy the FD, but full-time
+Support rows #6 and #8 have equal LHS values and different Work_Schedule values.
+Removing either conflicting row makes the FD hold on the cover, so six of the
+seven covered rows are keepers and confidence is 6/7≈0.8571.
+
+\x1b[1;33m>>> Definition (pattern bindings).\x1b[0m
+Besides wildcards, CFDFinder supports three forms of LHS binding in patterns.
+
+\x1b[1;36m1. Constant binding.\x1b[0m
+Embedded FD: [Department, Employment_Type] -> Work_Schedule
+Pattern tableau:
++-----+--------------+-------------------+-----------------+
+|   # | Department   | Employment_Type   | Work_Schedule   |
+|-----+--------------+-------------------+-----------------|
+|   1 | IT           | _                 | _               |
++-----+--------------+-------------------+-----------------+
+
+The constant IT means Department=IT. Together with the wildcard, this pattern
+covers all IT employees, which are rows #1-#3.
+
+\x1b[1;36m2. Negated constant binding.\x1b[0m
+Embedded FD: [Department, Employment_Type] -> Work_Schedule
+Pattern tableau:
++-----+--------------+-------------------+-----------------+
+|   # | Department   | Employment_Type   | Work_Schedule   |
+|-----+--------------+-------------------+-----------------|
+|   1 | ¬Support     | _                 | _               |
++-----+--------------+-------------------+-----------------+
+
+The condition ¬Support means Department!=Support. It covers rows #1-#3 and #7
+and excludes the conflicting Support rows context. A negated constant can
+compactly describe a broad context by excluding one exceptional value.
+
+\x1b[1;36m3. Range binding.\x1b[0m
+Embedded FD: [Experience_Years] -> Work_Schedule
+Pattern tableau:
++-----+--------------------+-----------------+
+|   # | Experience_Years   | Work_Schedule   |
+|-----+--------------------+-----------------|
+|   1 | [1 - 5]            | _               |
++-----+--------------------+-----------------+
+
+The inclusive range [1 - 5] covers rows #1-#5. Inside this range, every
+experience value is associated with one schedule. Rows #6-#8 are outside this
+range; in particular, Experience_Years=6 has conflicting schedules in rows #6
+and #8.
+
+================================================================================
+\x1b[1;36mAlgorithm parameters\x1b[0m
+================================================================================
+The algorithm has three main strategy parameters.
+
+Main parameters (strategies):
++--------------------+-------------------------------------------+
+| parameter          | role                                      |
+|--------------------+-------------------------------------------|
+| expansion_strategy | controls the bindings allowed in patterns |
+| pruning_strategy   | determines the algorithm's usage scenario |
+| result_strategy    | filters the final set of discovered CFDs  |
++--------------------+-------------------------------------------+
+
+\x1b[1;33m>>> expansion_strategy.\x1b[0m
+Expansion strategy variants:
++-------------------+------------------------------------------------+
+| value             | allowed bindings                               |
+|-------------------+------------------------------------------------|
+| constant          | constants and the wildcard '_'                 |
+| negative_constant | constants, negated constants (¬value), and '_' |
+| range             | ranges, constants, and '_'                     |
++-------------------+------------------------------------------------+
+
+For range bindings, CFDFinder arranges the attribute domain in lexicographic
+order and uses intervals over that order.
+
+\x1b[1;33m>>> pruning_strategy.\x1b[0m
+The available pruning strategies are legacy, support_independent, and
+partial_fd. The selected strategy determines the algorithm's usage scenario and
+has its own additional parameters, which are introduced in the corresponding
+scenarios below.
+
+\x1b[1;33m>>> result_strategy.\x1b[0m
+This strategy acts as a filter over the final set of CFDs found according to the
+other algorithm parameters.
+
+Result strategy variants:
++---------+--------------------------------------------+
+| value   | filtering                                  |
+|---------+--------------------------------------------|
+| direct  | keeps every discovered CFD                 |
+| lattice | keeps the most general CFDs for each RHS   |
+| tree    | also keeps some specific high-support CFDs |
++---------+--------------------------------------------+
+
+Auxiliary parameters:
++-----------------+-------------------------------------------------------+
+| parameter       | meaning                                               |
+|-----------------+-------------------------------------------------------|
+| max_lhs         | maximum number of attributes on the embedded FD's LHS |
+| threads         | number of worker threads                              |
+| limit_pli_cache | maximum number of cached position-list indexes        |
+| rhs_indices     | optional list of columns allowed on the RHS           |
++-----------------+-------------------------------------------------------+
+
+================================================================================
+\x1b[1;36mDataset description\x1b[0m
+================================================================================
+The dataset contains fourteen bacteria-growth experiments. Oxygen level,
+temperature, pH, and nutrient level are controlled parameters; growth rate is
+the observed result. We use CFD mining to look for stable experimental regimes
+and possible design issues.
+
+Bacteria-growth experiments:
++-----+----------------+-----------------+------+------------------+---------------+
+|   # | Oxygen_Level   |   Temperature_C |   pH | Nutrient_Level   | Growth_Rate   |
+|-----+----------------+-----------------+------+------------------+---------------|
+|   1 | Low            |              25 |  6.5 | Medium           | Slow          |
+|   2 | Low            |              25 |  6.5 | Medium           | Medium        |
+|   3 | Low            |              25 |  6.5 | Medium           | Slow          |
+|   4 | Low            |              25 |  7.5 | High             | Very_Fast     |
+|   5 | Low            |              25 |  7.5 | High             | Very_Fast     |
+|   6 | Low            |              25 |  6.5 | Medium           | Very_Fast     |
+|   7 | Medium         |              25 |  7   | Medium           | Medium        |
+|   8 | Medium         |              25 |  7   | Medium           | Medium        |
+|   9 | Medium         |              25 |  7.5 | Medium           | Slow          |
+|  10 | Medium         |              35 |  7   | High             | Fast          |
+|  11 | Medium         |              40 |  6.5 | Low              | Dead          |
+|  12 | Medium         |              40 |  6.5 | Low              | Dead          |
+|  13 | High           |              35 |  7.5 | High             | Very_Fast     |
+|  14 | High           |              40 |  7   | High             | Dead          |
++-----+----------------+-----------------+------+------------------+---------------+
+
+================================================================================
+\x1b[1;36mScenario 1. Discovering CFDs with support and confidence thresholds\x1b[0m
+================================================================================
+The most straightforward way to use CFDFinder is to set minimum support and
+confidence thresholds. For this mode, select the legacy pruning strategy with
+pruning_strategy='legacy'. It returns only CFDs whose pattern tableaux meet both
+cfd_minsup and cfd_minconf.
+
+Execution parameters:
++--------------------+-------------------+
+| parameter          | value             |
+|--------------------+-------------------|
+| expansion_strategy | negative_constant |
+| pruning_strategy   | legacy            |
+| result_strategy    | direct            |
+| cfd_minsup         | 0.7               |
+| cfd_minconf        | 1.0               |
+| max_lhs            | 2                 |
++--------------------+-------------------+
+
+CFDFinder discovered 11 CFDs that meet both thresholds. Three useful examples
+are shown below.
+
+CFD #1: [Oxygen_Level, Nutrient_Level] -> Temperature_C
+Pattern tableau:
++-----+----------------+------------------+-----------------+
+|   # | Oxygen_Level   | Nutrient_Level   | Temperature_C   |
+|-----+----------------+------------------+-----------------|
+|   1 | ¬High          | _                | _               |
++-----+----------------+------------------+-----------------+
+
+Support: 0.8571
+Confidence: 1.0000
+
+For every oxygen level except High, the combination of oxygen and nutrient
+levels determines the experiment temperature. This rule reveals coupling between
+controlled parameters and suggests which oxygen-nutrient-temperature
+combinations are missing from the study.
+
+CFD #2: [Growth_Rate] -> Temperature_C
+Pattern tableau:
++-----+---------------+-----------------+
+|   # | Growth_Rate   | Temperature_C   |
+|-----+---------------+-----------------|
+|   1 | ¬Very_Fast    | _               |
++-----+---------------+-----------------+
+
+Support: 0.7143
+Confidence: 1.0000
+
+For every growth regime except Very_Fast, each growth rate is associated with
+one temperature: Slow and Medium occur at 25 C, Fast at 35 C, and Dead at 40 C.
+This rule can help validate new measurements and identify operating regimes that
+deserve closer investigation.
+
+CFD #3: [Temperature_C, pH] -> Oxygen_Level
+Pattern tableau:
++-----+-----------------+------+----------------+
+|   # | Temperature_C   | pH   | Oxygen_Level   |
+|-----+-----------------+------+----------------|
+|   1 | _               | ¬7.5 | _              |
++-----+-----------------+------+----------------+
+
+Support: 0.7143
+Confidence: 1.0000
+
+For every pH value except 7.5, temperature and pH determine the oxygen level.
+Because all three attributes are controlled parameters, this CFD is useful for
+detecting experimental-design bias and gaps in factor coverage.
+
+================================================================================
+\x1b[1;36mScenario 2. Rare but precise CFDs\x1b[0m
+================================================================================
+A high minimum support can hide rules that describe rare but informative rules.
+Such a rule may cover only a few rows yet be valuable when those rows follow it
+with high confidence. The support_independent strategy is designed for this
+case: it does not require a global cfd_minsup threshold.
+
+Execution parameters:
++------------------------+---------------------+
+| parameter              | value               |
+|------------------------+---------------------|
+| expansion_strategy     | range               |
+| pruning_strategy       | support_independent |
+| result_strategy        | direct              |
+| cfd_minconf            | 1.0                 |
+| min_support_gain       | 4                   |
+| max_level_support_drop | 2                   |
+| max_patterns           | 1                   |
+| rhs_indices            | [4]                 |
+| max_lhs                | 2                   |
++------------------------+---------------------+
+
+The min_support_gain=4 threshold requires every pattern to match at least four
+rows. With max_level_support_drop=2, support must not decrease by more than two
+rows when one attribute is removed from the embedded FD's LHS.
+
+The max_patterns=1 limit allows one row in each pattern tableau, max_lhs=2
+allows at most two attributes on the embedded FD's LHS, and rhs_indices=[4]
+restricts the RHS to Growth_Rate.
+
+CFDFinder discovered 5 CFDs with Growth_Rate on the RHS. Two informative low-
+support rules are shown below.
+
+CFD #1: [Oxygen_Level, Temperature_C] -> Growth_Rate
+Pattern tableau:
++-----+----------------+-----------------+---------------+
+|   # | Oxygen_Level   | Temperature_C   | Growth_Rate   |
+|-----+----------------+-----------------+---------------|
+|   1 | _              | [35 - 40]       | _             |
++-----+----------------+-----------------+---------------+
+
+Support: 0.3571
+Confidence: 1.0000
+
+The Temperature_C=[35 - 40] condition covers experiments #10-#14. Within this
+range, equal Oxygen_Level and Temperature_C values always have the same
+Growth_Rate: at 35 C, Medium oxygen corresponds to Fast growth and High oxygen
+to Very_Fast growth; at 40 C, the observed growth is Dead. The CFD has support
+5/14≈0.3571 and confidence 1, so it identifies a small high-temperature region
+in which oxygen helps predict growth.
+
+CFD #2: [Temperature_C, pH] -> Growth_Rate
+Pattern tableau:
++-----+-----------------+------+---------------+
+|   # | Temperature_C   | pH   | Growth_Rate   |
+|-----+-----------------+------+---------------|
+|   1 | [35 - 40]       | _    | _             |
++-----+-----------------+------+---------------+
+
+Support: 0.3571
+Confidence: 1.0000
+
+The same Temperature_C=[35 - 40] range also makes temperature and pH a precise
+predictor of growth in experiments #10-#14. At 35 C, pH 7.0 corresponds to Fast
+growth and pH 7.5 to Very_Fast growth; at 40 C, the observed growth is Dead.
+This CFD also has support 5/14≈0.3571 and confidence 1, suggesting that pH is
+worth varying more thoroughly in future high-temperature experiments.
+
+Because these CFDs are based on only five experiments, they are useful as
+signals and hypotheses rather than general scientific conclusions. More
+experiments in the 35-40 C range are needed to validate them.
+
+================================================================================
+\x1b[1;36mScenario 3. Approximate dependencies covering the whole table\x1b[0m
+================================================================================
+The partial_fd strategy searches for dependencies that cover the entire relation
+but may have confidence below one. The max_g1 parameter bounds the fraction of
+tuple pairs that violate the embedded FD.
+
+Execution parameters:
++--------------------+------------+
+| parameter          | value      |
+|--------------------+------------|
+| expansion_strategy | constant   |
+| pruning_strategy   | partial_fd |
+| result_strategy    | direct     |
+| max_g1             | 0.08       |
+| rhs_indices        | [4]        |
+| max_lhs            | 3          |
++--------------------+------------+
+
+CFDFinder discovered 4 approximate dependencies with Growth_Rate on the RHS. We
+consider one of them below.
+
+CFD: [Oxygen_Level, pH, Nutrient_Level] -> Growth_Rate
+Pattern tableau:
++-----+----------------+------+------------------+---------------+
+|   # | Oxygen_Level   | pH   | Nutrient_Level   | Growth_Rate   |
+|-----+----------------+------+------------------+---------------|
+|   1 | _              | _    | _                | _             |
++-----+----------------+------+------------------+---------------+
+
+Support: 1.0000
+Confidence: 0.8571
+
+CFDFinder reports the quality of a discovered partial FD but does not expose its
+violating rows. Since a verifier for CFDs under CFDFinder's definition is not
+yet available, we use the verifier for another algorithm to find the rows that
+violate the discovered CFD. Any partial FD has only wildcard bindings, so it can
+be passed directly to that verifier.
+
+FD-First verification result:
++---------------------------------------------------+---------+------------------+
+| CFD                                               | holds   |   violating rows |
+|---------------------------------------------------+---------+------------------|
+| [Oxygen_Level, pH, Nutrient_Level] -> Growth_Rate | False   |                2 |
++---------------------------------------------------+---------+------------------+
+
+Rows marked as violations by the verifier:
++-----+----------------+-----------------+------+------------------+---------------+
+|   # | Oxygen_Level   |   Temperature_C |   pH | Nutrient_Level   | Growth_Rate   |
+|-----+----------------+-----------------+------+------------------+---------------|
+|   2 | Low            |              25 |  6.5 | Medium           | Medium        |
+|   6 | Low            |              25 |  6.5 | Medium           | Very_Fast     |
++-----+----------------+-----------------+------+------------------+---------------+
+
+Rows #1, #2, #3, and #6 have the same Oxygen_Level, pH, and Nutrient_Level.
+Growth_Rate=Slow occurs twice in this LHS cluster, while Medium and Very_Fast
+occur once each. The verifier therefore marks rows #2 and #6 as violations. Such
+uncommon disagreements may be measurement errors, omitted factors, or evidence
+that the system is close to a stability boundary.
+
+================================================================================
+\x1b[1;36mSummary\x1b[0m
+================================================================================
+You have now mastered the core idea behind CFDs and know how to apply it in
+practice.
+
+Using CFDFinder usually requires experimenting with strategies and their
+parameters. For straightforward scenarios with explicit minimum support and
+confidence thresholds, start with the legacy pruning strategy. Use
+support_independent when you need more flexible settings, especially for precise
+rules that cover small groups of rows.
+
+Use the RHS filter through rhs_indices when you are interested only in specific
+columns on the right-hand side. Restricting the allowed RHS columns can
+significantly reduce the algorithm's execution time.
+
+The negative_constant and range expansion strategies can substantially increase
+memory consumption and execution time because they generate many possible
+bindings. They are therefore best used when the attribute domains in the input
+table are not large.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Conditional Dependencies:
+* CFD mining under definition [2]          - examples/basic/mining_cfd.py
+* CFD verification under definition [2]    - examples/basic/verifying_cfd.py
+* CIND mining under definition [3]         - examples/basic/mining_cind1.py
+* CIND verification under definition [3]   - examples/basic/verifying_cind.py
+* CIND mining under definition [4]         - examples/basic/mining_cind2.py
+
+Functional Dependencies:
+* AFD mining              - examples/basic/mining_fd_approximate.py
+* FD mining               - examples/basic/mining_fd.py
+* FD/AFD verification     - examples/basic/verifying_fd_afd.py
+
+================================================================================
+\x1b[1;36mReferences:\x1b[0m
+================================================================================
+[1]  Efficient Discovery of Conditional Dependencies with Desbordante, 39th
+FRUCT, Helsinki, Finland, 2026, pp. 130-141.
+
+[2]  J. Rammelaere and F. Geerts in 'Revisiting Conditional Functional
+DependencyDiscovery: Splitting the “C” from the “FD”', ECML PKDD 2018.
+
+[3]  J. Bauckmann, Z. Abedjan, U. Leser, H. Muller, F. Naumann. Discovering
+Conditional Inclusion Dependencies. CIKM 2012, pp. 2094-2098.
+
+[4]  O. Cure. Improving the Data Quality of Drug Databases usingConditional
+Dependencies and Ontologies. ACM JDIQ 4(1):20, 2012.
+
+'''
