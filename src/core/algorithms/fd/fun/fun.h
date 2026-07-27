@@ -1,93 +1,33 @@
 #pragma once
 
+#include <list>
 #include <set>
 
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
-#include "core/util/custom_hashes.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
+#include "core/algorithms/fd/probing_tables_load_data.h"
+#include "core/config/max_lhs/type.h"
+#include "core/model/index.h"
+#include "core/model/table/table_header.h"
 
-namespace algos {
+namespace algos::fd {
 
-class FunQuadruple {
-private:
-    Vertical candidate_;
-    unsigned long count_;
-    Vertical quasiclosure_;
-    Vertical closure_;
-
-public:
-    explicit FunQuadruple(Vertical const& candidate)
-        : candidate_(candidate),
-          count_(0),
-          quasiclosure_(candidate.GetSchema()->CreateEmptyVertical()),
-          closure_(candidate.GetSchema()->CreateEmptyVertical()) {}
-
-    explicit FunQuadruple(Column const& candidate) : FunQuadruple(Vertical(candidate)) {}
-
-    Vertical const& GetCandidate() const {
-        return candidate_;
-    }
-
-    unsigned long GetCount() const {
-        return count_;
-    }
-
-    Vertical const& GetClosure() const {
-        return closure_;
-    }
-
-    Vertical const& GetQuasiclosure() const {
-        return quasiclosure_;
-    }
-
-    void SetCount(unsigned long new_count) {
-        count_ = new_count;
-    }
-
-    void SetClosure(Vertical const& new_closure) {
-        closure_ = new_closure;
-    }
-
-    void SetQuasiclosure(Vertical const& new_quasiclosure) {
-        quasiclosure_ = new_quasiclosure;
-    }
-
-    bool operator==(FunQuadruple const& that) const {
-        return candidate_ == that.candidate_;
-    }
-
-    bool operator!=(FunQuadruple const& that) const {
-        return candidate_ != that.candidate_;
-    }
-
-    bool operator<(FunQuadruple const& that) const {
-        return candidate_ < that.candidate_;
-    }
-
-    FunQuadruple Union(Column const& that) const;
-
-    FunQuadruple Union(Vertical const& that) const;
-
-    bool Contains(FunQuadruple const& that) const;
-
-    bool Contains(Vertical const& that) const;
-};
-
-class FUN : public PliBasedFDAlgorithm {
+class FUN : public ProbingTablesLoadData {
     // Entities from the algorithm itself
 private:
-    Vertical r_;
-    Vertical r_prime_;
+    boost::dynamic_bitset<> r_;
+    boost::dynamic_bitset<> r_prime_;
 
+    class FunQuadruple;
     using Level = std::list<FunQuadruple>;
 
-    void ResetStateFd() final;
+    void ResetState() final;
     void ExecuteInternal() final;
 
     Level GenerateCandidate(Level const& l_k) const;
 
     void ComputeClosure(Level& l_k_minus_1, Level const& l_k) const;
 
-    unsigned long Count(Vertical const& l) const;
+    unsigned long Count(boost::dynamic_bitset<> const& l) const;
 
     unsigned long FastCount(Level const& l_k_minus_1, Level const& l_k,
                             FunQuadruple const& l) const;
@@ -100,10 +40,21 @@ private:
 
     // Supporting entities
 private:
-    RelationalSchema const* schema_;
-    std::unordered_map<Column, std::set<Vertical>> fds_;
+    LhsMaskFdView::OwningPointer fd_view_;
 
+    config::MaxLhsType max_lhs_;
+    std::vector<std::deque<boost::dynamic_bitset<>>> fds_;
+
+    void RegisterOptions();
+    void MakeExecuteOptsAvailable() final;
     bool IsKey(FunQuadruple const& l) const;
+
+public:
+    FUN();
+
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
+    }
 };
 
-}  // namespace algos
+}  // namespace algos::fd
