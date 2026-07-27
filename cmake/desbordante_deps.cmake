@@ -77,4 +77,4 @@ if(DESBORDANTE_BUILD_BENCHMARKS)
     list(APPEND boost_libraries program_options)
 endif()
 
-find_package(Boost 1.85.0 REQUIRED COMPONENTS ${boost_libraries})
+find_package(Boost 1.90.0 REQUIRED COMPONENTS ${boost_libraries})

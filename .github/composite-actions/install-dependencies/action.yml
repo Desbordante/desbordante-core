@@ -97,7 +97,7 @@ runs:
       uses: ./.github/composite-actions/download-library
       with:
         directory: boost
-        download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
+        download-command: wget -O boost_1_90_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.90.0/boost_1_90_0.tar.gz/download && tar xzvf boost_1_90_0.tar.gz && mv boost_1_90_0 boost
 
     - name: Install Boost built with GCC (on Ubuntu)
       run: |
