@@ -5,7 +5,6 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/fd/pyrocommon/model/list_agree_set_sample.h"
-#include "core/model/table/agree_set_factory.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/identifier_set.h"
 #include "core/util/levenshtein_distance.h"
@@ -14,8 +13,7 @@
 
 namespace tests {
 
-using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, model::AgreeSetFactory,
-        model::MCGenMethod, model::AgreeSetsGenMethod;
+using std::deque, std::vector, std::cout, std::endl, std::unique_ptr;
 using ::testing::ContainerEq, ::testing::Eq;
 
 namespace fs = std::filesystem;
@@ -201,71 +199,6 @@ TEST(IdentifierSetTest, Intersection) {
     }
     ASSERT_THAT(intersection_ans, ContainerEq(intersection_actual));
 }
-
-void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
-    std::set<std::string> agree_sets_actual;  // id set intersection result
-    std::set<std::string> agree_sets_ans = {"[A D F]", "[A B]",       "[D E F]",   "[A E]",
-                                            "[C E F]", "[E F]",       "[B C F]",   "[A B E F]",
-                                            "[]",      "[A C D E]",   "[B D E]",   "[A B C E F]",
-                                            "[A F]",   "[A B D E F]", "[A C D F]", "[A C E]"};
-
-    try {
-        auto input_table = MakeInputTable(kBernoulliRelation);
-        auto relation = ColumnLayoutRelationData::CreateFrom(*input_table);
-        AgreeSetFactory factory(relation.get(), c);
-        for (model::AgreeSet const& agree_set : factory.GenAgreeSets()) {
-            agree_sets_actual.insert(agree_set.ToString());
-        }
-    } catch (std::runtime_error const& e) {
-        cout << "Exception raised in test: " << e.what() << endl;
-        FAIL();
-    }
-    ASSERT_THAT(agree_sets_ans, ContainerEq(agree_sets_actual));
-}
-
-TEST(AgreeSetFactoryTest, UsingVectorOfIDSets) {
-    AgreeSetFactory::Configuration c(AgreeSetsGenMethod::kUsingVectorOfIDSets);
-    TestAgreeSetFactory(c);
-}
-
-TEST(AgreeSetFactoryTest, UsingMapOfIDSets) {
-    AgreeSetFactory::Configuration c(AgreeSetsGenMethod::kUsingMapOfIDSets);
-    TestAgreeSetFactory(c);
-}
-
-TEST(AgreeSetFactoryTest, UsingGetAgreeSet) {
-    AgreeSetFactory::Configuration c(AgreeSetsGenMethod::kUsingGetAgreeSet);
-    TestAgreeSetFactory(c);
-}
-
-TEST(AgreeSetFactoryTest, UsingMCAndGetAgreeSet) {
-    AgreeSetFactory::Configuration c(AgreeSetsGenMethod::kUsingMCAndGetAgreeSet);
-    TestAgreeSetFactory(c);
-}
-
-TEST(AgreeSetFactoryTest, UsingHandleEqvClass) {
-    AgreeSetFactory::Configuration c(MCGenMethod::kUsingHandleEqvClass);
-    TestAgreeSetFactory(c);
-}
-
-TEST(AgreeSetFactoryTest, UsingCalculateSupersets) {
-    AgreeSetFactory::Configuration c(MCGenMethod::kUsingCalculateSupersets);
-    TestAgreeSetFactory(c);
-}
-
-TEST(AgreeSetFactoryTest, UsingHandlePartition) {
-    AgreeSetFactory::Configuration c(MCGenMethod::kUsingHandlePartition);
-    TestAgreeSetFactory(c);
-}
-
-#if 0
-TEST(AgreeSetFactoryTest, MCGenParallel) {
-    AgreeSetFactory::Configuration c(AgreeSetsGenMethod::kUsingVectorOfIDSets,
-                                     MCGenMethod::kParallel,
-                                     std::thread::hardware_concurrency());
-    testAgreeSetFactory(c);
-}
-#endif
 
 struct TestLevenshteinParam {
     std::string l;

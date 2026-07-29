@@ -2,8 +2,7 @@ set(NAME model.table)
 desbordante_add_lib(NAME OBJECT)
 target_sources(
     ${NAME}
-    PRIVATE agree_set_factory.cpp
-            block_data.cpp
+    PRIVATE block_data.cpp
             column_combination.cpp
             column.cpp
             column_encoded_relation_data.cpp
