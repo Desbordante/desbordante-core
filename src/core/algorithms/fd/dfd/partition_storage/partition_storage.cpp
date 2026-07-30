@@ -140,10 +140,6 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     return variant_intersection_pli;
 }
 
-size_t PartitionStorage::Size() const {
-    return index_->GetSize();
-}
-
 std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
 PartitionStorage::CachingProcess(Vertical const& vertical,
                                  std::unique_ptr<model::PositionListIndex> pli) {

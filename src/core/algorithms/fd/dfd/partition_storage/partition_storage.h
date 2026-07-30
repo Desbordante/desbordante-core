@@ -33,7 +33,5 @@ public:
     std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
     GetOrCreateFor(Vertical const& vertical);
 
-    size_t Size() const;
-
     virtual ~PartitionStorage();
 };

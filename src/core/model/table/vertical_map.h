@@ -99,10 +99,6 @@ public:
     explicit VerticalMap(RelationalSchema const* relation)
         : relation_(relation), set_trie_(relation->GetNumColumns()) {}
 
-    virtual size_t GetSize() const {
-        return size_;
-    }
-
     virtual bool IsEmpty() const {
         return size_ == 0;
     }
@@ -162,7 +158,6 @@ public:
 
     explicit BlockingVerticalMap(RelationalSchema const* relation) : VerticalMap<V>(relation) {}
 
-    virtual size_t GetSize() const override;
     virtual bool IsEmpty() const override;
 
     virtual std::shared_ptr<V const> Get(Vertical const& key) const override;

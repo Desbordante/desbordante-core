@@ -167,10 +167,6 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
     return variant_intersection_pli;
 }
 
-size_t PLICache::Size() const {
-    return index_->GetSize();
-}
-
 std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::CachingProcess(
         Vertical const& vertical, std::unique_ptr<PositionListIndex> pli,
         ProfilingContext* profiling_context) {

@@ -67,8 +67,6 @@ public:
         maximum_entropy_ = e;
     }
 
-    size_t Size() const;
-
     // returns ownership of single column PLIs back to ColumnLayoutRelationData
     virtual ~PLICache();
 };

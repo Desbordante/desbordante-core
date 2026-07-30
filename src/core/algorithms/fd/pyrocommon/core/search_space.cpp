@@ -349,9 +349,6 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
         }
     }
 
-    LOG_DEBUG("* {} alleged minimum dependencies (UNIMPLEMENTED)", alleged_min_deps->GetSize());
-
-    int num_uncertain_min_deps = 0;
     for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
         if (info->is_extremal_ && !global_visitees_->ContainsKey(alleged_min_dep)) {
             LOG_DEBUG("[{}] Minimum dependency: {} (error={})", recursion_depth_,
@@ -361,13 +358,7 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
             global_visitees_->Put(alleged_min_dep, std::make_unique<VerticalInfo>(*info));
             strategy_->RegisterDependency(alleged_min_dep, info->error_, *context_);
         }
-        if (!info->is_extremal_) {
-            num_uncertain_min_deps++;
-        }
     }
-
-    LOG_DEBUG("* {}/{} alleged minimum dependencies might be non-minimal", num_uncertain_min_deps,
-              alleged_min_deps->GetSize());
 
     auto alleged_min_deps_set = alleged_min_deps->KeySet();
     // TODO: костыль: CalculateHittingSet needs a list, but KeySet returns an unordered_set
