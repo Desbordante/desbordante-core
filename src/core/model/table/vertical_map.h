@@ -91,12 +91,7 @@ protected:
 
     RelationalSchema const* relation_;
     size_t size_ = 0;
-    long long shrink_invocations_ = 0;
-    long long time_spent_on_shrinking_ = 0;
     SetTrie set_trie_;
-
-    unsigned int RemoveFromUsageCounter(std::unordered_map<Vertical, unsigned int>& usage_counter,
-                                        Vertical const& key);
 
 public:
     using Entry = std::pair<Vertical, std::shared_ptr<Value const>>;
@@ -148,23 +143,6 @@ public:
     virtual std::vector<Entry> GetRestrictedSupersetEntries(Vertical const& vertical,
                                                             Vertical const& exclusion) const;
     virtual bool RemoveSupersetEntries(Vertical const& key);
-    virtual bool RemoveSubsetEntries(Vertical const& key);
-
-    /* methods to shrink the map by deleting removable entries
-     * !!! Untested yet - use carefully
-     * */
-    virtual void Shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                        std::function<bool(Entry)> const& can_remove);
-    virtual void Shrink(std::unordered_map<Vertical, unsigned int>& usage_counter,
-                        std::function<bool(Entry)> const& can_remove);
-
-    virtual long long GetShrinkInvocations() {
-        return shrink_invocations_;
-    }
-
-    virtual long long GetTimeSpentOnShrinking() {
-        return time_spent_on_shrinking_;
-    }
 
     virtual ~VerticalMap() = default;
 };
@@ -215,15 +193,6 @@ public:
     virtual std::vector<Entry> GetRestrictedSupersetEntries(
             Vertical const& vertical, Vertical const& exclusion) const override;
     virtual bool RemoveSupersetEntries(Vertical const& key) override;
-    virtual bool RemoveSubsetEntries(Vertical const& key) override;
-
-    virtual void Shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                        std::function<bool(Entry)> const& can_remove) override;
-    virtual void Shrink(std::unordered_map<Vertical, unsigned int>& usage_counter,
-                        std::function<bool(Entry)> const& can_remove) override;
-
-    virtual long long GetShrinkInvocations() override;
-    virtual long long GetTimeSpentOnShrinking() override;
 
     virtual ~BlockingVerticalMap() = default;
 };

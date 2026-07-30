@@ -355,15 +355,6 @@ bool VerticalMap<Value>::RemoveSupersetEntries(Vertical const& key) {
 }
 
 template <class Value>
-bool VerticalMap<Value>::RemoveSubsetEntries(Vertical const& key) {
-    std::vector<typename VerticalMap<Value>::Entry> subset_entries = GetSubsetEntries(key);
-    for (auto subset_entry : subset_entries) {
-        Remove(subset_entry.first);
-    }
-    return !subset_entries.empty();
-}
-
-template <class Value>
 std::unordered_set<Vertical> VerticalMap<Value>::KeySet() {
     std::unordered_set<Vertical> key_set;
     Bitset subset_key(relation_->GetNumColumns());
@@ -394,12 +385,6 @@ std::unordered_set<typename VerticalMap<Value>::Entry> VerticalMap<Value>::Entry
 }
 
 template <class Value>
-unsigned int VerticalMap<Value>::RemoveFromUsageCounter(
-        std::unordered_map<Vertical, unsigned int>& usage_counter, Vertical const& key) {
-    return usage_counter.erase(key);
-}
-
-template <class Value>
 std::shared_ptr<Value> VerticalMap<Value>::Remove(Vertical const& key) {
     auto removed_value = set_trie_.Remove(key.GetColumnIndices(), 0);
     if (removed_value != nullptr) size_--;
@@ -411,83 +396,6 @@ std::shared_ptr<Value> VerticalMap<Value>::Remove(VerticalMap::Bitset const& key
     auto removed_value = set_trie_.Remove(key, 0);
     if (removed_value != nullptr) size_--;
     return removed_value;
-}
-
-// comparator is of Compare type - check ascending/descending issues
-template <class Value>
-void VerticalMap<Value>::Shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                                std::function<bool(Entry)> const& can_remove) {
-    // some logging
-
-    std::priority_queue<Entry, std::vector<Entry>, std::function<bool(Entry, Entry)>> key_queue(
-            compare, std::vector<Entry>(size_));
-    Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.TraverseEntries(subset_key, [&key_queue, this, &can_remove](auto& k, auto v) {
-        if (Entry entry(relation_->GetVertical(k), v); can_remove(entry)) {
-            key_queue.push(entry);
-        }
-    });
-    // unsigned int num_of_removed = 0;
-    unsigned int target_size = size_ * factor;
-    while (!key_queue.empty() && size_ > target_size) {
-        auto key = key_queue.top().first;
-        key_queue.pop();
-
-        // insert additional logging
-
-        // num_of_removed++;
-        Remove(key);
-    }
-    shrink_invocations_++;
-    time_spent_on_shrinking_ += 1;  // haven't implemented time measuring yet
-}
-
-template <class Value>
-void VerticalMap<Value>::Shrink(std::unordered_map<Vertical, unsigned int>& usage_counter,
-                                std::function<bool(Entry)> const& can_remove) {
-    // some logging
-
-    std::vector<int> usage_counters(usage_counter.size());
-    for (auto& [first, second] : usage_counter) {
-        usage_counters.push_back(second);
-    }
-    std::sort(usage_counters.begin(), usage_counters.end());
-    unsigned int median_of_usage = usage_counters.size() % 2 == 0
-                                           ? (usage_counters[usage_counters.size() / 2 + 1] +
-                                              usage_counters[usage_counters.size() / 2]) /
-                                                     2
-                                           : usage_counters[usage_counters.size() / 2];
-
-    std::queue<Entry> key_queue;
-    Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.TraverseEntries(
-            subset_key,
-            [&key_queue, this, &can_remove, &usage_counter, median_of_usage](auto& k,
-                                                                             auto v) -> void {
-                if (Entry entry(relation_->GetVertical(k), v);
-                    can_remove(entry) && usage_counter.at(entry.first) <= median_of_usage) {
-                    key_queue.push(entry);
-                }
-            });
-    // unsigned int num_of_removed = 0;
-    while (!key_queue.empty()) {
-        auto key = key_queue.front().first;
-        key_queue.pop();
-
-        // insert additional logging
-
-        // num_of_removed++;
-        Remove(key);
-        RemoveFromUsageCounter(usage_counter, key);
-    }
-
-    // TODO: what do we want to accomplish here? - looks ok btw
-    for (auto& [first, second] : usage_counter) {
-        second = 0;
-    }
-
-    shrink_invocations_++;
-    time_spent_on_shrinking_ += 1;  // haven't implemented time measuring yet
 }
 
 template <class Value>
@@ -660,38 +568,6 @@ template <class V>
 bool BlockingVerticalMap<V>::RemoveSupersetEntries(Vertical const& key) {
     std::scoped_lock write_lock(read_write_mutex_);
     return VerticalMap<V>::RemoveSupersetEntries(key);
-}
-
-template <class V>
-bool BlockingVerticalMap<V>::RemoveSubsetEntries(Vertical const& key) {
-    std::scoped_lock write_lock(read_write_mutex_);
-    return VerticalMap<V>::RemoveSubsetEntries(key);
-}
-
-template <class V>
-void BlockingVerticalMap<V>::Shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                                    std::function<bool(Entry)> const& can_remove) {
-    std::scoped_lock write_lock(read_write_mutex_);
-    VerticalMap<V>::Shrink(factor, compare, can_remove);
-}
-
-template <class V>
-void BlockingVerticalMap<V>::Shrink(std::unordered_map<Vertical, unsigned int>& usage_counter,
-                                    std::function<bool(Entry)> const& can_remove) {
-    std::scoped_lock write_lock(read_write_mutex_);
-    VerticalMap<V>::Shrink(usage_counter, can_remove);
-}
-
-template <class V>
-long long BlockingVerticalMap<V>::GetShrinkInvocations() {
-    std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetShrinkInvocations();
-}
-
-template <class V>
-long long BlockingVerticalMap<V>::GetTimeSpentOnShrinking() {
-    std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetTimeSpentOnShrinking();
 }
 
 template class BlockingVerticalMap<PositionListIndex>;
