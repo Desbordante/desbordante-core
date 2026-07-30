@@ -138,9 +138,10 @@ double ProfilingContext::SetMaximumEntropy(ColumnLayoutRelationData const* relat
 model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical const& focus,
                                                                    double boost_factor) {
     auto pli = pli_cache_->GetOrCreateFor(focus, this);
-    auto pli_pointer = std::holds_alternative<model::PositionListIndex*>(pli)
-                               ? std::get<model::PositionListIndex*>(pli)
-                               : std::get<std::unique_ptr<model::PositionListIndex>>(pli).get();
+    auto pli_pointer =
+            std::holds_alternative<model::PositionListIndex const*>(pli)
+                    ? std::get<model::PositionListIndex const*>(pli)
+                    : std::get<std::unique_ptr<model::PositionListIndex const>>(pli).get();
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, pli_pointer, parameters_.sample_size * boost_factor,
             custom_random_);

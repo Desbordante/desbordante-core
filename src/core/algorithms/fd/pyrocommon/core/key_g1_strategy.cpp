@@ -5,7 +5,7 @@
 #include "core/algorithms/fd/pyrocommon/core/search_space.h"
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 
-double KeyG1Strategy::CalculateKeyError(model::PositionListIndex* pli) const {
+double KeyG1Strategy::CalculateKeyError(model::PositionListIndex const* pli) const {
     return CalculateKeyError(pli->GetNepAsLong());
 }
 
@@ -31,9 +31,10 @@ void KeyG1Strategy::EnsureInitialized(SearchSpace* search_space) const {
 
 double KeyG1Strategy::CalculateError(Vertical const& key_candidate) const {
     auto pli = context_->GetPliCache()->GetOrCreateFor(key_candidate, context_);
-    auto pli_pointer = std::holds_alternative<model::PositionListIndex*>(pli)
-                               ? std::get<model::PositionListIndex*>(pli)
-                               : std::get<std::unique_ptr<model::PositionListIndex>>(pli).get();
+    auto pli_pointer =
+            std::holds_alternative<model::PositionListIndex const*>(pli)
+                    ? std::get<model::PositionListIndex const*>(pli)
+                    : std::get<std::unique_ptr<model::PositionListIndex const>>(pli).get();
     double error = CalculateKeyError(pli_pointer);
     calc_count_++;
     return error;
@@ -49,9 +50,10 @@ model::ConfidenceInterval KeyG1Strategy::CalculateKeyError(
 DependencyCandidate KeyG1Strategy::CreateDependencyCandidate(Vertical const& vertical) const {
     if (vertical.GetArity() == 1) {
         auto pli = context_->GetPliCache()->GetOrCreateFor(vertical, context_);
-        auto pli_pointer = std::holds_alternative<model::PositionListIndex*>(pli)
-                                   ? std::get<model::PositionListIndex*>(pli)
-                                   : std::get<std::unique_ptr<model::PositionListIndex>>(pli).get();
+        auto pli_pointer =
+                std::holds_alternative<model::PositionListIndex const*>(pli)
+                        ? std::get<model::PositionListIndex const*>(pli)
+                        : std::get<std::unique_ptr<model::PositionListIndex const>>(pli).get();
         double key_error = CalculateKeyError(pli_pointer->GetNepAsLong());
         return DependencyCandidate(vertical, model::ConfidenceInterval(key_error), true);
     }

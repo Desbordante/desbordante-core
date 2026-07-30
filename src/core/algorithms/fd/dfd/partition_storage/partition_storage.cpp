@@ -6,13 +6,13 @@
 #include "core/model/table/vertical_map.h"
 #include "core/util/logger.h"
 
-model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
+model::PositionListIndex const* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
 }
 
 PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data)
     : relation_data_(relation_data),
-      index_(std::make_unique<model::BlockingVerticalMap<model::PositionListIndex>>(
+      index_(std::make_unique<model::BlockingVerticalMap<model::PositionListIndex const>>(
               relation_data->GetSchema())) {
     for (auto& column_ptr : relation_data->GetSchema()->GetColumns()) {
         index_->Put(static_cast<Vertical>(*column_ptr),
@@ -23,13 +23,13 @@ PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data)
 PartitionStorage::~PartitionStorage() {}
 
 // obtains or calculates a PositionListIndex using cache
-std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
+std::variant<model::PositionListIndex const*, std::unique_ptr<model::PositionListIndex const>>
 PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     std::scoped_lock lock(getting_pli_mutex_);
     LOG_DEBUG("PLI for {} requested: ", vertical.ToString());
 
     // is PLI already cached?
-    model::PositionListIndex* pli = Get(vertical);
+    model::PositionListIndex const* pli = Get(vertical);
     if (pli != nullptr) {
         LOG_DEBUG("Served from PLI cache.");
         // addToUsageCounter
@@ -108,7 +108,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     }
 
     // Intersect and cache
-    std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
+    std::variant<model::PositionListIndex const*, std::unique_ptr<model::PositionListIndex const>>
             variant_intersection_pli;
     if (operands.size() >= 4) {
         PositionListIndexRank base_pli_rank = operands[0];
@@ -122,15 +122,17 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
         for (size_t i = 1; i < operands.size(); i++) {
             current_vertical = current_vertical.Union(*operands[i].vertical_);
             variant_intersection_pli =
-                    std::holds_alternative<model::PositionListIndex*>(variant_intersection_pli)
-                            ? std::get<model::PositionListIndex*>(variant_intersection_pli)
+                    std::holds_alternative<model::PositionListIndex const*>(
+                            variant_intersection_pli)
+                            ? std::get<model::PositionListIndex const*>(variant_intersection_pli)
                                       ->Intersect(operands[i].pli_.get())
-                            : std::get<std::unique_ptr<model::PositionListIndex>>(
+                            : std::get<std::unique_ptr<model::PositionListIndex const>>(
                                       variant_intersection_pli)
                                       ->Intersect(operands[i].pli_.get());
             variant_intersection_pli = CachingProcess(
-                    current_vertical, std::move(std::get<std::unique_ptr<model::PositionListIndex>>(
-                                              variant_intersection_pli)));
+                    current_vertical,
+                    std::move(std::get<std::unique_ptr<model::PositionListIndex const>>(
+                            variant_intersection_pli)));
         }
     }
 
@@ -140,9 +142,9 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     return variant_intersection_pli;
 }
 
-std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
+std::variant<model::PositionListIndex const*, std::unique_ptr<model::PositionListIndex const>>
 PartitionStorage::CachingProcess(Vertical const& vertical,
-                                 std::unique_ptr<model::PositionListIndex> pli) {
+                                 std::unique_ptr<model::PositionListIndex const> pli) {
     auto pli_pointer = pli.get();
     index_->Put(vertical, std::move(pli));
     return pli_pointer;

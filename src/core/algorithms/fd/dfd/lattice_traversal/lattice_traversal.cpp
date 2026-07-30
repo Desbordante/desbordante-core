@@ -73,15 +73,16 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
                     // if we were not able to infer category, we calculate the partitions
                     auto node_pli = partition_storage_->GetOrCreateFor(node);
                     auto node_pli_pointer =
-                            std::holds_alternative<model::PositionListIndex*>(node_pli)
-                                    ? std::get<model::PositionListIndex*>(node_pli)
-                                    : std::get<std::unique_ptr<model::PositionListIndex>>(node_pli)
+                            std::holds_alternative<model::PositionListIndex const*>(node_pli)
+                                    ? std::get<model::PositionListIndex const*>(node_pli)
+                                    : std::get<std::unique_ptr<model::PositionListIndex const>>(
+                                              node_pli)
                                               .get();
                     auto intersected_pli = partition_storage_->GetOrCreateFor(node.Union(*rhs_));
                     auto intersected_pli_pointer =
-                            std::holds_alternative<model::PositionListIndex*>(intersected_pli)
-                                    ? std::get<model::PositionListIndex*>(intersected_pli)
-                                    : std::get<std::unique_ptr<model::PositionListIndex>>(
+                            std::holds_alternative<model::PositionListIndex const*>(intersected_pli)
+                                    ? std::get<model::PositionListIndex const*>(intersected_pli)
+                                    : std::get<std::unique_ptr<model::PositionListIndex const>>(
                                               intersected_pli)
                                               .get();
 

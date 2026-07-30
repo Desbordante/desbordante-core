@@ -6,7 +6,7 @@
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 #include "core/util/logger.h"
 
-double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
+double FdG1Strategy::CalculateG1(model::PositionListIndex const* lhs_pli) const {
     unsigned long long num_violations = 0;
     std::unordered_map<int, int> value_counts;
     std::vector<int> const& probing_table = context_->GetColumnLayoutRelationData()
@@ -69,9 +69,9 @@ double FdG1Strategy::CalculateError(Vertical const& lhs) const {
     } else {
         auto lhs_pli = context_->GetPliCache()->GetOrCreateFor(lhs, context_);
         auto lhs_pli_pointer =
-                std::holds_alternative<model::PositionListIndex*>(lhs_pli)
-                        ? std::get<model::PositionListIndex*>(lhs_pli)
-                        : std::get<std::unique_ptr<model::PositionListIndex>>(lhs_pli).get();
+                std::holds_alternative<model::PositionListIndex const*>(lhs_pli)
+                        ? std::get<model::PositionListIndex const*>(lhs_pli)
+                        : std::get<std::unique_ptr<model::PositionListIndex const>>(lhs_pli).get();
         auto joint_pli = context_->GetPliCache()->Get(lhs.Union(static_cast<Vertical>(*rhs_)));
         error = joint_pli == nullptr
                         ? CalculateG1(lhs_pli_pointer)

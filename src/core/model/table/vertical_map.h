@@ -115,9 +115,6 @@ public:
     virtual std::shared_ptr<Value> Remove(Vertical const& key);
     virtual std::shared_ptr<Value> Remove(Bitset const& key);
 
-    // non-const version of get() for костыль purposes
-    virtual std::shared_ptr<Value> Get(Vertical const& key);
-
     // get all keys/values/entries for traversing
     virtual std::unordered_set<Vertical> KeySet();
     virtual std::vector<std::shared_ptr<Value const>> Values();
@@ -166,8 +163,6 @@ public:
     virtual std::shared_ptr<V> Put(Vertical const& key, std::shared_ptr<V> value) override;
     virtual std::shared_ptr<V> Remove(Vertical const& key) override;
     virtual std::shared_ptr<V> Remove(Bitset const& key) override;
-
-    virtual std::shared_ptr<V> Get(Vertical const& key) override;
 
     virtual std::unordered_set<Vertical> KeySet() override;
     virtual std::vector<std::shared_ptr<V const>> Values() override;

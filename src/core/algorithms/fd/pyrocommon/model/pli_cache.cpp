@@ -7,7 +7,7 @@
 
 namespace model {
 
-PositionListIndex* PLICache::Get(Vertical const& vertical) {
+PositionListIndex const* PLICache::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
 }
 
@@ -19,7 +19,8 @@ PLICache::PLICache(ColumnLayoutRelationData* relation_data, CachingMethod cachin
       // TODO: сделать
       // index_(std::make_unique<VerticalMap<PositionListIndex>>(relation_data->GetSchema())) при
       // одном потоке
-      index_(std::make_unique<BlockingVerticalMap<PositionListIndex>>(relation_data->GetSchema())),
+      index_(std::make_unique<BlockingVerticalMap<PositionListIndex const>>(
+              relation_data->GetSchema())),
       caching_method_(caching_method),
       eviction_method_(eviction_method),
       caching_method_value_(caching_method_value),
@@ -44,16 +45,15 @@ PLICache::~PLICache() {
 }
 
 // obtains or calculates a PositionListIndex using cache
-std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::GetOrCreateFor(
-        Vertical const& vertical, ProfilingContext* profiling_context) {
+std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>>
+PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_context) {
     std::scoped_lock lock(getting_pli_mutex_);
     LOG_DEBUG("PLI for {} requested: ", vertical.ToString());
 
     // is PLI already cached?
-    PositionListIndex* pli = Get(vertical);
+    PositionListIndex const* pli = Get(vertical);
     if (pli != nullptr) {
         LOG_DEBUG("Served from PLI cache.");
-        // addToUsageCounter
         return pli;
     }
     // look for cached PLIs to construct the requested one
@@ -134,7 +134,8 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
     // TODO: тут не очень понятно: CachingProcess может забрать себе PLI, а может и отдать обратно,
     //  поэтому приходится через variant разбирать. Проверить, насколько много платим за обёртку.
     // Intersect and cache
-    std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> variant_intersection_pli;
+    std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>>
+            variant_intersection_pli;
     if (operands.size() >= profiling_context->GetParameters().nary_intersection_size) {
         PositionListIndexRank base_pli_rank = operands[0];
         auto intersection_pli = base_pli_rank.pli_->ProbeAll(
@@ -148,16 +149,17 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
         for (size_t i = 1; i < operands.size(); i++) {
             current_vertical = current_vertical.Union(*operands[i].vertical_);
             variant_intersection_pli =
-                    std::holds_alternative<PositionListIndex*>(variant_intersection_pli)
-                            ? std::get<PositionListIndex*>(variant_intersection_pli)
+                    std::holds_alternative<PositionListIndex const*>(variant_intersection_pli)
+                            ? std::get<PositionListIndex const*>(variant_intersection_pli)
                                       ->Intersect(operands[i].pli_.get())
-                            : std::get<std::unique_ptr<PositionListIndex>>(variant_intersection_pli)
+                            : std::get<std::unique_ptr<PositionListIndex const>>(
+                                      variant_intersection_pli)
                                       ->Intersect(operands[i].pli_.get());
-            variant_intersection_pli = CachingProcess(
-                    current_vertical,
-                    std::move(
-                            std::get<std::unique_ptr<PositionListIndex>>(variant_intersection_pli)),
-                    profiling_context);
+            variant_intersection_pli =
+                    CachingProcess(current_vertical,
+                                   std::move(std::get<std::unique_ptr<PositionListIndex const>>(
+                                           variant_intersection_pli)),
+                                   profiling_context);
         }
     }
 
@@ -167,9 +169,9 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
     return variant_intersection_pli;
 }
 
-std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::CachingProcess(
-        Vertical const& vertical, std::unique_ptr<PositionListIndex> pli,
-        ProfilingContext* profiling_context) {
+std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>>
+PLICache::CachingProcess(Vertical const& vertical, std::unique_ptr<PositionListIndex const> pli,
+                         ProfilingContext* profiling_context) {
     auto pli_pointer = pli.get();
     switch (caching_method_) {
         case CachingMethod::kCoin:

@@ -17,17 +17,16 @@ private:
     class PositionListIndexRank {
     public:
         Vertical const* vertical_;
-        std::shared_ptr<PositionListIndex> pli_;
+        std::shared_ptr<PositionListIndex const> pli_;
         int added_arity_;
 
-        PositionListIndexRank(Vertical const* vertical, std::shared_ptr<PositionListIndex> pli,
-                              int initial_arity)
+        PositionListIndexRank(Vertical const* vertical,
+                              std::shared_ptr<PositionListIndex const> pli, int initial_arity)
             : vertical_(vertical), pli_(pli), added_arity_(initial_arity) {}
     };
 
-    // using CacheMap = VerticalMap<PositionListIndex>;
     ColumnLayoutRelationData* relation_data_;
-    std::unique_ptr<VerticalMap<PositionListIndex>> index_;
+    std::unique_ptr<VerticalMap<PositionListIndex const>> index_;
     // usageCounter - for parallelism
 
     // All these MAYBE_UNUSED_PRIVATE_FIELD variables are required to support Pyro's caching
@@ -49,8 +48,8 @@ private:
     MAYBE_UNUSED_PRIVATE_FIELD double median_gini_;
     MAYBE_UNUSED_PRIVATE_FIELD double median_inverted_entropy_;
 
-    std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> CachingProcess(
-            Vertical const& vertical, std::unique_ptr<PositionListIndex> pli,
+    std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>> CachingProcess(
+            Vertical const& vertical, std::unique_ptr<PositionListIndex const> pli,
             ProfilingContext* profiling_context);
 
 public:
@@ -59,8 +58,8 @@ public:
              double mean_entropy, double median_entropy, double maximum_entropy, double median_gini,
              double median_inverted_entropy);
 
-    PositionListIndex* Get(Vertical const& vertical);
-    std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> GetOrCreateFor(
+    PositionListIndex const* Get(Vertical const& vertical);
+    std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>> GetOrCreateFor(
             Vertical const& vertical, ProfilingContext* profiling_context);
 
     void SetMaximumEntropy(double e) {

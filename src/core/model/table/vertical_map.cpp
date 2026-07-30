@@ -412,17 +412,12 @@ std::shared_ptr<Value const> VerticalMap<Value>::Get(Vertical const& key) const 
 }
 
 template <class Value>
-std::shared_ptr<Value> VerticalMap<Value>::Get(Vertical const& key) {
-    return std::const_pointer_cast<Value>(set_trie_.Get(key.GetColumnIndices(), 0));
-}
-
-template <class Value>
 std::shared_ptr<Value const> VerticalMap<Value>::Get(Bitset const& key) const {
     return set_trie_.Get(key, 0);
 }
 
 // explicitly instantiate to solve template implementation linking issues
-template class VerticalMap<PositionListIndex>;
+template class VerticalMap<PositionListIndex const>;
 
 template class VerticalMap<AgreeSetSample>;
 
@@ -474,12 +469,6 @@ template <class V>
 std::shared_ptr<V> BlockingVerticalMap<V>::Remove(Bitset const& key) {
     std::scoped_lock write_lock(read_write_mutex_);
     return VerticalMap<V>::Remove(key);
-}
-
-template <class V>
-std::shared_ptr<V> BlockingVerticalMap<V>::Get(Vertical const& key) {
-    std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::Get(key);
 }
 
 template <class V>
@@ -564,7 +553,7 @@ bool BlockingVerticalMap<V>::RemoveSupersetEntries(Vertical const& key) {
     return VerticalMap<V>::RemoveSupersetEntries(key);
 }
 
-template class BlockingVerticalMap<PositionListIndex>;
+template class BlockingVerticalMap<PositionListIndex const>;
 
 template class BlockingVerticalMap<AgreeSetSample>;
 

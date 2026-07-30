@@ -8,7 +8,7 @@ class FdG1Strategy : public DependencyStrategy {
 private:
     Column const* rhs_;
 
-    double CalculateG1(model::PositionListIndex* lhs_pli) const;
+    double CalculateG1(model::PositionListIndex const* lhs_pli) const;
     double CalculateG1(double num_violating_tuple_pairs) const;
     model::ConfidenceInterval CalculateG1(model::ConfidenceInterval const& num_violations) const;
 
