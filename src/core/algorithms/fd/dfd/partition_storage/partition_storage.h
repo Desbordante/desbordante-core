@@ -7,18 +7,6 @@
 
 class PartitionStorage {
 private:
-    class PositionListIndexRank {
-    public:
-        Vertical const* vertical_;
-        std::shared_ptr<model::PositionListIndex const> pli_;
-        int added_arity_;
-
-        PositionListIndexRank(Vertical const* vertical,
-                              std::shared_ptr<model::PositionListIndex const> pli,
-                              int initial_arity)
-            : vertical_(vertical), pli_(pli), added_arity_(initial_arity) {}
-    };
-
     ColumnLayoutRelationData* relation_data_;
     std::unique_ptr<model::VerticalMap<model::PositionListIndex const>> index_;
 

@@ -21,15 +21,13 @@ class VerticalMap {
 protected:
     using Bitset = boost::dynamic_bitset<>;
 
-    // typename std::shared_ptr<Value> shared_ptr<Value>;
-
     // Each node corresponds to a bit in a bitset. Each node also has a vector of the possible
     // consequent set bits.
     class SetTrie {
     private:
         size_t offset_;
         size_t dimension_;
-        std::vector<std::unique_ptr<SetTrie>> subtries_;  // unique_ptr?
+        std::vector<std::unique_ptr<SetTrie>> subtries_;
         std::shared_ptr<Value> value_;
 
         bool IsEmpty() const;
@@ -94,7 +92,7 @@ protected:
     SetTrie set_trie_;
 
 public:
-    using Entry = std::pair<Vertical, std::shared_ptr<Value const>>;
+    using Entry = std::pair<Bitset, std::shared_ptr<Value const>>;
 
     explicit VerticalMap(RelationalSchema const* relation)
         : relation_(relation), set_trie_(relation->GetNumColumns()) {}
@@ -104,38 +102,36 @@ public:
     }
 
     // basic get-check-insert-remove operations
-    virtual std::shared_ptr<Value const> Get(Vertical const& key) const;
     virtual std::shared_ptr<Value const> Get(Bitset const& key) const;
 
-    virtual bool ContainsKey(Vertical const& key) const {
+    virtual bool ContainsKey(Bitset const& key) const {
         return Get(key) != nullptr;
     }
 
-    virtual std::shared_ptr<Value> Put(Vertical const& key, std::shared_ptr<Value> value);
-    virtual std::shared_ptr<Value> Remove(Vertical const& key);
+    virtual std::shared_ptr<Value> Put(Bitset const& key, std::shared_ptr<Value> value);
     virtual std::shared_ptr<Value> Remove(Bitset const& key);
 
     // get all keys/values/entries for traversing
-    virtual std::unordered_set<Vertical> KeySet();
+    virtual std::unordered_set<Bitset> KeySet();
     virtual std::vector<std::shared_ptr<Value const>> Values();
-    virtual std::unordered_set<Entry> EntrySet();
+    virtual std::vector<Entry> EntrySet();
 
     // get specific entries for traversing
-    virtual std::vector<Vertical> GetSubsetKeys(Vertical const& vertical) const;
-    virtual std::vector<Entry> GetSubsetEntries(Vertical const& vertical) const;
-    virtual Entry GetAnySubsetEntry(Vertical const& vertical) const;
+    virtual std::vector<Bitset> GetSubsetKeys(Bitset const& vertical) const;
+    virtual std::vector<Entry> GetSubsetEntries(Bitset const& vertical) const;
+    virtual Entry GetAnySubsetEntry(Bitset const& vertical) const;
     virtual Entry GetAnySubsetEntry(
-            Vertical const& vertical,
-            std::function<bool(Vertical const*, std::shared_ptr<Value const>)> const& condition)
+            Bitset const& vertical,
+            std::function<bool(Bitset const*, std::shared_ptr<Value const>)> const& condition)
             const;
-    virtual std::vector<Entry> GetSupersetEntries(Vertical const& vertical) const;
-    virtual Entry GetAnySupersetEntry(Vertical const& vertical) const;
+    virtual std::vector<Entry> GetSupersetEntries(Bitset const& vertical) const;
+    virtual Entry GetAnySupersetEntry(Bitset const& vertical) const;
     virtual Entry GetAnySupersetEntry(
-            Vertical const& vertical,
-            std::function<bool(Vertical const*, std::shared_ptr<Value const>)> condition) const;
-    virtual std::vector<Entry> GetRestrictedSupersetEntries(Vertical const& vertical,
-                                                            Vertical const& exclusion) const;
-    virtual bool RemoveSupersetEntries(Vertical const& key);
+            Bitset const& vertical,
+            std::function<bool(Bitset const*, std::shared_ptr<Value const>)> condition) const;
+    virtual std::vector<Entry> GetRestrictedSupersetEntries(Bitset const& vertical,
+                                                            Bitset const& exclusion) const;
+    virtual bool RemoveSupersetEntries(Bitset const& key);
 
     virtual ~VerticalMap() = default;
 };
@@ -157,32 +153,30 @@ public:
 
     virtual bool IsEmpty() const override;
 
-    virtual std::shared_ptr<V const> Get(Vertical const& key) const override;
     virtual std::shared_ptr<V const> Get(Bitset const& key) const override;
-    virtual bool ContainsKey(Vertical const& key) const override;
-    virtual std::shared_ptr<V> Put(Vertical const& key, std::shared_ptr<V> value) override;
-    virtual std::shared_ptr<V> Remove(Vertical const& key) override;
+    virtual bool ContainsKey(Bitset const& key) const override;
+    virtual std::shared_ptr<V> Put(Bitset const& key, std::shared_ptr<V> value) override;
     virtual std::shared_ptr<V> Remove(Bitset const& key) override;
 
-    virtual std::unordered_set<Vertical> KeySet() override;
+    virtual std::unordered_set<Bitset> KeySet() override;
     virtual std::vector<std::shared_ptr<V const>> Values() override;
-    virtual std::unordered_set<Entry> EntrySet() override;
+    virtual std::vector<Entry> EntrySet() override;
 
-    virtual std::vector<Vertical> GetSubsetKeys(Vertical const& vertical) const override;
-    virtual std::vector<Entry> GetSubsetEntries(Vertical const& vertical) const override;
-    virtual Entry GetAnySubsetEntry(Vertical const& vertical) const override;
+    virtual std::vector<Bitset> GetSubsetKeys(Bitset const& vertical) const override;
+    virtual std::vector<Entry> GetSubsetEntries(Bitset const& vertical) const override;
+    virtual Entry GetAnySubsetEntry(Bitset const& vertical) const override;
     virtual Entry GetAnySubsetEntry(
-            Vertical const& vertical,
-            std::function<bool(Vertical const*, std::shared_ptr<V const>)> const& condition)
+            Bitset const& vertical,
+            std::function<bool(Bitset const*, std::shared_ptr<V const>)> const& condition)
             const override;
-    virtual std::vector<Entry> GetSupersetEntries(Vertical const& vertical) const override;
-    virtual Entry GetAnySupersetEntry(Vertical const& vertical) const override;
-    virtual Entry GetAnySupersetEntry(Vertical const& vertical,
-                                      std::function<bool(Vertical const*, std::shared_ptr<V const>)>
-                                              condition) const override;
-    virtual std::vector<Entry> GetRestrictedSupersetEntries(
-            Vertical const& vertical, Vertical const& exclusion) const override;
-    virtual bool RemoveSupersetEntries(Vertical const& key) override;
+    virtual std::vector<Entry> GetSupersetEntries(Bitset const& vertical) const override;
+    virtual Entry GetAnySupersetEntry(Bitset const& vertical) const override;
+    virtual Entry GetAnySupersetEntry(
+            Bitset const& vertical,
+            std::function<bool(Bitset const*, std::shared_ptr<V const>)> condition) const override;
+    virtual std::vector<Entry> GetRestrictedSupersetEntries(Bitset const& vertical,
+                                                            Bitset const& exclusion) const override;
+    virtual bool RemoveSupersetEntries(Bitset const& key) override;
 
     virtual ~BlockingVerticalMap() = default;
 };

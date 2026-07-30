@@ -224,12 +224,12 @@ bool VerticalMap<Value>::SetTrie::CollectRestrictedSupersetKeys(
 }
 
 template <class Value>
-std::vector<Vertical> VerticalMap<Value>::GetSubsetKeys(Vertical const& vertical) const {
-    std::vector<Vertical> subset_keys;
+auto VerticalMap<Value>::GetSubsetKeys(Bitset const& bitset) const -> std::vector<Bitset> {
+    std::vector<Bitset> subset_keys;
     Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.CollectSubsetKeys(vertical.GetColumnIndices(), 0, subset_key,
-                                [&subset_keys, this](auto& indices, [[maybe_unused]] auto value) {
-                                    subset_keys.push_back(relation_->GetVertical(indices));
+    set_trie_.CollectSubsetKeys(bitset, 0, subset_key,
+                                [&subset_keys](auto& indices, [[maybe_unused]] auto value) {
+                                    subset_keys.push_back(indices);
                                     return true;
                                 });
     return subset_keys;
@@ -237,42 +237,39 @@ std::vector<Vertical> VerticalMap<Value>::GetSubsetKeys(Vertical const& vertical
 
 template <class Value>
 std::vector<typename VerticalMap<Value>::Entry> VerticalMap<Value>::GetSubsetEntries(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     std::vector<typename VerticalMap<Value>::Entry> entries;
     Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.CollectSubsetKeys(vertical.GetColumnIndices(), 0, subset_key,
-                                [&entries, this](auto& indices, auto value) {
-                                    entries.emplace_back(relation_->GetVertical(indices), value);
-                                    return true;
-                                });
+    set_trie_.CollectSubsetKeys(bitset, 0, subset_key, [&entries](auto& indices, auto value) {
+        entries.emplace_back(indices, value);
+        return true;
+    });
     return entries;
 }
 
 // returns an empty pair if no entry is found
 template <class Value>
 typename VerticalMap<Value>::Entry VerticalMap<Value>::GetAnySubsetEntry(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     typename VerticalMap<Value>::Entry entry;
     Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.CollectSubsetKeys(vertical.GetColumnIndices(), 0, subset_key,
-                                [&entry, this](auto& indices, auto value) {
-                                    entry = {relation_->GetVertical(indices), value};
-                                    return false;
-                                });
+    set_trie_.CollectSubsetKeys(bitset, 0, subset_key, [&entry](auto& indices, auto value) {
+        entry = {indices, value};
+        return false;
+    });
     return entry;
 }
 
 template <class Value>
 typename VerticalMap<Value>::Entry VerticalMap<Value>::GetAnySubsetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<Value const>)> const& condition) const {
+        Bitset const& bitset,
+        std::function<bool(Bitset const*, std::shared_ptr<Value const>)> const& condition) const {
     typename VerticalMap<Value>::Entry entry;
     Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.CollectSubsetKeys(vertical.GetColumnIndices(), 0, subset_key,
-                                [&entry, this, &condition](auto& indices, auto value) {
-                                    auto kv = relation_->GetVertical(indices);
-                                    if (condition(&kv, value)) {
-                                        entry = {kv, value};
+    set_trie_.CollectSubsetKeys(bitset, 0, subset_key,
+                                [&entry, &condition](auto& indices, auto value) {
+                                    if (condition(&indices, value)) {
+                                        entry = {indices, value};
                                         return false;
                                     } else {
                                         return true;
@@ -283,41 +280,38 @@ typename VerticalMap<Value>::Entry VerticalMap<Value>::GetAnySubsetEntry(
 
 template <class Value>
 std::vector<typename VerticalMap<Value>::Entry> VerticalMap<Value>::GetSupersetEntries(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     std::vector<typename VerticalMap<Value>::Entry> entries;
     Bitset superset_key(relation_->GetNumColumns());
-    set_trie_.CollectSupersetKeys(vertical.GetColumnIndices(), 0, superset_key,
-                                  [&entries, this](auto& indices, auto value) {
-                                      entries.emplace_back(relation_->GetVertical(indices), value);
-                                      return true;
-                                  });
+    set_trie_.CollectSupersetKeys(bitset, 0, superset_key, [&entries](auto& indices, auto value) {
+        entries.emplace_back(indices, value);
+        return true;
+    });
     return entries;
 }
 
 template <class Value>
 typename VerticalMap<Value>::Entry VerticalMap<Value>::GetAnySupersetEntry(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     typename VerticalMap<Value>::Entry entry;
     Bitset superset_key(relation_->GetNumColumns());
-    set_trie_.CollectSupersetKeys(vertical.GetColumnIndices(), 0, superset_key,
-                                  [&entry, this](auto& indices, auto value) {
-                                      entry = {relation_->GetVertical(indices), value};
-                                      return false;
-                                  });
+    set_trie_.CollectSupersetKeys(bitset, 0, superset_key, [&entry](auto& indices, auto value) {
+        entry = {indices, value};
+        return false;
+    });
     return entry;
 }
 
 template <class Value>
 typename VerticalMap<Value>::Entry VerticalMap<Value>::GetAnySupersetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<Value const>)> condition) const {
+        Bitset const& bitset,
+        std::function<bool(Bitset const*, std::shared_ptr<Value const>)> condition) const {
     typename VerticalMap<Value>::Entry entry;
     Bitset superset_key(relation_->GetNumColumns());
-    set_trie_.CollectSupersetKeys(vertical.GetColumnIndices(), 0, superset_key,
-                                  [&entry, this, &condition](auto& indices, auto value) {
-                                      auto kv = relation_->GetVertical(indices);
-                                      if (condition(&kv, value)) {
-                                          entry = {kv, value};
+    set_trie_.CollectSupersetKeys(bitset, 0, superset_key,
+                                  [&entry, &condition](auto& indices, auto value) {
+                                      if (condition(&indices, value)) {
+                                          entry = {indices, value};
                                           return false;
                                       } else {
                                           return true;
@@ -328,25 +322,24 @@ typename VerticalMap<Value>::Entry VerticalMap<Value>::GetAnySupersetEntry(
 
 template <class Value>
 std::vector<typename VerticalMap<Value>::Entry> VerticalMap<Value>::GetRestrictedSupersetEntries(
-        Vertical const& vertical, Vertical const& exclusion) const {
-    if (vertical.GetColumnIndices().intersects(exclusion.GetColumnIndices()))
+        Bitset const& bitset, Bitset const& exclusion) const {
+    if (bitset.intersects(exclusion))
         throw std::runtime_error(
                 "Error in GetRestrictedSupersetEntries: a vertical shouldn't intersect with a "
                 "restriction");
 
     std::vector<typename VerticalMap<Value>::Entry> entries;
     Bitset superset_key(relation_->GetNumColumns());
-    set_trie_.CollectRestrictedSupersetKeys(
-            vertical.GetColumnIndices(), exclusion.GetColumnIndices(), 0, superset_key,
-            [&entries, this](auto& indices, auto value) {
-                entries.emplace_back(relation_->GetVertical(indices), value);
-                return true;
-            });
+    set_trie_.CollectRestrictedSupersetKeys(bitset, exclusion, 0, superset_key,
+                                            [&entries](auto& indices, auto value) {
+                                                entries.emplace_back(indices, value);
+                                                return true;
+                                            });
     return entries;
 }
 
 template <class Value>
-bool VerticalMap<Value>::RemoveSupersetEntries(Vertical const& key) {
+bool VerticalMap<Value>::RemoveSupersetEntries(Bitset const& key) {
     std::vector<typename VerticalMap<Value>::Entry> superset_entries = GetSupersetEntries(key);
     for (auto superset_entry : superset_entries) {
         Remove(superset_entry.first);
@@ -355,12 +348,11 @@ bool VerticalMap<Value>::RemoveSupersetEntries(Vertical const& key) {
 }
 
 template <class Value>
-std::unordered_set<Vertical> VerticalMap<Value>::KeySet() {
-    std::unordered_set<Vertical> key_set;
+auto VerticalMap<Value>::KeySet() -> std::unordered_set<Bitset> {
+    std::unordered_set<Bitset> key_set;
     Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.TraverseEntries(subset_key, [&key_set, this](auto& k, [[maybe_unused]] auto v) {
-        key_set.insert(relation_->GetVertical(k));
-    });
+    set_trie_.TraverseEntries(subset_key,
+                              [&key_set](auto& k, [[maybe_unused]] auto v) { key_set.insert(k); });
     return key_set;
 }
 
@@ -375,40 +367,27 @@ std::vector<std::shared_ptr<Value const>> VerticalMap<Value>::Values() {
 }
 
 template <class Value>
-std::unordered_set<typename VerticalMap<Value>::Entry> VerticalMap<Value>::EntrySet() {
-    std::unordered_set<typename VerticalMap<Value>::Entry> entry_set;
+auto VerticalMap<Value>::EntrySet() -> std::vector<Entry> {
+    std::vector<Entry> entry_set;
     Bitset subset_key(relation_->GetNumColumns());
-    set_trie_.TraverseEntries(subset_key, [&entry_set, this](auto& k, auto v) -> void {
-        entry_set.emplace(relation_->GetVertical(k), v);
-    });
+    set_trie_.TraverseEntries(
+            subset_key, [&entry_set](auto& k, auto v) -> void { entry_set.emplace_back(k, v); });
     return entry_set;
 }
 
 template <class Value>
-std::shared_ptr<Value> VerticalMap<Value>::Remove(Vertical const& key) {
-    auto removed_value = set_trie_.Remove(key.GetColumnIndices(), 0);
-    if (removed_value != nullptr) size_--;
-    return removed_value;
-}
-
-template <class Value>
-std::shared_ptr<Value> VerticalMap<Value>::Remove(VerticalMap::Bitset const& key) {
+std::shared_ptr<Value> VerticalMap<Value>::Remove(Bitset const& key) {
     auto removed_value = set_trie_.Remove(key, 0);
     if (removed_value != nullptr) size_--;
     return removed_value;
 }
 
 template <class Value>
-std::shared_ptr<Value> VerticalMap<Value>::Put(Vertical const& key, std::shared_ptr<Value> value) {
-    auto old_value = set_trie_.Associate(key.GetColumnIndices(), 0, std::move(value));
+std::shared_ptr<Value> VerticalMap<Value>::Put(Bitset const& key, std::shared_ptr<Value> value) {
+    auto old_value = set_trie_.Associate(key, 0, std::move(value));
     if (old_value == nullptr) size_++;
 
     return old_value;
-}
-
-template <class Value>
-std::shared_ptr<Value const> VerticalMap<Value>::Get(Vertical const& key) const {
-    return set_trie_.Get(key.GetColumnIndices(), 0);
 }
 
 template <class Value>
@@ -436,33 +415,21 @@ bool BlockingVerticalMap<V>::IsEmpty() const {
 }
 
 template <class V>
-std::shared_ptr<V const> BlockingVerticalMap<V>::Get(Vertical const& key) const {
-    std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::Get(key);
-}
-
-template <class V>
 std::shared_ptr<V const> BlockingVerticalMap<V>::Get(Bitset const& key) const {
     std::shared_lock read_lock(read_write_mutex_);
     return VerticalMap<V>::Get(key);
 }
 
 template <class V>
-bool BlockingVerticalMap<V>::ContainsKey(Vertical const& key) const {
+bool BlockingVerticalMap<V>::ContainsKey(Bitset const& key) const {
     std::shared_lock read_lock(read_write_mutex_);
     return VerticalMap<V>::ContainsKey(key);
 }
 
 template <class V>
-std::shared_ptr<V> BlockingVerticalMap<V>::Put(Vertical const& key, std::shared_ptr<V> value) {
+std::shared_ptr<V> BlockingVerticalMap<V>::Put(Bitset const& key, std::shared_ptr<V> value) {
     std::scoped_lock write_lock(read_write_mutex_);
     return VerticalMap<V>::Put(key, value);
-}
-
-template <class V>
-std::shared_ptr<V> BlockingVerticalMap<V>::Remove(Vertical const& key) {
-    std::scoped_lock write_lock(read_write_mutex_);
-    return VerticalMap<V>::Remove(key);
 }
 
 template <class V>
@@ -472,7 +439,7 @@ std::shared_ptr<V> BlockingVerticalMap<V>::Remove(Bitset const& key) {
 }
 
 template <class V>
-std::unordered_set<Vertical> BlockingVerticalMap<V>::KeySet() {
+auto BlockingVerticalMap<V>::KeySet() -> std::unordered_set<Bitset> {
     std::shared_lock read_lock(read_write_mutex_);
     return VerticalMap<V>::KeySet();
 }
@@ -484,71 +451,71 @@ std::vector<std::shared_ptr<V const>> BlockingVerticalMap<V>::Values() {
 }
 
 template <class V>
-std::unordered_set<typename BlockingVerticalMap<V>::Entry> BlockingVerticalMap<V>::EntrySet() {
+auto BlockingVerticalMap<V>::EntrySet() -> std::vector<Entry> {
     std::shared_lock read_lock(read_write_mutex_);
     return VerticalMap<V>::EntrySet();
 }
 
 template <class V>
-std::vector<Vertical> BlockingVerticalMap<V>::GetSubsetKeys(Vertical const& vertical) const {
+auto BlockingVerticalMap<V>::GetSubsetKeys(Bitset const& bitset) const -> std::vector<Bitset> {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetSubsetKeys(vertical);
+    return VerticalMap<V>::GetSubsetKeys(bitset);
 }
 
 template <class V>
 std::vector<typename BlockingVerticalMap<V>::Entry> BlockingVerticalMap<V>::GetSubsetEntries(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetSubsetEntries(vertical);
+    return VerticalMap<V>::GetSubsetEntries(bitset);
 }
 
 template <class V>
 typename BlockingVerticalMap<V>::Entry BlockingVerticalMap<V>::GetAnySubsetEntry(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetAnySubsetEntry(vertical);
+    return VerticalMap<V>::GetAnySubsetEntry(bitset);
 }
 
 template <class V>
 typename BlockingVerticalMap<V>::Entry BlockingVerticalMap<V>::GetAnySubsetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<V const>)> const& condition) const {
+        Bitset const& bitset,
+        std::function<bool(Bitset const*, std::shared_ptr<V const>)> const& condition) const {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetAnySubsetEntry(vertical, condition);
+    return VerticalMap<V>::GetAnySubsetEntry(bitset, condition);
 }
 
 template <class V>
 std::vector<typename BlockingVerticalMap<V>::Entry> BlockingVerticalMap<V>::GetSupersetEntries(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetSupersetEntries(vertical);
+    return VerticalMap<V>::GetSupersetEntries(bitset);
 }
 
 template <class V>
 typename BlockingVerticalMap<V>::Entry BlockingVerticalMap<V>::GetAnySupersetEntry(
-        Vertical const& vertical) const {
+        Bitset const& bitset) const {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetAnySupersetEntry(vertical);
+    return VerticalMap<V>::GetAnySupersetEntry(bitset);
 }
 
 template <class V>
 typename BlockingVerticalMap<V>::Entry BlockingVerticalMap<V>::GetAnySupersetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<V const>)> condition) const {
+        Bitset const& bitset,
+        std::function<bool(Bitset const*, std::shared_ptr<V const>)> condition) const {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetAnySupersetEntry(vertical, condition);
+    return VerticalMap<V>::GetAnySupersetEntry(bitset, condition);
 }
 
 template <class V>
 std::vector<typename BlockingVerticalMap<V>::Entry>
-BlockingVerticalMap<V>::GetRestrictedSupersetEntries(Vertical const& vertical,
-                                                     Vertical const& exclusion) const {
+BlockingVerticalMap<V>::GetRestrictedSupersetEntries(Bitset const& bitset,
+                                                     Bitset const& exclusion) const {
     std::shared_lock read_lock(read_write_mutex_);
-    return VerticalMap<V>::GetRestrictedSupersetEntries(vertical, exclusion);
+    return VerticalMap<V>::GetRestrictedSupersetEntries(bitset, exclusion);
 }
 
 template <class V>
-bool BlockingVerticalMap<V>::RemoveSupersetEntries(Vertical const& key) {
+bool BlockingVerticalMap<V>::RemoveSupersetEntries(Bitset const& key) {
     std::scoped_lock write_lock(read_write_mutex_);
     return VerticalMap<V>::RemoveSupersetEntries(key);
 }

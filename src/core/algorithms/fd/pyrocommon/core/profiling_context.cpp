@@ -147,7 +147,7 @@ model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical cons
             custom_random_);
     LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
-    agree_set_samples_->Put(focus, std::move(sample));
+    agree_set_samples_->Put(focus.GetColumnIndicesRef(), std::move(sample));
     return sample_ptr;
 }
 
@@ -159,14 +159,15 @@ model::AgreeSetSample const* ProfilingContext::CreateColumnFocusedSample(
             custom_random_);
     LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
-    agree_set_samples_->Put(focus, std::move(sample));
+    agree_set_samples_->Put(focus.GetColumnIndicesRef(), std::move(sample));
     return sample_ptr;
 }
 
 shared_ptr<model::AgreeSetSample const> ProfilingContext::GetAgreeSetSample(
         Vertical const& focus) const {
     shared_ptr<model::AgreeSetSample const> sample = nullptr;
-    for (auto& [key, next_sample] : agree_set_samples_->GetSubsetEntries(focus)) {
+    for (auto& [key, next_sample] :
+         agree_set_samples_->GetSubsetEntries(focus.GetColumnIndicesRef())) {
         if (sample == nullptr || next_sample->GetSamplingRatio() > sample->GetSamplingRatio()) {
             sample = next_sample;
         }
