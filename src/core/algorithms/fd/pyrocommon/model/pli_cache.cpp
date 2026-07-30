@@ -62,10 +62,7 @@ PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_c
     std::vector<PositionListIndexRank> ranks;
     ranks.reserve(subset_entries.size());
     for (auto& [sub_vertical, sub_pli_ptr] : subset_entries) {
-        // TODO: избавиться от таких const_cast, которые сбрасывают константность
-        PositionListIndexRank pli_rank(&sub_vertical,
-                                       std::const_pointer_cast<PositionListIndex>(sub_pli_ptr),
-                                       sub_vertical.GetArity());
+        PositionListIndexRank pli_rank(&sub_vertical, sub_pli_ptr, sub_vertical.GetArity());
         ranks.push_back(pli_rank);
         if (!smallest_pli_rank || smallest_pli_rank->pli_->GetSize() > pli_rank.pli_->GetSize() ||
             (smallest_pli_rank->pli_->GetSize() == pli_rank.pli_->GetSize() &&

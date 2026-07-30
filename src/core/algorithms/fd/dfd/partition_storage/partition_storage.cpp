@@ -41,9 +41,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     std::vector<PositionListIndexRank> ranks;
     ranks.reserve(subset_entries.size());
     for (auto& [sub_vertical, sub_pli_ptr] : subset_entries) {
-        PositionListIndexRank pli_rank(
-                &sub_vertical, std::const_pointer_cast<model::PositionListIndex>(sub_pli_ptr),
-                sub_vertical.GetArity());
+        PositionListIndexRank pli_rank(&sub_vertical, sub_pli_ptr, sub_vertical.GetArity());
         ranks.push_back(pli_rank);
         if (!smallest_pli_rank || smallest_pli_rank->pli_->GetSize() > pli_rank.pli_->GetSize() ||
             (smallest_pli_rank->pli_->GetSize() == pli_rank.pli_->GetSize() &&
