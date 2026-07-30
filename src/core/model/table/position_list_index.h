@@ -137,7 +137,7 @@ public:
     std::unique_ptr<PositionListIndex> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;
     std::unique_ptr<PositionListIndex> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
+                                                ColumnLayoutRelationData& relation_data) const;
     std::string ToString() const;
 };
 
