@@ -24,8 +24,6 @@ public:
     virtual void EnsureInitialized(SearchSpace* search_space) const = 0;
     virtual DependencyCandidate CreateDependencyCandidate(Vertical const& candidate) const = 0;
     virtual double CalculateError(Vertical const& candidate) const = 0;
-    virtual std::string Format(Vertical const& vertical) const = 0;
-    explicit virtual operator std::string() const = 0;
     virtual void RegisterDependency(Vertical const& vertical, double error,
                                     DependencyConsumer const& discovery_unit) const = 0;
     virtual bool IsIrrelevantColumn(unsigned int column_index) const = 0;

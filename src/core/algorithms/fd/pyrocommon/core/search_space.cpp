@@ -10,7 +10,6 @@
 // delete the object - pass empty deleter [](*) {}
 
 void SearchSpace::Discover() {
-    LOG_TRACE("Discovering in: {}", static_cast<std::string>(*strategy_));
     while (true) {  // на второй итерации дропается
         std::optional<DependencyCandidate> launch_pad = PollLaunchPad();
         if (!launch_pad.has_value()) break;
@@ -156,8 +155,6 @@ void SearchSpace::ReturnLaunchPad(DependencyCandidate const& launch_pad, bool is
 }
 
 bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
-    LOG_DEBUG("===== Ascending from {} ======", strategy_->Format(launch_pad.vertical_));
-
     if (strategy_->ShouldResample(launch_pad.vertical_, sample_boost_)) {
         LOG_TRACE("Resampling.");
         context_->CreateFocusedSample(launch_pad.vertical_, sample_boost_);
