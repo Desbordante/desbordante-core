@@ -13,14 +13,15 @@ private:
     mutable std::mutex getting_pli_mutex_;
 
     std::variant<model::PositionListIndex const*, std::unique_ptr<model::PositionListIndex const>>
-    CachingProcess(Vertical const& vertical, std::unique_ptr<model::PositionListIndex const> pli);
+    CachingProcess(boost::dynamic_bitset<> const& vertical,
+                   std::unique_ptr<model::PositionListIndex const> pli);
 
 public:
     PartitionStorage(ColumnLayoutRelationData* relation_data);
 
-    model::PositionListIndex const* Get(Vertical const& vertical);
+    model::PositionListIndex const* Get(boost::dynamic_bitset<> const& vertical);
     std::variant<model::PositionListIndex const*, std::unique_ptr<model::PositionListIndex const>>
-    GetOrCreateFor(Vertical const& vertical);
+    GetOrCreateFor(boost::dynamic_bitset<> const& vertical);
 
     virtual ~PartitionStorage();
 };

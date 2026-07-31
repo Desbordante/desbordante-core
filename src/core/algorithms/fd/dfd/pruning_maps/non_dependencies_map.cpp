@@ -2,9 +2,9 @@
 
 NonDependenciesMap::NonDependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
 
-std::unordered_set<Vertical> NonDependenciesMap::GetPrunedSupersets(
-        std::unordered_set<Vertical> const& supersets) const {
-    std::unordered_set<Vertical> pruned_supersets;
+std::unordered_set<boost::dynamic_bitset<>> NonDependenciesMap::GetPrunedSupersets(
+        std::unordered_set<boost::dynamic_bitset<>> const& supersets) const {
+    std::unordered_set<boost::dynamic_bitset<>> pruned_supersets;
     for (auto const& node : supersets) {
         if (CanBePruned(node)) {
             pruned_supersets.insert(node);
@@ -13,12 +13,12 @@ std::unordered_set<Vertical> NonDependenciesMap::GetPrunedSupersets(
     return pruned_supersets;
 }
 
-bool NonDependenciesMap::CanBePruned(Vertical const& node) const {
+bool NonDependenciesMap::CanBePruned(boost::dynamic_bitset<> const& node) const {
     for (auto const& map_row : *this) {
-        Vertical const& key = map_row.first;
-        if (node.Contains(key)) {
-            for (Vertical const& non_dependency : map_row.second) {
-                if (non_dependency.Contains(node)) {
+        boost::dynamic_bitset<> const& key = map_row.first;
+        if (key.is_subset_of(node)) {
+            for (boost::dynamic_bitset<> const& non_dependency : map_row.second) {
+                if (node.is_subset_of(non_dependency)) {
                     return true;
                 }
             }
@@ -27,21 +27,21 @@ bool NonDependenciesMap::CanBePruned(Vertical const& node) const {
     return false;
 }
 
-void NonDependenciesMap::AddNewNonDependency(Vertical const& node_to_add) {
+void NonDependenciesMap::AddNewNonDependency(boost::dynamic_bitset<> const& node_to_add) {
     for (auto& map_row : *this) {
-        Vertical const& key = map_row.first;
+        boost::dynamic_bitset<> const& key = map_row.first;
 
-        if (node_to_add.Contains(key)) {
+        if (key.is_subset_of(node_to_add)) {
             auto& non_deps_for_key = map_row.second;
             bool has_superset_entry = false;
 
             for (auto iter = non_deps_for_key.begin(); iter != non_deps_for_key.end();) {
                 // if verticals are the same, then contains == true
-                Vertical const& non_dep = *iter;
-                if (non_dep.Contains(node_to_add)) {
+                boost::dynamic_bitset<> const& non_dep = *iter;
+                if (node_to_add.is_subset_of(non_dep)) {
                     has_superset_entry = true;
                     break;
-                } else if (node_to_add.Contains(non_dep)) {
+                } else if (non_dep.is_subset_of(node_to_add)) {
                     iter = non_deps_for_key.erase(iter);
                 } else {
                     iter++;

@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
 
+#include "core/model/index.h"
 #include "core/model/table/vertical_map.h"
 #include "core/util/logger.h"
 
@@ -19,17 +20,19 @@ public:
 };
 }  // namespace
 
-model::PositionListIndex const* PartitionStorage::Get(Vertical const& vertical) {
-    return index_->Get(vertical.GetColumnIndicesRef()).get();
+model::PositionListIndex const* PartitionStorage::Get(boost::dynamic_bitset<> const& vertical) {
+    return index_->Get(vertical).get();
 }
 
 PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data)
     : relation_data_(relation_data),
       index_(std::make_unique<model::BlockingVerticalMap<model::PositionListIndex const>>(
               relation_data->GetSchema())) {
-    for (auto& column_ptr : relation_data->GetSchema()->GetColumns()) {
-        index_->Put(static_cast<Vertical>(*column_ptr).GetColumnIndicesRef(),
-                    relation_data->GetColumnData(column_ptr->GetIndex()).GetPliOwnership());
+    for (model::Index column_index = 0; column_index != relation_data->GetSchema()->GetNumColumns();
+         ++column_index) {
+        index_->Put(boost::dynamic_bitset<>(relation_data->GetSchema()->GetNumColumns())
+                            .set(column_index),
+                    relation_data->GetColumnData(column_index).GetPliOwnership());
     }
 }
 
@@ -37,9 +40,8 @@ PartitionStorage::~PartitionStorage() {}
 
 // obtains or calculates a PositionListIndex using cache
 std::variant<model::PositionListIndex const*, std::unique_ptr<model::PositionListIndex const>>
-PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
+PartitionStorage::GetOrCreateFor(boost::dynamic_bitset<> const& vertical) {
     std::scoped_lock lock(getting_pli_mutex_);
-    LOG_DEBUG("PLI for {} requested: ", vertical.ToString());
 
     // is PLI already cached?
     model::PositionListIndex const* pli = Get(vertical);
@@ -49,7 +51,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
         return pli;
     }
     // look for cached PLIs to construct the requested one
-    auto subset_entries = index_->GetSubsetEntries(vertical.GetColumnIndicesRef());
+    auto subset_entries = index_->GetSubsetEntries(vertical);
     boost::optional<PositionListIndexRank> smallest_pli_rank;
     std::vector<PositionListIndexRank> ranks;
     ranks.reserve(subset_entries.size());
@@ -71,7 +73,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
         operands.push_back(*smallest_pli_rank);
         cover |= *smallest_pli_rank->vertical_;
 
-        while (cover.count() < vertical.GetArity() && !ranks.empty()) {
+        while (cover.count() < vertical.count() && !ranks.empty()) {
             boost::optional<PositionListIndexRank> best_rank;
             // erase ranks with low added_arity_
             ranks.erase(std::remove_if(ranks.begin(), ranks.end(),
@@ -99,15 +101,16 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
         }
     }
 
-    std::vector<std::unique_ptr<Vertical>> vertical_columns;
+    std::vector<boost::dynamic_bitset<>> vertical_columns;
 
-    for (auto& column : vertical.GetColumns()) {
-        if (!cover[column->GetIndex()]) {
-            vertical_columns.push_back(std::make_unique<Vertical>(static_cast<Vertical>(*column)));
-            auto column_pli = index_->Get((**vertical_columns.rbegin()).GetColumnIndicesRef());
-            operands.emplace_back(&(**vertical_columns.rbegin()).GetColumnIndicesRef(), column_pli,
-                                  1);
-        }
+    util::ForEachIndex(vertical, [&](model::Index column_index) {
+        if (cover.test(column_index)) return;
+        vertical_columns.push_back(
+                boost::dynamic_bitset<>(relation_data_->GetNumColumns()).set(column_index));
+    });
+    for (boost::dynamic_bitset<> const& vertical : vertical_columns) {
+        auto column_pli = index_->Get(vertical);
+        operands.emplace_back(&vertical, std::move(column_pli), 1);
     }
     // sort operands by ascending order
     std::sort(operands.begin(), operands.end(),
@@ -124,19 +127,15 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
             variant_intersection_pli;
     if (operands.size() >= 4) {
         PositionListIndexRank base_pli_rank = operands[0];
-        auto intersection_pli = base_pli_rank.pli_->ProbeAll(
-                vertical.Without(
-                        relation_data_->GetSchema()->GetVertical(*base_pli_rank.vertical_)),
-                *relation_data_);
+        auto intersection_pli =
+                base_pli_rank.pli_->ProbeAll(vertical - *base_pli_rank.vertical_, *relation_data_);
         variant_intersection_pli = CachingProcess(vertical, std::move(intersection_pli));
     } else {
-        Vertical current_vertical =
-                relation_data_->GetSchema()->GetVertical(*operands.begin()->vertical_);
+        boost::dynamic_bitset<> current_vertical = *operands.begin()->vertical_;
         variant_intersection_pli = operands.begin()->pli_.get();
 
         for (size_t i = 1; i < operands.size(); i++) {
-            current_vertical = current_vertical.Union(
-                    relation_data_->GetSchema()->GetVertical(*operands[i].vertical_));
+            current_vertical |= *operands[i].vertical_;
             variant_intersection_pli =
                     std::holds_alternative<model::PositionListIndex const*>(
                             variant_intersection_pli)
@@ -153,15 +152,15 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     }
 
     LOG_DEBUG("Calculated from {} sub-PLIs (saved {} intersections).", operands.size(),
-              (vertical.GetArity() - operands.size()));
+              (vertical.count() - operands.size()));
 
     return variant_intersection_pli;
 }
 
 std::variant<model::PositionListIndex const*, std::unique_ptr<model::PositionListIndex const>>
-PartitionStorage::CachingProcess(Vertical const& vertical,
+PartitionStorage::CachingProcess(boost::dynamic_bitset<> const& vertical,
                                  std::unique_ptr<model::PositionListIndex const> pli) {
     auto pli_pointer = pli.get();
-    index_->Put(vertical.GetColumnIndicesRef(), std::move(pli));
+    index_->Put(vertical, std::move(pli));
     return pli_pointer;
 }
