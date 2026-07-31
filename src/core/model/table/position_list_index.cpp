@@ -184,7 +184,8 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
 }
 
 std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
-        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) const {
+        boost::dynamic_bitset<> const& probing_columns,
+        ColumnLayoutRelationData& relation_data) const {
     assert(this->relation_size_ == relation_data.GetNumRows());
     std::deque<std::vector<int>> new_index;
     unsigned int new_size = 0;
@@ -226,16 +227,26 @@ std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
                                                this->relation_size_, this->relation_size_);
 }
 
+std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
+        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) const {
+    return ProbeAll(probing_columns.GetColumnIndicesRef(), relation_data);
+}
+
 bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relation_data,
-                                  Vertical const& probing_columns, std::vector<int>& probe) {
-    boost::dynamic_bitset<> probing_indices = probing_columns.GetColumnIndices();
-    for (unsigned long index = probing_indices.find_first(); index < probing_indices.size();
-         index = probing_indices.find_next(index)) {
+                                  boost::dynamic_bitset<> const& probing_columns,
+                                  std::vector<int>& probe) {
+    for (unsigned long index = probing_columns.find_first(); index < probing_columns.size();
+         index = probing_columns.find_next(index)) {
         int value = relation_data.GetColumnData(index).GetProbingTableValue(position);
         if (value == PositionListIndex::kSingletonValueId) return false;
         probe.push_back(value);
     }
     return true;
+}
+
+bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relation_data,
+                                  Vertical const& probing_columns, std::vector<int>& probe) {
+    return TakeProbe(position, relation_data, probing_columns.GetColumnIndicesRef(), probe);
 }
 
 std::string PositionListIndex::ToString() const {
