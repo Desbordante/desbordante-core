@@ -4,6 +4,7 @@
 
 #include "core/algorithms/fd/pyrocommon/model/list_agree_set_sample.h"
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
+#include "core/model/index.h"
 #include "core/model/table/vertical_map.h"
 #include "core/util/logger.h"
 
@@ -32,10 +33,11 @@ ProfilingContext::ProfilingContext(algos::pyro::Parameters parameters,
                 std::make_unique<model::BlockingVerticalMap<model::AgreeSetSample>>(schema);
         // TODO: сделать, чтобы при одном потоке agree_set_samples_ =
         // std::make_unique<VerticalMap<AgreeSetSample>>(schema);
-        for (auto& column : schema->GetColumns()) {
+        for (model::Index column_index = 0; column_index != schema->GetNumColumns();
+             ++column_index) {
             CreateColumnFocusedSample(
-                    static_cast<Vertical>(*column),
-                    relation_data->GetColumnData(column->GetIndex()).GetPositionListIndex(), 1);
+                    boost::dynamic_bitset<>(schema->GetNumColumns()).set(column_index),
+                    relation_data->GetColumnData(column_index).GetPositionListIndex(), 1);
         }
     } else {
         agree_set_samples_ = nullptr;
@@ -135,8 +137,8 @@ double ProfilingContext::SetMaximumEntropy(ColumnLayoutRelationData const* relat
     }
 }
 
-model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical const& focus,
-                                                                   double boost_factor) {
+model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(
+        boost::dynamic_bitset<> const& focus, double boost_factor) {
     auto pli = pli_cache_->GetOrCreateFor(focus, this);
     auto pli_pointer =
             std::holds_alternative<model::PositionListIndex const*>(pli)
@@ -145,29 +147,26 @@ model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical cons
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, pli_pointer, parameters_.sample_size * boost_factor,
             custom_random_);
-    LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
-    agree_set_samples_->Put(focus.GetColumnIndicesRef(), std::move(sample));
+    agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
 }
 
 model::AgreeSetSample const* ProfilingContext::CreateColumnFocusedSample(
-        Vertical const& focus, model::PositionListIndex const* restriction_pli,
+        boost::dynamic_bitset<> const& focus, model::PositionListIndex const* restriction_pli,
         double boost_factor) {
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, restriction_pli, parameters_.sample_size * boost_factor,
             custom_random_);
-    LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
-    agree_set_samples_->Put(focus.GetColumnIndicesRef(), std::move(sample));
+    agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
 }
 
 shared_ptr<model::AgreeSetSample const> ProfilingContext::GetAgreeSetSample(
-        Vertical const& focus) const {
+        boost::dynamic_bitset<> const& focus) const {
     shared_ptr<model::AgreeSetSample const> sample = nullptr;
-    for (auto& [key, next_sample] :
-         agree_set_samples_->GetSubsetEntries(focus.GetColumnIndicesRef())) {
+    for (auto& [key, next_sample] : agree_set_samples_->GetSubsetEntries(focus)) {
         if (sample == nullptr || next_sample->GetSamplingRatio() > sample->GetSamplingRatio()) {
             sample = next_sample;
         }

@@ -14,10 +14,11 @@ public:
     KeyG1Strategy(double max_error, double deviation) : DependencyStrategy(max_error, deviation) {}
 
     void EnsureInitialized(SearchSpace* search_space) const override;
-    double CalculateError(Vertical const& key_candidate) const override;
-    DependencyCandidate CreateDependencyCandidate(Vertical const& vertical) const override;
+    double CalculateError(boost::dynamic_bitset<> const& key_candidate) const override;
+    DependencyCandidate CreateDependencyCandidate(
+            boost::dynamic_bitset<> const& vertical) const override;
 
-    void RegisterDependency(Vertical const& vertical, double error,
+    void RegisterDependency(boost::dynamic_bitset<> const& vertical, double error,
                             DependencyConsumer const& discovery_unit) const override;
 
     bool IsIrrelevantColumn([[maybe_unused]] unsigned int column_index) const override {
@@ -28,8 +29,9 @@ public:
         return 1;
     }
 
-    Vertical GetIrrelevantColumns() const override {
-        return context_->GetColumnLayoutRelationData()->GetSchema()->CreateEmptyVertical();
+    boost::dynamic_bitset<> GetIrrelevantColumns() const override {
+        return boost::dynamic_bitset<>(
+                context_->GetColumnLayoutRelationData()->GetSchema()->GetNumColumns());
     }
 
     std::unique_ptr<DependencyStrategy> CreateClone() override;

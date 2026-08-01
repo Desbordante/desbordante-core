@@ -6,27 +6,28 @@
 
 class FdG1Strategy : public DependencyStrategy {
 private:
-    Column const* rhs_;
+    model::Index rhs_index_;
 
     double CalculateG1(model::PositionListIndex const* lhs_pli) const;
     double CalculateG1(double num_violating_tuple_pairs) const;
     model::ConfidenceInterval CalculateG1(model::ConfidenceInterval const& num_violations) const;
 
 public:
-    FdG1Strategy(Column const* rhs, double max_error, double deviation)
-        : DependencyStrategy(max_error, deviation), rhs_(rhs) {}
+    FdG1Strategy(model::Index rhs_index, double max_error, double deviation)
+        : DependencyStrategy(max_error, deviation), rhs_index_(rhs_index) {}
 
     void EnsureInitialized(SearchSpace* search_space) const override;
-    double CalculateError(Vertical const& lhs) const override;
-    DependencyCandidate CreateDependencyCandidate(Vertical const& vertical) const override;
+    double CalculateError(boost::dynamic_bitset<> const& lhs) const override;
+    DependencyCandidate CreateDependencyCandidate(
+            boost::dynamic_bitset<> const& vertical) const override;
 
     // TODO: can it be const though? Dependency registers --> some state somewhere changes.
     // Non-const discovery_unit?
-    void RegisterDependency(Vertical const& vertical, double error,
+    void RegisterDependency(boost::dynamic_bitset<> const& vertical, double error,
                             DependencyConsumer const& discovery_unit) const override;
 
     bool IsIrrelevantColumn(unsigned int column_index) const override {
-        return rhs_->GetIndex() == column_index;
+        return rhs_index_ == column_index;
     }
 
     unsigned int GetNumIrrelevantColumns() const override {
@@ -35,7 +36,7 @@ public:
 
     std::unique_ptr<DependencyStrategy> CreateClone() override;
 
-    Vertical GetIrrelevantColumns() const override {
-        return static_cast<Vertical>(*rhs_);
+    boost::dynamic_bitset<> GetIrrelevantColumns() const override {
+        return boost::dynamic_bitset<>(context_->GetSchema()->GetNumColumns()).set(rhs_index_);
     }
 };

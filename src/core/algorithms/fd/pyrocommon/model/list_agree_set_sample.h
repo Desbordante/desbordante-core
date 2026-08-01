@@ -26,19 +26,24 @@ public:
             boost::dynamic_bitset<> const& bitset);
 
     static std::unique_ptr<ListAgreeSetSample> CreateFocusedFor(
-            ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
+            ColumnLayoutRelationData const* relation,
+            boost::dynamic_bitset<> const& restriction_vertical,
             PositionListIndex const* restriction_p_li, unsigned int sample_size,
             CustomRandom& random);
 
-    ListAgreeSetSample(ColumnLayoutRelationData const* relation, Vertical const& focus,
-                       unsigned int sample_size, unsigned long long population_size,
+    ListAgreeSetSample(ColumnLayoutRelationData const* relation,
+                       boost::dynamic_bitset<> const& focus, unsigned int sample_size,
+                       unsigned long long population_size,
                        std::unordered_map<boost::dynamic_bitset<>, int> const& agree_set_counters);
 
-    unsigned long long GetNumAgreeSupersets(Vertical const& agreement) const override;
-    unsigned long long GetNumAgreeSupersets(Vertical const& agreement,
-                                            Vertical const& disagreement) const override;
+    unsigned long long GetNumAgreeSupersets(
+            boost::dynamic_bitset<> const& agreement) const override;
+    unsigned long long GetNumAgreeSupersets(
+            boost::dynamic_bitset<> const& agreement,
+            boost::dynamic_bitset<> const& disagreement) const override;
     std::unique_ptr<std::vector<unsigned long long>> GetNumAgreeSupersetsExt(
-            Vertical const& agreement, Vertical const& disagreement) const override;
+            boost::dynamic_bitset<> const& agreement,
+            boost::dynamic_bitset<> const& disagreement) const override;
 };
 
 }  // namespace model

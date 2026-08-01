@@ -125,20 +125,6 @@ std::string Vertical::ToIndicesString() const {
     return result;
 }
 
-std::vector<Vertical> Vertical::GetParents() const {
-    if (GetArity() < 2) return std::vector<Vertical>();
-    std::vector<Vertical> parents(GetArity());
-    int i = 0;
-    for (size_t column_index = column_indices_.find_first();
-         column_index != boost::dynamic_bitset<>::npos;
-         column_index = column_indices_.find_next(column_index)) {
-        auto parent_column_indices = column_indices_;
-        parent_column_indices.reset(column_index);
-        parents[i++] = GetSchema()->GetVertical(std::move(parent_column_indices));
-    }
-    return parents;
-}
-
 bool Vertical::operator<(Vertical const& rhs) const {
     assert(*schema_ == *rhs.schema_);
     if (this->column_indices_ == rhs.column_indices_) return false;

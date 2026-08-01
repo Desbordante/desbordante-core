@@ -404,7 +404,7 @@ template class VerticalMap<DependencyCandidate>;
 
 template class VerticalMap<VerticalInfo>;
 
-template class VerticalMap<Vertical>;
+template class VerticalMap<boost::dynamic_bitset<>>;
 
 template class VerticalMap<std::monostate>;
 
@@ -528,6 +528,6 @@ template class BlockingVerticalMap<DependencyCandidate>;
 
 template class BlockingVerticalMap<VerticalInfo>;
 
-template class BlockingVerticalMap<Vertical>;
+template class BlockingVerticalMap<boost::dynamic_bitset<>>;
 
 }  // namespace model

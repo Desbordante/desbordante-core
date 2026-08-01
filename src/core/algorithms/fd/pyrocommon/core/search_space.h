@@ -10,7 +10,6 @@
 #include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
 #include "core/algorithms/fd/pyrocommon/core/vertical_info.h"
 #include "core/model/table/relational_schema.h"
-#include "core/model/table/vertical.h"
 #include "core/model/table/vertical_map.h"
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {
@@ -24,7 +23,7 @@ private:
     std::set<DependencyCandidate, DependencyCandidateComp> launch_pads_;
     std::unique_ptr<model::VerticalMap<DependencyCandidate>> launch_pad_index_;
     std::list<DependencyCandidate> deferred_launch_pads_;
-    std::unique_ptr<model::VerticalMap<Vertical>> scope_;
+    std::unique_ptr<model::VerticalMap<boost::dynamic_bitset<>>> scope_;
     double sample_boost_;
     int recursion_depth_;
     bool is_ascend_randomly_ = false;
@@ -33,23 +32,23 @@ private:
 
     // void Discover(std::unique_ptr<VerticalMap<VerticalInfo>> localVisitees);
     std::optional<DependencyCandidate> PollLaunchPad();
-    void EscapeLaunchPad(Vertical const& hitting_set_candidate,
-                         std::vector<Vertical> pruning_supersets);
+    void EscapeLaunchPad(boost::dynamic_bitset<> const& hitting_set_candidate,
+                         std::vector<boost::dynamic_bitset<>> pruning_supersets);
     void ReturnLaunchPad(DependencyCandidate const& launch_pad, bool is_defer);
 
     bool Ascend(DependencyCandidate const& launch_pad);
     void CheckEstimate(DependencyStrategy* strategy,
                        DependencyCandidate const& traversal_candidate);
-    void TrickleDown(Vertical const& main_peak, double main_peak_error);
-    std::optional<Vertical> TrickleDownFrom(DependencyCandidate min_dep_candidate,
-                                            DependencyStrategy* strategy,
-                                            model::VerticalMap<VerticalInfo>* alleged_min_deps,
-                                            std::unordered_set<Vertical>& alleged_non_deps,
-                                            model::VerticalMap<VerticalInfo>* global_visitees,
-                                            double boost_factor);
-    std::unordered_set<Vertical> CalculateHittingSet(std::vector<Vertical> verticals,
-                                                     auto pruning_function) const;
-    std::unordered_set<Vertical> CalculateHittingSet(std::vector<Vertical> verticals) const;
+    void TrickleDown(boost::dynamic_bitset<> const& main_peak, double main_peak_error);
+    std::optional<boost::dynamic_bitset<>> TrickleDownFrom(
+            DependencyCandidate min_dep_candidate, DependencyStrategy* strategy,
+            model::VerticalMap<VerticalInfo>* alleged_min_deps,
+            std::unordered_set<boost::dynamic_bitset<>>& alleged_non_deps,
+            model::VerticalMap<VerticalInfo>* global_visitees, double boost_factor);
+    std::unordered_set<boost::dynamic_bitset<>> CalculateHittingSet(
+            std::vector<boost::dynamic_bitset<>> verticals, auto pruning_function) const;
+    std::unordered_set<boost::dynamic_bitset<>> CalculateHittingSet(
+            std::vector<boost::dynamic_bitset<>> verticals) const;
 
     // CAREFUL: resets globalVisitees_, therefore SearchSpace could become invalidated
     std::unique_ptr<model::VerticalMap<VerticalInfo>> MoveOutGlobalVisitees() {
@@ -66,12 +65,13 @@ private:
     }
 
     static void RequireMinimalDependency(DependencyStrategy* strategy,
-                                         Vertical const& min_dependency);
-    static std::vector<Vertical> GetSubsetDeps(Vertical const& vertical,
-                                               model::VerticalMap<VerticalInfo>* vertical_infos);
-    static bool IsImpliedByMinDep(Vertical const& vertical,
+                                         boost::dynamic_bitset<> const& min_dependency);
+    static std::vector<boost::dynamic_bitset<>> GetSubsetDeps(
+            boost::dynamic_bitset<> const& vertical,
+            model::VerticalMap<VerticalInfo>* vertical_infos);
+    static bool IsImpliedByMinDep(boost::dynamic_bitset<> const& vertical,
                                   model::VerticalMap<VerticalInfo>* vertical_infos);
-    static bool IsKnownNonDependency(Vertical const& vertical,
+    static bool IsKnownNonDependency(boost::dynamic_bitset<> const& vertical,
                                      model::VerticalMap<VerticalInfo>* vertical_infos);
     static std::string FormatArityHistogram() = delete;
     static std::string FormatArityHistogram(model::VerticalMap<int*>) = delete;
@@ -81,7 +81,7 @@ public:
     int id_;
 
     SearchSpace(int id, std::unique_ptr<DependencyStrategy> strategy,
-                std::unique_ptr<model::VerticalMap<Vertical>> scope,
+                std::unique_ptr<model::VerticalMap<boost::dynamic_bitset<>>> scope,
                 std::unique_ptr<model::VerticalMap<VerticalInfo>> global_visitees,
                 RelationalSchema const* schema,
                 DependencyCandidateComp const& dependency_candidate_comparator, int recursion_depth,

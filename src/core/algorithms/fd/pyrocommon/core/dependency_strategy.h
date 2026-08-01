@@ -2,7 +2,7 @@
 #include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
 #include "core/algorithms/fd/pyrocommon/core/dependency_consumer.h"
 #include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
-#include "core/model/table/vertical.h"
+#include "core/model/index.h"
 
 class SearchSpace;
 
@@ -22,23 +22,20 @@ public:
      * Create the initial candidate for the given SearchSpace
      * */
     virtual void EnsureInitialized(SearchSpace* search_space) const = 0;
-    virtual DependencyCandidate CreateDependencyCandidate(Vertical const& candidate) const = 0;
-    virtual double CalculateError(Vertical const& candidate) const = 0;
-    virtual void RegisterDependency(Vertical const& vertical, double error,
+    virtual DependencyCandidate CreateDependencyCandidate(
+            boost::dynamic_bitset<> const& candidate) const = 0;
+    virtual double CalculateError(boost::dynamic_bitset<> const& candidate) const = 0;
+    virtual void RegisterDependency(boost::dynamic_bitset<> const& vertical, double error,
                                     DependencyConsumer const& discovery_unit) const = 0;
     virtual bool IsIrrelevantColumn(unsigned int column_index) const = 0;
     virtual unsigned int GetNumIrrelevantColumns() const = 0;
-    virtual Vertical GetIrrelevantColumns() const = 0;
+    virtual boost::dynamic_bitset<> GetIrrelevantColumns() const = 0;
 
     virtual ~DependencyStrategy() = default;
 
     virtual std::unique_ptr<DependencyStrategy> CreateClone() = 0;
 
-    bool ShouldResample(Vertical const& vertical, double boost_factor) const;
-
-    bool IsIrrelevantColumn(Column const& column) const {
-        return this->IsIrrelevantColumn(column.GetIndex());
-    }
+    bool ShouldResample(boost::dynamic_bitset<> const& vertical, double boost_factor) const;
 
     static double Round(double error) {
         return std::ceil(error * 32768) / 32768;

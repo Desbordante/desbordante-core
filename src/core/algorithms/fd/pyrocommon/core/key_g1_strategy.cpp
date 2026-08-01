@@ -20,16 +20,18 @@ double KeyG1Strategy::CalculateKeyError(double num_violating_tuple_pairs) const 
 void KeyG1Strategy::EnsureInitialized(SearchSpace* search_space) const {
     if (search_space->is_initialized_) return;
 
-    for (auto& column : context_->GetSchema()->GetColumns()) {
-        if (IsIrrelevantColumn(column->GetIndex())) continue;
+    for (model::Index column_index = 0; column_index != context_->GetSchema()->GetNumColumns();
+         ++column_index) {
+        if (IsIrrelevantColumn(column_index)) continue;
 
-        search_space->AddLaunchPad(CreateDependencyCandidate(static_cast<Vertical>(*column)));
+        search_space->AddLaunchPad(CreateDependencyCandidate(
+                boost::dynamic_bitset<>(context_->GetSchema()->GetNumColumns()).set(column_index)));
     }
 
     search_space->is_initialized_ = true;
 }
 
-double KeyG1Strategy::CalculateError(Vertical const& key_candidate) const {
+double KeyG1Strategy::CalculateError(boost::dynamic_bitset<> const& key_candidate) const {
     auto pli = context_->GetPliCache()->GetOrCreateFor(key_candidate, context_);
     auto pli_pointer =
             std::holds_alternative<model::PositionListIndex const*>(pli)
@@ -47,8 +49,9 @@ model::ConfidenceInterval KeyG1Strategy::CalculateKeyError(
                                      CalculateKeyError(num_violations.GetMax()));
 }
 
-DependencyCandidate KeyG1Strategy::CreateDependencyCandidate(Vertical const& vertical) const {
-    if (vertical.GetArity() == 1) {
+DependencyCandidate KeyG1Strategy::CreateDependencyCandidate(
+        boost::dynamic_bitset<> const& vertical) const {
+    if (vertical.count() == 1) {
         auto pli = context_->GetPliCache()->GetOrCreateFor(vertical, context_);
         auto pli_pointer =
                 std::holds_alternative<model::PositionListIndex const*>(pli)
@@ -71,7 +74,7 @@ DependencyCandidate KeyG1Strategy::CreateDependencyCandidate(Vertical const& ver
     return DependencyCandidate(vertical, key_error, false);
 }
 
-void KeyG1Strategy::RegisterDependency(Vertical const& vertical, double error,
+void KeyG1Strategy::RegisterDependency(boost::dynamic_bitset<> const& vertical, double error,
                                        DependencyConsumer const& discovery_unit) const {
     discovery_unit.RegisterUcc(vertical, error, 0);  // TODO: calculate score?
 }

@@ -17,7 +17,9 @@ Pyro::Pyro() : PliBasedFDAlgorithm() {
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
-        this->FDAlgorithm::RegisterFd(fd.lhs_, fd.rhs_, relation_->GetSharedPtrSchema());
+        this->FDAlgorithm::RegisterFd(relation_->GetSchema()->GetVertical(fd.lhs_),
+                                      *relation_->GetSchema()->GetColumn(fd.rhs_),
+                                      relation_->GetSharedPtrSchema());
     };
     ucc_consumer_ = nullptr;
 }
@@ -56,10 +58,11 @@ void Pyro::ExecuteInternal() {
     }
 
     int next_id = 0;
-    for (auto& rhs : schema->GetColumns()) {
+    for (model::Index rhs_column_index = 0; rhs_column_index != schema->GetNumColumns();
+         ++rhs_column_index) {
         std::unique_ptr<DependencyStrategy> strategy;
         if (parameters_.ucc_error_measure == "g1prime") {
-            strategy = std::make_unique<FdG1Strategy>(rhs.get(), parameters_.max_ucc_error,
+            strategy = std::make_unique<FdG1Strategy>(rhs_column_index, parameters_.max_ucc_error,
                                                       parameters_.error_dev);
         } else {
             throw std::runtime_error("Unknown key error measure.");

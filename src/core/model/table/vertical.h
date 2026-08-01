@@ -87,7 +87,6 @@ public:
 
     std::vector<Column const*> GetColumns() const;
     std::vector<unsigned> GetColumnIndicesAsVector() const;
-    std::vector<Vertical> GetParents() const;
 
     std::string ToString() const;
     std::string ToIndicesString() const;

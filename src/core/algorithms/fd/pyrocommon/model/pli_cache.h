@@ -38,7 +38,7 @@ private:
     MAYBE_UNUSED_PRIVATE_FIELD double median_inverted_entropy_;
 
     std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>> CachingProcess(
-            Vertical const& vertical, std::unique_ptr<PositionListIndex const> pli,
+            boost::dynamic_bitset<> const& vertical, std::unique_ptr<PositionListIndex const> pli,
             ProfilingContext* profiling_context);
 
 public:
@@ -47,9 +47,9 @@ public:
              double mean_entropy, double median_entropy, double maximum_entropy, double median_gini,
              double median_inverted_entropy);
 
-    PositionListIndex const* Get(Vertical const& vertical);
+    PositionListIndex const* Get(boost::dynamic_bitset<> const& vertical);
     std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>> GetOrCreateFor(
-            Vertical const& vertical, ProfilingContext* profiling_context);
+            boost::dynamic_bitset<> const& vertical, ProfilingContext* profiling_context);
 
     void SetMaximumEntropy(double e) {
         maximum_entropy_ = e;

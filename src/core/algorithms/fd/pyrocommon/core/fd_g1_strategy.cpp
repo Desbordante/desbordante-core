@@ -9,11 +9,8 @@
 double FdG1Strategy::CalculateG1(model::PositionListIndex const* lhs_pli) const {
     unsigned long long num_violations = 0;
     std::unordered_map<int, int> value_counts;
-    std::vector<int> const& probing_table = context_->GetColumnLayoutRelationData()
-                                                    ->GetColumnData(rhs_->GetIndex())
-                                                    .GetProbingTable();
-
-    LOG_DEBUG("Probing table size for {}: {}", rhs_->ToString(), probing_table.size());
+    std::vector<int> const& probing_table =
+            context_->GetColumnLayoutRelationData()->GetColumnData(rhs_index_).GetProbingTable();
 
     // Perform probing
     int probing_table_value_id;
@@ -48,8 +45,8 @@ double FdG1Strategy::CalculateG1(double num_violating_tuple_pairs) const {
 void FdG1Strategy::EnsureInitialized(SearchSpace* search_space) const {
     if (search_space->is_initialized_) return;
 
-    Vertical empty_vertical =
-            context_->GetColumnLayoutRelationData()->GetSchema()->CreateEmptyVertical();
+    boost::dynamic_bitset<> empty_vertical = boost::dynamic_bitset<>(
+            context_->GetColumnLayoutRelationData()->GetSchema()->GetNumColumns());
     double zero_fd_error = CalculateError(empty_vertical);
     search_space->AddLaunchPad(DependencyCandidate(std::move(empty_vertical),
                                                    model::ConfidenceInterval(zero_fd_error), true));
@@ -57,10 +54,13 @@ void FdG1Strategy::EnsureInitialized(SearchSpace* search_space) const {
     search_space->is_initialized_ = true;
 }
 
-double FdG1Strategy::CalculateError(Vertical const& lhs) const {
+double FdG1Strategy::CalculateError(boost::dynamic_bitset<> const& lhs) const {
     double error = 0;
-    if (lhs.GetArity() == 0) {
-        auto rhs_pli = context_->GetPliCache()->Get(static_cast<Vertical>(*rhs_));
+    if (lhs.count() == 0) {
+        auto rhs_pli = context_->GetPliCache()->Get(
+                boost::dynamic_bitset<>(
+                        context_->GetColumnLayoutRelationData()->GetSchema()->GetNumColumns())
+                        .set(rhs_index_));
         if (rhs_pli == nullptr) {
             throw std::runtime_error(
                     "Couldn't get rhsPLI from PLICache while calculating FD error");
@@ -72,7 +72,7 @@ double FdG1Strategy::CalculateError(Vertical const& lhs) const {
                 std::holds_alternative<model::PositionListIndex const*>(lhs_pli)
                         ? std::get<model::PositionListIndex const*>(lhs_pli)
                         : std::get<std::unique_ptr<model::PositionListIndex const>>(lhs_pli).get();
-        auto joint_pli = context_->GetPliCache()->Get(lhs.Union(static_cast<Vertical>(*rhs_)));
+        auto joint_pli = context_->GetPliCache()->Get(boost::dynamic_bitset<>(lhs).set(rhs_index_));
         error = joint_pli == nullptr
                         ? CalculateG1(lhs_pli_pointer)
                         : CalculateG1(lhs_pli_pointer->GetNepAsLong() - joint_pli->GetNepAsLong());
@@ -88,7 +88,8 @@ model::ConfidenceInterval FdG1Strategy::CalculateG1(
                                      CalculateG1(num_violations.GetMax()));
 }
 
-DependencyCandidate FdG1Strategy::CreateDependencyCandidate(Vertical const& vertical) const {
+DependencyCandidate FdG1Strategy::CreateDependencyCandidate(
+        boost::dynamic_bitset<> const& vertical) const {
     if (context_->IsAgreeSetSamplesEmpty()) {
         return DependencyCandidate(vertical, model::ConfidenceInterval(0, .5, 1), false);
     }
@@ -96,20 +97,24 @@ DependencyCandidate FdG1Strategy::CreateDependencyCandidate(Vertical const& vert
     auto agree_set_sample = context_->GetAgreeSetSample(vertical);
     model::ConfidenceInterval num_violating_tuple_pairs =
             agree_set_sample
-                    ->EstimateMixed(vertical, static_cast<Vertical>(*rhs_),
+                    ->EstimateMixed(vertical,
+                                    boost::dynamic_bitset<>(context_->GetColumnLayoutRelationData()
+                                                                    ->GetSchema()
+                                                                    ->GetNumColumns())
+                                            .set(rhs_index_),
                                     context_->GetParameters().estimate_confidence)
                     .Multiply(context_->GetColumnLayoutRelationData()->GetNumTuplePairs());
     model::ConfidenceInterval g1 = CalculateG1(num_violating_tuple_pairs);
     return DependencyCandidate(vertical, g1, false);
 }
 
-void FdG1Strategy::RegisterDependency(Vertical const& vertical, double error,
+void FdG1Strategy::RegisterDependency(boost::dynamic_bitset<> const& vertical, double error,
                                       DependencyConsumer const& discovery_unit) const {
-    discovery_unit.RegisterFd(vertical, *rhs_, error, 0);  // TODO: calculate score?
+    discovery_unit.RegisterFd(vertical, rhs_index_, error, 0);  // TODO: calculate score?
 }
 
 std::unique_ptr<DependencyStrategy> FdG1Strategy::CreateClone() {
-    return std::make_unique<FdG1Strategy>(rhs_,
+    return std::make_unique<FdG1Strategy>(rhs_index_,
                                           (max_dependency_error_ + min_non_dependency_error_) / 2,
                                           (max_dependency_error_ - min_non_dependency_error_) / 2);
 }

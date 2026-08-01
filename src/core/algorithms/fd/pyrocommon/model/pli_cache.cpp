@@ -2,6 +2,7 @@
 
 #include <boost/optional.hpp>
 
+#include "core/model/index.h"
 #include "core/model/table/vertical_map.h"
 #include "core/util/logger.h"
 
@@ -20,8 +21,8 @@ public:
 
 namespace model {
 
-PositionListIndex const* PLICache::Get(Vertical const& vertical) {
-    return index_->Get(vertical.GetColumnIndicesRef()).get();
+PositionListIndex const* PLICache::Get(boost::dynamic_bitset<> const& vertical) {
+    return index_->Get(vertical).get();
 }
 
 PLICache::PLICache(ColumnLayoutRelationData* relation_data, CachingMethod caching_method,
@@ -43,25 +44,27 @@ PLICache::PLICache(ColumnLayoutRelationData* relation_data, CachingMethod cachin
       median_entropy_(median_entropy),
       median_gini_(median_gini),
       median_inverted_entropy_(median_inverted_entropy) {
-    for (auto& column_ptr : relation_data->GetSchema()->GetColumns()) {
-        index_->Put(static_cast<Vertical>(*column_ptr).GetColumnIndicesRef(),
-                    relation_data->GetColumnData(column_ptr->GetIndex()).GetPliOwnership());
+    for (model::Index column_index = 0;
+         column_index != relation_data_->GetSchema()->GetNumColumns(); ++column_index) {
+        index_->Put(boost::dynamic_bitset<>(relation_data_->GetSchema()->GetNumColumns())
+                            .set(column_index),
+                    relation_data->GetColumnData(column_index).GetPliOwnership());
     }
 }
 
 PLICache::~PLICache() {
-    for (auto& column_ptr : relation_data_->GetSchema()->GetColumns()) {
-        // auto PLI =
-        index_->Remove(static_cast<Vertical>(*column_ptr).GetColumnIndicesRef());
-        // relation_data_->GetColumnData(column_ptr->getIndex()).getPLI(std::move(PLI));
+    for (model::Index column_index = 0;
+         column_index != relation_data_->GetSchema()->GetNumColumns(); ++column_index) {
+        index_->Remove(boost::dynamic_bitset<>(relation_data_->GetSchema()->GetNumColumns())
+                               .set(column_index));
     }
 }
 
 // obtains or calculates a PositionListIndex using cache
 std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>>
-PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_context) {
+PLICache::GetOrCreateFor(boost::dynamic_bitset<> const& vertical,
+                         ProfilingContext* profiling_context) {
     std::scoped_lock lock(getting_pli_mutex_);
-    LOG_DEBUG("PLI for {} requested: ", vertical.ToString());
 
     // is PLI already cached?
     PositionListIndex const* pli = Get(vertical);
@@ -70,7 +73,7 @@ PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_c
         return pli;
     }
     // look for cached PLIs to construct the requested one
-    auto subset_entries = index_->GetSubsetEntries(vertical.GetColumnIndicesRef());
+    auto subset_entries = index_->GetSubsetEntries(vertical);
     boost::optional<PositionListIndexRank> smallest_pli_rank;
     std::vector<PositionListIndexRank> ranks;
     ranks.reserve(subset_entries.size());
@@ -92,7 +95,7 @@ PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_c
         operands.push_back(*smallest_pli_rank);
         cover |= *smallest_pli_rank->vertical_;
 
-        while (cover.count() < vertical.GetArity() && !ranks.empty()) {
+        while (cover.count() < vertical.count() && !ranks.empty()) {
             boost::optional<PositionListIndexRank> best_rank;
             // erase ranks with low added_arity_
             ranks.erase(std::remove_if(ranks.begin(), ranks.end(),
@@ -120,16 +123,16 @@ PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_c
         }
     }
 
-    // TODO: конкретные костыли, надо делать Column : Vertical
-    std::vector<std::unique_ptr<Vertical>> vertical_columns;
+    std::vector<boost::dynamic_bitset<>> vertical_columns;
 
-    for (auto& column : vertical.GetColumns()) {
-        if (!cover[column->GetIndex()]) {
-            vertical_columns.push_back(std::make_unique<Vertical>(static_cast<Vertical>(*column)));
-            auto column_pli = index_->Get((**vertical_columns.rbegin()).GetColumnIndicesRef());
-            operands.emplace_back(&(**vertical_columns.rbegin()).GetColumnIndicesRef(), column_pli,
-                                  1);
-        }
+    util::ForEachIndex(vertical, [&](model::Index column_index) {
+        if (cover.test(column_index)) return;
+        vertical_columns.push_back(
+                boost::dynamic_bitset<>(relation_data_->GetNumColumns()).set(column_index));
+    });
+    for (boost::dynamic_bitset<> const& vertical : vertical_columns) {
+        auto column_pli = index_->Get(vertical);
+        operands.emplace_back(&vertical, std::move(column_pli), 1);
     }
     // sort operands by ascending order
     std::sort(operands.begin(), operands.end(),
@@ -149,20 +152,16 @@ PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_c
             variant_intersection_pli;
     if (operands.size() >= profiling_context->GetParameters().nary_intersection_size) {
         PositionListIndexRank base_pli_rank = operands[0];
-        auto intersection_pli = base_pli_rank.pli_->ProbeAll(
-                vertical.Without(
-                        relation_data_->GetSchema()->GetVertical(*base_pli_rank.vertical_)),
-                *relation_data_);
+        auto intersection_pli =
+                base_pli_rank.pli_->ProbeAll(vertical - *base_pli_rank.vertical_, *relation_data_);
         variant_intersection_pli =
                 CachingProcess(vertical, std::move(intersection_pli), profiling_context);
     } else {
-        Vertical current_vertical =
-                relation_data_->GetSchema()->GetVertical(*operands.begin()->vertical_);
+        boost::dynamic_bitset<> current_vertical = *operands.begin()->vertical_;
         variant_intersection_pli = operands.begin()->pli_.get();
 
         for (size_t i = 1; i < operands.size(); i++) {
-            current_vertical = current_vertical.Union(
-                    relation_data_->GetSchema()->GetVertical(*operands[i].vertical_));
+            current_vertical |= *operands[i].vertical_;
             variant_intersection_pli =
                     std::holds_alternative<PositionListIndex const*>(variant_intersection_pli)
                             ? std::get<PositionListIndex const*>(variant_intersection_pli)
@@ -179,20 +178,21 @@ PLICache::GetOrCreateFor(Vertical const& vertical, ProfilingContext* profiling_c
     }
 
     LOG_DEBUG("Calculated from {} sub-PLIs (saved {} intersections).", operands.size(),
-              (vertical.GetArity() - operands.size()));
+              (vertical.count() - operands.size()));
 
     return variant_intersection_pli;
 }
 
 std::variant<PositionListIndex const*, std::unique_ptr<PositionListIndex const>>
-PLICache::CachingProcess(Vertical const& vertical, std::unique_ptr<PositionListIndex const> pli,
+PLICache::CachingProcess(boost::dynamic_bitset<> const& vertical,
+                         std::unique_ptr<PositionListIndex const> pli,
                          ProfilingContext* profiling_context) {
     auto pli_pointer = pli.get();
     switch (caching_method_) {
         case CachingMethod::kCoin:
             if (profiling_context->NextDouble() <
                 profiling_context->GetParameters().caching_probability) {
-                index_->Put(vertical.GetColumnIndicesRef(), std::move(pli));
+                index_->Put(vertical, std::move(pli));
                 return pli_pointer;
             } else {
                 return pli;
@@ -200,7 +200,7 @@ PLICache::CachingProcess(Vertical const& vertical, std::unique_ptr<PositionListI
         case CachingMethod::kNoCaching:
             return pli;
         case CachingMethod::kAllCaching:
-            index_->Put(vertical.GetColumnIndicesRef(), std::move(pli));
+            index_->Put(vertical, std::move(pli));
             return pli_pointer;
         default:
             throw std::runtime_error(

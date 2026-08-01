@@ -2,8 +2,9 @@
 
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 
-bool DependencyStrategy::ShouldResample(Vertical const& vertical, double boost_factor) const {
-    if (context_->GetParameters().sample_size <= 0 || vertical.GetArity() < 1) return false;
+bool DependencyStrategy::ShouldResample(boost::dynamic_bitset<> const& vertical,
+                                        double boost_factor) const {
+    if (context_->GetParameters().sample_size <= 0 || vertical.count() < 1) return false;
 
     // Do we have an exact sample already?
     auto current_sample = context_->GetAgreeSetSample(vertical);

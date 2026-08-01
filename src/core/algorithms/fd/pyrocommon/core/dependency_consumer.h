@@ -29,13 +29,10 @@ protected:
     }
 
 public:
-    PartialFD RegisterFd(Vertical const& lhs, Column const& rhs, double error, double score) const;
-    PartialKey RegisterUcc(Vertical const& key_vertical, double error, double score) const;
-
-    std::string FDsToString() const;
-    std::string UCCsToString() const;
-
-    virtual std::string GetJsonFDs();
+    PartialFD RegisterFd(boost::dynamic_bitset<> const& lhs, model::Index rhs, double error,
+                         double score) const;
+    PartialKey RegisterUcc(boost::dynamic_bitset<> const& key_vertical, double error,
+                           double score) const;
 
     virtual ~DependencyConsumer() = default;
 };

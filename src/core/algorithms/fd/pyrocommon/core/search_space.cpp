@@ -36,22 +36,18 @@ std::optional<DependencyCandidate> SearchSpace::PollLaunchPad() {
         auto launch_pad = launch_pads_.extract(launch_pads_.begin()).value();
 
         // launchPads_.erase(launchPads_.begin());
-        launch_pad_index_->Remove(launch_pad.vertical_.GetColumnIndicesRef());
+        launch_pad_index_->Remove(launch_pad.vertical_);
 
         if (IsImpliedByMinDep(launch_pad.vertical_, global_visitees_.get()) ||
             (local_visitees_ != nullptr &&
              IsImpliedByMinDep(launch_pad.vertical_, local_visitees_.get()))) {
-            launch_pad_index_->Remove(launch_pad.vertical_.GetColumnIndicesRef());
-            LOG_TRACE("* Removing subset-pruned launch pad {{{}}}",
-                      launch_pad.vertical_.ToString());
+            launch_pad_index_->Remove(launch_pad.vertical_);
             continue;
         }
 
-        auto superset_entries =
-                global_visitees_->GetSupersetEntries(launch_pad.vertical_.GetColumnIndicesRef());
+        auto superset_entries = global_visitees_->GetSupersetEntries(launch_pad.vertical_);
         if (local_visitees_ != nullptr) {
-            auto local_superset_entries =
-                    local_visitees_->GetSupersetEntries(launch_pad.vertical_.GetColumnIndicesRef());
+            auto local_superset_entries = local_visitees_->GetSupersetEntries(launch_pad.vertical_);
             auto end_iterator =
                     std::remove_if(local_superset_entries.begin(), local_superset_entries.end(),
                                    [](auto& entry) { return !entry.second->IsPruningSubsets(); });
@@ -60,12 +56,10 @@ std::optional<DependencyCandidate> SearchSpace::PollLaunchPad() {
                           [&superset_entries](auto& entry) { superset_entries.push_back(entry); });
         }
         if (superset_entries.empty()) return launch_pad;
-        LOG_TRACE("* Escaping launch_pad {} from: [UNIMPLEMENTED]",
-                  launch_pad.vertical_.ToString());
-        std::vector<Vertical> superset_verticals;
+        std::vector<boost::dynamic_bitset<>> superset_verticals;
 
         for (auto& entry : superset_entries) {
-            superset_verticals.push_back(context_->GetSchema()->GetVertical(entry.first));
+            superset_verticals.push_back(entry.first);
         }
 
         EscapeLaunchPad(launch_pad.vertical_, std::move(superset_verticals));
@@ -73,12 +67,11 @@ std::optional<DependencyCandidate> SearchSpace::PollLaunchPad() {
 }
 
 // this move looks legit IMO
-void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
-                                  std::vector<Vertical> pruning_supersets) {
-    std::transform(pruning_supersets.begin(), pruning_supersets.end(), pruning_supersets.begin(),
-                   [this](auto& superset) {
-                       return superset.Invert().Without(strategy_->GetIrrelevantColumns());
-                   });
+void SearchSpace::EscapeLaunchPad(boost::dynamic_bitset<> const& launch_pad,
+                                  std::vector<boost::dynamic_bitset<>> pruning_supersets) {
+    std::transform(
+            pruning_supersets.begin(), pruning_supersets.end(), pruning_supersets.begin(),
+            [this](auto& superset) { return ~superset - strategy_->GetIrrelevantColumns(); });
 
     auto pruning_function = [this, &launch_pad](auto const& hitting_set_candidate) -> bool {
         if (scope_ != nullptr &&
@@ -86,8 +79,7 @@ void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
             return true;
         }
 
-        auto launch_pad_candidate =
-                launch_pad.Union(context_->GetSchema()->GetVertical(hitting_set_candidate));
+        auto launch_pad_candidate = launch_pad | hitting_set_candidate;
 
         if ((local_visitees_ == nullptr &&
              IsImpliedByMinDep(launch_pad_candidate, local_visitees_.get())) ||
@@ -95,43 +87,25 @@ void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
             return true;
         }
 
-        if (launch_pad_index_->GetAnySubsetEntry(launch_pad_candidate.GetColumnIndicesRef())
-                    .second != nullptr) {
+        if (launch_pad_index_->GetAnySubsetEntry(launch_pad_candidate).second != nullptr) {
             return true;
         }
 
         return false;
     };
-    {
-        std::string pruning_supersets_str = "[";
-        for (auto& pruning_superset : pruning_supersets) {
-            pruning_supersets_str += pruning_superset.ToString();
-        }
-        pruning_supersets_str += "]";
-        LOG_TRACE("Escaping {} pruned by {}", launch_pad.ToString(), pruning_supersets_str);
-    }
     auto hitting_set = CalculateHittingSet(std::move(pruning_supersets), pruning_function);
-    {
-        std::string hitting_set_str = "[";
-        for (auto& el : hitting_set) {
-            hitting_set_str += el.ToString();
-        }
-        hitting_set_str += "]";
-        LOG_TRACE("* Evaluated hitting set: {}", hitting_set_str);
-    }
     for (auto& escaping : hitting_set) {
-        auto escaped_launch_pad_vertical = launch_pad.Union(escaping);
+        auto escaped_launch_pad_vertical = launch_pad | escaping;
 
         // assert, который не имплементнуть из-за трансформа
         LOG_TRACE("CreateDependencyCandidate while escaping launch pad");
         DependencyCandidate escaped_launch_pad =
                 strategy_->CreateDependencyCandidate(escaped_launch_pad_vertical);
-        LOG_TRACE("Escaped: {}", escaped_launch_pad_vertical.ToString());
         LOG_DEBUG("Proposed launch pad arity: {} should be <= max_lhs: {}",
-                  escaped_launch_pad.vertical_.GetArity(), context_->GetParameters().max_lhs);
-        if (escaped_launch_pad.vertical_.GetArity() <= context_->GetParameters().max_lhs) {
+                  escaped_launch_pad.vertical_.count(), context_->GetParameters().max_lhs);
+        if (escaped_launch_pad.vertical_.count() <= context_->GetParameters().max_lhs) {
             launch_pads_.insert(escaped_launch_pad);
-            launch_pad_index_->Put(escaped_launch_pad.vertical_.GetColumnIndicesRef(),
+            launch_pad_index_->Put(escaped_launch_pad.vertical_,
                                    std::make_unique<DependencyCandidate>(escaped_launch_pad));
         }
     }
@@ -139,19 +113,16 @@ void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
 
 void SearchSpace::AddLaunchPad(DependencyCandidate const& launch_pad) {
     launch_pads_.insert(launch_pad);
-    launch_pad_index_->Put(launch_pad.vertical_.GetColumnIndicesRef(),
-                           std::make_unique<DependencyCandidate>(launch_pad));
+    launch_pad_index_->Put(launch_pad.vertical_, std::make_unique<DependencyCandidate>(launch_pad));
 }
 
 void SearchSpace::ReturnLaunchPad(DependencyCandidate const& launch_pad, bool is_defer) {
     if (is_defer && context_->GetParameters().is_defer_failed_launch_pads) {
         deferred_launch_pads_.push_back(launch_pad);
-        LOG_TRACE("Deferred seed {}", launch_pad.vertical_.ToString());
     } else {
         launch_pads_.insert(launch_pad);
     }
-    launch_pad_index_->Put(launch_pad.vertical_.GetColumnIndicesRef(),
-                           std::make_unique<DependencyCandidate>(launch_pad));
+    launch_pad_index_->Put(launch_pad.vertical_, std::make_unique<DependencyCandidate>(launch_pad));
 }
 
 bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
@@ -164,8 +135,6 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
     boost::optional<double> error;
 
     while (true) {
-        LOG_TRACE("-> {}", traversal_candidate.vertical_.ToString());
-
         if (context_->GetParameters().is_check_estimates) {
             CheckEstimate(strategy_.get(), traversal_candidate);
         }
@@ -175,14 +144,11 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
             error = traversal_candidate.error_.Get();
 
             bool can_be_dependency = *error <= strategy_->max_dependency_error_;
-            local_visitees_->Put(traversal_candidate.vertical_.GetColumnIndicesRef(),
+            local_visitees_->Put(traversal_candidate.vertical_,
                                  std::make_unique<VerticalInfo>(can_be_dependency, false, *error));
             if (can_be_dependency) break;
         } else {
             if (traversal_candidate.error_.GetMin() > strategy_->max_dependency_error_) {
-                LOG_TRACE("Skipping check form {} (estimated error: {}).",
-                          traversal_candidate.vertical_.ToString(),
-                          std::string(traversal_candidate.error_));
                 error.reset();
             } else {
                 error = context_->GetParameters().is_estimate_only
@@ -191,7 +157,7 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
                 // double errorDiff = *error - traversal_candidate.error_.GetMean();
 
                 local_visitees_->Put(
-                        traversal_candidate.vertical_.GetColumnIndicesRef(),
+                        traversal_candidate.vertical_,
                         std::make_unique<VerticalInfo>(error <= strategy_->max_dependency_error_,
                                                        false, *error));
 
@@ -204,25 +170,26 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
             }
         }
 
-        if (traversal_candidate.vertical_.GetArity() >=
+        if (traversal_candidate.vertical_.count() >=
                     context_->GetColumnLayoutRelationData()->GetNumColumns() -
                             strategy_->GetNumIrrelevantColumns() ||
-            traversal_candidate.vertical_.GetArity() >= context_->GetParameters().max_lhs) {
+            traversal_candidate.vertical_.count() >= context_->GetParameters().max_lhs) {
             break;
         }
 
         boost::optional<DependencyCandidate> next_candidate;
         int num_seen_elements = is_ascend_randomly_ ? 1 : -1;
-        for (auto& extension_column : context_->GetSchema()->GetColumns()) {
-            if (traversal_candidate.vertical_.GetColumnIndices()[extension_column->GetIndex()] ||
-                strategy_->IsIrrelevantColumn(*extension_column)) {
+        for (model::Index extension_column_index = 0;
+             extension_column_index != context_->GetSchema()->GetNumColumns();
+             ++extension_column_index) {
+            if (traversal_candidate.vertical_[extension_column_index] ||
+                strategy_->IsIrrelevantColumn(extension_column_index)) {
                 continue;
             }
-            auto extended_vertical =
-                    traversal_candidate.vertical_.Union(static_cast<Vertical>(*extension_column));
+            auto extended_vertical = boost::dynamic_bitset<>(traversal_candidate.vertical_)
+                                             .set(extension_column_index);
 
-            if (scope_ != nullptr &&
-                scope_->GetSupersetEntries(extended_vertical.GetColumnIndicesRef()).empty()) {
+            if (scope_ != nullptr && scope_->GetSupersetEntries(extended_vertical).empty()) {
                 continue;
             }
 
@@ -249,24 +216,19 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
         }
     }
 
-    // std::cout << static_cast<std::string>(traversal_candidate) << std::endl;
-
     if (!error) {
-        LOG_TRACE("Hit ceiling at {}.", traversal_candidate.vertical_.ToString());
         error = strategy_->CalculateError(traversal_candidate.vertical_);
         [[maybe_unused]] double error_diff = *error - traversal_candidate.error_.GetMean();
         LOG_TRACE("Checking candidate... actual error: {}", *error);
     }
 
     if (*error <= strategy_->max_dependency_error_) {
-        LOG_TRACE("Key peak in climbing phase e({})={} -> Need to minimize.",
-                  traversal_candidate.vertical_.ToString(), *error);
         TrickleDown(traversal_candidate.vertical_, *error);
 
         if (recursion_depth_ == 0) {
             assert(scope_ == nullptr);
             global_visitees_->Put(
-                    traversal_candidate.vertical_.GetColumnIndicesRef(),
+                    traversal_candidate.vertical_,
                     std::make_unique<VerticalInfo>(VerticalInfo::ForMinimalDependency()));
         }
 
@@ -275,15 +237,11 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
         if (recursion_depth_ == 0) {
             assert(scope_ == nullptr);
             global_visitees_->Put(
-                    traversal_candidate.vertical_.GetColumnIndicesRef(),
+                    traversal_candidate.vertical_,
                     std::make_unique<VerticalInfo>(VerticalInfo::ForMaximalNonDependency()));
-            LOG_DEBUG("[---] {} is maximum non-dependency (err={}).",
-                      traversal_candidate.vertical_.ToString(), *error);
         } else {
-            local_visitees_->Put(traversal_candidate.vertical_.GetColumnIndicesRef(),
+            local_visitees_->Put(traversal_candidate.vertical_,
                                  std::make_unique<VerticalInfo>(VerticalInfo::ForNonDependency()));
-            LOG_DEBUG("      {} is local-maximum non-dependency (err={}).",
-                      traversal_candidate.vertical_.ToString(), *error);
         }
     }
     return false;
@@ -294,10 +252,8 @@ void SearchSpace::CheckEstimate([[maybe_unused]] DependencyStrategy* strategy,
     LOG_DEBUG("Stepped into method 'checkEstimate' - not implemented yet being a debug method\n");
 }
 
-void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error) {
-    LOG_DEBUG("====== Trickling down from {} ======", main_peak.ToString());
-
-    std::unordered_set<Vertical> maximal_non_deps;
+void SearchSpace::TrickleDown(boost::dynamic_bitset<> const& main_peak, double main_peak_error) {
+    std::unordered_set<boost::dynamic_bitset<>> maximal_non_deps;
     auto alleged_min_deps =
             std::make_unique<model::VerticalMap<VerticalInfo>>(context_->GetSchema());
     auto peaks_comparator = [](auto& candidate1, auto& candidate2) -> bool {
@@ -307,7 +263,7 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
     std::make_heap(peaks.begin(), peaks.end(), peaks_comparator);
     peaks.emplace_back(main_peak, model::ConfidenceInterval(main_peak_error), true);
     std::push_heap(peaks.begin(), peaks.end(), peaks_comparator);
-    std::unordered_set<Vertical> alleged_non_deps;
+    std::unordered_set<boost::dynamic_bitset<>> alleged_non_deps;
 
     while (!peaks.empty()) {
         auto peak = peaks.front();
@@ -318,14 +274,14 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
             peaks.pop_back();
 
             auto peak_hitting_set = CalculateHittingSet(std::move(subset_deps));
-            std::unordered_set<Vertical> escaped_peak_verticals;
+            std::unordered_set<boost::dynamic_bitset<>> escaped_peak_verticals;
 
             for (auto& vertical : peak_hitting_set) {
-                escaped_peak_verticals.insert(peak.vertical_.Without(vertical));
+                escaped_peak_verticals.insert(peak.vertical_ - vertical);
             }
 
             for (auto& escaped_peak_vertical : escaped_peak_verticals) {
-                if (escaped_peak_vertical.GetArity() > 0 &&
+                if (escaped_peak_vertical.count() > 0 &&
                     alleged_non_deps.find(escaped_peak_vertical) == alleged_non_deps.end()) {
                     LOG_TRACE("CreateDependencyCandidate as an escaped peak while trickling down");
                     auto escaped_peak = strategy_->CreateDependencyCandidate(escaped_peak_vertical);
@@ -355,29 +311,22 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
 
     for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
         if (info->is_extremal_ && !global_visitees_->ContainsKey(alleged_min_dep)) {
-            LOG_DEBUG("[{}] Minimum dependency: {} (error={})", recursion_depth_,
-                      main_peak.GetSchema()->GetVertical(alleged_min_dep).ToString(), info->error_);
             // TODO: Костыль -- info в нескольких местах должен храниться. ХЗ, кому он принадлежит,
             // пока копирую
             global_visitees_->Put(alleged_min_dep, std::make_unique<VerticalInfo>(*info));
-            strategy_->RegisterDependency(main_peak.GetSchema()->GetVertical(alleged_min_dep),
-                                          info->error_, *context_);
+            strategy_->RegisterDependency(alleged_min_dep, info->error_, *context_);
         }
     }
 
     auto alleged_min_deps_set = alleged_min_deps->KeySet();
-    auto to_verticals = alleged_min_deps_set |
-                        std::ranges::views::transform([&](boost::dynamic_bitset<> const& bs) {
-                            return context_->GetSchema()->GetVertical(bs);
-                        });
     // TODO: костыль: CalculateHittingSet needs a list, but KeySet returns an unordered_set
     // ещё и морока с transform и unordered_set - мб вообще в лист переделать.
-    auto alleged_max_non_deps_hs =
-            CalculateHittingSet(std::vector<Vertical>(to_verticals.begin(), to_verticals.end()));
-    std::unordered_set<Vertical> alleged_max_non_deps;
+    auto alleged_max_non_deps_hs = CalculateHittingSet(std::vector<boost::dynamic_bitset<>>(
+            alleged_min_deps_set.begin(), alleged_min_deps_set.end()));
+    std::unordered_set<boost::dynamic_bitset<>> alleged_max_non_deps;
 
     for (auto& min_leave_out_vertical : alleged_max_non_deps_hs) {
-        alleged_max_non_deps.insert(min_leave_out_vertical.Invert(main_peak));
+        alleged_max_non_deps.insert(min_leave_out_vertical ^ main_peak);
     }
 
     LOG_DEBUG("* {} alleged maximum non-dependencies (UNIMPLEMENTED)", alleged_max_non_deps.size());
@@ -387,21 +336,19 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
     //         });
 
     // checking the consistency of all data model
-    if (auto alleged_min_deps_key_set = alleged_min_deps->KeySet();
-        !std::all_of(alleged_min_deps_key_set.begin(), alleged_min_deps_key_set.end(),
-                     [main_peak](auto& vertical) -> bool {
-                         return vertical.is_subset_of(main_peak.GetColumnIndicesRef());
-                     })) {
+    if (auto alleged_min_deps_key_set = alleged_min_deps->KeySet(); !std::all_of(
+                alleged_min_deps_key_set.begin(), alleged_min_deps_key_set.end(),
+                [main_peak](auto& vertical) -> bool { return vertical.is_subset_of(main_peak); })) {
         throw std::runtime_error("Main peak should contain all alleged min dependencies");
     }
     if (!std::all_of(
                 alleged_max_non_deps.begin(), alleged_max_non_deps.end(),
-                [main_peak](auto& vertical) -> bool { return main_peak.Contains(vertical); })) {
+                [main_peak](auto& vertical) -> bool { return vertical.is_subset_of(main_peak); })) {
         throw std::runtime_error("Main peak should contain all alleged max non-dependencies");
     }
 
     for (auto& alleged_max_non_dep : alleged_max_non_deps) {
-        if (alleged_max_non_dep.GetArity() == 0) continue;
+        if (alleged_max_non_dep.count() == 0) continue;
 
         if (maximal_non_deps.find(alleged_max_non_dep) != maximal_non_deps.end() ||
             IsKnownNonDependency(alleged_max_non_dep, local_visitees_.get()) ||
@@ -414,11 +361,9 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
                         ? strategy_->CreateDependencyCandidate(alleged_max_non_dep).error_.GetMean()
                         : strategy_->CalculateError(alleged_max_non_dep);
         bool is_non_dep = error > strategy_->min_non_dependency_error_;
-        LOG_TRACE("* Alleged maximal non-dependency {}: non-dep?: {}, error: {}",
-                  alleged_max_non_dep.ToString(), is_non_dep, error);
         if (is_non_dep) {
             maximal_non_deps.insert(alleged_max_non_dep);
-            local_visitees_->Put(alleged_max_non_dep.GetColumnIndicesRef(),
+            local_visitees_->Put(alleged_max_non_dep,
                                  std::make_unique<VerticalInfo>(VerticalInfo::ForNonDependency()));
         } else {
             peaks.emplace_back(alleged_max_non_dep, model::ConfidenceInterval(error), true);
@@ -429,25 +374,21 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
     if (peaks.empty()) {
         for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
             if (!info->is_extremal_ && !global_visitees_->ContainsKey(alleged_min_dep)) {
-                LOG_DEBUG("[{}] Minimum dependency: {} (error={})", recursion_depth_,
-                          strategy_->context_->GetSchema()->GetVertical(alleged_min_dep).ToString(),
-                          info->error_);
                 // TODO: тут надо сделать non-const - костыльный mutable; опять Info в двух местах
                 // хранится
                 info->is_extremal_ = true;
                 global_visitees_->Put(alleged_min_dep, std::make_unique<VerticalInfo>(*info));
-                strategy_->RegisterDependency(
-                        strategy_->context_->GetSchema()->GetVertical(alleged_min_dep),
-                        info->error_, *context_);
+                strategy_->RegisterDependency(alleged_min_dep, info->error_, *context_);
             }
         }
     } else {
         LOG_DEBUG("* {} new peaks (UNIMPLEMENTED)", peaks.size());
-        auto new_scope = std::make_unique<model::VerticalMap<Vertical>>(context_->GetSchema());
+        auto new_scope = std::make_unique<model::VerticalMap<boost::dynamic_bitset<>>>(
+                context_->GetSchema());
         std::sort_heap(peaks.begin(), peaks.end(), peaks_comparator);
         for (auto& peak : peaks) {
-            new_scope->Put(peak.vertical_.GetColumnIndicesRef(),
-                           std::make_unique<Vertical>(peak.vertical_));
+            new_scope->Put(peak.vertical_,
+                           std::make_unique<boost::dynamic_bitset<>>(peak.vertical_));
         }
 
         double new_sample_boost = sample_boost_ * sample_boost_;
@@ -461,18 +402,15 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
                 sample_boost_ * context_->GetParameters().sample_booster);
         nested_search_space->SetContext(context_);
 
-        std::unordered_set<Column> scope_columns;
+        std::unordered_set<model::Index> scope_columns;
         for (auto& vertical : scope_verticals) {
-            util::ForEachIndex(vertical, [&](auto i) {
-                scope_columns.insert(*context_->GetSchema()->GetColumn(i));
-            });
+            util::ForEachIndex(vertical, [&](auto i) { scope_columns.insert(i); });
         }
         for (auto& scope_column : scope_columns) {
             LOG_TRACE("CreateDependencyCandidate while building a nested search space");
-            // TODO: again problems with conversion: Column* -> Vertical*. If this is too
-            // inefficient, consider refactoring
-            nested_search_space->AddLaunchPad(
-                    strategy_->CreateDependencyCandidate(static_cast<Vertical>(scope_column)));
+            nested_search_space->AddLaunchPad(strategy_->CreateDependencyCandidate(
+                    boost::dynamic_bitset<>(context_->GetSchema()->GetNumColumns())
+                            .set(scope_column)));
         }
         num_nested_++;
         // std::cout << static_cast<std::string>(*strategy_) << ' ';
@@ -483,27 +421,21 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
         local_visitees_ = nested_search_space->MoveOutLocalVisitees();
 
         for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
-            if (!IsImpliedByMinDep(context_->GetSchema()->GetVertical(alleged_min_dep),
-                                   global_visitees_.get())) {
-                LOG_DEBUG("[{}] Minimum dependency: {} (error={}) (was right after all)",
-                          recursion_depth_,
-                          context_->GetSchema()->GetVertical(alleged_min_dep).ToString(),
-                          info->error_);
+            if (!IsImpliedByMinDep(alleged_min_dep, global_visitees_.get())) {
                 // TODO: тут надо сделать non-const - костыльный mutable; опять Info в двух местах
                 // хранится
                 info->is_extremal_ = true;
                 global_visitees_->Put(alleged_min_dep, std::make_unique<VerticalInfo>(*info));
-                strategy_->RegisterDependency(context_->GetSchema()->GetVertical(alleged_min_dep),
-                                              info->error_, *context_);
+                strategy_->RegisterDependency(alleged_min_dep, info->error_, *context_);
             }
         }
     }
 }
 
-std::optional<Vertical> SearchSpace::TrickleDownFrom(
+std::optional<boost::dynamic_bitset<>> SearchSpace::TrickleDownFrom(
         DependencyCandidate min_dep_candidate, DependencyStrategy* strategy,
         model::VerticalMap<VerticalInfo>* alleged_min_deps,
-        std::unordered_set<Vertical>& alleged_non_deps,
+        std::unordered_set<boost::dynamic_bitset<>>& alleged_non_deps,
         model::VerticalMap<VerticalInfo>* global_visitees, double boost_factor) {
     if (min_dep_candidate.error_.GetMin() > strategy->max_dependency_error_) {
         throw std::runtime_error(
@@ -511,24 +443,30 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
     }
 
     bool are_all_parents_known_non_deps = true;
-    if (min_dep_candidate.vertical_.GetArity() > 1) {
+    if (min_dep_candidate.vertical_.count() > 1) {
         std::priority_queue<DependencyCandidate, std::vector<DependencyCandidate>,
                             std::function<bool(DependencyCandidate&, DependencyCandidate&)>>
                 parent_candidates([](auto& candidate1, auto& candidate2) {
                     return DependencyCandidate::MinErrorComparator(candidate1, candidate2);
                 });
-        for (auto& parent_vertical : min_dep_candidate.vertical_.GetParents()) {
+        auto parent_vertical = min_dep_candidate.vertical_;
+        util::ForEachIndex(parent_vertical, [&](model::Index i) {
+            parent_vertical.reset(i);
             if (IsKnownNonDependency(parent_vertical, local_visitees_.get()) ||
-                IsKnownNonDependency(parent_vertical, global_visitees))
-                continue;
+                IsKnownNonDependency(parent_vertical, global_visitees)) {
+                parent_vertical.set(i);
+                return;
+            }
             if (alleged_non_deps.count(parent_vertical) != 0) {
                 are_all_parents_known_non_deps = false;
-                continue;
+                parent_vertical.set(i);
+                return;
             }
             // TODO: construction methods should return unique_ptr<...>
             LOG_TRACE("CreateDependencyCandidate while trickling down from");
             parent_candidates.push(strategy->CreateDependencyCandidate(parent_vertical));
-        }
+            parent_vertical.set(i);
+        });
 
         while (!parent_candidates.empty()) {
             auto parent_candidate = parent_candidates.top();
@@ -538,7 +476,7 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
                 do {
                     if (parent_candidate.IsExact()) {
                         local_visitees_->Put(
-                                parent_candidate.vertical_.GetColumnIndicesRef(),
+                                parent_candidate.vertical_,
                                 std::make_unique<VerticalInfo>(VerticalInfo::ForNonDependency()));
                     } else {
                         alleged_non_deps.insert(parent_candidate.vertical_);
@@ -576,10 +514,8 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
                                      : strategy->CalculateError(min_dep_candidate.vertical_);
     [[maybe_unused]] double error_diff = candidate_error - min_dep_candidate.error_.GetMean();
     if (candidate_error <= strategy->max_dependency_error_) {
-        LOG_TRACE("* Found {}-ary minimum dependency candidate: {}",
-                  min_dep_candidate.vertical_.GetArity(), std::string(min_dep_candidate));
-        alleged_min_deps->RemoveSupersetEntries(min_dep_candidate.vertical_.GetColumnIndicesRef());
-        alleged_min_deps->Put(min_dep_candidate.vertical_.GetColumnIndicesRef(),
+        alleged_min_deps->RemoveSupersetEntries(min_dep_candidate.vertical_);
+        alleged_min_deps->Put(min_dep_candidate.vertical_,
                               std::make_unique<VerticalInfo>(true, are_all_parents_known_non_deps,
                                                              candidate_error));
         if (are_all_parents_known_non_deps && context_->GetParameters().is_check_estimates) {
@@ -588,46 +524,46 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
         return min_dep_candidate.vertical_;
     } else {
         LOG_TRACE("* Guessed incorrect {}-ary minimum dependency candidate.",
-                  min_dep_candidate.vertical_.GetArity());
-        local_visitees_->Put(min_dep_candidate.vertical_.GetColumnIndicesRef(),
+                  min_dep_candidate.vertical_.count());
+        local_visitees_->Put(min_dep_candidate.vertical_,
                              std::make_unique<VerticalInfo>(VerticalInfo::ForNonDependency()));
 
         if (strategy->ShouldResample(min_dep_candidate.vertical_, boost_factor)) {
             context_->CreateFocusedSample(min_dep_candidate.vertical_, boost_factor);
         }
-        return std::optional<Vertical>();
+        return std::optional<boost::dynamic_bitset<>>();
     }
 }
 
 // TODO: critical part - consider optimization
 // TODO: list -> vector as list doesn't have RAIterators therefore can't be sorted
-std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(std::vector<Vertical> verticals,
-                                                              auto pruning_function) const {
+std::unordered_set<boost::dynamic_bitset<>> SearchSpace::CalculateHittingSet(
+        std::vector<boost::dynamic_bitset<>> verticals, auto pruning_function) const {
     RelationalSchema const* schema = context_->GetSchema();
     auto arity_comparer = [](boost::dynamic_bitset<> const& vertical1,
                              boost::dynamic_bitset<> const& vertical2) {
         return vertical1.count() < vertical2.count();
     };
 
-    std::ranges::sort(verticals, [](Vertical const& vertical1, Vertical const& vertical2) {
-        return vertical1.GetArity() < vertical2.GetArity();
+    std::ranges::sort(verticals, [](boost::dynamic_bitset<> const& vertical1,
+                                    boost::dynamic_bitset<> const& vertical2) {
+        return vertical1.count() < vertical2.count();
     });
     model::VerticalMap<std::monostate> consolidated_verticals(schema);
     model::VerticalMap<std::monostate> hitting_set(schema);
     // TODO: VerticalMap requires `shared_ptr`s, so using this hack with a dummy pointer here.
     auto dummy_ptr = std::make_shared<std::monostate>();
 
-    hitting_set.Put(schema->CreateEmptyVertical().GetColumnIndicesRef(), dummy_ptr);
+    hitting_set.Put(boost::dynamic_bitset<>(schema->GetNumColumns()), dummy_ptr);
 
-    for (Vertical const& vertical : verticals) {
-        if (consolidated_verticals.GetAnySubsetEntry(vertical.GetColumnIndicesRef()).second !=
-            nullptr) {
+    for (boost::dynamic_bitset<> const& vertical : verticals) {
+        if (consolidated_verticals.GetAnySubsetEntry(vertical).second != nullptr) {
             continue;
         }
-        consolidated_verticals.Put(vertical.GetColumnIndicesRef(), dummy_ptr);
+        consolidated_verticals.Put(vertical, dummy_ptr);
 
         std::vector<boost::dynamic_bitset<>> invalid_hitting_set_members =
-                hitting_set.GetSubsetKeys(vertical.Invert().GetColumnIndicesRef());
+                hitting_set.GetSubsetKeys(~vertical);
         std::ranges::sort(invalid_hitting_set_members, arity_comparer);
 
         for (auto& invalid_hitting_set_member : invalid_hitting_set_members) {
@@ -635,13 +571,11 @@ std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(std::vector<Vertic
         }
 
         for (boost::dynamic_bitset<> const& invalid_member : invalid_hitting_set_members) {
-            boost::dynamic_bitset<> const& column_indices = vertical.GetColumnIndices();
-            for (size_t corrective_column_index = column_indices.find_first();
+            for (size_t corrective_column_index = vertical.find_first();
                  corrective_column_index != boost::dynamic_bitset<>::npos;
-                 corrective_column_index = column_indices.find_next(corrective_column_index)) {
-                Column const& corrective_column = *schema->GetColumn(corrective_column_index);
+                 corrective_column_index = vertical.find_next(corrective_column_index)) {
                 boost::dynamic_bitset<> corrected_member =
-                        boost::dynamic_bitset<>(invalid_member).set(corrective_column.GetIndex());
+                        boost::dynamic_bitset<>(invalid_member).set(corrective_column_index);
 
                 if (hitting_set.GetAnySubsetEntry(corrected_member).second == nullptr) {
                     bool is_pruned = pruning_function(corrected_member);
@@ -653,67 +587,63 @@ std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(std::vector<Vertic
         }
         if (hitting_set.IsEmpty()) break;
     }
-    auto to_verticals = hitting_set.KeySet() |
-                        std::ranges::views::transform([&](boost::dynamic_bitset<> const& s) {
-                            return schema->GetVertical(s);
-                        });
-    return {to_verticals.begin(), to_verticals.end()};
+    return hitting_set.KeySet();
 }
 
-std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(
-        std::vector<Vertical> verticals) const {
+std::unordered_set<boost::dynamic_bitset<>> SearchSpace::CalculateHittingSet(
+        std::vector<boost::dynamic_bitset<>> verticals) const {
     return CalculateHittingSet(std::move(verticals), [](auto&&...) { return false; });
 }
 
 void SearchSpace::RequireMinimalDependency(DependencyStrategy* strategy,
-                                           Vertical const& min_dependency) {
+                                           boost::dynamic_bitset<> const& min_dependency) {
     double error = strategy->CalculateError(min_dependency);
     if (error > strategy->max_dependency_error_) {
         throw std::runtime_error("Wrong minimal dependency estimate");
     }
-    if (min_dependency.GetArity() > 1) {
-        for (auto& parent : min_dependency.GetParents()) {
+    if (min_dependency.count() > 1) {
+        boost::dynamic_bitset<> parent = min_dependency;
+        util::ForEachIndex(min_dependency, [&](model::Index i) {
+            parent.reset(i);
             double parent_error = strategy->CalculateError(parent);
+            parent.set(i);
             if (parent_error <= strategy->min_non_dependency_error_) {
                 throw std::runtime_error("Wrong minimal dependency estimate");
             }
-        }
+        });
     }
 }
 
-std::vector<Vertical> SearchSpace::GetSubsetDeps(Vertical const& vertical,
-                                                 model::VerticalMap<VerticalInfo>* vertical_infos) {
-    auto subset_entries = vertical_infos->GetSubsetEntries(vertical.GetColumnIndicesRef());
+std::vector<boost::dynamic_bitset<>> SearchSpace::GetSubsetDeps(
+        boost::dynamic_bitset<> const& vertical, model::VerticalMap<VerticalInfo>* vertical_infos) {
+    auto subset_entries = vertical_infos->GetSubsetEntries(vertical);
     auto subset_entries_end =
             std::remove_if(subset_entries.begin(), subset_entries.end(),
                            [](auto& entry) { return !entry.second->is_dependency_; });
-    std::vector<Vertical> subset_deps;
+    std::vector<boost::dynamic_bitset<>> subset_deps;
 
     std::transform(subset_entries.begin(), subset_entries_end,
                    std::inserter(subset_deps, subset_deps.begin()),
-                   [&](auto& entry) { return vertical.GetSchema()->GetVertical(entry.first); });
+                   [&](auto& entry) { return entry.first; });
 
     return subset_deps;
 }
 
-bool SearchSpace::IsImpliedByMinDep(Vertical const& vertical,
+bool SearchSpace::IsImpliedByMinDep(boost::dynamic_bitset<> const& vertical,
                                     model::VerticalMap<VerticalInfo>* vertical_infos) {
-    // TODO: function<bool(Vertical, ...)> --> function<bool(Vertical&, ...)>
     return vertical_infos
-                   ->GetAnySubsetEntry(vertical.GetColumnIndicesRef(),
+                   ->GetAnySubsetEntry(vertical,
                                        []([[maybe_unused]] auto vertical, auto info) {
                                            return info->is_dependency_ && info->is_extremal_;
                                        })
                    .second != nullptr;
 }
 
-bool SearchSpace::IsKnownNonDependency(Vertical const& vertical,
+bool SearchSpace::IsKnownNonDependency(boost::dynamic_bitset<> const& vertical,
                                        model::VerticalMap<VerticalInfo>* vertical_infos) {
     return vertical_infos
-                   ->GetAnySupersetEntry(vertical.GetColumnIndicesRef(),
-                                         []([[maybe_unused]] auto vertical, auto info) {
-                                             return !info->is_dependency_;
-                                         })
+                   ->GetAnySupersetEntry(vertical, []([[maybe_unused]] auto vertical,
+                                                      auto info) { return !info->is_dependency_; })
                    .second != nullptr;
 }
 
@@ -723,9 +653,4 @@ void SearchSpace::PrintStats() const {
 
 void SearchSpace::EnsureInitialized() {
     strategy_->EnsureInitialized(this);
-    std::string initialized_launch_pads;
-    for (auto const& pad : launch_pads_) {
-        initialized_launch_pads += std::string(pad) + " ";
-    }
-    LOG_TRACE("Initialized with launch pads: {}", initialized_launch_pads);
 }

@@ -2,8 +2,9 @@
 #include <functional>
 #include <utility>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
-#include "core/model/table/vertical.h"
 
 class DependencyCandidate {
 private:
@@ -11,15 +12,13 @@ private:
 
 public:
     model::ConfidenceInterval error_;
-    Vertical vertical_;
+    boost::dynamic_bitset<> vertical_;
 
-    DependencyCandidate(Vertical vertical, model::ConfidenceInterval error, bool is_exact)
+    DependencyCandidate(boost::dynamic_bitset<> vertical, model::ConfidenceInterval error,
+                        bool is_exact)
         : is_exact_(is_exact), error_(error), vertical_(std::move(vertical)) {}
 
     bool operator<(DependencyCandidate const& other) const;
-
-    // TODO: implement if used
-    // bool operator==(DependencyCandidate const& other) const;
 
     bool IsExact() const {
         return is_exact_ && error_.IsPoint();
@@ -33,11 +32,4 @@ public:
     // static bool maxErrorComparator(DependencyCandidate const &, DependencyCandidate const &);
     static bool FullArityErrorComparator(DependencyCandidate const&, DependencyCandidate const&);
     static bool FullErrorArityComparator(DependencyCandidate const&, DependencyCandidate const&);
-
-    explicit operator std::string() const {
-        return "Candidate " + static_cast<std::string>(vertical_) +
-               static_cast<std::string>(error_);
-    }
-
-    friend std::ostream& operator<<(std::ostream&, DependencyCandidate const&);
 };
