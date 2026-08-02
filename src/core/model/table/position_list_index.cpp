@@ -15,7 +15,6 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/vertical.h"
 #include "core/util/logger.h"
 
 namespace model {
@@ -227,11 +226,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
                                                this->relation_size_, this->relation_size_);
 }
 
-std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
-        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) const {
-    return ProbeAll(probing_columns.GetColumnIndicesRef(), relation_data);
-}
-
 bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relation_data,
                                   boost::dynamic_bitset<> const& probing_columns,
                                   std::vector<int>& probe) {
@@ -242,11 +236,6 @@ bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relati
         probe.push_back(value);
     }
     return true;
-}
-
-bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relation_data,
-                                  Vertical const& probing_columns, std::vector<int>& probe) {
-    return TakeProbe(position, relation_data, probing_columns.GetColumnIndicesRef(), probe);
 }
 
 std::string PositionListIndex::ToString() const {

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <future>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -13,6 +14,7 @@
 #include "core/algorithms/fd/hycommon/util/pli_util.h"
 #include "core/algorithms/fd/hycommon/validator_helpers.h"
 #include "core/algorithms/fd/hyfd/hyfd_config.h"
+#include "core/util/bitset_utils.h"
 
 namespace {
 

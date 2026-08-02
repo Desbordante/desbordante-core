@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "core/model/table/column.h"
+#include <boost/dynamic_bitset.hpp>
 
 class ColumnLayoutRelationData;
 
@@ -32,8 +32,6 @@ protected:
     static void SortClusters(std::deque<Cluster>& clusters);
     static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
                           boost::dynamic_bitset<> const& probing_columns, std::vector<int>& probe);
-    static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
-                          Vertical const& probing_columns, std::vector<int>& probe);
 
 private:
     double entropy_;
@@ -139,8 +137,6 @@ public:
     std::unique_ptr<PositionListIndex> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;
     std::unique_ptr<PositionListIndex> ProbeAll(boost::dynamic_bitset<> const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data) const;
-    std::unique_ptr<PositionListIndex> ProbeAll(Vertical const& probing_columns,
                                                 ColumnLayoutRelationData& relation_data) const;
     std::string ToString() const;
 };
