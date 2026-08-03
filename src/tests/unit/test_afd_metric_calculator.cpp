@@ -45,10 +45,16 @@ INSTANTIATE_TEST_SUITE_P(
             AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG2, 1.L/6),
             AFDMetricCalculatorParams({4}, {3}, AFDMetric::kFi, 1 - std::log(4) / std::log(746496)),
             AFDMetricCalculatorParams({4}, {3}, AFDMetric::kMuPlus, 498.L/630),
+            AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG3, 11.L/12),
+            AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG1, 1.L/12),
+            AFDMetricCalculatorParams({4}, {3}, AFDMetric::kRho, 0.8333333333333334),
             AFDMetricCalculatorParams({3}, {4}, AFDMetric::kTau, 54.L/114),
             AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG2, 5.L/6),
             AFDMetricCalculatorParams({3}, {4}, AFDMetric::kFi, std::log(432) / std::log(13824)),
-            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kMuPlus, 252.L/912)
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kMuPlus, 252.L/912),
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG3, 5.L/12),
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG1, 13.L/12),
+            AFDMetricCalculatorParams({3}, {4}, AFDMetric::kRho, 0.6666666666666666)
             ));
 // clang-format on
 

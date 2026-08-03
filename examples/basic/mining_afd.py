@@ -29,7 +29,7 @@ df = pd.read_csv(TABLE)
 print(tabulate(df, headers=['Id','ProductName','Price'], showindex=False, tablefmt='psql')+'\n')
 
 
-pyro_alg = desbordante.afd.algorithms.Default()
+pyro_alg = desbordante.afd.algorithms.Pyro()
 pyro_alg.load_data(table=(TABLE, ',', True))
 pyro_alg.execute(error=ERROR)
 

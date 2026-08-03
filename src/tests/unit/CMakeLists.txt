@@ -234,6 +234,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     gmock
@@ -247,24 +248,13 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     ${DESBORDANTE_PREFIX}::fd::euler
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     gmock
-    Boost::headers
-)
-desbordante_add_test(
-    fd.afd_metric
-    SRCS
-    test_afd_metric_calculator.cpp
-    LIBS
-    ${DESBORDANTE_PREFIX}::fd::afd_metric
-    ${DESBORDANTE_PREFIX}::testlib::common
-    ${DESBORDANTE_PREFIX}::model::table
-    ${DESBORDANTE_PREFIX}::model::types
-    spdlog::spdlog_header_only
     Boost::headers
 )
 desbordante_add_test(
@@ -290,6 +280,7 @@ desbordante_add_test(
     test_pfdtane.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
@@ -329,6 +320,7 @@ desbordante_add_test(
     test_tane_afd_measures.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
@@ -393,6 +385,36 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::parser::sequence
     spdlog::spdlog_header_only
     magic_enum::magic_enum
+    gmock
+    Boost::headers
+)
+
+# --- AFD ---
+desbordante_add_test(
+    afd.metric_calc
+    SRCS
+    test_afd_metric_calculator.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::afd::metric_calc
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+
+desbordante_add_test(
+    afd.algos
+    SRCS
+    test_afd_algorithm.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::fd::tane
+    ${DESBORDANTE_PREFIX}::afd
+    spdlog::spdlog_header_only
     gmock
     Boost::headers
 )

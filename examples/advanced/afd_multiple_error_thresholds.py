@@ -1,6 +1,6 @@
 import desbordante
 import pandas as pd
-pyro = desbordante.afd.algorithms.Pyro()  # same as desbordante.afd.algorithms.Default()
+pyro = desbordante.afd.algorithms.Pyro()
 df = pd.read_csv('examples/datasets/iris.csv', sep=',', header=None)
 pyro.load_data(table=df)
 pyro.execute(error=0.0)
