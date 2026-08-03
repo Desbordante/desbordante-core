@@ -4,7 +4,6 @@
 #include <list>
 #include <memory>
 
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/algorithms/fd/tane/model/lattice_level.h"
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 #include "core/config/error/option.h"
@@ -18,17 +17,13 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon() : PliBasedFDAlgorithm() {
+TaneCommon::TaneCommon() : PliBasedAFDAlgorithm() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
 double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
                                      ColumnLayoutRelationData const* relation_data) {
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
-}
-
-void TaneCommon::RegisterAndCountFd(Vertical lhs, Column const* rhs) {
-    RegisterFd(std::move(lhs), *rhs, relation_->GetSharedPtrSchema());
 }
 
 void TaneCommon::Prune(model::LatticeLevel* level) {
@@ -65,7 +60,8 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
                             }
                             // Found fd: vertex->rhs => register it
                             if (is_rhs_candidate) {
-                                RegisterAndCountFd(columns, schema->GetColumn(rhs_index));
+                                RegisterAfd(AFD(columns, *schema->GetColumn(rhs_index), ucc_error,
+                                                relation_->GetSharedPtrSchema()));
                             }
                         }
                     }
@@ -116,7 +112,7 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             if (error <= max_fd_error_) {
                 Column const* rhs = schema->GetColumns()[a_index].get();
 
-                RegisterAndCountFd(lhs, rhs);
+                RegisterAfd(AFD(lhs, *rhs, error, relation_->GetSharedPtrSchema()));
                 xa_vertex->GetRhsCandidates().set(rhs->GetIndex(), false);
                 if (error == 0) {
                     xa_vertex->GetRhsCandidates() &= lhs.GetColumnIndices();
@@ -167,7 +163,8 @@ void TaneCommon::ExecuteInternal() {
         double fd_error = CalculateZeroAryFdError(&column_data);
         if (fd_error <= max_fd_error_) {  // TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
-            RegisterAndCountFd(schema->CreateEmptyVertical(), column.get());
+            RegisterAfd(AFD(schema->CreateEmptyVertical(), *column, fd_error,
+                            relation_->GetSharedPtrSchema()));
 
             vertex->GetRhsCandidates().set(column->GetIndex(), false);
             if (fd_error == 0) {
@@ -194,7 +191,8 @@ void TaneCommon::ExecuteInternal() {
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
                     if (rhs_index != column.GetColumnIndices().find_first()) {
-                        RegisterAndCountFd(column, schema->GetColumn(rhs_index));
+                        RegisterAfd(AFD(column, *schema->GetColumn(rhs_index), ucc_error,
+                                        relation_->GetSharedPtrSchema()));
                     }
                 }
                 vertex->GetRhsCandidates() &= column.GetColumnIndices();
@@ -229,7 +227,7 @@ void TaneCommon::ExecuteInternal() {
         // TODO: printProfilingData
     }
 
-    LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
+    LOG_DEBUG("Total FD count: {}", afd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
 }
 

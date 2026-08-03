@@ -5,7 +5,6 @@
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
-#include "core/algorithms/fd/tane/afd_measures.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/fd/tane/tane.h"
 #include "core/config/names.h"
@@ -63,8 +62,8 @@ TEST_P(TestTanePdepSelfValidation, SelfCalculationTest) {
     auto relation = ColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [column_id, expected_error] : p.errors) {
         auto const& column_pli = relation->GetColumnData(column_id).GetPLWSIndex();
-        config::ErrorType error = algos::PdepSelf(column_pli);
-        error = algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(column_pli);
+        config::ErrorType error =
+                algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(column_pli);
         EXPECT_NEAR(error, expected_error, eps)
                 << "column_id = " << column_id << "\n"
                 << "error = " << error << "\n"
@@ -83,16 +82,20 @@ TEST_P(TestTaneAfdMeasuresValidation, ErrorCalculationTest) {
         config::ErrorType error;
         switch (p.error_measure) {
             case algos::AfdErrorMeasure::kPdep:
-                error = algos::CalculatePdepMeasure(lhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(
+                        lhs, lhs->Intersect(rhs).get());
                 break;
             case algos::AfdErrorMeasure::kTau:
-                error = algos::CalculateTauMeasure(lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateTau(
+                        lhs, rhs, lhs->Intersect(rhs).get());
                 break;
             case algos::AfdErrorMeasure::kMuPlus:
-                error = algos::CalculateMuPlusMeasure(lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(
+                        lhs, rhs, lhs->Intersect(rhs).get());
                 break;
             case algos::AfdErrorMeasure::kRho:
-                error = algos::CalculateRhoMeasure(lhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateRhoMeasure(
+                        lhs, lhs->Intersect(rhs).get());
                 break;
             default:
                 FAIL();

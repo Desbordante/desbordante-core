@@ -5,8 +5,8 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
-#include "core/algorithms/fd/tane/afd_measures.h"
 #include "core/config/equal_nulls/type.h"
+#include "core/config/error/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_relation_data.h"
@@ -51,6 +51,9 @@ public:
     static long double CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                    size_t num_rows);
 
+    static long double CalculateG3(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                   size_t num_rows);
+
     static long double CalculateTau(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
                                     model::PLIWS const* joint_pli);
 
@@ -59,6 +62,16 @@ public:
 
     static long double CalculateFI(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
                                    size_t num_rows);
+
+    static config::ErrorType CalculateZeroAryG1(ColumnData const* rhs,
+                                                unsigned long long num_tuple_pairs);
+
+    static config::ErrorType CalculateG1Error(model::PLIWS const* lhs_pli,
+                                              model::PLIWS const* joint_pli,
+                                              unsigned long long num_tuple_pairs);
+
+    static config::ErrorType CalculateRhoMeasure(model::PLIWS const* x_pli,
+                                                 model::PLIWS const* xa_pli);
 
     long double GetResult() const {
         return result_;
