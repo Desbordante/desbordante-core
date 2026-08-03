@@ -69,7 +69,7 @@ desbordante_add_bind(
 
 desbordante_add_bind(
     afd_metric SRCS afd_metric/bind_afd_metric_calculation.cpp LIBS
-    ${DESBORDANTE_PREFIX}::fd::afd_metric Boost::headers
+    ${DESBORDANTE_PREFIX}::afd::metric_calc Boost::headers
 )
 
 desbordante_add_bind(
@@ -156,6 +156,18 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::bindlib::util
     magic_enum::magic_enum
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+
+desbordante_add_bind(
+    afd
+    SRCS
+    fd/bind_afd.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fd::tane
+    ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers
 )

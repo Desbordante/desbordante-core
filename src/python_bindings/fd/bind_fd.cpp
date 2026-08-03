@@ -73,24 +73,10 @@ void BindFd(py::module_& main_module) {
                     }));
 
     static constexpr auto kPyroName = "Pyro";
-    static constexpr auto kTaneName = "Tane";
-    static constexpr auto kPFDTaneName = "PFDTane";
-    auto fd_algos_module = BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep,
-                                         FdMine, FUN, Pyro, Tane, PFDTane>(
-            fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
-            {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine", "FUN",
-             kPyroName, kTaneName, kPFDTaneName});
-
-    auto define_submodule = [&fd_algos_module, &main_module](char const* name,
-                                                             std::vector<char const*> algorithms) {
-        auto algos_module = main_module.def_submodule(name).def_submodule("algorithms");
-        for (auto algo_name : algorithms) {
-            algos_module.attr(algo_name) = fd_algos_module.attr(algo_name);
-        }
-        algos_module.attr("Default") = algos_module.attr(algorithms.front());
-    };
-
-    define_submodule("afd", {kPyroName, kTaneName});
-    define_submodule("pfd", {kPFDTaneName});
+    auto fd_algos_module =
+            BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep, FdMine, FUN,
+                          Pyro>(fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
+                                {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep",
+                                 "FdMine", "FUN", kPyroName});
 }
 }  // namespace python_bindings
