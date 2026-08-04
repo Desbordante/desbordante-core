@@ -32,6 +32,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 
 # --- AR ---
@@ -49,6 +50,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 
 # --- CFD ---
@@ -65,6 +67,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 
 desbordante_add_test(
@@ -92,6 +95,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 
 # --- CIND ---
@@ -143,6 +147,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 
 # --- DC ---
@@ -160,6 +165,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     dc.verifier
@@ -167,11 +173,44 @@ desbordante_add_test(
     test_dc_verifier.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::dc::fastadc
+    ${DESBORDANTE_PREFIX}::dc::fastadc::structs
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
+)
+desbordante_add_test(
+    dc.weever
+    SRCS
+    test_weever.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::dc::weever
+    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::testlib::mock
+    ${DESBORDANTE_PREFIX}::parser::csv
+    spdlog::spdlog_header_only
+    Boost::headers
+    gmock
+    roaring
+)
+desbordante_add_test(
+    dc.weever.benchmark
+    SRCS
+    benchmark_weever.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::dc::weever
+    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::testlib::mock
+    ${DESBORDANTE_PREFIX}::parser::csv
+    spdlog::spdlog_header_only
+    Boost::headers
+    gmock
+    roaring
 )
 
 # --- DD ---
@@ -185,6 +224,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     dd.split
@@ -196,6 +236,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 
 # --- DES ---
@@ -213,6 +254,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 
 # --- FD ---
@@ -239,6 +281,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.approx
@@ -256,6 +299,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.mine
@@ -273,6 +317,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.tane.pfd
@@ -288,6 +333,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.pfd_verifier
@@ -300,6 +346,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.sfd.cords
@@ -313,6 +360,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.tane
@@ -328,6 +376,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.verifier.dynamic
@@ -342,6 +391,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     fd.verifier
@@ -417,6 +467,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     gmock
     Boost::headers
+    roaring
 )
 
 # --- GFD ---
@@ -431,6 +482,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     gfd.validator
@@ -458,6 +510,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 
 # --- IND ---
@@ -477,6 +530,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     ind.faida
@@ -490,6 +544,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     ind.verifier
@@ -502,6 +557,7 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     magic_enum::magic_enum
     Boost::headers
+    roaring
 )
 
 # --- Model ---
@@ -536,6 +592,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     gmock
     Boost::headers
+    roaring
 )
 desbordante_add_test(
     model.table
@@ -548,6 +605,16 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::parser::csv
     magic_enum::magic_enum
     Boost::headers
+)
+desbordante_add_test(
+    model.dynamic_row_table
+    SRCS
+    test_typed_dynamic_row_table_data.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::model::types
+    ${DESBORDANTE_PREFIX}::util
+    Boost::headers
+    spdlog::spdlog_header_only
 )
 
 # --- ND ---
@@ -562,6 +629,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 
 # --- MD ---
@@ -577,6 +645,7 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 desbordante_add_test(
     md.metrics
@@ -589,6 +658,7 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 desbordante_add_test(
     md.verifier
@@ -602,6 +672,7 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 
 # --- Metric ---
@@ -616,6 +687,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 
 # --- OD ---
@@ -630,6 +702,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 desbordante_add_test(
     od.order
@@ -642,6 +715,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 desbordante_add_test(
     od.set_based_aod_verifier
@@ -655,6 +729,7 @@ desbordante_add_test(
     magic_enum::magic_enum
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
+    roaring
 )
 
 # --- PAC ---
@@ -696,6 +771,7 @@ desbordante_add_test(
     gmock
     Boost::headers
     ${DESBORDANTE_PREFIX}::fd::hy::model
+    roaring
 )
 desbordante_add_test(
     ucc.verifier
@@ -711,6 +787,7 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::fd::hy::model
+    roaring
 )
 
 # --- SD ---
@@ -738,4 +815,14 @@ desbordante_add_test(
     Boost::headers
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
+)
+
+desbordante_add_test(
+    lttree
+    SRCS
+    test_lttree.cpp
+    LIBS
+    gmock
+    roaring
+    spdlog
 )

@@ -76,6 +76,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::ucc::hpivalid
               ${DESBORDANTE_PREFIX}::ucc::verifier
               ${DESBORDANTE_PREFIX}::sd::verifier
+              ${DESBORDANTE_PREFIX}::dc::weever
 )
 
 set(NAME algos)
@@ -92,4 +93,5 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::model::sequence
             spdlog::spdlog_header_only
             Boost::headers
+            roaring
 )

@@ -48,6 +48,14 @@ CPMAddPackage(
     SYSTEM YES
 )
 
+CPMAddPackage(
+    NAME roaring
+    GITHUB_REPOSITORY RoaringBitmap/CRoaring
+    GIT_TAG v2.1.2
+    OPTIONS "ROARING_BUILD_TESTS OFF" "ROARING_BUILD_BENCHMARKS OFF"
+    SYSTEM YES
+)
+
 if(DESBORDANTE_BUILD_TESTS)
     CPMAddPackage(
         NAME googletest

@@ -4,6 +4,7 @@
 #include <variant>
 
 #include "core/algorithms/dc/model/column_operand.h"
+#include "core/algorithms/dc/model/component.h"
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/tuple.h"
 #include "core/model/table/typed_column_data.h"
@@ -75,6 +76,32 @@ public:
         if (IsConstant()) return GetVariableOperand().GetTuple();
         if (IsCrossTuple()) return Tuple::kMixed;
         return l_.GetTuple();
+    }
+
+    // Transform a predicate to the following form: s.A op t.B
+    void Canonize() {
+        if (!IsCrossTuple()) return;
+        if (l_.GetTuple() != dc::Tuple::kS) {
+            std::swap(l_, r_);
+            op_.Inverse();
+        }
+    }
+
+    bool Eval(std::vector<std::byte const*> const& row) const {
+        assert(IsOneTuple());
+        dc::Component l_comp = l_.Eval(row);
+        dc::Component r_comp = r_.Eval(row);
+        return dc::Component::Eval(l_comp, r_comp, op_);
+    }
+
+    bool Eval(std::vector<std::byte const*> const& s_row,
+              std::vector<std::byte const*> const& t_row) const {
+        assert(IsCrossTuple());
+        auto const& l_row = (l_.GetTuple() == Tuple::kT) ? t_row : s_row;
+        auto const& r_row = (r_.GetTuple() == Tuple::kT) ? t_row : s_row;
+        dc::Component l_comp = l_.Eval(l_row);
+        dc::Component r_comp = r_.Eval(r_row);
+        return dc::Component::Eval(l_comp, r_comp, op_);
     }
 };
 

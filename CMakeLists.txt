@@ -133,6 +133,7 @@ string(
     "${DESBORDANTE_DEBUG_INFO_FLAG}"
     "-Wall"
     "-Wextra"
+    "-Wno-error=unused-parameter"
     "-Werror"
     "-fno-omit-frame-pointer"
     "-fno-optimize-sibling-calls"

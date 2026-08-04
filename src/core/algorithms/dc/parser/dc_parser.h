@@ -5,7 +5,7 @@
 #include "core/algorithms/dc/model/dc.h"
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
-#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/typed_column_data.h"
 
 namespace algos::dc {
@@ -13,8 +13,8 @@ namespace algos::dc {
 class DCParser {
 private:
     std::vector<std::string> str_operators_;
-    ColumnLayoutRelationData const* relation_;
-    std::vector<model::TypedColumnData> const& data_;
+    RelationalSchema const* schema_;
+    std::vector<model::Type const*> const& types_;
     static constexpr std::string_view const kSep = " and ";
     std::string dc_string_;
     bool has_next_predicate_;
@@ -22,8 +22,8 @@ private:
     size_t cur_;
 
 public:
-    DCParser(std::string dc_string, ColumnLayoutRelationData const* relation,
-             std::vector<model::TypedColumnData> const& data);
+    DCParser(std::string dc_string, RelationalSchema const* schema,
+             std::vector<model::Type const*> const& types);
 
     DC Parse();
     Predicate GetNextPredicate();
