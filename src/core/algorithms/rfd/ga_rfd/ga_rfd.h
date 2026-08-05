@@ -78,7 +78,7 @@ private:
     std::size_t population_size_ = 1024;
     double crossover_probability_ = 1.0;
     double mutation_probability_ = 1.0;
-    std::uint32_t seed_ = std::random_device{}();  // random number generator seed
+    std::uint32_t seed_ = 123;  // random number generator seed
 
     std::unordered_set<RFD, RFDHash> discovered_;
 
@@ -86,7 +86,7 @@ private:
     void RegisterOptions();
     void MakeExecuteOptsAvailable() final;
     void LoadDataInternal() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetState() final;
 
     // helper methods

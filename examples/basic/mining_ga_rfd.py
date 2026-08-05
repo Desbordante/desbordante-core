@@ -253,7 +253,7 @@ print("""
                           Accepts a single value (applied to all columns)
                           or a list of values (one per column). Values 
                           must be in [0,1]. (default {1.0, 1.0, ...})
-  seed                  - seed for reproducible results
+  seed                  - seed for reproducible results (default 123)
   cache_size            - maximum number of cached comparisons, the bigger 
                           the faster the algorithm will be (default 10000)
 """)
@@ -316,11 +316,7 @@ print_table(df)
 algo_rfd = desbordante.rfd.algorithms.GaRfd()
 algo_rfd.load_data(table=(DATA_PATH, ",", True))
 algo_rfd.set_metrics([abs_diff, abs_diff, abs_diff])
-algo_rfd.set_option("min_similarity", [0.95])
-algo_rfd.set_option("minconf", 0.7)
-algo_rfd.set_option("max_generations", 500)
-algo_rfd.set_option("seed", 42)
-algo_rfd.execute()
+algo_rfd.execute(min_similarity=[0.95], minconf=0.7, max_generations=500, seed=42)
 rfds = algo_rfd.get_rfds()
 
 highlight_key = make_rfd_key(COL_NAMES, ["height_cm", "weight_kg"], "shoe_size_eu")
@@ -360,11 +356,7 @@ print_table(df)
 algo_abs = desbordante.rfd.algorithms.GaRfd()
 algo_abs.load_data(table=(DATA_PATH, ",", True))
 algo_abs.set_metrics([abs_thresh(1.0), abs_thresh(10.0), abs_thresh(1.0)])
-algo_abs.set_option("min_similarity", [1.0])
-algo_abs.set_option("minconf", 0.5)
-algo_abs.set_option("max_generations", 500)
-algo_abs.set_option("seed", 42)
-algo_abs.execute()
+algo_abs.execute(min_similarity=[1.0], minconf=0.5, max_generations=500, seed=42)
 abs_rfds = algo_abs.get_rfds()
 
 highlight_key = make_rfd_key(COL_NAMES, ["height_cm", "weight_kg"], "shoe_size_eu")
@@ -426,12 +418,8 @@ def jaccard_2gram(a, b) -> float:
 algo_eq = desbordante.rfd.algorithms.GaRfd()
 algo_eq.load_data(table=(JACCARD_DATA_PATH, ",", True))
 algo_eq.set_metrics([eq, eq, eq])
-algo_eq.set_option("min_similarity", [1.0])
-algo_eq.set_option("minconf", 0.0001)
-algo_eq.set_option("max_generations", 150)
-algo_eq.set_option("population_size", 2000)
-algo_eq.set_option("seed", 42)
-algo_eq.execute()
+algo_eq.execute(min_similarity=[1.0], minconf=0.0001, max_generations=150,
+                population_size=2000, seed=42)
 eq_rfds = algo_eq.get_rfds()
 
 print_rfds_table(eq_rfds, COL_NAMES_STR,
@@ -445,12 +433,8 @@ printlns(
 algo_jac = desbordante.rfd.algorithms.GaRfd()
 algo_jac.load_data(table=(JACCARD_DATA_PATH, ",", True))
 algo_jac.set_metrics([jaccard_2gram, eq, eq])
-algo_jac.set_option("min_similarity", [0.3])
-algo_jac.set_option("minconf", 0.0001)
-algo_jac.set_option("max_generations", 150)
-algo_jac.set_option("population_size", 2000)
-algo_jac.set_option("seed", 42)
-algo_jac.execute()
+algo_jac.execute(min_similarity=[0.3], minconf=0.0001, max_generations=150,
+                 population_size=2000, seed=42)
 jac_rfds = algo_jac.get_rfds()
 
 highlight_key = make_rfd_key(COL_NAMES_STR, ["restaurant"], "cuisine")
@@ -485,12 +469,8 @@ print_table(clean_df, title="Clean dataset:")
 algo_clean = desbordante.rfd.algorithms.GaRfd()
 algo_clean.load_data(table=(CLEAN_DATA_PATH, ",", True))
 algo_clean.set_metrics([jaccard_2gram, eq, eq])
-algo_clean.set_option("min_similarity", [0.3, 1.0, 1.0])
-algo_clean.set_option("minconf", 0.6)
-algo_clean.set_option("max_generations", 1000)
-algo_clean.set_option("population_size", 5000)
-algo_clean.set_option("seed", 42)
-algo_clean.execute()
+algo_clean.execute(min_similarity=[0.3, 1.0, 1.0], minconf=0.6, max_generations=1000,
+                   population_size=5000, seed=42)
 clean_rfds = algo_clean.get_rfds()
 
 highlight_key = make_rfd_key(COL_NAMES_STR, ["cuisine"], "district")
@@ -502,12 +482,8 @@ print_table(dirty_df, title="Dirty dataset:")
 algo = desbordante.rfd.algorithms.GaRfd()
 algo.load_data(table=(DIRTY_DATA_PATH, ",", True))
 algo.set_metrics([jaccard_2gram, eq, eq])
-algo.set_option("min_similarity", [0.3, 1.0, 1.0])
-algo.set_option("minconf", 0.6)
-algo.set_option("max_generations", 1000)
-algo.set_option("population_size", 5000)
-algo.set_option("seed", 42)
-algo.execute()
+algo.execute(min_similarity=[0.3, 1.0, 1.0], minconf=0.6, max_generations=1000,
+             population_size=5000, seed=42)
 discovered_rfds = algo.get_rfds()
 
 print_rfds_table(discovered_rfds, COL_NAMES_STR,
@@ -529,7 +505,7 @@ banner("A note on reproducibility", num=10)
 printlns(
     "  GA-RFD uses randomness for initialization and evolution. To get the " + 
     "same results across runs, always set the seed parameter: " + 
-    "algo.set_option('seed', 42). Without a fixed seed, two runs with the " + 
+    "algo.execute(seed=42). Without a fixed seed, two runs with the " + 
     "same parameters may return slightly different sets of RFDs."
 )
 

@@ -16,7 +16,6 @@
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
 
 namespace {
 
@@ -94,7 +93,7 @@ void GaRfd::RegisterOptions() {
     RegisterOption(
             Option{&mutation_probability_, kRfdMutationProbability, kDRfdMutationProbability, 1.0}
                     .SetValueCheck(check_prob_range));
-    RegisterOption(Option{&seed_, kSeed, kDSeed, static_cast<std::uint32_t>(42)});
+    RegisterOption(Option{&seed_, kSeed, kDSeed, static_cast<std::uint32_t>(123)});
     RegisterOption(
             Option{&cache_max_size_, kCacheMaxSize, kDCacheMaxSize, static_cast<std::size_t>(10000)}
                     .SetValueCheck([](auto v) { return v >= 0; }));
@@ -215,7 +214,7 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
         std::size_t s = 0;
         for (uint64_t w : first_vec) s += std::popcount(w);
         support_cache_->put(attrs_mask, s);
-        LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), s);
+        LOG_DEBUG("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), s);
         return s;
     }
 
@@ -244,7 +243,7 @@ std::size_t GaRfd::ComputeSupport(uint32_t attrs_mask) const {
     for (std::size_t k = 0; k < vec_size; ++k) support += std::popcount(compute_buffer_[k]);
 
     support_cache_->put(attrs_mask, support);
-    LOG_INFO("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), support);
+    LOG_DEBUG("Support for mask {} = {}", BitRepresentation(attrs_mask, num_attrs_), support);
     return support;
 }
 
@@ -473,53 +472,42 @@ std::unordered_set<RFD, RFDHash> GaRfd::Finalize(
     return res;
 }
 
-unsigned long long GaRfd::ExecuteInternal() {
-    return ::util::TimedInvoke([&]() {
-        LOG_INFO("Build similarity bitsets...");
-        BuildSimilarityBitsets();
-
-        std::mt19937 rng(seed_);
-
-        auto pop = InitializePopulation(rng);
-        EvaluatePopulation(pop);
-
-        for (size_t gen = 0; gen < max_generations_; gen++) {
-            LOG_INFO("Generation {}/{} (pop size: {})", gen + 1, max_generations_, pop.size());
-            if (pop.size() >= population_size_ && AllOf(pop)) {
-                LOG_INFO("All individuals satisfy confidence threshold - stopping early");
-                break;
-            }
-
-            if (pop.empty()) [[unlikely]] {
-                LOG_INFO("Population is empty, stopping evolution");
-                break;
-            }
-
-            auto selected = Select(pop, rng);
-            auto offspring = Crossover(selected, rng);
-            auto mutated = Mutate(selected, rng);
-
-            if (offspring.empty() && mutated.empty()) {
-                pop = std::move(selected);
-            } else {
-                pop = std::move(selected);
-                pop.insert(offspring.begin(), offspring.end());
-                pop.insert(mutated.begin(), mutated.end());
-            }
-
-            if (pop.size() > population_size_ + 100) {
-                std::vector<Individual> sorted(pop.begin(), pop.end());
-                std::sort(sorted.begin(), sorted.end(),
-                          [](auto const& a, auto const& b) { return a.confidence > b.confidence; });
-                sorted.resize(population_size_ + 100);
-                pop = std::unordered_set<Individual, IndividualHash>(sorted.begin(), sorted.end());
-            }
-
-            EvaluatePopulation(pop);
+void GaRfd::ExecuteInternal() {
+    LOG_INFO("Build similarity bitsets...");
+    BuildSimilarityBitsets();
+    std::mt19937 rng(seed_);
+    auto pop = InitializePopulation(rng);
+    EvaluatePopulation(pop);
+    for (size_t gen = 0; gen < max_generations_; gen++) {
+        LOG_INFO("Generation {}/{} (pop size: {})", gen + 1, max_generations_, pop.size());
+        if (pop.size() >= population_size_ && AllOf(pop)) {
+            LOG_INFO("All individuals satisfy confidence threshold - stopping early");
+            break;
         }
-
-        discovered_ = Finalize(pop);
-    });
+        if (pop.empty()) [[unlikely]] {
+            LOG_INFO("Population is empty, stopping evolution");
+            break;
+        }
+        auto selected = Select(pop, rng);
+        auto offspring = Crossover(selected, rng);
+        auto mutated = Mutate(selected, rng);
+        if (offspring.empty() && mutated.empty()) {
+            pop = std::move(selected);
+        } else {
+            pop = std::move(selected);
+            pop.insert(offspring.begin(), offspring.end());
+            pop.insert(mutated.begin(), mutated.end());
+        }
+        if (pop.size() > population_size_ + 100) {
+            std::vector<Individual> sorted(pop.begin(), pop.end());
+            std::sort(sorted.begin(), sorted.end(),
+                      [](auto const& a, auto const& b) { return a.confidence > b.confidence; });
+            sorted.resize(population_size_ + 100);
+            pop = std::unordered_set<Individual, IndividualHash>(sorted.begin(), sorted.end());
+        }
+        EvaluatePopulation(pop);
+    }
+    discovered_ = Finalize(pop);
 }
 
 void GaRfd::ResetState() {
