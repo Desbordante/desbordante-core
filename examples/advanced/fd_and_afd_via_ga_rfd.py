@@ -175,9 +175,7 @@ print_table(df, title="Sample data - note duplicate weights in rows 1-2 and 5-6"
             highlight_rows=[0, 1, 4, 5])
 algo_fd = desbordante.rfd.algorithms.GaRfd()
 algo_fd.load_data(table=(DATA_PATH, ",", True))
-algo_fd.set_option("max_generations", 100)
-algo_fd.set_option("seed", 42)
-algo_fd.execute()
+algo_fd.execute(max_generations=100, seed=42)
 fds = algo_fd.get_rfds()
 
 highlight_fd = make_rfd_key(COL_NAMES, ["weight_kg"], "height_cm")
@@ -208,10 +206,7 @@ printlns(
 
 algo_afd = desbordante.rfd.algorithms.GaRfd()
 algo_afd.load_data(table=(DATA_PATH, ",", True))
-algo_afd.set_option("minconf", 0.6)
-algo_afd.set_option("max_generations", 100)
-algo_afd.set_option("seed", 42)
-algo_afd.execute()
+algo_afd.execute(minconf=0.6, max_generations=100, seed=42)
 afds = algo_afd.get_rfds()
 
 # Highlight the dependency discussed in the text: height_cm -> shoe_size_eu

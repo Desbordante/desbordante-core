@@ -54,6 +54,7 @@ extend-exclude = [
     # We only want to check code for now, skip datasets.
     "test_input_data/",
     "examples/datasets/jaccard_typo_data.csv",
+    "examples/test_examples/snapshots/snap_test_examples_pytest.py",
 ]
 [tool.typos.default]
 extend-ignore-re = [

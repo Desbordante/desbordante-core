@@ -31,8 +31,8 @@
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
-#include "core/config/enum_members_string.h"
 #include "core/config/custom_random_seed/type.h"
+#include "core/config/enum_members_string.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -45,6 +45,7 @@
 #include "python_bindings/py_util/create_dataframe_reader.h"
 #include "python_bindings/py_util/iterable_sequence_stream.h"
 #include "python_bindings/py_util/py_custom_metrics.h"
+#include "python_bindings/rfd/py_similarity_metric.h"
 
 namespace {
 
