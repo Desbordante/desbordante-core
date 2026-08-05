@@ -40,6 +40,7 @@ target_link_libraries(
               ${DESBORDANTE_PREFIX}::ar::apriori
               ${DESBORDANTE_PREFIX}::ar::verifier
               ${DESBORDANTE_PREFIX}::cfd
+              ${DESBORDANTE_PREFIX}::cfd::cfdfinder
               ${DESBORDANTE_PREFIX}::cfd::verifier
               ${DESBORDANTE_PREFIX}::cind::verifier
               ${DESBORDANTE_PREFIX}::datastats

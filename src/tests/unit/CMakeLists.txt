@@ -93,6 +93,23 @@ desbordante_add_test(
     magic_enum::magic_enum
     Boost::headers
 )
+desbordante_add_test(
+    cfd.cfdfinder
+    SRCS
+    test_cfdfinder.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cfd::cfdfinder::util
+    ${DESBORDANTE_PREFIX}::cfd::cfdfinder::model
+    ${DESBORDANTE_PREFIX}::cfd::cfdfinder::types
+    ${DESBORDANTE_PREFIX}::cfd::cfdfinder
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::fd
+    spdlog::spdlog_header_only
+    magic_enum::magic_enum
+    Boost::headers
+)
 
 # --- CIND ---
 desbordante_add_test(

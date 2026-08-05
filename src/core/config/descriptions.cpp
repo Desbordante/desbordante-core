@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
@@ -77,4 +78,10 @@ std::string_view const kDODLeftOrdering =
 std::string_view const kDConditionType =
         c<S("CIND condition types to use\n"), m<algos::cind::CondType>>;
 std::string_view const kDAlgoType = c<S("CIND algorithm types to use\n"), m<algos::cind::AlgoType>>;
+std::string_view const kDCfdExpansionStrategy =
+        c<S("CFD expansion strategy to use\n"), m<algos::cfdfinder::Expansion>>;
+std::string_view const kDCfdPruningStrategy =
+        c<S("CFD pruning strategy to use\n"), m<algos::cfdfinder::Pruning>>;
+std::string_view const kDCfdResultStrategy =
+        c<S("CFD result strategy to use\n"), m<algos::cfdfinder::Result>>;
 }  // namespace config::descriptions

@@ -14,6 +14,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
@@ -264,8 +265,9 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         {typeid(config::CustomMetricType), CustomMetricToAny},
         {typeid(config::CustomMetricsType), CustomMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
-};
-
+        kEnumConvPair<algos::cfdfinder::Expansion>,
+        kEnumConvPair<algos::cfdfinder::Pruning>,
+        kEnumConvPair<algos::cfdfinder::Result>};
 }  // namespace
 
 namespace python_bindings {
