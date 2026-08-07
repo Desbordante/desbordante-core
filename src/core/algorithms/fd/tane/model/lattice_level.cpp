@@ -9,7 +9,7 @@ namespace model {
 using std::move, std::min, std::shared_ptr, std::vector, std::sort, std::make_shared;
 
 void LatticeLevel::Add(std::unique_ptr<LatticeVertex> vertex) {
-    vertices_.emplace(vertex->GetVertical().GetColumnIndices(), std::move(vertex));
+    vertices_.emplace(vertex->GetVertical(), std::move(vertex));
 }
 
 LatticeVertex const* LatticeLevel::GetLatticeVertex(
@@ -59,14 +59,13 @@ void LatticeLevel::GenerateNextLevel(std::vector<std::unique_ptr<LatticeLevel>>&
                 continue;
             }
 
-            Vertical child_columns = vertex1->GetVertical().Union(vertex2->GetVertical());
+            boost::dynamic_bitset<> child_columns = vertex1->GetVertical() | vertex2->GetVertical();
             std::unique_ptr<LatticeVertex> child_vertex =
                     std::make_unique<LatticeVertex>(child_columns);
 
-            boost::dynamic_bitset<> parent_indices(
-                    vertex1->GetVertical().GetSchema()->GetNumColumns());
-            parent_indices |= vertex1->GetVertical().GetColumnIndices();
-            parent_indices |= vertex2->GetVertical().GetColumnIndices();
+            boost::dynamic_bitset<> parent_indices(vertex1->GetVertical().size());
+            parent_indices |= vertex1->GetVertical();
+            parent_indices |= vertex2->GetVertical();
 
             child_vertex->GetRhsCandidates() |= vertex1->GetRhsCandidates();
             child_vertex->GetRhsCandidates() &= vertex2->GetRhsCandidates();

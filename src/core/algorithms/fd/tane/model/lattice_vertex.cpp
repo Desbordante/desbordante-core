@@ -6,15 +6,9 @@ namespace model {
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;
 
-void LatticeVertex::AddRhsCandidates(vector<std::unique_ptr<Column>> const& candidates) {
-    for (auto& cand_ptr : candidates) {
-        rhs_candidates_.set(cand_ptr->GetIndex());
-    }
-}
-
 bool LatticeVertex::ComesBeforeAndSharePrefixWith(LatticeVertex const& that) const {
-    dynamic_bitset<> this_indices = vertical_.GetColumnIndices();
-    dynamic_bitset<> that_indices = that.vertical_.GetColumnIndices();
+    dynamic_bitset<> const& this_indices = vertical_;
+    dynamic_bitset<> const& that_indices = that.vertical_;
 
     int this_index = this_indices.find_first();
     int that_index = that_indices.find_first();
@@ -30,12 +24,12 @@ bool LatticeVertex::ComesBeforeAndSharePrefixWith(LatticeVertex const& that) con
 }
 
 bool LatticeVertex::operator>(LatticeVertex const& that) const {
-    if (vertical_.GetArity() != that.vertical_.GetArity())
-        return vertical_.GetArity() > that.vertical_.GetArity();
+    if (vertical_.count() != that.vertical_.count())
+        return vertical_.count() > that.vertical_.count();
 
-    dynamic_bitset this_indices = vertical_.GetColumnIndices();
+    dynamic_bitset<> const& this_indices = vertical_;
     int this_index = this_indices.find_first();
-    dynamic_bitset that_indices = that.vertical_.GetColumnIndices();
+    dynamic_bitset<> const& that_indices = that.vertical_;
     int that_index = that_indices.find_first();
 
     int result;
@@ -45,26 +39,6 @@ bool LatticeVertex::operator>(LatticeVertex const& that) const {
         this_index = this_indices.find_next(this_index);
         that_index = that_indices.find_next(that_index);
     }
-}
-
-string LatticeVertex::ToString() {
-    return "Vtx" + vertical_.ToString();
-}
-
-std::ostream& operator<<(std::ostream& os, LatticeVertex& lv) {
-    using std::endl;
-    os << "Vertex: " << lv.vertical_.ToString() << endl;
-
-    string rhs;
-    for (size_t index = lv.rhs_candidates_.find_first(); index != dynamic_bitset<>::npos;
-         index = lv.rhs_candidates_.find_next(index)) {
-        rhs += std::to_string(index) + " ";
-    }
-    os << "Rhs Candidates: " << rhs << endl;
-    os << "IsKeyCandidate, IsInvalid: " << lv.is_key_candidate_ << ", " << lv.is_invalid_ << endl;
-
-    os << endl;
-    return os;
 }
 
 PositionListIndex const* LatticeVertex::GetPositionListIndex() const {

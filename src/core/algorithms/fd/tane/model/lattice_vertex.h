@@ -7,16 +7,15 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "core/model/index.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/table/position_list_index_with_singletons.h"
-#include "core/model/table/relational_schema.h"
-#include "core/model/table/vertical.h"
 
 namespace model {
 
 class LatticeVertex {
 private:
-    Vertical vertical_;
+    boost::dynamic_bitset<> vertical_;
     // holds either an owned PLI (unique_ptr) or a non-owned one (const*)
     std::variant<std::unique_ptr<PositionListIndex>, PositionListIndex const*,
                  std::unique_ptr<PLIWS>, PLIWS const*>
@@ -27,14 +26,14 @@ private:
     bool is_invalid_ = false;
 
 public:
-    explicit LatticeVertex(Vertical vertical)
-        : vertical_(std::move(vertical)), rhs_candidates_(vertical_.GetSchema()->GetNumColumns()) {}
+    explicit LatticeVertex(boost::dynamic_bitset<> vertical)
+        : vertical_(std::move(vertical)), rhs_candidates_(vertical_.size()) {}
 
     std::vector<LatticeVertex const*>& GetParents() {
         return parents_;
     }
 
-    Vertical const& GetVertical() const {
+    boost::dynamic_bitset<> const& GetVertical() const {
         return vertical_;
     }
 
@@ -46,7 +45,9 @@ public:
         return rhs_candidates_;
     }
 
-    void AddRhsCandidates(std::vector<std::unique_ptr<Column>> const& candidates);
+    void SetAllRhsCandidates() {
+        rhs_candidates_.set();
+    }
 
     bool ComesBeforeAndSharePrefixWith(LatticeVertex const& that) const;
 
@@ -88,13 +89,9 @@ public:
 
     bool operator>(LatticeVertex const& that) const;
 
-    std::string ToString();
-
     static bool Comparator(LatticeVertex* v1, LatticeVertex* v2) {
         return *v2 > *v1;
     }
-
-    friend std::ostream& operator<<(std::ostream& os, LatticeVertex& lv);
 };
 
 }  // namespace model

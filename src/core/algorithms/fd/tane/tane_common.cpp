@@ -9,7 +9,6 @@
 #include "core/config/error/option.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/relational_schema.h"
 #include "core/util/logger.h"
 
 namespace algos {
@@ -30,7 +29,7 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
     RelationalSchema const* schema = relation_->GetSchema();
     std::list<model::LatticeVertex*> key_vertices;
     for (auto& [map_key, vertex] : level->GetVertices()) {
-        Vertical columns = vertex->GetVertical();  // Originally it's a ColumnCombination
+        boost::dynamic_bitset<> columns = vertex->GetVertical();
 
         if (vertex->GetIsKeyCandidate()) {
             double ucc_error = CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
@@ -41,17 +40,17 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
                     for (std::size_t rhs_index = vertex->GetRhsCandidates().find_first();
                          rhs_index != boost::dynamic_bitset<>::npos;
                          rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-                        Vertical rhs = static_cast<Vertical>(*schema->GetColumn((int)rhs_index));
-                        if (!columns.Contains(rhs)) {
+                        if (!columns.test(rhs_index)) {
                             bool is_rhs_candidate = true;
-                            for (auto const& column : columns.GetColumns()) {
-                                Vertical sibling =
-                                        columns.Without(static_cast<Vertical>(*column)).Union(rhs);
-                                auto sibling_vertex =
-                                        level->GetLatticeVertex(sibling.GetColumnIndices());
+                            for (model::Index column = columns.find_first();
+                                 column != boost::dynamic_bitset<>::npos;
+                                 column = columns.find_next(column)) {
+                                boost::dynamic_bitset<> sibling =
+                                        boost::dynamic_bitset<>(columns).reset(column).set(
+                                                rhs_index);
+                                auto sibling_vertex = level->GetLatticeVertex(sibling);
                                 if (sibling_vertex == nullptr ||
-                                    !sibling_vertex->GetConstRhsCandidates()
-                                             [rhs.GetColumnIndices().find_first()]) {
+                                    !sibling_vertex->GetConstRhsCandidates()[rhs_index]) {
                                     is_rhs_candidate = false;
                                     break;
                                 }
@@ -60,7 +59,8 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
                             }
                             // Found fd: vertex->rhs => register it
                             if (is_rhs_candidate) {
-                                RegisterAfd(AFD(columns, *schema->GetColumn(rhs_index), ucc_error,
+                                RegisterAfd(AFD(schema->GetVertical(columns),
+                                                *schema->GetColumn(rhs_index), ucc_error,
                                                 relation_->GetSharedPtrSchema()));
                             }
                         }
@@ -72,7 +72,7 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
         // if we seek for exact FDs then SetInvalid
         if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
             for (auto key_vertex : key_vertices) {
-                key_vertex->GetRhsCandidates() &= key_vertex->GetVertical().GetColumnIndices();
+                key_vertex->GetRhsCandidates() &= key_vertex->GetVertical();
                 key_vertex->SetInvalid(true);
             }
         }
@@ -85,7 +85,6 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
         if (xa_vertex->GetIsInvalid()) {
             continue;
         }
-        Vertical xa = xa_vertex->GetVertical();
         // Calculate XA PLI
         if (xa_vertex->GetPositionListIndex() == nullptr) {
             auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndexWithSingletons();
@@ -93,14 +92,14 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             xa_vertex->AcquirePLIWithSingletons(parent_pli_1->Intersect(parent_pli_2));
         }
 
-        dynamic_bitset<> xa_indices = xa.GetColumnIndices();
-        dynamic_bitset<> a_candidates = xa_vertex->GetRhsCandidates();
+        dynamic_bitset<> const& xa_indices = xa_vertex->GetVertical();
+        dynamic_bitset<> const& a_candidates = xa_vertex->GetRhsCandidates();
         auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
         for (auto const& x_vertex : xa_vertex->GetParents()) {
-            Vertical const& lhs = x_vertex->GetVertical();
+            dynamic_bitset<> const& lhs = x_vertex->GetVertical();
 
             // Find index of A in XA.
-            dynamic_bitset<> differing_bits = xa_indices ^ lhs.GetColumnIndices();
+            dynamic_bitset<> differing_bits = xa_indices ^ lhs;
             std::size_t a_index = differing_bits.find_first();
             if (!a_candidates[a_index]) {
                 continue;
@@ -110,12 +109,11 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             // Check X -> A
             config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
             if (error <= max_fd_error_) {
-                Column const* rhs = schema->GetColumns()[a_index].get();
-
-                RegisterAfd(AFD(lhs, *rhs, error, relation_->GetSharedPtrSchema()));
-                xa_vertex->GetRhsCandidates().set(rhs->GetIndex(), false);
+                RegisterAfd(AFD(schema->GetVertical(lhs), *schema->GetColumn(a_index), error,
+                                relation_->GetSharedPtrSchema()));
+                xa_vertex->GetRhsCandidates().set(a_index, false);
                 if (error == 0) {
-                    xa_vertex->GetRhsCandidates() &= lhs.GetColumnIndices();
+                    xa_vertex->GetRhsCandidates() &= lhs;
                 }
             }
         }
@@ -142,19 +140,20 @@ void TaneCommon::ExecuteInternal() {
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
     auto level0 = std::make_unique<model::LatticeLevel>(0);
     // TODO: через указатели кажется надо переделать
-    level0->Add(std::make_unique<model::LatticeVertex>(schema->CreateEmptyVertical()));
+    level0->Add(std::make_unique<model::LatticeVertex>(dynamic_bitset<>(schema->GetNumColumns())));
     model::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
     levels.push_back(std::move(level0));
 
     // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
     auto level1 = std::make_unique<model::LatticeLevel>(1);
-    for (auto& column : schema->GetColumns()) {
+    for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
         // for each attribute set vertex
-        ColumnData const& column_data = relation_->GetColumnData(column->GetIndex());
-        auto vertex = std::make_unique<model::LatticeVertex>(static_cast<Vertical>(*column));
+        ColumnData const& column_data = relation_->GetColumnData(column);
+        auto vertex = std::make_unique<model::LatticeVertex>(
+                dynamic_bitset<>(schema->GetNumColumns()).set(column));
 
-        vertex->AddRhsCandidates(schema->GetColumns());
+        vertex->SetAllRhsCandidates();
         vertex->GetParents().push_back(empty_vertex);
         vertex->SetKeyCandidate(true);
         vertex->SetPLIWithSingletons(column_data.GetPLWSIndex());
@@ -162,11 +161,11 @@ void TaneCommon::ExecuteInternal() {
         // check FDs: 0->A
         double fd_error = CalculateZeroAryFdError(&column_data);
         if (fd_error <= max_fd_error_) {  // TODO: max_error
-            zeroary_fd_rhs.set(column->GetIndex());
-            RegisterAfd(AFD(schema->CreateEmptyVertical(), *column, fd_error,
+            zeroary_fd_rhs.set(column);
+            RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(column), fd_error,
                             relation_->GetSharedPtrSchema()));
 
-            vertex->GetRhsCandidates().set(column->GetIndex(), false);
+            vertex->GetRhsCandidates().reset(column);
             if (fd_error == 0) {
                 vertex->GetRhsCandidates().reset();
             }
@@ -176,13 +175,12 @@ void TaneCommon::ExecuteInternal() {
     }
 
     for (auto& [key_map, vertex] : level1->GetVertices()) {
-        Vertical column = vertex->GetVertical();
+        dynamic_bitset<> column = vertex->GetVertical();
         vertex->GetRhsCandidates() &=
                 ~zeroary_fd_rhs;  //~ returns flipped copy <- removed already discovered zeroary FDs
 
         // вот тут костыль, чтобы вытянуть индекс колонки из вершины, в которой только один индекс
-        ColumnData const& column_data =
-                relation_->GetColumnData(column.GetColumnIndices().find_first());
+        ColumnData const& column_data = relation_->GetColumnData(column.find_first());
         double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
         if (ucc_error <= max_ucc_error_) {
             vertex->SetKeyCandidate(false);
@@ -190,12 +188,15 @@ void TaneCommon::ExecuteInternal() {
                 for (unsigned long rhs_index = vertex->GetRhsCandidates().find_first();
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-                    if (rhs_index != column.GetColumnIndices().find_first()) {
-                        RegisterAfd(AFD(column, *schema->GetColumn(rhs_index), ucc_error,
-                                        relation_->GetSharedPtrSchema()));
+                    if (rhs_index != column.find_first()) {
+                        RegisterAfd(
+                                AFD(schema->GetVertical(dynamic_bitset<>(schema->GetNumColumns())
+                                                                .set(column.find_first())),
+                                    *schema->GetColumn(rhs_index), ucc_error,
+                                    relation_->GetSharedPtrSchema()));
                     }
                 }
-                vertex->GetRhsCandidates() &= column.GetColumnIndices();
+                vertex->GetRhsCandidates() &= column;
                 // set vertex invalid if we seek for exact dependencies
                 if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
                     vertex->SetInvalid(true);
