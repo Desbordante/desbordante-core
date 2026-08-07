@@ -13,7 +13,6 @@ target_sources(
             compute_agree_sets.cpp
             create_stripped_partitions.cpp
             dynamic_position_list_index.cpp
-            identifier_set.cpp
             position_list_index.cpp
             position_list_index_with_singletons.cpp
             relational_schema.cpp
