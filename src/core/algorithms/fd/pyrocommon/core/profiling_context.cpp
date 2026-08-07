@@ -29,8 +29,8 @@ ProfilingContext::ProfilingContext(algos::pyro::Parameters parameters,
     //       что надо переделывать
     if (parameters_.sample_size > 0) {
         auto schema = relation_data_->GetSchema();
-        agree_set_samples_ =
-                std::make_unique<model::BlockingVerticalMap<model::AgreeSetSample>>(schema);
+        agree_set_samples_ = std::make_unique<model::BlockingVerticalMap<model::AgreeSetSample>>(
+                schema->GetNumColumns());
         // TODO: сделать, чтобы при одном потоке agree_set_samples_ =
         // std::make_unique<VerticalMap<AgreeSetSample>>(schema);
         for (model::Index column_index = 0; column_index != schema->GetNumColumns();

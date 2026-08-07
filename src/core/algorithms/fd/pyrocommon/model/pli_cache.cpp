@@ -34,7 +34,7 @@ PLICache::PLICache(ColumnLayoutRelationData* relation_data, CachingMethod cachin
       // index_(std::make_unique<VerticalMap<PositionListIndex>>(relation_data->GetSchema())) при
       // одном потоке
       index_(std::make_unique<BlockingVerticalMap<PositionListIndex const>>(
-              relation_data->GetSchema())),
+              relation_data->GetSchema()->GetNumColumns())),
       caching_method_(caching_method),
       eviction_method_(eviction_method),
       caching_method_value_(caching_method_value),

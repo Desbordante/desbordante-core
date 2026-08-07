@@ -15,8 +15,8 @@ void SearchSpace::Discover() {
         if (!launch_pad.has_value()) break;
 
         if (local_visitees_ == nullptr) {
-            local_visitees_ =
-                    std::make_unique<model::VerticalMap<VerticalInfo>>(context_->GetSchema());
+            local_visitees_ = std::make_unique<model::VerticalMap<VerticalInfo>>(
+                    context_->GetSchema()->GetNumColumns());
         }
 
         bool is_dependency_found = Ascend(*launch_pad);
@@ -254,8 +254,8 @@ void SearchSpace::CheckEstimate([[maybe_unused]] DependencyStrategy* strategy,
 
 void SearchSpace::TrickleDown(boost::dynamic_bitset<> const& main_peak, double main_peak_error) {
     std::unordered_set<boost::dynamic_bitset<>> maximal_non_deps;
-    auto alleged_min_deps =
-            std::make_unique<model::VerticalMap<VerticalInfo>>(context_->GetSchema());
+    auto alleged_min_deps = std::make_unique<model::VerticalMap<VerticalInfo>>(
+            context_->GetSchema()->GetNumColumns());
     auto peaks_comparator = [](auto& candidate1, auto& candidate2) -> bool {
         return DependencyCandidate::ArityComparator(candidate1, candidate2);
     };
@@ -384,7 +384,7 @@ void SearchSpace::TrickleDown(boost::dynamic_bitset<> const& main_peak, double m
     } else {
         LOG_DEBUG("* {} new peaks (UNIMPLEMENTED)", peaks.size());
         auto new_scope = std::make_unique<model::VerticalMap<boost::dynamic_bitset<>>>(
-                context_->GetSchema());
+                context_->GetSchema()->GetNumColumns());
         std::sort_heap(peaks.begin(), peaks.end(), peaks_comparator);
         for (auto& peak : peaks) {
             new_scope->Put(peak.vertical_,
@@ -549,8 +549,8 @@ std::unordered_set<boost::dynamic_bitset<>> SearchSpace::CalculateHittingSet(
                                     boost::dynamic_bitset<> const& vertical2) {
         return vertical1.count() < vertical2.count();
     });
-    model::VerticalMap<std::monostate> consolidated_verticals(schema);
-    model::VerticalMap<std::monostate> hitting_set(schema);
+    model::VerticalMap<std::monostate> consolidated_verticals(schema->GetNumColumns());
+    model::VerticalMap<std::monostate> hitting_set(schema->GetNumColumns());
     // TODO: VerticalMap requires `shared_ptr`s, so using this hack with a dummy pointer here.
     auto dummy_ptr = std::make_shared<std::monostate>();
 

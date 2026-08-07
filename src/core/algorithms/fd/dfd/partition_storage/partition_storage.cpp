@@ -27,7 +27,7 @@ model::PositionListIndex const* PartitionStorage::Get(boost::dynamic_bitset<> co
 PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data)
     : relation_data_(relation_data),
       index_(std::make_unique<model::BlockingVerticalMap<model::PositionListIndex const>>(
-              relation_data->GetSchema())) {
+              relation_data->GetSchema()->GetNumColumns())) {
     for (model::Index column_index = 0; column_index != relation_data->GetSchema()->GetNumColumns();
          ++column_index) {
         index_->Put(boost::dynamic_bitset<>(relation_data->GetSchema()->GetNumColumns())

@@ -1,4 +1,6 @@
 #pragma once
+
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <shared_mutex>
@@ -7,8 +9,6 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-
-#include "core/model/table/relational_schema.h"
 
 namespace model {
 
@@ -87,15 +87,15 @@ protected:
                 std::function<void(Bitset const&, std::shared_ptr<Value const>)> collector) const;
     };
 
-    RelationalSchema const* relation_;
+    std::size_t num_columns_;
     size_t size_ = 0;
     SetTrie set_trie_;
 
 public:
     using Entry = std::pair<Bitset, std::shared_ptr<Value const>>;
 
-    explicit VerticalMap(RelationalSchema const* relation)
-        : relation_(relation), set_trie_(relation->GetNumColumns()) {}
+    explicit VerticalMap(std::size_t num_columns)
+        : num_columns_(num_columns), set_trie_(num_columns) {}
 
     virtual bool IsEmpty() const {
         return size_ == 0;
@@ -149,7 +149,7 @@ public:
     using typename VerticalMap<V>::Entry;
     using typename VerticalMap<V>::Bitset;
 
-    explicit BlockingVerticalMap(RelationalSchema const* relation) : VerticalMap<V>(relation) {}
+    explicit BlockingVerticalMap(std::size_t num_columns) : VerticalMap<V>(num_columns) {}
 
     virtual bool IsEmpty() const override;
 

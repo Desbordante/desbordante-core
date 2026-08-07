@@ -89,7 +89,8 @@ public:
         : strategy_(std::move(strategy)),
           global_visitees_(std::move(global_visitees)),
           launch_pads_(dependency_candidate_comparator),
-          launch_pad_index_(std::make_unique<model::VerticalMap<DependencyCandidate>>(schema)),
+          launch_pad_index_(std::make_unique<model::VerticalMap<DependencyCandidate>>(
+                  schema->GetNumColumns())),
           scope_(std::move(scope)),
           sample_boost_(sample_boost),
           recursion_depth_(recursion_depth),
@@ -99,8 +100,8 @@ public:
                 RelationalSchema const* schema,
                 DependencyCandidateComp const& dependency_candidate_comparator)
         : SearchSpace(id, std::move(strategy), nullptr,
-                      std::make_unique<model::VerticalMap<VerticalInfo>>(schema), schema,
-                      dependency_candidate_comparator, 0, 1) {}
+                      std::make_unique<model::VerticalMap<VerticalInfo>>(schema->GetNumColumns()),
+                      schema, dependency_candidate_comparator, 0, 1) {}
 
     void EnsureInitialized();
     void Discover();
