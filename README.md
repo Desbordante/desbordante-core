@@ -52,6 +52,7 @@ The currently supported data patterns are:
    - Exact denial constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
     - Approximate denial constraints, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
 * Sequential dependencies (validation)
+* Frequent episodes, all/maximal/top-k (discovery)
 * Frequent subgraphs (discovery)
 * Relaxed functional dependencies (discovery)
 
@@ -172,6 +173,10 @@ Here is a list of papers about patterns, organized in the recommended reading or
 * Numerical association rules
    - [Minakshi Kaushik, Rahul Sharma, Iztok Fister Jr., and Dirk Draheim. 2023. Numerical Association Rule Mining: A Systematic Literature Review. 1, 1 (July 2023), 50 pages.](https://arxiv.org/abs/2307.00662)
    - [Fister, Iztok & Fister jr, Iztok. 2020. uARMSolver: A framework for Association Rule Mining. 10.48550/arXiv.2010.10884.](https://doi.org/10.48550/arXiv.2010.10884)
+* Frequent episode mining (all, maximal, and top-k)
+   - [H. Mannila, H. Toivonen, A. I. Verkamo. 1997. Discovery of Frequent Episodes in Event Sequences. Data Mining and Knowledge Discovery 1(3), 259-289.](https://link.springer.com/article/10.1023/A:1009748302351)
+   - [P. Fournier-Viger, M. S. Nawaz, Y. He, Y. Wu, F. Nouioua, U. Yun. 2022. MaxFEM: Mining Maximal Frequent Episodes in Complex Event Sequences. MIWAI 2022, pp. 86-98.](https://link.springer.com/chapter/10.1007/978-3-031-20992-5_8)
+   - [P. Fournier-Viger, Y. Yang, P. Yang, J. C.-W. Lin, U. Yun. 2020. TKE: Mining Top-K Frequent Episodes. IEA/AIE 2020, pp. 832-845.](https://link.springer.com/chapter/10.1007/978-3-030-55789-8_71)
 * Matching dependencies
    - [Philipp Schirmer, Thorsten Papenbrock, Ioannis Koumarelas, and Felix Naumann. 2020. Efficient Discovery of Matching Dependencies. ACM Trans. Database Syst. 45, 3, Article 13 (September 2020), 33 pages. https://doi.org/10.1145/3392778](https://dl.acm.org/doi/10.1145/3392778)
 * Denial constraints

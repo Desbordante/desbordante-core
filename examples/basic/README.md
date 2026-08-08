@@ -13,6 +13,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_aucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_aucc.py) — a scenario showing how to discover approximate unique column combinations.
 + [mining_cfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_cfd.py) — a scenario showing how to discover conditional functional dependencies.
 + [mining_dd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_dd.py) — a scenario showing how to discover differential dependencies.
++ [mining_fem](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_fem) — scenarios showing how to discover frequent episodes (all, maximal, and top-k) in a sequence of events.
 + [mining_fd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_fd.py) — a scenario showing how to discover exact functional dependencies.
 + [mining_fd_approximate.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_fd_approximate.py) — a scenario showing how to discover exact functional dependencies using an approximate algorithm.
 + [mining_gfd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_gfd) — scenarios showing how to discover graph functional dependencies.

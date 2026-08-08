@@ -2312,6 +2312,373 @@ AID-FD:
 In the advanced section, a more complex example will showcase additional features of the algorithms.
 '''
 
+snapshots['test_example[basic/mining_fem/afem.py-None-afem_output] afem_output'] = '''================================================================================
+\x1b[1;36mDiscovering All Frequent Episodes (AFEM)\x1b[0m
+================================================================================
+AFEM (All Frequent Episode Miner) finds every episode - every subsequence of
+events - that occurs often enough in a sequence of timestamped events.
+
+AFEM (and the other FEM algorithms) mine sequential data.
+
+Frequent episode mining problem along with the core definitions and concepts was
+introduced in:
+
+    H. Mannila, H. Toivonen, A. I. Verkamo. Discovery of Frequent
+    Episodes in Event Sequences. Data Mining and Knowledge Discovery
+    1(3), 259-289, 1997.
+
+The AFEM algorithm itself was introduced later, in:
+
+    P. Fournier-Viger, M. S. Nawaz, Y. He, Y. Wu, F. Nouioua, U. Yun.
+    MaxFEM: Mining Maximal Frequent Episodes in Complex Event
+    Sequences. MIWAI 2022, pp. 86-98.
+
+\x1b[1;36mKey definitions\x1b[0m
+--------------------------------------------------------------------------------
+  * event set                a subset of E = {1, 2, ..., m}, the finite set of
+                             events. The events in one event set are assumed to
+                             fire together, so it is also called a simultaneous
+                             event set.
+
+  * complex event sequence   a time-ordered list of (event set, timestamp)
+                             pairs S = <(SE_t1, t1), (SE_t2, t2), ..., (SE_tn, tn)>.
+
+  * episode                  an ordered list of event sets X1 -> X2 -> ... -> Xp,
+                             where Xi appears before Xj for i < j. An episode with
+                             a single event set is a parallel episode (p=1); one
+                             where every event set is a single event is a serial
+                             episode (|Xi|=1); the general case is also called
+                             a composite episode.
+
+  * occurrence               a time interval [ts, te] such that the episode's
+                             event sets X1, ..., Xp appear, in order, at
+                             increasing timestamps within [ts, te]. occSet(episode)
+                             is the set of occurrences shorter than window_size.
+
+  * support                  the number of distinct start points ts among an
+                             episode's occurrences: sup(episode) = |{ts : [ts, te]
+                             in occSet(episode)}| (also called head frequency).
+
+  * frequent episode mining  given a complex event sequence, a threshold
+                             minsup > 0 and a window_size > 0, enumerate all
+                             episodes with sup(episode) >= minsup.
+
+\x1b[1;36mDataset\x1b[0m
+--------------------------------------------------------------------------------
+Four kinds of events, numbered 1 to 4, occur over 11 timestamps below.
+
+The whole stream below is a single complex event sequence. {1, 2} at t=3 and t=7
+is a parallel event set: it occurs, in full, at exactly those two timestamps, so
+the parallel episode {1, 2} has support 2. Event 1 alone fires at five different
+timestamps (1, 2, 3, 6, 7), so the single-event episode 1 has support 5.
+Chaining that single event into the parallel pair gives 1 -> {1, 2}, a composite
+episode. Its occurrences are: {[2, 3], [6, 7]}.
+
+    t | event set
+  ----+-------------------------------
+    1 | {1, 3}
+    2 | {1}
+    3 | {1, 2}
+    6 | {1}
+    7 | {1, 2}
+    8 | {3}
+    9 | {2}
+   11 | {4}
+
+\x1b[1;36mDataset format\x1b[0m
+--------------------------------------------------------------------------------
+examples/datasets/fem/episodes_1.txt uses the simple SPMF-style sequence format
+all FEM datasets in Desbordante share: one line per timestamp, listing its event
+set as ascending, space-separated, duplicate-free event ids, then a '|', then
+the timestamp itself - both non-negative integers, e.g. '1 2|7' means events 1
+and 2 fire at t=7. The '|timestamp' suffix may be omitted for every line at
+once, in which case Desbordante numbers the lines 0, 1, 2, ... itself; a single
+file cannot mix both styles. Across the whole file, timestamps must be strictly
+increasing.
+
+\x1b[1;36mAlgorithm parameters\x1b[0m
+--------------------------------------------------------------------------------
+  * sequence              path to a sequence file, or an in-memory Python
+                          iterable of (event set, timestamp) pairs (see
+                          Scenario 3 below).
+
+  * minsup                minimum support an episode must reach to be
+                          reported. Positive integer, default 1.
+
+  * window_size           an occurrence longer than this (in timestamp
+                          units) is not counted. Positive integer, default 5.
+
+  * threads               number of worker threads for the composite-episode
+                          search. 0 (default) uses all available CPU cores.
+
+  * tasks_num_multiplier  ratio of parallel tasks to threads (default 3.0),
+                          a scheduling setting that only affects speed. Must
+                          be positive; roughly 1-8 is meaningful - much
+                          lower leaves threads idle near the end of the
+                          search, much higher creates so many tiny tasks
+                          that scheduling overhead dominates.
+
+================================================================================
+\x1b[1;36mScenario 1. Mining example\x1b[0m
+================================================================================
+Let's mine the event stream above with parameters minsup=2, window_size=2.
+
+Found 7 frequent episode(s):
+
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+  #4  {1, 2}   (support: 2)
+  #5  3   (support: 2)
+  #6  1 -> {1, 2}   (support: 2)
+  #7  1 -> 2   (support: 2)
+
+Reading the list: '->' chains event sets into successive, later-in-time steps
+(e.g. 1 -> 2 means event 1 occurs, then later event 2); braces group events that
+must fire together into one parallel event set (e.g. {1, 2}). 1 -> {1, 2} chains
+a single-event step into a parallel one and is therefore a composite episode.
+
+================================================================================
+\x1b[1;36mScenario 2. Raising minsup to 3\x1b[0m
+================================================================================
+Raising minsup from 2 to 3 removes less frequent episodes from the result: only
+three of the seven episodes from Scenario 1 satisfy this stricter condition.
+
+  found 3 frequent episode(s):
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+
+minsup must be chosen without prior knowledge of the data, so there is no way to
+determine an appropriate value in advance. examples/basic/mining_fem/tke.py's
+TKE algorithm avoids this: instead of minsup, it takes the number of episodes to
+return as a parameter.
+
+================================================================================
+\x1b[1;36mScenario 3. Loading the same data as a Python iterable\x1b[0m
+================================================================================
+The sequence parameter does not have to be a file path: Desbordante also accepts
+any Python iterable of (event set, timestamp) pairs, which is useful when the
+events are already available in memory, for example after being read from a
+database.
+
+  found 7 frequent episode(s), matching Scenario 1: True
+
+Passing the same 8 event sets as Python tuples instead of a file produces an
+identical result. examples/basic/mining_fem/maxfem.py and
+examples/basic/mining_fem/tke.py accept sequences the same way; refer back here
+for how to build the in-memory iterable.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related primitives in Desbordante:
+  * Maximal frequent episode mining -  examples/basic/mining_fem/maxfem.py
+  * Top-k frequent episode mining   -  examples/basic/mining_fem/tke.py
+
+'''
+
+snapshots['test_example[basic/mining_fem/maxfem.py-None-maxfem_output] maxfem_output'] = '''================================================================================
+\x1b[1;36mDiscovering Maximal Frequent Episodes (MaxFEM)\x1b[0m
+================================================================================
+The AFEM example (examples/basic/mining_fem/afem.py) showed that AFEM reports
+every frequent episode, including many that are sub-episodes of longer ones also
+present in the output. MaxFEM reports only the frequent episodes that are not
+contained in any other frequent episode - the maximal frequent episodes - of
+which there are typically far fewer.
+
+MaxFEM algorithm was introduced in:
+
+    P. Fournier-Viger, M. S. Nawaz, Y. He, Y. Wu, F. Nouioua, U. Yun.
+    MaxFEM: Mining Maximal Frequent Episodes in Complex Event
+    Sequences. MIWAI 2022, pp. 86-98.
+
+Read the AFEM example first if you have not already: it introduces the terms
+this example builds on.
+
+\x1b[1;36mKey definitions\x1b[0m
+--------------------------------------------------------------------------------
+  * strict inclusion         an episode Y1 -> ... -> Yi is strictly included in
+                             an episode X1 -> ... -> Xp (written Y ⊑ X) if and
+                             only if Y1 ⊆ X_k1, Y2 ⊆ X_k2, ..., Yi ⊆ X_ki for
+                             some integers 1 <= k1 < k2 < ... < ki <= p.
+
+  * maximal frequent         given a complex event sequence, minsup > 0
+    episode mining           and window_size > 0, enumerate all frequent episodes
+                             that are not strictly included in another frequent
+                             episode.
+
+\x1b[1;36mDataset\x1b[0m
+--------------------------------------------------------------------------------
+The same event sequence used in examples/basic/mining_fem/afem.py.
+
+    t | event set
+  ----+-------------------------------
+    1 | {1, 3}
+    2 | {1}
+    3 | {1, 2}
+    6 | {1}
+    7 | {1, 2}
+    8 | {3}
+    9 | {2}
+   11 | {4}
+
+\x1b[1;36mAlgorithm parameters\x1b[0m
+--------------------------------------------------------------------------------
+MaxFEM takes the same four parameters as AFEM: minsup, window_size, threads and
+tasks_num_multiplier (see examples/basic/mining_fem/afem.py for details on
+each).
+
+================================================================================
+\x1b[1;36mScenario 1. AFEM vs. MaxFEM (minsup=2, window_size=2)\x1b[0m
+================================================================================
+Let's compare AFEM and MaxFEM on the sequence above.
+
+  AFEM found 7 frequent episode(s):
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+  #4  {1, 2}   (support: 2)
+  #5  3   (support: 2)
+  #6  1 -> {1, 2}   (support: 2)
+  #7  1 -> 2   (support: 2)
+
+  MaxFEM found 2 maximal frequent episode(s):
+  #1  3   (support: 2)
+  #2  1 -> {1, 2}   (support: 2)
+
+Five of AFEM's seven episodes - #1, #2, #3, #4, #7 - are sub-episodes of the
+chain 1 -> {1, 2}. MaxFEM keeps only that chain and event 3, which is not
+contained in any other frequent episode. These two episodes are the maximal
+front for minsup=2.
+
+================================================================================
+\x1b[1;36mScenario 2. Checking maximality against Scenario 1\x1b[0m
+================================================================================
+Maximal frequent episode mining implies that every frequent episode is a sub-
+episode of some maximal one. This is verified below against Scenario 1's output:
+each of AFEM's 7 episodes should be included in one of MaxFEM's 2 maximal
+episodes.
+
+  1   (support: 5)                 included in 1 -> {1, 2}   (support: 2)
+  2   (support: 3)                 included in 1 -> {1, 2}   (support: 2)
+  1 -> 1   (support: 3)            included in 1 -> {1, 2}   (support: 2)
+  {1, 2}   (support: 2)            included in 1 -> {1, 2}   (support: 2)
+  3   (support: 2)                 included in 3   (support: 2)
+  1 -> {1, 2}   (support: 2)       included in 1 -> {1, 2}   (support: 2)
+  1 -> 2   (support: 2)            included in 1 -> {1, 2}   (support: 2)
+
+Each of the 7 episodes is included in one of the 2 maximal episodes, as
+expected. The maximal front is a lossless summary of the full set of frequent
+episodes.
+
+Note: episode 1 has support 5, but the maximal episode that includes it, 1 ->
+{1, 2}, has support only 2 - MaxFEM does not report the higher support value,
+only that episode 1 is not maximal.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related primitives in Desbordante:
+  * All frequent episode mining   -  examples/basic/mining_fem/afem.py
+  * Top-k frequent episode mining -  examples/basic/mining_fem/tke.py
+
+'''
+
+snapshots['test_example[basic/mining_fem/tke.py-None-tke_output] tke_output'] = '''================================================================================
+\x1b[1;36mDiscovering the Top-K Frequent Episodes (TKE)\x1b[0m
+================================================================================
+The AFEM example (examples/basic/mining_fem/afem.py) showed that AFEM requires a
+minsup threshold: too low a value produces an unmanageably large result and a
+slower search, too high a value omits relevant episodes, and there is no way to
+determine an appropriate value without already knowing the data. TKE finds the k
+most frequent episodes instead, without requiring minsup: it takes the number k
+of episodes to return directly.
+
+This example follows:
+
+    P. Fournier-Viger, Y. Yang, P. Yang, J. C.-W. Lin, U. Yun. TKE:
+    Mining Top-K Frequent Episodes. IEA/AIE 2020, pp. 832-845.
+
+Read examples/basic/mining_fem/afem.py first if you have not already: it
+introduces the terms this example builds on.
+
+\x1b[1;36mKey definitions\x1b[0m
+--------------------------------------------------------------------------------
+  * top-k frequent           given a complex event sequence, a
+    episode mining           window_size and an integer k > 0, find a set T of k
+                             episodes such that their support is greater than or
+                             equal to that of any episode not in T. If several
+                             episodes are tied on the cutoff support value, more
+                             than one such set exists; TKE breaks ties by
+                             discovery order (see the note on threads below).
+
+\x1b[1;33m>>> A note on determinism.\x1b[0m
+TKE is not a randomized algorithm: support counting is exact, as in AFEM and
+MaxFEM. However, its search runs in parallel, and thread scheduling can affect
+the result in two ways. First, when several episodes are tied on the support
+value at the k-th position, which one is reported depends on which thread
+reaches it first. Second, all three algorithms prune an episode as soon as it
+appears infrequent and do not search its super-episodes further, even though a
+specific super-episode could still be frequent; which episode gets pruned before
+its super-episodes are explored can depend on thread scheduling. To keep this
+example's output reproducible, every call below uses threads=1.
+
+\x1b[1;36mDataset\x1b[0m
+--------------------------------------------------------------------------------
+The same event sequence used in examples/basic/mining_fem/afem.py.
+
+    t | event set
+  ----+-------------------------------
+    1 | {1, 3}
+    2 | {1}
+    3 | {1, 2}
+    6 | {1}
+    7 | {1, 2}
+    8 | {3}
+    9 | {2}
+   11 | {4}
+
+\x1b[1;36mAlgorithm parameters\x1b[0m
+--------------------------------------------------------------------------------
+  * sequence     path to a sequence file, or an in-memory Python iterable
+                 of (event set, timestamp) pairs - see AFEM example's
+                 Scenario 3 (examples/basic/mining_fem/afem.py) for how
+                 to build one.
+
+  * episodes_num the number k of top episodes to return. Positive integer,
+                 default 10. This replaces minsup entirely.
+
+  * window_size  same meaning as in AFEM/MaxFEM: an occurrence longer than
+                 this (in timestamp units) is not counted. Positive integer,
+                 default 5.
+
+  * threads      number of worker threads. 0 uses all available CPU cores;
+                 see the determinism note above for why this example fixes
+                 it to 1. Unlike AFEM/MaxFEM, TKE has no tasks_num_multiplier
+                 option.
+
+\x1b[1;36mExample\x1b[0m
+--------------------------------------------------------------------------------
+Let's search the sequence above for its top-3 most frequent episodes.
+
+  top-3 episodes (window_size=2):
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+
+examples/basic/mining_fem/afem.py's Scenario 2 obtains the same three episodes
+by setting minsup=3; here no support threshold is specified.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related primitives in Desbordante:
+  * All frequent episode mining     -  examples/basic/mining_fem/afem.py
+  * Maximal frequent episode mining -  examples/basic/mining_fem/maxfem.py
+
+'''
+
 snapshots['test_example[basic/mining_frequent_subgraphs.py-None-mining_frequent_subgraphs_output] mining_frequent_subgraphs_output'] = '''\x1b[95m
 === Introduction ===\x1b[0m
 In this example, we will explore the gSpan algorithm (Graph-Based Substructure Pattern Mining).
