@@ -11,10 +11,10 @@
 namespace algos::fd {
 // For now, emphasizes the place where FDs are added for easier migration in the future. Will most
 // likely be used in some algorithm harnesses as the default result reporting function.
-inline BitsetResultReporter MakeReorderingLhsLimLhsMaskAdder(
-        std::deque<boost::dynamic_bitset<>>& fd_lhss, auto const& ordering,
-        config::MaxLhsType max_lhs) {
-    return [&fd_lhss, &ordering, max_lhs](boost::dynamic_bitset<> lhs) {
+inline BitsetResultReporter MakeReorderingLhsLimLhsMaskAdder(std::deque<LhsTableMask>& fd_lhss,
+                                                             auto const& ordering,
+                                                             config::MaxLhsType max_lhs) {
+    return [&fd_lhss, &ordering, max_lhs](LhsTableMask lhs) {
         if (lhs.count() > max_lhs) return;
         fd_lhss.push_back(util::ReorderBitset(lhs, ordering));
     };

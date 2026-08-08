@@ -1,10 +1,12 @@
 #pragma once
 
+#include <cstddef>
+
 #include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
 
 class NonDependenciesMap : public PruningMap {
 public:
-    explicit NonDependenciesMap(RelationalSchema const* schema);
+    explicit NonDependenciesMap(std::size_t num_columns);
     NonDependenciesMap() = default;
 
     std::unordered_set<boost::dynamic_bitset<>> GetPrunedSupersets(

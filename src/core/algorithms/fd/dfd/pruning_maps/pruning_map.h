@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -8,7 +9,7 @@
 class PruningMap : public std::unordered_map<boost::dynamic_bitset<>,
                                              std::unordered_set<boost::dynamic_bitset<>>> {
 public:
-    PruningMap(RelationalSchema const* schema);
+    PruningMap(std::size_t num_columns);
     PruningMap() = default;
 
     void Rebalance();

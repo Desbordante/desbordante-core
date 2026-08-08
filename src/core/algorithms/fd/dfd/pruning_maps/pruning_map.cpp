@@ -2,9 +2,9 @@
 
 #include "core/model/index.h"
 
-PruningMap::PruningMap(RelationalSchema const* schema) {
-    for (model::Index column_index = 0; column_index != schema->GetNumColumns(); ++column_index) {
-        try_emplace(std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column_index)));
+PruningMap::PruningMap(std::size_t num_columns) {
+    for (model::Index column_index = 0; column_index != num_columns; ++column_index) {
+        try_emplace(std::move(boost::dynamic_bitset<>(num_columns).set(column_index)));
     }
 }
 

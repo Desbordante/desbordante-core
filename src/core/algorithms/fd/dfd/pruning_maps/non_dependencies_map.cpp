@@ -1,6 +1,6 @@
 #include "core/algorithms/fd/dfd/pruning_maps/non_dependencies_map.h"
 
-NonDependenciesMap::NonDependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
+NonDependenciesMap::NonDependenciesMap(std::size_t num_columns) : PruningMap(num_columns) {}
 
 std::unordered_set<boost::dynamic_bitset<>> NonDependenciesMap::GetPrunedSupersets(
         std::unordered_set<boost::dynamic_bitset<>> const& supersets) const {

@@ -1,13 +1,17 @@
 #pragma once
 
-#include "core/model/table/column_data.h"
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/model/table/position_list_index.h"
 
 class ColumnOrder {
 private:
     std::vector<int> order_;
 
 public:
-    explicit ColumnOrder(ColumnLayoutRelationData const* const relation_data);
+    explicit ColumnOrder(std::vector<model::PositionListIndex> const& input_table_column_plis);
     ColumnOrder() = default;
 
     std::vector<int> GetOrderHighDistinctCount(boost::dynamic_bitset<> const& columns) const;

@@ -6,12 +6,14 @@
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/relational_schema.h"
 
-ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
-    : order_(relation_data->GetSchema()->GetNumColumns()) {
+ColumnOrder::ColumnOrder(std::vector<model::PositionListIndex> const& input_table_column_plis)
+    : order_(input_table_column_plis.size()) {
     std::set<OrderedPartition> partitions;
-    for (auto const& column_data : relation_data->GetColumnData()) {
-        partitions.emplace(column_data.GetPositionListIndex(), relation_data->GetNumRows(),
-                           column_data.GetColumn()->GetIndex());
+    for (model::Index column_index = 0; column_index != input_table_column_plis.size();
+         ++column_index) {
+        model::PositionListIndex const& pli = input_table_column_plis[column_index];
+        partitions.emplace(&input_table_column_plis[column_index],
+                           pli.GetCachedProbingTable()->size(), column_index);
     }
 
     int order_index = 0;

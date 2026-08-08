@@ -32,6 +32,8 @@ protected:
     static void SortClusters(std::deque<Cluster>& clusters);
     static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
                           boost::dynamic_bitset<> const& probing_columns, std::vector<int>& probe);
+    static bool TakeProbe(int position, std::vector<PositionListIndex> const& plis,
+                          boost::dynamic_bitset<> const& probing_columns, std::vector<int>& probe);
 
 private:
     double entropy_;
@@ -138,6 +140,8 @@ public:
             std::shared_ptr<std::vector<int> const> probing_table) const;
     std::unique_ptr<PositionListIndex> ProbeAll(boost::dynamic_bitset<> const& probing_columns,
                                                 ColumnLayoutRelationData& relation_data) const;
+    std::unique_ptr<PositionListIndex> ProbeAll(boost::dynamic_bitset<> const& probing_columns,
+                                                std::vector<PositionListIndex> const& plis) const;
     std::string ToString() const;
 };
 

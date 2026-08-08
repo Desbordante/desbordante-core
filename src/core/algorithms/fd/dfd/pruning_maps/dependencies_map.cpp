@@ -1,6 +1,6 @@
 #include "core/algorithms/fd/dfd/pruning_maps/dependencies_map.h"
 
-DependenciesMap::DependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
+DependenciesMap::DependenciesMap(std::size_t num_columns) : PruningMap(num_columns) {}
 
 std::unordered_set<boost::dynamic_bitset<>> DependenciesMap::GetPrunedSubsets(
         std::unordered_set<boost::dynamic_bitset<>> const& subsets) const {

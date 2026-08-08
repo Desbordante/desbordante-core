@@ -219,12 +219,67 @@ std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
                                                this->relation_size_, this->relation_size_);
 }
 
+std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
+        boost::dynamic_bitset<> const& probing_columns,
+        std::vector<PositionListIndex> const& plis) const {
+    std::deque<std::vector<int>> new_index;
+    unsigned int new_size = 0;
+    double new_key_gap = 0.0;
+    unsigned long long new_nep = 0;
+
+    std::map<std::vector<int>, std::vector<int>> partial_index;
+    std::vector<int> probe;
+
+    for (auto& cluster : this->index_) {
+        for (int position : cluster) {
+            if (!TakeProbe(position, plis, probing_columns, probe)) {
+                probe.clear();
+                continue;
+            }
+
+            partial_index[probe].push_back(position);
+            probe.clear();
+        }
+
+        for (auto& iter : partial_index) {
+            auto& new_cluster = iter.second;
+            if (new_cluster.size() == 1) continue;
+
+            new_size += new_cluster.size();
+            new_key_gap += new_cluster.size() * log(new_cluster.size());
+            new_nep += CalculateNep(new_cluster.size());
+
+            new_index.emplace_back(std::move(new_cluster));
+        }
+        partial_index.clear();
+    }
+
+    double new_entropy = log(this->relation_size_) - new_key_gap / this->relation_size_;
+
+    SortClusters(new_index);
+
+    return std::make_unique<PositionListIndex>(std::move(new_index), new_size, new_entropy, new_nep,
+                                               this->relation_size_, this->relation_size_);
+}
+
 bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relation_data,
                                   boost::dynamic_bitset<> const& probing_columns,
                                   std::vector<int>& probe) {
     for (unsigned long index = probing_columns.find_first(); index < probing_columns.size();
          index = probing_columns.find_next(index)) {
         int value = relation_data.GetColumnData(index).GetProbingTableValue(position);
+        if (value == PositionListIndex::kSingletonValueId) return false;
+        probe.push_back(value);
+    }
+    return true;
+}
+
+bool PositionListIndex::TakeProbe(int position, std::vector<PositionListIndex> const& plis,
+                                  boost::dynamic_bitset<> const& probing_columns,
+                                  std::vector<int>& probe) {
+    for (unsigned long index = probing_columns.find_first(); index < probing_columns.size();
+         index = probing_columns.find_next(index)) {
+        int value = (*plis[index].GetCachedProbingTable())[position];
         if (value == PositionListIndex::kSingletonValueId) return false;
         probe.push_back(value);
     }

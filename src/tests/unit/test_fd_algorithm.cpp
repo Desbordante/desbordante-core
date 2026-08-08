@@ -149,7 +149,7 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using Algorithms = ::testing::Types<algos::Pyro, algos::DFD>;
+using Algorithms = ::testing::Types<algos::Pyro>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
@@ -258,7 +258,7 @@ REGISTER_TYPED_TEST_SUITE_P(FdDiscoveryTest, ThrowsOnEmpty, ReturnsEmptyOnSingle
                             MaxLHSOptionWork);
 
 using AlgorithmsNew = ::testing::Types<algos::fd::FDep, algos::fd::hyfd::HyFD, algos::fd::Depminer,
-                                       algos::fd::FUN, algos::fd::FastFDs>;
+                                       algos::fd::FUN, algos::fd::FastFDs, algos::fd::DFD>;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(FdDiscoveryTest, FdDiscoveryTest, AlgorithmsNew);
 
