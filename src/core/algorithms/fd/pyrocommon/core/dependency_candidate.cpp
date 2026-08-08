@@ -6,9 +6,9 @@
 // strict weak ordering
 bool DependencyCandidate::ArityComparator(DependencyCandidate const& dc1,
                                           DependencyCandidate const& dc2) {
-    if (dc1.vertical_.GetArity() > dc2.vertical_.GetArity())
+    if (dc1.vertical_.count() > dc2.vertical_.count())
         return true;
-    else if (dc1.vertical_.GetArity() == dc2.vertical_.GetArity())
+    else if (dc1.vertical_.count() == dc2.vertical_.count())
         return (dc1.error_.GetMean() > dc2.error_.GetMean());
     return false;
 }
@@ -18,7 +18,7 @@ bool DependencyCandidate::MinErrorComparator(DependencyCandidate const& dc1,
     if (dc1.error_.GetMin() > dc2.error_.GetMin())
         return true;
     else if (dc1.error_.GetMin() == dc2.error_.GetMin())
-        return (dc1.vertical_.GetArity() > dc2.vertical_.GetArity());
+        return (dc1.vertical_.count() > dc2.vertical_.count());
     return false;
 }
 
@@ -34,11 +34,11 @@ bool DependencyCandidate::FullArityErrorComparator(DependencyCandidate const& dc
     if (dc1.error_.GetMean() < dc2.error_.GetMean())
         return true;
     else if (dc1.error_.GetMean() == dc2.error_.GetMean()) {
-        if (dc1.vertical_.GetArity() < dc2.vertical_.GetArity())
+        if (dc1.vertical_.count() < dc2.vertical_.count())
             return true;
-        else if (dc1.vertical_.GetArity() == dc2.vertical_.GetArity()) {
-            boost::dynamic_bitset<> dc1_cols = dc1.vertical_.GetColumnIndices();
-            boost::dynamic_bitset<> dc2_cols = dc2.vertical_.GetColumnIndices();
+        else if (dc1.vertical_.count() == dc2.vertical_.count()) {
+            boost::dynamic_bitset<> dc1_cols = dc1.vertical_;
+            boost::dynamic_bitset<> dc2_cols = dc2.vertical_;
 
             for (size_t a = dc1_cols.find_first(), b = dc2_cols.find_first(); a < dc1_cols.size();
                  a = dc1_cols.find_next(a), b = dc2_cols.find_next(b))
@@ -52,11 +52,11 @@ bool DependencyCandidate::operator<(DependencyCandidate const& other) const {
     if (error_.GetMean() < other.error_.GetMean())
         return true;
     else if (error_.GetMean() == other.error_.GetMean()) {
-        if (vertical_.GetArity() < other.vertical_.GetArity())
+        if (vertical_.count() < other.vertical_.count())
             return true;
-        else if (vertical_.GetArity() == other.vertical_.GetArity()) {
-            boost::dynamic_bitset<> dc1_cols = vertical_.GetColumnIndices();
-            boost::dynamic_bitset<> dc2_cols = other.vertical_.GetColumnIndices();
+        else if (vertical_.count() == other.vertical_.count()) {
+            boost::dynamic_bitset<> dc1_cols = vertical_;
+            boost::dynamic_bitset<> dc2_cols = other.vertical_;
 
             for (size_t a = dc1_cols.find_first(), b = dc2_cols.find_first(); a < dc1_cols.size();
                  a = dc1_cols.find_next(a), b = dc2_cols.find_next(b))
@@ -65,11 +65,3 @@ bool DependencyCandidate::operator<(DependencyCandidate const& other) const {
     }
     return false;
 }
-
-std::ostream& operator<<(std::ostream& ofs, DependencyCandidate const& dependency_candidate) {
-    return ofs << static_cast<std::string>(dependency_candidate);
-}
-
-/*bool DependencyCandidate::operator==(DependencyCandidate const & other) const {
-    return (*vertical_ == *(other.vertical_) && )
-}*/

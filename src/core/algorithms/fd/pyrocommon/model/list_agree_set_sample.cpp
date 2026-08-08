@@ -5,7 +5,8 @@
 namespace model {
 
 std::unique_ptr<ListAgreeSetSample> ListAgreeSetSample::CreateFocusedFor(
-        ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
+        ColumnLayoutRelationData const* relation,
+        boost::dynamic_bitset<> const& restriction_vertical,
         PositionListIndex const* restriction_p_li, unsigned int sample_size, CustomRandom& random) {
     return AgreeSetSample::CreateFocusedFor<ListAgreeSetSample>(
             relation, restriction_vertical, restriction_p_li, sample_size, random);
@@ -24,8 +25,8 @@ std::unique_ptr<std::vector<unsigned long long>> ListAgreeSetSample::BitSetToLon
 }
 
 ListAgreeSetSample::ListAgreeSetSample(
-        ColumnLayoutRelationData const* relation, Vertical const& focus, unsigned int sample_size,
-        unsigned long long population_size,
+        ColumnLayoutRelationData const* relation, boost::dynamic_bitset<> const& focus,
+        unsigned int sample_size, unsigned long long population_size,
         std::unordered_map<boost::dynamic_bitset<>, int> const& agree_set_counters)
     : AgreeSetSample(relation, focus, sample_size, population_size) {
     for (auto& el : agree_set_counters) {
@@ -33,10 +34,10 @@ ListAgreeSetSample::ListAgreeSetSample(
     }
 }
 
-unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(Vertical const& agreement) const {
+unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(
+        boost::dynamic_bitset<> const& agreement) const {
     unsigned long long count = 0;
-    std::vector<unsigned long long> min_agree_set =
-            *BitSetToLongLongVector(agreement.GetColumnIndices());
+    std::vector<unsigned long long> min_agree_set = *BitSetToLongLongVector(agreement);
 
     for (auto const& agree_set_counter : agree_set_counters_) {
         std::vector<unsigned long long> agree_set = *agree_set_counter.agree_set;
@@ -57,13 +58,12 @@ unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(Vertical const& agre
     return count;
 }
 
-unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(Vertical const& agreement,
-                                                            Vertical const& disagreement) const {
+unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(
+        boost::dynamic_bitset<> const& agreement,
+        boost::dynamic_bitset<> const& disagreement) const {
     unsigned long long count = 0;
-    std::vector<unsigned long long> min_agree_set =
-            *BitSetToLongLongVector(agreement.GetColumnIndices());
-    std::vector<unsigned long long> min_disagree_set =
-            *BitSetToLongLongVector(disagreement.GetColumnIndices());
+    std::vector<unsigned long long> min_agree_set = *BitSetToLongLongVector(agreement);
+    std::vector<unsigned long long> min_disagree_set = *BitSetToLongLongVector(disagreement);
     // std::cout << "-----------------------------------\n";
     for (auto const& agree_set_counter : agree_set_counters_) {
         /*for (auto const& el : *agree_set_counter.agreeSet_)
@@ -93,21 +93,15 @@ unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(Vertical const& agre
     Entries:
         continue;
     }
-    LOG_DEBUG("AgreeSetSample for {} against {} returned {} ", agreement.ToString(),
-              disagreement.ToString(), count);
-    // std::cout << '\n';
-    //_numQueries
-    //_nanoQueries
     return count;
 }
 
 std::unique_ptr<std::vector<unsigned long long>> ListAgreeSetSample::GetNumAgreeSupersetsExt(
-        Vertical const& agreement, Vertical const& disagreement) const {
+        boost::dynamic_bitset<> const& agreement,
+        boost::dynamic_bitset<> const& disagreement) const {
     unsigned long long count = 0, count_agreements = 0;
-    std::vector<unsigned long long> min_agree_set =
-            *BitSetToLongLongVector(agreement.GetColumnIndices());
-    std::vector<unsigned long long> min_disagree_set =
-            *BitSetToLongLongVector(disagreement.GetColumnIndices());
+    std::vector<unsigned long long> min_agree_set = *BitSetToLongLongVector(agreement);
+    std::vector<unsigned long long> min_disagree_set = *BitSetToLongLongVector(disagreement);
 
     for (auto const& agree_set_counter : agree_set_counters_) {
         std::vector<unsigned long long> agree_set = *agree_set_counter.agree_set;

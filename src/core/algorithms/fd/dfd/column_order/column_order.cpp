@@ -20,12 +20,13 @@ ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
     }
 }
 
-std::vector<int> ColumnOrder::GetOrderHighDistinctCount(Vertical const& columns) const {
-    std::vector<int> order_for_columns(columns.GetArity());
+std::vector<int> ColumnOrder::GetOrderHighDistinctCount(
+        boost::dynamic_bitset<> const& columns) const {
+    std::vector<int> order_for_columns(columns.count());
 
     int current_order_index = 0;
     for (int column_index : order_) {
-        if (columns.GetColumnIndices()[column_index]) {
+        if (columns.test(column_index)) {
             order_for_columns[current_order_index++] = column_index;
         }
     }
@@ -33,13 +34,14 @@ std::vector<int> ColumnOrder::GetOrderHighDistinctCount(Vertical const& columns)
     return order_for_columns;
 }
 
-std::vector<int> ColumnOrder::GetOrderLowDistinctCount(Vertical const& columns) const {
-    std::vector<int> order_for_columns(columns.GetArity());
+std::vector<int> ColumnOrder::GetOrderLowDistinctCount(
+        boost::dynamic_bitset<> const& columns) const {
+    std::vector<int> order_for_columns(columns.count());
 
     assert(!order_.empty());
     int current_order_index = 0;
     for (int i = this->order_.size() - 1; i >= 0; --i) {
-        if (columns.GetColumnIndices()[order_[i]]) {
+        if (columns.test(order_[i])) {
             order_for_columns[current_order_index++] = this->order_[i];
         }
     }

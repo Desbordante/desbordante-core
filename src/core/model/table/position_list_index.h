@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "core/model/table/column.h"
+#include <boost/dynamic_bitset.hpp>
 
 class ColumnLayoutRelationData;
 
@@ -31,7 +31,7 @@ protected:
 
     static void SortClusters(std::deque<Cluster>& clusters);
     static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
-                          Vertical const& probing_columns, std::vector<int>& probe);
+                          boost::dynamic_bitset<> const& probing_columns, std::vector<int>& probe);
 
 private:
     double entropy_;
@@ -39,7 +39,6 @@ private:
     double gini_impurity_;
     unsigned long long nep_;
     std::shared_ptr<std::vector<int> const> probing_table_cache_;
-    unsigned int freq_ = 0;
 
 public:
     static constexpr int kSingletonValueId = 0;
@@ -98,10 +97,6 @@ public:
         return index_.size() + relation_size_ - size_;
     }
 
-    unsigned int GetFreq() const {
-        return freq_;
-    }
-
     unsigned int GetSize() const {
         return size_;
     }
@@ -138,15 +133,11 @@ public:
         return relation_size_ <= 1 || (GetNumNonSingletonCluster() == 1 && size_ == relation_size_);
     }
 
-    void IncFreq() {
-        freq_++;
-    }
-
     std::unique_ptr<PositionListIndex> Intersect(PositionListIndex const* that) const;
     std::unique_ptr<PositionListIndex> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;
-    std::unique_ptr<PositionListIndex> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
+    std::unique_ptr<PositionListIndex> ProbeAll(boost::dynamic_bitset<> const& probing_columns,
+                                                ColumnLayoutRelationData& relation_data) const;
     std::string ToString() const;
 };
 

@@ -9,7 +9,6 @@
 
 #include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
 #include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/vertical.h"
 #include "core/util/custom_random.h"
 
 namespace model {
@@ -17,15 +16,20 @@ namespace model {
 // abstract base class for Agree Set Sample implementations (trie <- not used, list)
 class AgreeSetSample {
 public:
-    virtual unsigned long long GetNumAgreeSupersets(Vertical const& agreement) const = 0;
-    virtual unsigned long long GetNumAgreeSupersets(Vertical const& agreement,
-                                                    Vertical const& disagreement) const = 0;
+    virtual unsigned long long GetNumAgreeSupersets(
+            boost::dynamic_bitset<> const& agreement) const = 0;
+    virtual unsigned long long GetNumAgreeSupersets(
+            boost::dynamic_bitset<> const& agreement,
+            boost::dynamic_bitset<> const& disagreement) const = 0;
     virtual std::unique_ptr<std::vector<unsigned long long>> GetNumAgreeSupersetsExt(
-            Vertical const& agreement, Vertical const& disagreement) const;
+            boost::dynamic_bitset<> const& agreement,
+            boost::dynamic_bitset<> const& disagreement) const;
 
-    double EstimateAgreements(Vertical const& agreement) const;
-    ConfidenceInterval EstimateAgreements(Vertical const& agreement, double confidence) const;
-    ConfidenceInterval EstimateMixed(Vertical const& agreement, Vertical const& disagreement,
+    double EstimateAgreements(boost::dynamic_bitset<> const& agreement) const;
+    ConfidenceInterval EstimateAgreements(boost::dynamic_bitset<> const& agreement,
+                                          double confidence) const;
+    ConfidenceInterval EstimateMixed(boost::dynamic_bitset<> const& agreement,
+                                     boost::dynamic_bitset<> const& disagreement,
                                      double confidence) const;
 
     double GetSamplingRatio() const {
@@ -40,15 +44,15 @@ public:
 
 protected:
     ::ColumnLayoutRelationData const* relation_data_;
-    Vertical focus_;
+    boost::dynamic_bitset<> focus_;
     unsigned int sample_size_;
     unsigned long long population_size_;
-    AgreeSetSample(ColumnLayoutRelationData const* relation_data, Vertical focus,
+    AgreeSetSample(ColumnLayoutRelationData const* relation_data, boost::dynamic_bitset<> focus,
                    unsigned int sample_size, unsigned long long population_size);
 
     template <typename T>
     static std::unique_ptr<T> CreateFocusedFor(ColumnLayoutRelationData const* relation,
-                                               Vertical const& restriction_vertical,
+                                               boost::dynamic_bitset<> const& restriction_vertical,
                                                PositionListIndex const* restriction_pli,
                                                unsigned int sample_size, CustomRandom& random);
 

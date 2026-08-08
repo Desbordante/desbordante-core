@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/model/table/column_data.h"
-#include "core/model/table/vertical.h"
 
 class ColumnOrder {
 private:
@@ -11,6 +10,6 @@ public:
     explicit ColumnOrder(ColumnLayoutRelationData const* const relation_data);
     ColumnOrder() = default;
 
-    std::vector<int> GetOrderHighDistinctCount(Vertical const& columns) const;
-    std::vector<int> GetOrderLowDistinctCount(Vertical const& columns) const;
+    std::vector<int> GetOrderHighDistinctCount(boost::dynamic_bitset<> const& columns) const;
+    std::vector<int> GetOrderLowDistinctCount(boost::dynamic_bitset<> const& columns) const;
 };

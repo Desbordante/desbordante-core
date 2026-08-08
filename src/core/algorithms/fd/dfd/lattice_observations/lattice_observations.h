@@ -4,22 +4,21 @@
 
 #include "core/algorithms/fd/dfd/column_order/column_order.h"
 #include "core/algorithms/fd/dfd/node_category.h"
-#include "core/model/table/vertical.h"
-#include "core/util/custom_hashes.h"
 
-class LatticeObservations : public std::unordered_map<Vertical, NodeCategory> {
+class LatticeObservations : public std::unordered_map<boost::dynamic_bitset<>, NodeCategory> {
 public:
-    bool IsCandidate(Vertical const& node) const;
+    bool IsCandidate(boost::dynamic_bitset<> const& node) const;
 
-    bool IsVisited(Vertical const& node) const {
+    bool IsVisited(boost::dynamic_bitset<> const& node) const {
         return this->find(node) != this->end();
     }
 
-    NodeCategory UpdateDependencyCategory(Vertical const& node);
-    NodeCategory UpdateNonDependencyCategory(Vertical const& node, unsigned int rhs_index);
+    NodeCategory UpdateDependencyCategory(boost::dynamic_bitset<> const& node);
+    NodeCategory UpdateNonDependencyCategory(boost::dynamic_bitset<> const& node,
+                                             unsigned int rhs_index);
 
-    std::unordered_set<Vertical> GetUncheckedSubsets(Vertical const& node,
-                                                     ColumnOrder const&) const;
-    std::unordered_set<Vertical> GetUncheckedSupersets(Vertical const& node, unsigned int rhs_index,
-                                                       ColumnOrder const&) const;
+    std::unordered_set<boost::dynamic_bitset<>> GetUncheckedSubsets(
+            boost::dynamic_bitset<> const& node, ColumnOrder const&) const;
+    std::unordered_set<boost::dynamic_bitset<>> GetUncheckedSupersets(
+            boost::dynamic_bitset<> const& node, unsigned int rhs_index, ColumnOrder const&) const;
 };

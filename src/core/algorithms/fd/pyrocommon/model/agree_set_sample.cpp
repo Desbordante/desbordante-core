@@ -11,8 +11,9 @@ namespace model {
 
 using namespace std;
 
-AgreeSetSample::AgreeSetSample(ColumnLayoutRelationData const* relation_data, Vertical focus,
-                               unsigned int sample_size, unsigned long long population_size)
+AgreeSetSample::AgreeSetSample(ColumnLayoutRelationData const* relation_data,
+                               boost::dynamic_bitset<> focus, unsigned int sample_size,
+                               unsigned long long population_size)
     : relation_data_(relation_data),
       focus_(std::move(focus)),
       sample_size_(sample_size),
@@ -25,14 +26,15 @@ double AgreeSetSample::CalculateNonNegativeFraction(double a, double b) {
 }
 
 std::unique_ptr<std::vector<unsigned long long>> AgreeSetSample::GetNumAgreeSupersetsExt(
-        Vertical const& agreement, Vertical const& disagreement) const {
+        boost::dynamic_bitset<> const& agreement,
+        boost::dynamic_bitset<> const& disagreement) const {
     return std::make_unique<std::vector<unsigned long long>>(
             std::vector<unsigned long long>{this->GetNumAgreeSupersets(agreement),
                                             this->GetNumAgreeSupersets(agreement, disagreement)});
 }
 
-double AgreeSetSample::EstimateAgreements(Vertical const& agreement) const {
-    if (!agreement.Contains(this->focus_)) {
+double AgreeSetSample::EstimateAgreements(boost::dynamic_bitset<> const& agreement) const {
+    if (!focus_.is_subset_of(agreement)) {
         throw std::runtime_error("An agreement in estimateAgreements should contain the focus");
     }
 
@@ -42,9 +44,9 @@ double AgreeSetSample::EstimateAgreements(Vertical const& agreement) const {
     return ObservationsToRelationRatio(this->GetNumAgreeSupersets(agreement));
 }
 
-ConfidenceInterval AgreeSetSample::EstimateAgreements(Vertical const& agreement,
+ConfidenceInterval AgreeSetSample::EstimateAgreements(boost::dynamic_bitset<> const& agreement,
                                                       double confidence) const {
-    if (!agreement.Contains(this->focus_)) {
+    if (!focus_.is_subset_of(agreement)) {
         throw std::runtime_error(
                 "An agreement in estimateAgreements with confidence should contain the focus");
     }
@@ -58,10 +60,10 @@ ConfidenceInterval AgreeSetSample::EstimateAgreements(Vertical const& agreement,
     return EstimateGivenNumHits(num_hits, confidence);
 }
 
-ConfidenceInterval AgreeSetSample::EstimateMixed(Vertical const& agreement,
-                                                 Vertical const& disagreement,
+ConfidenceInterval AgreeSetSample::EstimateMixed(boost::dynamic_bitset<> const& agreement,
+                                                 boost::dynamic_bitset<> const& disagreement,
                                                  double confidence) const {
-    if (!agreement.Contains(this->focus_)) {
+    if (!focus_.is_subset_of(agreement)) {
         throw std::runtime_error("An agreement in EstimateMixed should contain the focus");
     }
     if (population_size_ == 0) {

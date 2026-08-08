@@ -33,7 +33,7 @@ private:
     CustomRandom custom_random_;
 
     model::AgreeSetSample const* CreateColumnFocusedSample(
-            Vertical const& focus, model::PositionListIndex const* restriction_pli,
+            boost::dynamic_bitset<> const& focus, model::PositionListIndex const* restriction_pli,
             double boost_factor);
 
 public:
@@ -46,8 +46,10 @@ public:
                      CacheEvictionMethod const& eviction_method, double caching_method_value);
 
     // Non-const as RandomGenerator state gets changed
-    model::AgreeSetSample const* CreateFocusedSample(Vertical const& focus, double boost_factor);
-    std::shared_ptr<model::AgreeSetSample const> GetAgreeSetSample(Vertical const& focus) const;
+    model::AgreeSetSample const* CreateFocusedSample(boost::dynamic_bitset<> const& focus,
+                                                     double boost_factor);
+    std::shared_ptr<model::AgreeSetSample const> GetAgreeSetSample(
+            boost::dynamic_bitset<> const& focus) const;
 
     model::PLICache* GetPliCache() {
         return pli_cache_.get();

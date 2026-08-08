@@ -1,25 +1,14 @@
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/lexical_cast.hpp>
-
-#include "core/model/table/column.h"
-#include "core/model/table/vertical.h"
 
 class PartialKey {
 public:
     double error_;
-    Vertical vertical_;
+    boost::dynamic_bitset<> vertical_;
     double score_;
 
-    PartialKey(Vertical vertical, double error, double score)
+    PartialKey(boost::dynamic_bitset<> vertical, double error, double score)
         : error_(error), vertical_(std::move(vertical)), score_(score) {}
-
-    std::string ToIndicesString() const {
-        return vertical_.ToIndicesString();
-    }
-
-    std::string ToString() const {
-        return vertical_.ToString() + "~>" + boost::lexical_cast<std::string>(error_) +
-               boost::lexical_cast<std::string>(score_);
-    }
 };

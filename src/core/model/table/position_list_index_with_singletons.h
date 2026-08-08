@@ -5,13 +5,9 @@
 #pragma once
 #include <deque>
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
-#include "core/model/table/column.h"
 #include "core/model/table/position_list_index.h"
-
-class ColumnLayoutRelationData;
 
 namespace model {
 
@@ -34,9 +30,6 @@ public:
         all_clusters.insert(all_clusters.end(), singletons_.begin(), singletons_.end());
         return all_clusters;
     }
-
-    std::unique_ptr<PLIWithSingletons> ProbeAll(Vertical const& probing_columns,
-                                                ColumnLayoutRelationData& relation_data);
 
     std::unique_ptr<PLIWithSingletons> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;

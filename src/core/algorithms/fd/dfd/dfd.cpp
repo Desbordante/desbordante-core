@@ -24,31 +24,31 @@ void DFD::MakeExecuteOptsAvailableFDInternal() {
     MakeOptionsAvailable({config::kThreadNumberOpt.GetName()});
 }
 
-void DFD::ResetStateFd() {
-    unique_columns_.clear();
-}
+void DFD::ResetStateFd() {}
 
 void DFD::ExecuteInternal() {
     auto partition_storage = std::make_unique<PartitionStorage>(relation_.get());
     RelationalSchema const* const schema = relation_->GetSchema();
+    std::vector<boost::dynamic_bitset<>> unique_columns;
 
     // search for unique columns
-    for (auto const& column : schema->GetColumns()) {
-        ColumnData& column_data = relation_->GetColumnData(column->GetIndex());
+    for (model::Index column_index = 0; column_index != schema->GetNumColumns(); ++column_index) {
+        ColumnData& column_data = relation_->GetColumnData(column_index);
         model::PositionListIndex const* const column_pli = column_data.GetPositionListIndex();
 
         if (column_pli->AllValuesAreUnique()) {
-            Vertical const lhs = Vertical(*column);
-            unique_columns_.push_back(lhs);
+            unique_columns.push_back(
+                    std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column_index)));
             // we do not register an FD at once, because we check for FDs with empty LHS later
         }
     }
 
     boost::asio::thread_pool search_space_pool(number_of_threads_);
 
-    for (auto& rhs : schema->GetColumns()) {
-        boost::asio::post(search_space_pool, [this, &rhs, schema, &partition_storage]() {
-            ColumnData const& rhs_data = relation_->GetColumnData(rhs->GetIndex());
+    for (model::Index rhs_index = 0; rhs_index != schema->GetNumColumns(); ++rhs_index) {
+        boost::asio::post(search_space_pool, [this, rhs_index, schema, &partition_storage,
+                                              &unique_columns]() {
+            ColumnData const& rhs_data = relation_->GetColumnData(rhs_index);
             model::PositionListIndex const* const rhs_pli = rhs_data.GetPositionListIndex();
 
             /* if all the rows have the same value, then we register FD with empty LHS
@@ -56,16 +56,18 @@ void DFD::ExecuteInternal() {
              * this RHS, so we register it and move to the next RHS
              * */
             if (rhs_pli->GetNepAsLong() == relation_->GetNumTuplePairs()) {
-                RegisterFd(schema->CreateEmptyVertical(), *rhs, relation_->GetSharedPtrSchema());
+                RegisterFd(schema->CreateEmptyVertical(), *schema->GetColumn(rhs_index),
+                           relation_->GetSharedPtrSchema());
                 return;
             }
 
-            auto search_space = LatticeTraversal(rhs.get(), relation_.get(), unique_columns_,
+            auto search_space = LatticeTraversal(rhs_index, relation_.get(), unique_columns,
                                                  partition_storage.get());
             auto const minimal_deps = search_space.FindLHSs();
 
             for (auto const& minimal_dependency_lhs : minimal_deps) {
-                RegisterFd(minimal_dependency_lhs, *rhs, relation_->GetSharedPtrSchema());
+                RegisterFd(schema->GetVertical(minimal_dependency_lhs),
+                           *schema->GetColumn(rhs_index), relation_->GetSharedPtrSchema());
             }
         });
     }

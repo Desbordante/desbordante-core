@@ -1,8 +1,10 @@
 #include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
 
+#include "core/model/index.h"
+
 PruningMap::PruningMap(RelationalSchema const* schema) {
-    for (auto const& column : schema->GetColumns()) {
-        this->insert(std::make_pair(Vertical(*column), std::unordered_set<Vertical>()));
+    for (model::Index column_index = 0; column_index != schema->GetNumColumns(); ++column_index) {
+        try_emplace(std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column_index)));
     }
 }
 
@@ -12,7 +14,7 @@ void PruningMap::Rebalance() {
     do {
         rebalanced_group = false;
         for (auto iter = this->begin(); iter != this->end();) {
-            Vertical const& key = iter->first;
+            boost::dynamic_bitset<> const& key = iter->first;
             auto const& related_verticals = iter->second;
 
             // RebalanceGroup() invalidates this iterator, because it erases the key element
@@ -25,18 +27,18 @@ void PruningMap::Rebalance() {
     } while (rebalanced_group);
 }
 
-void PruningMap::RebalanceGroup(Vertical const& key) {
+void PruningMap::RebalanceGroup(boost::dynamic_bitset<> const& key) {
     auto const& deps_of_group = this->at(key);
-    auto inverted_columns = key.GetColumnIndices().operator~();
+    auto inverted_columns = ~key;
 
     for (size_t column_index = inverted_columns.find_first();
          column_index < inverted_columns.size();
          column_index = inverted_columns.find_next(column_index)) {
-        Vertical new_key = key.Union(*key.GetSchema()->GetColumn(column_index));
-        std::unordered_set<Vertical> new_group;
+        boost::dynamic_bitset<> new_key = boost::dynamic_bitset<>(key).set(column_index);
+        std::unordered_set<boost::dynamic_bitset<>> new_group;
 
         for (auto const& dep_of_group : deps_of_group) {
-            if (dep_of_group.Contains(new_key)) {
+            if (new_key.is_subset_of(dep_of_group)) {
                 new_group.insert(dep_of_group);
             }
         }

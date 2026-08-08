@@ -1,10 +1,10 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "core/algorithms/cind/condition_miners/position_lists_set.h"
-#include "core/model/table/column.h"
 
 class ColumnLayoutRelationData;
 
