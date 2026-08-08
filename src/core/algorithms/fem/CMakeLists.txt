@@ -1,3 +1,4 @@
+add_subdirectory(afem)
 add_subdirectory(maxfem)
 add_subdirectory(tke)
 

@@ -4,6 +4,7 @@
 
 #include <pybind11/stl.h>
 
+#include "core/algorithms/fem/afem/afem.h"
 #include "core/algorithms/fem/maxfem/maxfem.h"
 #include "core/algorithms/fem/tke/tke.h"
 #include "python_bindings/py_util/bind_primitive.h"
@@ -21,6 +22,9 @@ void BindFem(pybind11::module_& main_module) {
 
     detail::RegisterAlgorithm<algos::maxfem::MaxFEM, algos::FEMAlgorithm>(fem_module, "MaxFEM")
             .def("get_max_frequent_episodes", &algos::maxfem::MaxFEM::GetMaxFrequentEpisodes);
+
+    detail::RegisterAlgorithm<algos::afem::AFEM, algos::FEMAlgorithm>(fem_module, "AFEM")
+            .def("get_frequent_episodes", &algos::afem::AFEM::GetFrequentEpisodes);
 
     detail::RegisterAlgorithm<algos::tke::TKE, algos::FEMAlgorithm>(fem_module, "TKE")
             .def("get_top_k_frequent_episodes", &algos::tke::TKE::GetTopKFrequentEpisodes);

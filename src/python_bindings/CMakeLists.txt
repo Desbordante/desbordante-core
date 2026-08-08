@@ -177,6 +177,7 @@ desbordante_add_bind(
     SRCS
     fem/bind_fem.cpp
     LIBS
+    ${DESBORDANTE_PREFIX}::fem::afem
     ${DESBORDANTE_PREFIX}::fem::maxfem
     ${DESBORDANTE_PREFIX}::fem::tke
     ${DESBORDANTE_PREFIX}::bindlib::util
