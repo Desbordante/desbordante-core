@@ -19,7 +19,6 @@
 #include "core/algorithms/rfd/rfd.h"
 #include "core/algorithms/rfd/similarity_metric.h"
 #include "core/config/tabular_data/input_table_type.h"
-#include "core/model/table/column_index.h"
 
 namespace tests {
 class GaRfdTester;
@@ -28,17 +27,12 @@ class GaRfdTester;
 namespace algos::rfd {
 
 class GaRfd final : public algos::Algorithm {
-public:
+private:
     struct Individual {
         uint32_t lhs_mask = 0;
         uint8_t rhs_index = 0;
         double confidence = 0.0;
         double support = 0.0;
-
-        bool operator<(Individual const& other) const {
-            if (lhs_mask != other.lhs_mask) return lhs_mask < other.lhs_mask;
-            return rhs_index < other.rhs_index;
-        }
 
         bool operator==(Individual const& other) const {
             return lhs_mask == other.lhs_mask && rhs_index == other.rhs_index;
@@ -51,7 +45,6 @@ public:
         }
     };
 
-private:
     // Input
     config::InputTable input_table_;
     std::vector<std::shared_ptr<SimilarityMetric>> metrics_;
@@ -63,7 +56,7 @@ private:
     std::size_t total_pairs_ = 0;
 
     mutable std::vector<uint64_t> compute_buffer_;
-    uint32_t full_mask_;
+    uint32_t full_mask_ = 0;
 
     // separate bin column on chunk of 64 bit
     std::vector<std::vector<uint64_t>> attr_similarity_bits_;
@@ -90,6 +83,10 @@ private:
     void ResetState() final;
 
     // helper methods
+    // Expands per-attribute parameters (min_similarity, metrics) to match
+    // num_attrs_, filling defaults where unset; called at load and before
+    // every execution.
+    void NormalizeSimilarityConfig();
     void BuildSimilarityBitsets();
     [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const;
     // Computes conf and supp for a single individual

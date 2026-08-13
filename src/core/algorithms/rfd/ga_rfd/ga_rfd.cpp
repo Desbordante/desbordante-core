@@ -1,11 +1,14 @@
 #include "ga_rfd.h"
 
 #include <algorithm>
+#include <bit>
 #include <bitset>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <iterator>
+#include <numeric>
 #include <ranges>
 #include <stdexcept>
 #include <string>
@@ -54,9 +57,7 @@ std::string RFD::ToString() const {
 GaRfd::GaRfd() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kRfdMinSimilarity, kRfdMinimumConfidence, kPopulationSize,
-                          kRfdMaxGenerations, kRfdCrossoverProbability, kRfdMutationProbability,
-                          kSeed, kMetrics, config::kTableOpt.GetName(), kCacheMaxSize});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
 void GaRfd::MakeExecuteOptsAvailable() {
@@ -75,8 +76,8 @@ void GaRfd::RegisterOptions() {
     };
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&metrics_, kMetrics, kDRfdMetrics,
-                          std::vector<std::shared_ptr<SimilarityMetric>>{}});
+    RegisterOption(Option<std::vector<std::shared_ptr<SimilarityMetric>>>{
+            &metrics_, kMetrics, kDRfdMetrics, [this]() { return metrics_; }});
     RegisterOption(Option{&min_similarity_, kRfdMinSimilarity, kDRfdMinSimilarity,
                           std::vector<double>{1.0}}
                            .SetValueCheck(check_sim));
@@ -94,9 +95,8 @@ void GaRfd::RegisterOptions() {
             Option{&mutation_probability_, kRfdMutationProbability, kDRfdMutationProbability, 1.0}
                     .SetValueCheck(check_prob_range));
     RegisterOption(Option{&seed_, kSeed, kDSeed, static_cast<std::uint32_t>(123)});
-    RegisterOption(
-            Option{&cache_max_size_, kCacheMaxSize, kDCacheMaxSize, static_cast<std::size_t>(10000)}
-                    .SetValueCheck([](auto v) { return v >= 0; }));
+    RegisterOption(Option{&cache_max_size_, kCacheMaxSize, kDCacheMaxSize,
+                          static_cast<std::size_t>(10000)});
 }
 
 void GaRfd::LoadDataInternal() {
@@ -107,9 +107,9 @@ void GaRfd::LoadDataInternal() {
 
     auto first_row = input_table_->GetNextRow();
     num_attrs_ = first_row.size();
-    full_mask_ = (1u << num_attrs_) - 1;
     if (num_attrs_ < 2) throw std::runtime_error("GA-rfd requires at least 2 attributes");
     if (num_attrs_ > kMaxAttributes) throw std::runtime_error("Maximum 31 attributes supported");
+    full_mask_ = (1u << num_attrs_) - 1;
 
     constexpr size_t k_reserve_chunk = 1024;
     column_data_.resize(num_attrs_);
@@ -120,7 +120,8 @@ void GaRfd::LoadDataInternal() {
 
     while (input_table_->HasNextRow()) {
         auto row = input_table_->GetNextRow();
-        assert(row.size() == num_attrs_ && "Inconsistent number of attributes");
+        if (row.size() != num_attrs_)
+            throw std::runtime_error("Inconsistent number of attributes in row");
         for (size_t i = 0; i < num_attrs_; ++i) column_data_[i].emplace_back(std::move(row[i]));
         ++num_rows_;
     }
@@ -133,6 +134,10 @@ void GaRfd::LoadDataInternal() {
 
     LOG_INFO("Loaded {} rows, {} attributes, {} total pairs", num_rows_, num_attrs_, total_pairs_);
 
+    NormalizeSimilarityConfig();
+}
+
+void GaRfd::NormalizeSimilarityConfig() {
     if (min_similarity_.empty()) {
         min_similarity_.assign(num_attrs_, 1.0);
     } else if (min_similarity_.size() == 1) {
@@ -148,16 +153,12 @@ void GaRfd::LoadDataInternal() {
     }
     if (metrics_.size() != num_attrs_)
         throw std::invalid_argument("The number of attributes and metrics do not match");
-
-    support_cache_ = std::make_unique<util::LRUCache<uint32_t, std::size_t>>(cache_max_size_);
 }
 
 void GaRfd::BuildSimilarityBitsets() {
     if (!support_cache_) {
         support_cache_ = std::make_unique<util::LRUCache<uint32_t, std::size_t>>(cache_max_size_);
     }
-    LOG_INFO("BuildSimilarityBitsets: total_pairs_ = {}, num_attrs_ = {}, num_rows_ = {}",
-             total_pairs_, num_attrs_, num_rows_);
     std::size_t const num_uint64_per_attr = (total_pairs_ + 63) / 64;
     attr_similarity_bits_.assign(num_attrs_, std::vector<uint64_t>(num_uint64_per_attr, 0));
 
@@ -418,7 +419,7 @@ std::unordered_set<GaRfd::Individual, GaRfd::IndividualHash> GaRfd::Mutate(
 
         bool mutated_flag = false;
         switch (coin(rng)) {
-            case 0: {
+            case 0: {  // Remove one random set bit from the mask
                 int ones = std::popcount(mask);
                 if (ones == 0) break;
                 int skip = std::uniform_int_distribution<int>(0, ones - 1)(rng);
@@ -428,7 +429,8 @@ std::unordered_set<GaRfd::Individual, GaRfd::IndividualHash> GaRfd::Mutate(
                 mutated_flag = true;
                 break;
             }
-            case 1: {
+            case 1: {  // Add a random available bit to the lhs (excludes bits already in lhs and
+                       // rhs)
                 uint32_t avail = (full_mask_) & ~mask & ~(1u << rhs);
                 if (avail == 0) break;
                 int ones = std::popcount(avail);
@@ -439,8 +441,8 @@ std::unordered_set<GaRfd::Individual, GaRfd::IndividualHash> GaRfd::Mutate(
                 mutated_flag = true;
                 break;
             }
-            case 2: {
-                uint32_t avail = (full_mask_) & ~mask;
+            case 2: {  // Move the rhs variable to a new available bit (not in lhs and curr rhs)
+                uint32_t avail = (full_mask_) & ~mask & ~(1u << rhs);
                 if (avail == 0) break;
                 int ones = std::popcount(avail);
                 int skip = std::uniform_int_distribution<int>(0, ones - 1)(rng);
@@ -474,6 +476,7 @@ std::unordered_set<RFD, RFDHash> GaRfd::Finalize(
 
 void GaRfd::ExecuteInternal() {
     LOG_INFO("Build similarity bitsets...");
+    NormalizeSimilarityConfig();
     BuildSimilarityBitsets();
     std::mt19937 rng(seed_);
     auto pop = InitializePopulation(rng);
@@ -491,13 +494,10 @@ void GaRfd::ExecuteInternal() {
         auto selected = Select(pop, rng);
         auto offspring = Crossover(selected, rng);
         auto mutated = Mutate(selected, rng);
-        if (offspring.empty() && mutated.empty()) {
-            pop = std::move(selected);
-        } else {
-            pop = std::move(selected);
-            pop.insert(offspring.begin(), offspring.end());
-            pop.insert(mutated.begin(), mutated.end());
-        }
+        pop = std::move(selected);
+        pop.insert(offspring.begin(), offspring.end());
+        pop.insert(mutated.begin(), mutated.end());
+        EvaluatePopulation(pop);
         if (pop.size() > population_size_ + 100) {
             std::vector<Individual> sorted(pop.begin(), pop.end());
             std::sort(sorted.begin(), sorted.end(),
@@ -505,7 +505,6 @@ void GaRfd::ExecuteInternal() {
             sorted.resize(population_size_ + 100);
             pop = std::unordered_set<Individual, IndividualHash>(sorted.begin(), sorted.end());
         }
-        EvaluatePopulation(pop);
     }
     discovered_ = Finalize(pop);
 }

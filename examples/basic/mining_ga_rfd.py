@@ -156,7 +156,7 @@ print(')', end='')
 print("\n")
 
 printlns(
-    f"{YELLOW}!?{RESET}  It is important not to confuse RFD as a general term for 'approximate FD'. " + 
+    f"{YELLOW}!?{RESET}  It is important not to confuse RFD with the broader term 'approximate FD'. " + 
     "Here RFD refers to a concrete pattern defined by Caruccio et al. that " + 
     "combines similarity metric for each column with a global coverage threshold."
 )
@@ -209,14 +209,14 @@ DATA_PATH = "examples/datasets/sample_original_from_paper.csv"
 COL_NAMES = ["height_cm", "weight_kg", "shoe_size_eu"]
 
 df = pd.read_csv(DATA_PATH, header=0)
-print_table(df, title="Sample data (8 persons, 3 numeric attributes)")
+print_table(df, title="Sample data (7 persons, 3 numeric attributes)")
 
 printlns(
-    f"  {GREEN}Dataset description:{RESET} This dataset contains information about 8 people. " +
+    f"  {GREEN}Dataset description:{RESET} This dataset contains information about 7 people. " +
     "Each row represents one person with three numeric attributes:"
 )
-prints(f"  * {BOLD}height_cm{RESET} — person's height in centimeters")
-prints(f"  * {BOLD}weight_kg{RESET} — person's weight in kilograms")
+prints(f"  * {BOLD}height_cm{RESET}    — person's height in centimeters")
+prints(f"  * {BOLD}weight_kg{RESET}    — person's weight in kilograms")
 prints(f"  * {BOLD}shoe_size_eu{RESET} — European shoe size")
 print()
 
@@ -247,7 +247,7 @@ print("""
   max_generations       - number of iterations (default 32)
   crossover_probability - chance of combining two parents (in [0,1], 
                           default 1.0)
-  mutation_probability  - chance of random change (in [0,1], default 0.1)
+  mutation_probability  - chance of random change (in [0,1], default 1.0)
   minconf               - minimum confidence (in [0,1], default 1.0)
   min_similarity        - similarity threshold(s) for relaxed comparisons.
                           Accepts a single value (applied to all columns)
@@ -257,6 +257,15 @@ print("""
   cache_size            - maximum number of cached comparisons, the bigger 
                           the faster the algorithm will be (default 10000)
 """)
+printlns(
+    "  Note: the paper that introduced GA-RFD evaluates the probabilities 0.85/0.3 " + 
+    "for crossover/mutation; Desbordante defaults to 1.0/1.0. Tune them for your data."
+)
+printlns(
+    "  The algorithm returns every candidate whose confidence is at least minconf, " + 
+    "without pruning subsumed rules: a minimal cover is not computed. " + 
+    "If you need a minimal cover, apply post-processing on the discovered RFDs."
+)
 printlns(
     "  Because GA-RFD uses randomness, always set the seed if you need " + 
     "reproducible results."
@@ -283,10 +292,14 @@ banner("Built-in similarity metrics", num=5)
 print(f"""
 Desbordante provides four ready-to-use metrics:
 
-  {BOLD}abs_diff_metric(){RESET} - for numeric attributes: 1 - |x-y| / max(|x|,|y|);
-  {BOLD}abs_threshold_metric(diff){RESET} - for numeric attributes: 1 if |x-y| <= diff, else 0;
-  {BOLD}equality_metric(){RESET} - returns 1 if the two values are exactly equal, else 0;
-  {BOLD}levenshtein_metric(){RESET} - for strings: 1 - edit_distance(x,y) / max(len(x), len(y)).
+  {BOLD}abs_diff_metric(){RESET}          - for numeric attributes: 
+                               1 - |x-y| / max(|x|,|y|), clamped to >= 0;
+  {BOLD}abs_threshold_metric(diff){RESET} - for numeric attributes: 
+                               1 if |x-y| <= diff, else 0;
+  {BOLD}equality_metric(){RESET}          - returns 1 if the two values are exactly equal, 
+                               else 0;
+  {BOLD}levenshtein_metric(){RESET}       - for strings: 
+                               1 - edit_distance(x,y) / max(len(x), len(y)).
 
 You can also supply any Python function f(a,b)->float as a custom metric.
 """)
@@ -321,15 +334,15 @@ rfds = algo_rfd.get_rfds()
 
 highlight_key = make_rfd_key(COL_NAMES, ["height_cm", "weight_kg"], "shoe_size_eu")
 print_rfds_table(rfds, COL_NAMES,
-                 title=f"Found {len(rfds)} RFD(s) with min_similarity=[0.95], minconf>=0.7",
-                 highlight={highlight_key})
+                 title=f"Found {len(rfds)} RFD(s) with min_similarity=[0.95], minconf>=0.7")
 
-print(f"Let's take {YELLOW}[height_cm, weight_kg] -> [shoe_size_eu]{RESET} and see what it means:")
 printlns(
-    "  'if two people have similar height " + 
-    "and weight (within ~5%), then their shoe sizes are also " + 
-    "similar'. This is useful for data imputation, anomaly detection, "
-    "or schema understanding."
+    "  The search finds 4 RFDs: the height column dominates because its pairs are "
+    "the most similar under the relative 5% threshold. The natural rule "
+    f"{YELLOW}[height_cm, weight_kg] -> [shoe_size_eu]{RESET} is NOT among them: "
+    "jointly similar (height, weight) pairs are rare, and only 3 of the 6 such pairs "
+    "also have similar shoe sizes, so its confidence is 0.5, below minconf=0.7. "
+    "In Section 7 we will recover this rule using stricter absolute thresholds."
 )
 
 # ------------------------------------------------------------
@@ -366,7 +379,7 @@ print_rfds_table(abs_rfds, COL_NAMES,
 
 printlns(
     f"  The key dependency {GREEN}[height_cm, weight_kg] -> [shoe_size_eu]{RESET} " +
-    "has confidence=1.000 and support=0.250. " +
+    "has confidence=1.000 and support=0.286. " +
     "It tells us: among pairs that differ by at most 1 cm in height, 10 kg in weight, " +
     "the shoe size <= 1. " +
     "This is a clear, actionable rule for data quality or prediction."
@@ -393,7 +406,7 @@ printlns(
     "You can pass any Python function f(a,b)->float as a metric. " +
     "Here we use the Jaccard coefficient on sets of character 2-grams."
 )
-prints("  Jaccard(s1,s2) = |grams(s1) INTERSECT grams(s2)| / |grams(s1) UNION grams(s2)|")
+printlns("  Jaccard(s1,s2) =|grams(s1) INTERSECT grams(s2)| / |grams(s1) UNION grams(s2)|")
 printlns(
     "This is robust to small typos: for example, 'Le Petit Cafe' and 'La Petite Cafe' " +
     "share many 2-grams, so their Jaccard similarity is > 0."
@@ -539,7 +552,7 @@ print("  * FD mining                -  examples/basic/mining_fd.py")
 print("  * AFD mining               -  examples/basic/mining_afd.py")
 print("  * MFD verifying            -  examples/basic/verifying_mfd.py") 
 print("  * MD mining                -  examples/basic/mining_md.py")
-print("  * Mining FD/AFD via GA-RFD -  examples/advanced/fd_and_afd_via_ga-rfd.py")
+print("  * Mining FD/AFD via GA-RFD -  examples/advanced/fd_and_afd_via_ga_rfd.py")
 print()
 
 print(f"\n{GREEN}Next: try GA-RFD on your own dataset!{RESET}\n")

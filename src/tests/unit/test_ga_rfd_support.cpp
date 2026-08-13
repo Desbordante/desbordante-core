@@ -26,7 +26,7 @@ public:
 
 static algos::StdParamsMap MakeParams(
         config::InputTable const& table,
-        std::vector<double> const& min_sim,  // теперь вектор порогов
+        std::vector<double> const& min_sim,  // per-attribute thresholds
         double beta, std::size_t pop_size, std::size_t max_gen,
         std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics = {}) {
     algos::StdParamsMap params{{config::names::kTable, table},
@@ -49,7 +49,7 @@ TEST(GARfdSupport, SupportComputationOnIris) {
     std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics(5);
     for (int i = 0; i < 5; ++i) metrics[i] = rfd::EqualityMetric();
 
-    std::vector<double> sim_vec(5, 1.0);  // пороги для всех атрибутов
+    std::vector<double> sim_vec(5, 1.0);  // thresholds for all attributes
 
     auto algo = std::make_unique<rfd::GaRfd>();
     auto params = MakeParams(table, sim_vec, 0.5, 10, 1, metrics);

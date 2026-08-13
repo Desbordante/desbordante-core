@@ -4,9 +4,11 @@
 #include <memory>
 #include <string>
 
+#include "core/util/export.h"
+
 namespace algos::rfd {
 
-class SimilarityMetric {
+class DESBORDANTE_EXPORT SimilarityMetric {
 public:
     virtual ~SimilarityMetric() = default;
     virtual double Compare(std::string const& a, std::string const& b) const = 0;

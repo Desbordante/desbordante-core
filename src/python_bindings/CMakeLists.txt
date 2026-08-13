@@ -310,12 +310,10 @@ desbordante_add_bind(
     rfd
     SRCS
     rfd/bind_ga_rfd.cpp
-    rfd/py_similarity_metric.h
     LIBS
     ${DESBORDANTE_PREFIX}::rfd::ga_rfd
     ${DESBORDANTE_PREFIX}::rfd
     Boost::headers
-    magic_enum::magic_enum
 )
 
 desbordante_add_bind(

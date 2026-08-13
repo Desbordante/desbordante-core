@@ -18,6 +18,7 @@
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/rfd/similarity_metric.h"
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
@@ -53,6 +54,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::vector<double>>,
+        kNormalConvPair<std::vector<std::shared_ptr<algos::rfd::SimilarityMetric>>>,
         kNormalConvPair<config::ThreadNumType>,
         kNormalConvPair<config::CustomRandomSeedType>,
         kNormalConvPair<config::MaxLhsType>,

@@ -19,19 +19,9 @@ namespace tests {
 namespace config_names = config::names;
 namespace rfd = algos::rfd;
 
-auto lev = rfd::LevenshteinMetric();
-auto eq = rfd::EqualityMetric();
-auto abs_diff = rfd::AbsoluteDifferenceMetric();
-
-using namespace std::chrono;
-
-template <typename Func>
-long long MeasureExecutionTime(Func&& f) {
-    auto start = high_resolution_clock::now();
-    f();
-    auto end = high_resolution_clock::now();
-    return duration_cast<milliseconds>(end - start).count();
-}
+auto const lev = rfd::LevenshteinMetric();
+auto const eq = rfd::EqualityMetric();
+auto const abs_diff = rfd::AbsoluteDifferenceMetric();
 
 // Helper to build params with a vector of similarity thresholds
 static algos::StdParamsMap MakeParams(
@@ -153,6 +143,11 @@ struct RFDTestParams {
     std::size_t min_rfd_count;
 };
 
+std::ostream& operator<<(std::ostream& os, RFDTestParams const& p) {
+    return os << p.csv_config.path.filename() << ", min_sim=" << p.min_sim << ", beta=" << p.beta
+              << ", pop=" << p.pop_size << ", max_gen=" << p.max_gen;
+}
+
 class GaRfdDatasetTest : public ::testing::TestWithParam<RFDTestParams> {};
 
 TEST_P(GaRfdDatasetTest, DiscoversRFDs) {
@@ -254,7 +249,8 @@ TEST(GARfdEvolution, EarlyStopWhenAllSatisfy) {
 TEST(GARfdEdge, MismatchedMetricsCountThrows) {
     auto metrics = EqualityMetrics(3);
     auto params = MakeParams(kIris, 0.5, 0.5, 10, 1, metrics);
-    EXPECT_THROW(algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params), std::invalid_argument);
+    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    EXPECT_THROW(algo->Execute(), std::invalid_argument);
 }
 
 TEST(GARfdOperators, ZeroCrossoverAndMutation) {

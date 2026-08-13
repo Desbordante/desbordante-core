@@ -13,6 +13,9 @@ TABLE_ONLY_CONTAINER = OptionContainer(
     "WDC_satellites.csv", {}, {}
 )
 
+# GaRfd enforces a hard limit of 31 attributes (WDC_satellites.csv has 57).
+GA_RFD_CONTAINER = OptionContainer("TestWide.csv", {}, {})
+
 
 def get_common_option_container(execute_options):
     return OptionContainer(
@@ -37,6 +40,7 @@ ALGO_CORRECT_OPTIONS_INFO = [
     (desb.fd.algorithms.FdMine, [TABLE_ONLY_CONTAINER]),
     (desb.fd.algorithms.HyFD, [TABLE_ONLY_CONTAINER]),
     (desb.fd.algorithms.EulerFD, [TABLE_ONLY_CONTAINER]),
+    (desb.rfd.algorithms.GaRfd, [GA_RFD_CONTAINER]),
     (desb.afd.algorithms.Pyro, [
         get_common_option_container(
             {"seed": 1, "max_lhs": 12, "threads": 5, "error": 0.015}
