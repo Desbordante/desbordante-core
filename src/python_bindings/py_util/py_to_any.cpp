@@ -274,11 +274,18 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         {typeid(config::CustomMetricType), CustomMetricToAny},
         {typeid(config::CustomMetricsType), CustomMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
-        {typeid(std::shared_ptr<algos::rfd::SimilarityMetric>),
+        {typeid(std::vector<std::shared_ptr<algos::rfd::SimilarityMetric>>),
          [](std::string_view, py::handle obj) {
-             return std::shared_ptr<algos::rfd::SimilarityMetric>(
-                     new python_bindings::PySimilarityMetric(
-                             py::reinterpret_borrow<py::object>(obj)));
+             std::vector<std::shared_ptr<algos::rfd::SimilarityMetric>> metrics;
+             for (py::handle item : obj) {
+                 if (py::isinstance<py::function>(item)) {
+                     metrics.push_back(std::make_shared<python_bindings::PySimilarityMetric>(
+                             py::reinterpret_borrow<py::object>(item)));
+                 } else {
+                     metrics.push_back(item.cast<std::shared_ptr<algos::rfd::SimilarityMetric>>());
+                 }
+             }
+             return metrics;
          }},
         kNormalConvPair<std::vector<double>>,
 };

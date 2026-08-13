@@ -41,8 +41,18 @@ void BindGaRfd(py::module_& main_module) {
 
     py::class_<RFD>(rfd_module, "RFD")
             .def(py::init<>())
-            .def(py::init<uint32_t, uint8_t, double, double>(), py::arg("lhs_mask"),
-                 py::arg("rhs_index"), py::arg("support") = 0.0, py::arg("confidence") = 0.0)
+            .def(py::init([](uint32_t lhs_mask, uint8_t rhs_index, double support,
+                             double confidence) {
+                     if (rhs_index > algos::rfd::kMaxAttributes - 1)
+                         throw std::out_of_range("RHS index must be in [0, 30]");
+                     if (lhs_mask & ~((1u << algos::rfd::kMaxAttributes) - 1))
+                         throw std::out_of_range("LHS mask must not use attributes above 30");
+                     if (lhs_mask & (1u << rhs_index))
+                         throw std::invalid_argument("RHS attribute cannot be in LHS");
+                     return RFD{lhs_mask, rhs_index, support, confidence};
+                 }),
+                 py::arg("lhs_mask"), py::arg("rhs_index"), py::arg("support") = 0.0,
+                 py::arg("confidence") = 0.0)
             .def_static(
                     "from_lhs_rhs",
                     [](std::vector<int> lhs_indices, int rhs_index, double support,
@@ -53,6 +63,8 @@ void BindGaRfd(py::module_& main_module) {
                                 throw std::out_of_range("Index must be in [0, 30]");
                             mask |= (1u << idx);
                         }
+                        if (rhs_index < 0 || rhs_index > 30)
+                            throw std::out_of_range("RHS index must be in [0, 30]");
                         if (mask & (1u << rhs_index))
                             throw std::invalid_argument("RHS attribute cannot be in LHS");
                         return RFD{mask, static_cast<uint8_t>(rhs_index), support, confidence};
@@ -66,8 +78,10 @@ void BindGaRfd(py::module_& main_module) {
             .def_property_readonly("lhs",
                                    [](RFD const& r) {
                                        std::vector<int> indices;
-                                       for (int i = 0; i < 31; ++i) {
-                                           if (r.lhs_mask & (1u << i)) indices.push_back(i);
+                                       for (std::size_t i = 0; i < algos::rfd::kMaxAttributes;
+                                            ++i) {
+                                           if (r.lhs_mask & (1u << i))
+                                               indices.push_back(static_cast<int>(i));
                                        }
                                        return indices;
                                    })
