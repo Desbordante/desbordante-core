@@ -12,9 +12,9 @@
 #include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
-#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
+#include "core/util/custom_metric/custom_vector_metric.h"
 
 namespace algos::pac_verifier {
 /// @brief Unique Column Combination Probabilistic Approximate Constraint verifier
@@ -34,11 +34,11 @@ namespace algos::pac_verifier {
 //    Therefore, empirical probability becomes
 //      Pr(eps) = |sigma| / |Gamma| = (2 * |sigma'| + |r|) / |r|^2
 class UCCPACVerifier final : public PairWisePACVerifier {
+private:
     using Pairs = std::vector<TuplePair>;
 
     config::IndicesType column_indices_;
-    std::shared_ptr<config::ICustomVectorMetric> metric_;
-    double max_delta_;
+    std::shared_ptr<util::ICustomVectorMetric> metric_;
 
     std::shared_ptr<pac::model::TupleType> tuple_type_;
     std::shared_ptr<std::vector<pac::model::Tuple>> tuples_;
@@ -52,9 +52,8 @@ class UCCPACVerifier final : public PairWisePACVerifier {
     /// @brief Fill sorted_pairs_
     void PreparePairs();
 
-    void ProcessPACTypeOptions() override;
     void PreparePACTypeData() override;
-    void PACTypeExecuteInternal() override;
+    void ExecuteInternal() override;
 
     EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const override {
         return GetEpsilonDeltaForEpsilonImpl(epsilon, *sorted_pairs_);
@@ -67,14 +66,6 @@ class UCCPACVerifier final : public PairWisePACVerifier {
 
     void ResetState() override {
         pac_ = std::nullopt;
-    }
-
-    double MaxDelta() const override {
-        return max_delta_;
-    }
-
-    void SetMaxDelta(double val) override {
-        max_delta_ = val;
     }
 
     void RefineDelta(PairsIt&) const override;
