@@ -131,6 +131,9 @@ void Tane::ComputeDependencies(model::LatticeLevel* level) {
 }
 
 config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
+    // NOTE: Sometimes the empty LHS case is not defined, so we have to figure out a value that
+    // makes sense on our own. If the RHS is constant, there is an FD, so it only makes sense for
+    // error to be 0.
     switch (afd_measure_) {
         case model::AfdMeasure::kPerValue:
         case model::AfdMeasure::kG3: {
@@ -145,14 +148,49 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
         case model::AfdMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1(
                     rhs, relation_.get()->GetNumTuplePairs());
-        /* TODO: check if this is correct */
+        /*
+         * dom_{empty_set}(R) needs some care in its definition. If that care is taken, we get
+         * |dom_{empty_set}(R)| = 1.
+         */
         case model::AfdMeasure::kRho:
+            return 1;  // incorrect
+            /* return static_cast<config::ErrorType>(rhs->GetPositionListIndex()->GetNumCluster() -
+             * 1) / rhs->GetPositionListIndex()->GetNumCluster(); */
+        /*
+         * The probability that a tuple participates in a violating pair is 0 if there is an FD,
+         * otherwise it is 1 for an empty LHS and non-constant RHS
+         */
         case model::AfdMeasure::kG2:
+        /*
+         * For an empty LHS, the mutual information is 0, but if the entropy of RHS is also 0 (i.e.
+         * it is constant), the measure is technically undefined.
+         */
         case model::AfdMeasure::kFi:
+            return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
+        /*
+         * The original definition of this one requires the presence of two attributes. The exact
+         * expression used is pdep(X, Y) = p(R1.Y = R.Y2 | R1.X = R2.X). If we treat the projection
+         * of a tuple on empty X as the empty set, then we get pdep({}, Y) = p(R1.Y = R.Y2), which
+         * is exactly the self-dependency measure pdep(Y).
+         */
         case model::AfdMeasure::kPdep:
+            return 1;  // incorrect
+            /*return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(
+                               rhs->GetPLWSIndex());*/
+        /*
+         * When using pdep({}, Y) = pdep(Y), tau has 0 in the numerator. If pdep(Y), it has 0 in the
+         * denominator too, so it is technically undefined.
+         */
         case model::AfdMeasure::kTau:
+        /*
+         * Since Y is taken to be constant in the definition, pdep({} -> Y, R) is just pdep(Y). The
+         * expected value of a constant is that constant, so we get a 0 in the numerator. The
+         * denominator is again 0 when the RHS is constant, so this measure is technically undefined
+         * as well in that case.
+         */
         case model::AfdMeasure::kMuPlus:
-            return 1;
+            // return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
+            return 1;  // incorrect
     }
     assert(false);
     __builtin_unreachable();
@@ -177,10 +215,10 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateFI(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG2:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG2(
+            return 1 - /*<- incorrect*/ afd_metric_calculator::AFDMetricCalculator::CalculateG2(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG3:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG3(
+            return 1 - /*<- incorrect*/ afd_metric_calculator::AFDMetricCalculator::CalculateG3(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateG1Error(
