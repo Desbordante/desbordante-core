@@ -136,8 +136,8 @@ constexpr auto kDifferenceTable = "difference_table";
 constexpr auto kNumColumns = "num_columns";
 constexpr auto kNumRows = "num_rows";
 // Tane
-constexpr auto kAfdErrorMeasure = "afd_error_measure";
-// Tane, Pfd verifier
+constexpr auto kAfdMeasure = "afd_measure";
+// Pfd verifier
 constexpr auto kPfdErrorMeasure = "pfd_error_measure";
 // Typo miner
 constexpr auto kApproximateAlgorithm = "approximate_algorithm";

@@ -10,8 +10,6 @@
 #include "core/algorithms/fd/fun/fun.h"
 #include "core/algorithms/fd/hyfd/hyfd.h"
 #include "core/algorithms/fd/pyro/pyro.h"
-#include "core/algorithms/fd/tane/pfdtane.h"
-#include "core/algorithms/fd/tane/tane.h"
 #include "core/model/table/relational_schema.h"
 #include "core/util/bitset_utils.h"
 #include "tests/unit/test_fd_util.h"

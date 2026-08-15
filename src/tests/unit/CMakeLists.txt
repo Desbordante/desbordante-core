@@ -212,8 +212,6 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::fun
     ${DESBORDANTE_PREFIX}::fd::hy
     ${DESBORDANTE_PREFIX}::fd::pyro
-    ${DESBORDANTE_PREFIX}::fd::tane::pfd
-    ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::fd
     ${DESBORDANTE_PREFIX}::afd
     spdlog::spdlog_header_only
@@ -259,7 +257,7 @@ desbordante_add_test(
     LIBS
     ${DESBORDANTE_PREFIX}::fd
     ${DESBORDANTE_PREFIX}::afd
-    ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::afd::tane
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
@@ -290,13 +288,13 @@ desbordante_add_test(
     Boost::headers
 )
 desbordante_add_test(
-    fd.tane
+    afd.tane
     SRCS
     test_tane_afd_measures.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd
     ${DESBORDANTE_PREFIX}::afd
-    ${DESBORDANTE_PREFIX}::fd::tane
+    ${DESBORDANTE_PREFIX}::afd::tane
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
@@ -411,8 +409,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::testlib::common
-    ${DESBORDANTE_PREFIX}::fd::tane::pfd
-    ${DESBORDANTE_PREFIX}::fd::tane
+    ${DESBORDANTE_PREFIX}::afd::tane
     ${DESBORDANTE_PREFIX}::afd
     spdlog::spdlog_header_only
     gmock

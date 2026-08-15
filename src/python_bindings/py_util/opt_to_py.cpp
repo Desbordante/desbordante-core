@@ -11,6 +11,7 @@
 
 #include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/afd_measure.h"
 #include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/gdd/gdd.h"
@@ -73,7 +74,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::des::DifferentialStrategy>,
         kEnumConvPair<algos::od::Ordering>,
-        kEnumConvPair<algos::AfdErrorMeasure>};
+        kEnumConvPair<model::AfdMeasure>};
 }  // namespace
 
 namespace python_bindings {

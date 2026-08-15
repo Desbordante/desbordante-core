@@ -10,9 +10,9 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::dd::split
             ${DESBORDANTE_PREFIX}::ind
             ${DESBORDANTE_PREFIX}::ind::mind
+            ${DESBORDANTE_PREFIX}::afd::tane
             ${DESBORDANTE_PREFIX}::fd::hy
             ${DESBORDANTE_PREFIX}::fd::pyro
-            ${DESBORDANTE_PREFIX}::fd::tane
             ${DESBORDANTE_PREFIX}::fd::aid
             ${DESBORDANTE_PREFIX}::md::hy
             ${DESBORDANTE_PREFIX}::md::hy::preprocessing

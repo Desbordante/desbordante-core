@@ -6,7 +6,6 @@
 
 #include "core/algorithms/fd/afd.h"
 #include "core/algorithms/fd/afd_algorithm.h"
-#include "core/algorithms/fd/tane/pfdtane.h"
 #include "core/algorithms/fd/tane/tane.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"
@@ -43,12 +42,8 @@ void BindAfd(py::module_& main_module) {
                         return AFD(lhs, rhs, threshold, std::move(schema));
                     }));
 
-    static constexpr auto kTaneName = "Tane";
-    static constexpr auto kPFDTaneName = "PFDTane";
-    static constexpr auto kPyroName = "Pyro";
-    auto afd_algos_module =
-            BindPrimitive<Tane, PFDTane>(afd_module, &AFDAlgorithm::SortedAfdList, "AfdAlgorithm",
-                                         "get_fds", {kTaneName, kPFDTaneName});
+    auto afd_algos_module = BindPrimitive<Tane>(afd_module, &AFDAlgorithm::SortedAfdList,
+                                                "AfdAlgorithm", "get_fds", {"Tane"});
 
     // Pyro is registered as an FdAlgorithm in bind_fd.cpp: it discovers approximate FDs via a
     // g1 threshold but returns plain FD objects (no threshold accessor), unlike Tane/PFDTane,
@@ -57,17 +52,7 @@ void BindAfd(py::module_& main_module) {
     // this reuses the single Python class already created in bind_fd.cpp and only exposes it
     // under an additional path, so that it is discoverable alongside the other AFD-discovery
     // algorithms.
+    static constexpr auto kPyroName = "Pyro";
     afd_algos_module.attr(kPyroName) = main_module.attr("fd").attr("algorithms").attr(kPyroName);
-
-    auto define_submodule = [&afd_algos_module, &main_module](char const* name,
-                                                              std::vector<char const*> algorithms) {
-        auto algos_module = main_module.def_submodule(name).def_submodule("algorithms");
-        for (auto algo_name : algorithms) {
-            algos_module.attr(algo_name) = afd_algos_module.attr(algo_name);
-        }
-        algos_module.attr("Default") = algos_module.attr(algorithms.front());
-    };
-
-    define_submodule("pfd", {kPFDTaneName});
 }
 }  // namespace python_bindings

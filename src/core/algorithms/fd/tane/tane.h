@@ -1,21 +1,33 @@
 #pragma once
 
-#include "core/algorithms/fd/tane/enums.h"
-#include "core/algorithms/fd/tane/tane_common.h"
+#include "core/algorithms/fd/afd_measure.h"
+#include "core/algorithms/fd/pli_based_afd_algorithm.h"
+#include "core/algorithms/fd/tane/model/lattice_level.h"
 #include "core/config/error/type.h"
 #include "core/model/table/column_data.h"
+#include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/position_list_index.h"
 
 namespace algos {
 
-class Tane : public tane::TaneCommon {
+class Tane final : public PliBasedAFDAlgorithm {
+protected:
+    config::ErrorType max_fd_error_;
+    config::ErrorType max_ucc_error_;
+    model::AfdMeasure afd_measure_;
+
 private:
-    AfdErrorMeasure afd_error_measure_ = AfdErrorMeasure::kG1;
-    void MakeExecuteOptsAvailableFDInternal() override final;
-    config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) override;
-    config::ErrorType CalculateFdError(model::PLIWithSingletons const* lhs_pli,
-                                       model::PLIWithSingletons const* rhs_pli,
-                                       model::PLIWithSingletons const* joint_pli) override;
+    void ResetStateFd() final {}
+
+    void Prune(model::LatticeLevel* level);
+    void ComputeDependencies(model::LatticeLevel* level);
+    void ExecuteInternal() final;
+    void MakeExecuteOptsAvailableFDInternal() final;
+    config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs);
+    config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
+                                       model::PLIWS const* joint_pli);
+    static double CalculateUccError(model::PositionListIndex const* pli,
+                                    ColumnLayoutRelationData const* relation_data);
 
 public:
     Tane();

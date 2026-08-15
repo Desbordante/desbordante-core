@@ -19,6 +19,7 @@
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
+#include "core/algorithms/fd/afd_measure.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/gdd/gdd.h"
@@ -243,7 +244,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,
-        kEnumConvPair<config::AfdErrorMeasureType>,
+        kEnumConvPair<model::AfdMeasure>,
         kEnumConvPair<algos::afd_metric_calculator::AFDMetric>,
         kEnumConvPair<model::InputFormatType>,
         kEnumConvPair<algos::cfd::Substrategy>,

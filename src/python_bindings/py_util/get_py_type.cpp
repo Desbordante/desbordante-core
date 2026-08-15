@@ -16,6 +16,7 @@
 #include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/afd_measure.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
@@ -102,7 +103,7 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<algos::metric::Metric, &PyUnicode_Type>,
             kPyTypePair<algos::metric::MetricAlgo, &PyUnicode_Type>,
             kPyTypePair<config::PfdErrorMeasureType, &PyUnicode_Type>,
-            kPyTypePair<config::AfdErrorMeasureType, &PyUnicode_Type>,
+            kPyTypePair<model::AfdMeasure, &PyUnicode_Type>,
             kPyTypePair<model::InputFormatType, &PyUnicode_Type>,
             kPyTypePair<algos::cfd::Substrategy, &PyUnicode_Type>,
             kPyTypePair<algos::hymd::LevelDefinition, &PyUnicode_Type>,
