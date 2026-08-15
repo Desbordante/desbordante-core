@@ -16,7 +16,7 @@
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
-#include "core/config/custom_metric/custom_vector_metric_option.h"
+#include "core/config/custom_metric/custom_vector_metric/option.h"
 #include "core/config/descriptions.h"
 #include "core/config/indices/option.h"
 #include "core/config/names.h"
@@ -63,20 +63,20 @@ void UCCPACVerifier::PreparePairs() {
     std::ranges::sort(*sorted_pairs_, {}, [](TuplePair const& p) { return p.dist; });
 }
 
-void UCCPACVerifier::ProcessPACTypeOptions() {
+void UCCPACVerifier::PreparePACTypeData() {
     std::vector<model::Type const*> types(column_indices_.size());
     auto const& col_data = TypedRelation().GetColumnData();
     std::ranges::transform(column_indices_, types.begin(),
                            [&col_data](std::size_t const idx) { return &col_data[idx].GetType(); });
 
     tuple_type_ = std::make_shared<pac::model::TupleType>(std::move(types));
-}
 
-void UCCPACVerifier::PreparePACTypeData() {
     tuples_ = pac::util::MakeTuples(TypedRelation().GetColumnData(), column_indices_);
 }
 
-void UCCPACVerifier::PACTypeExecuteInternal() {
+void UCCPACVerifier::ExecuteInternal() {
+    LogCommonOptions();
+
     std::ostringstream oss;
     oss << '{';
     for (auto it = column_indices_.begin(); it != column_indices_.end(); ++it) {
@@ -110,7 +110,7 @@ void UCCPACVerifier::RefineDelta(UCCPACVerifier::PairsIt& iter) const {
     LOG_TRACE("Refining ({}, {})...", iter->dist,
               GetDelta(std::distance(sorted_pairs_->cbegin(), iter)));
     if (iter == sorted_pairs_->begin()) {
-        LOG_TRACE("\tAlready fine");
+        LOG_TRACE("\tAlready at finest position");
     } else {
         auto initial_eps = iter->dist;
         while (iter != sorted_pairs_->begin() && initial_eps - iter->dist < kDistThreshold) {
@@ -127,17 +127,15 @@ UCCPACVerifier::UCCPACVerifier() {
     DESBORDANTE_OPTION_USING;
     using namespace config;
 
+    RegisterCommonOptions(false, true);
+
     RegisterOption(kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices}}}));
 
     RegisterOption(IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
             &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
-    RegisterOption(VectorMetricOption{&metric_});
+    RegisterOption(VectorMetricOption(&metric_));
 
-    RegisterOption(Option(&max_delta_, kMaxDelta, kDMaxDelta, -1.0).SetValueCheck([](double x) {
-        return x <= 1;
-    }));
-
-    MakeOptionsAvailable({kTableOpt.GetName(), kMetric});
+    MakeOptionsAvailable({kTableOpt.GetName(), kCustomMetric});
 }
 
 UCCPACHighlight UCCPACVerifier::GetHighlights(double eps_1, double eps_2) const {

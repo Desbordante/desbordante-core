@@ -1,6 +1,8 @@
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -9,14 +11,20 @@
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_verifier.h"
-#include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/exceptions.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
 #include "core/model/types/builtin.h"
-#include "core/model/types/type.h"
+#include "core/util/custom_metric/custom_vector_metric.h"
 #include "gtest/gtest.h"
 #include "tests/common/all_csv_configs.h"
+
+namespace {
+template <typename T>
+boost::any OptToAny(std::optional<T>&& opt) {
+    return opt ? *opt : boost::any{};
+}
+}  // namespace
 
 namespace tests {
 using namespace config::names;
@@ -30,20 +38,20 @@ struct UCCPACVerifyingParams {
     double exp_delta;
 
     UCCPACVerifyingParams(CSVConfig const& csv_config, config::IndicesType&& column_indices,
-                          double expected_epsilon, double expected_delta, double max_delta = -1,
-                          double min_epsilon = -1, double max_epsilon = -1,
-                          unsigned long delta_steps = 0,
-                          std::shared_ptr<config::ICustomVectorMetric>&& metric = nullptr,
-                          double diagonal_threshold = 1e-5)
+                          double expected_epsilon, double expected_delta,
+                          std::optional<double> max_delta = std::nullopt,
+                          std::optional<double> min_epsilon = std::nullopt,
+                          std::optional<double> max_epsilon = std::nullopt,
+                          std::optional<unsigned long> delta_steps = std::nullopt,
+                          std::shared_ptr<util::ICustomVectorMetric>&& metric = nullptr)
         : params({
                   {kCsvConfig, csv_config},
                   {kColumnIndices, std::move(column_indices)},
-                  {kMaxDelta, max_delta},
-                  {kMinEpsilon, min_epsilon},
-                  {kMaxEpsilon, max_epsilon},
-                  {kDeltaSteps, delta_steps},
+                  {kMaxDelta, OptToAny(std::move(max_delta))},
+                  {kMinEpsilon, OptToAny(std::move(min_epsilon))},
+                  {kMaxEpsilon, OptToAny(std::move(max_epsilon))},
+                  {kDeltaSteps, OptToAny(std::move(delta_steps))},
                   {kMetric, std::move(metric)},
-                  {kDiagonalThreshold, diagonal_threshold},
           }),
           exp_epsilon(expected_epsilon),
           exp_delta(expected_delta) {}
@@ -65,50 +73,47 @@ auto const kAlphabetMetric = [](std::string const& a, std::string const& b) {
     return std::abs(a.front() - b.front());
 };
 
-auto const kDynamicStringMetric = std::make_shared<config::CustomVectorMetric>(
-        [](std::vector<model::Type const*> const& types, std::vector<std::byte const*> const& first,
-           std::vector<std::byte const*> const& second) {
-            std::size_t result = 0;
-            for (std::size_t i = 0; i < types.size(); ++i) {
-                auto const* type = types[i];
-                auto first_str = type->ValueToString(first[i]);
-                auto second_str = type->ValueToString(second[i]);
-                result += kAlphabetMetric(first_str, second_str);
-            }
-            return result;
-        });
-
 INSTANTIATE_TEST_SUITE_P(
         UCCPACVerifierTests, TestUCCPACVerifier,
         testing::ValuesIn({
+                // FIXME: Тут всё падает, надо расчехлять скрипт
                 // Quite ordinary UCC PAC
                 //  a. Unlike other PAC verifiers, UCC PAC verifier tries to minimize delta, so we
                 //     can get delta=0, even though there are pairs on the diagonal
                 UCCPACVerifyingParams(kMetricMovies, {2}, 0, 0),
                 //  b. Again, check that delta is being minimized correctly
-                UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.7, -1, -1, 1000),
+                UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.7, std::nullopt,
+                                      std::nullopt, 1000),
                 // Another quite ordinary UCC PAC
                 UCCPACVerifyingParams(kTestFDPAC, {0}, 0.23, 0.11),
-                // Custom metric
+                // Custom metric (also check that passing a temporary metric is OK)
                 UCCPACVerifyingParams(
-                        kMarineUrchins, {1, 2}, 1, 0.173, 0.25, -1, -1, 0,
-                        std::make_shared<config::CustomVectorMetric>(
-                                [](auto const&, auto const& first, auto const& second) {
-                                    assert(first.size() == 2 && second.size() == 2);
-                                    double int_dist =
-                                            std::abs(model::Type::GetValue<model::Int>(first[0]) -
-                                                     model::Type::GetValue<model::Int>(second[0]));
-                                    auto char_dist = std::abs(
-                                            model::Type::GetValue<model::String>(first[1])[0] -
-                                            model::Type::GetValue<model::String>(second[1])[0]);
-                                    if (char_dist == 0) {
-                                        return int_dist / 10;
-                                    }
-                                    return int_dist / char_dist;
-                                })),
+                        kMarineUrchins, {1, 2}, 1, 0.173, 0.25, std::nullopt, std::nullopt,
+                        std::nullopt,
+                        std::make_shared<util::CustomVectorMetric>([](auto const&,
+                                                                      auto const& first,
+                                                                      auto const& second) {
+                            assert(first.size() == 2 && second.size() == 2);
+                            // Values should be remapped properly, i. e. Col1 becomes [0]
+                            // and Col2 becomes [1]
+                            double col0_first_frac =
+                                    std::fmod(model::Type::GetValue<model::Double>(first[0]), 1.0);
+                            double col0_second_frac =
+                                    std::fmod(model::Type::GetValue<model::Double>(second[0]), 1.0);
+                            double col1_first_int =
+                                    std::floor(model::Type::GetValue<model::Double>(first[1]));
+                            double col1_second_int =
+                                    std::floor(model::Type::GetValue<model::Double>(second[1]));
+
+                            double col0_dist = std::abs(col0_first_frac - col0_second_frac);
+                            double col1_dist = std::abs(col1_first_int - col1_second_int);
+
+                            return col0_dist + col1_dist;
+                        })),
                 // "Verification"
                 // FIXME: This test fails!
-                UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.402, -1, -1),
+                UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.402, std::nullopt,
+                                      std::nullopt),
         }));
 
 TEST(UCCPACVerifierTests, DefaultMetricFails) {
@@ -130,13 +135,10 @@ struct UCCPACHighlightParams {
     IndexPairs expected_highlight;
 
     UCCPACHighlightParams(CSVConfig const& csv_config, config::IndicesType&& column_indices,
-                          IndexPairs&& expected_highlight, double eps_1 = 0, double eps_2 = -1,
-                          double max_delta = -1, unsigned long delta_steps = 0)
+                          IndexPairs&& expected_highlight, double eps_1 = 0, double eps_2 = -1)
         : params({
                   {kCsvConfig, csv_config},
                   {kColumnIndices, column_indices},
-                  {kMaxDelta, max_delta},
-                  {kDeltaSteps, delta_steps},
           }),
           eps_1(eps_1),
           eps_2(eps_2),
