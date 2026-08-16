@@ -59,11 +59,6 @@ private:
         return GetEpsilonDeltaForEpsilonImpl(epsilon, *sorted_pairs_);
     }
 
-    void MakeExecuteOptsAvailable() override {
-        PACVerifier::MakeExecuteOptsAvailable();
-        MakeOptionsAvailable({config::names::kMaxDelta});
-    }
-
     void ResetState() override {
         pac_ = std::nullopt;
     }
