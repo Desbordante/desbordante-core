@@ -118,7 +118,10 @@ long double AFDMetricCalculator::CalculateG3(model::PLI const* lhs_pli, model::P
         num_error_rows += size;
     }
 
-    return num_error_rows / num_rows;
+    unsigned int unique_rows =
+            static_cast<unsigned int>(lhs_pli->GetRelationSize() - lhs_pli->GetSize());
+
+    return (num_error_rows + unique_rows) / num_rows;
 }
 
 config::ErrorType AFDMetricCalculator::CalculateRhoMeasure(model::PLIWS const* x_pli,
