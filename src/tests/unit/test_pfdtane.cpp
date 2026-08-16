@@ -10,12 +10,6 @@
 namespace tests {
 namespace onam = config::names;
 
-struct PFD {
-    std::size_t lhs_id;
-    std::size_t rhs_id;
-    config::ErrorType expected_error;
-};
-
 struct PFDTaneMiningParams {
     algos::StdParamsMap params;
     unsigned int result_hash;
@@ -28,15 +22,7 @@ struct PFDTaneMiningParams {
           result_hash(result_hash) {}
 };
 
-struct PFDTaneValidationParams {
-    std::vector<PFD> fds;
-    model::AfdMeasure measure;
-    CSVConfig csv_config;
-};
-
 class TestPFDTaneMining : public ::testing::TestWithParam<PFDTaneMiningParams> {};
-
-class TestPFDTaneValidation : public ::testing::TestWithParam<PFDTaneValidationParams> {};
 
 TEST_P(TestPFDTaneMining, DefaultTest) {
     auto const& p = GetParam();
@@ -44,22 +30,6 @@ TEST_P(TestPFDTaneMining, DefaultTest) {
     algos->Execute();
     EXPECT_EQ(p.result_hash, algos->Fletcher16());
 }
-
-/*
-TEST_P(TestPFDTaneValidation, ErrorCalculationTest) {
-    auto const& p = GetParam();
-    double eps = 0.00001;
-    auto table = std::make_shared<CSVParser>(p.csv_config);
-    auto relation = ColumnLayoutRelationData::CreateFrom(*table);
-
-    for (auto const& [lhs_id, rhs_id, expected_error] : p.fds) {
-        auto const& lhs = relation->GetColumnData(lhs_id).GetPositionListIndex();
-        auto const& rhs = relation->GetColumnData(rhs_id).GetPositionListIndex();
-        config::ErrorType error =
-                algos::Tane::CalculatePFDError(lhs, lhs->Intersect(rhs).get(), p.measure);
-        EXPECT_NEAR(error, expected_error, eps);
-    }
-}*/
 
 INSTANTIATE_TEST_SUITE_P(
         PFDTaneTestMiningSuite, TestPFDTaneMining,
@@ -69,26 +39,4 @@ INSTANTIATE_TEST_SUITE_P(
                 PFDTaneMiningParams(10695, 0.01, model::AfdMeasure::kPerValue, kIris),
                 PFDTaneMiningParams(44088, 0.1, model::AfdMeasure::kPerValue, kNeighbors10k),
                 PFDTaneMiningParams(41837, 0.01, model::AfdMeasure::kPerValue, kNeighbors10k)));
-
-/*
-INSTANTIATE_TEST_SUITE_P(
-        PFDTaneTestValidationSuite, TestPFDTaneValidation,
-        ::testing::Values(PFDTaneValidationParams({{2, 3, 0.0625},
-                                                   {4, 5, 0.333333},
-                                                   {3, 2, 0.291666},
-                                                   {0, 1, 0.75},
-                                                   {1, 0, 0.0},
-                                                   {4, 3, 0.099999},
-                                                   {1, 5, 0.416666},
-                                                   {5, 1, 0.0}},
-                                                  model::AfdMeasure::kPerValue, kTestFD),
-                          PFDTaneValidationParams({{2, 3, 0.083333},
-                                                   {4, 5, 0.333333},
-                                                   {3, 2, 0.5},
-                                                   {0, 1, 0.75},
-                                                   {1, 0, 0.0},
-                                                   {4, 3, 0.083333},
-                                                   {1, 5, 0.416666},
-                                                   {5, 1, 0.0}},
-                                                  model::AfdMeasure::kG3, kTestFD)));*/
 }  // namespace tests

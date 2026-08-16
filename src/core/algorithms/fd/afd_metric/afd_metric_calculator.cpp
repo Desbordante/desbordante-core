@@ -78,6 +78,9 @@ void AFDMetricCalculator::ExecuteInternal() {
         case AFDMetric::kRho:
             result_ = CalculateRhoMeasure(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
             break;
+        case AFDMetric::kPerValue:
+            result_ = CalculatePerValue(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
+            break;
     }
 }
 
