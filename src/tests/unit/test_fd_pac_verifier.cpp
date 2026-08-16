@@ -47,8 +47,7 @@ struct FDPACVerifyingParams {
                          std::optional<double> max_epsilon = std::nullopt,
                          std::optional<double> min_delta = std::nullopt,
                          config::CustomMetricsType lhs_metrics = {},
-                         config::CustomMetricsType rhs_metrics = {},
-                         std::optional<double> diagonal_threshold = std::nullopt)
+                         config::CustomMetricsType rhs_metrics = {})
         : rhs_arity(rhs_indices.size()),
           params({
                   {kCsvConfig, csv_config},
@@ -60,7 +59,6 @@ struct FDPACVerifyingParams {
                   {kMinDelta, OptToAny(std::move(min_delta))},
                   {kLhsMetrics, VectorToAny(std::move(lhs_metrics))},
                   {kRhsMetrics, VectorToAny(std::move(rhs_metrics))},
-                  {kDiagonalThreshold, OptToAny(std::move(diagonal_threshold))},
           }),
           exp_epsilon(expected_epsilon),
           exp_delta(expected_delta) {}
@@ -133,8 +131,13 @@ INSTANTIATE_TEST_SUITE_P(
                 //   b. [default, custom] -> [default]
                 FDPACVerifyingParams(kMarineUrchins, {0, 2}, {1}, 13, 0.98, {10, 1}, std::nullopt,
                                      std::nullopt, 0.9, {nullptr, kDynamicStringMetric}, {}),
+                //   c. [default, custom] -> [custom]
+                //      (also check that a single metric object can be used on multiple columns)
+                FDPACVerifyingParams(kMarineUrchins, {0, 2}, {1}, 1, 0.98, {10, 1}, std::nullopt,
+                                     std::nullopt, 0.9, {nullptr, kDynamicStringMetric},
+                                     {kDynamicStringMetric}),
                 // -- Parametrized refinement --
-                // #10
+                // #11
                 // Both min epsilon and max epsilon
                 FDPACVerifyingParams(kMetricCoords, {2}, {3}, 0.007, 0.66, {0.2}, 0.005, 0.025),
                 // Only max epsilon
@@ -154,25 +157,12 @@ INSTANTIATE_TEST_SUITE_P(
                 // All bounds
                 FDPACVerifyingParams(kMetricMovies, {1}, {2}, 5, 0.733, {0.2}, 0.9, 6.5, 0.7),
                 // Validation
-                // #17
+                // #18
                 //   a. Find epsilon by delta
                 FDPACVerifyingParams(kMetricCoords, {2}, {3}, 0.027, 0.962, {0.2}, 0, 0, 0.962),
                 //   b. Find delta by epsilon
                 FDPACVerifyingParams(kMetricCoords, {2}, {3}, 0.027, 0.962, {0.2}, 0.027, 0.027),
         }));
-
-INSTANTIATE_TEST_SUITE_P(
-        FDPACVerifierHeavyDatasets, TestFDPACVerifier,
-        testing::Values(
-                // Custom metrics
-                //  a. Default diagonal threshold
-                //     Also check that two pointers to a single metrics don't interfere
-                FDPACVerifyingParams(kMushroom, {0}, {3}, 18, 0.936, {0}, 0.5, std::nullopt,
-                                     std::nullopt, {kStaticStringMetric}, {kStaticStringMetric}),
-                //  b. Bigger diagonal threshold
-                FDPACVerifyingParams(kMushroom, {0}, {3}, 11, 0.759, {0}, 0.5, std::nullopt,
-                                     std::nullopt, {kDynamicStringMetric}, {kDynamicStringMetric},
-                                     0.015)));
 
 using IndexPairs = std::vector<std::pair<std::size_t, std::size_t>>;
 
