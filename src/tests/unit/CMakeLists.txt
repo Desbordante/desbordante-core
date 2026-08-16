@@ -251,20 +251,6 @@ desbordante_add_test(
     Boost::headers
 )
 desbordante_add_test(
-    fd.tane.pfd
-    SRCS
-    test_pfdtane.cpp
-    LIBS
-    ${DESBORDANTE_PREFIX}::fd
-    ${DESBORDANTE_PREFIX}::afd
-    ${DESBORDANTE_PREFIX}::afd::tane
-    ${DESBORDANTE_PREFIX}::testlib::common
-    ${DESBORDANTE_PREFIX}::model::table
-    ${DESBORDANTE_PREFIX}::model::types
-    spdlog::spdlog_header_only
-    Boost::headers
-)
-desbordante_add_test(
     fd.pfd_verifier
     SRCS
     test_pfd_verifier.cpp
