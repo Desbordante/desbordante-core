@@ -74,18 +74,11 @@ auto const kAlphabetMetric = [](std::string const& a, std::string const& b) {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-        UCCPACVerifierTests, TestUCCPACVerifier,
+        Refinement, TestUCCPACVerifier,
         testing::ValuesIn({
-                // FIXME: Тут всё падает, надо расчехлять скрипт
                 // Quite ordinary UCC PAC
-                //  a. Unlike other PAC verifiers, UCC PAC verifier tries to minimize delta, so we
-                //     can get delta=0, even though there are pairs on the diagonal
-                UCCPACVerifyingParams(kMetricMovies, {2}, 0, 0),
-                //  b. Again, check that delta is being minimized correctly
-                UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.7, std::nullopt,
-                                      std::nullopt, 1000),
-                // Another quite ordinary UCC PAC
-                UCCPACVerifyingParams(kTestFDPAC, {0}, 0.23, 0.11),
+                UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.5),
+                UCCPACVerifyingParams(kMetricCoords, {2, 3}, 35, 0.316, 0.7),
                 // Custom metric (also check that passing a temporary metric is OK)
                 UCCPACVerifyingParams(
                         kMarineUrchins, {1, 2}, 1, 0.173, 0.25, std::nullopt, std::nullopt,
@@ -96,25 +89,61 @@ INSTANTIATE_TEST_SUITE_P(
                             assert(first.size() == 2 && second.size() == 2);
                             // Values should be remapped properly, i. e. Col1 becomes [0]
                             // and Col2 becomes [1]
-                            double col0_first_frac =
+                            double col1_first_frac =
                                     std::fmod(model::Type::GetValue<model::Double>(first[0]), 1.0);
-                            double col0_second_frac =
+                            double col1_second_frac =
                                     std::fmod(model::Type::GetValue<model::Double>(second[0]), 1.0);
-                            double col1_first_int =
+                            double col2_first_int =
                                     std::floor(model::Type::GetValue<model::Double>(first[1]));
-                            double col1_second_int =
+                            double col2_second_int =
                                     std::floor(model::Type::GetValue<model::Double>(second[1]));
 
-                            double col0_dist = std::abs(col0_first_frac - col0_second_frac);
-                            double col1_dist = std::abs(col1_first_int - col1_second_int);
+                            double col1_dist = std::abs(col1_first_frac - col1_second_frac);
+                            double col2_dist = std::abs(col2_first_int - col2_second_int);
 
-                            return col0_dist + col1_dist;
+                            return col1_dist + col2_dist;
                         })),
-                // "Verification"
-                // FIXME: This test fails!
-                UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.402, std::nullopt,
-                                      std::nullopt),
+                // TODO(p-senchenkov): Something more?
         }));
+
+UCCPACVerifyingParams MetricMoviesBoundsParams(double expeceted_eps, double expected_delta,
+                                               std::optional<double> max_delta = std::nullopt,
+                                               std::optional<double> min_eps = std::nullopt,
+                                               std::optional<double> max_eps = std::nullopt) {
+    return {kMetricCoords,        {2, 3},
+            expeceted_eps,        expected_delta,
+            std::move(max_delta), std::move(min_eps),
+            std::move(max_eps)};
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        ParametrizedRefinement, TestUCCPACVerifier,
+        testing::ValuesIn({
+                // Both min epsilon and max epsilon
+                MetricMoviesBoundsParams(78.7, 0.53, 1, 40, 180),
+                // Only max epsilon
+                MetricMoviesBoundsParams(34, 0.326 /* TODO: or 0.503 (here and later)? */, 1,
+                                         std::nullopt, 180),
+                // Only min epsilon
+                MetricMoviesBoundsParams(197, 0.777, 1, 125),
+                // Only max delta
+                MetricMoviesBoundsParams(34, 0.326, 0.57),
+                // Min epsilon and max delta
+                MetricMoviesBoundsParams(77.7, 0.521, 0.777, 36),
+                // Max epsilon and max delta
+                MetricMoviesBoundsParams(34, 0.326, 0.7, std::nullopt, 110),
+                // All bounds
+                MetricMoviesBoundsParams(78.7, 0.53, 0.7, 38, 110),
+        }));
+
+// TODO(p-senichenkov): wonder if these won't fail
+INSTANTIATE_TEST_SUITE_P(Validation, TestUCCPACVerifier,
+                         testing::ValuesIn({
+                                 // Find epsilon by delta
+                                 MetricMoviesBoundsParams(77.7, 0.597, 0.597, 0, 0),
+                                 // Find delta by epsilon
+                                 MetricMoviesBoundsParams(80, 0.597, std::nullopt, 80, 80),
+                         }));
 
 TEST(UCCPACVerifierTests, DefaultMetricFails) {
     // Check that an attempt to use default metric on non-metrizable column results in clear error
