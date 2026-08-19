@@ -241,18 +241,6 @@ void Tane::ExecuteInternal() {
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
 
-    LOG_DEBUG("{} has {} columns, {} rows, and a maximum NIP of {:2}.", schema->GetName(),
-              relation_->GetNumColumns(), relation_->GetNumRows(), relation_->GetMaximumNip());
-
-    for (auto& column : schema->GetColumns()) {
-        double avg_partners = relation_->GetColumnData(column->GetIndex())
-                                      .GetPositionListIndex()
-                                      ->GetNepAsLong() *
-                              2.0 / relation_->GetNumRows();
-        LOG_DEBUG("*{}: every tuple has {:2} partners on average.", column->ToString(),
-                  avg_partners);
-    }
-
     // Initialize level 0
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
     auto level0 = std::make_unique<model::LatticeLevel>();
