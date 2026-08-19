@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
-#include "core/algorithms/fd/tane/model/lattice_level.h"
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 #include "core/config/error/option.h"
 #include "core/config/names_and_descriptions.h"
@@ -18,6 +17,7 @@
 namespace algos {
 using boost::dynamic_bitset;
 using Cluster = model::PositionListIndex::Cluster;
+using model::LatticeVertex;
 
 Tane::Tane() : PliBasedAFDAlgorithm() {
     DESBORDANTE_OPTION_USING;
@@ -35,10 +35,10 @@ double Tane::CalculateUccError(model::PositionListIndex const* pli,
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-void Tane::Prune(model::LatticeLevel* level) {
+void Tane::Prune(LatticeLevel& level) {
     RelationalSchema const* schema = relation_->GetSchema();
     std::list<model::LatticeVertex*> key_vertices;
-    for (auto& [map_key, vertex] : level->GetVertices()) {
+    for (auto& [map_key, vertex] : level) {
         if (!vertex->GetIsKeyCandidate()) continue;
 
         /* probably incorrect */
@@ -61,12 +61,12 @@ void Tane::Prune(model::LatticeLevel* level) {
                  column != boost::dynamic_bitset<>::npos; column = columns.find_next(column)) {
                 columns.reset(column);
                 columns.set(rhs_index);
-                auto sibling_vertex = level->GetLatticeVertex(columns);
+                auto sibling_vertex_it = level.find(columns);
                 columns.reset(rhs_index);
                 columns.set(column);
 
-                if (sibling_vertex == nullptr ||
-                    !sibling_vertex->GetConstRhsCandidates()[rhs_index]) {
+                if (sibling_vertex_it == level.end() ||
+                    !sibling_vertex_it->second->GetConstRhsCandidates()[rhs_index]) {
                     is_rhs_candidate = false;
                     break;
                 }
@@ -95,9 +95,9 @@ void Tane::Prune(model::LatticeLevel* level) {
     }
 }
 
-void Tane::ComputeDependencies(model::LatticeLevel* level) {
+void Tane::ComputeDependencies(LatticeLevel& level) {
     RelationalSchema const* schema = relation_->GetSchema();
-    for (auto& [key_map, xa_vertex] : level->GetVertices()) {
+    for (auto& [key_map, xa_vertex] : level) {
         if (xa_vertex->GetIsInvalid()) {
             continue;
         }
@@ -132,6 +132,115 @@ void Tane::ComputeDependencies(model::LatticeLevel* level) {
                     xa_vertex->GetRhsCandidates() &= lhs;  // remove all B in R \ X from C+(X)
                 }
             }
+        }
+    }
+}
+
+void Tane::GenerateNextLevel(std::vector<LatticeLevel>& levels) {
+    unsigned int arity = levels.size() - 1;
+    assert(arity >= 1);
+    LOG_TRACE("-------------Creating level {}...-----------------\n", arity + 1);
+
+    LatticeLevel& current_level = levels[arity];
+
+    std::vector<LatticeVertex*> current_level_vertices;
+    for (auto const& [map_key, vertex] : current_level) {
+        current_level_vertices.push_back(vertex.get());
+    }
+
+    std::sort(current_level_vertices.begin(), current_level_vertices.end(),
+              LatticeVertex::Comparator);
+    LatticeLevel next_level;
+
+    for (unsigned int vertex_index_1 = 0; vertex_index_1 < current_level_vertices.size();
+         vertex_index_1++) {
+        LatticeVertex& vertex1 = *current_level_vertices[vertex_index_1];
+
+        if (vertex1.GetRhsCandidates().none() && !vertex1.GetIsKeyCandidate()) {
+            continue;
+        }
+
+        for (unsigned int vertex_index_2 = vertex_index_1 + 1;
+             vertex_index_2 < current_level_vertices.size(); vertex_index_2++) {
+            LatticeVertex& vertex2 = *current_level_vertices[vertex_index_2];
+
+            if (!vertex1.ComesBeforeAndSharePrefixWith(vertex2)) {
+                break;
+            }
+
+            if (!vertex1.GetRhsCandidates().intersects(vertex1.GetRhsCandidates()) &&
+                !vertex2.GetIsKeyCandidate()) {
+                continue;
+            }
+
+            boost::dynamic_bitset<> child_columns = vertex1.GetVertical() | vertex2.GetVertical();
+            std::unique_ptr<LatticeVertex> child_vertex =
+                    std::make_unique<LatticeVertex>(child_columns);
+
+            boost::dynamic_bitset<> parent_indices(vertex1.GetVertical().size());
+            parent_indices |= vertex1.GetVertical();
+            parent_indices |= vertex2.GetVertical();
+
+            child_vertex->GetRhsCandidates() |= vertex1.GetRhsCandidates();
+            child_vertex->GetRhsCandidates() &= vertex2.GetRhsCandidates();
+            child_vertex->SetKeyCandidate(vertex1.GetIsKeyCandidate() &&
+                                          vertex2.GetIsKeyCandidate());
+            child_vertex->SetInvalid(vertex1.GetIsInvalid() || vertex2.GetIsInvalid());
+
+            for (unsigned int i = 0, skip_index = parent_indices.find_first(); i < arity - 1;
+                 i++, skip_index = parent_indices.find_next(skip_index)) {
+                parent_indices[skip_index] = false;
+                auto parent_vertex_it = current_level.find(parent_indices);
+
+                if (parent_vertex_it == current_level.end()) {
+                    goto continueMidOuter;
+                }
+                LatticeVertex const& parent_vertex = *parent_vertex_it->second;
+                child_vertex->GetRhsCandidates() &= parent_vertex.GetConstRhsCandidates();
+                if (child_vertex->GetRhsCandidates().none()) {
+                    goto continueMidOuter;
+                }
+                child_vertex->GetParents().push_back(&parent_vertex);
+                parent_indices[skip_index] = true;
+
+                child_vertex->SetKeyCandidate(child_vertex->GetIsKeyCandidate() &&
+                                              parent_vertex.GetIsKeyCandidate());
+                child_vertex->SetInvalid(child_vertex->GetIsInvalid() ||
+                                         parent_vertex.GetIsInvalid());
+
+                if (!child_vertex->GetIsKeyCandidate() && child_vertex->GetRhsCandidates().none()) {
+                    goto continueMidOuter;
+                }
+            }
+
+            child_vertex->GetParents().push_back(&vertex1);
+            child_vertex->GetParents().push_back(&vertex2);
+
+            {
+                boost::dynamic_bitset<> const& child_vertical = child_vertex->GetVertical();
+                next_level.try_emplace(child_vertical, std::move(child_vertex));
+            }
+
+        continueMidOuter:
+            continue;
+        }
+    }
+
+    levels.push_back(std::move(next_level));
+}
+
+void Tane::ClearLevelsBelow(std::vector<LatticeLevel>& levels, unsigned int arity) {
+    // Clear the levels from the level list
+    auto it = levels.begin();
+
+    for (unsigned int i = 0; i < std::min((unsigned int)levels.size(), arity); i++) {
+        (it++)->clear();
+    }
+
+    // Clear child references
+    if (arity < levels.size()) {
+        for (auto& [map_key, retained_vertex] : levels[arity]) {
+            retained_vertex->GetParents().clear();
         }
     }
 }
@@ -242,16 +351,18 @@ void Tane::ExecuteInternal() {
     RelationalSchema const* schema = relation_->GetSchema();
 
     // Initialize level 0
-    std::vector<std::unique_ptr<model::LatticeLevel>> levels;
-    auto level0 = std::make_unique<model::LatticeLevel>();
-    // TODO: через указатели кажется надо переделать
-    level0->Add(std::make_unique<model::LatticeVertex>(dynamic_bitset<>(schema->GetNumColumns())));
-    model::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
+    std::vector<LatticeLevel> levels;
+    LatticeLevel level0;
+    model::LatticeVertex const* empty_vertex =
+            level0.emplace(dynamic_bitset<>(schema->GetNumColumns()),
+                           std::make_unique<model::LatticeVertex>(
+                                   dynamic_bitset<>(schema->GetNumColumns())))
+                    .first->second.get();
     levels.push_back(std::move(level0));
 
     // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
-    auto level1 = std::make_unique<model::LatticeLevel>();
+    LatticeLevel level1;
     for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
         // for each attribute set vertex
         ColumnData const& column_data = relation_->GetColumnData(column);
@@ -276,10 +387,11 @@ void Tane::ExecuteInternal() {
             }
         }
 
-        level1->Add(std::move(vertex));
+        boost::dynamic_bitset<> const& vertical = vertex->GetVertical();
+        level1.emplace(vertical, std::move(vertex));
     }
 
-    for (auto& [key_map, vertex] : level1->GetVertices()) {
+    for (auto& [key_map, vertex] : level1) {
         dynamic_bitset<> column = vertex->GetVertical();
         vertex->GetRhsCandidates() -= zeroary_fd_rhs;  // remove already discovered zeroary FDs
 
@@ -318,12 +430,12 @@ void Tane::ExecuteInternal() {
     unsigned int max_arity =
             max_lhs_ == std::numeric_limits<unsigned int>::max() ? max_lhs_ : max_lhs_ + 1;
     for (unsigned int arity = 2; arity <= max_arity; arity++) {
-        model::LatticeLevel::ClearLevelsBelow(levels, arity - 1);
-        model::LatticeLevel::GenerateNextLevel(levels);
+        ClearLevelsBelow(levels, arity - 1);
+        GenerateNextLevel(levels);
 
-        model::LatticeLevel* level = levels[arity].get();
-        LOG_TRACE("Checking {} {}-ary lattice vertices.", level->GetVertices().size(), arity);
-        if (level->GetVertices().empty()) {
+        LatticeLevel& level = levels[arity];
+        LOG_TRACE("Checking {} {}-ary lattice vertices.", level.size(), arity);
+        if (level.empty()) {
             break;
         }
 

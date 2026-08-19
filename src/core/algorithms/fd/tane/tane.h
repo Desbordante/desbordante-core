@@ -1,8 +1,10 @@
 #pragma once
 
+#include <map>
+
 #include "core/algorithms/fd/afd_measure.h"
 #include "core/algorithms/fd/pli_based_afd_algorithm.h"
-#include "core/algorithms/fd/tane/model/lattice_level.h"
+#include "core/algorithms/fd/tane/model/lattice_vertex.h"
 #include "core/config/error/type.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
@@ -17,10 +19,14 @@ protected:
     model::AfdMeasure afd_measure_;
 
 private:
+    using LatticeLevel = std::map<boost::dynamic_bitset<>, std::unique_ptr<model::LatticeVertex>>;
+
     void ResetStateFd() final {}
 
-    void Prune(model::LatticeLevel* level);
-    void ComputeDependencies(model::LatticeLevel* level);
+    void Prune(LatticeLevel& level);
+    void ComputeDependencies(LatticeLevel& level);
+    static void GenerateNextLevel(std::vector<LatticeLevel>& levels);
+    static void ClearLevelsBelow(std::vector<LatticeLevel>& levels, unsigned int arity);
     void ExecuteInternal() final;
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs);
