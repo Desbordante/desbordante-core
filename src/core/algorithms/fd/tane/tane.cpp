@@ -39,52 +39,53 @@ void Tane::Prune(model::LatticeLevel* level) {
     RelationalSchema const* schema = relation_->GetSchema();
     std::list<model::LatticeVertex*> key_vertices;
     for (auto& [map_key, vertex] : level->GetVertices()) {
+        if (!vertex->GetIsKeyCandidate()) continue;
+
+        /* probably incorrect */
+        double ucc_error = CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
+
+        if (ucc_error > max_ucc_error_) continue;  // If a key candidate is not an approx UCC
+
+        vertex->SetKeyCandidate(false);
+        if (ucc_error != 0) continue;  // HUH?
+
         boost::dynamic_bitset<> columns = vertex->GetVertical();
 
-        if (vertex->GetIsKeyCandidate()) {
-            double ucc_error = CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
-            if (ucc_error <= max_ucc_error_) {  // If a key candidate is an approx UCC
+        for (std::size_t rhs_index = vertex->GetRhsCandidates().find_first();
+             rhs_index != boost::dynamic_bitset<>::npos;
+             rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
+            if (columns.test(rhs_index)) continue;  // for each A ∈ C+(X) \ X
 
-                vertex->SetKeyCandidate(false);
-                if (ucc_error == 0) {
-                    for (std::size_t rhs_index = vertex->GetRhsCandidates().find_first();
-                         rhs_index != boost::dynamic_bitset<>::npos;
-                         rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-                        if (!columns.test(rhs_index)) {
-                            bool is_rhs_candidate = true;
-                            for (model::Index column = columns.find_first();
-                                 column != boost::dynamic_bitset<>::npos;
-                                 column = columns.find_next(column)) {
-                                boost::dynamic_bitset<> sibling =
-                                        boost::dynamic_bitset<>(columns).reset(column).set(
-                                                rhs_index);
-                                auto sibling_vertex = level->GetLatticeVertex(sibling);
-                                if (sibling_vertex == nullptr ||
-                                    !sibling_vertex->GetConstRhsCandidates()[rhs_index]) {
-                                    is_rhs_candidate = false;
-                                    break;
-                                }
-                                // for each outer rhs: if there is a sibling s.t. it doesn't
-                                // have this rhs, there is no FD: vertex->rhs
-                            }
-                            // Found fd: vertex->rhs => register it
-                            if (is_rhs_candidate) {
-                                RegisterAfd(AFD(schema->GetVertical(columns),
-                                                *schema->GetColumn(rhs_index), ucc_error,
-                                                relation_->GetSharedPtrSchema()));
-                            }
-                        }
-                    }
-                    key_vertices.push_back(vertex.get());
+            bool is_rhs_candidate = true;
+            for (model::Index column = columns.find_first();
+                 column != boost::dynamic_bitset<>::npos; column = columns.find_next(column)) {
+                columns.reset(column);
+                columns.set(rhs_index);
+                auto sibling_vertex = level->GetLatticeVertex(columns);
+                columns.reset(rhs_index);
+                columns.set(column);
+
+                if (sibling_vertex == nullptr ||
+                    !sibling_vertex->GetConstRhsCandidates()[rhs_index]) {
+                    is_rhs_candidate = false;
+                    break;
                 }
+                // for each outer rhs: if there is a sibling s.t. it doesn't
+                // have this rhs, there is no FD: vertex->rhs
+            }
+            // Found fd: vertex->rhs => register it
+            if (is_rhs_candidate) {
+                RegisterAfd(AFD(schema->GetVertical(columns), *schema->GetColumn(rhs_index),
+                                ucc_error, relation_->GetSharedPtrSchema()));
             }
         }
-        // if we seek for exact FDs then SetInvalid
-        if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
-            for (auto key_vertex : key_vertices) {
-                key_vertex->GetRhsCandidates() &= key_vertex->GetVertical();
-                key_vertex->SetInvalid(true);
-            }
+        key_vertices.push_back(vertex.get());
+    }
+    // if we seek for exact FDs then SetInvalid
+    if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
+        for (auto key_vertex : key_vertices) {
+            key_vertex->GetRhsCandidates() &= key_vertex->GetVertical();
+            key_vertex->SetInvalid(true);
         }
     }
 }
@@ -118,12 +119,12 @@ void Tane::ComputeDependencies(model::LatticeLevel* level) {
             auto a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
             // Check X -> A
             config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
-            if (error <= max_fd_error_) {
+            if (error <= max_fd_error_) {  // if X \ {A} → A is valid
                 RegisterAfd(AFD(schema->GetVertical(lhs), *schema->GetColumn(a_index), error,
-                                relation_->GetSharedPtrSchema()));
-                xa_vertex->GetRhsCandidates().set(a_index, false);
+                                relation_->GetSharedPtrSchema()));  // output X \ {A} → A
+                xa_vertex->GetRhsCandidates().reset(a_index);       // remove A from C+(X)
                 if (error == 0) {
-                    xa_vertex->GetRhsCandidates() &= lhs;
+                    xa_vertex->GetRhsCandidates() &= lhs;  // remove all B in R \ X from C+(X)
                 }
             }
         }
@@ -218,7 +219,7 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
             return 1 - /*<- incorrect*/ afd_metric_calculator::AFDMetricCalculator::CalculateG2(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG3:
-            return 1 - /*<- incorrect*/ afd_metric_calculator::AFDMetricCalculator::CalculateG3(
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG3(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateG1Error(
@@ -287,8 +288,7 @@ void Tane::ExecuteInternal() {
 
     for (auto& [key_map, vertex] : level1->GetVertices()) {
         dynamic_bitset<> column = vertex->GetVertical();
-        vertex->GetRhsCandidates() &=
-                ~zeroary_fd_rhs;  //~ returns flipped copy <- removed already discovered zeroary FDs
+        vertex->GetRhsCandidates() -= zeroary_fd_rhs;  // remove already discovered zeroary FDs
 
         // вот тут костыль, чтобы вытянуть индекс колонки из вершины, в которой только один индекс
         ColumnData const& column_data = relation_->GetColumnData(column.find_first());

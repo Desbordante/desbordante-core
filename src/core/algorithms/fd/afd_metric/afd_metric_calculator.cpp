@@ -84,7 +84,7 @@ void AFDMetricCalculator::ExecuteInternal() {
     }
 }
 
-// Misleading: this is g2 error
+// Misleading: this is g2 error?
 long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                              size_t num_rows) {
     if (num_rows <= 0) throw std::invalid_argument("received non-positive number of rows");
