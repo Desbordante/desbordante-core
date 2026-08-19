@@ -75,8 +75,13 @@ void Tane::Prune(model::LatticeLevel* level) {
             }
             // Found fd: vertex->rhs => register it
             if (is_rhs_candidate) {
+                auto x_pli = vertex->GetPositionListIndexWithSingletons();
+                auto a_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
+                config::ErrorType fd_error =
+                        CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
+                if (fd_error > max_fd_error_) continue;
                 RegisterAfd(AFD(schema->GetVertical(columns), *schema->GetColumn(rhs_index),
-                                ucc_error, relation_->GetSharedPtrSchema()));
+                                fd_error, relation_->GetSharedPtrSchema()));
             }
         }
         key_vertices.push_back(vertex.get());
@@ -300,10 +305,15 @@ void Tane::ExecuteInternal() {
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
                     if (rhs_index != column.find_first()) {
+                        auto x_pli = vertex->GetPositionListIndexWithSingletons();
+                        auto a_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
+                        config::ErrorType fd_error =
+                                CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
+                        if (fd_error > max_fd_error_) continue;
                         RegisterAfd(
                                 AFD(schema->GetVertical(dynamic_bitset<>(schema->GetNumColumns())
                                                                 .set(column.find_first())),
-                                    *schema->GetColumn(rhs_index), ucc_error,
+                                    *schema->GetColumn(rhs_index), fd_error,
                                     relation_->GetSharedPtrSchema()));
                     }
                 }
