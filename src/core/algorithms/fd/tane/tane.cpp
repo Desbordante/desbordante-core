@@ -255,7 +255,7 @@ void Tane::ExecuteInternal() {
 
     // Initialize level 0
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
-    auto level0 = std::make_unique<model::LatticeLevel>(0);
+    auto level0 = std::make_unique<model::LatticeLevel>();
     // TODO: через указатели кажется надо переделать
     level0->Add(std::make_unique<model::LatticeVertex>(dynamic_bitset<>(schema->GetNumColumns())));
     model::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
@@ -263,7 +263,7 @@ void Tane::ExecuteInternal() {
 
     // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
-    auto level1 = std::make_unique<model::LatticeLevel>(1);
+    auto level1 = std::make_unique<model::LatticeLevel>();
     for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
         // for each attribute set vertex
         ColumnData const& column_data = relation_->GetColumnData(column);

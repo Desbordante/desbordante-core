@@ -36,7 +36,7 @@ void LatticeLevel::GenerateNextLevel(std::vector<std::unique_ptr<LatticeLevel>>&
 
     std::sort(current_level_vertices.begin(), current_level_vertices.end(),
               LatticeVertex::Comparator);
-    auto next_level = std::make_unique<LatticeLevel>(arity + 1);
+    auto next_level = std::make_unique<LatticeLevel>();
 
     for (unsigned int vertex_index_1 = 0; vertex_index_1 < current_level_vertices.size();
          vertex_index_1++) {
