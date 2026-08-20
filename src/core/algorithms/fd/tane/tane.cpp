@@ -38,7 +38,7 @@ double Tane::CalculateUccError(model::PositionListIndex const* pli,
 
 void Tane::Prune(LatticeLevel& level) {
     RelationalSchema const* schema = relation_->GetSchema();
-    std::list<model::LatticeVertex*> key_vertices;
+    std::list<LatticeVertex*> key_vertices;
     for (auto& [map_key, vertex] : level) {  // for each X ∈ L_l do
         if (!vertex->GetIsKeyCandidate()) continue;
 
@@ -171,16 +171,13 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                 continue;
             }
 
-            std::unique_ptr<LatticeVertex> child_vertex =
-                    std::make_unique<LatticeVertex>(vertex1.GetVertical() | vertex2.GetVertical());
+            std::unique_ptr<LatticeVertex> child_vertex = std::make_unique<LatticeVertex>(
+                    vertex1.GetVertical() | vertex2.GetVertical(),
+                    vertex1.GetRhsCandidates() & vertex2.GetRhsCandidates(),
+                    vertex1.GetIsKeyCandidate() && vertex2.GetIsKeyCandidate(),
+                    vertex1.GetIsInvalid() || vertex2.GetIsInvalid());
 
             boost::dynamic_bitset<> parent_indices(child_vertex->GetVertical());
-
-            child_vertex->GetRhsCandidates() |= vertex1.GetRhsCandidates();
-            child_vertex->GetRhsCandidates() &= vertex2.GetRhsCandidates();
-            child_vertex->SetKeyCandidate(vertex1.GetIsKeyCandidate() &&
-                                          vertex2.GetIsKeyCandidate());
-            child_vertex->SetInvalid(vertex1.GetIsInvalid() || vertex2.GetIsInvalid());
 
             for (unsigned int i = 0, skip_index = parent_indices.find_first(); i < arity - 1;
                  i++, skip_index = parent_indices.find_next(skip_index)) {
@@ -326,11 +323,12 @@ void Tane::ExecuteInternal() {
 
     // Initialize level 0
     LatticeLevel prev_level;
-    model::LatticeVertex const* empty_vertex =
+    LatticeVertex const* empty_vertex =
             prev_level
                     .emplace(dynamic_bitset<>(schema->GetNumColumns()),
-                             std::make_unique<model::LatticeVertex>(
-                                     dynamic_bitset<>(schema->GetNumColumns())))
+                             std::make_unique<LatticeVertex>(
+                                     dynamic_bitset<>(schema->GetNumColumns()),
+                                     dynamic_bitset<>(schema->GetNumColumns()), false, false))
                     .first->second.get();
 
     // Initialize level 1
@@ -339,13 +337,8 @@ void Tane::ExecuteInternal() {
     for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
         // for each attribute set vertex
         ColumnData const& column_data = relation_->GetColumnData(column);
-        auto vertex = std::make_unique<model::LatticeVertex>(
-                dynamic_bitset<>(schema->GetNumColumns()).set(column));
 
-        vertex->SetAllRhsCandidates();
-        vertex->GetParents().push_back(empty_vertex);
-        vertex->SetKeyCandidate(true);
-        vertex->SetPLIWithSingletons(column_data.GetPLWSIndex());
+        boost::dynamic_bitset<> rhs_candidates;
 
         // check FDs: 0->A
         double fd_error = CalculateZeroAryFdError(&column_data);
@@ -355,12 +348,19 @@ void Tane::ExecuteInternal() {
                             relation_->GetSharedPtrSchema()));
 
             if (fd_error == 0) {
-                vertex->GetRhsCandidates().reset();
+                rhs_candidates.resize(schema->GetNumColumns(), false);
             } else {
-                vertex->GetRhsCandidates().reset(column);
+                rhs_candidates.resize(schema->GetNumColumns(), true);
+                rhs_candidates.reset(column);
             }
+        } else {
+            rhs_candidates.resize(schema->GetNumColumns(), true);
         }
 
+        auto vertex = std::make_unique<LatticeVertex>(
+                std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column)),
+                std::move(rhs_candidates), true, false,
+                std::vector<LatticeVertex const*>{empty_vertex}, column_data.GetPLWSIndex());
         boost::dynamic_bitset<> const& vertical = vertex->GetVertical();
         current_level.emplace(vertical, std::move(vertex));
     }

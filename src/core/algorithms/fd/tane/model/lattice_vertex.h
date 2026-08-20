@@ -15,19 +15,28 @@ namespace model {
 
 class LatticeVertex {
 private:
+    using PLIPtr = std::variant<std::unique_ptr<PositionListIndex>, PositionListIndex const*,
+                                std::unique_ptr<PLIWS>, PLIWS const*>;
+
     boost::dynamic_bitset<> vertical_;
     // holds either an owned PLI (unique_ptr) or a non-owned one (const*)
-    std::variant<std::unique_ptr<PositionListIndex>, PositionListIndex const*,
-                 std::unique_ptr<PLIWS>, PLIWS const*>
-            position_list_index_;
+    PLIPtr position_list_index_;
     boost::dynamic_bitset<> rhs_candidates_;
-    bool is_key_candidate_ = false;
+    bool is_key_candidate_;
     std::vector<LatticeVertex const*> parents_;
-    bool is_invalid_ = false;
+    bool is_invalid_;
 
 public:
-    explicit LatticeVertex(boost::dynamic_bitset<> vertical)
-        : vertical_(std::move(vertical)), rhs_candidates_(vertical_.size()) {}
+    explicit LatticeVertex(boost::dynamic_bitset<> vertical, boost::dynamic_bitset<> rhs_candidates,
+                           bool is_key_candidate,
+                           bool is_invalid, std::vector<LatticeVertex const*> parents = {},
+                           PLIPtr pli_ptr = (PositionListIndex const*)nullptr)
+        : vertical_(std::move(vertical)),
+          position_list_index_(std::move(pli_ptr)),
+          rhs_candidates_(std::move(rhs_candidates)),
+          is_key_candidate_(is_key_candidate),
+          parents_(std::move(parents)),
+          is_invalid_(is_invalid) {}
 
     std::vector<LatticeVertex const*>& GetParents() {
         return parents_;
