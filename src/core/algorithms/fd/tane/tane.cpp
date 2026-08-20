@@ -38,7 +38,7 @@ double Tane::CalculateUccError(model::PositionListIndex const* pli,
 void Tane::Prune(LatticeLevel& level) {
     RelationalSchema const* schema = relation_->GetSchema();
     std::list<model::LatticeVertex*> key_vertices;
-    for (auto& [map_key, vertex] : level) {
+    for (auto& [map_key, vertex] : level) {  // for each X ∈ L_l do
         if (!vertex->GetIsKeyCandidate()) continue;
 
         /* probably incorrect */
@@ -47,7 +47,7 @@ void Tane::Prune(LatticeLevel& level) {
         if (ucc_error > max_ucc_error_) continue;  // If a key candidate is not an approx UCC
 
         vertex->SetKeyCandidate(false);
-        if (ucc_error != 0) continue;  // HUH?
+        if (ucc_error != 0) continue;  // if X is a (super)key
 
         boost::dynamic_bitset<> columns = vertex->GetVertical();
 
@@ -112,12 +112,12 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
         dynamic_bitset<> const& a_candidates = xa_vertex->GetRhsCandidates();
         auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
         for (auto const& x_vertex : xa_vertex->GetParents()) {
-            dynamic_bitset<> const& lhs = x_vertex->GetVertical();
+            dynamic_bitset<> const& parent_lhs = x_vertex->GetVertical();
 
             // Find index of A in XA.
-            dynamic_bitset<> differing_bits = xa_indices ^ lhs;
+            dynamic_bitset<> differing_bits = xa_indices ^ /*- ?*/ parent_lhs;
             std::size_t a_index = differing_bits.find_first();
-            if (!a_candidates[a_index]) {
+            if (!a_candidates[a_index]) {  // differing_bits.count() == 1? Makes sense
                 continue;
             }
             auto x_pli = x_vertex->GetPositionListIndexWithSingletons();
@@ -125,11 +125,12 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
             // Check X -> A
             config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
             if (error <= max_fd_error_) {  // if X \ {A} → A is valid
-                RegisterAfd(AFD(schema->GetVertical(lhs), *schema->GetColumn(a_index), error,
+                RegisterAfd(AFD(schema->GetVertical(parent_lhs), *schema->GetColumn(a_index), error,
                                 relation_->GetSharedPtrSchema()));  // output X \ {A} → A
                 xa_vertex->GetRhsCandidates().reset(a_index);       // remove A from C+(X)
                 if (error == 0) {
-                    xa_vertex->GetRhsCandidates() &= lhs;  // remove all B in R \ X from C+(X)
+                    xa_vertex->GetRhsCandidates() &=
+                            parent_lhs;  // remove all B in R \ X from C+(X)
                 }
             }
         }
@@ -234,7 +235,7 @@ void Tane::ClearLevelsBelow(std::vector<LatticeLevel>& levels, unsigned int arit
     auto it = levels.begin();
 
     for (unsigned int i = 0; i < std::min((unsigned int)levels.size(), arity); i++) {
-        (it++)->clear();
+        it++->clear();
     }
 
     // Clear child references
@@ -446,7 +447,6 @@ void Tane::ExecuteInternal() {
         }
 
         Prune(level);
-        // TODO: printProfilingData
     }
 
     LOG_DEBUG("Total FD count: {}", afd_collection_.Size());
