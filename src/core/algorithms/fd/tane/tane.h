@@ -25,8 +25,7 @@ private:
 
     void Prune(LatticeLevel& level);
     void ComputeDependencies(LatticeLevel& level);
-    static void GenerateNextLevel(std::vector<LatticeLevel>& levels);
-    static void ClearLevelsBelow(std::vector<LatticeLevel>& levels, unsigned int arity);
+    static LatticeLevel GenerateNextLevel(LatticeLevel& level);
     void ExecuteInternal() final;
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs);

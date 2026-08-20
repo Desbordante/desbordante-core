@@ -1,8 +1,9 @@
 #include "core/algorithms/fd/tane/tane.h"
 
-#include <iomanip>
+#include <algorithm>
 #include <list>
 #include <memory>
+#include <ranges>
 
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
@@ -111,7 +112,7 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
         dynamic_bitset<> const& xa_indices = xa_vertex->GetVertical();
         dynamic_bitset<> const& a_candidates = xa_vertex->GetRhsCandidates();
         auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
-        for (auto const& x_vertex : xa_vertex->GetParents()) {
+        for (LatticeVertex const* x_vertex : xa_vertex->GetParents()) {
             dynamic_bitset<> const& parent_lhs = x_vertex->GetVertical();
 
             // Find index of A in XA.
@@ -137,13 +138,9 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
     }
 }
 
-void Tane::GenerateNextLevel(std::vector<LatticeLevel>& levels) {
-    unsigned int arity = levels.size() - 1;
-    assert(arity >= 1);
-    LOG_TRACE("-------------Creating level {}...-----------------\n", arity + 1);
-
-    LatticeLevel& current_level = levels[arity];
-
+auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
+    assert(!current_level.empty());
+    unsigned int const arity = current_level.begin()->second->GetVertical().count();
     std::vector<LatticeVertex*> current_level_vertices;
     for (auto const& [map_key, vertex] : current_level) {
         current_level_vertices.push_back(vertex.get());
@@ -226,23 +223,7 @@ void Tane::GenerateNextLevel(std::vector<LatticeLevel>& levels) {
         }
     }
 
-    levels.push_back(std::move(next_level));
-}
-
-void Tane::ClearLevelsBelow(std::vector<LatticeLevel>& levels, unsigned int arity) {
-    // Clear the levels from the level list
-    auto it = levels.begin();
-
-    for (unsigned int i = 0; i < std::min((unsigned int)levels.size(), arity); i++) {
-        it++->clear();
-    }
-
-    // Clear child references
-    if (arity < levels.size()) {
-        for (auto& [map_key, retained_vertex] : levels[arity]) {
-            retained_vertex->GetParents().clear();
-        }
-    }
+    return next_level;
 }
 
 config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
@@ -351,18 +332,17 @@ void Tane::ExecuteInternal() {
     RelationalSchema const* schema = relation_->GetSchema();
 
     // Initialize level 0
-    std::vector<LatticeLevel> levels;
-    LatticeLevel level0;
+    LatticeLevel prev_level;
     model::LatticeVertex const* empty_vertex =
-            level0.emplace(dynamic_bitset<>(schema->GetNumColumns()),
-                           std::make_unique<model::LatticeVertex>(
-                                   dynamic_bitset<>(schema->GetNumColumns())))
+            prev_level
+                    .emplace(dynamic_bitset<>(schema->GetNumColumns()),
+                             std::make_unique<model::LatticeVertex>(
+                                     dynamic_bitset<>(schema->GetNumColumns())))
                     .first->second.get();
-    levels.push_back(std::move(level0));
 
     // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
-    LatticeLevel level1;
+    LatticeLevel current_level;
     for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
         // for each attribute set vertex
         ColumnData const& column_data = relation_->GetColumnData(column);
@@ -388,10 +368,10 @@ void Tane::ExecuteInternal() {
         }
 
         boost::dynamic_bitset<> const& vertical = vertex->GetVertical();
-        level1.emplace(vertical, std::move(vertex));
+        current_level.emplace(vertical, std::move(vertex));
     }
 
-    for (auto& [key_map, vertex] : level1) {
+    for (auto& [key_map, vertex] : current_level) {
         dynamic_bitset<> column = vertex->GetVertical();
         vertex->GetRhsCandidates() -= zeroary_fd_rhs;  // remove already discovered zeroary FDs
 
@@ -425,27 +405,28 @@ void Tane::ExecuteInternal() {
             }
         }
     }
-    levels.push_back(std::move(level1));
 
     unsigned int max_arity =
             max_lhs_ == std::numeric_limits<unsigned int>::max() ? max_lhs_ : max_lhs_ + 1;
     for (unsigned int arity = 2; arity <= max_arity; arity++) {
-        ClearLevelsBelow(levels, arity - 1);
-        GenerateNextLevel(levels);
+        std::ranges::for_each(
+                current_level | std::views::values,
+                [](std::unique_ptr<LatticeVertex>& vertex) { vertex->GetParents().clear(); });
+        prev_level = std::move(current_level);
+        current_level = GenerateNextLevel(prev_level);
 
-        LatticeLevel& level = levels[arity];
-        LOG_TRACE("Checking {} {}-ary lattice vertices.", level.size(), arity);
-        if (level.empty()) {
+        LOG_TRACE("Checking {} {}-ary lattice vertices.", current_level.size(), arity);
+        if (current_level.empty()) {
             break;
         }
 
-        ComputeDependencies(level);
+        ComputeDependencies(current_level);
 
         if (arity == max_arity) {
             break;
         }
 
-        Prune(level);
+        Prune(current_level);
     }
 
     LOG_DEBUG("Total FD count: {}", afd_collection_.Size());
