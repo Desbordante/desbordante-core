@@ -166,7 +166,7 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                 break;
             }
 
-            if (!vertex1.GetRhsCandidates().intersects(vertex1.GetRhsCandidates()) &&
+            if (!vertex1.GetRhsCandidates().intersects(vertex2.GetRhsCandidates()) &&
                 !vertex2.GetIsKeyCandidate()) {
                 continue;
             }
