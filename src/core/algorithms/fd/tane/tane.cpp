@@ -194,12 +194,12 @@ void Tane::GenerateNextLevel(std::vector<LatticeLevel>& levels) {
                 auto parent_vertex_it = current_level.find(parent_indices);
 
                 if (parent_vertex_it == current_level.end()) {
-                    goto continueMidOuter;
+                    goto notInNextLevel;
                 }
                 LatticeVertex const& parent_vertex = *parent_vertex_it->second;
                 child_vertex->GetRhsCandidates() &= parent_vertex.GetConstRhsCandidates();
                 if (child_vertex->GetRhsCandidates().none()) {
-                    goto continueMidOuter;
+                    goto notInNextLevel;
                 }
                 child_vertex->GetParents().push_back(&parent_vertex);
                 parent_indices[skip_index] = true;
@@ -210,19 +210,18 @@ void Tane::GenerateNextLevel(std::vector<LatticeLevel>& levels) {
                                          parent_vertex.GetIsInvalid());
 
                 if (!child_vertex->GetIsKeyCandidate() && child_vertex->GetRhsCandidates().none()) {
-                    goto continueMidOuter;
+                    goto notInNextLevel;
                 }
             }
 
-            child_vertex->GetParents().push_back(&vertex1);
-            child_vertex->GetParents().push_back(&vertex2);
-
             {
+                child_vertex->GetParents().push_back(&vertex1);
+                child_vertex->GetParents().push_back(&vertex2);
                 boost::dynamic_bitset<> const& child_vertical = child_vertex->GetVertical();
                 next_level.try_emplace(child_vertical, std::move(child_vertex));
             }
 
-        continueMidOuter:
+        notInNextLevel:
             continue;
         }
     }
@@ -331,7 +330,7 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateFI(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG2:
-            return 1 - /*<- incorrect*/ afd_metric_calculator::AFDMetricCalculator::CalculateG2(
+            return 1 - /*<- incorrect?*/ afd_metric_calculator::AFDMetricCalculator::CalculateG2(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG3:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG3(
