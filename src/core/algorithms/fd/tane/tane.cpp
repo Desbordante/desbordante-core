@@ -171,13 +171,10 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                 continue;
             }
 
-            boost::dynamic_bitset<> child_columns = vertex1.GetVertical() | vertex2.GetVertical();
             std::unique_ptr<LatticeVertex> child_vertex =
-                    std::make_unique<LatticeVertex>(child_columns);
+                    std::make_unique<LatticeVertex>(vertex1.GetVertical() | vertex2.GetVertical());
 
-            boost::dynamic_bitset<> parent_indices(vertex1.GetVertical().size());
-            parent_indices |= vertex1.GetVertical();
-            parent_indices |= vertex2.GetVertical();
+            boost::dynamic_bitset<> parent_indices(child_vertex->GetVertical());
 
             child_vertex->GetRhsCandidates() |= vertex1.GetRhsCandidates();
             child_vertex->GetRhsCandidates() &= vertex2.GetRhsCandidates();
@@ -205,10 +202,6 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                                               parent_vertex.GetIsKeyCandidate());
                 child_vertex->SetInvalid(child_vertex->GetIsInvalid() ||
                                          parent_vertex.GetIsInvalid());
-
-                if (!child_vertex->GetIsKeyCandidate() && child_vertex->GetRhsCandidates().none()) {
-                    goto notInNextLevel;
-                }
             }
 
             {
@@ -340,7 +333,7 @@ void Tane::ExecuteInternal() {
                                      dynamic_bitset<>(schema->GetNumColumns())))
                     .first->second.get();
 
-    // Initialize level1
+    // Initialize level 1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
     LatticeLevel current_level;
     for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
@@ -361,9 +354,10 @@ void Tane::ExecuteInternal() {
             RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(column), fd_error,
                             relation_->GetSharedPtrSchema()));
 
-            vertex->GetRhsCandidates().reset(column);
             if (fd_error == 0) {
                 vertex->GetRhsCandidates().reset();
+            } else {
+                vertex->GetRhsCandidates().reset(column);
             }
         }
 
