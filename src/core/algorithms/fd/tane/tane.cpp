@@ -54,10 +54,20 @@ auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
                             relation_->GetSharedPtrSchema()));
 
             if (fd_error == 0) {
+                // there is an actual FD [] -> A
+                // continue;?? passed the tests
                 rhs_candidates.resize(schema->GetNumColumns(), false);
             } else {
+                // there is an approximate FD [] -> A
                 rhs_candidates.resize(schema->GetNumColumns(), true);
-                rhs_candidates.reset(column);
+                // We've already found an FD with this RHS. But what about an FD with a lower error?
+                // "In some applications, it might also be useful to know approximate dependencies
+                // that are not minimal but have smaller error. We leave the necessary modifications
+                // as an exercise to the reader."
+                // Oh, ok.
+                // Don't search for FDs with lower error.
+                // rhs_candidates.reset(column);
+                // There is no point, it gets subtracted in the loop below.
             }
         } else {
             rhs_candidates.resize(schema->GetNumColumns(), true);
@@ -201,13 +211,17 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
             auto a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
             // Check X -> A
             config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
-            if (error <= max_fd_error_) {  // if X \ {A} → A is valid
+            // if X \ {A} → A is valid
+            if (error <= max_fd_error_) {
+                // output X \ {A} → A
                 RegisterAfd(AFD(schema->GetVertical(parent_lhs), *schema->GetColumn(a_index), error,
-                                relation_->GetSharedPtrSchema()));  // output X \ {A} → A
-                xa_vertex->GetRhsCandidates().reset(a_index);       // remove A from C+(X)
+                                relation_->GetSharedPtrSchema()));
+                // remove A from C+(X)
+                xa_vertex->GetRhsCandidates().reset(a_index);
+                // if X \ {A} → A holds exactly
                 if (error == 0) {
-                    xa_vertex->GetRhsCandidates() &=
-                            parent_lhs;  // remove all B in R \ X from C+(X)
+                    // remove all B in R \ X from C+(X)
+                    xa_vertex->GetRhsCandidates() &= parent_lhs;
                 }
             }
         }
@@ -230,6 +244,7 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
          vertex_index_1++) {
         LatticeVertex& vertex1 = *current_level_vertices[vertex_index_1];
 
+        /* Get rid of GetIsKeyCandidate? */
         if (vertex1.GetRhsCandidates().none() && !vertex1.GetIsKeyCandidate()) {
             continue;
         }
