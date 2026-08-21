@@ -113,6 +113,7 @@ CSVConfig const kTestDif2 = CreateCsvConfig("dif_tables/TestDif2.csv", ',', true
 CSVConfig const kTestDif3 = CreateCsvConfig("dif_tables/TestDif3.csv", ',', true);
 CSVConfig const kTestDif4 = CreateCsvConfig("dif_tables/TestDif4.csv", ',', true);
 CSVConfig const kTestDif5 = CreateCsvConfig("dif_tables/TestDif5.csv", ',', true);
+CSVConfig const kTestDif6 = CreateCsvConfig("dif_tables/TestDif6.csv", ',', true);
 CSVConfig const kTestDynamicFDEmpty = CreateCsvConfig("dynamic_fd/TestDynamicEmpty.csv", ',', true);
 CSVConfig const kTestDynamicFDInit = CreateCsvConfig("dynamic_fd/TestDynamicInit.csv", ',', true);
 CSVConfig const kTestDynamicFDInsert =

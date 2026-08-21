@@ -183,11 +183,12 @@ desbordante_add_test(
     Boost::headers
 )
 desbordante_add_test(
-    dd.split
+    dd.algos
     SRCS
-    test_split.cpp
+    test_dd_algorithms.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dd::split
+    ${DESBORDANTE_PREFIX}::dd::fastdd
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
     magic_enum::magic_enum
