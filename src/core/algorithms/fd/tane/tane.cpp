@@ -24,7 +24,7 @@ using model::LatticeVertex;
 Tane::Tane() : PliBasedAFDAlgorithm() {
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(config::kErrorOpt(&max_ucc_error_));
+    RegisterOption(config::kErrorOpt(&max_fd_error_));
     RegisterOption(Option{&afd_measure_, kAfdMeasure, kDAfdMeasure, model::AfdMeasure::kG1});
 }
 
@@ -61,7 +61,7 @@ auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
 
         auto vertex = std::make_unique<LatticeVertex>(
                 std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column)),
-                std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set()), true, false,
+                std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set()), false,
                 std::vector<LatticeVertex const*>{empty_vertex}, column_data.GetPLWSIndex());
         boost::dynamic_bitset<> const& vertical = vertex->GetVertical();
         current_level.emplace(vertical, std::move(vertex));
@@ -76,8 +76,6 @@ auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
         model::Index const lhs_column_index = column.find_first();
         ColumnData const& column_data = relation_->GetColumnData(lhs_column_index);
         double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
-        if (ucc_error > max_ucc_error_) continue;
-        vertex->SetKeyCandidate(false);
         if (ucc_error != 0 || max_lhs_ == 0) continue;
 
         // The LHS column only has unique values
@@ -97,7 +95,7 @@ auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
         vertex->GetRhsCandidates().reset();
         if (has_lhs_set) vertex->GetRhsCandidates().set(lhs_column_index);
         // set vertex invalid if we seek for exact dependencies
-        if (max_fd_error_ != 0 || max_ucc_error_ != 0) continue;
+        if (max_fd_error_ != 0) continue;
         // Is it correct? Not all measures are g1, which is what is used for ucc_error.
         vertex->SetInvalid(true);
     }
@@ -108,15 +106,9 @@ auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
 void Tane::Prune(LatticeLevel& level) {
     RelationalSchema const* schema = relation_->GetSchema();
     std::list<LatticeVertex*> key_vertices;
-    for (auto& [map_key, vertex] : level) {  // for each X ∈ L_l do
-        if (!vertex->GetIsKeyCandidate()) continue;
-
-        /* probably incorrect */
+    for (auto& [map_key, vertex] : level) {    // for each X ∈ L_l do
+        if (vertex->GetIsInvalid()) continue;  // Metanome copy, may not be needed?
         double ucc_error = CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
-
-        if (ucc_error > max_ucc_error_) continue;  // If a key candidate is not an approx UCC
-
-        vertex->SetKeyCandidate(false);
         if (ucc_error != 0) continue;  // if X is a (super)key
 
         boost::dynamic_bitset<> sibling_lhs_scratch = vertex->GetVertical();
@@ -158,7 +150,7 @@ void Tane::Prune(LatticeLevel& level) {
         }
         key_vertices.push_back(vertex.get());
     }
-    if (max_fd_error_ != 0 || max_ucc_error_ != 0) return;
+    if (max_fd_error_ != 0) return;
 
     // if we seek for exact FDs then SetInvalid
     for (LatticeVertex* key_vertex : key_vertices) {
@@ -228,7 +220,7 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
         LatticeVertex& vertex1 = *current_level_vertices[vertex_index_1];
 
         /* Get rid of GetIsKeyCandidate? */
-        if (vertex1.GetRhsCandidates().none() && !vertex1.GetIsKeyCandidate()) {
+        if (vertex1.GetRhsCandidates().none()) {
             continue;
         }
 
@@ -238,8 +230,7 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
 
             if (!vertex1.ComesBeforeAndSharePrefixWith(vertex2)) break;
 
-            if (!vertex1.GetRhsCandidates().intersects(vertex2.GetRhsCandidates()) &&
-                !vertex2.GetIsKeyCandidate()) {
+            if (!vertex1.GetRhsCandidates().intersects(vertex2.GetRhsCandidates())) {
                 continue;
             }
 
@@ -248,7 +239,6 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                     vertex1.GetRhsCandidates() & vertex2.GetRhsCandidates();
             std::vector<LatticeVertex const*> parents;
             // parents.reserve(arity + 1);
-            bool is_key_candidate = vertex1.GetIsKeyCandidate() && vertex2.GetIsKeyCandidate();
             bool is_invalid = vertex1.GetIsInvalid() || vertex2.GetIsInvalid();
 
             for (unsigned int i = 0, skip_index = vertical.find_first(); i < arity - 1;
@@ -273,16 +263,15 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                 parents.push_back(&parent_vertex);
                 vertical.set(skip_index);
 
-                if (!parent_vertex.GetIsKeyCandidate()) is_key_candidate = false;
                 if (parent_vertex.GetIsInvalid()) is_invalid = true;
             }
 
             {
                 parents.push_back(&vertex1);
                 parents.push_back(&vertex2);
-                auto child_vertex = std::make_unique<LatticeVertex>(
-                        std::move(vertical), std::move(rhs_candidates), is_key_candidate,
-                        is_invalid, std::move(parents));
+                auto child_vertex = std::make_unique<LatticeVertex>(std::move(vertical),
+                                                                    std::move(rhs_candidates),
+                                                                    is_invalid, std::move(parents));
                 boost::dynamic_bitset<> const& child_vertical = child_vertex->GetVertical();
                 next_level.try_emplace(child_vertical, std::move(child_vertex));
             }
@@ -397,7 +386,6 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
 }
 
 void Tane::ExecuteInternal() {
-    max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
 
     // Initialize level 0
@@ -407,7 +395,7 @@ void Tane::ExecuteInternal() {
                     .emplace(dynamic_bitset<>(schema->GetNumColumns()),
                              std::make_unique<LatticeVertex>(
                                      dynamic_bitset<>(schema->GetNumColumns()),
-                                     dynamic_bitset<>(schema->GetNumColumns()), false, false))
+                                     dynamic_bitset<>(schema->GetNumColumns()), false))
                     .first->second.get();
 
     // Initialize level 1

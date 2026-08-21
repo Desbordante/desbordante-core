@@ -15,7 +15,6 @@ namespace algos {
 class Tane final : public PliBasedAFDAlgorithm {
 protected:
     config::ErrorType max_fd_error_;
-    config::ErrorType max_ucc_error_;
     model::AfdMeasure afd_measure_;
 
 private:
