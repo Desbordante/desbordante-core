@@ -7,6 +7,7 @@
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/fastdd/fastdd.h"
 #include "core/algorithms/dd/split/split.h"
 #include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
@@ -29,7 +30,8 @@ void CompareDDStringLists(std::set<std::pair<std::set<model::DFStringConstraint>
     }
 }
 
-class SplitAlgorithmTest : public ::testing::Test {
+template <typename AlgorithmUnderTest>
+class DDAlgorithmTest : public ::testing::Test {
 public:
     static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config,
                                            std::optional<CSVConfig> const& dif_table_csv_config) {
@@ -41,16 +43,18 @@ public:
                 {kDifferenceTable, MakeInputTable(dif_table_csv_config.value())}};
     }
 
-    static std::unique_ptr<algos::dd::Split> CreateSplitAlgorithmInstance(
+    static std::unique_ptr<algos::dd::DDAlgorithm> CreateDDAlgorithmInstance(
             CSVConfig const& csv_config,
             std::optional<CSVConfig> const& dif_table_csv_config = std::nullopt) {
-        return algos::CreateAndLoadAlgorithm<algos::dd::Split>(
+        return algos::CreateAndLoadAlgorithm<AlgorithmUnderTest>(
                 GetParamMap(csv_config, dif_table_csv_config));
     }
 };
 
-TEST_F(SplitAlgorithmTest, Test0) {
-    auto algo = CreateSplitAlgorithmInstance(kTestDD, kTestDif);
+TYPED_TEST_SUITE_P(DDAlgorithmTest);
+
+TYPED_TEST_P(DDAlgorithmTest, Test0) {
+    auto algo = this->CreateDDAlgorithmInstance(kTestDD, kTestDif);
     algo->Execute();
 
     auto actual_results = algo->DDList();
@@ -60,8 +64,8 @@ TEST_F(SplitAlgorithmTest, Test0) {
     CompareDDStringLists(expected_results, actual_results);
 }
 
-TEST_F(SplitAlgorithmTest, Test1) {
-    auto algo = CreateSplitAlgorithmInstance(kTestDD1);
+TYPED_TEST_P(DDAlgorithmTest, Test1) {
+    auto algo = this->CreateDDAlgorithmInstance(kTestDD1, kTestDif1);
     algo->Execute();
 
     auto actual_results = algo->DDList();
@@ -71,8 +75,8 @@ TEST_F(SplitAlgorithmTest, Test1) {
     CompareDDStringLists(expected_results, actual_results);
 }
 
-TEST_F(SplitAlgorithmTest, Test2) {
-    auto algo = CreateSplitAlgorithmInstance(kTestDD2, kTestDif1);
+TYPED_TEST_P(DDAlgorithmTest, Test2) {
+    auto algo = this->CreateDDAlgorithmInstance(kTestDD2, kTestDif2);
     algo->Execute();
 
     auto actual_results = algo->DDList();
@@ -81,8 +85,8 @@ TEST_F(SplitAlgorithmTest, Test2) {
     CompareDDStringLists(expected_results, actual_results);
 }
 
-TEST_F(SplitAlgorithmTest, Test3) {
-    auto algo = CreateSplitAlgorithmInstance(kTestDD2, kTestDif2);
+TYPED_TEST_P(DDAlgorithmTest, Test3) {
+    auto algo = this->CreateDDAlgorithmInstance(kTestDD2, kTestDif3);
     algo->Execute();
 
     auto actual_results = algo->DDList();
@@ -120,8 +124,8 @@ TEST_F(SplitAlgorithmTest, Test3) {
     CompareDDStringLists(also_expected_results, actual_results);
 }
 
-TEST_F(SplitAlgorithmTest, Test4) {
-    auto algo = CreateSplitAlgorithmInstance(kTestDD3, kTestDif3);
+TYPED_TEST_P(DDAlgorithmTest, Test4) {
+    auto algo = this->CreateDDAlgorithmInstance(kTestDD3, kTestDif4);
     algo->Execute();
 
     auto actual_results = algo->DDList();
@@ -142,8 +146,8 @@ TEST_F(SplitAlgorithmTest, Test4) {
     CompareDDStringLists(expected_results, actual_results);
 }
 
-TEST_F(SplitAlgorithmTest, Test5) {
-    auto algo = CreateSplitAlgorithmInstance(kTestDD4, kTestDif4);
+TYPED_TEST_P(DDAlgorithmTest, Test5) {
+    auto algo = this->CreateDDAlgorithmInstance(kTestDD4, kTestDif5);
     algo->Execute();
 
     auto actual_results = algo->DDList();
@@ -166,8 +170,8 @@ TEST_F(SplitAlgorithmTest, Test5) {
     CompareDDStringLists(expected_results, actual_results);
 }
 
-TEST_F(SplitAlgorithmTest, TestDoubleCompare) {
-    auto algo = CreateSplitAlgorithmInstance(kTestDD5, kTestDif5);
+TYPED_TEST_P(DDAlgorithmTest, TestDoubleCompare) {
+    auto algo = this->CreateDDAlgorithmInstance(kTestDD5, kTestDif6);
     algo->Execute();
 
     auto actual_results = algo->DDList();
@@ -175,5 +179,11 @@ TEST_F(SplitAlgorithmTest, TestDoubleCompare) {
             expected_results = {{{{"Col3", 5.1, 5.1}}, {{"Col2", 4, 4}}}};
     CompareDDStringLists(expected_results, actual_results);
 }
+
+REGISTER_TYPED_TEST_SUITE_P(DDAlgorithmTest, Test0, Test1, Test2, Test3, Test4, Test5,
+                            TestDoubleCompare);
+
+using Algorithms = ::testing::Types<algos::dd::Split, algos::dd::FastDD>;
+INSTANTIATE_TYPED_TEST_SUITE_P(DDAlgorithmTest, DDAlgorithmTest, Algorithms);
 
 }  // namespace tests
