@@ -52,26 +52,14 @@ auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
             zeroary_fd_rhs.set(column);
             RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(column), fd_error,
                             relation_->GetSharedPtrSchema()));
+            // continue; ??? passed the tests
 
             if (fd_error == 0) {
                 // there is an actual FD [] -> A
-                // continue;?? passed the tests
-                rhs_candidates.resize(schema->GetNumColumns(), false);
-            } else {
-                // there is an approximate FD [] -> A
-                rhs_candidates.resize(schema->GetNumColumns(), true);
-                // We've already found an FD with this RHS. But what about an FD with a lower error?
-                // "In some applications, it might also be useful to know approximate dependencies
-                // that are not minimal but have smaller error. We leave the necessary modifications
-                // as an exercise to the reader."
-                // Oh, ok.
-                // Don't search for FDs with lower error.
-                // rhs_candidates.reset(column);
-                // There is no point, it gets subtracted in the loop below.
+                continue;
             }
-        } else {
-            rhs_candidates.resize(schema->GetNumColumns(), true);
         }
+        rhs_candidates.resize(schema->GetNumColumns(), true);
 
         auto vertex = std::make_unique<LatticeVertex>(
                 std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column)),
@@ -280,6 +268,12 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                 }
                 LatticeVertex const& parent_vertex = *parent_vertex_it->second;
                 rhs_candidates &= parent_vertex.GetConstRhsCandidates();
+                // For any node, its rhs_candidates (C^+(X)) is the intersection of all its parents'
+                // rhs_candidates. So if any node has empty rhs_candidates, it will block other
+                // nodes from having any RHSs in the answer. The same effect would be achieved if
+                // they were never added in the first place, since GenerateNextLevel checks for the
+                // presence of every node. Leap of faith: let's just delete them immediately and
+                // assume they never exist!
                 if (rhs_candidates.none()) {
                     goto notInNextLevel;
                 }
