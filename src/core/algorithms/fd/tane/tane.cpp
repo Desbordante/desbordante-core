@@ -126,24 +126,25 @@ void Tane::Prune(LatticeLevel& level) {
         vertex->SetKeyCandidate(false);
         if (ucc_error != 0) continue;  // if X is a (super)key
 
-        boost::dynamic_bitset<> columns = vertex->GetVertical();
+        boost::dynamic_bitset<> lhs = vertex->GetVertical();
 
         for (std::size_t rhs_index = vertex->GetRhsCandidates().find_first();
              rhs_index != boost::dynamic_bitset<>::npos;
              rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-            if (columns.test(rhs_index)) continue;  // for each A ∈ C+(X) \ X
+            if (lhs.test(rhs_index)) continue;  // for each A ∈ C^+(X) \ X
 
             bool is_rhs_candidate = true;
-            for (model::Index column = columns.find_first();
-                 column != boost::dynamic_bitset<>::npos; column = columns.find_next(column)) {
-                columns.reset(column);
-                columns.set(rhs_index);
-                auto sibling_vertex_it = level.find(columns);
-                columns.reset(rhs_index);
-                columns.set(column);
+            for (model::Index column = lhs.find_first(); column != boost::dynamic_bitset<>::npos;
+                 column = lhs.find_next(column)) {
+                lhs.reset(column);
+                lhs.set(rhs_index);
+                auto sibling_vertex_it = level.find(lhs);
+                lhs.reset(rhs_index);
+                lhs.set(column);
 
                 if (sibling_vertex_it == level.end() ||
                     !sibling_vertex_it->second->GetConstRhsCandidates()[rhs_index]) {
+                    // if A ∈ ⋂B∈X C+(X ∪ {A} \ {B})
                     is_rhs_candidate = false;
                     break;
                 }
@@ -157,8 +158,8 @@ void Tane::Prune(LatticeLevel& level) {
                 config::ErrorType fd_error =
                         CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
                 if (fd_error > max_fd_error_) continue;
-                RegisterAfd(AFD(schema->GetVertical(columns), *schema->GetColumn(rhs_index),
-                                fd_error, relation_->GetSharedPtrSchema()));
+                RegisterAfd(AFD(schema->GetVertical(lhs), *schema->GetColumn(rhs_index), fd_error,
+                                relation_->GetSharedPtrSchema()));
             }
         }
         key_vertices.push_back(vertex.get());
