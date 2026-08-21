@@ -36,6 +36,82 @@ double Tane::CalculateUccError(model::PositionListIndex const* pli,
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
+auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
+    RelationalSchema const* schema = relation_->GetSchema();
+    dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
+    LatticeLevel current_level;
+    for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
+        // for each attribute set vertex
+        ColumnData const& column_data = relation_->GetColumnData(column);
+
+        boost::dynamic_bitset<> rhs_candidates;
+
+        // check FDs: 0->A
+        double fd_error = CalculateZeroAryFdError(&column_data);
+        if (fd_error <= max_fd_error_) {  // TODO: max_error
+            zeroary_fd_rhs.set(column);
+            RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(column), fd_error,
+                            relation_->GetSharedPtrSchema()));
+
+            if (fd_error == 0) {
+                rhs_candidates.resize(schema->GetNumColumns(), false);
+            } else {
+                rhs_candidates.resize(schema->GetNumColumns(), true);
+                rhs_candidates.reset(column);
+            }
+        } else {
+            rhs_candidates.resize(schema->GetNumColumns(), true);
+        }
+
+        auto vertex = std::make_unique<LatticeVertex>(
+                std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column)),
+                std::move(rhs_candidates), true, false,
+                std::vector<LatticeVertex const*>{empty_vertex}, column_data.GetPLWSIndex());
+        boost::dynamic_bitset<> const& vertical = vertex->GetVertical();
+        current_level.emplace(vertical, std::move(vertex));
+    }
+
+    for (auto& [key_map, vertex] : current_level) {
+        dynamic_bitset<> const& column = vertex->GetVertical();
+        vertex->GetRhsCandidates() -= zeroary_fd_rhs;  // remove already discovered zeroary FDs
+
+        // TODO: figure out how to make use of this
+        assert(column.count() == 1);
+        ColumnData const& column_data = relation_->GetColumnData(column.find_first());
+        double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
+        if (ucc_error <= max_ucc_error_) {
+            vertex->SetKeyCandidate(false);
+            if (ucc_error == 0 && max_lhs_ != 0) {
+                // The LHS column only has unique values
+                for (unsigned long rhs_index = vertex->GetRhsCandidates().find_first();
+                     rhs_index < vertex->GetRhsCandidates().size();
+                     rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
+                    if (rhs_index != column.find_first()) {
+                        auto x_pli = vertex->GetPositionListIndexWithSingletons();
+                        auto a_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
+                        config::ErrorType fd_error =
+                                CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
+                        if (fd_error > max_fd_error_) continue;
+                        RegisterAfd(AFD(schema->GetVertical(
+                                                std::move(dynamic_bitset<>(schema->GetNumColumns())
+                                                                  .set(column.find_first()))),
+                                        *schema->GetColumn(rhs_index), fd_error,
+                                        relation_->GetSharedPtrSchema()));
+                    }
+                }
+                vertex->GetRhsCandidates() &= column;
+                // set vertex invalid if we seek for exact dependencies
+                if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
+                    // Is it correct? Not all measures are g1, which is what is used for ucc_error.
+                    vertex->SetInvalid(true);
+                }
+            }
+        }
+    }
+
+    return current_level;
+}
+
 void Tane::Prune(LatticeLevel& level) {
     RelationalSchema const* schema = relation_->GetSchema();
     std::list<LatticeVertex*> key_vertices;
@@ -334,75 +410,7 @@ void Tane::ExecuteInternal() {
 
     // Initialize level 1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
-    LatticeLevel current_level;
-    for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
-        // for each attribute set vertex
-        ColumnData const& column_data = relation_->GetColumnData(column);
-
-        boost::dynamic_bitset<> rhs_candidates;
-
-        // check FDs: 0->A
-        double fd_error = CalculateZeroAryFdError(&column_data);
-        if (fd_error <= max_fd_error_) {  // TODO: max_error
-            zeroary_fd_rhs.set(column);
-            RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(column), fd_error,
-                            relation_->GetSharedPtrSchema()));
-
-            if (fd_error == 0) {
-                rhs_candidates.resize(schema->GetNumColumns(), false);
-            } else {
-                rhs_candidates.resize(schema->GetNumColumns(), true);
-                rhs_candidates.reset(column);
-            }
-        } else {
-            rhs_candidates.resize(schema->GetNumColumns(), true);
-        }
-
-        auto vertex = std::make_unique<LatticeVertex>(
-                std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column)),
-                std::move(rhs_candidates), true, false,
-                std::vector<LatticeVertex const*>{empty_vertex}, column_data.GetPLWSIndex());
-        boost::dynamic_bitset<> const& vertical = vertex->GetVertical();
-        current_level.emplace(vertical, std::move(vertex));
-    }
-
-    for (auto& [key_map, vertex] : current_level) {
-        dynamic_bitset<> const& column = vertex->GetVertical();
-        vertex->GetRhsCandidates() -= zeroary_fd_rhs;  // remove already discovered zeroary FDs
-
-        // TODO: figure out how to make use of this
-        assert(column.count() == 1);
-        ColumnData const& column_data = relation_->GetColumnData(column.find_first());
-        double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
-        if (ucc_error <= max_ucc_error_) {
-            vertex->SetKeyCandidate(false);
-            if (ucc_error == 0 && max_lhs_ != 0) {
-                // The LHS column only has unique values
-                for (unsigned long rhs_index = vertex->GetRhsCandidates().find_first();
-                     rhs_index < vertex->GetRhsCandidates().size();
-                     rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-                    if (rhs_index != column.find_first()) {
-                        auto x_pli = vertex->GetPositionListIndexWithSingletons();
-                        auto a_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
-                        config::ErrorType fd_error =
-                                CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
-                        if (fd_error > max_fd_error_) continue;
-                        RegisterAfd(AFD(schema->GetVertical(
-                                                std::move(dynamic_bitset<>(schema->GetNumColumns())
-                                                                  .set(column.find_first()))),
-                                        *schema->GetColumn(rhs_index), fd_error,
-                                        relation_->GetSharedPtrSchema()));
-                    }
-                }
-                vertex->GetRhsCandidates() &= column;
-                // set vertex invalid if we seek for exact dependencies
-                if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
-                    // Is it correct? Not all measures are g1, which is what is used for ucc_error.
-                    vertex->SetInvalid(true);
-                }
-            }
-        }
-    }
+    LatticeLevel current_level = GenerateLevel1(empty_vertex);
 
     unsigned int max_arity =
             max_lhs_ == std::numeric_limits<unsigned int>::max() ? max_lhs_ : max_lhs_ + 1;

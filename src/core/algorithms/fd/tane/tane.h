@@ -23,6 +23,7 @@ private:
 
     void ResetStateFd() final {}
 
+    LatticeLevel GenerateLevel1(model::LatticeVertex const* empty_vertex);
     void Prune(LatticeLevel& level);
     void ComputeDependencies(LatticeLevel& level);
     static LatticeLevel GenerateNextLevel(LatticeLevel& level);
