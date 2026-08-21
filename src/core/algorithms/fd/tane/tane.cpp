@@ -13,6 +13,7 @@
 #include "core/config/option_using.h"
 #include "core/model/table/column_data.h"
 #include "core/model/table/column_layout_relation_data.h"
+#include "core/util/bitset_utils.h"
 #include "core/util/logger.h"
 
 namespace algos {
@@ -75,29 +76,30 @@ auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
 
         // TODO: figure out how to make use of this
         assert(column.count() == 1);
-        ColumnData const& column_data = relation_->GetColumnData(column.find_first());
+        model::Index const lhs_column_index = column.find_first();
+        ColumnData const& column_data = relation_->GetColumnData(lhs_column_index);
         double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
         if (ucc_error <= max_ucc_error_) {
             vertex->SetKeyCandidate(false);
             if (ucc_error == 0 && max_lhs_ != 0) {
                 // The LHS column only has unique values
-                for (unsigned long rhs_index = vertex->GetRhsCandidates().find_first();
-                     rhs_index < vertex->GetRhsCandidates().size();
-                     rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-                    if (rhs_index != column.find_first()) {
-                        auto x_pli = vertex->GetPositionListIndexWithSingletons();
-                        auto a_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
-                        config::ErrorType fd_error =
-                                CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
-                        if (fd_error > max_fd_error_) continue;
-                        RegisterAfd(AFD(schema->GetVertical(
-                                                std::move(dynamic_bitset<>(schema->GetNumColumns())
-                                                                  .set(column.find_first()))),
-                                        *schema->GetColumn(rhs_index), fd_error,
-                                        relation_->GetSharedPtrSchema()));
-                    }
-                }
-                vertex->GetRhsCandidates() &= column;
+                bool const has_lhs_set =
+                        vertex->GetRhsCandidates().test_set(lhs_column_index, false);
+                util::ForEachIndex(vertex->GetRhsCandidates(), [&](model::Index rhs_index) {
+                    assert(rhs_index != lhs_column_index);
+                    auto x_pli = vertex->GetPositionListIndexWithSingletons();
+                    auto a_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
+                    config::ErrorType fd_error =
+                            CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
+                    if (fd_error > max_fd_error_) return;
+                    RegisterAfd(AFD(
+                            schema->GetVertical(std::move(dynamic_bitset<>(schema->GetNumColumns())
+                                                                  .set(lhs_column_index))),
+                            *schema->GetColumn(rhs_index), fd_error,
+                            relation_->GetSharedPtrSchema()));
+                });
+                vertex->GetRhsCandidates().reset();
+                if (has_lhs_set) vertex->GetRhsCandidates().set(lhs_column_index);
                 // set vertex invalid if we seek for exact dependencies
                 if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
                     // Is it correct? Not all measures are g1, which is what is used for ucc_error.
