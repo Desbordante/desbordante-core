@@ -126,31 +126,32 @@ void Tane::Prune(LatticeLevel& level) {
         vertex->SetKeyCandidate(false);
         if (ucc_error != 0) continue;  // if X is a (super)key
 
-        boost::dynamic_bitset<> lhs = vertex->GetVertical();
+        boost::dynamic_bitset<> sibling_lhs_scratch = vertex->GetVertical();
 
         for (std::size_t rhs_index = vertex->GetRhsCandidates().find_first();
              rhs_index != boost::dynamic_bitset<>::npos;
              rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-            if (lhs.test(rhs_index)) continue;  // for each A ∈ C^+(X) \ X
+            if (vertex->GetVertical().test(rhs_index)) continue;  // for each A ∈ C^+(X) \ X
 
             bool is_rhs_candidate = true;
-            for (model::Index column = lhs.find_first(); column != boost::dynamic_bitset<>::npos;
-                 column = lhs.find_next(column)) {
-                lhs.reset(column);
-                lhs.set(rhs_index);
-                auto sibling_vertex_it = level.find(lhs);
-                lhs.reset(rhs_index);
-                lhs.set(column);
+            sibling_lhs_scratch.set(rhs_index);
+            for (model::Index column = vertex->GetVertical().find_first();
+                 column != boost::dynamic_bitset<>::npos;
+                 column = vertex->GetVertical().find_next(column)) {
+                sibling_lhs_scratch.reset(column);
+                auto sibling_vertex_it = level.find(sibling_lhs_scratch);
+                sibling_lhs_scratch.set(column);
 
                 if (sibling_vertex_it == level.end() ||
                     !sibling_vertex_it->second->GetConstRhsCandidates()[rhs_index]) {
-                    // if A ∈ ⋂B∈X C+(X ∪ {A} \ {B})
+                    // if A ∈ ⋂B∈X C^+(X ∪ {A} \ {B})
                     is_rhs_candidate = false;
                     break;
                 }
                 // for each outer rhs: if there is a sibling s.t. it doesn't
                 // have this rhs, there is no FD: vertex->rhs
             }
+            sibling_lhs_scratch.reset(rhs_index);
             // Found fd: vertex->rhs => register it
             if (is_rhs_candidate) {
                 auto x_pli = vertex->GetPositionListIndexWithSingletons();
@@ -158,7 +159,8 @@ void Tane::Prune(LatticeLevel& level) {
                 config::ErrorType fd_error =
                         CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
                 if (fd_error > max_fd_error_) continue;
-                RegisterAfd(AFD(schema->GetVertical(lhs), *schema->GetColumn(rhs_index), fd_error,
+                RegisterAfd(AFD(schema->GetVertical(vertex->GetVertical()),
+                                *schema->GetColumn(rhs_index), fd_error,
                                 relation_->GetSharedPtrSchema()));
             }
         }
