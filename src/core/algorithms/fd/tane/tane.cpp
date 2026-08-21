@@ -171,39 +171,40 @@ auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
                 continue;
             }
 
-            std::unique_ptr<LatticeVertex> child_vertex = std::make_unique<LatticeVertex>(
-                    vertex1.GetVertical() | vertex2.GetVertical(),
-                    vertex1.GetRhsCandidates() & vertex2.GetRhsCandidates(),
-                    vertex1.GetIsKeyCandidate() && vertex2.GetIsKeyCandidate(),
-                    vertex1.GetIsInvalid() || vertex2.GetIsInvalid());
+            boost::dynamic_bitset<> vertical = vertex1.GetVertical() | vertex2.GetVertical();
+            boost::dynamic_bitset<> rhs_candidates =
+                    vertex1.GetRhsCandidates() & vertex2.GetRhsCandidates();
+            std::vector<LatticeVertex const*> parents;
+            // parents.reserve(arity + 1);
+            bool is_key_candidate = vertex1.GetIsKeyCandidate() && vertex2.GetIsKeyCandidate();
+            bool is_invalid = vertex1.GetIsInvalid() || vertex2.GetIsInvalid();
 
-            boost::dynamic_bitset<> parent_indices(child_vertex->GetVertical());
-
-            for (unsigned int i = 0, skip_index = parent_indices.find_first(); i < arity - 1;
-                 i++, skip_index = parent_indices.find_next(skip_index)) {
-                parent_indices[skip_index] = false;
-                auto parent_vertex_it = current_level.find(parent_indices);
+            for (unsigned int i = 0, skip_index = vertical.find_first(); i < arity - 1;
+                 i++, skip_index = vertical.find_next(skip_index)) {
+                vertical.reset(skip_index);
+                auto parent_vertex_it = current_level.find(vertical);
 
                 if (parent_vertex_it == current_level.end()) {
                     goto notInNextLevel;
                 }
                 LatticeVertex const& parent_vertex = *parent_vertex_it->second;
-                child_vertex->GetRhsCandidates() &= parent_vertex.GetConstRhsCandidates();
-                if (child_vertex->GetRhsCandidates().none()) {
+                rhs_candidates &= parent_vertex.GetConstRhsCandidates();
+                if (rhs_candidates.none()) {
                     goto notInNextLevel;
                 }
-                child_vertex->GetParents().push_back(&parent_vertex);
-                parent_indices[skip_index] = true;
+                parents.push_back(&parent_vertex);
+                vertical.set(skip_index);
 
-                child_vertex->SetKeyCandidate(child_vertex->GetIsKeyCandidate() &&
-                                              parent_vertex.GetIsKeyCandidate());
-                child_vertex->SetInvalid(child_vertex->GetIsInvalid() ||
-                                         parent_vertex.GetIsInvalid());
+                if (!parent_vertex.GetIsKeyCandidate()) is_key_candidate = false;
+                if (parent_vertex.GetIsInvalid()) is_invalid = true;
             }
 
             {
-                child_vertex->GetParents().push_back(&vertex1);
-                child_vertex->GetParents().push_back(&vertex2);
+                parents.push_back(&vertex1);
+                parents.push_back(&vertex2);
+                auto child_vertex = std::make_unique<LatticeVertex>(
+                        std::move(vertical), std::move(rhs_candidates), is_key_candidate,
+                        is_invalid, std::move(parents));
                 boost::dynamic_bitset<> const& child_vertical = child_vertex->GetVertical();
                 next_level.try_emplace(child_vertical, std::move(child_vertex));
             }
@@ -366,15 +367,17 @@ void Tane::ExecuteInternal() {
     }
 
     for (auto& [key_map, vertex] : current_level) {
-        dynamic_bitset<> column = vertex->GetVertical();
+        dynamic_bitset<> const& column = vertex->GetVertical();
         vertex->GetRhsCandidates() -= zeroary_fd_rhs;  // remove already discovered zeroary FDs
 
-        // вот тут костыль, чтобы вытянуть индекс колонки из вершины, в которой только один индекс
+        // TODO: figure out how to make use of this
+        assert(column.count() == 1);
         ColumnData const& column_data = relation_->GetColumnData(column.find_first());
         double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
         if (ucc_error <= max_ucc_error_) {
             vertex->SetKeyCandidate(false);
             if (ucc_error == 0 && max_lhs_ != 0) {
+                // The LHS column only has unique values
                 for (unsigned long rhs_index = vertex->GetRhsCandidates().find_first();
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
@@ -384,16 +387,17 @@ void Tane::ExecuteInternal() {
                         config::ErrorType fd_error =
                                 CalculateFdError(x_pli, a_pli, x_pli->Intersect(a_pli).get());
                         if (fd_error > max_fd_error_) continue;
-                        RegisterAfd(
-                                AFD(schema->GetVertical(dynamic_bitset<>(schema->GetNumColumns())
-                                                                .set(column.find_first())),
-                                    *schema->GetColumn(rhs_index), fd_error,
-                                    relation_->GetSharedPtrSchema()));
+                        RegisterAfd(AFD(schema->GetVertical(
+                                                std::move(dynamic_bitset<>(schema->GetNumColumns())
+                                                                  .set(column.find_first()))),
+                                        *schema->GetColumn(rhs_index), fd_error,
+                                        relation_->GetSharedPtrSchema()));
                     }
                 }
                 vertex->GetRhsCandidates() &= column;
                 // set vertex invalid if we seek for exact dependencies
                 if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
+                    // Is it correct? Not all measures are g1, which is what is used for ucc_error.
                     vertex->SetInvalid(true);
                 }
             }
