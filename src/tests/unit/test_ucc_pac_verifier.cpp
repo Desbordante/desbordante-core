@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -18,6 +19,7 @@
 #include "core/util/custom_metric/custom_vector_metric.h"
 #include "gtest/gtest.h"
 #include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace {
 template <typename T>
@@ -32,6 +34,11 @@ using namespace pac::model;
 
 constexpr static auto kThreshold = 1e-3;
 
+struct EpsilonDelta {
+    double epsilon;
+    double delta;
+};
+
 struct UCCPACVerifyingParams {
     algos::StdParamsMap params;
     double exp_epsilon;
@@ -42,7 +49,6 @@ struct UCCPACVerifyingParams {
                           std::optional<double> max_delta = std::nullopt,
                           std::optional<double> min_epsilon = std::nullopt,
                           std::optional<double> max_epsilon = std::nullopt,
-                          std::optional<unsigned long> delta_steps = std::nullopt,
                           std::shared_ptr<util::ICustomVectorMetric>&& metric = nullptr)
         : params({
                   {kCsvConfig, csv_config},
@@ -50,11 +56,20 @@ struct UCCPACVerifyingParams {
                   {kMaxDelta, OptToAny(std::move(max_delta))},
                   {kMinEpsilon, OptToAny(std::move(min_epsilon))},
                   {kMaxEpsilon, OptToAny(std::move(max_epsilon))},
-                  {kDeltaSteps, OptToAny(std::move(delta_steps))},
                   {kMetric, std::move(metric)},
           }),
           exp_epsilon(expected_epsilon),
           exp_delta(expected_delta) {}
+
+    UCCPACVerifyingParams(CSVConfig const& csv_config, config::IndicesType&& column_indices,
+                          EpsilonDelta const& eps_delta,
+                          std::optional<double> max_delta = std::nullopt,
+                          std::optional<double> min_epsilon = std::nullopt,
+                          std::optional<double> max_epsilon = std::nullopt,
+                          std::shared_ptr<util::ICustomVectorMetric>&& metric = nullptr)
+        : UCCPACVerifyingParams(csv_config, std::move(column_indices), eps_delta.epsilon,
+                                eps_delta.delta, std::move(max_delta), std::move(min_epsilon),
+                                std::move(max_epsilon), std::move(metric)) {}
 };
 
 class TestUCCPACVerifier : public testing::TestWithParam<UCCPACVerifyingParams> {};
@@ -73,77 +88,94 @@ auto const kAlphabetMetric = [](std::string const& a, std::string const& b) {
     return std::abs(a.front() - b.front());
 };
 
+// Same dataset and indices are used in many tests
+// See
+// https://github.com/p-senichenkov/Domain-PAC-validation-comparison/blob/main/UCC-PAC/metirc-coords-annotated.pdf
+// Note that there are barely visible steps below visible knees, and algorithm "slides down" to
+// these steps
+static std::vector<EpsilonDelta> const kMetricCoordsKnees{
+        {0, 0}, {34.995, 0.514}, {77.986, 0.586}, {108, 0.6}, {120, 0.74}, {197.5, 0.822}};
+
 INSTANTIATE_TEST_SUITE_P(
         Refinement, TestUCCPACVerifier,
         testing::ValuesIn({
                 // Quite ordinary UCC PAC
                 UCCPACVerifyingParams(kMetricMovies, {2}, 11, 0.402, 0.5),
-                UCCPACVerifyingParams(kMetricCoords, {2, 3}, 35, 0.316, 0.7),
+                UCCPACVerifyingParams(kMetricCoords, {2, 3}, kMetricCoordsKnees[1], 0.7),
                 // Custom metric (also check that passing a temporary metric is OK)
                 UCCPACVerifyingParams(
-                        kMarineUrchins, {1, 2}, 1, 0.173, 0.25, std::nullopt, std::nullopt,
-                        std::nullopt,
-                        std::make_shared<util::CustomVectorMetric>([](auto const&,
-                                                                      auto const& first,
-                                                                      auto const& second) {
-                            assert(first.size() == 2 && second.size() == 2);
-                            // Values should be remapped properly, i. e. Col1 becomes [0]
-                            // and Col2 becomes [1]
-                            double col1_first_frac =
-                                    std::fmod(model::Type::GetValue<model::Double>(first[0]), 1.0);
-                            double col1_second_frac =
-                                    std::fmod(model::Type::GetValue<model::Double>(second[0]), 1.0);
-                            double col2_first_int =
-                                    std::floor(model::Type::GetValue<model::Double>(first[1]));
-                            double col2_second_int =
-                                    std::floor(model::Type::GetValue<model::Double>(second[1]));
+                        kMarineUrchins, {1, 2}, 46, 0.768, 0.8, std::nullopt, std::nullopt,
+                        std::make_shared<util::CustomVectorMetric>(
+                                [](auto const&, auto const& first, auto const& second) {
+                                    assert(first.size() == 2 && second.size() == 2);
 
-                            double col1_dist = std::abs(col1_first_frac - col1_second_frac);
-                            double col2_dist = std::abs(col2_first_int - col2_second_int);
+                                    // Values should be remapped properly, i. e. Col1 becomes [0]
+                                    // and Col2 becomes [1]
+                                    double col1_dist =
+                                            std::abs(model::Type::GetValue<model::Int>(first[0]) -
+                                                     model::Type::GetValue<model::Int>(second[0]));
 
-                            return col1_dist + col2_dist;
-                        })),
+                                    std::string col2_first_str =
+                                            model::Type::GetValue<model::String>(first[1]);
+                                    assert(col2_first_str.size() == 1);
+                                    std::string col2_second_str =
+                                            model::Type::GetValue<model::String>(second[1]);
+                                    assert(col2_second_str.size() == 1);
+                                    // "Alphabet distance"
+                                    double col2_dist = std::abs(col2_first_str.front() -
+                                                                col2_second_str.front());
+
+                                    return col1_dist * col2_dist;
+                                })),
                 // TODO(p-senchenkov): Something more?
         }));
 
-UCCPACVerifyingParams MetricMoviesBoundsParams(double expeceted_eps, double expected_delta,
+UCCPACVerifyingParams MetricMoviesBoundsParams(double expected_delta, double expected_epsilon,
                                                std::optional<double> max_delta = std::nullopt,
                                                std::optional<double> min_eps = std::nullopt,
                                                std::optional<double> max_eps = std::nullopt) {
     return {kMetricCoords,        {2, 3},
-            expeceted_eps,        expected_delta,
+            expected_delta,       expected_epsilon,
             std::move(max_delta), std::move(min_eps),
             std::move(max_eps)};
+}
+
+UCCPACVerifyingParams MetricMoviesBoundsParams(EpsilonDelta const& eps_delta,
+                                               std::optional<double> max_delta = std::nullopt,
+                                               std::optional<double> min_eps = std::nullopt,
+                                               std::optional<double> max_eps = std::nullopt) {
+    return MetricMoviesBoundsParams(eps_delta.epsilon, eps_delta.delta, std::move(max_delta),
+                                    std::move(min_eps), std::move(max_eps));
 }
 
 INSTANTIATE_TEST_SUITE_P(
         ParametrizedRefinement, TestUCCPACVerifier,
         testing::ValuesIn({
                 // Both min epsilon and max epsilon
-                MetricMoviesBoundsParams(78.7, 0.53, 1, 40, 180),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[2], 1, 50, 180),
                 // Only max epsilon
-                MetricMoviesBoundsParams(34, 0.326 /* TODO: or 0.503 (here and later)? */, 1,
-                                         std::nullopt, 180),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[1], 1, std::nullopt, 180),
                 // Only min epsilon
-                MetricMoviesBoundsParams(197, 0.777, 1, 125),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[5], 1, 125),
                 // Only max delta
-                MetricMoviesBoundsParams(34, 0.326, 0.57),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[1], 0.57),
                 // Min epsilon and max delta
-                MetricMoviesBoundsParams(77.7, 0.521, 0.777, 36),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[2], 0.777, 50),
                 // Max epsilon and max delta
-                MetricMoviesBoundsParams(34, 0.326, 0.7, std::nullopt, 110),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[1], 0.7, std::nullopt, 110),
                 // All bounds
-                MetricMoviesBoundsParams(78.7, 0.53, 0.7, 38, 110),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[2], 0.7, 50, 110),
         }));
 
 // TODO(p-senichenkov): wonder if these won't fail
-INSTANTIATE_TEST_SUITE_P(Validation, TestUCCPACVerifier,
-                         testing::ValuesIn({
-                                 // Find epsilon by delta
-                                 MetricMoviesBoundsParams(77.7, 0.597, 0.597, 0, 0),
-                                 // Find delta by epsilon
-                                 MetricMoviesBoundsParams(80, 0.597, std::nullopt, 80, 80),
-                         }));
+INSTANTIATE_TEST_SUITE_P(
+        Validation, TestUCCPACVerifier,
+        testing::ValuesIn({
+                // Find epsilon by delta
+                MetricMoviesBoundsParams(kMetricCoordsKnees[2].epsilon, 0.597, 0.597, 0, 0),
+                // Find delta by epsilon
+                MetricMoviesBoundsParams(80, kMetricCoordsKnees[2].delta, std::nullopt, 80, 80),
+        }));
 
 TEST(UCCPACVerifierTests, DefaultMetricFails) {
     // Check that an attempt to use default metric on non-metrizable column results in clear error
