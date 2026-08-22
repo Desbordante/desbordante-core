@@ -19,7 +19,7 @@ protected:
 
 private:
     constexpr static double kDefaultMinDelta = 0.9;
-    constexpr static double kDefaultMaxDelta = 0.2;
+    constexpr static double kDefaultMaxDelta = 0.6;
     // Diagonal threshold is the maximum slope coefficient of a segment on the ECDF, that is still
     // considered horizontal during verifying PAC via elbow method
     // See https://colab.research.google.com/drive/1t2i-BgzRaL3VSzL0Q0izR1RbgE1i0Ohu?usp=sharing

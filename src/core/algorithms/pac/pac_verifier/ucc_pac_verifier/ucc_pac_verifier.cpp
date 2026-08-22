@@ -30,8 +30,6 @@ double UCCPACVerifier::GetNumPairs(double delta) const {
     // => pairs = (delta * total_tuples^2 - total_tuples) / 2 =
     //          = total_tuples * (delta * total_tuples - 1) / 2
     double num_pairs = static_cast<double>(tuples_->size() * (delta * tuples_->size() - 1)) / 2;
-    LOG_TRACE("Pairs for delta={}: {} = {} * ({} * {} - 1) / 2", delta, num_pairs, tuples_->size(),
-              delta, tuples_->size());
     if (num_pairs < 0) {
         num_pairs = 0;
     }
@@ -42,8 +40,6 @@ double UCCPACVerifier::GetDelta(std::size_t num_pairs) const {
     // See "key ideas"
     double delta =
             static_cast<double>(2 * num_pairs + tuples_->size()) / std::pow(tuples_->size(), 2);
-    LOG_TRACE("Delta for {} pairs: {} = (2 * {} + {}) / ({}^2)", num_pairs, delta, num_pairs,
-              tuples_->size(), tuples_->size());
     assert(delta >= -PACVerifier::kDistThreshold && delta <= 1 + PACVerifier::kDistThreshold);
     return delta;
 }
@@ -92,35 +88,23 @@ void UCCPACVerifier::ExecuteInternal() {
 
     auto emp_probabilities = CalculateEmpiricalProbabilities(*sorted_pairs_);
     auto [epsilon, delta] = FindEpsilonDelta(std::move(emp_probabilities));
-    // UCC PACs have quite different meaning of epsilon-delta, and thus delta selected by PAC-Man
-    // can be further refined a little
-    auto [ref_epsilon, ref_delta] = GetEpsilonDeltaForEpsilon(epsilon);
-    LOG_TRACE("Epsilon-delta found by PAC-Man: ({}, {}), refined epsilon-delta: ({}, {})", epsilon,
-              delta, ref_epsilon, ref_delta);
-    assert(std::abs(epsilon - ref_epsilon) < kDistThreshold);
 
     Vertical columns = TypedRelation().GetSchema()->GetVertical(
             util::IndicesToBitset(column_indices_, TypedRelation().GetNumColumns()));
-    pac_ = model::UCCPAC{std::move(columns), ref_epsilon, ref_delta};
+    pac_ = model::UCCPAC{std::move(columns), epsilon, delta};
 
     LOG_INFO("Result: {}", pac_->ToLongString());
 }
 
 void UCCPACVerifier::RefineDelta(UCCPACVerifier::PairsIt& iter) const {
-    LOG_TRACE("Refining ({}, {})...", iter->dist,
-              GetDelta(std::distance(sorted_pairs_->cbegin(), iter)));
     if (iter == sorted_pairs_->begin()) {
-        LOG_TRACE("\tAlready at finest position");
-    } else {
-        auto initial_eps = iter->dist;
-        while (iter != sorted_pairs_->begin() && initial_eps - iter->dist < kDistThreshold) {
-            std::advance(iter, -1);
-        }
-        // This iterator is treated as inclusive one, not as past-the-end, so `advance` is not
-        // needed here
-        LOG_TRACE("\tRefined: ({}, {})", iter->dist,
-                  GetDelta(std::distance(sorted_pairs_->cbegin(), iter)));
+        return;
     }
+    auto initial_eps = iter->dist;
+    while (iter != sorted_pairs_->begin() && initial_eps - iter->dist < kDistThreshold) {
+        std::advance(iter, -1);
+    }
+    // This iterator is inclusive, not "past-the-", so `advance` is not needed here
 }
 
 UCCPACVerifier::UCCPACVerifier() {
