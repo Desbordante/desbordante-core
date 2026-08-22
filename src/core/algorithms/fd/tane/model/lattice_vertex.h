@@ -23,17 +23,18 @@ private:
     PLIPtr position_list_index_;
     boost::dynamic_bitset<> rhs_candidates_;
     std::vector<LatticeVertex const*> parents_;
-    bool is_invalid_;
+    // bool is_invalid_;
 
 public:
     explicit LatticeVertex(boost::dynamic_bitset<> vertical, boost::dynamic_bitset<> rhs_candidates,
-                           bool is_invalid, std::vector<LatticeVertex const*> parents = {},
+                           /*bool is_invalid, */ std::vector<LatticeVertex const*> parents = {},
                            PLIPtr pli_ptr = (PositionListIndex const*)nullptr)
         : vertical_(std::move(vertical)),
           position_list_index_(std::move(pli_ptr)),
           rhs_candidates_(std::move(rhs_candidates)),
-          parents_(std::move(parents)),
-          is_invalid_(is_invalid) {}
+          parents_(std::move(parents)) /*,
+           is_invalid_(is_invalid) */
+    {}
 
     std::vector<LatticeVertex const*>& GetParents() {
         return parents_;
@@ -57,13 +58,14 @@ public:
 
     bool ComesBeforeAndSharePrefixWith(LatticeVertex const& that) const;
 
+    /*
     bool GetIsInvalid() const {
         return is_invalid_;
     }
 
     void SetInvalid(bool m_is_invalid) {
         is_invalid_ = m_is_invalid;
-    }
+    }*/
 
     PositionListIndex const* GetPositionListIndex() const;
 
