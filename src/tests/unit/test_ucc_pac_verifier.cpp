@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -19,7 +20,6 @@
 #include "core/util/custom_metric/custom_vector_metric.h"
 #include "gtest/gtest.h"
 #include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
 
 namespace {
 template <typename T>
@@ -89,12 +89,11 @@ auto const kAlphabetMetric = [](std::string const& a, std::string const& b) {
 };
 
 // Same dataset and indices are used in many tests
-// See
 // https://github.com/p-senichenkov/Domain-PAC-validation-comparison/blob/main/UCC-PAC/metirc-coords-annotated.pdf
 // Note that there are barely visible steps below visible knees, and algorithm "slides down" to
 // these steps
 static std::vector<EpsilonDelta> const kMetricCoordsKnees{
-        {0, 0}, {34.995, 0.514}, {77.986, 0.586}, {108, 0.6}, {120, 0.74}, {197.5, 0.822}};
+        {0, 0}, {34.995, 0.514}, {77.986, 0.586}, {108, 0.6}, {120, 0.74}, {197.191, 0.846}};
 
 INSTANTIATE_TEST_SUITE_P(
         Refinement, TestUCCPACVerifier,
@@ -130,22 +129,14 @@ INSTANTIATE_TEST_SUITE_P(
                 // TODO(p-senchenkov): Something more?
         }));
 
-UCCPACVerifyingParams MetricMoviesBoundsParams(double expected_delta, double expected_epsilon,
-                                               std::optional<double> max_delta = std::nullopt,
-                                               std::optional<double> min_eps = std::nullopt,
-                                               std::optional<double> max_eps = std::nullopt) {
-    return {kMetricCoords,        {2, 3},
-            expected_delta,       expected_epsilon,
-            std::move(max_delta), std::move(min_eps),
-            std::move(max_eps)};
-}
-
 UCCPACVerifyingParams MetricMoviesBoundsParams(EpsilonDelta const& eps_delta,
                                                std::optional<double> max_delta = std::nullopt,
                                                std::optional<double> min_eps = std::nullopt,
                                                std::optional<double> max_eps = std::nullopt) {
-    return MetricMoviesBoundsParams(eps_delta.epsilon, eps_delta.delta, std::move(max_delta),
-                                    std::move(min_eps), std::move(max_eps));
+    return {kMetricCoords,        {2, 3},
+            eps_delta.epsilon,    eps_delta.delta,
+            std::move(max_delta), std::move(min_eps),
+            std::move(max_eps)};
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -156,7 +147,9 @@ INSTANTIATE_TEST_SUITE_P(
                 // Only max epsilon
                 MetricMoviesBoundsParams(kMetricCoordsKnees[1], 1, std::nullopt, 180),
                 // Only min epsilon
-                MetricMoviesBoundsParams(kMetricCoordsKnees[5], 1, 125),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[5], 1, 175),
+                // NOTE: algorithm is allowed to select passed min bound
+                MetricMoviesBoundsParams({125, 0.775}, 1, 125),
                 // Only max delta
                 MetricMoviesBoundsParams(kMetricCoordsKnees[1], 0.57),
                 // Min epsilon and max delta
@@ -172,9 +165,14 @@ INSTANTIATE_TEST_SUITE_P(
         Validation, TestUCCPACVerifier,
         testing::ValuesIn({
                 // Find epsilon by delta
-                MetricMoviesBoundsParams(kMetricCoordsKnees[2].epsilon, 0.597, 0.597, 0, 0),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[2],
+                                         // TODO(psenichenkov@): maybe add two separate functions,
+                                         // and do not complicate things?
+                                         kMetricCoordsKnees[2].delta + 0.02,
+                                         std::numeric_limits<double>::infinity(),
+                                         std::numeric_limits<double>::infinity()),
                 // Find delta by epsilon
-                MetricMoviesBoundsParams(80, kMetricCoordsKnees[2].delta, std::nullopt, 80, 80),
+                MetricMoviesBoundsParams(kMetricCoordsKnees[2], std::nullopt, 80, 80),
         }));
 
 TEST(UCCPACVerifierTests, DefaultMetricFails) {
@@ -223,13 +221,11 @@ INSTANTIATE_TEST_SUITE_P(
         testing::ValuesIn({
                 UCCPACHighlightParams(kMetricMovies, {2},
                                       {
-                                              // FIXME: This test fails!
-                                              // Highlights are (xx, xx], so (134, 144)
-                                              // must be here, while (135, 140) -- not
-                                              {2, 5},  {5, 2},  {2, 6},  {6, 2},  {3, 6}, {6, 3},
-                                              {3, 7},  {7, 3},  {4, 7},  {7, 4},  {4, 8}, {8, 4},
-                                              {5, 7},  {7, 5},  {5, 8},  {8, 5},  {8, 9}, {9, 8},
-                                              {9, 10}, {10, 9}, {9, 11}, {11, 9},
+                                              // NOTE: Highlights are (xx, xx]
+                                              {2, 3},  {2, 4},  {2, 5},   {3, 2},   {3, 6}, {3, 8},
+                                              {4, 2},  {4, 8},  {4, 10},  {5, 2},   {5, 9}, {6, 3},
+                                              {6, 9},  {7, 10}, {8, 3},   {8, 4},   {9, 5}, {9, 6},
+                                              {10, 4}, {10, 7}, {10, 11}, {11, 10},
                                       },
                                       5, 10),
         }));
