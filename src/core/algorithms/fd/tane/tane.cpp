@@ -182,6 +182,7 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
 
         dynamic_bitset<> const& xa_indices = xa_vertex->GetVertical();
         dynamic_bitset<> const& a_candidates = xa_vertex->GetRhsCandidates();
+        dynamic_bitset<> new_a_candidates = a_candidates;
         auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
         for (LatticeVertex const* x_vertex : xa_vertex->GetParents()) {
             // parent_lhs is X \ {A}
@@ -210,8 +211,9 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
             if (error != 0) continue;
             // if X \ {A} → A holds exactly
             // remove all B in R \ X from C^+(X)
-            xa_vertex->GetRhsCandidates() &= parent_lhs;
+            new_a_candidates &= parent_lhs;
         }
+        xa_vertex->GetRhsCandidates() = new_a_candidates;
     }
 }
 
