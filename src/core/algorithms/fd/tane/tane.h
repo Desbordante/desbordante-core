@@ -15,34 +15,36 @@ class Tane final : public PliBasedAFDAlgorithm {
     struct ColumnCombinationMetadata {
         // We technically don't need this member from the previous level, but it's relatively small.
         boost::dynamic_bitset<> rhs_candidates;
-        model::PLIWithSingletons position_list_index;
+        std::unique_ptr<model::PLIWithSingletons> position_list_index;
     };
+
+    struct PrevLevelColumnCombinationInfo {
+        model::Index non_suffix_column;
+        boost::dynamic_bitset<> const* rhs_candidates;
+    };
+
+    // TODO: suffix array? Not going to do much for <64 columns, I think?
+    using SuffixMap = std::unordered_map<boost::dynamic_bitset<>,
+                                         std::vector<PrevLevelColumnCombinationInfo>>;
 
     config::ErrorType max_fd_error_;
     model::AfdMeasure afd_measure_;
 
-    using LatticeLevel = std::map<boost::dynamic_bitset<>, std::unique_ptr<model::LatticeVertex>>;
     using Level = std::unordered_map<boost::dynamic_bitset<>, ColumnCombinationMetadata>;
 
     void ResetStateFd() final {}
 
-    LatticeLevel GenerateLevel1(model::LatticeVertex const* empty_vertex);
-    void Prune(LatticeLevel& level);
-    void ComputeDependencies(LatticeLevel& level);
+    void Prune(Level& level);
+    void ComputeDependencies(Level& current_level, Level const& prev_level);
     // Exactly PrefixBlocks but the order of bits is inverted
-    // TODO: suffix array? Not going to do much for <64 columns, I think?
-    std::unordered_map<boost::dynamic_bitset<>,
-                       std::vector<std::pair<model::Index, model::LatticeVertex const*>>>
-    SuffixBlocks(Level const& level);
-    static LatticeLevel GenerateNextLevel(LatticeLevel& level);
+    static SuffixMap SuffixBlocks(Level const& level);
+    static Level GenerateNextLevel(Level& level);
     void ExecuteInternal() final;
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs);
     config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
                                        model::PLIWS const* joint_pli);
     bool IsKey(model::PositionListIndex const* pli);
-    static double CalculateUccError(model::PositionListIndex const* pli,
-                                    ColumnLayoutRelationData const* relation_data);
 
 public:
     Tane();

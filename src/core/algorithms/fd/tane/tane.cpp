@@ -34,260 +34,151 @@ bool Tane::IsKey(model::PositionListIndex const* pli) {
     return pli->AllValuesAreUnique();
 }
 
-double Tane::CalculateUccError(model::PositionListIndex const* pli,
-                               ColumnLayoutRelationData const* relation_data) {
-    return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
-}
-
-auto Tane::GenerateLevel1(LatticeVertex const* empty_vertex) -> LatticeLevel {
+void Tane::Prune(Level& level) {
     RelationalSchema const* schema = relation_->GetSchema();
-    dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
-    LatticeLevel current_level;
-    for (model::Index column = 0; column != schema->GetNumColumns(); ++column) {
-        // for each attribute set vertex
-        ColumnData const& column_data = relation_->GetColumnData(column);
 
-        // Is this COMPUTE_DEPENDENCIES(L_1)?
-        // check FDs: 0->A
-        double fd_error = CalculateZeroAryFdError(&column_data);
-        if (fd_error <= max_fd_error_) {
-            // if X \ {A} → A is valid
-            // output X \ {A} → A
-            RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(column), fd_error,
-                            relation_->GetSharedPtrSchema()));
-            zeroary_fd_rhs.set(column);
-            // remove A from C^+(X)
-            // remove all B in R \ X from C^+(X)
-            // C^+(X) ends up being empty
-            // prune proactively:
-            // (2) if C+(X) = ∅ do (3) delete X from L`
+    for (auto it = level.begin(); it != level.end();) {
+        auto& [column_combination, metadata] = *it;
+        assert(metadata.rhs_candidates.any());
+        // Lines 2 and 3 have been done in GenerateNextLevel and ComputeDependencies
+        // TODO: collect proactively?
+        if (!IsKey(metadata.position_list_index.get())) {
+            ++it;
             continue;
         }
-
-        auto vertex = std::make_unique<LatticeVertex>(
-                std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set(column)),
-                // forall X ∈ L_1 C^+(X) = R
-                std::move(boost::dynamic_bitset<>(schema->GetNumColumns()).set()), /*false,*/
-                std::vector<LatticeVertex const*>{empty_vertex}, column_data.GetPLWSIndex());
-        boost::dynamic_bitset<> const& vertical = vertex->GetVertical();
-        current_level.emplace(vertical, std::move(vertex));
+        boost::dynamic_bitset<> sibling_scratch = column_combination;
+        util::ForEachIndex(
+                metadata.rhs_candidates - column_combination, [&](model::Index rhs_index) {
+                    sibling_scratch.set(rhs_index);
+                    bool not_candidate_for_all = false;
+                    for (model::Index j = column_combination.find_first();
+                         j != boost::dynamic_bitset<>::npos; j = column_combination.find_next(j)) {
+                        sibling_scratch.reset(j);
+                        auto it = level.find(sibling_scratch);
+                        sibling_scratch.set(j);
+                        if (it == level.end() || !it->second.rhs_candidates.test(rhs_index)) {
+                            not_candidate_for_all = true;
+                            break;
+                        }
+                    }
+                    sibling_scratch.reset(rhs_index);
+                    if (not_candidate_for_all) return;
+                    RegisterAfd(AFD(schema->GetVertical(column_combination),
+                                    *schema->GetColumn(rhs_index),
+                                    0.0 /* key -> attr is always a plain FD */,
+                                    relation_->GetSharedPtrSchema()));
+                });
+        it = level.erase(it);
     }
-
-    // PRUNE(L_1)?
-    for (auto level_it = current_level.begin();
-         level_it != current_level.end();) {  // for each X ∈ L_l do
-        auto prev_it = level_it;
-        auto& [map_key, vertex] = *level_it++;
-        // for each X ∈ L_1 do
-        dynamic_bitset<> const& column = vertex->GetVertical();
-        vertex->GetRhsCandidates() -= zeroary_fd_rhs;  // remove already discovered zeroary FDs
-
-        // TODO: figure out how to make use of this
-        assert(column.count() == 1);
-        model::Index const lhs_column_index = column.find_first();
-        ColumnData const& column_data = relation_->GetColumnData(lhs_column_index);
-        double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
-        if (ucc_error != 0) continue;
-        // The LHS column only has unique values
-        // if X is a (super)key do
-        if (max_lhs_ != 0) {
-            vertex->GetRhsCandidates().reset(lhs_column_index);
-            util::ForEachIndex(vertex->GetRhsCandidates(), [&](model::Index rhs_index) {
-                // for each A ∈ C^+(X) \ X do
-                assert(rhs_index != lhs_column_index);
-                // ⋂B∈X C^+(X ∪ {A} \ {B}) with X = {lhs_column_index}
-                // This is C^+({rhs_index}) = R, so the condition on line 6 of COMPUTE_DEPENDENCIES
-                // holds
-                RegisterAfd(AFD(
-                        schema->GetVertical(std::move(
-                                dynamic_bitset<>(schema->GetNumColumns()).set(lhs_column_index))),
-                        *schema->GetColumn(rhs_index), 0.0, relation_->GetSharedPtrSchema()));
-            });
-        }
-        level_it = current_level.erase(prev_it);
-    }
-
-    return current_level;
 }
 
-void Tane::Prune(LatticeLevel& level) {
+void Tane::ComputeDependencies(Level& current_level, Level const& prev_level) {
     RelationalSchema const* schema = relation_->GetSchema();
-    // std::list<LatticeVertex*> key_vertices;
-    for (auto level_it = level.begin(); level_it != level.end();) {  // for each X ∈ L_l do
-        auto prev_it = level_it;
-        auto& [map_key, vertex] = *level_it++;
-        if (vertex->GetRhsCandidates().none()) {
-            level_it = level.erase(prev_it);
-            continue;
+
+    // Lines 1 and 2 have been done in GenerateNextLevel
+
+    for (auto it = current_level.begin(); it != current_level.end();) {
+        auto& [column_combination, metadata] = *it;
+        assert(metadata.position_list_index == nullptr);
+        boost::dynamic_bitset<> parent_lhs = column_combination;
+        model::Index const column = parent_lhs.find_first();
+        parent_lhs.reset(column);
+        metadata.position_list_index =
+                prev_level.find(parent_lhs)
+                        ->second.position_list_index->Intersect(
+                                relation_->GetColumnData(column).GetPLWSIndex());
+        parent_lhs.set(column);
+        util::ForEachIndex(
+                column_combination & metadata.rhs_candidates, [&](model::Index rhs_index) {
+                    parent_lhs.reset(rhs_index);
+                    model::PLIWS const* pli =
+                            prev_level.find(parent_lhs)->second.position_list_index.get();
+                    parent_lhs.set(rhs_index);
+                    model::PLIWS const* rhs_pli =
+                            relation_->GetColumnData(rhs_index).GetPLWSIndex();
+
+                    config::ErrorType error =
+                            CalculateFdError(pli, rhs_pli, metadata.position_list_index.get());
+                    if (error > max_fd_error_) return;
+                    // if e(X \ {A} → A) ≤ ε then
+
+                    // output X \ {A} → A
+                    RegisterAfd(AFD(schema->GetVertical(parent_lhs), *schema->GetColumn(rhs_index),
+                                    error, relation_->GetSharedPtrSchema()));
+
+                    // remove A from C^+(X)
+                    metadata.rhs_candidates.reset(rhs_index);
+
+                    if (error != 0) return;
+                    // if X \ {A} → A holds exactly then
+
+                    // remove all B in R \ X from C^+(X)
+                    metadata.rhs_candidates &= parent_lhs;
+                });
+        if (metadata.rhs_candidates.none()) {
+            it = current_level.erase(it);
+        } else {
+            ++it;
         }
-        double ucc_error = CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
-        if (ucc_error != 0) continue;  // if X is a (super)key
-
-        boost::dynamic_bitset<> sibling_lhs_scratch = vertex->GetVertical();
-
-        for (std::size_t rhs_index = vertex->GetRhsCandidates().find_first();
-             rhs_index != boost::dynamic_bitset<>::npos;
-             rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
-            if (vertex->GetVertical().test(rhs_index)) continue;  // for each A ∈ C^+(X) \ X
-
-            bool is_rhs_candidate = true;
-            sibling_lhs_scratch.set(rhs_index);
-            for (model::Index column = vertex->GetVertical().find_first();
-                 column != boost::dynamic_bitset<>::npos;
-                 column = vertex->GetVertical().find_next(column)) {
-                sibling_lhs_scratch.reset(column);
-                auto sibling_vertex_it = level.find(sibling_lhs_scratch);
-                sibling_lhs_scratch.set(column);
-
-                if (sibling_vertex_it == level.end() ||
-                    !sibling_vertex_it->second->GetConstRhsCandidates()[rhs_index]) {
-                    // if A ∈ ⋂B∈X C^+(X ∪ {A} \ {B})
-                    is_rhs_candidate = false;
-                    break;
-                }
-                // for each outer rhs: if there is a sibling s.t. it doesn't
-                // have this rhs, there is no FD: vertex->rhs
-            }
-            sibling_lhs_scratch.reset(rhs_index);
-
-            if (!is_rhs_candidate) continue;
-
-            RegisterAfd(AFD(
-                    schema->GetVertical(vertex->GetVertical()), *schema->GetColumn(rhs_index),
-                    0.0 /* key -> attr is always a plain FD */, relation_->GetSharedPtrSchema()));
-        }
-        // delete X from L_l
-        level_it = level.erase(prev_it);
     }
 }
 
-void Tane::ComputeDependencies(LatticeLevel& level) {
-    RelationalSchema const* schema = relation_->GetSchema();
-    for (auto& [key_map, xa_vertex] : level) {
-        // if (xa_vertex->GetIsInvalid()) continue;
-
-        // Calculate XA PLI
-        if (xa_vertex->GetPositionListIndex() == nullptr) {
-            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndexWithSingletons();
-            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndexWithSingletons();
-            xa_vertex->AcquirePLIWithSingletons(parent_pli_1->Intersect(parent_pli_2));
-        }
-
-        dynamic_bitset<> const& xa_indices = xa_vertex->GetVertical();
-        dynamic_bitset<> const& a_candidates = xa_vertex->GetRhsCandidates();
-        dynamic_bitset<> new_a_candidates = a_candidates;
-        auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
-        for (LatticeVertex const* x_vertex : xa_vertex->GetParents()) {
-            // parent_lhs is X \ {A}
-            dynamic_bitset<> const& parent_lhs = x_vertex->GetVertical();
-
-            // Find index of A in XA.
-            dynamic_bitset<> differing_bits = xa_indices ^ /*- ?*/ parent_lhs;
-            assert(differing_bits.count() == 1);
-            std::size_t a_index = differing_bits.find_first();
-            // if A is not an RHS candidate, then X \ {A} → A is not valid, no point in going
-            // through with error calculation.
-            if (!a_candidates[a_index]) continue;
-
-            auto x_pli = x_vertex->GetPositionListIndexWithSingletons();
-            auto a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
-            // Check X -> A
-            config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
-            if (error > max_fd_error_) continue;
-            // if X \ {A} → A is valid
-            // output X \ {A} → A
-            RegisterAfd(AFD(schema->GetVertical(parent_lhs), *schema->GetColumn(a_index), error,
-                            relation_->GetSharedPtrSchema()));
-            // remove A from C+(X)
-            xa_vertex->GetRhsCandidates().reset(a_index);
-
-            if (error != 0) continue;
-            // if X \ {A} → A holds exactly
-            // remove all B in R \ X from C^+(X)
-            new_a_candidates &= parent_lhs;
-        }
-        xa_vertex->GetRhsCandidates() &= new_a_candidates;
+auto Tane::SuffixBlocks(Level const& level) -> SuffixMap {
+    SuffixMap map;
+    for (auto const& [column_combination, metadata] : level) {
+        if (column_combination.test(0)) continue;
+        boost::dynamic_bitset<> suffix = column_combination;
+        model::Index const non_suffix_column = suffix.find_first();
+        suffix.reset(non_suffix_column);
+        map[std::move(suffix)].emplace_back(non_suffix_column, &metadata.rhs_candidates);
     }
+    return map;
 }
 
-auto Tane::GenerateNextLevel(LatticeLevel& current_level) -> LatticeLevel {
-    assert(!current_level.empty());
-    unsigned int const arity = current_level.begin()->second->GetVertical().count();
-    std::vector<LatticeVertex*> current_level_vertices;
-    for (auto const& [map_key, vertex] : current_level) {
-        current_level_vertices.push_back(vertex.get());
-    }
+auto Tane::GenerateNextLevel(Level& current_level) -> Level {
+    Level next_level;
+    SuffixMap s_map = SuffixBlocks(current_level);
+    for (auto s_map_it = s_map.begin(); s_map_it != s_map.end();) {
+        SuffixMap::node_type node = s_map.extract(s_map_it++);
+        std::vector<PrevLevelColumnCombinationInfo>& infos = node.mapped();
+        std::ranges::sort(infos, [](PrevLevelColumnCombinationInfo const& i1,
+                                    PrevLevelColumnCombinationInfo const& i2) {
+            return i1.non_suffix_column < i2.non_suffix_column;
+        });
+        assert(!infos.empty());
+        boost::dynamic_bitset<>& column_combination = node.key();
+        for (auto outer_info_it = infos.begin(), end_it = std::prev(infos.end());
+             outer_info_it != end_it; ++outer_info_it) {
+            auto const [outer_cand_index, outer_rhs_candidates] = *outer_info_it;
+            column_combination.set(outer_cand_index);
+            for (auto inner_info_it = std::next(outer_info_it); inner_info_it != infos.end();
+                 ++inner_info_it) {
+                auto const [inner_cand_index, inner_rhs_candidates] = *inner_info_it;
+                if (!outer_rhs_candidates->intersects(*inner_rhs_candidates)) continue;
+                boost::dynamic_bitset<> new_rhs_candidates =
+                        *outer_rhs_candidates & *inner_rhs_candidates;
 
-    std::sort(current_level_vertices.begin(), current_level_vertices.end(),
-              LatticeVertex::Comparator);
-    LatticeLevel next_level;
-
-    for (unsigned int vertex_index_1 = 0; vertex_index_1 < current_level_vertices.size();
-         vertex_index_1++) {
-        LatticeVertex& vertex1 = *current_level_vertices[vertex_index_1];
-
-        if (vertex1.GetRhsCandidates().none()) {
-            continue;
-        }
-
-        for (unsigned int vertex_index_2 = vertex_index_1 + 1;
-             vertex_index_2 < current_level_vertices.size(); vertex_index_2++) {
-            LatticeVertex& vertex2 = *current_level_vertices[vertex_index_2];
-
-            // TODO: suffix, like in Depminer
-            if (!vertex1.ComesBeforeAndSharePrefixWith(vertex2)) break;
-
-            if (!vertex1.GetRhsCandidates().intersects(vertex2.GetRhsCandidates())) {
-                continue;
-            }
-
-            boost::dynamic_bitset<> vertical = vertex1.GetVertical() | vertex2.GetVertical();
-            boost::dynamic_bitset<> rhs_candidates =
-                    vertex1.GetRhsCandidates() & vertex2.GetRhsCandidates();
-            std::vector<LatticeVertex const*> parents;
-            // parents.reserve(arity + 1);
-            // bool is_invalid = vertex1.GetIsInvalid() || vertex2.GetIsInvalid();
-
-            for (unsigned int i = 0, skip_index = vertical.find_first(); i < arity - 1;
-                 i++, skip_index = vertical.find_next(skip_index)) {
-                vertical.reset(skip_index);
-                auto parent_vertex_it = current_level.find(vertical);
-
-                if (parent_vertex_it == current_level.end()) {
-                    goto notInNextLevel;
+                column_combination.set(inner_cand_index);
+                bool discard = false;
+                for (model::Index removed_column = column_combination.find_next(inner_cand_index);
+                     removed_column != boost::dynamic_bitset<>::npos;
+                     removed_column = column_combination.find_next(removed_column)) {
+                    column_combination.reset(removed_column);
+                    auto it = current_level.find(column_combination);
+                    column_combination.set(removed_column);
+                    if (it == current_level.end() ||
+                        (new_rhs_candidates &= it->second.rhs_candidates).none()) {
+                        discard = true;
+                        break;
+                    }
                 }
-                LatticeVertex const& parent_vertex = *parent_vertex_it->second;
-                rhs_candidates &= parent_vertex.GetConstRhsCandidates();
-                // For any node, its rhs_candidates (C^+(X)) is the intersection of all its parents'
-                // rhs_candidates. So if any node has empty rhs_candidates, it will block other
-                // nodes from having any RHSs in the answer. The same effect would be achieved if
-                // they were never added in the first place, since GenerateNextLevel checks for the
-                // presence of every node. Leap of faith: let's just delete them immediately and
-                // assume they never exist!
-                if (rhs_candidates.none()) {
-                    goto notInNextLevel;
-                }
-                parents.push_back(&parent_vertex);
-                vertical.set(skip_index);
-
-                // if (parent_vertex.GetIsInvalid()) is_invalid = true;
+                column_combination.reset(inner_cand_index);
+                if (discard) continue;
+                next_level.try_emplace(column_combination, std::move(new_rhs_candidates));
             }
-
-            {
-                parents.push_back(&vertex1);
-                parents.push_back(&vertex2);
-                // for each X ∈ L_l do C+(X) := ⋂A∈X C+(X \ {A})
-                auto child_vertex = std::make_unique<LatticeVertex>(
-                        std::move(vertical), std::move(rhs_candidates), std::move(parents));
-                boost::dynamic_bitset<> const& child_vertical = child_vertex->GetVertical();
-                next_level.try_emplace(child_vertical, std::move(child_vertex));
-            }
-
-        notInNextLevel:
-            continue;
+            column_combination.reset(outer_cand_index);
         }
     }
-
     return next_level;
 }
 
@@ -501,42 +392,6 @@ void Tane::ExecuteInternal() {
             // "Holds exactly" means error == 0.0 That is, error == 0.0 for an A on line 4 means
             // only the one column in X \ {A}, which is the single LHS column in the FD that is
             // output, remains in C^+(X).
-            // If an approximate FD holds, we don't test for its RHS on later levels because the
-            // later AFDs would be non-minimal (line 7).
-            // If an exact FD holds, we, in effect intersect the RHS candidates with the LHS.
-            // In line 4 of COMPUTE_DEPENDENCIES we iterate over the intersection of C^+(X) and X.
-            // Then, if X is a key, we iterate over C^+(X) \ X in PRUNE.
-
-            // Lemma 3.2: Let B ∈ X and let X \ {B} → B be a valid dependency. If X → A holds, then
-            // X \ {B} → A holds.
-            // Thus, we know that an FD X \ {A} -> B will hold for sure, therefore X -> B is not
-            // minimal. But if we are purely searching for AFDs, where our definition of "holds" is
-            // e(X \ {A} -> A) <= eps, then the fact that e(X \ {A} -> A) <= eps does not on its own
-            // imply that e(X -> B) <= eps. Or, at least, I don't see why it would and the article
-            // doesn't say that either.
-
-            // The article does not define the minimality of an AFD! But the definition for a FD as
-            // given is: "A functional dependency X → A is minimal (in r) if A is not functionally
-            // dependent on any proper subset of X, i.e. if Y → A does not hold in r for any Y ⊂ X."
-
-            // AFD definition: "Given an error threshold ε, 0 ≤ ε ≤ 1, we say that X → A is an
-            // approximate (functional) dependency if and only if e(X → A) is at most ε."
-
-            // In effect, for this algorithm, an AFD X → A is minimal, if there is no AFD or FD with
-            // the same RHS and a proper subset of X as LHS.
-            // Hmm, I guess it's still correct, though?
-
-            // X \ {A} -> B, A in another node as X \ {B} -> B?
-            // If there is an FD X \ {A} -> B, then there is an AFD X \ {A} -> B. It's pruned here,
-            // but where is it found?
-            // With A != B we have four cases: A ∈ X, A ∉ X; B ∈ X, B ∉ X;
-            // yy: trivial FD, not possible?
-            // nn: X -> B, with X present in the previous level. During PRUNE? No, would have been
-            // deleted. In a sibling as X' \ {B} -> B? Then it won't be in C^+(X) anyway.
-            // yn: present in the sibling with or not deleted during previous PRUNE
-            // ny: X -> B. Can potentially be found during PRUNE, approximate or not. If we skip
-            // lines 8 and 9 and we don't find it during PRUNE, then the other level will have X ∪
-            // {B}, and we'll find X' \ {B} -> {B} again.
 
             // error <= max_fd_error_ means the corresponing RHS column should be deleted (line 7).
             // The RHS column of one is the LHS column of the other.
@@ -559,7 +414,7 @@ void Tane::ExecuteInternal() {
             // them and cache the intersected PLI.
             auto add_to_level = [&](boost::dynamic_bitset<>&& rhs_candidates) {
                 current_level.try_emplace(std::move(bs().set(col1).set(col2)),
-                                          std::move(rhs_candidates), std::move(*joint_pli));
+                                          std::move(rhs_candidates), std::move(joint_pli));
             };
             if (error12 == 0.0) {
                 reg12();
@@ -611,55 +466,15 @@ void Tane::ExecuteInternal() {
 
     // TODO: figure out what happens when LHS size reaches the maximum.
     for (unsigned int lhs_size = 2; lhs_size <= max_lhs_; ++lhs_size) {
-        // PRUNE(L_{lhs_size})
-        // GENERATE_NEXT_LEVEL(L_{lhs_size})
+        Prune(current_level);
+        Level prev_level = std::move(current_level);
+        current_level = GenerateNextLevel(prev_level);
 
         // while L_l != ∅
         if (current_level.empty()) break;
 
-        // COMPUTE_DEPENDENCIES(L_{lhs_size + 1})
+        ComputeDependencies(current_level, prev_level);
     }
-    /*
-    RelationalSchema const* schema = relation_->GetSchema();
-    // Initialize level 0
-    LatticeLevel prev_level;
-    LatticeVertex const* empty_vertex =
-            prev_level
-                    .emplace(dynamic_bitset<>(schema->GetNumColumns()),
-                             std::make_unique<LatticeVertex>(
-                                     dynamic_bitset<>(schema->GetNumColumns()),
-                                     dynamic_bitset<>(schema->GetNumColumns()) //, false
-                                     ))
-                    .first->second.get();
-
-    // Initialize level 1
-    LatticeLevel current_level = GenerateLevel1(empty_vertex);
-
-    unsigned int max_arity =
-            max_lhs_ == std::numeric_limits<unsigned int>::max() ? max_lhs_ : max_lhs_ + 1;
-    for (unsigned int arity = 2; arity <= max_arity; arity++) {
-        std::ranges::for_each(
-                current_level | std::views::values,
-                [](std::unique_ptr<LatticeVertex>& vertex) { vertex->GetParents().clear(); });
-        prev_level = std::move(current_level);
-        current_level = GenerateNextLevel(prev_level);
-
-        LOG_TRACE("Checking {} {}-ary lattice vertices.", current_level.size(), arity);
-        if (current_level.empty()) {
-            break;
-        }
-
-        ComputeDependencies(current_level);
-
-        if (arity == max_arity) {
-            break;
-        }
-
-        Prune(current_level);
-    }
-
-    LOG_DEBUG("Total FD count: {}", afd_collection_.Size());
-    LOG_DEBUG("HASH: {}", Fletcher16());*/
 }
 
 }  // namespace algos
