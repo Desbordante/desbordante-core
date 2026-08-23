@@ -213,7 +213,7 @@ void Tane::ComputeDependencies(LatticeLevel& level) {
             // remove all B in R \ X from C^+(X)
             new_a_candidates &= parent_lhs;
         }
-        xa_vertex->GetRhsCandidates() = new_a_candidates;
+        xa_vertex->GetRhsCandidates() &= new_a_candidates;
     }
 }
 
