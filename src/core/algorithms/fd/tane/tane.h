@@ -15,12 +15,14 @@ class Tane final : public PliBasedAFDAlgorithm {
     struct ColumnCombinationMetadata {
         // We technically don't need this member from the previous level, but it's relatively small.
         boost::dynamic_bitset<> rhs_candidates;
+        // TODO: use a special pointer as PLI instead of this.
+        bool is_part_of_level;
         std::unique_ptr<model::PLIWithSingletons> position_list_index;
     };
 
     struct PrevLevelColumnCombinationInfo {
         model::Index non_suffix_column;
-        boost::dynamic_bitset<> const* rhs_candidates;
+        ColumnCombinationMetadata const* metadata;
     };
 
     // TODO: suffix array? Not going to do much for <64 columns, I think?

@@ -36,15 +36,12 @@ bool Tane::IsKey(model::PositionListIndex const* pli) {
 void Tane::Prune(Level& level) {
     RelationalSchema const* schema = relation_->GetSchema();
 
-    for (auto it = level.begin(); it != level.end();) {
-        auto& [column_combination, metadata] = *it;
+    for (auto& [column_combination, metadata] : level) {
         assert(metadata.rhs_candidates.any());
         // Lines 2 and 3 have been done in GenerateNextLevel and ComputeDependencies
         // TODO: collect proactively?
-        if (!IsKey(metadata.position_list_index.get())) {
-            ++it;
-            continue;
-        }
+        if (!IsKey(metadata.position_list_index.get())) continue;
+
         boost::dynamic_bitset<> sibling_scratch = column_combination;
         util::ForEachIndex(
                 metadata.rhs_candidates - column_combination, [&](model::Index rhs_index) {
@@ -69,15 +66,6 @@ void Tane::Prune(Level& level) {
                     // make sibling keys ignore this one
                     metadata.rhs_candidates.reset(rhs_index);
                 });
-        // it = level.erase(it);
-    }
-    // Can't delete immediately due to sibling keys.
-    for (auto it = level.begin(); it != level.end();) {
-        if (IsKey(it->second.position_list_index.get())) {
-            it = level.erase(it);
-        } else {
-            ++it;
-        }
     }
 }
 
@@ -88,6 +76,10 @@ void Tane::ComputeDependencies(Level& current_level, Level const& prev_level) {
 
     for (auto it = current_level.begin(); it != current_level.end();) {
         auto& [column_combination, metadata] = *it;
+        if (!metadata.is_part_of_level) {
+            ++it;
+            continue;
+        }
         assert(metadata.position_list_index == nullptr);
         boost::dynamic_bitset<> parent_lhs = column_combination;
         model::Index const column = parent_lhs.find_first();
@@ -143,7 +135,7 @@ auto Tane::SuffixBlocks(Level const& level) -> SuffixMap {
         boost::dynamic_bitset<> suffix = column_combination;
         model::Index const non_suffix_column = suffix.find_first();
         suffix.reset(non_suffix_column);
-        map[std::move(suffix)].emplace_back(non_suffix_column, &metadata.rhs_candidates);
+        map[std::move(suffix)].emplace_back(non_suffix_column, &metadata);
     }
     return map;
 }
@@ -162,14 +154,17 @@ auto Tane::GenerateNextLevel(Level& current_level) -> Level {
         boost::dynamic_bitset<>& column_combination = node.key();
         for (auto outer_info_it = infos.begin(), end_it = std::prev(infos.end());
              outer_info_it != end_it; ++outer_info_it) {
-            auto const [outer_cand_index, outer_rhs_candidates] = *outer_info_it;
+            auto const [outer_cand_index, outer_metadata] = *outer_info_it;
             column_combination.set(outer_cand_index);
             for (auto inner_info_it = std::next(outer_info_it); inner_info_it != infos.end();
                  ++inner_info_it) {
-                auto const [inner_cand_index, inner_rhs_candidates] = *inner_info_it;
-                if (!outer_rhs_candidates->intersects(*inner_rhs_candidates)) continue;
+                auto const [inner_cand_index, inner_metadata] = *inner_info_it;
+                if (!outer_metadata->rhs_candidates.intersects(inner_metadata->rhs_candidates))
+                    continue;
                 boost::dynamic_bitset<> new_rhs_candidates =
-                        *outer_rhs_candidates & *inner_rhs_candidates;
+                        outer_metadata->rhs_candidates & inner_metadata->rhs_candidates;
+                bool is_part_of_level =
+                        outer_metadata->is_part_of_level && inner_metadata->is_part_of_level;
 
                 column_combination.set(inner_cand_index);
                 bool add = true;
@@ -186,9 +181,11 @@ auto Tane::GenerateNextLevel(Level& current_level) -> Level {
                         add = false;
                         break;
                     }
+                    is_part_of_level = is_part_of_level && it->second.is_part_of_level;
                 }
                 if (add) {
-                    next_level.try_emplace(column_combination, std::move(new_rhs_candidates));
+                    next_level.try_emplace(column_combination, std::move(new_rhs_candidates),
+                                           is_part_of_level);
                 }
                 column_combination.reset(inner_cand_index);
             }
@@ -384,7 +381,7 @@ void Tane::ExecuteInternal() {
 
     // COMPUTE_DEPENDENCIES(L_2)
     Level current_level;
-    // Exactly 2 bits set in a column combination at this point, not less than that later on,PLIs
+    // Exactly 2 bits set in a column combination at this point, not less than that later on, PLIs
     // are all newly intersected.
     // All of X have C^+(X) = R, since the previous level had C^+(X) = R for all the nodes left
     // over, so we skip lines 1 and 2.
@@ -427,11 +424,11 @@ void Tane::ExecuteInternal() {
                                 *schema->GetColumn(col1), error21,
                                 relation_->GetSharedPtrSchema()));
             };
-            // Create the column combination that is the element of L_2, calculate C^+ of it, add
-            // them and cache the intersected PLI.
+            // Create the column combination that is the element of L_2, take the C^+ of it, add
+            // them and the intersected PLI.
             auto add_to_level = [&](boost::dynamic_bitset<>&& rhs_candidates) {
                 current_level.try_emplace(std::move(bs().set(col1).set(col2)),
-                                          std::move(rhs_candidates), std::move(joint_pli));
+                                          std::move(rhs_candidates), true, std::move(joint_pli));
             };
             if (error12 == 0.0) {
                 reg12();
@@ -440,7 +437,7 @@ void Tane::ExecuteInternal() {
                     reg21();
                     // Delete col1 too, so we get an empty intersection, which we never add in the
                     // first place instead of deleting later.
-                    // current_level.try_emplace(nothing);
+                    // add_to_level(nothing);
                     continue;
                 }
                 add_to_level(std::move(bs().set(col1)));
