@@ -38,9 +38,11 @@ void Tane::Prune(Level& level) {
 
     for (auto& [column_combination, metadata] : level) {
         assert(metadata.rhs_candidates.any());
+        if (!metadata.is_part_of_level) continue;
         // Lines 2 and 3 have been done in GenerateNextLevel and ComputeDependencies
         // TODO: collect proactively?
         if (!IsKey(metadata.position_list_index.get())) continue;
+        metadata.is_part_of_level = false;
 
         boost::dynamic_bitset<> sibling_scratch = column_combination;
         util::ForEachIndex(
@@ -63,8 +65,6 @@ void Tane::Prune(Level& level) {
                                     *schema->GetColumn(rhs_index),
                                     0.0 /* key -> attr is always a plain FD */,
                                     relation_->GetSharedPtrSchema()));
-                    // make sibling keys ignore this one
-                    metadata.rhs_candidates.reset(rhs_index);
                 });
     }
 }
@@ -81,45 +81,54 @@ void Tane::ComputeDependencies(Level& current_level, Level const& prev_level) {
             continue;
         }
         assert(metadata.position_list_index == nullptr);
+        boost::dynamic_bitset<> potential_rhss = column_combination & metadata.rhs_candidates;
+        model::Index rhs_index = potential_rhss.find_first();
         boost::dynamic_bitset<> parent_lhs = column_combination;
-        model::Index const column = parent_lhs.find_first();
-        parent_lhs.reset(column);
+        if (rhs_index == boost::dynamic_bitset<>::npos) {
+            for (model::Index i = column_combination.find_first();
+                 i != boost::dynamic_bitset<>::npos; i = column_combination.find_next(i)) {
+                parent_lhs.reset(i);
+                model::PLIWS const* pli =
+                        prev_level.find(parent_lhs)->second.position_list_index.get();
+                parent_lhs.set(i);
+                if (pli == nullptr) continue;
+                metadata.position_list_index =
+                        pli->Intersect(relation_->GetColumnData(i).GetPLWSIndex());
+                break;
+            }
+            ++it;
+            continue;
+        }
+        parent_lhs.reset(rhs_index);
         metadata.position_list_index =
                 prev_level.find(parent_lhs)
                         ->second.position_list_index->Intersect(
-                                relation_->GetColumnData(column).GetPLWSIndex());
-        parent_lhs.set(column);
-        util::ForEachIndex(
-                column_combination & metadata.rhs_candidates, [&](model::Index rhs_index) {
-                    parent_lhs.reset(rhs_index);
-                    assert(prev_level.contains(parent_lhs));
-                    model::PLIWS const* pli =
-                            prev_level.find(parent_lhs)->second.position_list_index.get();
-                    model::PLIWS const* rhs_pli =
-                            relation_->GetColumnData(rhs_index).GetPLWSIndex();
+                                relation_->GetColumnData(rhs_index).GetPLWSIndex());
+        do {
+            parent_lhs.reset(rhs_index);
+            assert(prev_level.contains(parent_lhs));
+            model::PLIWS const* pli = prev_level.find(parent_lhs)->second.position_list_index.get();
+            model::PLIWS const* rhs_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
 
-                    config::ErrorType error =
-                            CalculateFdError(pli, rhs_pli, metadata.position_list_index.get());
-                    if (error > max_fd_error_) {
-                        parent_lhs.set(rhs_index);
-                        return;
-                    }
-                    // if e(X \ {A} → A) ≤ ε then
+            config::ErrorType error =
+                    CalculateFdError(pli, rhs_pli, metadata.position_list_index.get());
+            if (error > max_fd_error_) continue;
+            // if e(X \ {A} → A) ≤ ε then
 
-                    // output X \ {A} → A
-                    RegisterAfd(AFD(schema->GetVertical(parent_lhs), *schema->GetColumn(rhs_index),
-                                    error, relation_->GetSharedPtrSchema()));
-                    parent_lhs.set(rhs_index);
+            // output X \ {A} → A
+            RegisterAfd(AFD(schema->GetVertical(parent_lhs), *schema->GetColumn(rhs_index), error,
+                            relation_->GetSharedPtrSchema()));
 
-                    // remove A from C^+(X)
-                    metadata.rhs_candidates.reset(rhs_index);
+            // remove A from C^+(X)
+            metadata.rhs_candidates.reset(rhs_index);
 
-                    if (error != 0) return;
-                    // if X \ {A} → A holds exactly then
+            if (error != 0) continue;
+            // if X \ {A} → A holds exactly then
 
-                    // remove all B in R \ X from C^+(X)
-                    metadata.rhs_candidates &= parent_lhs;
-                });
+            // remove all B in R \ X from C^+(X)
+            metadata.rhs_candidates &= parent_lhs;
+        } while (parent_lhs.set(rhs_index), (rhs_index = potential_rhss.find_next(rhs_index)) !=
+                                                    boost::dynamic_bitset<>::npos);
         if (metadata.rhs_candidates.none()) {
             it = current_level.erase(it);
         } else {

@@ -32,6 +32,7 @@ class Tane final : public PliBasedAFDAlgorithm {
     config::ErrorType max_fd_error_;
     model::AfdMeasure afd_measure_;
 
+    // TODO: rename, also stores C^+(X)
     using Level = std::unordered_map<boost::dynamic_bitset<>, ColumnCombinationMetadata>;
 
     void ResetStateFd() final {}
