@@ -1,4 +1,5 @@
 add_subdirectory(cfd_verifier)
+add_subdirectory(cfun)
 
 set(NAME cfd.util)
 desbordante_add_lib(NAME OBJECT)

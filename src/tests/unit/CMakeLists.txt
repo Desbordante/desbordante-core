@@ -90,6 +90,19 @@ desbordante_add_test(
     spdlog::spdlog_header_only
     Boost::headers
 )
+desbordante_add_test(
+    cfd.cfun
+    SRCS
+    test_cfun.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::model::types
+    ${DESBORDANTE_PREFIX}::cfd::cfun
+    ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::testlib::common
+    spdlog::spdlog_header_only
+    Boost::headers
+)
 
 # --- CIND ---
 desbordante_add_test(
