@@ -1,7 +1,6 @@
 #include "core/algorithms/fd/tane/tane.h"
 
 #include <algorithm>
-#include <list>
 #include <memory>
 #include <ranges>
 
@@ -67,8 +66,18 @@ void Tane::Prune(Level& level) {
                                     *schema->GetColumn(rhs_index),
                                     0.0 /* key -> attr is always a plain FD */,
                                     relation_->GetSharedPtrSchema()));
+                    // make sibling keys ignore this one
+                    metadata.rhs_candidates.reset(rhs_index);
                 });
-        it = level.erase(it);
+        // it = level.erase(it);
+    }
+    // Can't delete immediately due to sibling keys.
+    for (auto it = level.begin(); it != level.end();) {
+        if (IsKey(it->second.position_list_index.get())) {
+            it = level.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 
@@ -91,20 +100,24 @@ void Tane::ComputeDependencies(Level& current_level, Level const& prev_level) {
         util::ForEachIndex(
                 column_combination & metadata.rhs_candidates, [&](model::Index rhs_index) {
                     parent_lhs.reset(rhs_index);
+                    assert(prev_level.contains(parent_lhs));
                     model::PLIWS const* pli =
                             prev_level.find(parent_lhs)->second.position_list_index.get();
-                    parent_lhs.set(rhs_index);
                     model::PLIWS const* rhs_pli =
                             relation_->GetColumnData(rhs_index).GetPLWSIndex();
 
                     config::ErrorType error =
                             CalculateFdError(pli, rhs_pli, metadata.position_list_index.get());
-                    if (error > max_fd_error_) return;
+                    if (error > max_fd_error_) {
+                        parent_lhs.set(rhs_index);
+                        return;
+                    }
                     // if e(X \ {A} → A) ≤ ε then
 
                     // output X \ {A} → A
                     RegisterAfd(AFD(schema->GetVertical(parent_lhs), *schema->GetColumn(rhs_index),
                                     error, relation_->GetSharedPtrSchema()));
+                    parent_lhs.set(rhs_index);
 
                     // remove A from C^+(X)
                     metadata.rhs_candidates.reset(rhs_index);
@@ -123,10 +136,10 @@ void Tane::ComputeDependencies(Level& current_level, Level const& prev_level) {
     }
 }
 
+// Exactly PrefixBlocks but the order of bits is inverted, plus we store C^+(X).
 auto Tane::SuffixBlocks(Level const& level) -> SuffixMap {
     SuffixMap map;
     for (auto const& [column_combination, metadata] : level) {
-        if (column_combination.test(0)) continue;
         boost::dynamic_bitset<> suffix = column_combination;
         model::Index const non_suffix_column = suffix.find_first();
         suffix.reset(non_suffix_column);
@@ -159,7 +172,9 @@ auto Tane::GenerateNextLevel(Level& current_level) -> Level {
                         *outer_rhs_candidates & *inner_rhs_candidates;
 
                 column_combination.set(inner_cand_index);
-                bool discard = false;
+                bool add = true;
+                // outer + suffix and inner + suffix have been encountered in SuffixBlocks already,
+                // no point in checking for their existence.
                 for (model::Index removed_column = column_combination.find_next(inner_cand_index);
                      removed_column != boost::dynamic_bitset<>::npos;
                      removed_column = column_combination.find_next(removed_column)) {
@@ -168,13 +183,14 @@ auto Tane::GenerateNextLevel(Level& current_level) -> Level {
                     column_combination.set(removed_column);
                     if (it == current_level.end() ||
                         (new_rhs_candidates &= it->second.rhs_candidates).none()) {
-                        discard = true;
+                        add = false;
                         break;
                     }
                 }
+                if (add) {
+                    next_level.try_emplace(column_combination, std::move(new_rhs_candidates));
+                }
                 column_combination.reset(inner_cand_index);
-                if (discard) continue;
-                next_level.try_emplace(column_combination, std::move(new_rhs_candidates));
             }
             column_combination.reset(outer_cand_index);
         }
@@ -267,7 +283,7 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateFI(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG2:
-            return 1 - /*<- incorrect?*/ afd_metric_calculator::AFDMetricCalculator::CalculateG2(
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG2(
                                lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
         case model::AfdMeasure::kG3:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG3(
@@ -337,6 +353,7 @@ void Tane::ExecuteInternal() {
         model::Index const key_column = *lhs_it;
         if (!IsKey(relation_->GetColumnData(key_column).GetPositionListIndex())) {
             non_key_attrs.push_back(key_column);
+            ++lhs_it;
             continue;
         }
         // This column only consists of unique values, so any FD with it as LHS holds exactly.
@@ -371,10 +388,10 @@ void Tane::ExecuteInternal() {
     // are all newly intersected.
     // All of X have C^+(X) = R, since the previous level had C^+(X) = R for all the nodes left
     // over, so we skip lines 1 and 2.
-    for (auto col1_it = not_zeroary_afd_rhs.begin(), end_it = std::prev(not_zeroary_afd_rhs.end());
+    for (auto col1_it = non_key_attrs.begin(), end_it = std::prev(non_key_attrs.end());
          col1_it != end_it; ++col1_it) {
         model::Index const col1 = *col1_it;
-        for (auto col2_it = std::next(col1_it); col2_it != not_zeroary_afd_rhs.end(); ++col2_it) {
+        for (auto col2_it = std::next(col1_it); col2_it != non_key_attrs.end(); ++col2_it) {
             // for each A ∈ X ∩ C+(X) <=> for each A ∈ X ∩ R <=> for each A ∈ X
             model::Index const col2 = *col2_it;
 
@@ -444,8 +461,7 @@ void Tane::ExecuteInternal() {
                 reg12();
                 // Delete col2, everything else remains.
                 auto rhs_candidates = bs();
-                rhs_candidates.set();
-                rhs_candidates.reset(col2);
+                rhs_candidates.set().reset(col2);
                 if (error21 <= max_fd_error_) {
                     reg21();
                     // Also delete col1.
@@ -458,7 +474,10 @@ void Tane::ExecuteInternal() {
                 reg21();
                 // Delete col1, everything else remains.
                 add_to_level(std::move(bs().set().reset(col1)));
+                continue;
             }
+            // Otherwise, C^+(X) is R.
+            add_to_level(std::move(bs().set()));
         }
     }
 
