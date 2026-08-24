@@ -66,7 +66,8 @@ INSTANTIATE_TEST_SUITE_P(
                                   kSimpleTypes),
                 TypeParsingParams({TypeId::kMixed, TypeId::kDate, TypeId::kDate}, kACShippingDates),
                 TypeParsingParams({TypeId::kInt, TypeId::kString, TypeId::kDouble, TypeId::kMixed,
-                                   TypeId::kInt, TypeId::kDate, TypeId::kMixed},
+                                   TypeId::kInt, TypeId::kDate, TypeId::kMixed, TypeId::kBool,
+                                   TypeId::kMixed, TypeId::kInt, TypeId::kMixed, TypeId::kString},
                                   kSimpleTypes1)));
 
 TEST(TypeSystem, SumColumnDoubles) {
