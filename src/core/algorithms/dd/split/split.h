@@ -7,8 +7,8 @@
 #include <utility>
 #include <vector>
 
-#include "core/algorithms/algorithm.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/dd_algorithm.h"
 #include "core/algorithms/dd/split/enums.h"
 #include "core/algorithms/dd/split/model/distance_position_list_index.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -23,7 +23,7 @@ using DF = model::DF;
 using DD = model::DD;
 using DFConstraint = model::DFConstraint;
 
-class Split : public Algorithm {
+class Split final : public DDAlgorithm {
 private:
     config::InputTable input_table_;
 
@@ -46,15 +46,15 @@ private:
     std::vector<std::vector<std::vector<double>>> distances_;
     std::vector<std::pair<std::size_t, std::size_t>> tuple_pairs_;
     std::vector<std::vector<DFConstraint>> index_search_spaces_;
-    std::list<DD> dd_collection_;
+    std::list<DD> dds_;
 
     void RegisterOptions();
     void SetLimits();
     void CheckTypes();
     void ParseDifferenceTable();
 
-    void ResetState() final {
-        dd_collection_.clear();
+    virtual void ResetStateDD() override {
+        dds_.clear();
         tuple_pairs_.clear();
         non_empty_cols_.clear();
         index_search_spaces_.clear();
@@ -108,7 +108,6 @@ public:
     Split();
     std::list<DD> const& GetDDs() const;
     std::vector<model::DFConstraint> const& GetMinMaxDif() const;
-    std::list<model::DDString> GetDDStringList() const;
 };
 
 }  // namespace algos::dd

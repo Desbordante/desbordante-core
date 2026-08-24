@@ -1,4 +1,4 @@
-#include "python_bindings/dd/bind_split.h"
+#include "python_bindings/dd/bind_dd.h"
 
 #include <pybind11/pybind11.h>
 
@@ -6,6 +6,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/fastdd/fastdd.h"
 #include "core/algorithms/dd/split/split.h"
 #include "python_bindings/dd/create_dd.h"
 #include "python_bindings/py_util/bind_primitive.h"
@@ -15,7 +16,7 @@ namespace py = pybind11;
 }  // namespace
 
 namespace python_bindings {
-void BindSplit(py::module_& main_module) {
+void BindDD(py::module_& main_module) {
     using namespace algos;
     using model::DDString;
     using model::DFStringConstraint;
@@ -71,6 +72,8 @@ void BindSplit(py::module_& main_module) {
             .def(pybind11::self != pybind11::self)
             .def("__hash__", [](DDString const& dd) { return py::hash(py::str(dd.ToString())); })
             .def("to_json", &model::DDString::ToJSON);
-    BindPrimitiveNoBase<dd::Split>(dd_module, "Split").def("get_dds", &dd::Split::GetDDStringList);
+
+    BindPrimitive<dd::FastDD, dd::Split>(dd_module, &dd::DDAlgorithm::DDList, "DdAlgorithm",
+                                         "get_dds", {"FastDD", "Split"});
 }
 }  // namespace python_bindings
