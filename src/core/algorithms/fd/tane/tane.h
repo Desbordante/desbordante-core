@@ -12,36 +12,25 @@
 namespace algos {
 
 class Tane final : public PliBasedAFDAlgorithm {
-    struct ColumnCombinationMetadata {
-        // We technically don't need this member from the previous level, but it's relatively small.
-        boost::dynamic_bitset<> rhs_candidates;
-        // TODO: use a special pointer as PLI instead of this.
-        bool is_part_of_level;
-        std::unique_ptr<model::PLIWithSingletons> position_list_index;
-    };
-
-    struct PrevLevelColumnCombinationInfo {
-        model::Index non_suffix_column;
-        ColumnCombinationMetadata const* metadata;
-    };
-
     // TODO: suffix array? Not going to do much for <64 columns, I think?
-    using SuffixMap = std::unordered_map<boost::dynamic_bitset<>,
-                                         std::vector<PrevLevelColumnCombinationInfo>>;
+    using SuffixMap = std::unordered_map<boost::dynamic_bitset<>, std::vector<model::Index>>;
 
     config::ErrorType max_fd_error_;
     model::AfdMeasure afd_measure_;
 
-    // TODO: rename, also stores C^+(X)
-    using Level = std::unordered_map<boost::dynamic_bitset<>, ColumnCombinationMetadata>;
+    using Level = std::unordered_set<boost::dynamic_bitset<>>;
+    using CandidatesMap = std::unordered_map<boost::dynamic_bitset<>, boost::dynamic_bitset<>>;
+    using PartitionsMap =
+            std::unordered_map<boost::dynamic_bitset<>, std::unique_ptr<model::PLIWS>>;
 
     void ResetStateFd() final {}
 
-    void Prune(Level& level);
-    void ComputeDependencies(Level& current_level, Level const& prev_level);
+    void Prune(Level& level, CandidatesMap const& candidates_map, PartitionsMap const& plis);
+    void ComputeDependencies(Level const& level, PartitionsMap const& plis,
+                             CandidatesMap& candidates_map);
     // Exactly PrefixBlocks but the order of bits is inverted
     static SuffixMap SuffixBlocks(Level const& level);
-    static Level GenerateNextLevel(Level& level);
+    Level GenerateNextLevel(Level level, PartitionsMap& plis);
     void ExecuteInternal() final;
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs);
