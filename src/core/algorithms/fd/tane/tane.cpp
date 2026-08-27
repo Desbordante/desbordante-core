@@ -15,6 +15,26 @@
 #include "core/util/logger.h"
 
 namespace algos {
+// The original TANE algorithm is incorrect, because it deletes superkey nodes too early, leading to
+// failures when the intersection on line 6 of PRUNE is checked, as we might not have one or more of
+// the intersected C^+ sets calculated.
+// This shows itself when there is a column in C^+(X) \ X of a key (line 5 of PRUNE) that belongs to
+// another key of smaller size, as it would be deleted when processing a previous level, with line 2
+// in COMPUTE_DEPENDENCIES consequently not calculating the further C^+ sets.
+// One solution is to directly check each X \ {B} -> A (B ∈ X, A ∉ X) dependency when encountering a
+// key if no other C^+(X ∪ {A} \ {B}) that doesn't contain A exists (i. e. no evidence if
+// X \ {B} -> A holds). If we do happen upon it, we know that X \ {B} -> A holds and no direct
+// checking is needed. There would be a PLI available for each X \ {B}, as those had to have been
+// part of the previous level for X to end up in the current one.
+// Another is to, instead of deleting the key nodes, keep them and mark them, then skip the marked
+// ones in line 3 of COMPUTE_DEPENDENCIES, but not in lines 1 and 2 (i.e. keep calculating their
+// C^+(X)). This is the solution in the Metanome implementation.
+
+// The e(X) − e(X ∪ {A}) ≤ e(X → A) ≤ e(X) error bound optimization is omitted to make the algorithm
+// easier to generalize to other measures: figuring out how to define them for keys would take some
+// effort, and it is not guaranteed that the bounds would hold up under the most sensible
+// generalization.
+
 using boost::dynamic_bitset;
 using Cluster = model::PositionListIndex::Cluster;
 
@@ -33,50 +53,59 @@ bool Tane::IsKey(model::PositionListIndex const* pli) {
     return pli->AllValuesAreUnique();
 }
 
-void Tane::Prune(Level& level, CandidatesMap const& candidates_map, PartitionsMap const& plis) {
+void Tane::Prune(Level& level, CandidatesMap& candidates_map, PartitionsMap const& plis) {
     RelationalSchema const* schema = relation_->GetSchema();
     for (auto level_it = level.begin(); level_it != level.end();) {
-        boost::dynamic_bitset<> const column_combination = *level_it++;
-        if (candidates_map.find(column_combination)->second.none()) {
-            level.erase(column_combination);
+        boost::dynamic_bitset<>& rhs_candidates = candidates_map.find(*level_it)->second;
+        if (rhs_candidates.none()) {
+            level_it = level.erase(level_it);
+            continue;
         }
-        if (IsKey(plis.find(column_combination)->second.get())) {
-            util::ForEachIndex(
-                    candidates_map.find(column_combination)->second - column_combination,
-                    [&](model::Index rhs_index) {
-                        // The check in the original article is incorrect because we are not
-                        // guaranteed to have calculated C^+ of every sibling of the key.
-                        // A ∈ ⋂B∈X C+(X ∪ {A} \ {B}) means there is no FD X \ {B} -> A with B ∈ X,
-                        // so replace with a direct FD check.
-                        bool is_minimal = true;
-                        util::ForEachIndex(column_combination, [&](model::Index i) {
-                            config::ErrorType error;
-                            if (column_combination.count() == 1) {
-                                error = CalculateZeroAryFdError(
-                                        &relation_->GetColumnData(rhs_index));
-                            } else {
-                                model::PLIWS const* lhs_pli =
-                                        plis.find(boost::dynamic_bitset<>(column_combination)
-                                                          .reset(i))
-                                                ->second.get();
-                                model::PLIWS const* rhs_pli =
-                                        relation_->GetColumnData(rhs_index).GetPLWSIndex();
-                                std::unique_ptr<model::PLIWS> joint_pli =
-                                        lhs_pli->Intersect(rhs_pli);
-                                error = CalculateFdError(lhs_pli, rhs_pli, joint_pli.get());
-                            }
-                            if (error > max_fd_error_) return;
-                            is_minimal = false;
-                        });
-                        if (is_minimal) {
-                            RegisterAfd(AFD(schema->GetVertical(column_combination),
-                                            *schema->GetColumn(rhs_index),
-                                            0.0 /* key -> attr is always a plain FD */,
-                                            relation_->GetSharedPtrSchema()));
-                        }
-                    });
-            level.erase(column_combination);
+        if (!IsKey(plis.find(*level_it)->second.get())) {
+            ++level_it;
+            continue;
         }
+        Level::node_type node = level.extract(level_it++);
+        boost::dynamic_bitset<>& column_combination = node.value();
+        // The check in the original article is incorrect because we are not
+        // guaranteed to have calculated C^+ of every sibling of the key.
+        // A ∈ ⋂B∈X C+(X ∪ {A} \ {B}) means there is no FD X \ {B} -> A with B ∈ X,
+        // so replace with a direct FD check.
+        if (column_combination.count() == 1) {
+            model::Index const set_bit = column_combination.find_first();
+            bool was_candidate = rhs_candidates.test_set(set_bit, false);
+            util::ForEachIndex(rhs_candidates, [&](model::Index rhs_index) {
+                config::ErrorType error =
+                        CalculateZeroAryFdError(&relation_->GetColumnData(rhs_index));
+                if (error <= max_fd_error_) return;
+                RegisterAfd(AFD(schema->GetVertical(column_combination),
+                                *schema->GetColumn(rhs_index),
+                                0.0 /* key -> attr is always a plain FD */,
+                                relation_->GetSharedPtrSchema()));
+            });
+            if (was_candidate) {
+                rhs_candidates.set(set_bit);
+            }
+            continue;
+        }
+        util::ForEachIndex(rhs_candidates, [&](model::Index rhs_index) {
+            // rhs_candidates - column_combination without allocations
+            if (column_combination.test(rhs_index)) return;
+            for (model::Index i = column_combination.find_first();
+                 i != boost::dynamic_bitset<>::npos; i = column_combination.find_next(i)) {
+                column_combination.reset(i);
+                model::PLIWS const* lhs_pli = plis.find(column_combination)->second.get();
+                column_combination.set(i);
+                model::PLIWS const* rhs_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
+                std::unique_ptr<model::PLIWS> joint_pli = lhs_pli->Intersect(rhs_pli);
+                config::ErrorType error = CalculateFdError(lhs_pli, rhs_pli, joint_pli.get());
+
+                if (error <= max_fd_error_) return;
+            };
+            RegisterAfd(AFD(schema->GetVertical(column_combination), *schema->GetColumn(rhs_index),
+                            0.0 /* key -> attr is always a plain FD */,
+                            relation_->GetSharedPtrSchema()));
+        });
     }
 }
 
@@ -85,42 +114,55 @@ void Tane::ComputeDependencies(Level const& level, PartitionsMap const& plis,
     RelationalSchema const* schema = relation_->GetSchema();
 
     for (boost::dynamic_bitset<> const& column_combination : level) {
-        boost::dynamic_bitset<> intersection(relation_->GetNumColumns());
-        intersection.set();
-        util::ForEachIndex(column_combination, [&](model::Index i) {
-            intersection &=
-                    candidates_map.find(boost::dynamic_bitset<>(column_combination).reset(i))
-                            ->second;
-        });
+        model::Index i = column_combination.find_first();
+        assert(i != boost::dynamic_bitset<>::npos);
+        boost::dynamic_bitset<> parent = column_combination;
+        parent.reset(i);
+        boost::dynamic_bitset<> intersection = candidates_map.find(parent)->second;
+        parent.set(i);
+        for (i = column_combination.find_next(i); i != boost::dynamic_bitset<>::npos;
+             i = column_combination.find_next(i)) {
+            parent.reset(i);
+            intersection &= candidates_map.find(parent)->second;
+            parent.set(i);
+        }
         candidates_map.try_emplace(column_combination, std::move(intersection));
     }
     for (boost::dynamic_bitset<> const& column_combination : level) {
-        util::ForEachIndex(
-                column_combination & candidates_map.find(column_combination)->second,
-                [&](model::Index rhs_index) {
-                    config::ErrorType error;
-                    if (column_combination.count() == 1) {
-                        error = CalculateZeroAryFdError(&relation_->GetColumnData(rhs_index));
-                    } else {
-                        model::PLIWS const* lhs_pli =
-                                plis.find(boost::dynamic_bitset<>(column_combination)
-                                                  .reset(rhs_index))
-                                        ->second.get();
-                        model::PLIWS const* rhs_pli =
-                                relation_->GetColumnData(rhs_index).GetPLWSIndex();
-                        model::PLIWS const* joint_pli = plis.find(column_combination)->second.get();
-                        error = CalculateFdError(lhs_pli, rhs_pli, joint_pli);
-                    }
-                    if (error > max_fd_error_) return;
-                    RegisterAfd(AFD(
-                            schema->GetVertical(std::move(
-                                    boost::dynamic_bitset<>(column_combination).reset(rhs_index))),
-                            *schema->GetColumn(rhs_index), error, relation_->GetSharedPtrSchema()));
-                    boost::dynamic_bitset<>& rhs_candidates =
-                            candidates_map.find(column_combination)->second;
-                    rhs_candidates.reset(rhs_index);
-                    if (error == 0.0) rhs_candidates &= column_combination;
-                });
+        boost::dynamic_bitset<>& rhs_candidates = candidates_map.find(column_combination)->second;
+        if (column_combination.count() == 1) {
+            model::Index const rhs_index = column_combination.find_first();
+            if (!rhs_candidates.test(rhs_index)) continue;
+            config::ErrorType error = CalculateZeroAryFdError(&relation_->GetColumnData(rhs_index));
+            if (error > max_fd_error_) continue;
+            RegisterAfd(
+                    AFD(schema->GetVertical(boost::dynamic_bitset<>(relation_->GetNumColumns())),
+                        *schema->GetColumn(rhs_index), error, relation_->GetSharedPtrSchema()));
+            if (error == 0.0) {
+                rhs_candidates.reset();
+            } else {
+                rhs_candidates.reset(rhs_index);
+            }
+            continue;
+        }
+        boost::dynamic_bitset<> intersection = column_combination & rhs_candidates;
+        boost::dynamic_bitset<> parent = column_combination;
+        util::ForEachIndex(intersection, [&](model::Index rhs_index) {
+            parent.reset(rhs_index);
+            model::PLIWS const* lhs_pli = plis.find(parent)->second.get();
+            model::PLIWS const* rhs_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
+            model::PLIWS const* joint_pli = plis.find(column_combination)->second.get();
+            config::ErrorType error = CalculateFdError(lhs_pli, rhs_pli, joint_pli);
+            if (error > max_fd_error_) {
+                parent.set(rhs_index);
+                return;
+            }
+            RegisterAfd(AFD(schema->GetVertical(parent), *schema->GetColumn(rhs_index), error,
+                            relation_->GetSharedPtrSchema()));
+            parent.set(rhs_index);
+            rhs_candidates.reset(rhs_index);
+            if (error == 0.0) rhs_candidates &= column_combination;
+        });
     }
 }
 
@@ -128,6 +170,8 @@ void Tane::ComputeDependencies(Level const& level, PartitionsMap const& plis,
 auto Tane::SuffixBlocks(Level const& level) -> SuffixMap {
     SuffixMap map;
     for (auto const& column_combination : level) {
+        // TODO: test if this does anything.
+        if (column_combination.test(0) && column_combination.test(1)) continue;
         boost::dynamic_bitset<> suffix = column_combination;
         model::Index const non_suffix_column = suffix.find_first();
         suffix.reset(non_suffix_column);
@@ -144,29 +188,41 @@ auto Tane::GenerateNextLevel(Level level, PartitionsMap& plis) -> Level {
         std::vector<model::Index>& indices = node.mapped();
         if (indices.size() < 2) continue;
         std::ranges::sort(indices);
+        boost::dynamic_bitset<>& new_combination = node.key();
         for (auto outer_it = indices.begin(), end_it = std::prev(indices.end()); outer_it != end_it;
              ++outer_it) {
+            new_combination.set(*outer_it);
             for (auto inner_it = std::next(outer_it); inner_it != indices.end(); ++inner_it) {
-                boost::dynamic_bitset<> new_combination = node.key();
-                new_combination.set(*inner_it).set(*outer_it);
+                new_combination.set(*inner_it);
                 bool in_all_direct_subsets = true;
-                util::ForEachIndex(new_combination, [&](model::Index i) {
-                    if (!level.contains(boost::dynamic_bitset<>(new_combination).reset(i)))
+                // No point in checking anything earlier, we already know they exist because we got
+                // them from SuffixBlocks.
+                for (model::Index i = new_combination.find_next(*inner_it);
+                     i != boost::dynamic_bitset<>::npos; i = new_combination.find_next(i)) {
+                    new_combination.reset(i);
+                    auto it = level.find(new_combination);
+                    new_combination.set(i);
+                    if (it == level.end()) {
                         in_all_direct_subsets = false;
-                });
+                        break;
+                    }
+                }
                 if (in_all_direct_subsets) {
                     next_level.insert(new_combination);
-                    // A partition with respect to a larger attribute set X is computed when X is
-                    // added to its level on line 6 of GENERATE_NEXT_LEVEL
-                    model::Index const excluded_column = new_combination.find_first();
+                    // "A partition with respect tod a larger attribute set X is computed when X is
+                    // added to its level on line 6 of GENERATE_NEXT_LEVEL"
+                    model::Index const excluded_column = *outer_it;
+                    new_combination.reset(excluded_column);
+                    model::PLIWS const& old_pli = *plis.find(new_combination)->second;
+                    new_combination.set(excluded_column);
                     plis.try_emplace(
-                            std::move(new_combination),
-                            plis.find(boost::dynamic_bitset<>(new_combination)
-                                              .reset(excluded_column))
-                                    ->second->Intersect(relation_->GetColumnData(excluded_column)
-                                                                .GetPLWSIndex()));
+                            new_combination,
+                            old_pli.Intersect(
+                                    relation_->GetColumnData(excluded_column).GetPLWSIndex()));
                 }
+                new_combination.reset(*inner_it);
             }
+            new_combination.reset(*outer_it);
         }
     }
     return next_level;
@@ -274,6 +330,7 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
 }
 
 void Tane::ExecuteInternal() {
+    if (relation_->GetNumColumns() < 2) return;
     CandidatesMap rhs_candidates{
             {boost::dynamic_bitset<>(relation_->GetNumColumns()),
              std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set())}};
@@ -288,13 +345,13 @@ void Tane::ExecuteInternal() {
                                std::make_unique<model::PLIWS>(
                                        *relation_->GetColumnData(column_index).GetPLWSIndex()));
     }
-    std::size_t level_number = 1;
+    std::size_t level_index = 0;
     while (!current_level.empty()) {
         ComputeDependencies(current_level, partitions, rhs_candidates);
-        if (level_number - 1 == max_lhs_) break;
+        if (level_index == max_lhs_) break;
         Prune(current_level, rhs_candidates, partitions);
         current_level = GenerateNextLevel(std::move(current_level), partitions);
-        ++level_number;
+        ++level_index;
     }
 }
 

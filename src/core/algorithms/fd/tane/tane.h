@@ -25,7 +25,7 @@ class Tane final : public PliBasedAFDAlgorithm {
 
     void ResetStateFd() final {}
 
-    void Prune(Level& level, CandidatesMap const& candidates_map, PartitionsMap const& plis);
+    void Prune(Level& level, CandidatesMap& candidates_map, PartitionsMap const& plis);
     void ComputeDependencies(Level const& level, PartitionsMap const& plis,
                              CandidatesMap& candidates_map);
     // Exactly PrefixBlocks but the order of bits is inverted
