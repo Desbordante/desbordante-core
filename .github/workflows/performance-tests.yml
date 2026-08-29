@@ -34,7 +34,8 @@ jobs:
       - name: Build
         run: |
           export CXX=g++-14
-          ./build.sh --benchmark --no-tests
+
+          uv run build.py --benchmark --no-tests
 
       - name: Get previous results
         run: |
@@ -133,14 +134,12 @@ jobs:
 
       - name: Build plots
         run: |
-          python3 -m venv .venv
-          .venv/bin/python3 -m pip install uv
           if [[ -a 'baseline.json' ]]; then
-            .venv/bin/python3 -m uv run src/tests/benchmark/display_benchmarks.py \
+            uv run src/tests/benchmark/display_benchmarks.py \
               --old_results old-results --baseline baseline.json --curr_results curr-results.json \
               --output plots.pdf
           else
-            .venv/bin/python3 -m uv run src/tests/benchmark/display_benchmarks.py \
+            uv run src/tests/benchmark/display_benchmarks.py \
               --old_results old-results --curr_results curr-results.json --output plots.pdf
           fi
 

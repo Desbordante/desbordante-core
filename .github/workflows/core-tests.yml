@@ -39,7 +39,7 @@ concurrency:
   
 jobs:
   run_tests:
-    name: Run core-tests on ${{ matrix.system.os }} with ${{ matrix.system.toolset }}, ${{matrix.cfg.BUILD_TYPE}} ${{ matrix.cfg.SANITIZER }}
+    name: Run core-tests on ${{ matrix.system.os }} with ${{ matrix.system.toolset }}, ${{matrix.cfg.BUILD_TYPE}} ${{ join(matrix.cfg.SANITIZERS, ', ') }}
     continue-on-error: true
     strategy:
       matrix:
@@ -70,10 +70,12 @@ jobs:
             env: CXX=clang++
 
         cfg:
-          - { BUILD_TYPE: Release }
-          - { BUILD_TYPE: Debug, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
-          - { BUILD_TYPE: Debug, SANITIZER : ADDRESS, CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
-          - { BUILD_TYPE: Debug, SANITIZER : UB, CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
+          - BUILD_TYPE: Release
+          - BUILD_TYPE: Debug
+            CMAKE_OPTS: '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON'
+          - BUILD_TYPE: Debug
+            SANITIZERS : [ADDRESS, UB]
+            CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON'
 
     runs-on: ${{ matrix.system.os }}
     steps:
@@ -89,10 +91,19 @@ jobs:
           export ${{ matrix.system.env }}
 
           if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
-            ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }} \
-              --cmake-opt='${{ matrix.cfg.CMAKE_OPTS }}'
+            SANITIZERS="${{ join(matrix.cfg.SANITIZERS || '', ' ') }}"
+
+            SANITIZER_ARGS=()
+            # bash for-loop in quite counter-intuitive if argument is empty string
+            if [[ -n "$SANITIZERS" ]]; then
+              for SANITIZER in $SANITIZERS; do
+                SANITIZER_ARGS+=("--sanitizer=$SANITIZER")
+              done
+            fi
+
+            uv run build.py --debug "${SANITIZER_ARGS[@]}" --cmake-opts='${{ matrix.cfg.CMAKE_OPTS }}'
           else
-            ./build.sh
+            uv run build.py
           fi
       - name: Test
         working-directory: ${{github.workspace}}/build
