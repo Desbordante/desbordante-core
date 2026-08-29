@@ -216,7 +216,7 @@ auto Tane::GenerateNextLevel(Level level, PartitionsMap const& current_plis)
                 }
                 if (in_all_direct_subsets) {
                     next_level.insert(new_combination);
-                    // "A partition with respect tod a larger attribute set X is computed when X is
+                    // "A partition with respect to a larger attribute set X is computed when X is
                     // added to its level on line 6 of GENERATE_NEXT_LEVEL"
                     model::Index const excluded_column = *outer_it;
                     new_combination.reset(excluded_column);
