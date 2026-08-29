@@ -53,7 +53,8 @@ bool Tane::IsKey(model::PositionListIndex const* pli) {
     return pli->AllValuesAreUnique();
 }
 
-void Tane::Prune(Level& level, CandidatesMap& candidates_map, PartitionsMap const& plis) {
+void Tane::Prune(Level& level, CandidatesMap& candidates_map, PartitionsMap const& plis,
+                 PartitionsMap const& parent_plis) {
     RelationalSchema const* schema = relation_->GetSchema();
     for (auto level_it = level.begin(); level_it != level.end();) {
         boost::dynamic_bitset<>& rhs_candidates = candidates_map.find(*level_it)->second;
@@ -94,7 +95,7 @@ void Tane::Prune(Level& level, CandidatesMap& candidates_map, PartitionsMap cons
             for (model::Index i = column_combination.find_first();
                  i != boost::dynamic_bitset<>::npos; i = column_combination.find_next(i)) {
                 column_combination.reset(i);
-                model::PLIWS const* lhs_pli = plis.find(column_combination)->second.get();
+                model::PLIWS const* lhs_pli = parent_plis.find(column_combination)->second.get();
                 column_combination.set(i);
                 model::PLIWS const* rhs_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
                 std::unique_ptr<model::PLIWS> joint_pli = lhs_pli->Intersect(rhs_pli);
@@ -109,27 +110,30 @@ void Tane::Prune(Level& level, CandidatesMap& candidates_map, PartitionsMap cons
     }
 }
 
-void Tane::ComputeDependencies(Level const& level, PartitionsMap const& plis,
-                               CandidatesMap& candidates_map) {
+auto Tane::ComputeDependencies(Level const& level, PartitionsMap const& plis,
+                               PartitionsMap const& parent_plis,
+                               CandidatesMap const& prev_candidates) -> CandidatesMap {
     RelationalSchema const* schema = relation_->GetSchema();
+    CandidatesMap current_candidates;
 
     for (boost::dynamic_bitset<> const& column_combination : level) {
         model::Index i = column_combination.find_first();
         assert(i != boost::dynamic_bitset<>::npos);
         boost::dynamic_bitset<> parent = column_combination;
         parent.reset(i);
-        boost::dynamic_bitset<> intersection = candidates_map.find(parent)->second;
+        boost::dynamic_bitset<> intersection = prev_candidates.find(parent)->second;
         parent.set(i);
         for (i = column_combination.find_next(i); i != boost::dynamic_bitset<>::npos;
              i = column_combination.find_next(i)) {
             parent.reset(i);
-            intersection &= candidates_map.find(parent)->second;
+            intersection &= prev_candidates.find(parent)->second;
             parent.set(i);
         }
-        candidates_map.try_emplace(column_combination, std::move(intersection));
+        current_candidates.try_emplace(column_combination, std::move(intersection));
     }
     for (boost::dynamic_bitset<> const& column_combination : level) {
-        boost::dynamic_bitset<>& rhs_candidates = candidates_map.find(column_combination)->second;
+        boost::dynamic_bitset<>& rhs_candidates =
+                current_candidates.find(column_combination)->second;
         if (column_combination.count() == 1) {
             model::Index const rhs_index = column_combination.find_first();
             if (!rhs_candidates.test(rhs_index)) continue;
@@ -149,7 +153,7 @@ void Tane::ComputeDependencies(Level const& level, PartitionsMap const& plis,
         boost::dynamic_bitset<> parent = column_combination;
         util::ForEachIndex(intersection, [&](model::Index rhs_index) {
             parent.reset(rhs_index);
-            model::PLIWS const* lhs_pli = plis.find(parent)->second.get();
+            model::PLIWS const* lhs_pli = parent_plis.find(parent)->second.get();
             model::PLIWS const* rhs_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
             model::PLIWS const* joint_pli = plis.find(column_combination)->second.get();
             config::ErrorType error = CalculateFdError(lhs_pli, rhs_pli, joint_pli);
@@ -164,6 +168,7 @@ void Tane::ComputeDependencies(Level const& level, PartitionsMap const& plis,
             if (error == 0.0) rhs_candidates &= column_combination;
         });
     }
+    return current_candidates;
 }
 
 // Exactly PrefixBlocks but the order of bits is inverted.
@@ -180,8 +185,10 @@ auto Tane::SuffixBlocks(Level const& level) -> SuffixMap {
     return map;
 }
 
-auto Tane::GenerateNextLevel(Level level, PartitionsMap& plis) -> Level {
+auto Tane::GenerateNextLevel(Level level, PartitionsMap const& current_plis)
+        -> std::pair<Level, PartitionsMap> {
     Level next_level;
+    PartitionsMap next_level_plis;
     SuffixMap s_map = SuffixBlocks(level);
     for (auto s_map_it = s_map.begin(); s_map_it != s_map.end();) {
         SuffixMap::node_type node = s_map.extract(s_map_it++);
@@ -213,9 +220,9 @@ auto Tane::GenerateNextLevel(Level level, PartitionsMap& plis) -> Level {
                     // added to its level on line 6 of GENERATE_NEXT_LEVEL"
                     model::Index const excluded_column = *outer_it;
                     new_combination.reset(excluded_column);
-                    model::PLIWS const& old_pli = *plis.find(new_combination)->second;
+                    model::PLIWS const& old_pli = *current_plis.find(new_combination)->second;
                     new_combination.set(excluded_column);
-                    plis.try_emplace(
+                    next_level_plis.try_emplace(
                             new_combination,
                             old_pli.Intersect(
                                     relation_->GetColumnData(excluded_column).GetPLWSIndex()));
@@ -225,7 +232,7 @@ auto Tane::GenerateNextLevel(Level level, PartitionsMap& plis) -> Level {
             new_combination.reset(*outer_it);
         }
     }
-    return next_level;
+    return {std::move(next_level), std::move(next_level_plis)};
 }
 
 config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
@@ -331,27 +338,34 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
 
 void Tane::ExecuteInternal() {
     if (relation_->GetNumColumns() < 2) return;
-    CandidatesMap rhs_candidates{
+    CandidatesMap prev_rhs_candidates{
             {boost::dynamic_bitset<>(relation_->GetNumColumns()),
              std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set())}};
+    CandidatesMap rhs_candidates;
     Level current_level;
-    PartitionsMap partitions;
+    PartitionsMap prev_partitions;
+    PartitionsMap current_partitions;
     for (model::Index column_index = 0; column_index != relation_->GetNumColumns();
          ++column_index) {
         boost::dynamic_bitset<> column_combination(relation_->GetNumColumns());
         column_combination.set(column_index);
         current_level.insert(column_combination);
-        partitions.try_emplace(std::move(column_combination),
-                               std::make_unique<model::PLIWS>(
-                                       *relation_->GetColumnData(column_index).GetPLWSIndex()));
+        current_partitions.try_emplace(
+                std::move(column_combination),
+                std::make_unique<model::PLIWS>(
+                        *relation_->GetColumnData(column_index).GetPLWSIndex()));
     }
     std::size_t level_index = 0;
     while (!current_level.empty()) {
-        ComputeDependencies(current_level, partitions, rhs_candidates);
+        rhs_candidates = ComputeDependencies(current_level, current_partitions, prev_partitions,
+                                             prev_rhs_candidates);
         if (level_index == max_lhs_) break;
-        Prune(current_level, rhs_candidates, partitions);
-        current_level = GenerateNextLevel(std::move(current_level), partitions);
+        Prune(current_level, rhs_candidates, current_partitions, prev_partitions);
+        prev_partitions = std::move(current_partitions);
+        std::tie(current_level, current_partitions) =
+                GenerateNextLevel(std::move(current_level), prev_partitions);
         ++level_index;
+        prev_rhs_candidates = std::move(rhs_candidates);
     }
 }
 
