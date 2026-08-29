@@ -13,7 +13,9 @@ namespace algos {
 
 class Tane final : public PliBasedAFDAlgorithm {
     // TODO: suffix array? Not going to do much for <64 columns, I think?
-    using SuffixMap = std::unordered_map<boost::dynamic_bitset<>, std::vector<model::Index>>;
+    using SuffixMap = std::unordered_map<
+            boost::dynamic_bitset<>,
+            std::vector<std::pair<model::Index, boost::dynamic_bitset<> const*>>>;
     // RHS candidates and level together, PLIs? If not key, will need the PLI, unless last level. If
     // checking level, will need RHS candidates.
 
@@ -27,22 +29,20 @@ class Tane final : public PliBasedAFDAlgorithm {
     // ComputeDependencies. This will allow us to register slightly more dependencies in the case we
     // run out of memory, but it doesn't really matter. GenerateNextLevel is executed after all the
     // dependency checking is done, so we don't need previous level's PLIs by that point.
-    using Level = std::unordered_set<boost::dynamic_bitset<>>;
     using CandidatesMap = std::unordered_map<boost::dynamic_bitset<>, boost::dynamic_bitset<>>;
     using PartitionsMap =
             std::unordered_map<boost::dynamic_bitset<>, std::unique_ptr<model::PLIWS>>;
 
     void ResetStateFd() final {}
 
-    void Prune(Level& level, CandidatesMap& candidates_map, PartitionsMap const& plis,
+    void Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis,
                PartitionsMap const& parent_plis);
-    CandidatesMap ComputeDependencies(Level const& level, PartitionsMap const& plis,
-                                      PartitionsMap const& parent_plis,
-                                      CandidatesMap const& prev_candidates);
+    void ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& parent_plis,
+                             CandidatesMap& prev_candidates);
     // Exactly PrefixBlocks but the order of bits is inverted
-    static SuffixMap SuffixBlocks(Level const& level);
-    std::pair<Level, PartitionsMap> GenerateNextLevel(Level level,
-                                                      PartitionsMap const& current_plis);
+    static SuffixMap SuffixBlocks(CandidatesMap const& rhs_candidates);
+    std::pair<CandidatesMap, PartitionsMap> GenerateNextLevel(
+            CandidatesMap const& current_candidates, PartitionsMap const& current_plis);
     void ExecuteInternal() final;
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs);
