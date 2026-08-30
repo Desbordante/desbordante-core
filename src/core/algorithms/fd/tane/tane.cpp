@@ -143,11 +143,11 @@ void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& p
         }
         boost::dynamic_bitset<> intersection = column_combination & rhs_candidates;
         boost::dynamic_bitset<> parent = column_combination;
+        model::PLIWS const* joint_pli = plis.find(column_combination)->second.get();
         util::ForEachIndex(intersection, [&](model::Index rhs_index) {
             parent.reset(rhs_index);
             model::PLIWS const* lhs_pli = parent_plis.find(parent)->second.get();
             model::PLIWS const* rhs_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
-            model::PLIWS const* joint_pli = plis.find(column_combination)->second.get();
             config::ErrorType error = CalculateFdError(lhs_pli, rhs_pli, joint_pli);
             if (error > max_fd_error_) {
                 parent.set(rhs_index);
