@@ -12,6 +12,8 @@
 #include "core/model/types/type.h"
 #include "core/util/export.h"
 
+// TODO: vector metrics
+
 namespace util {
 /// @brief User-defined metric on a set of columns, that treats values as tuples (vectors)
 /// Together with @c PyCustomVectorMetric and @c CustomVectorMetric provides
