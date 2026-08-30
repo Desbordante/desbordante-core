@@ -15,17 +15,17 @@
 #include "core/util/logger.h"
 
 namespace algos {
-// The original TANE algorithm is incorrect, because it deletes superkey nodes too early, leading to
-// failures when the intersection on line 6 of PRUNE is checked, as we might not have one or more of
-// the intersected C^+ sets calculated.
+// The original TANE algorithm is incorrect, because it deletes superkey nodes too eagerly, leading
+// to failures when the intersection on line 6 of PRUNE is checked, as we might not have one or more
+// of the intersected C^+ sets calculated.
 // This shows itself when there is a column in C^+(X) \ X of a key (line 5 of PRUNE) that belongs to
-// another key of smaller size, as it would be deleted when processing a previous level, with line 2
-// in COMPUTE_DEPENDENCIES consequently not calculating the further C^+ sets.
+// another key of smaller size, as said key would be deleted when processing a previous level, with
+// line 2 in COMPUTE_DEPENDENCIES consequently not calculating the further C^+ sets.
 // One solution is to directly check each X \ {B} -> A (B ∈ X, A ∉ X) dependency when encountering a
 // key if no other C^+(X ∪ {A} \ {B}) that doesn't contain A exists (i. e. no evidence if
-// X \ {B} -> A holds). If we do happen upon it, we know that X \ {B} -> A holds and no direct
-// checking is needed. There would be a PLI available for each X \ {B}, as those had to have been
-// part of the previous level for X to end up in the current one.
+// X \ {B} -> A holds). If we do happen upon it, we know that X \ {B} -> A holds by definition of
+// C^+(X) and don't have to check that directly. There would be a PLI available for each X \ {B}, as
+// those had to have been part of the previous level for X to end up in the current one.
 // Another is to, instead of deleting the key nodes, keep them and mark them, then skip the marked
 // ones in line 3 of COMPUTE_DEPENDENCIES, but not in lines 1 and 2 (i.e. keep calculating their
 // C^+(X)). This is the solution in the Metanome implementation.
@@ -34,6 +34,35 @@ namespace algos {
 // easier to generalize to other measures: figuring out how to define them for keys would take some
 // effort, and it is not guaranteed that the bounds would hold up under the most sensible
 // generalization.
+
+// What if we avoid performing a part of PRUNE?
+// 1. Don't delete empty, don't remove keys.
+// - No pruning, but everything works.
+// 2. Don't delete empty, remove keys.
+// - I can't think of a way to use this beneficially.
+// 3. Delete empty, don't remove keys.
+// - We can assume C^+ is empty if we don't find it, so it makes no sense to implement 1, other than
+//   checking what effect the pruning has.
+// 4. Delete empty, remove keys.
+// - We have to use a direct FD check if we don't find C^+, as it may have been due to a removed key
+//   instead of it being empty.
+// 4.1. Remove keys immediately.
+// 4.2. Keep keys, remove on another pass.
+// - Avoids some direct FD checks.
+
+// TODO: Implement 3, 4.1, 4.2.
+// When implementing 3, we should use a single dict where the value contains the PLI, given that
+// PLIs and RHS candidates are added together. When finding a key in Prune, the PLI can be set to
+// nullptr.
+// In 4.1 deleting this combined values would delete the PLI for a sibling key, which we'll have to
+// calculate again if we don't see a set that does not contain the column in line 5 of PRUNE. To
+// mitigate, we can specifically store the key's column combination bitset, then delete the stored
+// ones, which is 4.2.
+
+// However, we can also keep PLIs in a separate map. That way, we can avoid recalculating any PLIs
+// in that case. This is a middle ground between 4.1 and 4.2. We can also, even with separate maps,
+// remove the PLIs on a second pass instead of immediately, like 4.2 (needs storing the key column
+// combinations). However, I doubt that would do much, keys are not that common.
 
 using boost::dynamic_bitset;
 using Cluster = model::PositionListIndex::Cluster;
@@ -58,6 +87,7 @@ void Tane::Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis,
     RelationalSchema const* schema = relation_->GetSchema();
     for (auto candidates_it = rhs_candidates.begin(); candidates_it != rhs_candidates.end();) {
         assert(candidates_it->second.any());
+        // TODO: remove beforehand, skip if PLI is nullptr then.
         if (!IsKey(plis.find(candidates_it->first)->second.get())) {
             ++candidates_it;
             continue;
@@ -143,6 +173,13 @@ void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& p
         }
         boost::dynamic_bitset<> intersection = column_combination & rhs_candidates;
         boost::dynamic_bitset<> parent = column_combination;
+        // TODO: the measures should be calculated at the same time as the PLIs are being
+        // intersected instead of doing a separate pass, i.e. the intersected PLI should be created
+        // here on the first iteration. Then it may be used for later iterations if there is a more
+        // efficient way.
+        // Creating the intersected PLIs here otherwise doesn't make sense, since the only effect it
+        // will have is maybe allowing us to report more FDs before memory runs out, but the peak
+        // memory usage would be the same either way.
         model::PLIWS const* joint_pli = plis.find(column_combination)->second.get();
         util::ForEachIndex(intersection, [&](model::Index rhs_index) {
             parent.reset(rhs_index);
@@ -157,6 +194,22 @@ void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& p
                             relation_->GetSharedPtrSchema()));
             parent.set(rhs_index);
             rhs_candidates.reset(rhs_index);
+            // This might be pointless, because these dependencies would be found for the siblings,
+            // which would then have the previous line fire. These columns would not end up in the
+            // intersections in the latter levels anyway. And because we are using bitsets to
+            // calculate the intersection, instead of, say, iterating through C+^(X)'s columns, this
+            // would not have any performance impact. Maybe we could get it to have some if we,
+            // like, had bitsets smaller than 64 columns, then had checks that cut the number of
+            // blocks if they are zero, but this is too difficult to implement and would probably
+            // not have that much impact. In fact, the intersections might become slower. We've run
+            // into a peculiarity with the machines we're using to compute: they only work with at
+            // least 8 bits in parallel.
+            // Except, not quite. The difference with the algorithm in the article is that we're
+            // pruning empties immediately. If rhs_candidates becomes empty, we may delete it, which
+            // could make some hashtable checks for a node's existence in GenerateNextLevel faster,
+            // because a node at the hash(new_combination) index in the node array might not exist,
+            // so we will avoid an equality check. However, I don't think it's going to happen that
+            // much effect.
             if (error == 0.0) rhs_candidates &= column_combination;
         });
         if (rhs_candidates.none()) {
@@ -221,6 +274,12 @@ auto Tane::GenerateNextLevel(CandidatesMap const& current_candidates,
                     }
                 }
                 if (in_next_level) {
+                    // Oh hey, the PLIs construction and adding RHS combinations happens on the same
+                    // level, so we can store them in the same dict without consequences. Except
+                    // when they are be deleted. Do we need a PLI where the C^+(X) is empty? Yes,
+                    // when we have a sibling key if we want to avoid the direct intersection in
+                    // this one case.
+                    // TODO: merge
                     next_rhs_candidates.try_emplace(new_combination, next_candidates);
                     // "A partition with respect to a larger attribute set X is computed when X is
                     // added to its level on line 6 of GENERATE_NEXT_LEVEL"
@@ -369,6 +428,9 @@ void Tane::ExecuteInternal() {
         Prune(rhs_candidates, current_partitions, prev_partitions);
 
         prev_partitions = std::move(current_partitions);
+        // TODO: On max_lhs_ level, do not save PLIs. This will need code that differs more from
+        // what's here right now, but once we have better measures calculation (i.e. intersections
+        // happen in ComputeDependencies), the procedure is not going to be as different.
         std::tie(rhs_candidates, current_partitions) =
                 GenerateNextLevel(rhs_candidates, prev_partitions);
         ++level_index;

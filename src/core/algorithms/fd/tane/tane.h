@@ -16,19 +16,12 @@ class Tane final : public PliBasedAFDAlgorithm {
     using SuffixMap = std::unordered_map<
             boost::dynamic_bitset<>,
             std::vector<std::pair<model::Index, boost::dynamic_bitset<> const*>>>;
-    // RHS candidates and level together, PLIs? If not key, will need the PLI, unless last level. If
-    // checking level, will need RHS candidates.
+    // RHS candidates and level together, what about PLIs? If not key, will need the PLI. On last
+    // level (max_lhs_), no PLIs need to be saved. If checking level, will need RHS candidates.
 
     config::ErrorType max_fd_error_;
     model::AfdMeasure afd_measure_;
 
-    // Merge Level and CandidatesMap? We have to do that for the no-prune mitigation, but what will
-    // this do for the direct calculation mitigation? ComputeDependencies and Prune use
-    // CandidatesMap, but we can also calculate RHS candidates in GenerateNextLevel. We need PLIs
-    // from the previous level too. The previous implementation intersected lazily, only in
-    // ComputeDependencies. This will allow us to register slightly more dependencies in the case we
-    // run out of memory, but it doesn't really matter. GenerateNextLevel is executed after all the
-    // dependency checking is done, so we don't need previous level's PLIs by that point.
     using CandidatesMap = std::unordered_map<boost::dynamic_bitset<>, boost::dynamic_bitset<>>;
     using PartitionsMap =
             std::unordered_map<boost::dynamic_bitset<>, std::unique_ptr<model::PLIWS>>;
