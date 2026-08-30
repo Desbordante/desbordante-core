@@ -1,10 +1,9 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 
-#include "core/util/custom_metric/custom_metric.h"
+#include "core/config/custom_metric/custom_metric/type.h"
 
 namespace config {
-using CustomMetricsType = std::vector<std::shared_ptr<util::ICustomMetric>>;
+using CustomMetricsType = std::vector<CustomMetricType>;
 }  // namespace config

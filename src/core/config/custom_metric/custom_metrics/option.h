@@ -6,6 +6,7 @@
 #include <memory>
 #include <sstream>
 #include <string_view>
+#include <variant>
 
 #include "core/config/column_index/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
@@ -13,6 +14,7 @@
 #include "core/config/exceptions.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
+#include "core/util/custom_metric/custom_metric.h"
 
 namespace config {
 /// @brief Option for a collection of user-defined metrics
@@ -22,7 +24,7 @@ private:
     std::string_view description_;
 
     static CustomMetricsType MakeDefaultMetrics(std::size_t indices_count) {
-        return CustomMetricsType(indices_count, nullptr);
+        return CustomMetricsType(indices_count, std::shared_ptr<util::ICustomMetric>{nullptr});
     }
 
     static void CheckMetrics(CustomMetricsType const& value, std::size_t indices_count) {
@@ -37,7 +39,12 @@ private:
     static void NormalizeMetrics(CustomMetricsType& value) {
         auto default_metric = std::make_shared<util::DefaultCustomMetric>();
 
-        std::ranges::replace_if(value, std::logical_not{}, default_metric);
+        std::ranges::replace_if(
+                value,
+                [](auto const& metric) {
+                    return std::visit([](auto const& metric) { return metric == nullptr; }, metric);
+                },
+                default_metric);
     }
 
 public:
