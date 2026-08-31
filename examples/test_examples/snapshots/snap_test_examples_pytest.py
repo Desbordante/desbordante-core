@@ -7049,6 +7049,358 @@ Third violating cluster:
 
 '''
 
+snapshots['test_example[basic/mining_sd.py-None-mining_sd_output] mining_sd_output'] = '''======================================================================
+\x1b[1;36m1. Paper\x1b[0m
+======================================================================
+This example demonstrates how to mine Sequential Dependencies (SDs)
+using the Desbordante library. The algorithm is based on the article
+by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha, and Divesh
+Srivastava. 2009. Sequential dependencies. Proc. VLDB Endow. 2, 1
+(August 2009), 574–585.
+
+This example focuses on mining an SD tableau and later compares the
+exact and faster strategies. If you want to validate a known SD,
+locate its violations, and see how the data can be repaired, continue
+with examples/basic/verifying_sd.py.
+
+======================================================================
+\x1b[1;36m2. Sequential Dependencies, tableau patterns, and tableaux\x1b[0m
+======================================================================
+Imagine that you have measurements that should arrive in a regular
+order, but delays and missing records sometimes break that order.
+SDMiner helps you find the ranges where the expected sequence is still
+visible.
+
+We will work with a log of network polls. PollNum is the poll number,
+and Time is the time when the poll occurred, in seconds.
+
+     PollNum         Time       Time gap           In [9, 11]
+           1           10              -                    -
+           2           20             10                  yes
+           3           25              5                   no
+           4           35             10                  yes
+           5           45             10                  yes
+           6           60             15                   no
+           7           90             30                   no
+           8          105             15                   no
+
+To describe the sequence, we first need a column that puts the rows in
+order. This column is called X. For our log, X is PollNum, so poll 1
+comes before poll 2. We also need a value to watch as we move through
+that order. This column is called Y, and here it is Time.
+
+\x1b[1;33mSD notation: X -> [g1, g2] Y\x1b[0m
+  * X tells SDMiner how to order the rows.
+  * Y is the value we want to follow through that order.
+  * g1 is the smallest change in Y that we will accept.
+  * g2 is the largest change in Y that we will accept.
+A change equal to either bound is accepted as well.
+
+\x1b[1;33mThis example: PollNum -> [9, 11] Time\x1b[0m
+After sorting by PollNum, Time must change by 9 to 11 seconds between
+consecutive rows. The change from 10 to 20 is 10 and satisfies the SD.
+The next change, from 20 to 25, is 5 and violates it.
+
+At this point, we have chosen the SD ourselves. SDMiner will not try
+to guess X, Y, or the gap bounds. Instead, it will look through the
+ordered rows and find contiguous ranges where our SD holds closely
+enough. Each such range is a tableau pattern. Together, the returned
+tableau patterns form one tableau.
+
+\x1b[1;33mTableau pattern notation:\x1b[0m
+  P1: PollNum in [1, 2], support = 2, confidence = 1.000
+
+Suppose SDMiner returns the line above. The bounds [1, 2] tell us
+where this tableau pattern starts and ends in X. Its support says that
+the range contains 2 rows. Its confidence tells us how well those rows
+follow the SD, and confidence 1 means that they follow it strictly. We
+call the next tableau patterns P2, P3, and so on. They all belong to
+one tableau T, written T = {P1, P2, ...}.
+
+Finally, we usually want to know how much of the original data the
+whole tableau explains. Global support answers that question by
+counting the distinct rows covered by its tableau patterns. If two
+tableau patterns overlap, a shared row is counted only once.
+
+======================================================================
+\x1b[1;36m3. SDMiner parameters\x1b[0m
+======================================================================
+Once you have chosen the SD you want to mine — its X and Y columns and
+the allowed gap bounds — you can configure SDMiner using the
+parameters below. You pass table to load_data() and all other
+parameters to execute().
+
+  * \x1b[1;33mtable (required)\x1b[0m
+    The data in which SDMiner will search for a tableau. This is the
+    only parameter passed to load_data()
+  * \x1b[1;33mlhs_indices (required)\x1b[0m
+    Determines which column is used as X. Pass a list containing one
+    zero-based column index. Only one numeric column is currently
+    supported
+  * \x1b[1;33mrhs_indices (required)\x1b[0m
+    Determines which column is used as Y. Pass a list containing one
+    zero-based column index. Only one numeric column is currently
+    supported
+  * \x1b[1;33mg1 (required)\x1b[0m
+    Sets the smallest allowed change in Y. It must be finite and
+    non-negative
+  * \x1b[1;33mg2 (required)\x1b[0m
+    Sets the largest allowed change in Y and normally must be at least
+    g1. A negative finite value removes the upper bound, as Section 6
+    shows
+  * \x1b[1;33mminimum_confidence (default: 1.0)\x1b[0m
+    Controls how closely each tableau pattern must follow the SD. A
+    value of 1 requires a strict match, while lower values allow more
+    deviations. You can choose any value from 0 to 1. Section 5 shows
+    this trade-off
+  * \x1b[1;33mminimum_support (default: 1.0)\x1b[0m
+    Controls how much of the data the whole tableau must cover. A
+    value of 1 requires every row, while lower values allow partial
+    coverage. You can choose any value from 0 to 1. Section 5 explains
+    how overlapping coverage is counted
+  * \x1b[1;33minterval_strategy (default: 'exact')\x1b[0m
+    SDMiner supports two algorithms for finding candidate intervals
+    for tableau patterns. 'exact' preserves minimum_confidence.
+    'approximate' can be faster, but returned tableau patterns may
+    have lower confidence. Section 8 compares them
+  * \x1b[1;33massembly_strategy (default: 'exact')\x1b[0m
+    SDMiner supports two algorithms for assembling the tableau.
+    'exact' produces the smallest tableau among the candidate
+    intervals found. 'greedy' usually uses less time and memory, but
+    its tableau may contain more tableau patterns than necessary.
+    Section 7 compares them
+  * \x1b[1;33mdelta (default: 0.05)\x1b[0m
+    Only affects the approximate interval strategy. Smaller values
+    keep the confidence guarantee closer to minimum_confidence but
+    usually require more work. Section 8 explains the exact guarantee.
+    Delta must be strictly between 0 and 1
+
+The defaults give a strict and predictable result, so the first run
+only provides the required parameters.
+
+======================================================================
+\x1b[1;36m4. First mining run\x1b[0m
+======================================================================
+For our run, we only need to pass the SD that we described above. We
+will leave every optional setting at its default. This asks SDMiner
+for tableau patterns that follow PollNum -> [9, 11] Time strictly and
+for a tableau that covers every row.
+
+Here is the input table again before we run the miner.
+
+     PollNum         Time       Time gap           In [9, 11]
+           1           10              -                    -
+           2           20             10                  yes
+           3           25              5                   no
+           4           35             10                  yes
+           5           45             10                  yes
+           6           60             15                   no
+           7           90             30                   no
+           8          105             15                   no
+
+\x1b[1;33mTableau T:\x1b[0m
+  P1: PollNum in [1, 2], support = 2, confidence = 1.000
+  P2: PollNum in [3, 5], support = 3, confidence = 1.000
+  P3: PollNum in [6, 6], support = 1, confidence = 1.000
+  P4: PollNum in [7, 7], support = 1, confidence = 1.000
+  P5: PollNum in [8, 8], support = 1, confidence = 1.000
+Global support(T) = 8 of 8 rows
+
+These five tableau patterns form one tableau T = {P1, P2, P3, P4, P5}.
+P1 contains polls 1 and 2, whose Time gap is 10. P2 contains polls 3
+through 5, whose two gaps are also 10. All three gaps satisfy the SD.
+
+The 15-second and 30-second gaps leave polls 6, 7, and 8 in separate
+tableau patterns. P3, P4, and P5 each contain one row, so there is no
+consecutive pair that could break the SD. That gives every tableau
+pattern confidence 1. Together they cover all 8 rows, exactly as
+minimum_support = 1 requires.
+
+======================================================================
+\x1b[1;36m5. Allowing imperfect tableau patterns\x1b[0m
+======================================================================
+Our strict tableau is quite fragmented because several gaps miss the
+interval [9, 11]. Real logs often contain delayed or missing
+measurements, so we may prefer a few longer ranges over many small
+ones. Imperfect tableau patterns let us make that choice.
+
+How does SDMiner decide how much imperfection a range contains? It
+uses confidence = (N - OPS) / N. Here N is the tableau pattern's
+support. OPS is the smallest number of row insertions and deletions
+that would make the SD strict inside that tableau pattern. These
+operations only define the score. SDMiner never changes our input
+table.
+
+For this run, we lower minimum_confidence to 0.6. We also choose
+minimum_support = 0.8, so the tableau still needs to cover at least 7
+of the 8 rows.
+
+\x1b[1;33mTableau T_imperfect:\x1b[0m
+  P1: PollNum in [1, 5], support = 5, confidence = 0.600
+  P2: PollNum in [3, 7], support = 5, confidence = 0.600
+Global support(T_imperfect) = 7 of 8 rows
+
+The relaxed confidence gives us two longer tableau patterns. Let us
+look at P1 first. It covers polls 1 through 5, whose Time values are
+[10, 20, 25, 35, 45]. If we remove the rows with Time values 10 and
+20, we are left with [25, 35, 45]. Both remaining gaps are 10, so this
+sequence follows the SD strictly.
+
+For P2, removing the rows with Time values 60 and 90 leaves the same
+strict sequence. Each tableau pattern contains 5 rows and needs 2
+deletions, giving confidence (5 - 2) / 5 = 0.6.
+
+They share polls 3, 4, and 5. Although their individual supports add
+up to 10, together they cover 7 distinct rows. This is enough to meet
+our 80% target.
+
+======================================================================
+\x1b[1;36m6. Removing the upper gap bound\x1b[0m
+======================================================================
+Suppose we only care that the time increases by at least 9 seconds.
+Long pauses are acceptable, so placing an upper limit on the gap would
+not help us. In this situation, we can pass any negative finite value
+as g2. We will use g2 = -1 and keep g1 = 9.
+
+Here is the log again. The last column now shows which gaps fit the SD
+without an upper bound.
+
+     PollNum         Time       Time gap     In [9, infinity]
+           1           10              -                    -
+           2           20             10                  yes
+           3           25              5                   no
+           4           35             10                  yes
+           5           45             10                  yes
+           6           60             15                  yes
+           7           90             30                  yes
+           8          105             15                  yes
+
+\x1b[1;33mTableau T_unbounded:\x1b[0m
+  P1: PollNum in [1, 2], support = 2, confidence = 1.000
+  P2: PollNum in [3, 8], support = 6, confidence = 1.000
+Global support(T_unbounded) = 8 of 8 rows
+
+Without an upper bound, the 15-second and 30-second gaps now fit our
+SD. The 5-second gap is still too small, so it separates P1 from P2.
+These two strict tableau patterns cover the entire log.
+
+======================================================================
+\x1b[1;36m7. Exact and greedy tableau assembly\x1b[0m
+======================================================================
+For this comparison, we return to the original upper bound g2 = 11.
+Once SDMiner has found suitable intervals, it still needs to choose
+which of them will make up the tableau. If we want the smallest
+possible number of tableau patterns, exact assembly is the right
+choice. If we care more about speed and memory, greedy assembly is
+usually more convenient, although its tableau may be larger.
+
+To compare them fairly, both runs will require confidence 0.75 and
+coverage of at least 7 of 8 rows. We will also use exact interval
+generation in both cases. This way, only assembly_strategy changes.
+
+\x1b[1;33mTableau T_exact:\x1b[0m
+  P1: PollNum in [1, 2], support = 2, confidence = 1.000
+  P2: PollNum in [3, 6], support = 4, confidence = 0.750
+  P3: PollNum in [7, 7], support = 1, confidence = 1.000
+Global support(T_exact) = 7 of 8 rows
+
+\x1b[1;33mTableau T_greedy:\x1b[0m
+  P1: PollNum in [1, 2], support = 2, confidence = 1.000
+  P2: PollNum in [2, 5], support = 4, confidence = 0.750
+  P3: PollNum in [7, 7], support = 1, confidence = 1.000
+  P4: PollNum in [8, 8], support = 1, confidence = 1.000
+Global support(T_greedy) = 7 of 8 rows
+
+Now we can see the difference that matters to us as users. T_exact
+needs three tableau patterns, while T_greedy returns four. Both cover
+7 rows, and every tableau pattern meets the same confidence threshold.
+Greedy changes the size of the answer, not the quality requirements
+that its tableau patterns must satisfy.
+
+The speedup from greedy depends strongly on your data and settings. In
+our tests, for example, switching from exact to greedy assembly with
+exact interval generation reduced peak process memory about 14-fold,
+with little change in total mining time. Greedy can save time as well,
+but the overall gain depends on the time spent generating candidates.
+
+======================================================================
+\x1b[1;36m8. Approximate interval generation\x1b[0m
+======================================================================
+On a large table, finding every suitable interval may take more time
+than we are willing to spend. Exact interval generation keeps our
+requested confidence intact. Approximate generation can finish sooner,
+but some returned tableau patterns may have lower confidence than we
+requested.
+
+This is where delta becomes useful. It tells SDMiner how much
+confidence we are prepared to trade for speed. The guarantee is
+minimum_confidence * (1 - delta) / (1 + delta). A smaller positive
+delta tightens the confidence guarantee, but it usually asks SDMiner
+to do more work.
+
+Before comparing the results, let us bring the original gaps back into
+view.
+
+     PollNum         Time       Time gap           In [9, 11]
+           1           10              -                    -
+           2           20             10                  yes
+           3           25              5                   no
+           4           35             10                  yes
+           5           45             10                  yes
+           6           60             15                   no
+           7           90             30                   no
+           8          105             15                   no
+
+For this run, we request confidence 1.0 and choose delta = 0.2. That
+gives us a guarantee of about 0.667. We keep exact assembly, which
+lets us focus only on the effect of approximate interval generation.
+
+\x1b[1;33mTableau T_approximate:\x1b[0m
+  P1: PollNum in [1, 2], support = 2, confidence = 1.000
+  P2: PollNum in [3, 6], support = 4, confidence = 0.750
+  P3: PollNum in [7, 7], support = 1, confidence = 1.000
+  P4: PollNum in [8, 8], support = 1, confidence = 1.000
+Global support(T_approximate) = 8 of 8 rows
+
+The result now contains four tableau patterns instead of the five
+strict ones from Section 4. In particular, P2 joins polls 3 through 6
+into one range with confidence 0.750. This is lower than the 1.0 we
+requested, but it remains above the promised 0.667. That is the speed
+and confidence trade-off we asked delta to control.
+
+In our tests, switching from exact to approximate generation while
+keeping exact assembly made mining about 13 times faster, with similar
+memory use. Switching to greedy assembly then cut total mining time by
+a further 13% and reduced peak process memory roughly ninefold.
+
+These figures describe the results of our tests, not guaranteed
+improvements. On your data, the speedup and memory savings may be very
+different, depending on the data and parameter choices. Approximate
+generation can even be slower than exact.
+
+======================================================================
+\x1b[1;36m9. See also\x1b[0m
+======================================================================
+In practice, you will often run SDMiner more than once. Start with the
+exact defaults, inspect the tableau, and then adjust confidence,
+support, or the strategies if the result is too fragmented or the run
+takes too long.
+
+After discovering a useful tableau, you may want to inspect the SD
+from another angle. If you already know the SD and want to check where
+it is violated, continue with the verification example. If you want to
+discover relationships between orderings themselves, take a look at
+the Order Dependency examples.
+
+  * SD verification and violations
+    examples/basic/verifying_sd.py
+  * List-based Order Dependency mining
+    examples/basic/mining_list_od.py
+  * Set-based Order Dependency mining
+    examples/basic/mining_set_od_1.py
+'''
+
+
 snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
 (SDs) using the Desbordante library. Algorithm is based on the
 article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
