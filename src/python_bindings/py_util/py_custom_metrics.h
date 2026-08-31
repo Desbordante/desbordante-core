@@ -3,6 +3,8 @@
 #include <pybind11/pybind11.h>
 
 #include <cstddef>
+#include <memory>
+#include <string>
 #include <utility>
 
 #include <pybind11/pytypes.h>
@@ -18,14 +20,29 @@ private:
     pybind11::object metric_;
 
 public:
+    class TypedMetric : public ITypedMetric {
+    private:
+        pybind11::object metric_;
+        model::Type const* type_;
+
+    public:
+        TypedMetric(pybind11::object metric, model::Type const* type)
+            : metric_(std::move(metric)), type_(type) {}
+
+        double operator()(std::byte const* a, std::byte const* b) const override {
+            return pybind11::cast<double>(metric_(ValueToPy(type_, a), ValueToPy(type_, b)));
+        }
+    };
+
     explicit PyCustomMetric(pybind11::object&& metric) : metric_(std::move(metric)) {}
 
-    double Dist(model::Type const* type, std::byte const* first,
-                std::byte const* second) const override {
-        return pybind11::cast<double>(metric_(ValueToPy(type, first), ValueToPy(type, second)));
+    std::unique_ptr<ITypedMetric> SetType(model::Type const* type,
+                                          std::string const&) const override {
+        return std::make_unique<TypedMetric>(metric_, type);
     }
 };
 
+// TODO: py custom vector metric
 class PyCustomVectorMetric : public util::ICustomVectorMetric {
 private:
     pybind11::object metric_;

@@ -62,8 +62,9 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kNormalConvPair<model::Gdd>,
         kNormalConvPair<algos::cfd::RawCFD>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
-        kNormalConvPair<config::CustomMetricType>,
-        kNormalConvPair<config::CustomMetricsType>,
+        kNormalConvPair<config::CustomMetricOptionType>,
+        kNormalConvPair<config::CustomMetricsOptionType>,
+        // TODO: CustomVectorMetricType
         kNormalConvPair<config::CustomVectorMetricType>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<algos::metric::Metric>,

@@ -201,15 +201,15 @@ boost::any StringVectorToAny(std::string_view option_name, py::handle obj) {
 }
 
 boost::any CustomMetricToAny(std::string_view, py::handle obj) {
-    return config::CustomMetricType{
+    return config::CustomMetricOptionType{
             new python_bindings::PyCustomMetric(py::reinterpret_borrow<py::object>(obj))};
 }
 
 boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
     auto metric_handles = CastAndReplaceCastError<std::vector<py::handle>>(option_name, obj);
-    config::CustomMetricsType result(metric_handles.size());
+    config::CustomMetricsOptionType result(metric_handles.size());
     std::ranges::transform(metric_handles, result.begin(),
-                           [](py::handle handle) -> config::CustomMetricType {
+                           [](py::handle handle) -> config::CustomMetricOptionType {
                                if (handle.is_none()) {
                                    return nullptr;
                                }
@@ -220,6 +220,7 @@ boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
 }
 
 boost::any CustomVectorMetricToAny(std::string_view, py::handle obj) {
+    // TODO: CustomVectorMetricOptionType
     return config::CustomVectorMetricType{
             new python_bindings::PyCustomVectorMetric(py::reinterpret_borrow<py::object>(obj))};
 }
