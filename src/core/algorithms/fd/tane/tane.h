@@ -14,8 +14,15 @@ namespace algos {
 class Tane final : public PliBasedAFDAlgorithm {
     struct ColumnCombinationInfo {
         boost::dynamic_bitset<> rhs_candidates;
-        bool is_superkey;
         std::unique_ptr<model::PLIWS> pli;
+
+        bool IsSuperkey() const noexcept {
+            return pli == nullptr;
+        }
+
+        void MarkSuperkey() noexcept {
+            pli = nullptr;
+        }
     };
 
     struct NoSuffixColumnCombinationInfoRef {

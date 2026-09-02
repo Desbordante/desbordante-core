@@ -88,13 +88,13 @@ void Tane::Prune(LevelColumnCombinationsInfo& level) {
         assert(info.rhs_candidates.any());
         // TODO: use nullptr as "this is a superkey". NOTE: in the case of 4.1 and 4.2 we may want
         // to delay actually setting PLI to nullptr to avoid direct checks on sibling keys.
-        if (info.is_superkey || !IsKey(info.pli.get())) {
+        if (info.IsSuperkey() || !IsKey(info.pli.get())) {
             continue;
         }
         // The check in the original article is incorrect because we are not
         // guaranteed to have calculated C^+ of every sibling of the key.
         // But it is correct if we've kept the keys like here and in Metanome.
-        info.is_superkey = true;
+        info.MarkSuperkey();
         boost::dynamic_bitset<> sibling = column_combination;
 
         // By definition of C^+(X) an attribute A being in C^+(X) \ X means
@@ -133,9 +133,9 @@ void Tane::ComputeDependencies(LevelColumnCombinationsInfo& level,
 
     for (auto it = level.begin(); it != level.end();) {
         auto& [column_combination, info] = *it;
-        auto& [rhs_candidates, is_superkey, pli] = info;
+        auto& [rhs_candidates, pli] = info;
         assert(rhs_candidates.any());
-        if (is_superkey) {
+        if (info.IsSuperkey()) {
             ++it;
             continue;
         }
@@ -252,7 +252,7 @@ auto Tane::GenerateNextLevel(LevelColumnCombinationsInfo const& level)
                     continue;
                 boost::dynamic_bitset<> next_candidates =
                         inner_it->info->rhs_candidates & outer_it->info->rhs_candidates;
-                bool is_superkey = outer_it->info->is_superkey || inner_it->info->is_superkey;
+                bool is_superkey = outer_it->info->IsSuperkey() || inner_it->info->IsSuperkey();
                 new_combination.set(inner_it->non_suffix_column);
                 bool in_next_level = true;
                 // No point in checking anything earlier, we already know they exist because we got
@@ -267,14 +267,13 @@ auto Tane::GenerateNextLevel(LevelColumnCombinationsInfo const& level)
                         in_next_level = false;
                         break;
                     }
-                    if (it->second.is_superkey) is_superkey = true;
+                    if (it->second.IsSuperkey()) is_superkey = true;
                 }
                 if (in_next_level) {
                     std::unique_ptr<model::PLIWS> pli =
                             is_superkey ? nullptr
                                         : outer_it->info->pli->Intersect(inner_it->info->pli.get());
-                    next_level.try_emplace(new_combination, next_candidates, is_superkey,
-                                           std::move(pli));
+                    next_level.try_emplace(new_combination, next_candidates, std::move(pli));
                 }
                 new_combination.reset(inner_it->non_suffix_column);
             }
@@ -389,8 +388,7 @@ void Tane::ExecuteInternal() {
     if (relation_->GetNumColumns() < 2) return;
     LevelColumnCombinationsInfo prev_level;
     prev_level.try_emplace(boost::dynamic_bitset<>(relation_->GetNumColumns()),
-                           std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()),
-                           false);
+                           std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()));
     LevelColumnCombinationsInfo current_level;
     for (model::Index column_index = 0; column_index != relation_->GetNumColumns();
          ++column_index) {
@@ -398,7 +396,7 @@ void Tane::ExecuteInternal() {
         column_combination.set(column_index);
         current_level.try_emplace(
                 std::move(column_combination),
-                std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()), false,
+                std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()),
                 std::make_unique<model::PLIWS>(
                         *relation_->GetColumnData(column_index).GetPLWSIndex()));
     }
