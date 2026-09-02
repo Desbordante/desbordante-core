@@ -14,6 +14,7 @@ namespace algos {
 class Tane final : public PliBasedAFDAlgorithm {
     struct ColumnCombinationInfo {
         boost::dynamic_bitset<> rhs_candidates;
+        bool is_superkey;
     };
 
     struct NoSuffixColumnCombinationInfoRef {
@@ -36,10 +37,9 @@ class Tane final : public PliBasedAFDAlgorithm {
 
     void ResetStateFd() final {}
 
-    void Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis,
-               PartitionsMap const& parent_plis);
+    void Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis);
     void ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& parent_plis,
-                             CandidatesMap& prev_candidates);
+                             CandidatesMap& candidates);
     // Exactly PrefixBlocks but the order of bits is inverted
     static SuffixMap SuffixBlocks(CandidatesMap const& rhs_candidates);
     std::pair<CandidatesMap, PartitionsMap> GenerateNextLevel(
