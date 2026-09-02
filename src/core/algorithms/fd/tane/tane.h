@@ -15,6 +15,7 @@ class Tane final : public PliBasedAFDAlgorithm {
     struct ColumnCombinationInfo {
         boost::dynamic_bitset<> rhs_candidates;
         bool is_superkey;
+        std::unique_ptr<model::PLIWS> pli;
     };
 
     struct NoSuffixColumnCombinationInfoRef {
@@ -31,19 +32,17 @@ class Tane final : public PliBasedAFDAlgorithm {
     config::ErrorType max_fd_error_;
     model::AfdMeasure afd_measure_;
 
-    using CandidatesMap = std::unordered_map<boost::dynamic_bitset<>, ColumnCombinationInfo>;
-    using PartitionsMap =
-            std::unordered_map<boost::dynamic_bitset<>, std::unique_ptr<model::PLIWS>>;
+    using LevelColumnCombinationsInfo =
+            std::unordered_map<boost::dynamic_bitset<>, ColumnCombinationInfo>;
 
     void ResetStateFd() final {}
 
-    void Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis);
-    void ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& parent_plis,
-                             CandidatesMap& candidates);
+    void Prune(LevelColumnCombinationsInfo& level);
+    void ComputeDependencies(LevelColumnCombinationsInfo& level,
+                             LevelColumnCombinationsInfo const& prev_level);
     // Exactly PrefixBlocks but the order of bits is inverted
-    static SuffixMap SuffixBlocks(CandidatesMap const& rhs_candidates);
-    std::pair<CandidatesMap, PartitionsMap> GenerateNextLevel(
-            CandidatesMap const& current_candidates, PartitionsMap const& current_plis);
+    static SuffixMap SuffixBlocks(LevelColumnCombinationsInfo const& level);
+    LevelColumnCombinationsInfo GenerateNextLevel(LevelColumnCombinationsInfo const& level);
     void ExecuteInternal() final;
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs);

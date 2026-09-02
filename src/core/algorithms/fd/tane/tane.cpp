@@ -82,13 +82,13 @@ bool Tane::IsKey(model::PositionListIndex const* pli) {
     return pli->AllValuesAreUnique();
 }
 
-void Tane::Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis) {
+void Tane::Prune(LevelColumnCombinationsInfo& level) {
     RelationalSchema const* schema = relation_->GetSchema();
-    for (auto& [column_combination, info] : rhs_candidates) {
+    for (auto& [column_combination, info] : level) {
         assert(info.rhs_candidates.any());
         // TODO: use nullptr as "this is a superkey". NOTE: in the case of 4.1 and 4.2 we may want
         // to delay actually setting PLI to nullptr to avoid direct checks on sibling keys.
-        if (info.is_superkey || !IsKey(plis.find(column_combination)->second.get())) {
+        if (info.is_superkey || !IsKey(info.pli.get())) {
             continue;
         }
         // The check in the original article is incorrect because we are not
@@ -107,9 +107,9 @@ void Tane::Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis) {
             for (model::Index i = column_combination.find_first();
                  i != boost::dynamic_bitset<>::npos; i = column_combination.find_next(i)) {
                 sibling.reset(i);
-                auto sibling_it = rhs_candidates.find(sibling);
+                auto sibling_it = level.find(sibling);
                 sibling.set(i);
-                if (sibling_it == rhs_candidates.end() ||
+                if (sibling_it == level.end() ||
                     !sibling_it->second.rhs_candidates.test(rhs_index)) {
                     sibling.reset(rhs_index);
                     return;
@@ -127,14 +127,13 @@ void Tane::Prune(CandidatesMap& rhs_candidates, PartitionsMap const& plis) {
     }
 }
 
-void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& parent_plis,
-                               CandidatesMap& candidates) {
+void Tane::ComputeDependencies(LevelColumnCombinationsInfo& level,
+                               LevelColumnCombinationsInfo const& prev_level) {
     RelationalSchema const* schema = relation_->GetSchema();
-    CandidatesMap current_candidates;
 
-    for (auto it = candidates.begin(); it != candidates.end();) {
+    for (auto it = level.begin(); it != level.end();) {
         auto& [column_combination, info] = *it;
-        auto& [rhs_candidates, is_superkey] = info;
+        auto& [rhs_candidates, is_superkey, pli] = info;
         assert(rhs_candidates.any());
         if (is_superkey) {
             ++it;
@@ -155,11 +154,11 @@ void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& p
                     AFD(schema->GetVertical(boost::dynamic_bitset<>(relation_->GetNumColumns())),
                         *schema->GetColumn(rhs_index), error, relation_->GetSharedPtrSchema()));
             if (error == 0.0) {
-                it = candidates.erase(it);
+                it = level.erase(it);
             } else {
                 info.rhs_candidates.reset(rhs_index);
                 if (info.rhs_candidates.none()) {
-                    it = candidates.erase(it);
+                    it = level.erase(it);
                 } else {
                     ++it;
                 }
@@ -175,12 +174,11 @@ void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& p
         // Creating the intersected PLIs here otherwise doesn't make sense, since the only effect it
         // will have is maybe allowing us to report more FDs before memory runs out, but the peak
         // memory usage would be the same either way.
-        model::PLIWS const* joint_pli = plis.find(column_combination)->second.get();
         util::ForEachIndex(intersection, [&](model::Index rhs_index) {
             parent.reset(rhs_index);
-            model::PLIWS const* lhs_pli = parent_plis.find(parent)->second.get();
+            model::PLIWS const* lhs_pli = prev_level.find(parent)->second.pli.get();
             model::PLIWS const* rhs_pli = relation_->GetColumnData(rhs_index).GetPLWSIndex();
-            config::ErrorType error = CalculateFdError(lhs_pli, rhs_pli, joint_pli);
+            config::ErrorType error = CalculateFdError(lhs_pli, rhs_pli, pli.get());
             if (error > max_fd_error_) {
                 parent.set(rhs_index);
                 return;
@@ -208,7 +206,7 @@ void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& p
             if (error == 0.0) info.rhs_candidates &= column_combination;
         });
         if (info.rhs_candidates.none()) {
-            it = candidates.erase(it);
+            it = level.erase(it);
         } else {
             ++it;
         }
@@ -216,11 +214,11 @@ void Tane::ComputeDependencies(PartitionsMap const& plis, PartitionsMap const& p
 }
 
 // Exactly PrefixBlocks but the order of bits is inverted and RHS candidates are stored.
-auto Tane::SuffixBlocks(CandidatesMap const& rhs_candidates) -> SuffixMap {
+auto Tane::SuffixBlocks(LevelColumnCombinationsInfo const& level) -> SuffixMap {
     SuffixMap map;
-    for (auto const& [column_combination, info] : rhs_candidates) {
-        // Only one column combination with this suffix is possible, avoid adding.
+    for (auto const& [column_combination, info] : level) {
         assert(column_combination.size() >= 2);
+        // Only one column combination with this suffix is possible, avoid adding.
         // TODO: test if this does anything.
         if (column_combination.test(0) && column_combination.test(1)) continue;
         boost::dynamic_bitset<> suffix = column_combination;
@@ -231,12 +229,10 @@ auto Tane::SuffixBlocks(CandidatesMap const& rhs_candidates) -> SuffixMap {
     return map;
 }
 
-auto Tane::GenerateNextLevel(CandidatesMap const& current_candidates,
-                             PartitionsMap const& current_plis)
-        -> std::pair<CandidatesMap, PartitionsMap> {
-    CandidatesMap next_rhs_candidates;
-    PartitionsMap next_plis;
-    SuffixMap s_map = SuffixBlocks(current_candidates);
+auto Tane::GenerateNextLevel(LevelColumnCombinationsInfo const& level)
+        -> LevelColumnCombinationsInfo {
+    LevelColumnCombinationsInfo next_level;
+    SuffixMap s_map = SuffixBlocks(level);
     for (auto s_map_it = s_map.begin(); s_map_it != s_map.end();) {
         SuffixMap::node_type node = s_map.extract(s_map_it++);
         std::vector<NoSuffixColumnCombinationInfoRef>& prev_level_combinations = node.mapped();
@@ -264,41 +260,28 @@ auto Tane::GenerateNextLevel(CandidatesMap const& current_candidates,
                 for (model::Index i = new_combination.find_next(inner_it->non_suffix_column);
                      i != boost::dynamic_bitset<>::npos; i = new_combination.find_next(i)) {
                     new_combination.reset(i);
-                    auto it = current_candidates.find(new_combination);
+                    auto it = level.find(new_combination);
                     new_combination.set(i);
-                    if (it == current_candidates.end() ||
+                    if (it == level.end() ||
                         (next_candidates &= it->second.rhs_candidates).none()) {
                         in_next_level = false;
                         break;
                     }
+                    if (it->second.is_superkey) is_superkey = true;
                 }
                 if (in_next_level) {
-                    // Oh hey, the PLIs construction and adding RHS combinations happens on the same
-                    // level, so we can store them in the same dict without consequences. Except
-                    // when they are be deleted. Do we need a PLI where the C^+(X) is empty? In 4.1
-                    // and 4.2 when we have a sibling key if we want to avoid the direct
-                    // intersection in this one case.
-                    // TODO: merge
-                    next_rhs_candidates.try_emplace(new_combination, next_candidates, is_superkey);
-                    // "A partition with respect to a larger attribute set X is computed when X is
-                    // added to its level on line 6 of GENERATE_NEXT_LEVEL"
-                    if (!is_superkey) {
-                        model::Index const excluded_column = outer_it->non_suffix_column;
-                        new_combination.reset(excluded_column);
-                        model::PLIWS const& old_pli = *current_plis.find(new_combination)->second;
-                        new_combination.set(excluded_column);
-                        next_plis.try_emplace(
-                                new_combination,
-                                old_pli.Intersect(
-                                        relation_->GetColumnData(excluded_column).GetPLWSIndex()));
-                    }
+                    std::unique_ptr<model::PLIWS> pli =
+                            is_superkey ? nullptr
+                                        : outer_it->info->pli->Intersect(inner_it->info->pli.get());
+                    next_level.try_emplace(new_combination, next_candidates, is_superkey,
+                                           std::move(pli));
                 }
                 new_combination.reset(inner_it->non_suffix_column);
             }
             new_combination.reset(outer_it->non_suffix_column);
         }
     }
-    return {std::move(next_rhs_candidates), std::move(next_plis)};
+    return next_level;
 }
 
 config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
@@ -404,36 +387,32 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
 
 void Tane::ExecuteInternal() {
     if (relation_->GetNumColumns() < 2) return;
-    CandidatesMap prev_rhs_candidates{
-            {boost::dynamic_bitset<>(relation_->GetNumColumns()),
-             {std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()), false}}};
-    CandidatesMap rhs_candidates;
-    PartitionsMap prev_partitions;
-    PartitionsMap current_partitions;
+    LevelColumnCombinationsInfo prev_level;
+    prev_level.try_emplace(boost::dynamic_bitset<>(relation_->GetNumColumns()),
+                           std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()),
+                           false);
+    LevelColumnCombinationsInfo current_level;
     for (model::Index column_index = 0; column_index != relation_->GetNumColumns();
          ++column_index) {
         boost::dynamic_bitset<> column_combination(relation_->GetNumColumns());
         column_combination.set(column_index);
-        rhs_candidates.try_emplace(
-                column_combination,
-                std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()), false);
-        current_partitions.try_emplace(
+        current_level.try_emplace(
                 std::move(column_combination),
+                std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()), false,
                 std::make_unique<model::PLIWS>(
                         *relation_->GetColumnData(column_index).GetPLWSIndex()));
     }
     std::size_t level_index = 0;
-    while (!rhs_candidates.empty()) {
-        ComputeDependencies(current_partitions, prev_partitions, rhs_candidates);
+    while (!current_level.empty()) {
+        ComputeDependencies(current_level, prev_level);
         if (level_index == max_lhs_) break;
-        Prune(rhs_candidates, current_partitions);
+        Prune(current_level);
 
-        prev_partitions = std::move(current_partitions);
+        prev_level = std::move(current_level);
         // TODO: On max_lhs_ level, do not save PLIs. This will need code that differs more from
         // what's here right now, but once we have better measures calculation (i.e. intersections
         // happen in ComputeDependencies), the procedure is not going to be as different.
-        std::tie(rhs_candidates, current_partitions) =
-                GenerateNextLevel(rhs_candidates, prev_partitions);
+        current_level = GenerateNextLevel(prev_level);
         ++level_index;
     }
 }
