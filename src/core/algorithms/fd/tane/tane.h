@@ -12,17 +12,25 @@
 namespace algos {
 
 class Tane final : public PliBasedAFDAlgorithm {
+    struct ColumnCombinationInfo {
+        boost::dynamic_bitset<> rhs_candidates;
+    };
+
+    struct NoSuffixColumnCombinationInfoRef {
+        model::Index non_suffix_column;
+        ColumnCombinationInfo const* info;
+    };
+
     // TODO: suffix array? Not going to do much for <64 columns, I think?
-    using SuffixMap = std::unordered_map<
-            boost::dynamic_bitset<>,
-            std::vector<std::pair<model::Index, boost::dynamic_bitset<> const*>>>;
+    using SuffixMap = std::unordered_map<boost::dynamic_bitset<>,
+                                         std::vector<NoSuffixColumnCombinationInfoRef>>;
     // RHS candidates and level together, what about PLIs? If not key, will need the PLI. On last
     // level (max_lhs_), no PLIs need to be saved. If checking level, will need RHS candidates.
 
     config::ErrorType max_fd_error_;
     model::AfdMeasure afd_measure_;
 
-    using CandidatesMap = std::unordered_map<boost::dynamic_bitset<>, boost::dynamic_bitset<>>;
+    using CandidatesMap = std::unordered_map<boost::dynamic_bitset<>, ColumnCombinationInfo>;
     using PartitionsMap =
             std::unordered_map<boost::dynamic_bitset<>, std::unique_ptr<model::PLIWS>>;
 
