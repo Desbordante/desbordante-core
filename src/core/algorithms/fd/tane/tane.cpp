@@ -306,20 +306,9 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
          * |dom_{empty_set}(R)| = 1.
          */
         case model::AfdMeasure::kRho:
-            return 1;  // incorrect
-            /* return static_cast<config::ErrorType>(rhs->GetPositionListIndex()->GetNumCluster() -
-             * 1) / rhs->GetPositionListIndex()->GetNumCluster(); */
-        /*
-         * The probability that a tuple participates in a violating pair is 0 if there is an FD,
-         * otherwise it is 1 for an empty LHS and non-constant RHS
-         */
-        case model::AfdMeasure::kG2:
-        /*
-         * For an empty LHS, the mutual information is 0, but if the entropy of RHS is also 0 (i.e.
-         * it is constant), the measure is technically undefined.
-         */
-        case model::AfdMeasure::kFi:
-            return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
+            return static_cast<config::ErrorType>(rhs->GetPositionListIndex()->GetNumCluster() -
+                                                  1) /
+                   rhs->GetPositionListIndex()->GetNumCluster();
         /*
          * The original definition of this one requires the presence of two attributes. The exact
          * expression used is pdep(X, Y) = p(R1.Y = R.Y2 | R1.X = R2.X). If we treat the projection
@@ -327,12 +316,21 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
          * is exactly the self-dependency measure pdep(Y).
          */
         case model::AfdMeasure::kPdep:
-            return 1;  // incorrect
-            /*return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(
-                               rhs->GetPLWSIndex());*/
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(
+                               rhs->GetPLWSIndex());
         /*
-         * When using pdep({}, Y) = pdep(Y), tau has 0 in the numerator. If pdep(Y), it has 0 in the
-         * denominator too, so it is technically undefined.
+         * The probability that a tuple participates in a violating pair is 0 if there is an FD,
+         * otherwise it is 1 for an empty LHS and non-constant RHS.
+         */
+        case model::AfdMeasure::kG2:
+        /*
+         * For an empty LHS, the mutual information is 0, but if the entropy of RHS is also 0 (i.e.
+         * it is constant), the measure is technically undefined.
+         */
+        case model::AfdMeasure::kFi:
+        /*
+         * When using pdep({}, Y) = pdep(Y), tau has 0 in the numerator. If pdep(Y) = 0, it has 0 in
+         * the denominator too, so it is technically undefined.
          */
         case model::AfdMeasure::kTau:
         /*
@@ -342,8 +340,7 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
          * as well in that case.
          */
         case model::AfdMeasure::kMuPlus:
-            // return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
-            return 1;  // incorrect
+            return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
     }
     assert(false);
     __builtin_unreachable();
