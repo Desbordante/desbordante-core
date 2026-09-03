@@ -39,7 +39,7 @@ bool NaiveGddValidator::GraphHasCompatibleEdge(model::gdd::graph_t const& graph,
             continue;
         }
 
-        if (model::Gdd::LabelsMatch(pattern_edge_label, graph[graph_edge].label)) {
+        if (LabelsMatch(pattern_edge_label, graph[graph_edge].label)) {
             return true;
         }
     }

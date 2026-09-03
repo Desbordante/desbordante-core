@@ -47,10 +47,7 @@ BfsQvoStrategy::VertexT BfsQvoStrategy::ChooseNextRoot() const {
         }
     }
 
-    if (!found) {
-        throw std::logic_error("BuildQueryVertexOrder called with no unvisited vertices left");
-    }
-
+    assert(found && "BuildQueryVertexOrder called with no unvisited vertices left");
     return best;
 }
 

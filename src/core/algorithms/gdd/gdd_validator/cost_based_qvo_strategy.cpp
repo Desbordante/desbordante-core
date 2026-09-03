@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "core/util/logger.h"
 #include "qvo_strategies.h"
 
@@ -9,12 +11,14 @@ void CostBasedQvoStrategy::ComputeAvgListSizes() {
         std::size_t count = 0;
     };
 
-    std::unordered_map<std::string, Acc> out_acc;
-    std::unordered_map<std::string, Acc> in_acc;
+    std::unordered_map<std::string_view, Acc> out_acc;
+    std::unordered_map<std::string_view, Acc> in_acc;
+    std::unordered_map<std::string_view, std::size_t> out_by_label;
+    std::unordered_map<std::string_view, std::size_t> in_by_label;
 
     for (auto const gv : boost::make_iterator_range(boost::vertices(graph_))) {
-        std::unordered_map<std::string, std::size_t> out_by_label;
-        std::unordered_map<std::string, std::size_t> in_by_label;
+        out_by_label.clear();
+        in_by_label.clear();
 
         for (auto const edge : boost::make_iterator_range(boost::out_edges(gv, graph_))) {
             ++out_by_label[graph_[edge].label];
@@ -48,7 +52,7 @@ std::size_t CostBasedQvoStrategy::VertexDomainSize(VertexT pattern_vertex) const
     return it == domain_.end() ? 0 : it->second.size();
 }
 
-double CostBasedQvoStrategy::AvgListSize(std::string const& edge_label, Direction direction) const {
+double CostBasedQvoStrategy::AvgListSize(std::string_view edge_label, Direction direction) const {
     auto const& table = direction == Direction::kIn ? avg_in_size_ : avg_out_size_;
     auto const it = table.find(edge_label);
     return it == table.end() ? 1.0 : it->second;
@@ -100,13 +104,9 @@ double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
                                       std::vector<double> const& card_by_level,
                                       double& match_estimate) const {
     std::vector<ExtensionListDescriptor> const& lists = ExtensionListsFor(next, placed);
+    assert(!lists.empty());  // ConnectsToPlaced(next, placed) is true
 
     double const domain_size = static_cast<double>(VertexDomainSize(next));
-
-    if (lists.empty()) {
-        match_estimate *= std::max(1.0, domain_size);
-        return 0.0;
-    }
 
     double min_list = std::numeric_limits<double>::infinity();
 
@@ -143,16 +143,22 @@ double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
 }
 
 std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderExhaustive() const {
-    std::vector pattern_vertices(boost::vertices(pattern_).first, boost::vertices(pattern_).second);
+    std::vector<VertexT> pattern_vertices(boost::vertices(pattern_).first,
+                                          boost::vertices(pattern_).second);
     std::ranges::sort(pattern_vertices, pattern_vertices_comparator_);
 
     std::vector<VertexT> best;
+    best.reserve(pattern_vertices.size());
     double best_cost = std::numeric_limits<double>::infinity();
 
+    std::unordered_map<VertexT, std::size_t> placed;
+    placed.reserve(pattern_vertices.size());
+    std::vector<double> card_by_level;
+    card_by_level.reserve(pattern_vertices.size());
+
     do {
-        std::unordered_map<VertexT, std::size_t> placed;
-        std::vector<double> card_by_level;
-        card_by_level.reserve(pattern_vertices.size());
+        placed.clear();
+        card_by_level.clear();
 
         double cost = 0.0;
         double match_estimate = 0.0;
@@ -188,8 +194,8 @@ std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderExhaustive
 }
 
 std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderGreedy() const {
-    std::vector const pattern_vertices(boost::vertices(pattern_).first,
-                                       boost::vertices(pattern_).second);
+    std::vector<VertexT> const pattern_vertices(boost::vertices(pattern_).first,
+                                                boost::vertices(pattern_).second);
     if (pattern_vertices.empty()) {
         return {};
     }
@@ -197,6 +203,7 @@ std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderGreedy() c
     std::vector<VertexT> order;
     order.reserve(pattern_vertices.size());
     std::unordered_map<VertexT, std::size_t> placed;
+    placed.reserve(pattern_vertices.size());
 
     // greedy choose first vertex
     VertexT root = pattern_vertices.front();
