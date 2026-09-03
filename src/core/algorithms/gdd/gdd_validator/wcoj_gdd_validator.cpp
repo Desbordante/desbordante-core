@@ -4,7 +4,6 @@
 #include <cassert>
 #include <ranges>
 #include <span>
-#include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -15,15 +14,45 @@
 
 namespace algos {
 
+namespace {
+
+// first position in [first, last) holding a value >= target
+// complexity is O(log d) where d is the distance to result
+template <typename T>
+T const* LeapFrogSeek(T const* first, T const* last, T target) {
+    if (first == last || !(*first < target)) {
+        return first;
+    }
+
+    // *first < target holds from here on, so `lo` always stays below the answer
+    auto const size = static_cast<std::size_t>(last - first);
+    std::size_t lo = 0;
+    std::size_t hi = 1;
+    while (hi < size && first[hi] < target) {
+        lo = hi;
+        hi <<= 1;
+    }
+
+    return std::lower_bound(first + lo + 1, first + std::min(hi, size), target);
+}
+
+}  // namespace
+
 void WcojGddValidator::Prepare(model::gdd::graph_t const& pattern,
                                model::gdd::graph_t const& graph) {
+    // adjacency_index_ is keyed by (graph vertex, direction, edge label) only, so it
+    // stays valid across every group matched for the same graph in one algo.execute()
+    // call (and graph_ sets to nullptr between calls in `Reset`)
+    if (graph_ != &graph) {
+        adjacency_index_.clear();
+    }
+
     graph_ = &graph;
     pattern_ = &pattern;
 
     cur_level_.Clear();
     next_level_.Clear();
     level_count_ = 0;
-    adjacency_index_.clear();
 
     domain_ = BuildDomain(*pattern_, *graph_);
     for (auto& set : domain_ | std::views::values) {
@@ -89,7 +118,7 @@ void WcojGddValidator::HoldsGroup(std::span<model::Gdd const* const> group,
     MappingT full_match;
 
     for (std::size_t i = 0; i < matches_size && remaining != 0; ++i) {
-        VertexT const* row = cur_level_.Row(i);
+        auto row = cur_level_.Row(i);
         full_match.clear();
         for (std::size_t j = 0; j < width; ++j) {
             full_match.emplace(qvo_[j], row[j]);
@@ -112,6 +141,17 @@ void WcojGddValidator::HoldsGroup(std::span<model::Gdd const* const> group,
 
 std::unique_ptr<GddValidator> WcojGddValidator::CreateWorker() const {
     return std::make_unique<WcojGddValidator>();
+}
+
+// prevent reuse of adjacency_index_ between calls like:
+// algo.load_data(graph=g, gdd=gdd1)
+// algo.execute()
+// algo.load_data(graph=g, gdd=gdd2)
+// algo.execute()
+// scenario when graph_ will point to the same memory as before is unlikely,
+// but better safe than sorry?
+void WcojGddValidator::ResetWorkerState() {
+    graph_ = nullptr;
 }
 
 WcojGddValidator::OperationResult WcojGddValidator::Scan() {
@@ -138,15 +178,12 @@ WcojGddValidator::OperationResult WcojGddValidator::Scan() {
 WcojGddValidator::OperationResult WcojGddValidator::ExtendIntersect() {
     intersection_cache_.last_isect_valid = false;
 
-    if (level_count_ == 0) {
-        throw std::logic_error("Scan call is required before ExtendIntersect call");
-    }
+    assert(level_count_ > 0 && "Scan call is required before ExtendIntersect call");
     if (level_count_ >= qvo_.size()) {
         return OperationResult::kFinished;
     }
 
     auto const new_pv = qvo_[level_count_];
-    std::size_t const parent_width = cur_level_.width;
     std::size_t const parent_count = cur_level_.Count();
 
     next_level_.Reset(level_count_ + 1);
@@ -155,12 +192,12 @@ WcojGddValidator::OperationResult WcojGddValidator::ExtendIntersect() {
 
     auto const& descriptors = BuildDescriptorsFor(new_pv, level_count_);
     for (std::size_t i = 0; i < parent_count; ++i) {
-        VertexT const* parent = cur_level_.Row(i);
+        std::span<VertexT const> const parent = cur_level_.Row(i);
         std::vector<VertexT> const& extension_set =
                 ComputeExtensionSet(parent, new_pv, descriptors);
 
         for (VertexT const graph_vertex : extension_set) {
-            next_level_.PushRow(parent, parent_width, graph_vertex);
+            next_level_.PushRow(parent, graph_vertex);
         }
     }
 
@@ -176,9 +213,7 @@ WcojGddValidator::OperationResult WcojGddValidator::ExtendIntersect() {
 
 std::vector<WcojGddValidator::AdjacencyDescriptor> WcojGddValidator::BuildDescriptorsFor(
         VertexT new_pv, std::size_t level) const {
-    if (level > qvo_.size()) {
-        throw std::logic_error("BuildDescriptorsFor level is greater than qvo_.size()");
-    }
+    assert(level <= qvo_.size() && "BuildDescriptorsFor level is greater than qvo_.size()");
 
     std::vector<AdjacencyDescriptor> descriptors;
     for (std::size_t i = 0; i < level; ++i) {
@@ -211,10 +246,8 @@ std::vector<WcojGddValidator::AdjacencyDescriptor> WcojGddValidator::BuildDescri
 }
 
 std::vector<GddValidator::VertexT> const& WcojGddValidator::GetNeighbors(
-        VertexT graph_vertex, Direction direction, std::string const& edge_label) {
-    if (graph_ == nullptr) {
-        throw std::logic_error("GetNeighbors called before Prepare");
-    }
+        VertexT graph_vertex, Direction direction, std::string_view edge_label) {
+    assert(graph_ != nullptr && "GetNeighbors called before Prepare");
 
     NeighborKey const key{
             .graph_vertex = graph_vertex,
@@ -251,7 +284,7 @@ std::vector<GddValidator::VertexT> const& WcojGddValidator::GetNeighbors(
 }
 
 std::vector<GddValidator::VertexT> const& WcojGddValidator::ComputeExtensionSet(
-        VertexT const* partial_match, VertexT new_pv,
+        std::span<VertexT const> partial_match, VertexT new_pv,
         std::vector<AdjacencyDescriptor> const& descriptors) {
     auto const domain_it = domain_.find(new_pv);
     if (domain_it == domain_.end() || domain_it->second.empty()) {
@@ -268,15 +301,19 @@ std::vector<GddValidator::VertexT> const& WcojGddValidator::ComputeExtensionSet(
         return domain;
     }
 
-    // lookup intersection cache
-    std::vector<VertexT> key;
-    key.reserve(descriptors.size());
-    for (auto const& d : descriptors) {
-        key.push_back(partial_match[d.qvo_index]);
-    }
+    auto& [cache_key, cache_set, cache_valid] = intersection_cache_;
 
-    if (intersection_cache_.last_isect_valid && intersection_cache_.last_isect_key == key) {
-        return intersection_cache_.last_isect_set;
+    // view of mapped descriptors
+    auto const mapped_descriptors =
+            descriptors | std::views::transform([&partial_match](auto const& d) {
+                return partial_match[d.qvo_index];
+            });
+
+    // lookup intersection cache
+    // NB: materialize view only if sizes are the same
+    if (cache_valid && descriptors.size() == cache_key.size() &&
+        std::ranges::equal(cache_key, mapped_descriptors)) {
+        return cache_set;
     }
 
     std::vector<std::vector<VertexT> const*> lists;
@@ -288,46 +325,76 @@ std::vector<GddValidator::VertexT> const& WcojGddValidator::ComputeExtensionSet(
         std::vector<VertexT> const& neighbors = GetNeighbors(mapped, d.direction, d.edge_label);
 
         if (neighbors.empty()) {
-            intersection_cache_.last_isect_valid = true;
-            intersection_cache_.last_isect_key.assign(key.begin(), key.end());
-            intersection_cache_.last_isect_set.clear();
-            return intersection_cache_.last_isect_set;
+            cache_valid = true;
+            cache_key.assign(mapped_descriptors.begin(), mapped_descriptors.end());
+            cache_set.clear();
+            return cache_set;
         }
 
-        // neighbors are cached in adjacency_index_, so the pointer lives
         lists.push_back(&neighbors);
     }
 
-    intersection_cache_.last_isect_key.assign(key.begin(), key.end());
-    IntersectSorted(lists, intersection_cache_.last_isect_set);
-    intersection_cache_.last_isect_valid = true;
-    return intersection_cache_.last_isect_set;
+    cache_key.assign(mapped_descriptors.begin(), mapped_descriptors.end());
+    LeapFrogJoin(lists, cache_set);
+    cache_valid = true;
+    return cache_set;
 }
 
-void WcojGddValidator::IntersectSorted(std::vector<std::vector<VertexT> const*>& lists,
-                                       std::vector<VertexT>& out) {
-    // for faster intersections, |A \cap B| <= max(|A|, |B|)
-    std::ranges::sort(lists, [](auto const* a, auto const* b) { return a->size() < b->size(); });
-
+void WcojGddValidator::LeapFrogJoin(std::vector<std::vector<VertexT> const*>& lists,
+                                    std::vector<VertexT>& out) {
     out.clear();
-    std::ranges::set_intersection(*lists[0], *lists[1], std::back_inserter(out));
-
-    if (lists.size() == 2) {
+    if (lists.empty()) {
         return;
     }
 
-    scratch_.clear();
-    std::vector<VertexT>* cur = &out;
-    std::vector<VertexT>* tmp = &scratch_;
-
-    for (std::size_t i = 2; i < lists.size() && !cur->empty(); ++i) {
-        tmp->clear();
-        std::ranges::set_intersection(*cur, *lists[i], std::back_inserter(*tmp));
-        std::swap(cur, tmp);
+    if (lists.size() == 1) {
+        out.assign(lists.front()->begin(), lists.front()->end());
+        return;
     }
 
-    if (cur != &out) {
-        std::swap(out, *cur);
+    std::ranges::sort(lists, [](auto const* a, auto const* b) { return a->size() < b->size(); });
+    if (lists.front()->empty()) {
+        return;
+    }
+
+    std::size_t const list_count = lists.size();
+    cursors_.resize(list_count);
+    for (std::size_t i = 0; i < list_count; ++i) {
+        cursors_[i] = ListCursor{
+                .cursor = lists[i]->data(),
+                .end = lists[i]->data() + lists[i]->size(),
+        };
+    }
+
+    // search for candidate in other lists
+    VertexT candidate = *cursors_[0].cursor;
+    // count of lists where candidate is matched
+    std::size_t matched = 1;
+    // current list index
+    std::size_t index = 1;
+
+    while (true) {
+        ListCursor& list = cursors_[index];
+        list.cursor = LeapFrogSeek(list.cursor, list.end, candidate);
+        if (list.cursor == list.end) {
+            return;
+        }
+
+        if (*list.cursor == candidate) {
+            if (++matched == list_count) {
+                out.push_back(candidate);
+                if (++list.cursor == list.end) {
+                    return;
+                }
+                candidate = *list.cursor;
+                matched = 1;
+            }
+        } else {
+            candidate = *list.cursor;
+            matched = 1;
+        }
+
+        index = index + 1 < list_count ? index + 1 : 0;
     }
 }
 

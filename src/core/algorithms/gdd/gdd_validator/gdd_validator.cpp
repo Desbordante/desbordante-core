@@ -21,6 +21,7 @@ void GddValidator::ResetState() {
     counterexamples_.clear();
     matches_count_.clear();
     matches_count_.reserve(gdds_.size());
+    ResetWorkerState();
 }
 
 void GddValidator::RegisterOptions() {

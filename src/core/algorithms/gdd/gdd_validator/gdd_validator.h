@@ -50,10 +50,6 @@ protected:
     static DomainT BuildDomain(model::gdd::graph_t const& pattern,
                                model::gdd::graph_t const& graph);
 
-    static bool LabelsMatch(std::string const& lhs, std::string const& rhs) noexcept {
-        return lhs == rhs;  // TODO: wildcards
-    }
-
     struct GddHoldsResult {
         std::optional<GddCounterexample> ce;
         std::size_t match_count = 0;
@@ -66,8 +62,14 @@ protected:
 
     virtual std::unique_ptr<GddValidator> CreateWorker() const = 0;
 
+    virtual void ResetWorkerState() {}
+
 public:
     GddValidator();
+
+    static bool LabelsMatch(std::string_view lhs, std::string_view rhs) noexcept {
+        return lhs == rhs;  // TODO: wildcards
+    }
 
     std::vector<model::Gdd> const& GetResult() const noexcept {
         return result_;
@@ -77,7 +79,7 @@ public:
         return counterexamples_;
     }
 
-    std::vector<std::size_t> GetMatchesCount() const {
+    std::vector<std::size_t> const& GetMatchesCount() const {
         return matches_count_;
     }
 

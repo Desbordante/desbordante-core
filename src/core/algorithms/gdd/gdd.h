@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <utility>
 #include <variant>
@@ -79,12 +80,12 @@ private:
 
     static std::size_t ExtractVertexIdFromConst(gdd::detail::ConstValue const& cv);
 
-    static std::optional<std::pair<std::size_t, std::string>> TokenAsRelation(
+    static std::optional<std::pair<std::size_t, std::string_view>> TokenAsRelation(
             gdd::detail::DistanceOperand const& operand);
 
     static std::unordered_set<gdd::vertex_t> CollectRelationTargets(gdd::graph_t const& g,
                                                                     gdd::vertex_t gv,
-                                                                    std::string const& rel_label);
+                                                                    std::string_view rel_label);
 
     std::optional<gdd::vertex_t> FindPatternVertexById(std::size_t id) const;
 
@@ -96,7 +97,7 @@ private:
             gdd::detail::DistanceOperand const& op) const;
 
     bool SatisfiesRelationConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
-                                     std::pair<std::size_t, std::string> const& lhs_rel,
+                                     std::pair<std::size_t, std::string_view> const& lhs_rel,
                                      gdd::detail::DistanceOperand const& rhs) const;
 
     bool SatisfiesAttributeConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
@@ -132,11 +133,6 @@ public:
 
     Phi const& GetRhs() const noexcept {
         return rhs_;
-    }
-
-    static bool LabelsMatch(std::string const& pattern_label,
-                            std::string const& graph_label) noexcept {
-        return pattern_label == graph_label;  // TODO: wildcards
     }
 
     // Testing purposes only

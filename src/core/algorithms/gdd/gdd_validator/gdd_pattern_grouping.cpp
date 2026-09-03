@@ -10,14 +10,15 @@ bool SamePattern(model::gdd::graph_t const& a, model::gdd::graph_t const& b) {
         return false;
     }
 
-    for (std::size_t v = 0; v < boost::num_vertices(a); ++v) {
+    using model::gdd::vertex_t;
+    for (vertex_t const v : boost::make_iterator_range(boost::vertices(a))) {
         if (a[v].id != b[v].id || a[v].label != b[v].label) {
             return false;
         }
     }
 
     auto edges = [](model::gdd::graph_t const& g) {
-        std::vector<std::tuple<std::size_t, std::size_t, std::string>> result;
+        std::vector<std::tuple<vertex_t, vertex_t, std::string_view>> result;
         result.reserve(boost::num_edges(g));
         for (auto const e : boost::make_iterator_range(boost::edges(g))) {
             result.emplace_back(boost::source(e, g), boost::target(e, g), g[e].label);
