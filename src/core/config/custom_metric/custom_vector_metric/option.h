@@ -8,7 +8,7 @@
 #include "core/config/option.h"
 
 namespace config {
-Option<CustomVectorMetricType> VectorMetricOption(
-        CustomVectorMetricType* value_ptr, std::string_view name = names::kCustomMetric,
+Option<CustomVectorMetricOptionType> VectorMetricOption(
+        CustomVectorMetricOptionType* value_ptr, std::string_view name = names::kCustomMetric,
         std::string_view description = descriptions::kDCustomMetric);
 }  // namespace config
