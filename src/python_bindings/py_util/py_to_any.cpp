@@ -220,8 +220,7 @@ boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
 }
 
 boost::any CustomVectorMetricToAny(std::string_view, py::handle obj) {
-    // TODO: CustomVectorMetricOptionType
-    return config::CustomVectorMetricType{
+    return config::CustomVectorMetricOptionType{
             new python_bindings::PyCustomVectorMetric(py::reinterpret_borrow<py::object>(obj))};
 }
 

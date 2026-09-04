@@ -42,16 +42,30 @@ public:
     }
 };
 
-// TODO: py custom vector metric
 class PyCustomVectorMetric : public util::ICustomVectorMetric {
 private:
     pybind11::object metric_;
 
 public:
+    class TypedMetric : public ITypedMetric {
+    private:
+        pybind11::object metric_;
+        Types types_;
+
+    public:
+        TypedMetric(pybind11::object metric, Types const& types)
+            : metric_(std::move(metric)), types_(types) {}
+
+        double operator()(Values const& a, Values const& b) const override {
+            return pybind11::cast<double>(metric_(ValuesToPy(types_, a), ValuesToPy(types_, b)));
+        }
+    };
+
     explicit PyCustomVectorMetric(pybind11::object&& metric) : metric_(std::move(metric)) {}
 
-    double Dist(Types const& types, Values const& first, Values const& second) const override {
-        return pybind11::cast<double>(metric_(ValuesToPy(types, first), ValuesToPy(types, second)));
+    std::unique_ptr<ITypedMetric> SetTypes(Types const& types,
+                                           std::vector<std::string> const&) const override {
+        return std::make_unique<TypedMetric>(metric_, types);
     }
 };
 

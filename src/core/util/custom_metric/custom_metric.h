@@ -122,7 +122,7 @@ public:
             type_ = dynamic_cast<model::IMetrizableType const*>(type);
             if (!type_) {
                 std::ostringstream msg;
-                msg << "Cannot use default metric, because column " << "type " << type->ToString();
+                msg << "Cannot use default metric, because column type " << type->ToString();
                 if (!column_name.empty()) {
                     msg << " for column " << column_name;
                 }

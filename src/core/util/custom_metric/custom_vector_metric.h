@@ -4,6 +4,9 @@
 #include <cmath>
 #include <cstddef>
 #include <functional>
+#include <memory>
+#include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -27,9 +30,22 @@ protected:
     using Values = std::vector<std::byte const*>;
 
 public:
+    /// @brief A user-defined metric populated with type
+    /// Even though interface doesn't bind TypedMetric to a column, it is highly recommended to use
+    /// a dedicated TypedMetric for each column to avoid unexpected results (because this type is
+    /// generally user-defined)
+    class DESBORDANTE_EXPORT ITypedMetric {
+    public:
+        virtual ~ITypedMetric() = default;
+        virtual double operator()(Values const& a, Values const& b) const = 0;
+    };
+
     virtual ~ICustomVectorMetric() = default;
 
-    virtual double Dist(Types const& types, Values const& first, Values const& second) const = 0;
+    // NOTE: column_name should be used only to emit more informative error messages.
+    // Do not try to reconstruct any column info depending on it
+    virtual std::unique_ptr<ITypedMetric> SetTypes(
+            Types const& types, std::vector<std::string> const& column_names = {}) const = 0;
 };
 
 /// @brief A custom vector metric, which uses real column types
@@ -40,10 +56,25 @@ private:
     Metric metric_;
 
 public:
+    class TypedMetric : public ITypedMetric {
+    private:
+        Metric metric_;
+        Types types_;
+
+    public:
+        TypedMetric(Metric metric, Types types)
+            : metric_(std::move(metric)), types_(std::move(types)) {}
+
+        double operator()(Values const& a, Values const& b) const override {
+            return metric_(types_, a, b);
+        }
+    };
+
     explicit CustomVectorMetric(Metric metric) : metric_(std::move(metric)) {}
 
-    double Dist(Types const& types, Values const& first, Values const& second) const override {
-        return metric_(types, first, second);
+    std::unique_ptr<ITypedMetric> SetTypes(Types const& types,
+                                           std::vector<std::string> const&) const {
+        return std::make_unique<TypedMetric>(metric_, types);
     }
 };
 
@@ -64,17 +95,48 @@ private:
     }
 
 public:
-    double Dist(Types const& types, Values const& first, Values const& second) const override {
-        assert(types.size() == first.size() && types.size() == second.size());
+    class TypedMetric : public ITypedMetric {
+    private:
+        std::vector<model::IMetrizableType const*> types_;
 
-        double result = 0;
-        for (std::size_t i = 0; i < types.size(); ++i) {
-            if (first[i] && second[i]) {
-                double dist = ConvertType(types[i])->Dist(first[i], second[i]);
-                result += dist * dist;
+    public:
+        TypedMetric(Types const& types, std::vector<std::string> const& column_names) {
+            assert(column_names.empty() || types.size() == column_names.size());
+
+            types_.reserve(types.size());
+            for (std::size_t i = 0; i < types.size(); ++i) {
+                auto metr_type = dynamic_cast<model::IMetrizableType const*>(types[i]);
+                if (!metr_type) {
+                    std::ostringstream msg;
+                    msg << "Cannot use default metric, because column type "
+                        << types[i]->ToString();
+                    if (!column_names.empty()) {
+                        msg << " for column " << column_names[i];
+                    }
+                    msg << " is not metrizable. Consider using custom metric";
+                    throw config::ConfigurationError(msg.str());
+                }
+                types_.push_back(metr_type);
             }
         }
-        return std::sqrt(result);
+
+        double operator()(Values const& a, Values const& b) const override {
+            assert(types_.size() == a.size() && types_.size() == b.size());
+
+            double result = 0;
+            for (std::size_t i = 0; i < types_.size(); ++i) {
+                if (a[i] && b[i]) {
+                    double dist = ConvertType(types_[i])->Dist(a[i], b[i]);
+                    result += dist * dist;
+                }
+            }
+            return std::sqrt(result);
+        }
+    };
+
+    std::unique_ptr<ITypedMetric> SetTypes(
+            Types const& types, std::vector<std::string> const& column_names = {}) const override {
+        return std::make_unique<TypedMetric>(types, column_names);
     }
 };
 }  // namespace util
