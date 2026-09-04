@@ -32,18 +32,6 @@ std::shared_ptr<model::PLI const> ColumnLayoutRelationData::CalculatePLI(
     return pli;
 }
 
-std::shared_ptr<model::PLIWS const> ColumnLayoutRelationData::CalculatePLIWS(
-        std::vector<unsigned int> const& indices) const {
-    if (indices.size() <= 0) throw std::invalid_argument("received unpositive number of indices");
-
-    std::shared_ptr<model::PLIWS const> pliws = GetColumnData(indices[0]).GetPliwsOwnership();
-
-    for (size_t i = 1; i < indices.size(); ++i) {
-        pliws = pliws->Intersect(GetColumnData(indices[i]).GetPLWSIndex());
-    }
-    return pliws;
-}
-
 std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         model::IDatasetStream& data_stream) {
     size_t const num_columns = data_stream.GetNumberOfColumns();
@@ -52,7 +40,7 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
     auto schema = RelationalSchema::CreateFrom(data_stream);
     std::vector<ColumnData> column_data;
     for (size_t i = 0; i < num_columns; ++i) {
-        auto pli = model::PLIWithSingletons::CreateFor(value_id_columns[i]);
+        auto pli = model::PLI::CreateFor(value_id_columns[i]);
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
 

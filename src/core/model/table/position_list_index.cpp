@@ -149,7 +149,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
 
     std::unordered_map<int, std::vector<int>> partial_index;
 
-    for (auto& positions : index_) {
+    for (auto const& positions : index_) {
         for (int position : positions) {
             if (probing_table == nullptr) LOG_DEBUG("NULLPTR");
             if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {

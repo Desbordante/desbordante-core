@@ -72,18 +72,4 @@ PositionListIndex const* LatticeVertex::GetPositionListIndex() const {
                       position_list_index_);
 }
 
-PLIWithSingletons const* LatticeVertex::GetPositionListIndexWithSingletons() const {
-    return std::visit(
-            [](auto const& ptr) -> PLIWS const* {
-                auto a = util::GetPointer(ptr);
-                if constexpr (std::is_same_v<std::decay_t<decltype(a)>, PLIWithSingletons const*>) {
-                    return a;
-                } else {
-                    assert(false);
-                    __builtin_unreachable();
-                }
-            },
-            position_list_index_);
-}
-
 }  // namespace model

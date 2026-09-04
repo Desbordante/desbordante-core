@@ -61,7 +61,7 @@ TEST_P(TestTanePdepSelfValidation, SelfCalculationTest) {
     auto table = std::make_shared<CSVParser>(p.csv_config);
     auto relation = ColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [column_id, expected_error] : p.errors) {
-        auto const& column_pli = relation->GetColumnData(column_id).GetPLWSIndex();
+        auto const& column_pli = relation->GetColumnData(column_id).GetPositionListIndex();
         config::ErrorType error =
                 algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(column_pli);
         EXPECT_NEAR(error, expected_error, eps)
@@ -77,21 +77,20 @@ TEST_P(TestTaneAfdMeasuresValidation, ErrorCalculationTest) {
     auto table = std::make_shared<CSVParser>(p.csv_config);
     auto relation = ColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [lhs_id, rhs_id, expected_error] : p.afds) {
-        auto const& lhs = relation->GetColumnData(lhs_id).GetPLWSIndex();
-        auto const& rhs = relation->GetColumnData(rhs_id).GetPLWSIndex();
+        auto const& lhs = relation->GetColumnData(lhs_id).GetPositionListIndex();
+        auto const& rhs = relation->GetColumnData(rhs_id).GetPositionListIndex();
         config::ErrorType error;
         switch (p.error_measure) {
             case algos::AfdErrorMeasure::kPdep:
                 error = algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(
-                        lhs, lhs->Intersect(rhs).get());
+                        lhs, rhs);
                 break;
             case algos::AfdErrorMeasure::kTau:
-                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateTau(
-                        lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs, rhs);
                 break;
             case algos::AfdErrorMeasure::kMuPlus:
-                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(
-                        lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs,
+                                                                                           rhs);
                 break;
             case algos::AfdErrorMeasure::kRho:
                 error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateRhoMeasure(

@@ -88,14 +88,14 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
         Vertical xa = xa_vertex->GetVertical();
         // Calculate XA PLI
         if (xa_vertex->GetPositionListIndex() == nullptr) {
-            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndexWithSingletons();
-            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndexWithSingletons();
-            xa_vertex->AcquirePLIWithSingletons(parent_pli_1->Intersect(parent_pli_2));
+            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndex();
+            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndex();
+            xa_vertex->AcquirePositionListIndex(parent_pli_1->Intersect(parent_pli_2));
         }
 
         dynamic_bitset<> xa_indices = xa.GetColumnIndices();
         dynamic_bitset<> a_candidates = xa_vertex->GetRhsCandidates();
-        auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
+        auto xa_pli = xa_vertex->GetPositionListIndex();
         for (auto const& x_vertex : xa_vertex->GetParents()) {
             Vertical const& lhs = x_vertex->GetVertical();
 
@@ -105,8 +105,8 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             if (!a_candidates[a_index]) {
                 continue;
             }
-            auto x_pli = x_vertex->GetPositionListIndexWithSingletons();
-            auto a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
+            auto x_pli = x_vertex->GetPositionListIndex();
+            auto a_pli = relation_->GetColumnData(a_index).GetPositionListIndex();
             // Check X -> A
             config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
             if (error <= max_fd_error_) {
@@ -157,7 +157,7 @@ void TaneCommon::ExecuteInternal() {
         vertex->AddRhsCandidates(schema->GetColumns());
         vertex->GetParents().push_back(empty_vertex);
         vertex->SetKeyCandidate(true);
-        vertex->SetPLIWithSingletons(column_data.GetPLWSIndex());
+        vertex->SetPositionListIndex(column_data.GetPositionListIndex());
 
         // check FDs: 0->A
         double fd_error = CalculateZeroAryFdError(&column_data);
