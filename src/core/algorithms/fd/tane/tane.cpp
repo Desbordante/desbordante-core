@@ -139,32 +139,7 @@ void Tane::ComputeDependencies(LevelColumnCombinationsInfo& level,
             ++it;
             continue;
         }
-        if (column_combination.count() == 1) {
-            model::Index const rhs_index = column_combination.find_first();
-            if (!info.rhs_candidates.test(rhs_index)) {
-                ++it;
-                continue;
-            }
-            config::ErrorType error = CalculateZeroAryFdError(&relation_->GetColumnData(rhs_index));
-            if (error > max_fd_error_) {
-                ++it;
-                continue;
-            }
-            RegisterAfd(
-                    AFD(schema->GetVertical(boost::dynamic_bitset<>(relation_->GetNumColumns())),
-                        *schema->GetColumn(rhs_index), error, relation_->GetSharedPtrSchema()));
-            if (error == 0.0) {
-                it = level.erase(it);
-            } else {
-                info.rhs_candidates.reset(rhs_index);
-                if (info.rhs_candidates.none()) {
-                    it = level.erase(it);
-                } else {
-                    ++it;
-                }
-            }
-            continue;
-        }
+        assert(column_combination.count() > 1);
         boost::dynamic_bitset<> intersection = column_combination & info.rhs_candidates;
         boost::dynamic_bitset<> parent = column_combination;
         // TODO: the measures should be calculated at the same time as the PLIs are being
@@ -383,32 +358,381 @@ config::ErrorType Tane::CalculateFdError(model::PLIWS const* lhs_pli, model::PLI
 
 void Tane::ExecuteInternal() {
     if (relation_->GetNumColumns() < 2) return;
-    LevelColumnCombinationsInfo prev_level;
-    prev_level.try_emplace(boost::dynamic_bitset<>(relation_->GetNumColumns()),
-                           std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()));
-    LevelColumnCombinationsInfo current_level;
-    for (model::Index column_index = 0; column_index != relation_->GetNumColumns();
-         ++column_index) {
-        boost::dynamic_bitset<> column_combination(relation_->GetNumColumns());
-        column_combination.set(column_index);
-        current_level.try_emplace(
-                std::move(column_combination),
-                std::move(boost::dynamic_bitset<>(relation_->GetNumColumns()).set()),
-                std::make_unique<model::PLIWS>(
-                        *relation_->GetColumnData(column_index).GetPLWSIndex()));
-    }
-    std::size_t level_index = 0;
-    while (!current_level.empty()) {
-        ComputeDependencies(current_level, prev_level);
-        if (level_index == max_lhs_) break;
-        Prune(current_level);
+    // The first level is handled and the second one is generated on the fly to avoid copying the
+    // already calculated PLIs.
 
-        prev_level = std::move(current_level);
-        // TODO: On max_lhs_ level, do not save PLIs. This will need code that differs more from
-        // what's here right now, but once we have better measures calculation (i.e. intersections
-        // happen in ComputeDependencies), the procedure is not going to be as different.
+    // This stuff is annoying to read in full, abbreviating.
+    // Allocate the bitset with the number of columns bits.
+    auto bs = [&]() { return boost::dynamic_bitset<>(relation_->GetNumColumns()); };
+
+    // COMPUTE_DEPENDENCIES(L_1)
+    // (1) for each X ∈ L_1 do (2) C^+(X) := ⋂A∈X C+(X \ {A})
+    // pointless, C^+({A}) is exactly R at this point
+    // (3) and (4) reduce to "for each attribute"
+    // 5' if e(X \ {A} → A) ≤ ε then
+    // 6    output ∅ → A
+    // 7    C^+({A}) = R \ {A} <=> remove A from C^+({A})
+    // 8'   if X \ {A} → A holds exactly then <=> if e(X \ {A} → A) == 0.0 then
+    // 9''    C^+({A}) = ∅ <- lines 7, and 9' reduce to this
+
+    // Upon encountering C^+(X) = ∅, PRUNE will delete the child node, which is exactly the
+    // same as if there was no such node in the first place, so we can just not add them.
+
+    RelationalSchema const* schema = relation_->GetSchema();
+    std::vector<model::Index> inexact_zeroary_afd_rhss;  // C^+({A}) = R \ {A}
+    std::vector<model::Index> not_zeroary_afd_rhss;      // C^+({A}) = R
+    for (model::Index col = 0; col != relation_->GetNumColumns(); ++col) {
+        // X = {col}
+        ColumnData const& column_data = relation_->GetColumnData(col);
+        double fd_error = CalculateZeroAryFdError(&column_data);
+        // if X \ {A} → A is valid
+        if (fd_error <= max_fd_error_) {
+            // output X \ {A} → A
+            RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(col), fd_error,
+                            relation_->GetSharedPtrSchema()));
+            // remove A from C^+({A})
+            if (fd_error != 0) inexact_zeroary_afd_rhss.push_back(col);  // C^+({A}) = R \ {A}
+
+            // (8') if X \ {A} → A holds exactly then (9') remove all B in R \ {A} from C^+({A})
+            // C^+({A}) = ∅
+            continue;
+        }
+        not_zeroary_afd_rhss.push_back(col);  // C^+({A}) = R
+    }
+    if (max_lhs_ == 0) return;
+    // TODO: remove zeroary RHS attributes from all C^+(X). Without that, line 6 of PRUNE has to go
+    // through them every time in the intersection.
+    // Idea: if we take FDs with a column as their RHS and look at their LHSs, if no LHS on the
+    // further levels can form a minimal FD, we can delete it from all C^+(X). Can we perhaps detect
+    // this situation during execution?
+
+    // The only possible values for C^+({A}) for {A} that is in the level at this point are R \ {A}
+    // and R.
+
+    // L_1 is the union of these at this point.
+    if (inexact_zeroary_afd_rhss.empty() && not_zeroary_afd_rhss.empty()) return;
+    // Note that in a table of size 1, all FDs hold exactly, so past this point we can assume that
+    // some AFDs don't hold. And that the size of the table is greater than 1.
+    // We can assume that a column cannot be both a key and zeroary FD RHS:
+    // If it's a zeroary FD RHS, then all its values are equal unconditionally.
+    // If it's a key, then either the table does not have records that differ, or it has more than
+    // one distinct value. If the table does not have records that differ, then all the zeroary FDs
+    // hold, which we know is not true by this point. Therefore, the column cannot be a zeroary FD
+    // RHS.
+
+    // PRUNE(L_1)
+    // Lines 2 and 3 can be omitted as attributes with C^+({A}) = ∅ have not been added.
+    // Line 4: keep as is
+    // C^+({A}) \ {A} is:
+    // (not_zeroary_afd_rhss) 1. C^+({A}) = R => C^+({A}) \ {A} = R \ {A}
+    // (inexact_zeroary_afd_rhss) 2. C^+({A}) = R \ {A} => C^+({A}) \ {A} = R \ {A}
+    // Thus, line 5 is iteration over all attributes except the one in X.
+    // The intersection on line 6 is computed for one element, so it is that element.
+    // C^+({B} ∪ {A} \ {B}) = C^+({A}), the cases are listed above.
+    // The condition on line 6 on L_1 holds in case 1 and doesn't otherwise. Case 1 is the one where
+    // the attribute is not an RHS of an FD (exact or approximate).
+    // So, for case 1, lines 5 and 6 mean iteration over all attributes that are not valid RHSs and
+    // not the element in X. The key is marked and its C^+(X) is R \ ({A | C^+({A}) = R} \ X).
+    // For case 2, lines 5 and 6 also mean iteration over those attributes (and the one in X is not
+    // one of them). The key is marked and its C^+(X) is (R \ {A | C^+({A}) = R}.
+    // Therefore, the possible C^+({A}) after PRUNE(L_1) values are:
+    // 1. Not AFD RHSs, keys = R: C^+({A}) = R \ {B | C^+({B}) = R /\ B != A}
+    // 2. AFD RHSs with non-zero error, keys: C^+({A}) = R \ {A | C^+({A}) = R}
+    // 3. AFD RHSs with non-zero error, not keys: C^+({A}) = R \ {A}
+    // 4. Not AFD RHSs, not keys: C^+({A}) = R
+
+    std::vector<model::Index> non_key_attrs_not_0afd;  // C^+({A}) = R
+    std::vector<model::Index> key_attrs_not_0afd;      // C^+({B}) = R \ ({A | C^+({A}) = R} \ {B})
+    boost::dynamic_bitset<> superkey_rhs_candidates = bs();
+    superkey_rhs_candidates.set();
+    for (auto lhs_it = not_zeroary_afd_rhss.begin(); lhs_it != not_zeroary_afd_rhss.end();) {
+        superkey_rhs_candidates.reset(*lhs_it);
+        model::Index const not_zeroary_afd_rhs = *lhs_it;
+        if (!IsKey(relation_->GetColumnData(not_zeroary_afd_rhs).GetPositionListIndex())) {
+            non_key_attrs_not_0afd.push_back(not_zeroary_afd_rhs);
+            ++lhs_it;
+            continue;
+        }
+        key_attrs_not_0afd.push_back(not_zeroary_afd_rhs);
+        // This column only consists of unique values, so any FD with it as LHS holds exactly, the
+        // error is 0.0.
+        for (auto rhs_it = not_zeroary_afd_rhss.begin(); rhs_it != lhs_it; ++rhs_it) {
+            RegisterAfd(AFD(schema->GetVertical(std::move(bs().set(not_zeroary_afd_rhs))),
+                            *schema->GetColumn(*rhs_it), 0.0, relation_->GetSharedPtrSchema()));
+        }
+        for (auto rhs_it = ++lhs_it; rhs_it != not_zeroary_afd_rhss.end(); ++rhs_it) {
+            RegisterAfd(AFD(schema->GetVertical(std::move(bs().set(not_zeroary_afd_rhs))),
+                            *schema->GetColumn(*rhs_it), 0.0, relation_->GetSharedPtrSchema()));
+        }
+    }
+
+    std::vector<model::Index> non_key_attrs_0afd;  // C^+({A}) = R \ {A}
+    std::vector<model::Index> key_attrs_0afd;      // C^+({A}) = R \ {A | C^+({A}) = R}
+    for (model::Index inexact_zeroary_afd_rhs : inexact_zeroary_afd_rhss) {
+        if (!IsKey(relation_->GetColumnData(inexact_zeroary_afd_rhs).GetPositionListIndex())) {
+            non_key_attrs_0afd.push_back(inexact_zeroary_afd_rhs);
+            continue;
+        }
+        key_attrs_0afd.push_back(inexact_zeroary_afd_rhs);
+        for (model::Index not_zeroary_afd_rhs : not_zeroary_afd_rhss) {
+            RegisterAfd(AFD(schema->GetVertical(std::move(bs().set(inexact_zeroary_afd_rhs))),
+                            *schema->GetColumn(not_zeroary_afd_rhs), 0.0,
+                            relation_->GetSharedPtrSchema()));
+        }
+    }
+
+    // L_2 := GENERATE_NEXT_LEVEL(L_1)
+    // L_1 contains single-element sets, so we can use an array of these elements.
+    // Iterate over indices left over from before.
+    // PREFIX_BLOCKS(L_1) outputs {L_1}, so lines 3 and 4 iterate over all pairs in L_1, and line 5
+    // obviously holds for every pair.
+    // Thus, the next level is just all the pairs, all of C^+(X) are known, we don't have to
+    // actually execute anything here, this can be done on-the-fly in the COMPUTE_DEPENDENCIES(L_2)
+    // procedure. We have to process 10 cases.
+
+    // COMPUTE_DEPENDENCIES(L_2)
+    LevelColumnCombinationsInfo current_level;
+    // All of C^+(X) are known, so we skip lines 1 and 2.
+
+    // Start with calculating all pairs where at least one column is a key. ComputeDependencies
+    // skips superkeys, so no FDs have to be accounted for, so the final C^+(X) is just the
+    // intersection of the corresponding columns' C^+(X).
+
+    // Case 1: key_attrs_not_0afd, key_attrs_0afd
+    // C^+(X) = R \ ({A | C^+({A}) = R} \ {B}) ⋂ (R \ {A | C^+({A}) = R}) = R \ {A | C^+({A}) = R}
+
+    // Case 2: key_attrs_not_0afd, key_attrs_not_0afd
+    // C^+(X) = (R \ ({A | C^+({A}) = R} \ {B})) ⋂ (R \ ({A | C^+({A}) = R} \ {C})) =
+    //   R \ {A | C^+({A}) = R}
+
+    // Case 3: key_attrs_not_0afd, non_key_attrs_not_0afd
+    // C^+(X) = (R \ ({A | C^+({A}) = R} \ {B})) ⋂ R = R \ ({A | C^+({A}) = R} \ {B})
+
+    // Case 4: key_attrs_not_0afd, non_key_attrs_0afd
+    // C^+(X) = R \ ({A | C^+({A}) = R} \ {B}) ⋂ (R \ {C}) = R \ ({A | C^+({A}) = R} \ {B}) \ {C}
+
+    for (auto it = key_attrs_not_0afd.begin(); it != key_attrs_not_0afd.end();) {
+        model::Index const key_attr = *it++;
+        auto add_superkey = [&](model::Index other_attr) {
+            current_level.try_emplace(std::move(bs().set(key_attr).set(other_attr)),
+                                      superkey_rhs_candidates);
+        };
+        assert(!superkey_rhs_candidates.test(key_attr));
+        superkey_rhs_candidates.set(key_attr);
+        for (model::Index i : non_key_attrs_not_0afd) {
+            add_superkey(i);
+        }
+        for (model::Index i : non_key_attrs_0afd) {
+            assert(superkey_rhs_candidates.test(i));
+            superkey_rhs_candidates.reset(i);
+            add_superkey(i);
+            superkey_rhs_candidates.set(i);
+        }
+        superkey_rhs_candidates.reset(key_attr);
+        // We end up repeatedly checking if things are empty. But expanding this would make the code
+        // even less readable with basically no performance benefit.
+        if (superkey_rhs_candidates.any()) {
+            for (model::Index i : key_attrs_0afd) {
+                add_superkey(i);
+            }
+            for (auto it2 = it; it2 != key_attrs_not_0afd.end(); ++it2) {
+                add_superkey(*it2);
+            }
+        }
+    }
+
+    // Case 5: key_attrs_0afd, key_attrs_0afd
+    // C^+(X) = (R \ {A | C^+({A}) = R}) ⋂ (R \ {A | C^+({A}) = R}) = R \ {A | C^+({A}) = R}
+
+    // Case 6: key_attrs_0afd, non_key_attrs_not_0afd
+    // C^+(X) = (R \ {A | C^+({A}) = R}) ⋂ R = R \ {A | C^+({A}) = R}
+
+    // Case 7: key_attrs_0afd, non_key_attrs_0afd
+    // C^+(X) = (R \ {A | C^+({A}) = R}) ⋂ (R \ {C}) = (R \ {A | C^+({A}) = R}) \ {C}
+    for (auto it = key_attrs_0afd.begin(); it != key_attrs_0afd.end();) {
+        model::Index const key_attr = *it++;
+        auto add_superkey = [&](model::Index other_attr) {
+            current_level.try_emplace(std::move(bs().set(key_attr).set(other_attr)),
+                                      superkey_rhs_candidates);
+        };
+        for (model::Index i : non_key_attrs_0afd) {
+            assert(superkey_rhs_candidates.test(i));
+            superkey_rhs_candidates.reset(i);
+            add_superkey(i);
+            superkey_rhs_candidates.set(i);
+        }
+        if (superkey_rhs_candidates.any()) {
+            for (auto it2 = it; it2 != key_attrs_0afd.end(); ++it2) {
+                add_superkey(*it2);
+            }
+            for (model::Index i : non_key_attrs_not_0afd) {
+                add_superkey(i);
+            }
+        }
+    }
+
+    // Case 8: non_key_attrs_0afd, non_key_attrs_0afd
+    // C^+(X) = (R \ {A}) ⋂ (R \ {B}) = R \ {A, B}
+    // The intersection in Line 4 of COMPUTE_DEPENDENCIES is empty, C^+(X) is from just
+    // GENERATE_NEXT_LEVEL.
+    for (auto attr_it = non_key_attrs_0afd.begin(); attr_it != non_key_attrs_0afd.end();
+         ++attr_it) {
+        for (auto attr2_it = std::next(attr_it); attr2_it != non_key_attrs_0afd.end(); ++attr2_it) {
+            current_level.try_emplace(std::move(bs().set(*attr_it).set(*attr2_it)),
+                                      std::move(bs().set().reset(*attr_it).reset(*attr2_it)));
+        }
+    }
+
+    // Case 9: non_key_attrs_0afd, non_key_attrs_not_0afd
+    // C^+(X) = (R \ {A}) ⋂ R = R \ {A}
+
+    // Case 10: non_key_attrs_not_0afd, non_key_attrs_not_0afd
+    // C^+(X) = R ⋂ R = R
+
+    // These two cases are handled in one loop.
+    // Unlike the other cases, these C^+(X)'s can get further modifications in ComputeDependencies.
+    for (auto col1_it = non_key_attrs_not_0afd.begin(); col1_it != non_key_attrs_not_0afd.end();) {
+        model::Index const col1 = *col1_it;
+        // Case 9
+        for (model::Index const col2 : non_key_attrs_0afd) {
+            // C^+(X) = (R \ {col2})
+            // X ∩ C^+(X) = {col1, col2} ∩ (R \ {col2}) = {col1}
+            // Check: col2 -> col1
+            model::PLIWS const* pli1 = relation_->GetColumnData(col1).GetPLWSIndex();
+            model::PLIWS const* pli2 = relation_->GetColumnData(col2).GetPLWSIndex();
+            std::unique_ptr<model::PLIWithSingletons> joint_pli = pli1->Intersect(pli2);
+
+            config::ErrorType error21 = CalculateFdError(pli2, pli1, joint_pli.get());
+            auto reg21 = [&]() {
+                RegisterAfd(AFD(schema->GetVertical(std::move(bs().set(col2))),
+                                *schema->GetColumn(col1), error21,
+                                relation_->GetSharedPtrSchema()));
+            };
+            if (error21 == 0.0) {
+                // output X \ {A} → A
+                reg21();
+                // 7 remove A from C+(X)
+                // 9' remove all B in R \ X from C+(X) <=> intersect C^+(X) with X
+                // C^+({col1, col2}) = ((R \ {col2}) \ {col1}) ∩ {col1, col2} = ∅
+                continue;
+            }
+            boost::dynamic_bitset<> rhs_candidates = bs();
+            rhs_candidates.set();
+            rhs_candidates.reset(col2);
+            // if e(X \ {A} → A) ≤ ε then
+            if (error21 <= max_fd_error_) {
+                // output X \ {A} → A
+                reg21();
+                // remove A from C+(X)
+                rhs_candidates.reset(col1);
+                // TODO: is this possible?
+                if (relation_->GetNumColumns() == 2) continue;
+            }
+            current_level.try_emplace(std::move(bs().set(col1).set(col2)),
+                                      std::move(rhs_candidates), std::move(joint_pli));
+        }
+        // Case 10
+        for (auto col2_it = ++col1_it; col2_it != non_key_attrs_not_0afd.end(); ++col2_it) {
+            model::Index const col2 = *col2_it;
+
+            // C^+(X) = R
+            // Check col1 -> col2, col2 -> col1
+            model::PLIWS const* pli1 = relation_->GetColumnData(col1).GetPLWSIndex();
+            model::PLIWS const* pli2 = relation_->GetColumnData(col2).GetPLWSIndex();
+            std::unique_ptr<model::PLIWithSingletons> joint_pli = pli1->Intersect(pli2);
+
+            config::ErrorType error12 = CalculateFdError(pli1, pli2, joint_pli.get());
+            config::ErrorType error21 = CalculateFdError(pli2, pli1, joint_pli.get());
+            // 5′ if e(X \ {A} → A) ≤ ε then
+            // 6      output X \ {A} → A
+            // 7      remove A from C+(X)
+            // 8′     if X \ {A} → A holds exactly then
+            // 9′         remove all B in R \ X from C+(X)
+            // "Holds exactly" means error == 0.0 That is, error == 0.0 for an A on line 4 means
+            // only the one column in X \ {A}, which is the single LHS column in the FD that is
+            // output, remains in C^+(X).
+
+            // error <= max_fd_error_ means the corresponing RHS column should be deleted (line 7).
+            // The RHS column of one is the LHS column of the other.
+            // The intersection is what makes it to the final C^+(X).
+            auto reg12 = [&]() {
+                RegisterAfd(AFD(schema->GetVertical(std::move(bs().set(col1))),
+                                *schema->GetColumn(col2), error12,
+                                relation_->GetSharedPtrSchema()));
+            };
+            auto reg21 = [&]() {
+                RegisterAfd(AFD(schema->GetVertical(std::move(bs().set(col2))),
+                                *schema->GetColumn(col1), error21,
+                                relation_->GetSharedPtrSchema()));
+            };
+            // Create the column combination that is the element of L_2, calculate C^+ of it, add
+            // them and cache the intersected PLI.
+            auto add_to_level = [&](boost::dynamic_bitset<>&& rhs_candidates) {
+                current_level.try_emplace(std::move(bs().set(col1).set(col2)),
+                                          std::move(rhs_candidates), std::move(joint_pli));
+            };
+            if (error12 == 0.0) {
+                reg12();
+                // Leave only col1.
+                if (error21 <= max_fd_error_) {
+                    reg21();
+                    // Delete col1 too, so we get an empty intersection, which we never add in the
+                    // first place instead of deleting later.
+                    // current_level.try_emplace(nothing);
+                    continue;
+                }
+                add_to_level(std::move(bs().set(col1)));
+                continue;
+            }
+            if (error21 == 0.0) {
+                reg21();
+                // Leave only col2.
+                if (error12 <= max_fd_error_) {
+                    reg12();
+                    // Delete col2 too.
+                    continue;
+                }
+                add_to_level(std::move(bs().set(col2)));
+                continue;
+            }
+            if (error12 <= max_fd_error_) {
+                reg12();
+                // Delete col2, everything else remains.
+                auto rhs_candidates = bs();
+                rhs_candidates.set().reset(col2);
+                if (error21 <= max_fd_error_) {
+                    reg21();
+                    // Also delete col1.
+                    rhs_candidates.reset(col1);
+                    // TODO: is this possible?
+                    if (relation_->GetNumColumns() == 2) continue;
+                }
+                add_to_level(std::move(rhs_candidates));
+                continue;
+            }
+            if (error21 <= max_fd_error_) {
+                reg21();
+                // Delete col1, everything else remains.
+                add_to_level(std::move(bs().set().reset(col1)));
+                continue;
+            }
+            // Otherwise, C^+(X) remains R.
+            add_to_level(std::move(bs().set()));
+        }
+    }
+
+    if (max_lhs_ == 1) return;
+
+    // TODO: figure out what happens when LHS size reaches the maximum.
+    for (unsigned int lhs_size = 2; lhs_size <= max_lhs_; ++lhs_size) {
+        Prune(current_level);
+        LevelColumnCombinationsInfo prev_level = std::move(current_level);
         current_level = GenerateNextLevel(prev_level);
-        ++level_index;
+
+        // while L_l != ∅
+        if (current_level.empty()) break;
+
+        ComputeDependencies(current_level, prev_level);
     }
 }
 
