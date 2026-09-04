@@ -24,19 +24,17 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
     return 1;
 }
 
-config::ErrorType Tane::CalculateFdError(model::PLIWithSingletons const* lhs_pli,
-                                         model::PLIWithSingletons const* rhs_pli,
-                                         model::PLIWithSingletons const* joint_pli) {
+config::ErrorType Tane::CalculateFdError(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                         model::PLI const* joint_pli) {
     switch (afd_error_measure_) {
         case AfdErrorMeasure::kPdep:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(lhs_pli,
-                                                                                        joint_pli);
+                                                                                        rhs_pli);
         case AfdErrorMeasure::kTau:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs_pli, rhs_pli,
-                                                                                joint_pli);
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs_pli, rhs_pli);
         case AfdErrorMeasure::kMuPlus:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs_pli, rhs_pli,
-                                                                                   joint_pli);
+            return 1 -
+                   afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs_pli, rhs_pli);
         case AfdErrorMeasure::kRho:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateRhoMeasure(lhs_pli,
                                                                                        joint_pli);
