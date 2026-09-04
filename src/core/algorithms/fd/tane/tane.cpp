@@ -381,6 +381,13 @@ void Tane::ExecuteInternal() {
     RelationalSchema const* schema = relation_->GetSchema();
     std::vector<model::Index> inexact_zeroary_afd_rhss;  // C^+({A}) = R \ {A}
     std::vector<model::Index> not_zeroary_afd_rhss;      // C^+({A}) = R
+    // These are removed from all C^+(X) immediately. Without that, line 6 of PRUNE has to go
+    // through them every time in the intersection.
+    // Idea: if we take FDs with a column as their RHS and look at their LHSs, if no LHS on the
+    // further levels can form a minimal FD, we can delete it from all C^+(X). Can we perhaps detect
+    // this situation during execution?
+    boost::dynamic_bitset not_exact_zeroary_afd_rhss = bs();
+    not_exact_zeroary_afd_rhss.set();
     for (model::Index col = 0; col != relation_->GetNumColumns(); ++col) {
         // X = {col}
         ColumnData const& column_data = relation_->GetColumnData(col);
@@ -390,24 +397,21 @@ void Tane::ExecuteInternal() {
             // output X \ {A} → A
             RegisterAfd(AFD(schema->CreateEmptyVertical(), *schema->GetColumn(col), fd_error,
                             relation_->GetSharedPtrSchema()));
-            // remove A from C^+({A})
-            if (fd_error != 0) inexact_zeroary_afd_rhss.push_back(col);  // C^+({A}) = R \ {A}
-
-            // (8') if X \ {A} → A holds exactly then (9') remove all B in R \ {A} from C^+({A})
-            // C^+({A}) = ∅
+            if (fd_error == 0) {
+                // (8') if X \ {A} → A holds exactly then (9') remove all B in R \ {A} from C^+({A})
+                not_exact_zeroary_afd_rhss.reset(col);  // C^+({A}) = ∅
+            } else {
+                // remove A from C^+({A})
+                inexact_zeroary_afd_rhss.push_back(col);  // C^+({A}) = R \ {A}
+            }
             continue;
         }
         not_zeroary_afd_rhss.push_back(col);  // C^+({A}) = R
     }
     if (max_lhs_ == 0) return;
-    // TODO: remove zeroary RHS attributes from all C^+(X). Without that, line 6 of PRUNE has to go
-    // through them every time in the intersection.
-    // Idea: if we take FDs with a column as their RHS and look at their LHSs, if no LHS on the
-    // further levels can form a minimal FD, we can delete it from all C^+(X). Can we perhaps detect
-    // this situation during execution?
 
     // The only possible values for C^+({A}) for {A} that is in the level at this point are R \ {A}
-    // and R.
+    // and R (minus zeroary RHSs).
 
     // L_1 is the union of these at this point.
     if (inexact_zeroary_afd_rhss.empty() && not_zeroary_afd_rhss.empty()) return;
@@ -443,8 +447,7 @@ void Tane::ExecuteInternal() {
 
     std::vector<model::Index> non_key_attrs_not_0afd;  // C^+({A}) = R
     std::vector<model::Index> key_attrs_not_0afd;      // C^+({B}) = R \ ({A | C^+({A}) = R} \ {B})
-    boost::dynamic_bitset<> superkey_rhs_candidates = bs();
-    superkey_rhs_candidates.set();
+    boost::dynamic_bitset<> superkey_rhs_candidates = not_exact_zeroary_afd_rhss;
     for (auto lhs_it = not_zeroary_afd_rhss.begin(); lhs_it != not_zeroary_afd_rhss.end();) {
         superkey_rhs_candidates.reset(*lhs_it);
         model::Index const not_zeroary_afd_rhs = *lhs_it;
@@ -616,9 +619,9 @@ void Tane::ExecuteInternal() {
                 // C^+({col1, col2}) = ((R \ {col2}) \ {col1}) ∩ {col1, col2} = ∅
                 continue;
             }
-            boost::dynamic_bitset<> rhs_candidates = bs();
-            rhs_candidates.set();
+            boost::dynamic_bitset<> rhs_candidates = not_exact_zeroary_afd_rhss;
             rhs_candidates.reset(col2);
+            assert(rhs_candidates.test(col1));
             // if e(X \ {A} → A) ≤ ε then
             if (error21 <= max_fd_error_) {
                 // output X \ {A} → A
@@ -626,7 +629,7 @@ void Tane::ExecuteInternal() {
                 // remove A from C+(X)
                 rhs_candidates.reset(col1);
                 // TODO: is this possible?
-                if (relation_->GetNumColumns() == 2) continue;
+                if (rhs_candidates.none()) continue;
             }
             current_level.try_emplace(std::move(bs().set(col1).set(col2)),
                                       std::move(rhs_candidates), std::move(joint_pli));
@@ -698,14 +701,15 @@ void Tane::ExecuteInternal() {
             if (error12 <= max_fd_error_) {
                 reg12();
                 // Delete col2, everything else remains.
-                auto rhs_candidates = bs();
-                rhs_candidates.set().reset(col2);
+                auto rhs_candidates = not_exact_zeroary_afd_rhss;
+                rhs_candidates.reset(col2);
+                assert(rhs_candidates.test(col1));
                 if (error21 <= max_fd_error_) {
                     reg21();
                     // Also delete col1.
                     rhs_candidates.reset(col1);
                     // TODO: is this possible?
-                    if (relation_->GetNumColumns() == 2) continue;
+                    if (rhs_candidates.none()) continue;
                 }
                 add_to_level(std::move(rhs_candidates));
                 continue;
@@ -713,11 +717,14 @@ void Tane::ExecuteInternal() {
             if (error21 <= max_fd_error_) {
                 reg21();
                 // Delete col1, everything else remains.
-                add_to_level(std::move(bs().set().reset(col1)));
+                auto rhs_candidates = not_exact_zeroary_afd_rhss;
+                rhs_candidates.reset(col1);
+                assert(rhs_candidates.test(col2));
+                add_to_level(std::move(rhs_candidates));
                 continue;
             }
             // Otherwise, C^+(X) remains R.
-            add_to_level(std::move(bs().set()));
+            add_to_level(boost::dynamic_bitset(not_exact_zeroary_afd_rhss));
         }
     }
 
