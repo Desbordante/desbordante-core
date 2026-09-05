@@ -2,6 +2,10 @@
 
 #include <string_view>
 
+#define DEFAULT_METRIC_NOTE                                                                \
+    "You can pass nullptr for some columns or leave the entire list empty to use default " \
+    "metrics, deduced from column type."
+
 namespace config::descriptions {
 // Common
 constexpr auto kDCustomMetric = "user-defined metric";
@@ -182,12 +186,20 @@ constexpr auto kDDiagonalThreshold =
         "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
         "containing N rows is not considered a change (default is 1e-5).";
 constexpr auto kDDomain = "Ordered domain for Domain PAC.";
+constexpr auto kDLhsDeltas =
+        "Maximum distances between values in left-hand side of FD PAC. "
+        "Default is 0 for each column.";
+constexpr auto kDLhsMetrics = "Metrics for left-hand side columns. " DEFAULT_METRIC_NOTE;
+constexpr auto kDRhsMetrics = "Metrics for right-hand side columns. " DEFAULT_METRIC_NOTE;
 constexpr auto kDMaxEpsilon =
         "Maximal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is +infinity).";
 constexpr auto kDMinEpsilon =
         "Minimal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is 0).";
+constexpr auto kDMaxDelta =
+        "Maximal value of delta, which is a probability at which values satisfy the dependency "
+        "(default is 1 if min_eps or max_eps is passed, 0.2 otherwise).";
 constexpr auto kDMinDelta =
         "Minimal value of delta, which is a probability at which values satisfy the dependency "
         "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";
@@ -242,3 +254,5 @@ constexpr auto kDSdG1 = "Lower bound of the sequential interval (inclusive).";
 constexpr auto kDSdG2 = "Upper bound of the sequential interval (inclusive). Set -1 for Infinity.";
 constexpr auto kDSdIndices = "Subset of row indices to validate the SD on.";
 }  // namespace config::descriptions
+
+#undef DEFAULT_METRIC_NOTE
