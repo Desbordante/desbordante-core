@@ -10,8 +10,16 @@
 
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/parser/dc_parser.h"
+#include "core/model/table/column_layout_relation_data.h"
 
 namespace algos::dc {
+
+dc::DC::DC(::std::string const& dc, ::ColumnLayoutRelationData const* relation,
+           std::vector<model::TypedColumnData> const& data) {
+    dc::DCParser parser = dc::DCParser(dc, relation, data);
+    *this = parser.Parse();
+}
 
 bool DC::CheckAllEquality() const {
     auto check = [](auto const& pred) {

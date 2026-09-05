@@ -26,7 +26,8 @@ CSVParser::CSVParser(std::filesystem::path const& path, char separator, bool has
       next_line_(),
       number_of_columns_(),
       column_names_(),
-      relation_name_(path.filename().string()) {
+      relation_name_(path.filename().string()),
+      path_(path) {
     // Wrong path
     if (!source_) {
         throw std::runtime_error("Error: couldn't find file " + path.string());

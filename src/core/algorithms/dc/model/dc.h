@@ -9,6 +9,7 @@
 
 #include "core/algorithms/dc/model/predicate.h"
 #include "core/model/table/column.h"
+#include "core/model/table/column_layout_relation_data.h"
 #include "core/model/table/vertical.h"
 
 namespace algos::dc {
@@ -40,10 +41,12 @@ private:
 public:
     DC(std::vector<Predicate>&& predicates) : predicates_(std::move(predicates)) {};
     DC(std::vector<Predicate> const& predicates) : predicates_(predicates) {};
+    DC(std::string const& dc, ::ColumnLayoutRelationData const* relation,
+       std::vector<model::TypedColumnData> const& data);
     DC() = default;
 
     template <class Iter>
-    DC(Iter first, Iter last) : predicates_(first, last) {};
+    DC(Iter first, Iter last) : predicates_(first, last) {}
 
     // returns unique columns indices from each Predicate which satisfy the given predicate
     template <class Pred>
