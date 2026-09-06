@@ -210,6 +210,32 @@ def print_subgraph_components(subgraph, index):
         print(colored("  (single-vertex pattern, no edges)", bcolors.WARNING))
 
 
+def sort_subgraphs_for_output(subgraphs):
+    def sort_key(subgraph):
+        edges = [edge for edge in subgraph.edge_list if int(edge.label) != -1]
+        vertex_labels = tuple(sorted(str(label) for label in subgraph.edge_list.get_vertex_labels()))
+        edge_labels = tuple(
+            sorted(
+                (
+                    min(str(edge.vertex1.label), str(edge.vertex2.label)),
+                    max(str(edge.vertex1.label), str(edge.vertex2.label)),
+                    str(edge.label),
+                )
+                for edge in edges
+            )
+        )
+        return (len(edges), vertex_labels, edge_labels, tuple(sorted(subgraph.graphs_ids)))
+
+    return sorted(subgraphs, key=sort_key)
+
+
+def print_subgraph_raw(subgraph, index):
+    lines = str(subgraph).strip().splitlines()
+    if lines and lines[0].startswith("t #"):
+        lines[0] = f"t # {index} * {subgraph.support}"
+    print("\n".join(lines))
+
+
 def visualize_subgraph_results(results, title, node_color='lightsalmon',
                                face_color='seashell', border_color='sienna'):
     if not HAS_VISUALIZATION:
@@ -266,7 +292,7 @@ def main():
     algo.execute()
     print(colored("  Done!", bcolors.OKGREEN))
 
-    results = algo.get_frequent_subgraphs()
+    results = sort_subgraphs_for_output(algo.get_frequent_subgraphs())
 
     # Inspect results in two forms: raw text and structured access
     print_section("Results (raw format)",
@@ -279,7 +305,7 @@ def main():
 
     for i, subgraph in enumerate(results):
         print(colored(f"\n--- Subgraph #{i + 1} ---", bcolors.OKCYAN))
-        print(str(subgraph).strip())
+        print_subgraph_raw(subgraph, i)
 
     print_section("Results (structured access)",
                   "Each FrequentSubgraph has a .edge_list field.\n"
