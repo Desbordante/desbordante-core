@@ -325,25 +325,25 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
         AfdMeasuresTaneMiningSuite, TestTaneAfdMeasuresMining,
         ::testing::Values(
-                TaneMiningParams(3325, 0.3, algos::AfdErrorMeasure::kPdep, kTestFD),
+                TaneMiningParams(29253, 0.3, algos::AfdErrorMeasure::kPdep, kTestFD),
                 TaneMiningParams(19266, 0.174, algos::AfdErrorMeasure::kPdep, kIris),
                 TaneMiningParams(18528, 0.1, algos::AfdErrorMeasure::kPdep, kIris),
-                TaneMiningParams(31178, 0.15, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
-                TaneMiningParams(1182, 0.21, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kTau, kTestFD),
+                TaneMiningParams(53657, 0.15, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
+                TaneMiningParams(44088, 0.21, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
+                TaneMiningParams(21731, 0.01, algos::AfdErrorMeasure::kTau, kTestFD),
                 TaneMiningParams(11680, 0.1, algos::AfdErrorMeasure::kTau, kIris),
                 TaneMiningParams(60896, 0.01, algos::AfdErrorMeasure::kTau, kIris),
-                TaneMiningParams(52638, 0.1, algos::AfdErrorMeasure::kTau, kNeighbors10k),
-                TaneMiningParams(44991, 0.01, algos::AfdErrorMeasure::kTau, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kMuPlus, kTestFD),
+                TaneMiningParams(41837, 0.1, algos::AfdErrorMeasure::kTau, kNeighbors10k),
+                TaneMiningParams(57486, 0.01, algos::AfdErrorMeasure::kTau, kNeighbors10k),
+                TaneMiningParams(21731, 0.01, algos::AfdErrorMeasure::kMuPlus, kTestFD),
                 TaneMiningParams(60841, 0.1, algos::AfdErrorMeasure::kMuPlus, kIris),
                 TaneMiningParams(60896, 0.01, algos::AfdErrorMeasure::kMuPlus, kIris),
-                TaneMiningParams(12185, 0.1, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
-                TaneMiningParams(12185, 0.01, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kRho, kTestFD),
+                TaneMiningParams(43368, 0.1, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
+                TaneMiningParams(43368, 0.01, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
+                TaneMiningParams(21731, 0.01, algos::AfdErrorMeasure::kRho, kTestFD),
                 TaneMiningParams(11873, 0.1, algos::AfdErrorMeasure::kRho, kIris),
                 TaneMiningParams(47878, 0.01, algos::AfdErrorMeasure::kRho, kIris),
-                TaneMiningParams(52638, 0.1, algos::AfdErrorMeasure::kRho, kNeighbors10k),
-                TaneMiningParams(52638, 0.01, algos::AfdErrorMeasure::kRho, kNeighbors10k)));
+                TaneMiningParams(41837, 0.1, algos::AfdErrorMeasure::kRho, kNeighbors10k),
+                TaneMiningParams(41837, 0.01, algos::AfdErrorMeasure::kRho, kNeighbors10k)));
 
 }  // namespace tests
