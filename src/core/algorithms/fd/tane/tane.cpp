@@ -753,7 +753,7 @@ void Tane::ComputeDependenciesLevel2NonKeysNotBothZeroaryAfdRhs(
             // only the one column in X \ {A}, which is the single LHS column in the FD that is
             // output, remains in C^+(X).
 
-            // error <= max_fd_error_ means the corresponing RHS column should be deleted (line 7).
+            // error <= max_fd_error_ means the corresponding RHS column should be deleted (line 7).
             // The RHS column of one is the LHS column of the other.
             // The intersection is what makes it to the final C^+(X).
             auto reg12 = [&]() {
