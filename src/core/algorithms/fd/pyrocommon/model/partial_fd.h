@@ -1,34 +1,25 @@
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "core/model/table/column.h"
-#include "core/model/table/vertical.h"
+#include "core/model/index.h"
 
 class PartialFD {
 public:
     double error_;
-    Vertical lhs_;
-    Column rhs_;
+    boost::dynamic_bitset<> lhs_;
+    model::Index rhs_;
     double score_;
 
-    PartialFD(Vertical lhs, Column rhs, double error, double score)
+    PartialFD(boost::dynamic_bitset<> lhs, model::Index rhs, double error, double score)
         : error_(error), lhs_(std::move(lhs)), rhs_(std::move(rhs)), score_(score) {}
-
-    std::string ToIndicesString() const {
-        return lhs_.ToIndicesString() + " - " + rhs_.ToIndicesString();
-    }
-
-    std::string ToString() const {
-        return lhs_.ToString() + "~>" + rhs_.ToString() + boost::lexical_cast<std::string>(error_) +
-               boost::lexical_cast<std::string>(score_);
-    }
 
     double GetError() const {
         return error_;
     }
 
     int GetArity() const {
-        return lhs_.GetColumns().size();
+        return lhs_.count();
     }
 };

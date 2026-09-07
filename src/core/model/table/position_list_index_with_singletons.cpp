@@ -13,8 +13,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/vertical.h"
 #include "core/util/logger.h"
 
 namespace model {
@@ -135,56 +133,6 @@ std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Probe(
     return std::make_unique<PLIWithSingletons>(std::move(new_index), std::move(singletons),
                                                new_size, new_entropy, new_nep, relation_size_,
                                                relation_size_);
-}
-
-std::unique_ptr<PLIWithSingletons> PLIWithSingletons::ProbeAll(
-        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
-    if (this->relation_size_ != relation_data.GetNumRows())
-        throw std::invalid_argument("received different number of rows");
-    std::deque<std::vector<int>> new_index;
-    std::deque<std::vector<int>> singletons(singletons_);
-    unsigned int new_size = 0;
-    double new_key_gap = 0.0;
-    unsigned long long new_nep = 0;
-
-    std::map<std::vector<int>, std::vector<int>> partial_index;
-    std::vector<int> probe;
-
-    for (auto& cluster : this->index_) {
-        for (int position : cluster) {
-            if (!TakeProbe(position, relation_data, probing_columns, probe)) {
-                partial_index[{kSingletonValueId}].push_back(position);
-                probe.clear();
-                continue;
-            }
-
-            partial_index[probe].push_back(position);
-            probe.clear();
-        }
-
-        for (auto& iter : partial_index) {
-            auto& new_cluster = iter.second;
-            if (new_cluster.size() <= 1 || iter.first == std::vector<int>{kSingletonValueId}) {
-                singletons.push_back(std::move(cluster));
-                continue;
-            }
-
-            new_size += new_cluster.size();
-            new_key_gap += new_cluster.size() * log(new_cluster.size());
-            new_nep += CalculateNep(new_cluster.size());
-
-            new_index.emplace_back(std::move(new_cluster));
-        }
-        partial_index.clear();
-    }
-
-    double new_entropy = log(this->relation_size_) - new_key_gap / this->relation_size_;
-
-    SortClusters(new_index);
-
-    return std::make_unique<PLIWithSingletons>(std::move(new_index), std::move(singletons),
-                                               new_size, new_entropy, new_nep, this->relation_size_,
-                                               this->relation_size_);
 }
 
 std::unique_ptr<PLIWithSingletons> PLIWithSingletons::Intersect(

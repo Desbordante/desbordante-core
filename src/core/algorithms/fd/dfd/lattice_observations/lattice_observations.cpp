@@ -1,20 +1,20 @@
 #include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
 
-NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node) {
+NodeCategory LatticeObservations::UpdateDependencyCategory(boost::dynamic_bitset<> const& node) {
     NodeCategory new_category;
-    if (node.GetArity() <= 1) {
+    if (node.count() <= 1) {
         new_category = NodeCategory::kMinimalDependency;
         (*this)[node] = new_category;
         return new_category;
     }
 
-    auto column_indices = node.GetColumnIndicesRef();  // copy indices
+    auto column_indices = node;  // copy indices
     bool has_unchecked_subset = false;
 
     for (size_t index = column_indices.find_first(); index < column_indices.size();
          index = column_indices.find_next(index)) {
         column_indices[index] = false;  // remove one column
-        auto const subset_node_iter = this->find(Vertical(node.GetSchema(), column_indices));
+        auto const subset_node_iter = this->find(column_indices);
 
         if (subset_node_iter == this->end()) {
             // if we found unchecked subset of this node
@@ -38,9 +38,9 @@ NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node)
     return new_category;
 }
 
-NodeCategory LatticeObservations::UpdateNonDependencyCategory(Vertical const& node,
+NodeCategory LatticeObservations::UpdateNonDependencyCategory(boost::dynamic_bitset<> const& node,
                                                               unsigned int rhs_index) {
-    auto column_indices = node.GetColumnIndicesRef();
+    auto column_indices = node;
     column_indices[rhs_index] = true;
     column_indices.flip();
 
@@ -49,7 +49,7 @@ NodeCategory LatticeObservations::UpdateNonDependencyCategory(Vertical const& no
 
     for (size_t index = column_indices.find_first(); index < column_indices.size();
          index = column_indices.find_next(index)) {
-        auto const superset_node_iter = this->find(node.Union(*node.GetSchema()->GetColumn(index)));
+        auto const superset_node_iter = this->find(boost::dynamic_bitset<>(node).set(index));
 
         if (superset_node_iter == this->end()) {
             // if we found unchecked superset of this node
@@ -71,7 +71,7 @@ NodeCategory LatticeObservations::UpdateNonDependencyCategory(Vertical const& no
     return new_category;
 }
 
-bool LatticeObservations::IsCandidate(Vertical const& node) const {
+bool LatticeObservations::IsCandidate(boost::dynamic_bitset<> const& node) const {
     auto node_iter = this->find(node);
     if (node_iter == this->end()) {
         return false;
@@ -81,14 +81,14 @@ bool LatticeObservations::IsCandidate(Vertical const& node) const {
     }
 }
 
-std::unordered_set<Vertical> LatticeObservations::GetUncheckedSubsets(
-        Vertical const& node, ColumnOrder const& column_order) const {
-    auto indices = node.GetColumnIndices();
-    std::unordered_set<Vertical> unchecked_subsets;
+std::unordered_set<boost::dynamic_bitset<>> LatticeObservations::GetUncheckedSubsets(
+        boost::dynamic_bitset<> const& node, ColumnOrder const& column_order) const {
+    auto indices = node;
+    std::unordered_set<boost::dynamic_bitset<>> unchecked_subsets;
 
     for (int column_index : column_order.GetOrderHighDistinctCount(node)) {
         indices[column_index] = false;
-        Vertical subset_node = Vertical(node.GetSchema(), indices);
+        boost::dynamic_bitset<> subset_node = indices;
         if (this->find(subset_node) == this->end()) {
             unchecked_subsets.insert(std::move(subset_node));
         }
@@ -98,19 +98,19 @@ std::unordered_set<Vertical> LatticeObservations::GetUncheckedSubsets(
     return unchecked_subsets;
 }
 
-std::unordered_set<Vertical> LatticeObservations::GetUncheckedSupersets(
-        Vertical const& node, unsigned int rhs_index, ColumnOrder const& column_order) const {
-    auto flipped_indices = node.GetColumnIndices().flip();
-    std::unordered_set<Vertical> unchecked_supersets;
+std::unordered_set<boost::dynamic_bitset<>> LatticeObservations::GetUncheckedSupersets(
+        boost::dynamic_bitset<> const& node, unsigned int rhs_index,
+        ColumnOrder const& column_order) const {
+    auto flipped_indices = ~node;
+    std::unordered_set<boost::dynamic_bitset<>> unchecked_supersets;
 
     flipped_indices[rhs_index] = false;
 
-    for (int column_index :
-         column_order.GetOrderHighDistinctCount(Vertical(node.GetSchema(), flipped_indices))) {
-        auto indices = node.GetColumnIndices();
+    for (int column_index : column_order.GetOrderHighDistinctCount(flipped_indices)) {
+        auto indices = node;
 
         indices[column_index] = true;
-        Vertical subset_node = Vertical(node.GetSchema(), indices);
+        boost::dynamic_bitset<> subset_node = indices;
         if (this->find(subset_node) == this->end()) {
             unchecked_supersets.insert(std::move(subset_node));
         }

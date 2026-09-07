@@ -2,15 +2,16 @@
 
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 
-bool DependencyStrategy::ShouldResample(Vertical const& vertical, double boost_factor) const {
-    if (context_->GetParameters().sample_size <= 0 || vertical.GetArity() < 1) return false;
+bool DependencyStrategy::ShouldResample(boost::dynamic_bitset<> const& vertical,
+                                        double boost_factor) const {
+    if (context_->GetParameters().sample_size <= 0 || vertical.count() < 1) return false;
 
     // Do we have an exact sample already?
     auto current_sample = context_->GetAgreeSetSample(vertical);
     if (current_sample->IsExact()) return false;
 
     // Get an estimate of the number of equality pairs in the vertical
-    model::PositionListIndex* pli = context_->GetPliCache()->Get(vertical);
+    model::PositionListIndex const* pli = context_->GetPliCache()->Get(vertical);
     double nep = pli != nullptr
                          ? pli->GetNepAsLong()
                          : current_sample->EstimateAgreements(vertical) *

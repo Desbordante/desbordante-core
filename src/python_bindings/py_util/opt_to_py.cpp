@@ -11,6 +11,8 @@
 
 #include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/afd_measure.h"
+#include "core/algorithms/fd/fd_input.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -65,13 +67,14 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kNormalConvPair<config::CustomMetricType>,
         kNormalConvPair<config::CustomMetricsType>,
         kNormalConvPair<config::CustomVectorMetricType>,
+        kNormalConvPair<model::FdInput>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<model::InputFormatType>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::des::DifferentialStrategy>,
         kEnumConvPair<algos::od::Ordering>,
-        kEnumConvPair<algos::AfdErrorMeasure>};
+        kEnumConvPair<model::AfdMeasure>};
 }  // namespace
 
 namespace python_bindings {

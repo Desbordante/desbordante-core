@@ -1,47 +1,58 @@
 #pragma once
 
+#include <cstddef>
+#include <list>
 #include <random>
 #include <stack>
 
+#include "core/algorithms/fd/bitset_result_reporter.h"
 #include "core/algorithms/fd/dfd/column_order/column_order.h"
 #include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
 #include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
 #include "core/algorithms/fd/dfd/pruning_maps/dependencies_map.h"
 #include "core/algorithms/fd/dfd/pruning_maps/non_dependencies_map.h"
-#include "core/model/table/vertical.h"
+#include "core/model/index.h"
 
+namespace algos::fd {
 class LatticeTraversal {
 private:
-    Column const* const rhs_;
+    model::Index const rhs_index_;
 
-    std::unordered_set<Vertical> minimal_deps_;
-    std::unordered_set<Vertical> maximal_non_deps_;
+    std::size_t num_columns_;
+    std::unordered_set<boost::dynamic_bitset<>> minimal_deps_;
+    std::unordered_set<boost::dynamic_bitset<>> maximal_non_deps_;
     DependenciesMap dependencies_map_;
     NonDependenciesMap non_dependencies_map_;
     LatticeObservations observations_;
-    std::stack<Vertical> trace_;
+    std::stack<boost::dynamic_bitset<>> trace_;
     ColumnOrder const column_order_;
 
-    std::vector<Vertical> const& unique_columns_;
-    ColumnLayoutRelationData const* const relation_;
+    std::vector<boost::dynamic_bitset<>> const& unique_columns_;
     PartitionStorage* const partition_storage_;
 
     std::random_device rd_;
     std::mt19937 gen_;
 
-    bool InferCategory(Vertical const& node, unsigned int rhs_index);
-    Vertical PickNextNode(Vertical const& node, unsigned int rhs_index);
-    std::stack<Vertical> GenerateNextSeeds(Column const* const current_rhs);
+    BitsetResultReporter report_fd_lhs_;
 
-    std::list<Vertical> Minimize(std::unordered_set<Vertical> const& node_list) const;
-    Vertical const& TakeRandom(std::unordered_set<Vertical>& node_set);
-    static void SubtractSets(std::unordered_set<Vertical>& set,
-                             std::unordered_set<Vertical> const& set_to_subtract);
+    bool InferCategory(boost::dynamic_bitset<> const& node, unsigned int rhs_index);
+    boost::dynamic_bitset<> PickNextNode(boost::dynamic_bitset<> const& node,
+                                         unsigned int rhs_index);
+    std::stack<boost::dynamic_bitset<>> GenerateNextSeeds(model::Index const current_rhs);
+
+    std::list<boost::dynamic_bitset<>> Minimize(
+            std::unordered_set<boost::dynamic_bitset<>> const& node_list) const;
+    boost::dynamic_bitset<> const& TakeRandom(
+            std::unordered_set<boost::dynamic_bitset<>>& node_set);
+    static void SubtractSets(std::unordered_set<boost::dynamic_bitset<>>& set,
+                             std::unordered_set<boost::dynamic_bitset<>> const& set_to_subtract);
 
 public:
-    LatticeTraversal(Column const* const rhs, ColumnLayoutRelationData const* const relation,
-                     std::vector<Vertical> const& unique_verticals,
-                     PartitionStorage* const partition_storage);
+    LatticeTraversal(model::Index rhs_index,
+                     std::vector<model::PositionListIndex> const& input_table_column_plis,
+                     std::vector<boost::dynamic_bitset<>> const& unique_verticals,
+                     PartitionStorage* const partition_storage, BitsetResultReporter report_fd_lhs);
 
-    std::unordered_set<Vertical> FindLHSs();
+    void FindLHSs();
 };
+}  // namespace algos::fd

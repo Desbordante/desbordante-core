@@ -2,8 +2,7 @@ set(NAME model.table)
 desbordante_add_lib(NAME OBJECT)
 target_sources(
     ${NAME}
-    PRIVATE agree_set_factory.cpp
-            block_data.cpp
+    PRIVATE block_data.cpp
             column_combination.cpp
             column.cpp
             column_encoded_relation_data.cpp
@@ -11,9 +10,9 @@ target_sources(
             column_domain_iterator.cpp
             column_layout_relation_data.cpp
             column_layout_typed_relation_data.cpp
+            compute_agree_sets.cpp
             create_stripped_partitions.cpp
             dynamic_position_list_index.cpp
-            identifier_set.cpp
             position_list_index.cpp
             position_list_index_with_singletons.cpp
             relational_schema.cpp

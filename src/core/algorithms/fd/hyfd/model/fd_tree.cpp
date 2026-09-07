@@ -5,7 +5,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace algos::hyfd::fd_tree {
+namespace algos::fd::hyfd::fd_tree {
 
 std::shared_ptr<FDTreeVertex> FDTree::AddFD(boost::dynamic_bitset<> const& lhs, size_t rhs) {
     FDTreeVertex* cur_node = root_.get();
@@ -65,4 +65,4 @@ std::vector<LhsPair> FDTree::GetLevel(unsigned target_level) {
     return vertices;
 }
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace algos::fd::hyfd::fd_tree

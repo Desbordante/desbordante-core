@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <stack>
+#include <unordered_set>
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>

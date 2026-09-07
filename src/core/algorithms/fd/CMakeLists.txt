@@ -59,3 +59,12 @@ target_sources(${NAME} PRIVATE pli_based_fd_algorithm.cpp)
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::fd ${DESBORDANTE_PREFIX}::util Boost::headers
 )
+
+# --- LoadDataInternal is creating PLIs with probing table ---
+# Temporary, avoid using unless you're certain there is no better way than the one exactly in this class already.
+set(NAME fd.probing_tables_load_data)
+desbordante_add_lib(NAME)
+target_sources(${NAME} PRIVATE probing_tables_load_data.cpp)
+target_link_libraries(
+    ${NAME} PUBLIC ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
+)

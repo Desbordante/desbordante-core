@@ -33,12 +33,8 @@ desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE algo_factory.cpp algorithm.cpp)
 target_link_libraries(
     ${NAME}
-    PUBLIC ${DESBORDANTE_PREFIX}::model::types
-    PRIVATE ${DESBORDANTE_PREFIX}::util
-            ${DESBORDANTE_PREFIX}::config
-            ${DESBORDANTE_PREFIX}::parser::csv
-            ${DESBORDANTE_PREFIX}::parser::sequence
-            ${DESBORDANTE_PREFIX}::model::sequence
-            spdlog::spdlog_header_only
-            Boost::headers
+    PUBLIC ${DESBORDANTE_PREFIX}::model::types Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::config
+            ${DESBORDANTE_PREFIX}::parser::csv ${DESBORDANTE_PREFIX}::parser::sequence
+            ${DESBORDANTE_PREFIX}::model::sequence spdlog::spdlog_header_only
 )

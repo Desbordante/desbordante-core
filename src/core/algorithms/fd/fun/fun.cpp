@@ -1,31 +1,106 @@
 #include "core/algorithms/fd/fun/fun.h"
 
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
+#include "core/config/max_lhs/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
 #include "core/util/logger.h"
 
-namespace algos {
+namespace algos::fd {
 
-FunQuadruple FunQuadruple::Union(Column const& that) const {
-    return FunQuadruple(candidate_.Union(that));
+// This looks like excessive abstraction.
+class FUN::FunQuadruple {
+private:
+    boost::dynamic_bitset<> candidate_;
+    unsigned long count_;
+    boost::dynamic_bitset<> quasiclosure_;
+    boost::dynamic_bitset<> closure_;
+
+public:
+    explicit FunQuadruple(boost::dynamic_bitset<> const& candidate)
+        : candidate_(candidate),
+          count_(0),
+          quasiclosure_(candidate.size()),
+          closure_(candidate.size()) {}
+
+    boost::dynamic_bitset<> const& GetCandidate() const {
+        return candidate_;
+    }
+
+    unsigned long GetCount() const {
+        return count_;
+    }
+
+    boost::dynamic_bitset<> const& GetClosure() const {
+        return closure_;
+    }
+
+    boost::dynamic_bitset<> const& GetQuasiclosure() const {
+        return quasiclosure_;
+    }
+
+    void SetCount(unsigned long new_count) {
+        count_ = new_count;
+    }
+
+    void SetClosure(boost::dynamic_bitset<> new_closure) {
+        closure_ = std::move(new_closure);
+    }
+
+    void SetQuasiclosure(boost::dynamic_bitset<> const& new_quasiclosure) {
+        quasiclosure_ = new_quasiclosure;
+    }
+
+    bool operator==(FunQuadruple const& that) const {
+        return candidate_ == that.candidate_;
+    }
+
+    bool operator!=(FunQuadruple const& that) const {
+        return candidate_ != that.candidate_;
+    }
+
+    bool operator<(FunQuadruple const& that) const {
+        return candidate_ < that.candidate_;
+    }
+
+    FunQuadruple Union(model::Index const& that) const {
+        boost::dynamic_bitset<> c = candidate_;
+        c.set(that);
+        return FunQuadruple(std::move(c));
+    }
+
+    FunQuadruple Union(boost::dynamic_bitset<> const& that) const {
+        return FunQuadruple(candidate_ | that);
+    }
+
+    bool Contains(FunQuadruple const& that) const {
+        return that.candidate_.is_subset_of(candidate_);
+    }
+
+    bool Contains(boost::dynamic_bitset<> const& that) const {
+        return that.is_subset_of(candidate_);
+    }
+};
+
+FUN::FUN() {
+    RegisterOptions();
 }
 
-FunQuadruple FunQuadruple::Union(Vertical const& that) const {
-    return FunQuadruple(candidate_.Union(that));
+void FUN::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName()});
 }
 
-bool FunQuadruple::Contains(FunQuadruple const& that) const {
-    return candidate_.Contains(that.candidate_);
+void FUN::RegisterOptions() {
+    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
 }
 
-bool FunQuadruple::Contains(Vertical const& that) const {
-    return candidate_.Contains(that);
-}
-
-void FUN::ResetStateFd() {
-    fds_.clear();
+void FUN::ResetState() {
+    fd_view_ = nullptr;
+    fds_.assign(input_table_column_plis_.size(), {});
 }
 
 bool FUN::IsKey(FunQuadruple const& l) const {
-    return l.GetCount() == relation_->GetNumRows();
+    return l.GetCount() == input_table_column_plis_.front().GetCachedProbingTable()->size();
 }
 
 void FUN::DisplayFD(Level const& l_k_minus_1) {
@@ -33,19 +108,16 @@ void FUN::DisplayFD(Level const& l_k_minus_1) {
         /*  our other algorithms mine l.candidate.GetArity() == 0,
          *  while Metanome's FUN explicitly ignores
          */
-        for (Column const* rhs : l.GetClosure().Without(l.GetQuasiclosure()).GetColumns()) {
-            fds_.try_emplace(*rhs, std::set<Vertical>());
-            bool subset_exists_already = false;
-            for (Vertical const& lhs : fds_.at(*rhs)) {
+        if (l.GetCandidate().count() > max_lhs_) continue;
+        util::ForEachIndex(l.GetClosure() - l.GetQuasiclosure(), [&](model::Index rhs) {
+            std::deque<boost::dynamic_bitset<>>& lhss = fds_[rhs];
+            for (boost::dynamic_bitset<> const& lhs : lhss) {
                 if (l.Contains(lhs)) {
-                    subset_exists_already = true;
-                    break;
+                    return;
                 }
             }
-            if (!subset_exists_already) {
-                fds_.at(*rhs).emplace(l.GetCandidate());
-            }
-        }
+            lhss.push_back(l.GetCandidate());
+        });
     }
 }
 
@@ -71,11 +143,12 @@ void FUN::ComputeClosure(Level& l_k_minus_1, Level const& l_k) const {
             continue;
         }
         l.SetClosure(l.GetQuasiclosure());
-        for (Column const* a : r_prime_.Without(l.GetQuasiclosure()).GetColumns()) {
-            if (FastCount(l_k_minus_1, l_k, l.Union(*a)) == l.GetCount()) {
-                l.SetClosure(l.GetClosure().Union(*a));
+        util::ForEachIndex(r_prime_ - l.GetQuasiclosure(), [&](model::Index a) {
+            if (FastCount(l_k_minus_1, l_k, l.Union(a)) == l.GetCount()) {
+                boost::dynamic_bitset<> bs = l.GetClosure();
+                l.SetClosure(std::move(bs.set(a)));
             }
-        }
+        });
     }
 }
 
@@ -87,28 +160,27 @@ void FUN::ComputeQuasiClosure(Level const& l_k_minus_1, Level& l_k) const {
         l.SetQuasiclosure(l.GetCandidate());
         for (FunQuadruple const& s : l_k_minus_1) {
             if (l.Contains(s)) {
-                l.SetQuasiclosure(l.GetQuasiclosure().Union(s.GetClosure()));
+                l.SetQuasiclosure(l.GetQuasiclosure() | s.GetClosure());
             }
         }
     }
 }
 
-unsigned long FUN::Count(Vertical const& l) const {
-    std::vector<ColumnData> const& column_data = relation_->GetColumnData();
-    size_t first_column_index = l.GetColumnIndices().find_first();
+unsigned long FUN::Count(boost::dynamic_bitset<> const& l) const {
+    size_t first_column_index = l.find_first();
 
-    model::PositionListIndex const* pli = column_data.at(first_column_index).GetPositionListIndex();
+    model::PositionListIndex const* pli = &input_table_column_plis_[first_column_index];
 
-    if (l.GetColumnIndices().count() == 1) {
+    if (l.count() == 1) {
         return pli->GetNumCluster();
     }
 
     //  workaround to avoid auto-destruction of plis
     std::unique_ptr<model::PositionListIndex> holder;
 
-    for (size_t i = l.GetColumnIndices().find_next(first_column_index);
-         i != boost::dynamic_bitset<>::npos; i = l.GetColumnIndices().find_next(i)) {
-        pli->Intersect(column_data.at(i).GetPositionListIndex()).swap(holder);
+    for (size_t i = l.find_next(first_column_index); i != boost::dynamic_bitset<>::npos;
+         i = l.find_next(i)) {
+        pli->Intersect(&input_table_column_plis_[i]).swap(holder);
         pli = holder.get();
     }
 
@@ -130,41 +202,42 @@ unsigned long FUN::FastCount(Level const& l_k_minus_1, Level const& l_k,
     return max;
 }
 
-std::list<FunQuadruple> FUN::GenerateCandidate(Level const& l_k) const {
+auto FUN::GenerateCandidate(Level const& l_k) const -> Level {
     std::set<FunQuadruple> l_k_plus_1;
     for (FunQuadruple const& l_prime : l_k) {
         if (IsKey(l_prime)) {
             continue;
         }
-        for (Column const* a : r_prime_.Without(l_prime.GetCandidate()).GetColumns()) {
-            FunQuadruple l = l_prime.Union(*a);
+        util::ForEachIndex(r_prime_ - l_prime.GetCandidate(), [&](model::Index a) {
+            FunQuadruple l = l_prime.Union(a);
             if (l_k_plus_1.find(l) == l_k_plus_1.end()) {
                 l.SetCount(Count(l.GetCandidate()));
                 l_k_plus_1.emplace(l);
             }
-        }
+        });
     }
     return {l_k_plus_1.begin(), l_k_plus_1.end()};
 }
 
 void FUN::ExecuteInternal() {
-    schema_ = relation_->GetSchema();
-    Vertical empty_vertical = schema_->CreateEmptyVertical();
+    boost::dynamic_bitset<> scratch(input_table_column_plis_.size());
 
-    r_ = empty_vertical;
-    r_prime_ = empty_vertical;
-    Level l_k_minus_1{FunQuadruple(empty_vertical)};
+    r_ = scratch;
+    r_prime_ = scratch;
+    Level l_k_minus_1{FunQuadruple(scratch)};
     Level l_k;
-    for (std::unique_ptr<Column> const& a : schema_->GetColumns()) {
-        FunQuadruple attribute(*a);
+    for (model::Index a = 0; a != input_table_column_plis_.size(); ++a) {
+        scratch.set(a);
+        FunQuadruple attribute(scratch);
+        scratch.reset(a);
         attribute.SetCount(Count(attribute.GetCandidate()));
         l_k.push_back(attribute);
-        r_ = r_.Union(*a);
+        r_.set(a);
         if (!IsKey(attribute)) {
-            r_prime_ = r_prime_.Union(*a);
+            r_prime_.set(a);
         }
         if (attribute.GetCount() == 1) {
-            fds_.emplace(*a, std::set<Vertical>{empty_vertical});
+            fds_[a].push_back(scratch);
         }
     }
 
@@ -178,16 +251,7 @@ void FUN::ExecuteInternal() {
     }
     DisplayFD(l_k_minus_1);
 
-    int total_fds = 0;
-    for (auto const& [rhs, lverticals] : fds_) {
-        for (Vertical const& lhs : lverticals) {
-            RegisterFd(lhs, rhs, relation_->GetSharedPtrSchema());
-            total_fds++;
-        }
-    }
-
-    LOG_INFO("Total FD count: {}", total_fds);
-    LOG_INFO("HASH: {}", Fletcher16());
+    fd_view_ = std::make_shared<LhsMaskFdView>(table_header_, std::move(fds_));
 }
 
-}  // namespace algos
+}  // namespace algos::fd

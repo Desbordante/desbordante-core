@@ -4,5 +4,5 @@ target_sources(${NAME} PRIVATE cluster.cpp eulerfd.cpp mlfq.cpp search_tree.cpp)
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
-    PRIVATE ${DESBORDANTE_PREFIX}::fd Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::fd Boost::headers spdlog::spdlog_header_only
 )

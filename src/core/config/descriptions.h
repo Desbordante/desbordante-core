@@ -93,6 +93,8 @@ constexpr auto kDMaxFitnessEvaluations =
         "the algorithm will be stopped after calculating the fitness "
         "function this many times";
 constexpr auto kDPopulationSize = "the number of individuals in the population at any given time";
+// FD verifiers
+constexpr auto kDFd = "the functional dependency to be verified";
 // Dynamic FD verifier
 constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
 constexpr auto kDInsertStatements = "Rows to be inserted into the table using the insert operation";
@@ -201,8 +203,8 @@ constexpr auto kDDifferenceTable = "CSV table containing difference limits for e
 constexpr auto kDNumColumns = "Use only first N columns of the table";
 constexpr auto kDNumRows = "Use only first N rows of the table";
 // Tane
-extern std::string_view const kDAfdErrorMeasure;
-// Tane, Pfd verifier
+extern std::string_view const kDAfdMeasure;
+// Pfd verifier
 extern std::string_view const kDPfdErrorMeasure;
 // Typo miner
 constexpr auto kDApproximateAlgorithm = "Algorithm which gets approximate FDs for typo miner";

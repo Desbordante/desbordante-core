@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "core/algorithms/fd/raw_fd.h"
 #include "core/model/table/column.h"

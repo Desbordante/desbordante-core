@@ -78,9 +78,13 @@ void AFDMetricCalculator::ExecuteInternal() {
         case AFDMetric::kRho:
             result_ = CalculateRhoMeasure(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
             break;
+        case AFDMetric::kPerValue:
+            result_ = CalculatePerValue(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
+            break;
     }
 }
 
+// Misleading: this is g2 error?
 long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                              size_t num_rows) {
     if (num_rows <= 0) throw std::invalid_argument("received non-positive number of rows");
@@ -117,7 +121,10 @@ long double AFDMetricCalculator::CalculateG3(model::PLI const* lhs_pli, model::P
         num_error_rows += size;
     }
 
-    return num_error_rows / num_rows;
+    unsigned int unique_rows =
+            static_cast<unsigned int>(lhs_pli->GetRelationSize() - lhs_pli->GetSize());
+
+    return (num_error_rows + unique_rows) / num_rows;
 }
 
 config::ErrorType AFDMetricCalculator::CalculateRhoMeasure(model::PLIWS const* x_pli,
@@ -263,6 +270,40 @@ long double AFDMetricCalculator::CalculateFI(model::PLIWS const* lhs_pli,
     conditional_entropy /= num_rows;
     auto mutual_information = entropy - conditional_entropy;
     return mutual_information / entropy;
+}
+
+double AFDMetricCalculator::CalculatePerValue(model::PositionListIndex const* x_pli,
+                                              model::PositionListIndex const* xa_pli) {
+    std::deque<Cluster> xa_index = xa_pli->GetIndex();
+    std::shared_ptr<Cluster const> probing_table_ptr = x_pli->CalculateAndGetProbingTable();
+    auto const& probing_table = *probing_table_ptr;
+    std::stable_sort(xa_index.begin(), xa_index.end(),
+                     [&probing_table](Cluster const& a, Cluster const& b) {
+                         return probing_table[a.front()] < probing_table[b.front()];
+                     });
+    double sum = 0.0;
+    std::size_t cluster_rows_count = 0;
+    std::deque<Cluster> const& x_index = x_pli->GetIndex();
+    auto xa_cluster_it = xa_index.begin();
+    for (Cluster const& x_cluster : x_index) {
+        std::size_t max = 1;
+        for (int x_row : x_cluster) {
+            if (xa_cluster_it == xa_index.end()) {
+                break;
+            }
+            auto const& xa_cluster = *xa_cluster_it;
+            if (x_row == xa_cluster[0]) {
+                max = std::max(max, xa_cluster_it->size());
+                xa_cluster_it++;
+            }
+        }
+        sum += static_cast<double>(max) / x_cluster.size();
+        cluster_rows_count += x_cluster.size();
+    }
+    unsigned int unique_rows =
+            static_cast<unsigned int>(x_pli->GetRelationSize() - cluster_rows_count);
+    double probability = static_cast<double>(sum + unique_rows) / (x_index.size() + unique_rows);
+    return probability;
 }
 
 config::ErrorType AFDMetricCalculator::CalculateZeroAryG1(ColumnData const* rhs,

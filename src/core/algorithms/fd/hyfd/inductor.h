@@ -6,7 +6,7 @@
 #include "core/algorithms/fd/hyfd/model/non_fd_list.h"
 #include "core/config/max_lhs/type.h"
 
-namespace algos::hyfd {
+namespace algos::fd::hyfd {
 
 class Inductor {
 private:
@@ -22,4 +22,4 @@ public:
     void UpdateFdTree(NonFDList&& non_fds);
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::fd::hyfd

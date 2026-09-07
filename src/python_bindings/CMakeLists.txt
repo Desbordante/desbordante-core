@@ -6,7 +6,7 @@ project(
     DESCRIPTION "Python bindings to the interface of the Desbordante C++ core library"
 )
 
-CPMAddPackage("gh:pybind/pybind11@2.13.4")
+CPMAddPackage("gh:pybind/pybind11@3.0.4")
 
 # ---- Python Bindings Configuration ----
 
@@ -154,8 +154,7 @@ desbordante_add_bind(
     SRCS
     fd/bind_afd.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::fd::tane
-    ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::afd::tane
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers

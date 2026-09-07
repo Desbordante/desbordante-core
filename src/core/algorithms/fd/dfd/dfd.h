@@ -1,29 +1,37 @@
 #pragma once
 
-#include <random>
-#include <stack>
+#include <boost/dynamic_bitset.hpp>
 
 #include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
+#include "core/algorithms/fd/probing_tables_load_data.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/tabular_data/input_table_type.h"
 #include "core/config/thread_number/type.h"
-#include "core/model/table/vertical.h"
+#include "core/model/table/table_header.h"
 
-namespace algos {
+namespace algos::fd {
 
-class DFD : public PliBasedFDAlgorithm {
+class DFD : public ProbingTablesLoadData {
 private:
-    std::vector<Vertical> unique_columns_;
-
     config::ThreadNumType number_of_threads_;
+    config::InputTable input_table_;
+    config::MaxLhsType max_lhs_;
 
-    void MakeExecuteOptsAvailableFDInternal() final;
+    LhsMaskFdView::OwningPointer fd_view_;
+
+    void MakeExecuteOptsAvailable() final;
     void RegisterOptions();
 
-    void ResetStateFd() final;
+    void ResetState() final;
     void ExecuteInternal() final;
 
 public:
     DFD();
+
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
+    }
 };
 
-}  // namespace algos
+}  // namespace algos::fd

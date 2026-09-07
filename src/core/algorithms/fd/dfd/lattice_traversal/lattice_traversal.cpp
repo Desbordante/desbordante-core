@@ -4,51 +4,53 @@
 
 #include "core/model/table/position_list_index.h"
 
-LatticeTraversal::LatticeTraversal(Column const* const rhs,
-                                   ColumnLayoutRelationData const* const relation,
-                                   std::vector<Vertical> const& unique_verticals,
-                                   PartitionStorage* const partition_storage)
-    : rhs_(rhs),
-      dependencies_map_(relation->GetSchema()),
-      non_dependencies_map_(relation->GetSchema()),
-      column_order_(relation),
+namespace algos::fd {
+LatticeTraversal::LatticeTraversal(
+        model::Index rhs_index,
+        std::vector<model::PositionListIndex> const& input_table_column_plis,
+        std::vector<boost::dynamic_bitset<>> const& unique_verticals,
+        PartitionStorage* const partition_storage, BitsetResultReporter report_fd_lhs)
+    : rhs_index_(rhs_index),
+      num_columns_(input_table_column_plis.size()),
+      dependencies_map_(num_columns_),
+      non_dependencies_map_(num_columns_),
+      column_order_(input_table_column_plis),
       unique_columns_(unique_verticals),
-      relation_(relation),
       partition_storage_(partition_storage),
-      gen_(rd_()) {}
+      gen_(rd_()),
+      report_fd_lhs_(std::move(report_fd_lhs)) {}
 
-std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
-    RelationalSchema const* const schema = relation_->GetSchema();
-
+void LatticeTraversal::FindLHSs() {
     // processing of found unique columns
     for (auto const& lhs : unique_columns_) {
-        if (!lhs.Contains(*rhs_)) {
+        if (!lhs.test(rhs_index_)) {
             observations_[lhs] = NodeCategory::kMinimalDependency;
             dependencies_map_.AddNewDependency(lhs);
+            report_fd_lhs_(lhs);
             minimal_deps_.insert(lhs);
         }
     }
 
-    std::stack<Vertical> seeds;
+    std::stack<boost::dynamic_bitset<>> seeds;
 
     /* Temporary fix. I think `GetOrderHighDistinctCount` should return vector of
      * unsigned integers since `order` should be something non-negative.
      */
-    for (unsigned partition_index :
-         column_order_.GetOrderHighDistinctCount(Vertical(*rhs_).Invert())) {
-        if (partition_index != rhs_->GetIndex()) {
-            seeds.push(Vertical(*schema->GetColumn(partition_index)));
+    for (unsigned partition_index : column_order_.GetOrderHighDistinctCount(
+                 ~(boost::dynamic_bitset<>(num_columns_).set(rhs_index_)))) {
+        if (partition_index != rhs_index_) {
+            seeds.push(std::move(boost::dynamic_bitset<>(num_columns_).set(partition_index)));
         }
     }
 
     do {
         while (!seeds.empty()) {
-            Vertical node;
+            boost::dynamic_bitset<> node;
             if (!seeds.empty()) {
                 node = std::move(seeds.top());
                 seeds.pop();
             } else {
-                node = schema->CreateEmptyVertical();
+                node = boost::dynamic_bitset<>(num_columns_);
             }
 
             do {
@@ -60,28 +62,30 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
                     if (node_category == NodeCategory::kCandidateMinimalDependency) {
                         node_category = observations_.UpdateDependencyCategory(node);
                         if (node_category == NodeCategory::kMinimalDependency) {
+                            report_fd_lhs_(node);
                             minimal_deps_.insert(node);
                         }
                     } else if (node_category == NodeCategory::kCandidateMaximalNonDependency) {
-                        node_category =
-                                observations_.UpdateNonDependencyCategory(node, rhs_->GetIndex());
+                        node_category = observations_.UpdateNonDependencyCategory(node, rhs_index_);
                         if (node_category == NodeCategory::kMaximalNonDependency) {
                             maximal_non_deps_.insert(node);
                         }
                     }
-                } else if (!InferCategory(node, rhs_->GetIndex())) {
+                } else if (!InferCategory(node, rhs_index_)) {
                     // if we were not able to infer category, we calculate the partitions
                     auto node_pli = partition_storage_->GetOrCreateFor(node);
                     auto node_pli_pointer =
-                            std::holds_alternative<model::PositionListIndex*>(node_pli)
-                                    ? std::get<model::PositionListIndex*>(node_pli)
-                                    : std::get<std::unique_ptr<model::PositionListIndex>>(node_pli)
+                            std::holds_alternative<model::PositionListIndex const*>(node_pli)
+                                    ? std::get<model::PositionListIndex const*>(node_pli)
+                                    : std::get<std::unique_ptr<model::PositionListIndex const>>(
+                                              node_pli)
                                               .get();
-                    auto intersected_pli = partition_storage_->GetOrCreateFor(node.Union(*rhs_));
+                    auto intersected_pli = partition_storage_->GetOrCreateFor(
+                            boost::dynamic_bitset<>(node).set(rhs_index_));
                     auto intersected_pli_pointer =
-                            std::holds_alternative<model::PositionListIndex*>(intersected_pli)
-                                    ? std::get<model::PositionListIndex*>(intersected_pli)
-                                    : std::get<std::unique_ptr<model::PositionListIndex>>(
+                            std::holds_alternative<model::PositionListIndex const*>(intersected_pli)
+                                    ? std::get<model::PositionListIndex const*>(intersected_pli)
+                                    : std::get<std::unique_ptr<model::PositionListIndex const>>(
                                               intersected_pli)
                                               .get();
 
@@ -89,11 +93,12 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
                         intersected_pli_pointer->GetNepAsLong()) {
                         observations_.UpdateDependencyCategory(node);
                         if (observations_[node] == NodeCategory::kMinimalDependency) {
+                            report_fd_lhs_(node);
                             minimal_deps_.insert(node);
                         }
                         dependencies_map_.AddNewDependency(node);
                     } else {
-                        observations_.UpdateNonDependencyCategory(node, rhs_->GetIndex());
+                        observations_.UpdateNonDependencyCategory(node, rhs_index_);
                         if (observations_[node] == NodeCategory::kMaximalNonDependency) {
                             maximal_non_deps_.insert(node);
                         }
@@ -101,20 +106,19 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
                     }
                 }
 
-                node = PickNextNode(node, rhs_->GetIndex());
-            } while (!node.IsEmpty());
+                node = PickNextNode(node, rhs_index_);
+            } while (!node.none());
         }
-        seeds = GenerateNextSeeds(rhs_);
+        seeds = GenerateNextSeeds(rhs_index_);
     } while (!seeds.empty());
-
-    return minimal_deps_;
 }
 
-bool LatticeTraversal::InferCategory(Vertical const& node, unsigned int rhs_index) {
+bool LatticeTraversal::InferCategory(boost::dynamic_bitset<> const& node, unsigned int rhs_index) {
     if (non_dependencies_map_.CanBePruned(node)) {
         observations_.UpdateNonDependencyCategory(node, rhs_index);
         non_dependencies_map_.AddNewNonDependency(node);
         if (observations_[node] == NodeCategory::kMinimalDependency) {
+            report_fd_lhs_(node);
             minimal_deps_.insert(node);
         }
         return true;
@@ -130,15 +134,17 @@ bool LatticeTraversal::InferCategory(Vertical const& node, unsigned int rhs_inde
     return false;
 }
 
-Vertical const& LatticeTraversal::TakeRandom(std::unordered_set<Vertical>& node_set) {
+boost::dynamic_bitset<> const& LatticeTraversal::TakeRandom(
+        std::unordered_set<boost::dynamic_bitset<>>& node_set) {
     std::uniform_int_distribution<> dis(0, std::distance(node_set.begin(), node_set.end()) - 1);
     auto iterator = node_set.begin();
     std::advance(iterator, dis(this->gen_));
-    Vertical const& node = *iterator;
+    boost::dynamic_bitset<> const& node = *iterator;
     return node;
 }
 
-Vertical LatticeTraversal::PickNextNode(Vertical const& node, unsigned int rhs_index) {
+boost::dynamic_bitset<> LatticeTraversal::PickNextNode(boost::dynamic_bitset<> const& node,
+                                                       unsigned int rhs_index) {
     auto node_iter = observations_.find(node);
 
     if (node_iter != observations_.end()) {
@@ -152,6 +158,7 @@ Vertical LatticeTraversal::PickNextNode(Vertical const& node, unsigned int rhs_i
             SubtractSets(unchecked_subsets, pruned_non_dep_subsets);
 
             if (unchecked_subsets.empty() && pruned_non_dep_subsets.empty()) {
+                report_fd_lhs_(node);
                 minimal_deps_.insert(node);
                 observations_[node] = NodeCategory::kMinimalDependency;
             } else if (!unchecked_subsets.empty()) {
@@ -189,7 +196,7 @@ Vertical LatticeTraversal::PickNextNode(Vertical const& node, unsigned int rhs_i
         }
     }
 
-    Vertical next_node = node.GetSchema()->CreateEmptyVertical();
+    boost::dynamic_bitset<> next_node(node.size());
     if (!trace_.empty()) {
         next_node = trace_.top();
         trace_.pop();
@@ -197,40 +204,41 @@ Vertical LatticeTraversal::PickNextNode(Vertical const& node, unsigned int rhs_i
     return next_node;
 }
 
-std::stack<Vertical> LatticeTraversal::GenerateNextSeeds(Column const* const current_rhs) {
-    std::unordered_set<Vertical> seeds;
-    std::unordered_set<Vertical> new_seeds;
+std::stack<boost::dynamic_bitset<>> LatticeTraversal::GenerateNextSeeds(
+        model::Index const current_rhs) {
+    std::unordered_set<boost::dynamic_bitset<>> seeds;
+    std::unordered_set<boost::dynamic_bitset<>> new_seeds;
 
     for (auto const& non_dep : maximal_non_deps_) {
-        auto complement_indices = non_dep.GetColumnIndicesRef();
-        complement_indices[current_rhs->GetIndex()] = true;
+        auto complement_indices = non_dep;
+        complement_indices[current_rhs] = true;
         complement_indices.flip();
 
         if (seeds.empty()) {
-            boost::dynamic_bitset<> single_column_bitset(relation_->GetNumColumns(), 0);
+            boost::dynamic_bitset<> single_column_bitset(num_columns_);
             single_column_bitset.reset();
 
             for (size_t column_index = complement_indices.find_first();
                  column_index < complement_indices.size();
                  column_index = complement_indices.find_next(column_index)) {
                 single_column_bitset[column_index] = true;
-                seeds.emplace(relation_->GetSchema(), single_column_bitset);
+                seeds.insert(single_column_bitset);
                 single_column_bitset[column_index] = false;
             }
         } else {
             for (auto const& dependency : seeds) {
-                auto new_combination = dependency.GetColumnIndicesRef();
+                auto new_combination = dependency;
 
                 for (size_t column_index = complement_indices.find_first();
                      column_index < complement_indices.size();
                      column_index = complement_indices.find_next(column_index)) {
                     new_combination[column_index] = true;
-                    new_seeds.emplace(relation_->GetSchema(), new_combination);
-                    new_combination[column_index] = dependency.GetColumnIndicesRef()[column_index];
+                    new_seeds.emplace(new_combination);
+                    new_combination[column_index] = dependency[column_index];
                 }
             }
 
-            std::list<Vertical> minimized_new_seeds = Minimize(new_seeds);
+            std::list<boost::dynamic_bitset<>> minimized_new_seeds = Minimize(new_seeds);
             seeds.clear();
             for (auto& new_seed : minimized_new_seeds) {
                 seeds.insert(std::move(new_seed));
@@ -247,7 +255,7 @@ std::stack<Vertical> LatticeTraversal::GenerateNextSeeds(Column const* const cur
         }
     }
 
-    std::stack<Vertical> remaining_seeds;
+    std::stack<boost::dynamic_bitset<>> remaining_seeds;
 
     for (auto const& new_seed : seeds) {
         remaining_seeds.push(new_seed);
@@ -256,17 +264,17 @@ std::stack<Vertical> LatticeTraversal::GenerateNextSeeds(Column const* const cur
     return remaining_seeds;
 }
 
-std::list<Vertical> LatticeTraversal::Minimize(
-        std::unordered_set<Vertical> const& node_list) const {
+std::list<boost::dynamic_bitset<>> LatticeTraversal::Minimize(
+        std::unordered_set<boost::dynamic_bitset<>> const& node_list) const {
     unsigned int max_cardinality = 0;
-    std::unordered_map<unsigned int, std::list<Vertical const*>> seeds_by_size(
-            node_list.size() / relation_->GetNumColumns());
+    std::unordered_map<unsigned int, std::list<boost::dynamic_bitset<> const*>> seeds_by_size(
+            node_list.size() / num_columns_);
 
     for (auto const& seed : node_list) {
-        unsigned int const cardinality_of_seed = seed.GetArity();
+        unsigned int const cardinality_of_seed = seed.count();
         max_cardinality = std::max(max_cardinality, cardinality_of_seed);
         if (seeds_by_size.find(cardinality_of_seed) == seeds_by_size.end()) {
-            seeds_by_size[cardinality_of_seed] = std::list<Vertical const*>();
+            seeds_by_size[cardinality_of_seed] = std::list<boost::dynamic_bitset<> const*>();
         }
         seeds_by_size[cardinality_of_seed].push_back(&seed);
     }
@@ -281,7 +289,7 @@ std::list<Vertical> LatticeTraversal::Minimize(
                     for (auto const& lower_seed : lower_bound_seeds) {
                         for (auto upper_it = upper_bound_seeds.begin();
                              upper_it != upper_bound_seeds.end();) {
-                            if ((*upper_it)->Contains(*lower_seed)) {
+                            if (lower_seed->is_subset_of(**upper_it)) {
                                 upper_it = upper_bound_seeds.erase(upper_it);
                             } else {
                                 ++upper_it;
@@ -293,7 +301,7 @@ std::list<Vertical> LatticeTraversal::Minimize(
         }
     }
 
-    std::list<Vertical> new_seeds;
+    std::list<boost::dynamic_bitset<>> new_seeds;
     for (auto& seed_list : seeds_by_size) {
         for (auto& seed : seed_list.second) {
             new_seeds.push_back(*seed);
@@ -302,8 +310,9 @@ std::list<Vertical> LatticeTraversal::Minimize(
     return new_seeds;
 }
 
-void LatticeTraversal::SubtractSets(std::unordered_set<Vertical>& set,
-                                    std::unordered_set<Vertical> const& set_to_subtract) {
+void LatticeTraversal::SubtractSets(
+        std::unordered_set<boost::dynamic_bitset<>>& set,
+        std::unordered_set<boost::dynamic_bitset<>> const& set_to_subtract) {
     for (auto const& node_to_delete : set_to_subtract) {
         auto found_element_iter = set.find(node_to_delete);
         if (found_element_iter != set.end()) {
@@ -311,3 +320,4 @@ void LatticeTraversal::SubtractSets(std::unordered_set<Vertical>& set,
         }
     }
 }
+}  // namespace algos::fd

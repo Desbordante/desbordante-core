@@ -61,6 +61,8 @@ constexpr auto kDifferentialScale = "differential_scale";
 constexpr auto kDifferentialStrategy = "differential_strategy";
 constexpr auto kMaxFitnessEvaluations = "max_fitness_evaluations";
 constexpr auto kPopulationSize = "population_size";
+// FD verifiers
+constexpr auto kFd = "fd";
 // Dynamic FD verifier
 constexpr auto kDeleteStatements = "delete";
 constexpr auto kInsertStatements = "insert";
@@ -134,8 +136,8 @@ constexpr auto kDifferenceTable = "difference_table";
 constexpr auto kNumColumns = "num_columns";
 constexpr auto kNumRows = "num_rows";
 // Tane
-constexpr auto kAfdErrorMeasure = "afd_error_measure";
-// Tane, Pfd verifier
+constexpr auto kAfdMeasure = "afd_measure";
+// Pfd verifier
 constexpr auto kPfdErrorMeasure = "pfd_error_measure";
 // Typo miner
 constexpr auto kApproximateAlgorithm = "approximate_algorithm";

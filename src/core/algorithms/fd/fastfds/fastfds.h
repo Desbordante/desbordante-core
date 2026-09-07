@@ -3,27 +3,33 @@
 #include <functional>
 #include <set>
 
-#include <boost/thread/mutex.hpp>
-
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/algorithms/fd/bitset_result_reporter.h"
+#include "core/algorithms/fd/lhs_mask_fd_view.h"
+#include "core/algorithms/fd/probing_tables_load_data.h"
+#include "core/config/max_lhs/type.h"
 #include "core/config/thread_number/type.h"
-#include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/vertical.h"
+#include "core/model/index.h"
+#include "core/model/table/table_header.h"
 
-namespace algos {
+namespace algos::fd {
 
-class FastFDs : public PliBasedFDAlgorithm {
+class FastFDs : public ProbingTablesLoadData {
 public:
     FastFDs();
 
+    LhsMaskFdView::OwningPointer GetFds() {
+        return fd_view_;
+    }
+
 private:
-    using OrderingComparator = std::function<bool(Column const&, Column const&)>;
-    using DiffSet = Vertical;
+    using OrderingComparator = std::function<bool(model::Index, model::Index)>;
+    using DiffSet = boost::dynamic_bitset<>;
 
     void RegisterOptions();
-    void MakeExecuteOptsAvailableFDInternal() final;
 
-    void ResetStateFd() final;
+    void MakeExecuteOptsAvailable() final;
+
+    void ResetState() final;
     void ExecuteInternal() final;
 
     // Computes all difference sets of `relation_` by complementing agree sets
@@ -32,30 +38,33 @@ private:
     /* Computes minimal difference sets
      * of `relation_` modulo `col`
      */
-    std::vector<DiffSet> GetDiffSetsMod(Column const& col) const;
+    std::vector<DiffSet> GetDiffSetsMod(model::Index col) const;
     /* Returns initial ordering,
      * the total ordering of { schema_->GetColumns() \ `attribute` } according to `diff_sets`
      */
-    std::set<Column, OrderingComparator> GetInitOrdering(std::vector<DiffSet> const& diff_sets,
-                                                         Column const& attribute) const;
+    std::set<model::Index, OrderingComparator> GetInitOrdering(
+            std::vector<DiffSet> const& diff_sets, model::Index attribute) const;
     /* Returns next ordering,
      * the total ordering of { B in schema_->GetColumns() | B > `attribute` (in `cur_ordering`) }
      * according to `diff_sets`
      */
-    std::set<Column, OrderingComparator> GetNextOrdering(
-            std::vector<DiffSet> const& diff_sets, Column const& attribute,
-            std::set<Column, OrderingComparator> const& cur_ordering) const;
-    void FindCovers(Column const& attribute, std::vector<DiffSet> const& diff_sets_mod,
-                    std::vector<DiffSet> const& cur_diff_sets, Vertical const& path,
-                    std::set<Column, OrderingComparator> const& ordering);
+    std::set<model::Index, OrderingComparator> GetNextOrdering(
+            std::vector<DiffSet> const& diff_sets, model::Index attribute,
+            std::set<model::Index, OrderingComparator> const& cur_ordering) const;
+    void FindCovers(std::vector<DiffSet> const& diff_sets_mod,
+                    std::vector<DiffSet> const& cur_diff_sets, boost::dynamic_bitset<> const& path,
+                    std::set<model::Index, OrderingComparator> const& ordering,
+                    BitsetResultReporter const& report_fd_lhs);
     /* Returns true if `cover` is the minimal cover of `diff_sets_mod`,
      * false otherwise
      */
-    bool CoverMinimal(Vertical const& cover, std::vector<DiffSet> const& diff_sets_mod) const;
+    bool CoverMinimal(boost::dynamic_bitset<> const& cover,
+                      std::vector<DiffSet> const& diff_sets_mod) const;
     /* Returns true if `candidate` covers `sets`,
      * false otherwise
      */
-    bool IsCover(Vertical const& candidate, std::vector<Vertical> const& sets) const;
+    bool IsCover(boost::dynamic_bitset<> const& candidate,
+                 std::vector<boost::dynamic_bitset<>> const& sets) const;
     /* Returns true if `l_col` > `r_col`,
      * false otherwise.
      * `l_col` > `r_col` iff
@@ -63,13 +72,14 @@ private:
      * `l_col` and `r_col` cover the same number of sets but
      * `l_col` index less than `r_col` index
      */
-    bool OrderingComp(std::vector<DiffSet> const& diff_sets, Column const& l_col,
-                      Column const& r_col) const;
-    bool ColumnContainsOnlyEqualValues(Column const& column) const;
+    bool OrderingComp(std::vector<DiffSet> const& diff_sets, model::Index l_col,
+                      model::Index r_col) const;
 
-    RelationalSchema const* schema_;
-    std::vector<DiffSet> diff_sets_;
+    config::MaxLhsType max_lhs_;
     config::ThreadNumType threads_num_;
+    std::vector<DiffSet> diff_sets_;
+
+    LhsMaskFdView::OwningPointer fd_view_;
 };
 
-}  // namespace algos
+}  // namespace algos::fd

@@ -1,15 +1,16 @@
 #pragma once
 
+#include <cstddef>
+
 #include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
-#include "core/model/table/vertical.h"
 
 class DependenciesMap : public PruningMap {
 public:
-    explicit DependenciesMap(RelationalSchema const* schema);
+    explicit DependenciesMap(std::size_t num_columns);
     DependenciesMap() = default;
 
-    std::unordered_set<Vertical> GetPrunedSubsets(
-            std::unordered_set<Vertical> const& subsets) const;
-    void AddNewDependency(Vertical const& node_to_add);
-    bool CanBePruned(Vertical const& node) const;
+    std::unordered_set<boost::dynamic_bitset<>> GetPrunedSubsets(
+            std::unordered_set<boost::dynamic_bitset<>> const& subsets) const;
+    void AddNewDependency(boost::dynamic_bitset<> const& node_to_add);
+    bool CanBePruned(boost::dynamic_bitset<> const& node) const;
 };

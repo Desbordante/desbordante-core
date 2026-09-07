@@ -4,6 +4,7 @@
 
 #include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cind/types.h"
+#include "core/algorithms/fd/afd_measure.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -66,8 +67,7 @@ std::string_view const kDCfdSubstrategy =
         c<S("CFD lattice traversal strategy to use\n"), m<algos::cfd::Substrategy>>;
 std::string_view const kDPfdErrorMeasure =
         c<S("PFD error measure to use\n"), m<algos::PfdErrorMeasure>>;
-std::string_view const kDAfdErrorMeasure =
-        c<S("AFD error measure to use\n"), m<algos::AfdErrorMeasure>>;
+std::string_view const kDAfdMeasure = c<S("AFD error measure to use\n"), m<model::AfdMeasure>>;
 std::string_view const kDLevelDefinition =
         c<S("MD lattice level definition to use\n"), m<algos::hymd::LevelDefinition>>;
 std::string_view const kDDifferentialStrategy =

@@ -207,7 +207,7 @@ Prior to cloning the repository and attempting to build the project, ensure that
 
 - GNU GCC, version 14+, LLVM Clang, version 16+, or Apple Clang, version 16+
 - CMake, version 3.25+
-- Boost library built with compiler you're going to use (GCC or Clang), version 1.85-1.86, 1.88+
+- Boost library built with the compiler you're going to use (GCC or Clang), version 1.90+
 
 Instructions below are given for GCC (on Linux) and Apple Clang (on macOS).
 Instructions for other supported compilers can be found in [Desbordante wiki](https://github.com/Desbordante/desbordante-core/wiki/Building).
@@ -226,12 +226,12 @@ export CXX=g++
 The last line sets g++ as CMake compiler in your terminal session.
 You can also set it by default in all sessions: `echo 'export CXX=g++' >> ~/.profile`
 
-For Ubuntu 24.04 and above, you can skip to the build steps. For older versions the Ubuntu APT repository
+For Ubuntu 26.04 and above, you can skip to the build steps. For older versions the Ubuntu APT repository
 might not have a compatible version of Boost, so you'll need to install it manually:
 ```sh
-wget https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.gz
-tar xzvf boost_1_89_0.tar.gz
-cd boost_1_89_0 && ./bootstrap.sh
+wget https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.gz
+tar xzvf boost_1_90_0.tar.gz
+cd boost_1_90_0 && ./bootstrap.sh
 sudo ./b2 install --prefix=/usr/
 ```
 

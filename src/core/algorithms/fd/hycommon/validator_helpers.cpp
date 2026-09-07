@@ -47,7 +47,7 @@ std::vector<VertexAndAgreeSet> CollectCurrentChildren(
 }
 
 using UCCLhsPair = algos::hyucc::LhsPair;
-using FDLhsPair = algos::hyfd::fd_tree::LhsPair;
+using FDLhsPair = algos::fd::hyfd::fd_tree::LhsPair;
 template std::vector<UCCLhsPair> CollectCurrentChildren<UCCLhsPair>(
         std::vector<UCCLhsPair> const& cur_level_vertices, size_t num_attributes);
 template std::vector<FDLhsPair> CollectCurrentChildren<FDLhsPair>(
