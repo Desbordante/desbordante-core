@@ -55,7 +55,7 @@ void AFDMetricCalculator::ExecuteInternal() {
 
     switch (metric_) {
         case AFDMetric::kG2:
-            result_ = CalculateG2(lhs_pli.get(), rhs_pli.get(), num_rows);
+            result_ = CalculateG2Error(lhs_pli.get(), rhs_pli.get(), num_rows);
             break;
         case AFDMetric::kTau:
             result_ = CalculateTau(lhs_pli.get(), rhs_pli.get());
@@ -82,8 +82,8 @@ void AFDMetricCalculator::ExecuteInternal() {
     }
 }
 
-long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
-                                             size_t num_rows) {
+long double AFDMetricCalculator::CalculateG2Error(model::PLI const* lhs_pli,
+                                                  model::PLI const* rhs_pli, size_t num_rows) {
     if (num_rows <= 0) throw std::invalid_argument("received non-positive number of rows");
 
     auto num_error_rows = 0.L;
