@@ -54,7 +54,7 @@ INSTANTIATE_TEST_SUITE_P(
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kFi,
                                                     std::log(432) / std::log(13824)),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kMuPlus, 252.L / 912),
-                          AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG3, 5.L / 12),
+                          AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG3, 7.L / 12),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG1, 13.L / 12),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kRho,
                                                     0.6666666666666666)));
