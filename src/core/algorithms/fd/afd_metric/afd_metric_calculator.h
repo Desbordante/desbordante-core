@@ -47,7 +47,7 @@ public:
                                         size_t num_rows);
 
     static long double CalculateG3(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
-                                   size_t num_rows);
+                                   std::size_t num_rows);
 
     static long double CalculateTau(model::PLI const* lhs_pli, model::PLI const* rhs_pli);
 
