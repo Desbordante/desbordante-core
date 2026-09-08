@@ -63,7 +63,7 @@ jobs:
           
           - os: macos-15
             toolset: apple-clang
-            env: CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
+            env: CXX=clang++ BOOST_ROOT=$(brew --prefix boost) ICU_ROOT=$(brew --prefix icu4c)
             
     runs-on: ${{ matrix.os }}
     steps:

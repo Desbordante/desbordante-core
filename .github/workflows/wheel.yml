@@ -145,16 +145,19 @@ jobs:
             yum install -y libicu-devel &&
             cd lib/boost &&
             ./bootstrap.sh --with-libraries=container,thread,graph &&
-            ./b2 install -j4 --prefix=/usr &&
-            export BOOST_ROOT=/usr &&
-            export CXX=g++-14
+            ./b2 install -j4 --prefix=/usr
+          CIBW_ENVIRONMENT_LINUX: >
+            BOOST_ROOT=/usr
+            CXX=g++
           CIBW_BEFORE_ALL_MACOS: >
             cd lib/boost &&
             ./bootstrap.sh --with-libraries=container,thread,graph &&
-            sudo ./b2 install -j3 --prefix=/usr/local cxxflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET} -std=c++20" linkflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" &&
-            export BOOST_ROOT=/usr/local &&
-            export CXX=clang++ &&
-            export DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} 
+            sudo ./b2 install -j3 --prefix=/usr/local cxxflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET} -std=c++20" linkflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
+          CIBW_ENVIRONMENT_MACOS: >
+            BOOST_ROOT=/usr/local
+            ICU_ROOT=$(brew --prefix icu4c)
+            DYLD_LIBRARY_PATH=/usr/local/lib:$(brew --prefix icu4c)/lib:${DYLD_LIBRARY_PATH}
+            CXX=clang++
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_TEST_COMMAND: >
