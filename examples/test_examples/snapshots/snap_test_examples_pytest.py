@@ -1370,26 +1370,58 @@ Those violations occur in pairs like \x1b[31m(6, 9), (7, 9), (8, 9)\x1b[0m,
 where each number is a record index in the dataset.
 '''
 
-snapshots['test_example[basic/mining_afd.py-None-mining_afd_output] mining_afd_output'] = '''==============================================
-In Desbordante we consider an approximate functional dependency (AFD)
-any kind of functional dependency (FD) that employs an error metric and is not named
-(e.g. soft functional dependencies). This metric is used to calculate the extent of
-violation for a given exact FD and lies within [0, 1] range (the lower, the less violations
-are found in data). For the discovery task a user can specify the threshold and Desbordante
-will find all AFDs, which have their error equal or less than the threshold, according to the selected metric.
+snapshots['test_example[basic/mining_afd.py-None-mining_afd_output] mining_afd_output'] = '''
+\x1b[1m\x1b[92mApproximate Functional Dependency (AFD) Discovery Example\x1b[0m
 
-Currently, Desbordante supports:
-1) Five metrics: g1, pdep, tau, mu+, rho.
-2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest. 
-Unfortunately, Pyro can handle only the g1 metric, for the rest use Tane.
+\x1b[1m\x1b[93mPattern definition\x1b[0m
+Functional Dependencies (FDs) are strict constraints where values in the
+Left-Hand Side (LHS) columns uniquely determine the Right-Hand Side (RHS)
+value. Approximate Functional Dependencies (AFDs) extend this concept by
+incorporating error measures, allowing for the discovery of relationships
+that hold "mostly" true despite the presence of noise, typos, or outliers.
+This approximation uses a threshold (ranging from 0.0 to 1.0), where a
+value of 0.0 identifies only perfect, exact dependencies, while higher
+values relax the constraints to capture patterns that are nearly consistent
+across the dataset. A comprehensive list of all existing measures for AFD
+discovery and validation can be found in reference [1].
+
+Desbordante allows your Python programs to discover and validate AFDs
+with different measures.
+
+\x1b[1m\x1b[93mSupported algorithms\x1b[0m
+\x1b[96m* Pyro\x1b[0m [2]: Optimized for speed; supports the \x1b[92mg1\x1b[0m measure only.
+\x1b[96m* TANE\x1b[0m [3]: Highly versatile; supports all measures coded in Desbordante:
+  \x1b[92m- g1\x1b[0m (fraction of tuple pairs that violate the FD),
+  \x1b[92m- pdep\x1b[0m (probability of equal RHS values given equal LHS values),
+  \x1b[92m- tau\x1b[0m (improvement in predicting the RHS when the LHS is known),
+  \x1b[92m- mu_plus\x1b[0m (pdep corrected for its expected value under random
+           permutations),
+  \x1b[92m- rho\x1b[0m (ratio of distinct LHS values to distinct LHS-RHS
+       combinations).
 
 For more information consider:
-1) Measuring Approximate Functional Dependencies: A Comparative Study by M. Parciak et al.
-2) Efficient Discovery of Approximate Dependencies by S. Kruse and F. Naumann.
-3) TANE: An Efficient Algorithm for Discovering Functional and Approximate Dependencies by Y. Huhtala et al.
-==============================================
+  [1] Marcel Parciak, Sebastiaan Weytjens, Niel Hens, Frank Neven, Liesbet
+      M. Peeters, Stijn Vansummeren: \x1b[1m\x1b[92mMeasuring Approximate Functional
+      Dependencies: a Comparative Study. \x1b[0mCoRR abs/2312.06296 (2023)
 
-Now, we are going to demonstrate how to discover AFDs. First, consider the dataset:
+  [2] Sebastian Kruse, Felix Naumann: \x1b[1m\x1b[92mEfficient Discovery of Approximate
+      Dependencies\x1b[0m Published in PVLDB Vol 11, Issue 7 (2018)
+
+  [3] Yka Huntala, Juha Karkkainen, Pasi Porkka and Hannu Toivonen:
+      \x1b[1m\x1b[92mTANE: An Efficient Algorithm for Discovering Functional and
+      Approximate Dependencies\x1b[0m The Computer Journal (Oxford University
+      Press) (1999)
+
+Let’s see how to do this with Desbordante.
+
+
+\x1b[1m\x1b[94m-----------------------------------------------------------------
+1. Discovery on Small Dataset
+-----------------------------------------------------------------\x1b[0m
+
+Before we begin, consider the following dataset
+(\x1b[96mexamples/datasets/inventory_afd.csv\x1b[0m):
+
 +------+---------------+---------+
 |   Id | ProductName   |   Price |
 |------+---------------+---------|
@@ -1407,41 +1439,73 @@ Now, we are going to demonstrate how to discover AFDs. First, consider the datas
 |   12 | Notebook      |    3000 |
 +------+---------------+---------+
 
-AFDs mined by Pyro with g1 measure:
-[Price] -> Id
-[Price] -> ProductName
-[ProductName] -> Id
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+\x1b[1mLet's try Pyro first, with g1 measure and threshold set to 0.3.
+Found AFDs:\x1b[0m
+  \x1b[92m[Price] -> Id\x1b[0m
+  \x1b[92m[Price] -> ProductName\x1b[0m
+  \x1b[92m[ProductName] -> Id\x1b[0m
+  \x1b[92m[ProductName] -> Price\x1b[0m
+  \x1b[92m[Id] -> ProductName\x1b[0m
+  \x1b[92m[Id] -> Price\x1b[0m
+  \x1b[92m...\x1b[0m
 
-AFDs mined by Tane
-g1:
-[Price] -> Id
-[Price] -> ProductName
-[ProductName] -> Id
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+\x1b[1mNow, let's try different measures with Tane, the threshold stays the same.
+Found AFDs:\x1b[0m
+  \x1b[96mMeasure g1     :\x1b[0m 6 dependencies.
+    \x1b[92m[Price] -> Id\x1b[0m
+    \x1b[92m[Price] -> ProductName\x1b[0m
+    \x1b[92m...\x1b[0m
+  \x1b[96mMeasure pdep   :\x1b[0m 3 dependencies.
+    \x1b[92m[ProductName] -> Price\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m
+    \x1b[92m...\x1b[0m
+  \x1b[96mMeasure tau    :\x1b[0m 3 dependencies.
+    \x1b[92m[ProductName] -> Price\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m
+    \x1b[92m...\x1b[0m
+  \x1b[96mMeasure mu_plus:\x1b[0m 2 dependencies.
+    \x1b[92m[Id] -> ProductName\x1b[0m
+    \x1b[92m[Id] -> Price\x1b[0m
+  \x1b[96mMeasure rho    :\x1b[0m 3 dependencies.
+    \x1b[92m[ProductName] -> Price\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m
+    \x1b[92m...\x1b[0m
 
-pdep:
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+\x1b[1m\x1b[93mReflections\x1b[0m
+The discovery results reveal structural patterns in the data. For instance,
+the dependency \x1b[96m[ProductName] -> Price\x1b[0m with a low error suggests that a
+product name generally dictates its price, but the non-zero error points to
+specific inconsistencies (like the 300 vs 3000 price for a Laptop). Finding
+such AFDs is the first step in data profiling: they highlight where your data
+follows business logic and where it deviates.
 
-tau:
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+The measures return different sets of dependencies for this dataset even
+though the threshold is unchanged. This happens because each measure assigns
+a different error value to the same dependency. For example, the
+\x1b[92mg1\x1b[0m error is based on the proportion of tuple pairs that violate the
+candidate FD: fewer violating pairs produce a lower \x1b[92mg1\x1b[0m error. Other
+measures quantify deviations using different definitions, so their values are
+not directly interchangeable. Each result should be interpreted according to
+the selected measure; see [1] for the definitions and comparison.
 
-mu_plus:
-[Id] -> ProductName
-[Id] -> Price
+By correcting the identified price typos in row 3 and row 8, you would see
+these AFDs transform into exact FDs (error 0.0), effectively cleaning the
+dataset.
 
-rho:
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+
+\x1b[1m\x1b[94m-----------------------------------------------------------------
+2. Next Steps
+-----------------------------------------------------------------\x1b[0m
+
+After learning about AFD discovery, you may want to explore:
+\x1b[96m*\x1b[0m AFD Verification: Checking if a specific known dependency holds on a
+  dataset.
+\x1b[96m*\x1b[0m Exact FD Mining: Finding rules that have zero violations.
+\x1b[96m*\x1b[0m Conditional Functional Dependencies (CFD): Rules that hold only for a
+  specific subset of data (e.g., Price depends on Name only for
+  'Electronics').
+\x1b[96m*\x1b[0m Association Rules (AR): Finding rules X -> Y between itemsets that
+  meet specified support and confidence thresholds.
 
 '''
 
@@ -4910,14 +4974,22 @@ Num distinct rhs values: 2
 Most frequent rhs value proportion: 0.6666666666666666
 Num distinct rhs values: 2
 
-We learned that in this case the specified FD does not hold and there are two clusters of rows that contain values that prevent our FD from holding. A \x1b[1;46mcluster\x1b[1;49m (with respect to a fixed FD) is a collection of rows that share the same left-hand side part but differ on the right-hand side one.
+We learned that in this case the specified FD does not hold and there are two
+clusters of rows that contain values that prevent our FD from holding.
+A \x1b[1;46mcluster\x1b[1;49m (with respect to a fixed FD) is a collection
+of rows that share the same left-hand side part but differ on the right-hand side one.
 Let's take a closer look at them.
 
-In the first cluster, three values are "0" and a single one is "nan". This suggests that this single entry with the "nan" value is a result of a mistake by someone who is not familiar with the table population policy. Therefore, it should probably be changed to "0".
+In the first cluster, three values are "0" and a single one is "nan".
+This suggests that this single entry with the "nan" value is a result of a mistake by someone
+who is not familiar with the table population policy. Therefore, it should probably be changed to "0".
 
-Now let\'s take a look at the second cluster. There are two entries: "27" and "28". In this case, it is probably a typo, since buttons 7 and 8 are located close to each other on the keyboard.
+Now let's take a look at the second cluster.
+There are two entries: "27" and "28". In this case, it is probably a typo, since buttons 7 and 8 are located
+close to each other on the keyboard.
 
-Having analyzed these clusters, we can conclude that our FD does not hold due to typos in the data. Therefore, by eliminating them, we can get this FD to hold (and make our dataset error-free).
+Having analyzed these clusters, we can conclude that our FD does not hold due to typos in the data.
+Therefore, by eliminating them, we can get this FD to hold (and make our dataset error-free).
 
 --------------------------------------------------------------------------------
 Now let's look at the DnD.csv to consider the AFD
@@ -4958,6 +5030,166 @@ Num distinct rhs values: 2
 6: Dwarf -> 6
 Most frequent rhs value proportion: 0.5
 Num distinct rhs values: 2
+
+
+--------------------------------------------------------------------------------
+Note: This example uses the default error metric internally (g1).
+Desbordante supports several other AFD metrics — g2, tau, mu_plus, fi —
+each offering a different perspective on dependency strength.
+
+A dedicated walkthrough of all available metrics can be found at:
+\x1b[1;42mexamples/basic/verifying_fd_afd_metric.py\x1b[1;49m
+'''
+
+snapshots['test_example[basic/verifying_fd_afd_metric.py-None-verifying_fd_afd_metric_output] verifying_fd_afd_metric_output'] = '''
+\x1b[1m\x1b[92mApproximate Functional Dependency (AFD) Metric Verification Example\x1b[0m
+
+\x1b[1m\x1b[93mUnderstanding dependencies and metrics.\x1b[0m
+A Functional Dependency (FD) is a rule of the form LHS -> RHS
+(Left-Hand Side -> Right-Hand Side). It states that if two records
+have the same values in the LHS columns (e.g., Product Name), then
+they must have the same values in the RHS columns (e.g., Price).
+
+However, real-world data often contains typos, outliers, or
+other types of inconsistencies. An Approximate Functional
+Dependency (AFD) allows such rules to hold "mostly" true. The
+error metric is a score that quantifies the degree of violation:
+- 0.0 means the rule is perfect (an exact dependency).
+- Values closer to 1.0 indicate that the relationship is weak or non-existent.
+
+We say that an approximate functional dependency holds if the computed
+value of an error metric is less than a pre-specified error threshold.
+
+To quantify these violations, Desbordante utilizes several error metrics,
+each offering a different mathematical lens on the relationship:
+- \x1b[1m\x1b[92mg2\x1b[0m: Measures the fraction of tuples that do not participate in any violating pair;
+- \x1b[1m\x1b[92mtau\x1b[0m: Measures the proportional reduction in logical entropy of the RHS given
+  the LHS;
+- \x1b[1m\x1b[92mmu_plus\x1b[0m: A logical-entropy metric that corrects for permutation bias;
+- \x1b[1m\x1b[92mfi\x1b[0m: Represents the reduction of Shannon entropy (uncertainty) of the RHS
+  achieved by knowing the LHS.
+
+Metric definitions are taken from the following paper: Marcel
+Parciak, Sebastiaan Weytjens, Niel Hens, Frank Neven, Liesbet
+M. Peeters, Stijn Vansummeren: \x1b[1m\x1b[92mMeasuring Approximate Functional
+Dependencies: a Comparative Study. \x1b[0mCoRR abs/2312.06296 (2023)
+
+In this example we demonstrate how to verify specific dependency candidates,
+interpret various error metrics to assess data quality, and utilize
+internal optimizations for processing large-scale datasets efficiently.
+
+
+\x1b[1m\x1b[94m-----------------------------------------------------------------
+1. Basic usage: dataset profiling
+-----------------------------------------------------------------\x1b[0m
+
+To demonstrate the pattern, we check a common hypothesis: does a person's occupation
+('Occupation', col 7) determine their income bracket ('Salary', col 15)?
+
+Loading dataset: examples/datasets/adult.csv ...
+Data loaded successfully.
+
+\x1b[1mFirst 10 rows of the dataset (showing only a subset of columns):\x1b[0m
+    Age | ... | Work Sector      | ... | Occupation        | ... | Sex    | ... | Salary
+    ----+-----+------------------+-----+-------------------+-----+--------+-----+-------
+    39  | ... | State-gov        | ... | Adm-clerical      | ... | Male   | ... | <=50K
+    50  | ... | Self-emp-not-inc | ... | Exec-managerial   | ... | Male   | ... | <=50K
+    38  | ... | Private          | ... | Handlers-cleaners | ... | Male   | ... | <=50K
+    53  | ... | Private          | ... | Handlers-cleaners | ... | Male   | ... | <=50K
+    28  | ... | Private          | ... | Prof-specialty    | ... | Female | ... | <=50K
+    37  | ... | Private          | ... | Exec-managerial   | ... | Female | ... | <=50K
+    49  | ... | Private          | ... | Other-service     | ... | Female | ... | <=50K
+    52  | ... | Self-emp-not-inc | ... | Exec-managerial   | ... | Male   | ... | >50K
+    31  | ... | Private          | ... | Prof-specialty    | ... | Female | ... | >50K
+    42  | ... | Private          | ... | Exec-managerial   | ... | Male   | ... | >50K
+    ... | ... | ...              | ... | ...               | ... | ...    | ... | ...
+
+\x1b[92mResult for verifying AFD [Occupation] -> [Salary] (mu_plus metric): 0.123451\x1b[0m
+
+
+\x1b[1m\x1b[93mInterpreting the result.\x1b[0m
+An error of ~0.12 suggests that the 'Occupation' attribute is a highly influential
+factor, but it does not strictly determine 'Salary'. In practical terms, this value
+tells us that while most people in a specific occupation fall into the same salary
+bracket, there are roughly 12% "exceptions" or noise in the functional relationship.
+
+\x1b[1m\x1b[93mThe need for multiple metrics.\x1b[0m
+Evaluating a dependency with a single metric can sometimes be misleading. By comparing
+different mathematical approaches, we can verify the stability of the relationship:
+
+
+     Metric | Value
+    --------+------
+         g2 | 1.000
+        tau | 0.124
+    mu_plus | 0.123
+         fi | 0.117
+
+
+Here, g2 reports a 1.0 (total violation), suggesting no dependency exists. This is
+because g2 is a strict, pair-wise metric: if even a few identical LHS values are paired
+with different RHS values across the dataset, g2 penalizes the relationship heavily.
+
+Conversely, entropy-based metrics (tau, mu_plus, fi) hover around 0.12. These metrics
+measure "information flow"—they show that even if the rule isn\'t perfect, knowing the
+'Occupation' reduces our uncertainty about 'Salary' by nearly 88%. This suggests a
+genuine structural pattern exists, even though it fails the strict pair-wise consistency
+test used by g2. This highlights why experimenting with multiple metrics is vital for
+accurate data profiling.
+
+
+\x1b[1m\x1b[94m-----------------------------------------------------------------
+2. Multi-column LHS
+-----------------------------------------------------------------\x1b[0m
+
+In many scenarios, a single attribute is insufficient to define a rule. Here, we
+investigate a more complex relationship in the same dataset: Does the combination of
+Occupation (col 7) and Sex (col 10) determine Salary (col 15)?
+
+The pattern also supports complex determinants. Multiple LHS columns are automatically
+intersected in the C++ core to form a composite index.
+
+   \x1b[96mCase: Occupation + Sex -> Salary\x1b[0m
+     Metric | Value
+    --------+------
+        tau | 0.177
+    mu_plus | 0.177
+         g2 | 1.000
+
+
+This approach allows you to identify hidden constraints that only emerge when attributes
+are analyzed in combination. Generally, as more relevant context is added to the LHS,
+the dependency becomes more `exact*`, leading to lower error values. Multi-column
+verification is therefore a crucial step in refining data quality rules beyond simple
+single-attribute checks.
+
+* Keep in mind that this does not always indicate a `true` dependency. Sometimes this
+effect can arise simply from insufficient data, because violating a composite dependency
+requires substantially more data to find a counterexample. Which exact case applies to
+your result has to be checked; it depends on the specific dependency, the table
+attributes, and its size.
+
+
+\x1b[1m\x1b[93mWorking with exceptions.\x1b[0m
+Beyond measuring aggregate error, Desbordante can also highlight individual cluster-level
+violations — groups of rows sharing the same LHS value but differing on the RHS. This
+helps distinguish data-entry typos from genuine structural patterns. A dedicated
+walkthrough is available at:
+    \x1b[92mexamples/basic/verifying_fd_afd.py\x1b[0m
+
+
+\x1b[1m\x1b[94m-----------------------------------------------------------------
+3. Next steps
+-----------------------------------------------------------------\x1b[0m
+
+- Explore AFD Discovery to automatically find these dependencies.
+    \x1b[92mexamples/basic/mining_afd.py\x1b[0m
+- See Exact FD Mining for rules that hold with zero errors.
+    \x1b[92mexamples/basic/mining_fd.py\x1b[0m
+- Inspect FD and AFD exceptions with cluster analysis.
+    \x1b[92mexamples/basic/verifying_fd_afd.py\x1b[0m
+- Check Conditional Functional Dependencies (CFD) for context-specific rules.
+    \x1b[92mexamples/basic/mining_cfd.py\x1b[0m
 
 '''
 
@@ -6640,6 +6872,159 @@ Third violating cluster:
 
 '''
 
+snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
+(SDs) using the Desbordante library. Algorithm is based on the
+article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
+and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB
+Endow. 2, 1 (August 2009), 574–585.
+
+
+An SD expresses a relationship between ordered attributes,
+written as X -> [g1, g2] Y. This means that when the dataset
+is sorted by X, the difference between the Y-values of any
+two consecutive records must fall within the specified
+interval [g1, g2].
+
+Validation checks whether a user-specified SD holds for a given
+dataset, utilizing an edit-distance based confidence metric.
+Confidence is determined by the minimum number of operations
+(OPS) — record insertions or deletions — required to make the
+sequence completely valid.
+
+Confidence = (N - OPS) / N, where N is the number of rows in the
+dataset. If confidence = 1, the dependency is a perfect fit for
+the pattern with no outliers or exceptions. Confidence can't be
+exactly 0, because in the worst case we need to delete all but
+one record so the SD holds; thus, confidence is at least 1/N.
+
+Desbordante detects SD violations, pinpointing exactly which
+rows must be deleted and where virtual records should be
+inserted to restore the correct sequence. Right now, X and
+Y can be represented by a single column each; however, it
+can be expanded in the future.
+
+In this example, let's look at a dataset containing network
+performance statistics. Specifically, network polls probed
+periodically.
+
+Let's say we want to check whether the data collector probes
+the network routers at the expected frequency, e.g., every 9
+to 11 seconds.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         4    70
+4         5    80
+5         6    90
+6         7   100
+7         8   110
+8         9   120
+9        10   130
+10       11   140
+11       12   150
+12       13   152
+13       14   154
+14       15   240
+15       16   250
+16       17   260
+17       18   270
+18       19   280
+19       20   290
+20       21   300
+21       22   310
+22       23   320
+23       24   330
+24       25   340
+25       26   350
+26       27   360
+27       28   370
+28       29   380
+29       30   390
+30       31   890
+--- Original Data Results ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;31mFalse\x1b[0m
+Operations needed (OPS): 14
+Confidence: 0.5484
+
+\x1b[1;34m--- Detected Violations ---\x1b[0m
+  \x1b[1;43m#1 INSERTION:\x1b[0m Gap between row 2 and 3.
+       Values: 30.0 -> 70.0. Number of required insertions: from 3 to 3
+  \x1b[1;31m#2 DELETION:\x1b[0m Row index 12 must be deleted.
+  \x1b[1;31m#3 DELETION:\x1b[0m Row index 13 must be deleted.
+  \x1b[1;43m#4 INSERTION:\x1b[0m Gap between row 11 and 14.
+       Values: 150.0 -> 240.0. Number of required insertions: from 8 to 9
+  \x1b[1;31m#5 DELETION:\x1b[0m Row index 30 must be deleted.
+
+
+We can see that the rule is violated in several places.
+This may indicate missing data due to an unresponsive router,
+or spurious measurements.
+
+Let's run a simple python function to automatically fix the
+dataset by deleting extra records and inserting missing ones.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         3    40
+4         3    50
+5         3    60
+6         4    70
+7         5    80
+8         6    90
+9         7   100
+10        8   110
+11        9   120
+12       10   130
+13       11   140
+14       12   150
+15       12   160
+16       12   170
+17       12   180
+18       12   190
+19       12   200
+20       12   210
+21       12   220
+22       12   230
+23       15   240
+24       16   250
+25       17   260
+26       18   270
+27       19   280
+28       20   290
+29       21   300
+30       22   310
+31       23   320
+32       24   330
+33       25   340
+34       26   350
+35       27   360
+36       28   370
+37       29   380
+38       30   390
+
+And now let's verify the fixed data:
+
+--- Verification of Fixed Data ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;32mTrue\x1b[0m
+Operations needed (OPS): 0
+Confidence: 1.0000
+
+Note: When inserting missing records to bridge the time gaps,
+we simply duplicate the 'PollNum' of the preceding valid
+record. This choice keeps the fix local and prevents the need
+to shift and rewrite all subsequent 'PollNum' values in the
+entire table.
+
+In conclusion, we've learned about SDs and how to verify them in
+your own datasets. Now, let's experiment with your own data!
+'''
+
 snapshots['test_example[basic/verifying_ucc.py-None-verifying_ucc_output] verifying_ucc_output'] = '''Checking whether (First Name) UCC holds
 UCC does not hold
 Total number of rows violating UCC: 2
@@ -6942,158 +7327,4 @@ Typo candidates and context:
                                      id       worker_name supervisor_surname     workshop salary                 job_post
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
-'''
-
-
-snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
-(SDs) using the Desbordante library. Algorithm is based on the
-article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
-and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB
-Endow. 2, 1 (August 2009), 574–585. 
-
-
-An SD expresses a relationship between ordered attributes,
-written as X -> [g1, g2] Y. This means that when the dataset
-is sorted by X, the difference between the Y-values of any
-two consecutive records must fall within the specified
-interval [g1, g2].
-
-Validation checks whether a user-specified SD holds for a given
-dataset, utilizing an edit-distance based confidence metric. 
-Confidence is determined by the minimum number of operations
-(OPS) — record insertions or deletions — required to make the
-sequence completely valid.
-
-Confidence = (N - OPS) / N, where N is the number of rows in the
-dataset. If confidence = 1, the dependency is a perfect fit for 
-the pattern with no outliers or exceptions. Confidence can't be
-exactly 0, because in the worst case we need to delete all but 
-one record so the SD holds; thus, confidence is at least 1/N.
-
-Desbordante detects SD violations, pinpointing exactly which
-rows must be deleted and where virtual records should be
-inserted to restore the correct sequence. Right now, X and 
-Y can be represented by a single column each; however, it
-can be expanded in the future.
-
-In this example, let's look at a dataset containing network
-performance statistics. Specifically, network polls probed
-periodically.
-
-Let's say we want to check whether the data collector probes
-the network routers at the expected frequency, e.g., every 9
-to 11 seconds.
-
-    PollNum  Time
-0         1    10
-1         2    20
-2         3    30
-3         4    70
-4         5    80
-5         6    90
-6         7   100
-7         8   110
-8         9   120
-9        10   130
-10       11   140
-11       12   150
-12       13   152
-13       14   154
-14       15   240
-15       16   250
-16       17   260
-17       18   270
-18       19   280
-19       20   290
-20       21   300
-21       22   310
-22       23   320
-23       24   330
-24       25   340
-25       26   350
-26       27   360
-27       28   370
-28       29   380
-29       30   390
-30       31   890
---- Original Data Results ---
-\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
-SD strictly holds: \x1b[1;31mFalse\x1b[0m
-Operations needed (OPS): 14
-Confidence: 0.5484
-
-\x1b[1;34m--- Detected Violations ---\x1b[0m
-  \x1b[1;43m#1 INSERTION:\x1b[0m Gap between row 2 and 3.
-       Values: 30.0 -> 70.0. Number of required insertions: from 3 to 3
-  \x1b[1;31m#2 DELETION:\x1b[0m Row index 12 must be deleted.
-  \x1b[1;31m#3 DELETION:\x1b[0m Row index 13 must be deleted.
-  \x1b[1;43m#4 INSERTION:\x1b[0m Gap between row 11 and 14.
-       Values: 150.0 -> 240.0. Number of required insertions: from 8 to 9
-  \x1b[1;31m#5 DELETION:\x1b[0m Row index 30 must be deleted.
-
-
-We can see that the rule is violated in several places.
-This may indicate missing data due to an unresponsive router,
-or spurious measurements.
-
-Let's run a simple python function to automatically fix the 
-dataset by deleting extra records and inserting missing ones.
-
-    PollNum  Time
-0         1    10
-1         2    20
-2         3    30
-3         3    40
-4         3    50
-5         3    60
-6         4    70
-7         5    80
-8         6    90
-9         7   100
-10        8   110
-11        9   120
-12       10   130
-13       11   140
-14       12   150
-15       12   160
-16       12   170
-17       12   180
-18       12   190
-19       12   200
-20       12   210
-21       12   220
-22       12   230
-23       15   240
-24       16   250
-25       17   260
-26       18   270
-27       19   280
-28       20   290
-29       21   300
-30       22   310
-31       23   320
-32       24   330
-33       25   340
-34       26   350
-35       27   360
-36       28   370
-37       29   380
-38       30   390
-
-And now let's verify the fixed data:
-
---- Verification of Fixed Data ---
-\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
-SD strictly holds: \x1b[1;32mTrue\x1b[0m
-Operations needed (OPS): 0
-Confidence: 1.0000
-
-Note: When inserting missing records to bridge the time gaps,
-we simply duplicate the 'PollNum' of the preceding valid
-record. This choice keeps the fix local and prevents the need
-to shift and rewrite all subsequent 'PollNum' values in the
-entire table.
-
-In conclusion, we've learned about SDs and how to verify them in
-your own datasets. Now, let's experiment with your own data!
 '''
