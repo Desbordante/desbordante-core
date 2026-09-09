@@ -81,6 +81,7 @@ extend-ignore-re = [
     "BA thesis\\.pdf", # "BA" is Bachelor of Arts (typo for "BY" or "BE")
     "Comput\\. J\\.", # "Comput" is short for Computer (typo for "Compute")
     "Peter J\\. Hass", # "Hass" is a surname (typo for "Hash")
+    "Sebastiaan Weytjens", # Author's name; "Sebastiaan" is flagged as "Sebastian"
 ]
 
 [tool.typos.default.extend-words]
