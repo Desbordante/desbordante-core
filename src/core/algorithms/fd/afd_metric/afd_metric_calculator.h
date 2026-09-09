@@ -43,11 +43,11 @@ public:
     // Computes Pdep(X, X∪A) directly from X clusters and A's probing table.
     static long double CalculatePdepMeasure(model::PLI const* x_pli, model::PLI const* a_pli);
 
-    static long double CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
-                                   size_t num_rows);
+    static long double CalculateG2Error(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                        size_t num_rows);
 
     static long double CalculateG3(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
-                                   size_t num_rows);
+                                   std::size_t num_rows);
 
     static long double CalculateTau(model::PLI const* lhs_pli, model::PLI const* rhs_pli);
 

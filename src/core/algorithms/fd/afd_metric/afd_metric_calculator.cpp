@@ -55,7 +55,7 @@ void AFDMetricCalculator::ExecuteInternal() {
 
     switch (metric_) {
         case AFDMetric::kG2:
-            result_ = CalculateG2(lhs_pli.get(), rhs_pli.get(), num_rows);
+            result_ = CalculateG2Error(lhs_pli.get(), rhs_pli.get(), num_rows);
             break;
         case AFDMetric::kTau:
             result_ = CalculateTau(lhs_pli.get(), rhs_pli.get());
@@ -82,8 +82,8 @@ void AFDMetricCalculator::ExecuteInternal() {
     }
 }
 
-long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
-                                             size_t num_rows) {
+long double AFDMetricCalculator::CalculateG2Error(model::PLI const* lhs_pli,
+                                                  model::PLI const* rhs_pli, size_t num_rows) {
     if (num_rows <= 0) throw std::invalid_argument("received non-positive number of rows");
 
     auto num_error_rows = 0.L;
@@ -101,24 +101,27 @@ long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::P
 }
 
 long double AFDMetricCalculator::CalculateG3(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
-                                             size_t num_rows) {
+                                             std::size_t num_rows) {
     if (num_rows <= 0) throw std::invalid_argument("received non-positive number of rows");
 
-    auto num_error_rows = 0.L;
+    std::size_t const lhs_singleton_rows = lhs_pli->GetRelationSize() - lhs_pli->GetSize();
+    std::size_t max_fd_holds_rows = lhs_singleton_rows;
 
-    auto const& lhs_clusters = lhs_pli->GetIndex();
-    auto pt_shared = rhs_pli->CalculateAndGetProbingTable();
-    auto const& pt = *pt_shared.get();
-    for (auto const& cluster : lhs_clusters) {
-        auto frequencies = model::PLI::CreateFrequencies(cluster, pt);
-        std::size_t size = 1;
-        for (auto const& val : frequencies) {
-            if (val.second > size) size = val.second;
+    std::deque<model::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
+    std::shared_ptr<std::vector<int> const> probing_table_ptr =
+            rhs_pli->CalculateAndGetProbingTable();
+    std::vector<int> const& probing_table = *probing_table_ptr;
+    for (model::PLI::Cluster const& cluster : lhs_clusters) {
+        auto frequencies = model::PLI::CreateFrequencies(cluster, probing_table);
+        std::size_t max_fd_holds_in_cluster = 1;
+        for (auto const& [rhs_value, rhs_cluster_size] : frequencies) {
+            if (rhs_cluster_size > max_fd_holds_in_cluster)
+                max_fd_holds_in_cluster = rhs_cluster_size;
         }
-        num_error_rows += size;
+        max_fd_holds_rows += max_fd_holds_in_cluster;
     }
 
-    return num_error_rows / num_rows;
+    return max_fd_holds_rows / static_cast<long double>(num_rows);
 }
 
 config::ErrorType AFDMetricCalculator::CalculateRhoMeasure(model::PLI const* x_pli,
