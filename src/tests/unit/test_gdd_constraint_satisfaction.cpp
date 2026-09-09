@@ -62,7 +62,7 @@ TEST_P(GddSatisfiesAttrConstTest, WorksAsExpected) {
     graph_t g;
     auto const gv = AddVertex(g, tc.graph_vertex_id, tc.graph_vertex_label, tc.graph_vertex_attrs);
     auto const pv = FindVertexById(p, 1);
-    std::unordered_map<vertex_t, vertex_t> const map{{pv, gv}};
+    model::gdd::detail::MappingT const map{{pv, gv}};
 
     if (tc.expect_throw) {
         EXPECT_THROW(gdd.Satisfies(g, map), std::logic_error);
@@ -289,7 +289,7 @@ TEST_P(GddSatisfiesAttrAttrTest, WorksAsExpected) {
     auto const p1 = FindVertexById(p, 1);
     auto const p2 = FindVertexById(p, 2);
 
-    std::unordered_map<vertex_t, vertex_t> const map{{p1, g1}, {p2, g2}};
+    model::gdd::detail::MappingT const map{{p1, g1}, {p2, g2}};
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
 
@@ -346,7 +346,7 @@ TEST_P(GddSatisfiesRelConstTest, WorksAsExpected) {
     AddEdge(g, a, b, tc.actual_edge_label);
 
     auto const pv = FindVertexById(p, 1);
-    std::unordered_map<vertex_t, vertex_t> const map{{pv, a}};
+    model::gdd::detail::MappingT const map{{pv, a}};
 
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
@@ -403,7 +403,7 @@ TEST_P(GddSatisfiesRelRelTest, WorksAsExpected) {
 
     auto const p1 = FindVertexById(p, 1);
     auto const p2 = FindVertexById(p, 2);
-    std::unordered_map<vertex_t, vertex_t> const map{{p1, a}, {p2, c_v}};
+    model::gdd::detail::MappingT const map{{p1, a}, {p2, c_v}};
 
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
@@ -449,7 +449,7 @@ TEST(GddSatisfiesConstraint, EmptyLhsRhsSatisfies) {
     auto const gv = AddVertex(g, 10, "X");
     auto const pv = FindVertexById(p, 1);
 
-    std::unordered_map<vertex_t, vertex_t> map;
+    model::gdd::detail::MappingT map;
     map.emplace(pv, gv);
 
     EXPECT_TRUE(gdd.Satisfies(g, map));
@@ -493,7 +493,7 @@ TEST(GddSatisfiesConstraint, RelConstNonInt64ConstValueTypesThrows) {
     AddEdge(g, a, b, "knows");
 
     auto const pv = FindVertexById(p, 1);
-    std::unordered_map<vertex_t, vertex_t> const map{{pv, a}};
+    model::gdd::detail::MappingT const map{{pv, a}};
 
     EXPECT_THROW(gdd.Satisfies(g, map), std::logic_error);
 }
