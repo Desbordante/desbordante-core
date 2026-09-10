@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "frequent_subgraph.h"
-#include "graph.h"
+#include "types/frequent_subgraph.h"
+#include "types/graph.h"
 
 namespace gspan::parser {
 

@@ -2813,12 +2813,12 @@ Format legend:
 \x1b[96m
 --- Subgraph #1 ---\x1b[0m
 t # 0 * 3
-v 0 11
+v 0 10
 x 0 1 2
 \x1b[96m
 --- Subgraph #2 ---\x1b[0m
 t # 1 * 3
-v 0 10
+v 0 11
 x 0 1 2
 \x1b[96m
 --- Subgraph #3 ---\x1b[0m
@@ -2834,12 +2834,12 @@ You can iterate over it to inspect edges and see vertex IDs/labels and edge labe
 \x1b[96m
   Pattern #1\x1b[0m  support=\x1b[1m3\x1b[0m  graphs=[0, 1, 2]
 \x1b[94m  Vertices:\x1b[0m
-    v0  label=11
+    v0  label=10
 \x1b[93m  (single-vertex pattern, no edges)\x1b[0m
 \x1b[96m
   Pattern #2\x1b[0m  support=\x1b[1m3\x1b[0m  graphs=[0, 1, 2]
 \x1b[94m  Vertices:\x1b[0m
-    v0  label=10
+    v0  label=11
 \x1b[93m  (single-vertex pattern, no edges)\x1b[0m
 \x1b[96m
   Pattern #3\x1b[0m  support=\x1b[1m3\x1b[0m  graphs=[0, 1, 2]
@@ -2877,26 +2877,26 @@ Let's re-run with minsup = 0.6 to see how many more patterns emerge.
 New patterns (showing up to 3 of 4):
 \x1b[96m
   --- New Pattern ---\x1b[0m
-t # 2 * 2
+t # 3 * 2
+v 0 10
+v 1 11
+e 0 1 23
+x 0 2
+\x1b[96m
+  --- New Pattern ---\x1b[0m
+t # 4 * 2
 v 0 11
 v 1 11
 e 0 1 22
 x 0 2
 \x1b[96m
   --- New Pattern ---\x1b[0m
-t # 4 * 2
+t # 5 * 2
 v 0 10
 v 1 11
 v 2 11
 e 0 1 20
 e 1 2 22
-x 0 2
-\x1b[96m
-  --- New Pattern ---\x1b[0m
-t # 5 * 2
-v 0 10
-v 1 11
-e 0 1 23
 x 0 2
   ...
 \x1b[95m

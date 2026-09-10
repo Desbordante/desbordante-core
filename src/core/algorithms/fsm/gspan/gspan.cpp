@@ -7,155 +7,27 @@
 #include <boost/range/iterator_range.hpp>
 
 #include "core/config/option_using.h"
+#include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
-#include "graph_parser.h"
-#include "sparse_triangular_matrix.h"
+#include "miner/subgraph_miner.h"
+#include "parser/graph_parser.h"
+#include "types/sparse_triangular_matrix.h"
+#include "utils/utils.h"
 using namespace gspan;
 
 namespace algos {
-
-namespace {
-
-// Get all vertex descriptors having a given label
-std::vector<vertex_t> FindAllWithLabel(int target_label, graph_t const& graph) {
-    return graph[boost::graph_bundle].label_to_vertices.at(target_label);
-}
-
-// Find all isomorphisms between graph described by DFSCode and boost::graph, each
-// isomorphism is represented by a map
-std::vector<std::unordered_map<int, vertex_t>> SubgraphIsomorphisms(DFSCode const& code,
-                                                                    graph_t const& graph) {
-    LOG_TRACE("Finding subgraph isomorphisms: pattern size={}, target vertices={}, edges={}",
-              code.Size(), boost::num_vertices(graph), boost::num_edges(graph));
-    std::vector<std::unordered_map<int, vertex_t>> isoms;
-
-    // Initial isomorphisms by finding all vertices with same label as vertex 0 in code
-    int start_label = code.GetExtendedEdges()[0].vertex1.label;
-    for (vertex_t vertex : FindAllWithLabel(start_label, graph)) {
-        std::unordered_map<int, vertex_t> map;
-        map[0] = vertex;
-        isoms.push_back(std::move(map));
-    }
-    LOG_TRACE("Initial candidate mappings: {}", isoms.size());
-
-    // Each extended edge will update partial isomorphisms.
-    // For forward edge, each isomorphism will be either extended or discarded.
-    // For backward edge, each isomorphism will be either unchanged or discarded.
-    for (ExtendedEdge const& ee : code.GetExtendedEdges()) {
-        int v1 = ee.vertex1.id;
-        int v2 = ee.vertex2.id;
-        int v2_label = ee.vertex2.label;
-        int edge_label = ee.label;
-
-        std::vector<std::unordered_map<int, vertex_t>> update_isoms;
-        for (auto& iso : isoms) {
-            auto mapped_v1 = iso[v1];
-
-            // If it is a forward edge extension
-            if (v1 < v2) {
-                auto n = boost::num_vertices(graph);
-                std::vector<int> inv(n, -1);
-                for (auto& [dfs_id, graph_vertex] : iso) {
-                    inv[graph_vertex] = dfs_id;
-                }
-
-                // For each neighbor of the vertex corresponding to v1
-                for (auto edge : boost::make_iterator_range(boost::out_edges(mapped_v1, graph))) {
-                    vertex_t mapped_v2 = (boost::source(edge, graph) == mapped_v1)
-                                                 ? boost::target(edge, graph)
-                                                 : boost::source(edge, graph);
-                    auto& mapped_edge = graph[edge];
-
-                    if (v2_label == graph[mapped_v2].label && (inv[mapped_v2] == -1) &&
-                        (edge_label == mapped_edge.label)) {
-                        std::unordered_map<int, vertex_t> temp_map(iso);
-                        temp_map[v2] = mapped_v2;
-
-                        update_isoms.push_back(std::move(temp_map));
-                    }
-                }
-            } else {
-                // If it is a backward edge extension.
-                // V2 has been visited, only require mappedV1 and mappedV2 are connected in graph.
-                auto mapped_v2 = iso[v2];
-                auto [mapped_edge, is_neighbors] = boost::edge(mapped_v1, mapped_v2, graph);
-                if (is_neighbors && edge_label == graph[mapped_edge].label) {
-                    update_isoms.push_back(iso);
-                }
-            }
-        }
-        isoms = update_isoms;
-    }
-
-    LOG_TRACE("Found {} valid isomorphisms", isoms.size());
-    return isoms;
-}
-
-// Precalculate the list of vertices having each label
-void PrecalculateLabelsToVertices(graph_t& graph) {
-    auto& label_to_verts = graph[boost::graph_bundle].label_to_vertices;
-    for (auto v : boost::make_iterator_range(boost::vertices(graph))) {
-        label_to_verts[graph[v].label].push_back(v);
-    }
-}
-
-graph_t CreateGraphFromDFSCode(DFSCode const& code) {
-    graph_t result;
-    std::unordered_map<int, vertex_t> id_to_desc;
-    for (auto const& ee : code.GetExtendedEdges()) {
-        vertex_t vertex1;
-        if (id_to_desc.contains(ee.vertex1.id)) {
-            vertex1 = id_to_desc[ee.vertex1.id];
-        } else {
-            vertex1 = boost::add_vertex(result);
-            id_to_desc[ee.vertex1.id] = vertex1;
-        }
-
-        vertex_t vertex2;
-        if (id_to_desc.contains(ee.vertex2.id)) {
-            vertex2 = id_to_desc[ee.vertex2.id];
-        } else {
-            vertex2 = boost::add_vertex(result);
-            id_to_desc[ee.vertex2.id] = vertex2;
-        }
-
-        result[vertex1].id = ee.vertex1.id;
-        result[vertex1].label = ee.vertex1.label;
-
-        result[vertex2].id = ee.vertex2.id;
-        result[vertex2].label = ee.vertex2.label;
-        auto edge = boost::add_edge(vertex1, vertex2, result);
-        result[edge.first].label = ee.label;
-    }
-
-    result[boost::graph_bundle].original_id = -1;
-    PrecalculateLabelsToVertices(result);
-    return result;
-}
-
-std::unordered_set<int> TranslateToOriginalIds(std::unordered_set<int> const& internal_ids,
-                                               std::vector<graph_t> const& graph_db) {
-    std::unordered_set<int> original_ids;
-    original_ids.reserve(internal_ids.size());
-    for (int id : internal_ids) {
-        original_ids.insert(graph_db[id][boost::graph_bundle].original_id);
-    }
-    return original_ids;
-}
-
-}  // namespace
 
 GSpan::GSpan() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::names::kGraphDatabase, config::names::kGSpanMinimumSupport,
                           config::names::kOutputSingleVertices, config::names::kMaxNumberOfEdges,
-                          config::names::kGSpanOutputPath});
+                          config::names::kGSpanOutputPath, config::names::kThreads});
 }
 
 void GSpan::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable(
-            {kGSpanMinimumSupport, kOutputSingleVertices, kMaxNumberOfEdges, kGSpanOutputPath});
+    MakeOptionsAvailable({kGSpanMinimumSupport, kOutputSingleVertices, kMaxNumberOfEdges,
+                          kGSpanOutputPath, kThreads});
 }
 
 void GSpan::RegisterOptions() {
@@ -186,6 +58,7 @@ void GSpan::RegisterOptions() {
 
     RegisterOption(config::Option{&output_path_, kGSpanOutputPath, kDGSpanOutputPath,
                                   std::filesystem::path{}});
+    RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
 void GSpan::LoadDataInternal() {
@@ -196,15 +69,15 @@ void GSpan::LoadDataInternal() {
 
 void GSpan::ResetState() {
     pruned_graphs_ = raw_dataset_;
+    pruned_csr_graphs_.clear();
     frequent_subgraphs_.clear();
     frequent_vertex_labels_.clear();
-    empty_graphs_removed_ = 0;
 }
 
 void GSpan::ExecuteInternal() {
     min_sup_ = static_cast<int>(std::ceil(min_frequency_ * raw_dataset_.size()));
 
-    MineSubgraphs();
+    Launch();
     LOG_DEBUG("Mining complete: {} frequent subgraphs found", frequent_subgraphs_.size());
 
     if (!output_path_.empty()) {
@@ -214,7 +87,7 @@ void GSpan::ExecuteInternal() {
     }
 }
 
-void GSpan::MineSubgraphs() {
+void GSpan::Launch() {
     LOG_INFO("Starting GSpan algorithm: {} graphs, min_sup_={}", raw_dataset_.size(), min_sup_);
 
     LOG_DEBUG("Searching for frequent vertex labels");
@@ -224,28 +97,111 @@ void GSpan::MineSubgraphs() {
     LOG_DEBUG("Pruning infrequent vertex pairs and edge labels");
     RemoveInfrequentVertexPairs();
     LOG_DEBUG("Pruning complete");
+    CompactIds();
 
-    // Set with all the graph ids
-    LOG_DEBUG("Building active graph set");
-    std::unordered_set<int> graph_ids;
-    for (size_t i = 0; i < pruned_graphs_.size(); i++) {
-        graph_t& graph = pruned_graphs_[i];
-        if (boost::num_vertices(graph) != 0) {
-            graph_ids.insert(i);
-            PrecalculateLabelsToVertices(graph);
-        } else {
-            empty_graphs_removed_++;
+    pruned_csr_graphs_.reserve(pruned_graphs_.size());
+    for (auto const& graph : pruned_graphs_) {
+        pruned_csr_graphs_.push_back(ConvertToCSR(graph));
+    }
+
+    ProjectionMap embeddings = GetInitialEdges();
+
+    ThreadPool pool(threads_num_);
+    std::vector<std::unique_ptr<SubgraphMiner>> miners;
+    for (size_t i = 0; i < threads_num_ + 1; ++i) {
+        auto miner =
+                std::make_unique<SubgraphMiner>(pruned_csr_graphs_, min_sup_, max_number_of_edges_);
+        miner->SetParallelContext(&pool, &miners, i);
+        miners.push_back(std::move(miner));
+    }
+
+    std::atomic<int> pending{0};
+    for (auto const& [ee, proj] : embeddings) {
+        pool.Spawn([&miners, &proj, ee](int t_id) { miners[t_id]->MineFromSeed(proj, ee); },
+                   pending);
+    }
+
+    pool.Wait(pending, threads_num_);
+
+    for (auto& miner : miners) {
+        for (auto& fs : miner->GetFrequentSubgraphs()) {
+            frequent_subgraphs_.push_back(std::move(fs));
         }
     }
-    LOG_DEBUG("Active graphs: {}, empty graphs removed: {}", graph_ids.size(),
-              empty_graphs_removed_);
 
-    if (frequent_vertex_labels_.size() != 0) {
-        LOG_DEBUG("Starting DFS search with {} graphs", graph_ids.size());
-        GSpanDFS(DFSCode(), std::move(graph_ids));
+    std::sort(frequent_subgraphs_.begin(), frequent_subgraphs_.end(),
+              [](gspan::FrequentSubgraph const& a, gspan::FrequentSubgraph const& b) {
+                  auto const& ca = a.dfs_code.GetExtendedEdges();
+                  auto const& cb = b.dfs_code.GetExtendedEdges();
+                  if (ca.size() != cb.size()) {
+                      return ca.size() < cb.size();
+                  }
+                  for (size_t i = 0; i < ca.size(); ++i) {
+                      if (ca[i].SmallerThan(cb[i])) return true;
+                      if (cb[i].SmallerThan(ca[i])) return false;
+                  }
+                  return false;
+              });
+
+    for (size_t i = 0; i < frequent_subgraphs_.size(); ++i) {
+        frequent_subgraphs_[i].id = i;
     }
 
     LOG_INFO("GSpan complete: {} frequent subgraphs found", frequent_subgraphs_.size());
+}
+
+void GSpan::CompactIds() {
+    for (auto& graph : pruned_graphs_) {
+        int vertex_id = 0;
+        for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
+            graph[vertex].id = vertex_id;
+            vertex_id++;
+        }
+
+        int edge_id = 0;
+        boost::unordered_flat_set<int> processed;
+
+        for (auto edge : boost::make_iterator_range(boost::edges(graph))) {
+            int orig_id = graph[edge].id;
+            if (processed.contains(orig_id)) {
+                continue;
+            }
+
+            processed.insert(orig_id);
+
+            vertex_t source = boost::source(edge, graph);
+            vertex_t target = boost::target(edge, graph);
+
+            graph[edge].id = edge_id;
+
+            auto [twin, _] = boost::edge(target, source, graph);
+            graph[twin].id = edge_id;
+            edge_id++;
+        }
+    }
+}
+
+ProjectionMap GSpan::GetInitialEdges() {
+    ProjectionMap result;
+    for (size_t i = 0; i < pruned_csr_graphs_.size(); i++) {
+        auto const& graph = pruned_csr_graphs_[i];
+        for (auto v1 : boost::make_iterator_range(boost::vertices(graph))) {
+            for (auto edge : boost::make_iterator_range(boost::out_edges(v1, graph))) {
+                vertex_t v2 = boost::target(edge, graph);
+                int source_label = graph[v1].label;
+                int target_label = graph[v2].label;
+                // Partial pruning: if the first label is greater than the
+                // second label, then there must be another graph whose second
+                // label is greater than the first label.
+                if (source_label <= target_label) {
+                    ExtendedEdge ee = ExtendedEdge(Vertex(0, source_label), Vertex(1, target_label),
+                                                   graph[edge].label);
+                    result[ee].emplace_back(i, edge, nullptr);
+                }
+            }
+        }
+    }
+    return result;
 }
 
 void GSpan::RemoveInfrequentLabel(gspan::graph_t& graph, int label) {
@@ -264,18 +220,18 @@ void GSpan::RemoveInfrequentLabel(gspan::graph_t& graph, int label) {
 }
 
 void GSpan::RemoveInfrequentVertexPairs() {
-    std::unordered_set<std::pair<int, int>, boost::hash<std::pair<int, int>>> already_seen_pair;
+    boost::unordered_flat_set<std::pair<int, int>, boost::hash<std::pair<int, int>>>
+            already_seen_pair;
     SparseTriangularMatrix matrix;
-    std::unordered_set<int> already_seen_edge_label;
-    std::unordered_map<int, int> edge_label_to_support;
+    boost::unordered_flat_set<int> already_seen_edge_label;
+    boost::unordered_flat_map<int, int> edge_label_to_support;
 
     // Calculate the support of each entry
     for (graph_t& graph : pruned_graphs_) {
         for (auto v1 : boost::make_iterator_range(boost::vertices(graph))) {
             int v1_label = graph[v1].label;
             for (auto edge : boost::make_iterator_range(boost::out_edges(v1, graph))) {
-                vertex_t v2 = (v1 == boost::source(edge, graph)) ? boost::target(edge, graph)
-                                                                 : boost::source(edge, graph);
+                vertex_t v2 = boost::target(edge, graph);
                 int v2_label = graph[v2].label;
 
                 // Update vertex pair count
@@ -325,7 +281,7 @@ void GSpan::RemoveInfrequentVertexPairs() {
         // Remove isolated vertices
         std::vector<vertex_t> isolated;
         for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
-            if (boost::degree(vertex, graph) == 0) {
+            if (boost::out_degree(vertex, graph) == 0) {
                 isolated.push_back(vertex);
             }
         }
@@ -337,188 +293,18 @@ void GSpan::RemoveInfrequentVertexPairs() {
     }
 }
 
-void GSpan::GSpanDFS(gspan::DFSCode const& code, std::unordered_set<int> graph_ids) {
-    LOG_TRACE("DFS step: pattern size={}, candidate graphs={}, patterns found={}", code.Size(),
-              graph_ids.size(), frequent_subgraphs_.size());
-
-    // If we have reached the maximum size, we do not need to extend this graph
-    if (code.Size() == static_cast<size_t>(max_number_of_edges_)) {
-        LOG_TRACE("Maximum pattern size reached, backtracking");
-        return;
-    }
-
-    // Find all the extensions of this graph, with their support values.
-    // They are stored in a map where the key is an extended edge, and the value
-    // is the list of graph ids where this edge extends the current subgraph.
-    std::unordered_map<ExtendedEdge, std::unordered_set<int>, ExtendedEdge::Hash> extensions =
-            RightMostPathExtensions(code, std::move(graph_ids));
-    LOG_TRACE("Found {} candidate extensions", extensions.size());
-
-    for (auto& [extension, new_graph_ids] : extensions) {
-        int sup = new_graph_ids.size();
-
-        // If the support is enough
-        if (sup >= min_sup_) {
-            // Create the new DFS code of this graph
-            DFSCode new_code = code;
-            new_code.Add(extension);
-
-            // If the resulting graph is canonical (it means that the graph is non redundant)
-            if (IsCanonical(new_code)) {
-                LOG_TRACE("New frequent subgraph: size={}, support={}", new_code.Size(), sup);
-                frequent_subgraphs_.emplace_back(
-                        frequent_subgraphs_.size(), new_code,
-                        TranslateToOriginalIds(new_graph_ids, pruned_graphs_), sup);
-                GSpanDFS(new_code, std::move(new_graph_ids));
-            }
-        }
-    }
-}
-
-template <class Emit>
-void EnumerateRightMostExtensions(DFSCode const& code, graph_t const& graph, Emit&& emit) {
-    LOG_TRACE("Computing sgraph extensions: pattern size={}, vertices={}", code.Size(),
-              boost::num_vertices(graph));
-    if (code.Empty()) {
-        // If we have an empty subgraph that we want to extend,
-        // find all distinct label tuples
-        LOG_TRACE("Empty pattern, collecting initial edges");
-        for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
-            for (auto edge : boost::make_iterator_range(boost::out_edges(vertex, graph))) {
-                int vertex_label = graph[vertex].label;
-                auto neighbor = boost::target(edge, graph) == vertex ? boost::source(edge, graph)
-                                                                     : boost::target(edge, graph);
-                int neighbor_label = graph[neighbor].label;
-                ExtendedEdge ee =
-                        (vertex_label < neighbor_label)
-                                ? ExtendedEdge(Vertex(0, vertex_label), Vertex(1, neighbor_label),
-                                               graph[edge].label)
-                                : ExtendedEdge(Vertex(0, neighbor_label), Vertex(1, vertex_label),
-                                               graph[edge].label);
-                emit(ee);
-            }
-        }
-    } else {
-        // If we want to extend a subgraph
-        auto rightmost = code.GetRightMost();
-        std::vector<std::unordered_map<int, vertex_t>> isoms = SubgraphIsomorphisms(code, graph);
-        LOG_TRACE("Found {} embeddings for extension", isoms.size());
-        for (auto& isom : isoms) {
-            // Backward extensions from rightmost child
-            auto n = boost::num_vertices(graph);
-            std::vector<int> inverted_isom(n, -1);
-            for (auto& [dfs_id, graph_vertex] : isom) {
-                inverted_isom[graph_vertex] = dfs_id;
-            }
-
-            auto mapped_rightmost = isom[rightmost];
-            int mapped_rightmost_label = graph[mapped_rightmost].label;
-            for (auto edge :
-                 boost::make_iterator_range(boost::out_edges(mapped_rightmost, graph))) {
-                vertex_t neighbor = (boost::source(edge, graph) == mapped_rightmost)
-                                            ? boost::target(edge, graph)
-                                            : boost::source(edge, graph);
-                if (inverted_isom[neighbor] == -1) {
-                    continue;
-                }
-
-                auto inverted = inverted_isom[neighbor];
-                if (code.OnRightMostPath(inverted) && code.NotPreOfRM(inverted) &&
-                    !code.ContainEdge(rightmost, inverted)) {
-                    // Rightmost and inverted both have correspondings in graph, so label of
-                    // vertices and edge all can be found by correspondings
-                    int edge_label = graph[edge].label;
-                    ExtendedEdge ee(Vertex(rightmost, mapped_rightmost_label),
-                                    Vertex(inverted, graph[neighbor].label), edge_label);
-                    emit(ee);
-                }
-            }
-
-            // Forward extensions from nodes on rightmost path
-            for (auto vertex : code.GetRightMostPath()) {
-                auto mapped_vertex = isom[vertex];
-                int mapped_vertex_label = graph[mapped_vertex].label;
-                for (auto edge :
-                     boost::make_iterator_range(boost::out_edges(mapped_vertex, graph))) {
-                    vertex_t neighbor = (boost::source(edge, graph) == mapped_vertex)
-                                                ? boost::target(edge, graph)
-                                                : boost::source(edge, graph);
-                    if (inverted_isom[neighbor] == -1) {
-                        int edge_label = graph[edge].label;
-                        ExtendedEdge ee(Vertex(vertex, mapped_vertex_label),
-                                        Vertex(rightmost + 1, graph[neighbor].label), edge_label);
-                        emit(ee);
-                    }
-                }
-            }
-        }
-    }
-}
-
-std::unordered_map<ExtendedEdge, std::unordered_set<int>, ExtendedEdge::Hash>
-GSpan::RightMostPathExtensions(DFSCode const& code, std::unordered_set<int> graph_ids) {
-    std::unordered_map<ExtendedEdge, std::unordered_set<int>, ExtendedEdge::Hash> out;
-
-    for (int graph_id : graph_ids) {
-        auto const& graph = pruned_graphs_[graph_id];
-
-        EnumerateRightMostExtensions(code, graph,
-                                     [&](ExtendedEdge const& ee) { out[ee].insert(graph_id); });
-    }
-
-    return out;
-}
-
-std::unordered_set<ExtendedEdge, ExtendedEdge::Hash> GSpan::RightMostPathExtensionsFromSingle(
-        DFSCode const& code, graph_t const& graph) {
-    std::unordered_set<ExtendedEdge, ExtendedEdge::Hash> out;
-
-    EnumerateRightMostExtensions(code, graph, [&](ExtendedEdge const& ee) { out.insert(ee); });
-
-    return out;
-}
-
-bool GSpan::IsCanonical(DFSCode const& code) {
-    LOG_TRACE("Checking canonicity: pattern size={}", code.Size());
-    DFSCode canon;
-    graph_t canon_graph = CreateGraphFromDFSCode(code);
-    for (size_t i = 0; i < code.Size(); i++) {
-        std::unordered_set<ExtendedEdge, ExtendedEdge::Hash> extensions =
-                RightMostPathExtensionsFromSingle(canon, canon_graph);
-
-        if (extensions.empty()) {
-            return false;
-        }
-
-        ExtendedEdge min_ee = *extensions.begin();
-        for (auto const& ee : extensions) {
-            if (ee.SmallerThan(min_ee)) min_ee = ee;
-        }
-
-        if (min_ee.SmallerThan(code[i])) {
-            LOG_TRACE("Non-canonical at edge {}", i);
-            return false;
-        }
-
-        canon.Add(min_ee);
-    }
-
-    LOG_TRACE("Pattern is canonical");
-    return true;
-}
-
 // This method finds all frequent vertex labels from a graph database.
 void GSpan::FindAllOnlyOneVertex() {
     LOG_DEBUG("Collecting vertex label statistics");
 
     // Create a map (key = vertex label, value = graph ids)
     // to count the support of each vertex
-    std::unordered_map<int, std::unordered_set<int>> label_map;
+    boost::unordered_flat_map<int, boost::unordered_flat_set<int>> label_map;
 
     for (size_t i = 0; i < pruned_graphs_.size(); i++) {
         auto const& graph = pruned_graphs_[i];
         for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
-            if (boost::degree(vertex, graph) != 0) {
+            if (boost::out_degree(vertex, graph) != 0) {
                 int label = graph[vertex].label;
                 label_map[label].insert(i);
             }
@@ -526,7 +312,7 @@ void GSpan::FindAllOnlyOneVertex() {
     }
     LOG_DEBUG("Found {} distinct vertex labels", label_map.size());
 
-    for (auto [label, temp_sup_g] : label_map) {
+    for (auto const& [label, temp_sup_g] : label_map) {
         int sup = temp_sup_g.size();
         if (sup >= min_sup_) {
             frequent_vertex_labels_.push_back(label);

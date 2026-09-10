@@ -4,15 +4,17 @@
 #include <sstream>
 #include <unordered_set>
 
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
-#include "core/algorithms/fsm/gspan/dfscode.h"
-#include "core/algorithms/fsm/gspan/extended_edge.h"
-#include "core/algorithms/fsm/gspan/graph_parser.h"
 #include "core/algorithms/fsm/gspan/gspan.h"
+#include "core/algorithms/fsm/gspan/parser/graph_parser.h"
+#include "core/algorithms/fsm/gspan/types/dfscode.h"
+#include "core/algorithms/fsm/gspan/types/extended_edge.h"
 #include "core/config/names.h"
+#include "core/config/thread_number/type.h"
 #include "tests/common/csv_config_util.h"
 
 namespace tests {
@@ -30,13 +32,15 @@ std::filesystem::path const kGSpanLargeGraph = kGraphDataDir / "gspan_mutag_grap
 
 algos::StdParamsMap CreateGSpanParams(std::filesystem::path const& graph_path, double min_support,
                                       bool output_single_vertices = true, int max_edges = INT_MAX,
-                                      bool output_graph_ids = true) {
+                                      bool output_graph_ids = true,
+                                      config::ThreadNumType threads_num = 0) {
     using namespace config::names;
     return {{kGraphDatabase, graph_path},
             {kGSpanMinimumSupport, min_support},
             {kOutputSingleVertices, output_single_vertices},
             {kMaxNumberOfEdges, max_edges},
-            {kOutputGraphIds, output_graph_ids}};
+            {kOutputGraphIds, output_graph_ids},
+            {kThreads, threads_num}};
 }
 
 }  // namespace
@@ -47,7 +51,6 @@ TEST_F(DFSCodeTest, EmptyCode) {
     gspan::DFSCode code;
     EXPECT_TRUE(code.Empty());
     EXPECT_EQ(code.Size(), 0);
-    EXPECT_EQ(code.GetRightMost(), -1);
 }
 
 TEST_F(DFSCodeTest, AddSingleEdge) {
@@ -57,7 +60,6 @@ TEST_F(DFSCodeTest, AddSingleEdge) {
 
     EXPECT_FALSE(code.Empty());
     EXPECT_EQ(code.Size(), 1);
-    EXPECT_EQ(code.GetRightMost(), 1);
 }
 
 TEST_F(DFSCodeTest, AddMultipleEdges) {
@@ -66,19 +68,6 @@ TEST_F(DFSCodeTest, AddMultipleEdges) {
     code.Add(gspan::ExtendedEdge(gspan::Vertex{1, 2}, gspan::Vertex{2, 3}, 1));
 
     EXPECT_EQ(code.Size(), 2);
-    EXPECT_EQ(code.GetRightMost(), 2);
-}
-
-TEST_F(DFSCodeTest, RightMostPath) {
-    gspan::DFSCode code;
-    code.Add(gspan::ExtendedEdge(gspan::Vertex{0, 1}, gspan::Vertex{1, 2}, 1));
-    code.Add(gspan::ExtendedEdge(gspan::Vertex{1, 2}, gspan::Vertex{2, 3}, 1));
-
-    auto const& path = code.GetRightMostPath();
-    EXPECT_FALSE(path.empty());
-    EXPECT_TRUE(code.OnRightMostPath(0));
-    EXPECT_TRUE(code.OnRightMostPath(1));
-    EXPECT_TRUE(code.OnRightMostPath(2));
 }
 
 TEST_F(DFSCodeTest, ContainEdge) {
@@ -159,7 +148,7 @@ TEST_F(GraphParserTest, ParseSingleGraph) {
     auto graphs = gspan::parser::ReadGraphs(ss);
     ASSERT_EQ(graphs.size(), 1);
     EXPECT_EQ(boost::num_vertices(graphs[0]), 2);
-    EXPECT_EQ(boost::num_edges(graphs[0]), 1);
+    EXPECT_EQ(boost::num_edges(graphs[0]) / 2, 1);
     bool found_v0 = false, found_v1 = false;
     for (auto v : boost::make_iterator_range(boost::vertices(graphs[0]))) {
         if (graphs[0][v].label == 1) found_v0 = true;
@@ -209,9 +198,9 @@ TEST_F(GraphParserTest, ParseMultipleGraphs) {
     auto graphs = gspan::parser::ReadGraphs(ss);
     ASSERT_EQ(graphs.size(), 2);
     EXPECT_EQ(boost::num_vertices(graphs[0]), 2);
-    EXPECT_EQ(boost::num_edges(graphs[0]), 1);
+    EXPECT_EQ(boost::num_edges(graphs[0]) / 2, 1);
     EXPECT_EQ(boost::num_vertices(graphs[1]), 3);
-    EXPECT_EQ(boost::num_edges(graphs[1]), 2);
+    EXPECT_EQ(boost::num_edges(graphs[1]) / 2, 2);
 }
 
 TEST_F(GraphParserTest, VertexLabels) {
@@ -240,7 +229,7 @@ TEST_F(FrequentSubgraphTest, Construction) {
     gspan::DFSCode code;
     code.Add(gspan::ExtendedEdge(gspan::Vertex{0, 1}, gspan::Vertex{1, 2}, 1));
 
-    std::unordered_set<int> graph_ids{0, 1, 2};
+    boost::unordered_flat_set<int> graph_ids{0, 1, 2};
     gspan::FrequentSubgraph subgraph(0, code, graph_ids, 3);
 
     EXPECT_EQ(subgraph.support, 3);
@@ -270,11 +259,14 @@ protected:
 };
 
 TEST_F(GSpanTest, LargeGraph) {
+    size_t expected_subgraphs_count = 682;  // on mutag dataset with minsup 0.5
+
     auto algorithm = CreateAlgorithmInstance(kGSpanLargeGraph, 0.5);
     algorithm->Execute();
-
     auto const& subgraphs = algorithm->GetFrequentSubgraphs();
-    EXPECT_GE(subgraphs.size(), 1);
+    size_t actual_subgraphs_count = subgraphs.size();
+
+    EXPECT_EQ(actual_subgraphs_count, expected_subgraphs_count);
     for (auto const& sg : subgraphs) {
         EXPECT_GE(sg.support, algorithm->GetMinSup());
     }

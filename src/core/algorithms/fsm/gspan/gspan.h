@@ -3,10 +3,16 @@
 #include <cmath>
 #include <vector>
 
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
+
 #include "core/algorithms/algorithm.h"
 #include "core/config/names_and_descriptions.h"
-#include "frequent_subgraph.h"
-#include "graph.h"
+#include "core/config/thread_number/type.h"
+#include "types/frequent_subgraph.h"
+#include "types/graph.h"
+#include "types/history.h"
+#include "types/projection.h"
 
 namespace algos {
 class GSpan : public Algorithm {
@@ -27,26 +33,21 @@ protected:
     // Maximum number of edges in each frequent subgraph
     int max_number_of_edges_ = INT_MAX;
 
-    // Empty graphs removed count
-    int empty_graphs_removed_;
-
     std::filesystem::path graph_database_path_;
     std::filesystem::path output_path_;
+
+    config::ThreadNumType threads_num_;
+
     std::vector<gspan::graph_t> raw_dataset_;
     std::vector<gspan::graph_t> pruned_graphs_;
+    std::vector<gspan::csr_graph_t> pruned_csr_graphs_;
 
     void FindAllOnlyOneVertex();
     void RemoveInfrequentLabel(gspan::graph_t& graph, int label);
     void RemoveInfrequentVertexPairs();
-    void GSpanDFS(gspan::DFSCode const& code, std::unordered_set<int> graph_ids);
+    void CompactIds();
 
-    std::unordered_map<gspan::ExtendedEdge, std::unordered_set<int>, gspan::ExtendedEdge::Hash>
-    RightMostPathExtensions(gspan::DFSCode const& code, std::unordered_set<int> graph_ids);
-
-    std::unordered_set<gspan::ExtendedEdge, gspan::ExtendedEdge::Hash>
-    RightMostPathExtensionsFromSingle(gspan::DFSCode const& code, gspan::graph_t const& graph);
-
-    bool IsCanonical(gspan::DFSCode const& code);
+    gspan::ProjectionMap GetInitialEdges();
 
     void ExecuteInternal();
 
@@ -57,9 +58,9 @@ protected:
     void RegisterOptions();
 
 public:
-    void MineSubgraphs();
-
     GSpan();
+
+    void Launch();
 
     std::vector<gspan::FrequentSubgraph> const& GetFrequentSubgraphs() const {
         return frequent_subgraphs_;
