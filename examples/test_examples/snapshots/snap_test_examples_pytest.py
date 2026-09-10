@@ -343,6 +343,174 @@ UCC \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m holds, and we have found and re
 inconsistencies in the data.
 '''
 
+snapshots['test_example[advanced/fd_and_afd_via_ga_rfd.py-None-fd_and_afd_via_ga_rfd_output] fd_and_afd_via_ga_rfd_output'] = '''
+================================================================================
+\x1b[1;36m1. Introduction\x1b[0m
+================================================================================
+  This example is intended for users who want to dive deeper into the GA-RFD. We
+strongly recommend going through the basic GA-RFD example first to become
+familiar with the core concepts and API. Here we move on to exact FDs and
+approximate FDs, and we show how to validate AFDs using the built-in verifier
+that computes the g₁ error.
+
+  By the end you will understand the difference between the confidence reported
+by GA-RFD (based on tuple pairs) and the g₁ error from the AFD verifier (based
+on tuple pairs), and how these two measures correspond.
+
+
+================================================================================
+\x1b[1;36m2. Dataset\x1b[0m
+================================================================================
+
+\x1b[1;33mSample data (8 persons, 3 numeric attributes)\x1b[0m
++-----+-------------+-------------+----------------+
+|   # |   height_cm |   weight_kg |   shoe_size_eu |
+|-----+-------------+-------------+----------------|
+|   1 |         175 |          70 |             40 |
+|   2 |         175 |          70 |             40 |
+|   3 |         175 |          75 |             40 |
+|   4 |         176 |          71 |             41 |
+|   5 |         178 |          81 |             42 |
+|   6 |         178 |          81 |             41 |
+|   7 |         169 |          73 |             37 |
+|   8 |         170 |          62 |             39 |
++-----+-------------+-------------+----------------+
+
+  \x1b[1;32mDataset description:\x1b[0m This dataset contains information about 8
+people. Each row represents one person with three numeric attributes:
+
+  * \x1b[1mheight_cm\x1b[0m — person's height in centimeters
+  * \x1b[1mweight_kg\x1b[0m — person's weight in kilograms
+  * \x1b[1mshoe_size_eu\x1b[0m — European shoe size
+
+
+================================================================================
+\x1b[1;36m3. Exact FDs (minconf=1.0, equality metrics)\x1b[0m
+================================================================================
+  Setting minconf = 1.0 and using the default equality metric makes GA-RFD mine
+classical exact functional dependencies.
+
+
+\x1b[1;33mSample data - note duplicate weights in rows 1-2 and 5-6\x1b[0m
++-----+-------------+-------------+----------------+
+|   # |   height_cm |   weight_kg |   shoe_size_eu |
+|-----+-------------+-------------+----------------|
+\x1b[1;34m|   1 |         175 |          70 |             40 |\x1b[0m
+\x1b[1;34m|   2 |         175 |          70 |             40 |\x1b[0m
+|   3 |         175 |          75 |             40 |
+|   4 |         176 |          71 |             41 |
+\x1b[1;34m|   5 |         178 |          81 |             42 |\x1b[0m
+\x1b[1;34m|   6 |         178 |          81 |             41 |\x1b[0m
+|   7 |         169 |          73 |             37 |
+|   8 |         170 |          62 |             39 |
++-----+-------------+-------------+----------------+
+
+\x1b[1;33mFound 2 exact FD(s) with minconf=1.0\x1b[0m
+\x1b[1;33m 1. [weight_kg] -> [height_cm]           (conf=1.000, supp=0.071)\x1b[0m
+ 2. [weight_kg, shoe_size_eu] -> [height_cm]    (conf=1.000, supp=0.036)
+
+\x1b[1;33mWhy does [weight_kg] -> [height_cm] have conf=1.000 and supp=0.071?\x1b[0m
+
+  There are 8 rows, therefore 8*7/2 = 28 tuple pairs. Only two pairs share the
+same weight: (row 1, row 2) with weight 70, and (row 5, row 6) with weight 81.
+In both pairs the height is also equal (175 and 178 respectively). Hence, among
+the 2 pairs that agree on the left side, all 2 agree on the right side =>
+confidence = 2/2 = 1.0. Support = 2/28 ≈ 0.071 because the whole dependency
+holds for exactly 2 pairs.
+
+
+================================================================================
+\x1b[1;36m4. Approximate FDs (AFDs): lowering minconf\x1b[0m
+================================================================================
+  When we keep equality metrics but lower minconf below 1.0, the RFD pattern
+reduces to an Approximate Functional Dependency (AFD). Minconf = 0.6 means we
+accept dependencies that hold in at least 60% of the cases.
+
+\x1b[1;33mFound 4 AFD(s) with minconf>=0.6\x1b[0m
+ 1. [weight_kg] -> [height_cm]                  (conf=1.000, supp=0.071)
+ 2. [shoe_size_eu] -> [height_cm]               (conf=0.750, supp=0.107)
+ 3. [weight_kg, shoe_size_eu] -> [height_cm]    (conf=1.000, supp=0.036)
+\x1b[1;33m 4. [height_cm] -> [shoe_size_eu]        (conf=0.750, supp=0.107)\x1b[0m
+
+\x1b[1;33mWhy does [height_cm] -> [shoe_size_eu] have conf=0.750 and
+supp=0.107?\x1b[0m
+
+  There are 4 pairs with identical height: (1,2), (1,3), (2,3) from height 175
+and (5,6) from height 178. Among them, the first three also share the same shoe
+size (40), but the pair (5,6) has different shoe sizes (42 vs 41). Hence
+confidence = 3/4 = 0.75. Support = 3/28 ≈ 0.107 because three pairs satisfy both
+sides.
+
+
+================================================================================
+\x1b[1;36m5. Verifying AFDs with the AFD verifier (g₁ error)\x1b[0m
+================================================================================
+  An AFD can be quantified by its g₁ error: the fraction of all tuple pairs (i,
+j) that violate the dependency — that is, pairs where the left-hand side
+attributes are equal but the right-hand side differ. Desbordante provides a
+dedicated AFD verifier that computes exactly this measure. We will verify each
+AFD discovered by GA-RFD and compare the g₁ error with the confidence value.
+
+
+\x1b[1;33mVerification results:\x1b[0m
+
++------------------------------------------+--------+--------+------------+------------+
+|                   rule                   | conf   | supp   | g₁ error   | 1 - conf   |
+|------------------------------------------+--------+--------+------------+------------|
+|        [weight_kg] -> [height_cm]        | 1      | 0.071  | 0          | 0          |
+|      [shoe_size_eu] -> [height_cm]       | 0.75   | 0.107  | 0.036      | 0.25       |
+| [weight_kg, shoe_size_eu] -> [height_cm] | 1      | 0.036  | 0          | 0          |
+|      [height_cm] -> [shoe_size_eu]       | 0.75   | 0.107  | 0.036      | 0.25       |
++------------------------------------------+--------+--------+------------+------------+
+
+\x1b[1;33mObservations\x1b[0m
+
+  The table compares the confidence reported by GA-RFD with the g₁ error from
+the verifier. Confidence is defined as the fraction of pairs with equal LHS that
+also have equal RHS. The g₁ error, on the other hand, is the fraction of all
+possible pairs in the dataset that violate the rule (LHS equal, RHS different).
+
+  Because they are computed over different sets of pairs, 1 - Confidence and g₁
+error generally do not match. For example, in our 8-row dataset there are 8·7/2
+= 28 total pairs. For the dependency [height_cm] => [shoe_size_eu] only 4 pairs
+agree on height. Among those, 3 also agree on shoe size, so confidence = 3/4 =
+0.75, and 1 - confidence = 0.25. However, the number of violating pairs is just
+1 (rows 5 and 6), which gives a g₁ error of 1/28 ≈ 0.036 — exactly the value
+shown by the verifier.
+
+  This illustrates the important difference: g₁ error gives a global, pair-based
+measure of how much the data deviates from a perfect FD, while confidence tells
+us how reliable the dependency is among the tuples that actually share the LHS
+values.
+
+
+================================================================================
+\x1b[1;36mSummary\x1b[0m
+================================================================================
+  In this advanced example we:
+  * Mined exact FDs and approximate FDs using GA-RFD with equality metrics.
+  * Verified the AFDs with the AFD verifier, computing the g₁ error and
+comparing it to the confidence reported by the mining algorithm.
+  * Understood the difference: confidence is based on tuple pairs, g₁ error is
+the fraction of violating tuple pairs. Both are useful, but the verifier gives a
+direct measure of data quality at the pair level.
+
+  When using RFDs for data cleaning, you can first mine approximate dependencies
+with GA-RFD, then pass them to the verifier to obtain exact pair-level error
+statistics.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related patterns in Desbordante:
+  * FD mining     -  examples/basic/mining_fd.py
+  * AFD mining    -  examples/basic/mining_afd.py
+  * MFD verifying -  examples/basic/verifying_mfd.py
+  * MD mining     -  examples/basic/mining_md.py
+  * RFD mining    -  examples/basic/mining_ga_rfd.py
+
+'''
+
 snapshots['test_example[advanced/md_semantic_checks.py-None-md_semantic_checks_output] md_semantic_checks_output'] = '''In this example we find a meaningful MD and try to use it to enforce data integrity.
 We are going to use a dataset of flights between cities.
  id Source             From               To  Distance (km)
@@ -2906,6 +3074,403 @@ Visualizing all patterns found at the lower support threshold...\x1b[0m
 === Conclusion ===\x1b[0m
 You have now learned the fundamentals of Frequent Subgraph Mining with the gSpan algorithm.
 Feel free to experiment with different datasets and minsup values.
+'''
+
+snapshots['test_example[basic/mining_ga_rfd.py-None-mining_ga_rfd_output] mining_ga_rfd_output'] = '''
+================================================================================
+\x1b[1;36m1. Introduction\x1b[0m
+================================================================================
+  In this example we will learn the basics of RFD mining from tables. RFD
+(Relaxed Functional Dependency) is a pattern that captures the rule: 'if two
+tuples are similar on a set of attributes X, then they are likely similar on
+attribute Y'. Similarity is defined via configurable metrics and thresholds,
+making RFD more flexible than classical functional dependencies.
+
+  This pattern is similar to FD (exact Functional Dependencies), AFD
+(Approximate FDs), but differs in that it allows per-attribute similarity
+metrics and controls acceptable deviations via the min_similarity and minconf
+parameters.
+
+  This pattern is formally defined in the paper: \x1b[1mL. Caruccio, V. Deufemia,
+G. Polese. 'A genetic algorithm to discover relaxed functional dependencies from
+data'. SEBD 2017\x1b[0m. (\x1b]8;;https://ceur-ws.org/Vol-2037/paper_22.pdf\x07Read\x1b]8;;\x07)
+
+\x1b[1;33m!?\x1b[0m  It is important not to confuse RFD with the broader term
+'approximate FD'. Here RFD refers to a concrete pattern defined by Caruccio et
+al. that combines similarity metric for each column with a global coverage
+threshold.
+
+
+================================================================================
+\x1b[1;36m2. What is an RFD?\x1b[0m
+================================================================================
+\x1b[1;33m2.1. Pattern definition\x1b[0m
+A Relaxed Functional Dependency (RFD) is a specific pattern of the form
+
+  X (similarity constraints) => Y (similarity constraints)
+
+where X and Y are sets of columns. For each column we indicate a similarity
+metric and we set a global coverage threshold which indicates the fraction of
+tuple pairs for which the rule holds (confidence).
+
+Informally, the dependency means:
+  "If two tuples are similar on X, then they are likely similar on Y."
+
+* Using equality metrics and setting confidence = 1.0 gives us exact FDs.
+* Lowering confidence gives us AFDs.
+
+\x1b[1;33m2.2. Confidence and support\x1b[0m
+Two numbers describe an RFD.
+
+  \x1b[1mConfidence\x1b[0m tells us how reliable the rule is. It is the fraction of
+pairs that are similar on X and Y, divided by the number of pairs that are
+similar on X. For example, if confidence = 0.9, then among all pairs that are
+similar on X, 90% are also similar on Y.
+
+  \x1b[1mSupport\x1b[0m is the fraction of all tuple pairs that are similar on
+\x1b[1mboth X and Y\x1b[0m. It tells us how often the entire dependency holds. If
+support = 0.5, half of all pairs satisfy the rule.
+
+
+================================================================================
+\x1b[1;36m3. Dataset\x1b[0m
+================================================================================
+
+\x1b[1;33mSample data (7 persons, 3 numeric attributes)\x1b[0m
++-----+-------------+-------------+----------------+
+|   # |   height_cm |   weight_kg |   shoe_size_eu |
+|-----+-------------+-------------+----------------|
+|   1 |         175 |          70 |             40 |
+|   2 |         175 |          75 |             39 |
+|   3 |         175 |          69 |             40 |
+|   4 |         176 |          71 |             40 |
+|   5 |         178 |          81 |             41 |
+|   6 |         169 |          73 |             37 |
+|   7 |         170 |          62 |             39 |
++-----+-------------+-------------+----------------+
+
+  \x1b[1;32mDataset description:\x1b[0m This dataset contains information about 7
+people. Each row represents one person with three numeric attributes:
+
+  * \x1b[1mheight_cm\x1b[0m    — person's height in centimeters
+  * \x1b[1mweight_kg\x1b[0m    — person's weight in kilograms
+  * \x1b[1mshoe_size_eu\x1b[0m — European shoe size
+
+  \x1b[1;32mHypothesis:\x1b[0m we assume that if people have similar height and
+weight, then they will also have similar shoe sizes. We will test this
+hypothesis using the GA-RFD algorithm.
+
+  In terms of RFD, we expect to discover a dependency of the form
+\x1b[1;32m[height_cm, weight_kg] -> [shoe_size_eu]\x1b[0m with high confidence.
+
+
+================================================================================
+\x1b[1;36m4. GA-RFD algorithm and key parameters\x1b[0m
+================================================================================
+  GA-RFD (Genetic Algorithm for Relaxed Functional Dependencies) evolves a
+population of candidate RFDs. Each individual encodes a left-hand side (a set of
+attributes) and a right-hand side (a single attribute). The fitness of an
+individual is the confidence of the candidate.
+
+The main parameters you can set:
+
+  population_size       - number of individuals (default 1024)
+  max_generations       - number of iterations (default 32)
+  crossover_probability - chance of combining two parents (in [0,1], 
+                          default 1.0)
+  mutation_probability  - chance of random change (in [0,1], default 1.0)
+  minconf               - minimum confidence (in [0,1], default 1.0)
+  min_similarity        - similarity threshold(s) for relaxed comparisons.
+                          Accepts a single value (applied to all columns)
+                          or a list of values (one per column). Values 
+                          must be in [0,1]. (default {1.0, 1.0, ...})
+  seed                  - seed for reproducible results (default 123)
+  cache_size            - maximum number of cached comparisons, the bigger 
+                          the faster the algorithm will be (default 10000)
+
+  Note: the paper that introduced GA-RFD evaluates the probabilities 0.85/0.3
+for crossover/mutation; Desbordante defaults to 1.0/1.0. Tune them for your
+data.
+
+  The algorithm returns every candidate whose confidence is at least minconf,
+without pruning subsumed rules: a minimal cover is not computed. If you need a
+minimal cover, apply post-processing on the discovered RFDs.
+
+  Because GA-RFD uses randomness, always set the seed if you need reproducible
+results.
+
+\x1b[1;33mWhere are similarity metrics defined?\x1b[0m
+  Similarity metrics are set using the \x1b[1mset_metrics()\x1b[0m method, which takes
+a list of metric functions (one per column). For example:
+
+  \x1b[1malgo.set_metrics([abs_diff, abs_diff, equality])\x1b[0m
+
+  This assigns absolute difference metric to the first two columns and equality
+metric to the third column.
+
+
+================================================================================
+\x1b[1;36m5. Built-in similarity metrics\x1b[0m
+================================================================================
+
+Desbordante provides four ready-to-use metrics:
+
+  \x1b[1mabs_diff_metric()\x1b[0m          - for numeric attributes: 
+                               1 - |x-y| / max(|x|,|y|), clamped to >= 0;
+  \x1b[1mabs_threshold_metric(diff)\x1b[0m - for numeric attributes: 
+                               1 if |x-y| <= diff, else 0;
+  \x1b[1mequality_metric()\x1b[0m          - returns 1 if the two values are exactly equal, 
+                               else 0;
+  \x1b[1mlevenshtein_metric()\x1b[0m       - for strings: 
+                               1 - edit_distance(x,y) / max(len(x), len(y)).
+
+You can also supply any Python function f(a,b)->float as a custom metric.
+
+
+================================================================================
+\x1b[1;36m6. Relaxed FDs (RFDs): using abs_diff and min_similarity=[0.95]\x1b[0m
+================================================================================
+\x1b[1;33mExplanation\x1b[0m: Now we allow 'similar' rather than 'equal' values by
+setting min_similarity = 0.95 (values within about 5% are considered similar)
+and using abs_diff_metric() for all three columns.
+
+On this example:
+  A tuple pair (t1,t2) satisfies the antecedent if, for each X-attribute,
+abs_diff(t1[A], t2[A]) >= 0.95.
+
++-----+-------------+-------------+----------------+
+|   # |   height_cm |   weight_kg |   shoe_size_eu |
+|-----+-------------+-------------+----------------|
+|   1 |         175 |          70 |             40 |
+|   2 |         175 |          75 |             39 |
+|   3 |         175 |          69 |             40 |
+|   4 |         176 |          71 |             40 |
+|   5 |         178 |          81 |             41 |
+|   6 |         169 |          73 |             37 |
+|   7 |         170 |          62 |             39 |
++-----+-------------+-------------+----------------+
+
+\x1b[1;33mFound 4 RFD(s) with min_similarity=[0.95], minconf>=0.7\x1b[0m
+ 1. [weight_kg] -> [height_cm]                  (conf=1.000, supp=0.286)
+ 2. [shoe_size_eu] -> [height_cm]               (conf=1.000, supp=0.714)
+ 3. [weight_kg, shoe_size_eu] -> [height_cm]    (conf=1.000, supp=0.143)
+ 4. [height_cm] -> [shoe_size_eu]               (conf=0.750, supp=0.714)
+
+  The search finds 4 RFDs: the height column dominates because its pairs are the
+most similar under the relative 5% threshold. The natural rule
+\x1b[1;33m[height_cm, weight_kg] -> [shoe_size_eu]\x1b[0m is NOT among them: jointly
+similar (height, weight) pairs are rare, and only 3 of the 6 such pairs also
+have similar shoe sizes, so its confidence is 0.5, below minconf=0.7. In Section
+7 we will recover this rule using stricter absolute thresholds.
+
+
+================================================================================
+\x1b[1;36m7. Verifying hypothesis\x1b[0m
+================================================================================
+  \x1b[1;32mRecall our hypothesis from Section 3:\x1b[0m we expect that similar height
+and weight imply similar shoe size. The absolute metric lets us define 'similar'
+in concrete, measurable terms.
+
+  \x1b[1;33mTo check it we set the following attribute difference thresholds:\x1b[0m
+height <= 1 cm, weight <= 10 kg, shoe size <= 1. This models \x1b[1m'people of
+practically the same height and roughly the same weight should have almost the
+same shoe size'\x1b[0m. Since the used abs_threshold_metric returns 0 or 1, we set
+min_similarity=1.0 to accept only exact matches according to these thresholds.
+
++-----+-------------+-------------+----------------+
+|   # |   height_cm |   weight_kg |   shoe_size_eu |
+|-----+-------------+-------------+----------------|
+|   1 |         175 |          70 |             40 |
+|   2 |         175 |          75 |             39 |
+|   3 |         175 |          69 |             40 |
+|   4 |         176 |          71 |             40 |
+|   5 |         178 |          81 |             41 |
+|   6 |         169 |          73 |             37 |
+|   7 |         170 |          62 |             39 |
++-----+-------------+-------------+----------------+
+
+\x1b[1;33mRFDs with absolute thresholds (minconf=0.5)\x1b[0m
+ 1. [weight_kg, shoe_size_eu] -> [height_cm]           (conf=0.600, supp=0.286)
+ 2. [height_cm] -> [weight_kg]                         (conf=0.857, supp=0.286)
+ 3. [shoe_size_eu] -> [weight_kg]                      (conf=0.769, supp=0.476)
+ 4. [height_cm, shoe_size_eu] -> [weight_kg]           (conf=1.000, supp=0.286)
+ 5. [height_cm] -> [shoe_size_eu]                      (conf=0.857, supp=0.286)
+ 6. [weight_kg] -> [shoe_size_eu]                      (conf=0.625, supp=0.476)
+\x1b[1;32m 7. [height_cm, weight_kg] -> [shoe_size_eu]    (conf=1.000, supp=0.286)\x1b[0m
+
+  The key dependency \x1b[1;32m[height_cm, weight_kg] -> [shoe_size_eu]\x1b[0m has
+confidence=1.000 and support=0.286. It tells us: among pairs that differ by at
+most 1 cm in height, 10 kg in weight, the shoe size <= 1. This is a clear,
+actionable rule for data quality or prediction.
+
+  \x1b[1;32mThis confirms our hypothesis:\x1b[0m people with very similar height and
+weight (according to our chosen absolute thresholds) indeed have almost the same
+shoe size. The discovered RFD gives a precise, quantitative formulation of that
+intuitive relationship.
+
+  Because the thresholds are strict, only a few pairs have similar lhs and
+similar rhs - hence the support is low, but the confidence can still be high.
+The absolute metric makes the similarity definition completely transparent.
+
+================================================================================
+\x1b[1;36m8. Custom metric: Jaccard on 2-grams (with typos)\x1b[0m
+================================================================================
+You can pass any Python function f(a,b)->float as a metric. Here we use the
+Jaccard coefficient on sets of character 2-grams.
+
+  Jaccard(s1,s2) =|grams(s1) INTERSECT grams(s2)| / |grams(s1) UNION grams(s2)|
+
+This is robust to small typos: for example, 'Le Petit Cafe' and 'La Petite Cafe'
+share many 2-grams, so their Jaccard similarity is > 0.
+
+
+\x1b[1;33mString dataset with a typo:\x1b[0m
++-----+-----------------+-----------+------------+
+|   # | restaurant      | cuisine   | district   |
+|-----+-----------------+-----------+------------|
+|   1 | Sakura          | Japanese  | Downtown   |
+|   2 | Sakura Express  | Japanese  | Downtown   |
+|   3 | Tokyo Ramen     | Japanese  | Downtown   |
+|   4 | Bella Napoli    | Italian   | Midtown    |
+|   5 | Bella Pizza     | Italian   | Midtown    |
+|   6 | El Toro         | Mexican   | Uptown     |
+|   7 | El Toro Express | Mexican   | Uptown     |
+|   8 | Golden Dragon   | Chinese   | Downtown   |
+|   9 | Le Petit Cafe   | French    | Midtown    |
+|  10 | Le Petit Caf    | Italian   | Uptown     |
+|  11 | LePetitCafe     | Italian   | Uptown     |
++-----+-----------------+-----------+------------+
+
+\x1b[1;33mRFDs with exact equality on all columns\x1b[0m
+ 1. [district] -> [cuisine]    (conf=0.400, supp=0.109)
+ 2. [cuisine] -> [district]    (conf=0.600, supp=0.109)
+
+  Without fuzzy matching, the only dependencies found involve cuisine and
+district because they contain exact duplicates. On the other hand, restaurant
+names, which are all unique due to typos, never appear in any found RFD.
+
+\x1b[1;33mRFDs with Jaccard on restaurant (min_similarity=0.3)\x1b[0m
+ 1. [cuisine] -> [restaurant]              (conf=0.400, supp=0.073)
+ 2. [district] -> [restaurant]             (conf=0.267, supp=0.073)
+ 3. [cuisine, district] -> [restaurant]    (conf=0.667, supp=0.073)
+\x1b[1;32m 4. [restaurant] -> [cuisine]       (conf=0.571, supp=0.073)\x1b[0m
+ 5. [district] -> [cuisine]                (conf=0.400, supp=0.109)
+ 6. [restaurant, district] -> [cuisine]    (conf=1.000, supp=0.073)
+ 7. [restaurant] -> [district]             (conf=0.571, supp=0.073)
+ 8. [cuisine] -> [district]                (conf=0.600, supp=0.109)
+ 9. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.073)
+
+  Now restaurant appears in the dependencies! For instance, \x1b[1;32m[restaurant]
+-> [cuisine]\x1b[0m tells us that restaurants with similar names tend to serve the
+same cuisine, even when the names contain small typos. This rule was invisible
+with exact equality. Jaccard on 2-grams successfully absorbs spelling variations
+and keeps the dependency alive.
+
+  Support is low because very few restaurant-name pairs reach the 0.3 Jaccard
+threshold, but confidence is well above random, indicating a real signal.
+
+
+================================================================================
+\x1b[1;36m9. Error detection and data cleaning (single dirty dataset)\x1b[0m
+================================================================================
+
+\x1b[1;33mClean dataset:\x1b[0m
++-----+-----------------+-----------+------------+
+|   # | restaurant      | cuisine   | district   |
+|-----+-----------------+-----------+------------|
+|   1 | Sakura          | Japanese  | Downtown   |
+|   2 | Sakura Express  | Japanese  | Downtown   |
+|   3 | Tokyo Ramen     | Japanese  | Downtown   |
+|   4 | Bella Napoli    | Italian   | Midtown    |
+|   5 | Bella Pizza     | Italian   | Midtown    |
+|   6 | El Toro         | Mexican   | Uptown     |
+|   7 | El Toro Express | Mexican   | Uptown     |
+|   8 | Golden Dragon   | Chinese   | Downtown   |
+|   9 | Le Petit Cafe   | French    | Midtown    |
++-----+-----------------+-----------+------------+
+
+\x1b[1;33mFound 7 RFD(s) on clean data\x1b[0m
+ 1. [cuisine] -> [restaurant]              (conf=0.600, supp=0.083)
+ 2. [cuisine, district] -> [restaurant]    (conf=0.600, supp=0.083)
+ 3. [restaurant] -> [cuisine]              (conf=0.750, supp=0.083)
+ 4. [restaurant, district] -> [cuisine]    (conf=1.000, supp=0.083)
+ 5. [restaurant] -> [district]             (conf=0.750, supp=0.083)
+\x1b[1;33m 6. [cuisine] -> [district]         (conf=1.000, supp=0.139)\x1b[0m
+ 7. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.083)
+
+
+\x1b[1;33mDirty dataset:\x1b[0m
++-----+-----------------+-----------+------------+
+|   # | restaurant      | cuisine   | district   |
+|-----+-----------------+-----------+------------|
+|   1 | Sakura          | Japanese  | Downtown   |
+|   2 | Sakura Express  | Japanese  | Downtown   |
+|   3 | Tokyo Ramen     | Japanese  | Downtown   |
+|   4 | Bella Napoli    | Italian   | Midtown    |
+|   5 | Bella Pizza     | Italian   | Midtown    |
+|   6 | El Toro         | Mexican   | Uptown     |
+|   7 | El Toro Express | Mexican   | Uptown     |
+|   8 | Golden Dragon   | Chinese   | Downtown   |
+|   9 | Le Petit Cafe   | French    | Midtown    |
+|  10 | Le Petit Caf    | Italian   | Uptown     |
+|  11 | LePetitCafe     | Italian   | Uptown     |
++-----+-----------------+-----------+------------+
+
+\x1b[1;33mFound 4 RFD(s) on dirty data\x1b[0m
+ 1. [cuisine, district] -> [restaurant]    (conf=0.667, supp=0.073)
+ 2. [restaurant, district] -> [cuisine]    (conf=1.000, supp=0.073)
+\x1b[1;33m 3. [cuisine] -> [district]         (conf=0.600, supp=0.109)\x1b[0m
+ 4. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.073)
+
+\x1b[1;33mWhy do the RFD sets differ, and how to find out if there is an error?\x1b[0m
+
+  On clean data, [cuisine] -> [district] holds with confidence 1.0 because every
+cuisine appears in only one district. After adding rows 10-11 (Italian in
+Uptown), the confidence drops to 0.6. This change signals a potential
+inconsistency.
+
+
+================================================================================
+\x1b[1;36m10. A note on reproducibility\x1b[0m
+================================================================================
+  GA-RFD uses randomness for initialization and evolution. To get the same
+results across runs, always set the seed parameter: algo.execute(seed=42).
+Without a fixed seed, two runs with the same parameters may return slightly
+different sets of RFDs.
+
+
+================================================================================
+\x1b[1;36mSummary\x1b[0m
+================================================================================
+  We have seen how GA-RFD can discover exact FDs, approximate FDs, and relaxed
+FDs by adjusting the similarity threshold min_similarity and the confidence
+minconf. The choice of similarity metric is crucial: equality gives strict
+comparisons, while absolute difference and Levenshtein allow fuzzy matching.
+
+  We also demonstrated how to define a custom metric using Python functions and
+how to use RFDs for error detection. In practice, you would mine RFDs on clean
+data, then score new records: low similarity on the right-hand side despite high
+similarity on the left-hand side flags potential issues.
+
+  When applying GA-RFD to your own data, remember to tune the population size
+and the number of generations for your dataset size. Larger populations and more
+generations improve recall but increase runtime. Always set a fixed seed for
+reproducible experiments.
+
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related patterns in Desbordante:
+  * FD mining                -  examples/basic/mining_fd.py
+  * AFD mining               -  examples/basic/mining_afd.py
+  * MFD verifying            -  examples/basic/verifying_mfd.py
+  * MD mining                -  examples/basic/mining_md.py
+  * Mining FD/AFD via GA-RFD -  examples/advanced/fd_and_afd_via_ga_rfd.py
+
+
+\x1b[1;32mNext: try GA-RFD on your own dataset!\x1b[0m
+
 '''
 
 snapshots['test_example[basic/mining_gfd/mining_gfd1.py-None-mining_gfd1_output] mining_gfd1_output'] = '''Our profiler supports two tasks related to graph functional dependencies (GFDs): validation and mining (discovery). In this example, we will focus on the mining task (for validation, we refer the reader to another example). The mining algorithm used in our profiler is described in the article "Discovering Graph Functional Dependencies" by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Pinge, presented at SIGMOD \'18.
@@ -6640,6 +7205,159 @@ Third violating cluster:
 
 '''
 
+snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
+(SDs) using the Desbordante library. Algorithm is based on the
+article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
+and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB
+Endow. 2, 1 (August 2009), 574–585. 
+
+
+An SD expresses a relationship between ordered attributes,
+written as X -> [g1, g2] Y. This means that when the dataset
+is sorted by X, the difference between the Y-values of any
+two consecutive records must fall within the specified
+interval [g1, g2].
+
+Validation checks whether a user-specified SD holds for a given
+dataset, utilizing an edit-distance based confidence metric. 
+Confidence is determined by the minimum number of operations
+(OPS) — record insertions or deletions — required to make the
+sequence completely valid.
+
+Confidence = (N - OPS) / N, where N is the number of rows in the
+dataset. If confidence = 1, the dependency is a perfect fit for 
+the pattern with no outliers or exceptions. Confidence can't be
+exactly 0, because in the worst case we need to delete all but 
+one record so the SD holds; thus, confidence is at least 1/N.
+
+Desbordante detects SD violations, pinpointing exactly which
+rows must be deleted and where virtual records should be
+inserted to restore the correct sequence. Right now, X and 
+Y can be represented by a single column each; however, it
+can be expanded in the future.
+
+In this example, let's look at a dataset containing network
+performance statistics. Specifically, network polls probed
+periodically.
+
+Let's say we want to check whether the data collector probes
+the network routers at the expected frequency, e.g., every 9
+to 11 seconds.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         4    70
+4         5    80
+5         6    90
+6         7   100
+7         8   110
+8         9   120
+9        10   130
+10       11   140
+11       12   150
+12       13   152
+13       14   154
+14       15   240
+15       16   250
+16       17   260
+17       18   270
+18       19   280
+19       20   290
+20       21   300
+21       22   310
+22       23   320
+23       24   330
+24       25   340
+25       26   350
+26       27   360
+27       28   370
+28       29   380
+29       30   390
+30       31   890
+--- Original Data Results ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;31mFalse\x1b[0m
+Operations needed (OPS): 14
+Confidence: 0.5484
+
+\x1b[1;34m--- Detected Violations ---\x1b[0m
+  \x1b[1;43m#1 INSERTION:\x1b[0m Gap between row 2 and 3.
+       Values: 30.0 -> 70.0. Number of required insertions: from 3 to 3
+  \x1b[1;31m#2 DELETION:\x1b[0m Row index 12 must be deleted.
+  \x1b[1;31m#3 DELETION:\x1b[0m Row index 13 must be deleted.
+  \x1b[1;43m#4 INSERTION:\x1b[0m Gap between row 11 and 14.
+       Values: 150.0 -> 240.0. Number of required insertions: from 8 to 9
+  \x1b[1;31m#5 DELETION:\x1b[0m Row index 30 must be deleted.
+
+
+We can see that the rule is violated in several places.
+This may indicate missing data due to an unresponsive router,
+or spurious measurements.
+
+Let's run a simple python function to automatically fix the 
+dataset by deleting extra records and inserting missing ones.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         3    40
+4         3    50
+5         3    60
+6         4    70
+7         5    80
+8         6    90
+9         7   100
+10        8   110
+11        9   120
+12       10   130
+13       11   140
+14       12   150
+15       12   160
+16       12   170
+17       12   180
+18       12   190
+19       12   200
+20       12   210
+21       12   220
+22       12   230
+23       15   240
+24       16   250
+25       17   260
+26       18   270
+27       19   280
+28       20   290
+29       21   300
+30       22   310
+31       23   320
+32       24   330
+33       25   340
+34       26   350
+35       27   360
+36       28   370
+37       29   380
+38       30   390
+
+And now let's verify the fixed data:
+
+--- Verification of Fixed Data ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;32mTrue\x1b[0m
+Operations needed (OPS): 0
+Confidence: 1.0000
+
+Note: When inserting missing records to bridge the time gaps,
+we simply duplicate the 'PollNum' of the preceding valid
+record. This choice keeps the fix local and prevents the need
+to shift and rewrite all subsequent 'PollNum' values in the
+entire table.
+
+In conclusion, we've learned about SDs and how to verify them in
+your own datasets. Now, let's experiment with your own data!
+'''
+
 snapshots['test_example[basic/verifying_ucc.py-None-verifying_ucc_output] verifying_ucc_output'] = '''Checking whether (First Name) UCC holds
 UCC does not hold
 Total number of rows violating UCC: 2
@@ -6942,158 +7660,4 @@ Typo candidates and context:
                                      id       worker_name supervisor_surname     workshop salary                 job_post
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
-'''
-
-
-snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
-(SDs) using the Desbordante library. Algorithm is based on the
-article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
-and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB
-Endow. 2, 1 (August 2009), 574–585. 
-
-
-An SD expresses a relationship between ordered attributes,
-written as X -> [g1, g2] Y. This means that when the dataset
-is sorted by X, the difference between the Y-values of any
-two consecutive records must fall within the specified
-interval [g1, g2].
-
-Validation checks whether a user-specified SD holds for a given
-dataset, utilizing an edit-distance based confidence metric. 
-Confidence is determined by the minimum number of operations
-(OPS) — record insertions or deletions — required to make the
-sequence completely valid.
-
-Confidence = (N - OPS) / N, where N is the number of rows in the
-dataset. If confidence = 1, the dependency is a perfect fit for 
-the pattern with no outliers or exceptions. Confidence can't be
-exactly 0, because in the worst case we need to delete all but 
-one record so the SD holds; thus, confidence is at least 1/N.
-
-Desbordante detects SD violations, pinpointing exactly which
-rows must be deleted and where virtual records should be
-inserted to restore the correct sequence. Right now, X and 
-Y can be represented by a single column each; however, it
-can be expanded in the future.
-
-In this example, let's look at a dataset containing network
-performance statistics. Specifically, network polls probed
-periodically.
-
-Let's say we want to check whether the data collector probes
-the network routers at the expected frequency, e.g., every 9
-to 11 seconds.
-
-    PollNum  Time
-0         1    10
-1         2    20
-2         3    30
-3         4    70
-4         5    80
-5         6    90
-6         7   100
-7         8   110
-8         9   120
-9        10   130
-10       11   140
-11       12   150
-12       13   152
-13       14   154
-14       15   240
-15       16   250
-16       17   260
-17       18   270
-18       19   280
-19       20   290
-20       21   300
-21       22   310
-22       23   320
-23       24   330
-24       25   340
-25       26   350
-26       27   360
-27       28   370
-28       29   380
-29       30   390
-30       31   890
---- Original Data Results ---
-\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
-SD strictly holds: \x1b[1;31mFalse\x1b[0m
-Operations needed (OPS): 14
-Confidence: 0.5484
-
-\x1b[1;34m--- Detected Violations ---\x1b[0m
-  \x1b[1;43m#1 INSERTION:\x1b[0m Gap between row 2 and 3.
-       Values: 30.0 -> 70.0. Number of required insertions: from 3 to 3
-  \x1b[1;31m#2 DELETION:\x1b[0m Row index 12 must be deleted.
-  \x1b[1;31m#3 DELETION:\x1b[0m Row index 13 must be deleted.
-  \x1b[1;43m#4 INSERTION:\x1b[0m Gap between row 11 and 14.
-       Values: 150.0 -> 240.0. Number of required insertions: from 8 to 9
-  \x1b[1;31m#5 DELETION:\x1b[0m Row index 30 must be deleted.
-
-
-We can see that the rule is violated in several places.
-This may indicate missing data due to an unresponsive router,
-or spurious measurements.
-
-Let's run a simple python function to automatically fix the 
-dataset by deleting extra records and inserting missing ones.
-
-    PollNum  Time
-0         1    10
-1         2    20
-2         3    30
-3         3    40
-4         3    50
-5         3    60
-6         4    70
-7         5    80
-8         6    90
-9         7   100
-10        8   110
-11        9   120
-12       10   130
-13       11   140
-14       12   150
-15       12   160
-16       12   170
-17       12   180
-18       12   190
-19       12   200
-20       12   210
-21       12   220
-22       12   230
-23       15   240
-24       16   250
-25       17   260
-26       18   270
-27       19   280
-28       20   290
-29       21   300
-30       22   310
-31       23   320
-32       24   330
-33       25   340
-34       26   350
-35       27   360
-36       28   370
-37       29   380
-38       30   390
-
-And now let's verify the fixed data:
-
---- Verification of Fixed Data ---
-\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
-SD strictly holds: \x1b[1;32mTrue\x1b[0m
-Operations needed (OPS): 0
-Confidence: 1.0000
-
-Note: When inserting missing records to bridge the time gaps,
-we simply duplicate the 'PollNum' of the preceding valid
-record. This choice keeps the fix local and prevents the need
-to shift and rewrite all subsequent 'PollNum' values in the
-entire table.
-
-In conclusion, we've learned about SDs and how to verify them in
-your own datasets. Now, let's experiment with your own data!
 '''
