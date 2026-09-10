@@ -8,6 +8,7 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/config/names_and_descriptions.h"
+#include "core/config/thread_number/type.h"
 #include "types/frequent_subgraph.h"
 #include "types/graph.h"
 #include "types/history.h"
@@ -34,6 +35,8 @@ protected:
 
     std::filesystem::path graph_database_path_;
     std::filesystem::path output_path_;
+
+    config::ThreadNumType threads_num_;
 
     std::vector<gspan::graph_t> raw_dataset_;
     std::vector<gspan::graph_t> pruned_graphs_;

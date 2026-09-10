@@ -7,6 +7,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include "core/config/option_using.h"
+#include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
 #include "miner/subgraph_miner.h"
 #include "parser/graph_parser.h"
@@ -20,13 +21,13 @@ GSpan::GSpan() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::names::kGraphDatabase, config::names::kGSpanMinimumSupport,
                           config::names::kOutputSingleVertices, config::names::kMaxNumberOfEdges,
-                          config::names::kGSpanOutputPath});
+                          config::names::kGSpanOutputPath, config::names::kThreads});
 }
 
 void GSpan::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable(
-            {kGSpanMinimumSupport, kOutputSingleVertices, kMaxNumberOfEdges, kGSpanOutputPath});
+    MakeOptionsAvailable({kGSpanMinimumSupport, kOutputSingleVertices, kMaxNumberOfEdges,
+                          kGSpanOutputPath, kThreads});
 }
 
 void GSpan::RegisterOptions() {
@@ -57,6 +58,7 @@ void GSpan::RegisterOptions() {
 
     RegisterOption(config::Option{&output_path_, kGSpanOutputPath, kDGSpanOutputPath,
                                   std::filesystem::path{}});
+    RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
 void GSpan::LoadDataInternal() {
@@ -104,12 +106,9 @@ void GSpan::Launch() {
 
     ProjectionMap embeddings = GetInitialEdges();
 
-    size_t num_workers = std::thread::hardware_concurrency();
-    if (num_workers == 0) num_workers = 1;
-
-    ThreadPool pool(num_workers);
+    ThreadPool pool(threads_num_);
     std::vector<std::unique_ptr<SubgraphMiner>> miners;
-    for (size_t i = 0; i < num_workers + 1; ++i) {
+    for (size_t i = 0; i < threads_num_ + 1; ++i) {
         auto miner =
                 std::make_unique<SubgraphMiner>(pruned_csr_graphs_, min_sup_, max_number_of_edges_);
         miner->SetParallelContext(&pool, &miners, i);
@@ -122,7 +121,7 @@ void GSpan::Launch() {
                    pending);
     }
 
-    pool.Wait(pending, num_workers);
+    pool.Wait(pending, threads_num_);
 
     for (auto& miner : miners) {
         for (auto& fs : miner->GetFrequentSubgraphs()) {

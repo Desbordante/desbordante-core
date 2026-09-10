@@ -14,6 +14,7 @@
 #include "core/algorithms/fsm/gspan/types/dfscode.h"
 #include "core/algorithms/fsm/gspan/types/extended_edge.h"
 #include "core/config/names.h"
+#include "core/config/thread_number/type.h"
 #include "tests/common/csv_config_util.h"
 
 namespace tests {
@@ -31,13 +32,15 @@ std::filesystem::path const kGSpanLargeGraph = kGraphDataDir / "gspan_mutag_grap
 
 algos::StdParamsMap CreateGSpanParams(std::filesystem::path const& graph_path, double min_support,
                                       bool output_single_vertices = true, int max_edges = INT_MAX,
-                                      bool output_graph_ids = true) {
+                                      bool output_graph_ids = true,
+                                      config::ThreadNumType threads_num = 0) {
     using namespace config::names;
     return {{kGraphDatabase, graph_path},
             {kGSpanMinimumSupport, min_support},
             {kOutputSingleVertices, output_single_vertices},
             {kMaxNumberOfEdges, max_edges},
-            {kOutputGraphIds, output_graph_ids}};
+            {kOutputGraphIds, output_graph_ids},
+            {kThreads, threads_num}};
 }
 
 }  // namespace
