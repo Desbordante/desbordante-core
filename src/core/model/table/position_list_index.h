@@ -50,6 +50,7 @@ public:
                       double inverted_entropy = 0, double gini_impurity = 0);
 
     static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int> const& data);
+    static std::unique_ptr<PositionListIndex> MakeSuperkeyPLI(std::size_t num_rows);
 
     static std::unordered_map<int, unsigned> CreateFrequencies(
             Cluster const& cluster, std::vector<int> const& probing_table);
