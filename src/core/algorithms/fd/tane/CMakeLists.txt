@@ -1,7 +1,7 @@
 # --- TaneCommon ---
 set(NAME fd.tane.common)
 desbordante_add_lib(NAME OBJECT)
-target_sources(${NAME} PRIVATE model/lattice_level.cpp model/lattice_vertex.cpp tane_common.cpp)
+target_sources(${NAME} PRIVATE tane_common.cpp tane_common_initial.cpp)
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::afd ${DESBORDANTE_PREFIX}::afd::pli
