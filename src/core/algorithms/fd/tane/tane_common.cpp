@@ -96,7 +96,7 @@ bool TaneCommon::Prune(LevelAttributeSetsData& level) {
     for (auto it = level.begin(); it != level.end();) {
         auto& [column_combination, info] = *it;
         assert(info.rhs_candidates.any());
-        if (info.IsSuperkey()) {
+        if (info.IsMarkedSuperkey()) {
             ++it;
             continue;
         }
@@ -184,7 +184,7 @@ bool TaneCommon::ComputeDependencies(LevelAttributeSetsData& level,
         auto& [column_combination, info] = *it;
         auto& [rhs_candidates, pli] = info;
         assert(rhs_candidates.any());
-        if (info.IsSuperkey()) {
+        if (info.IsMarkedSuperkey()) {
             ++it;
             continue;
         }
@@ -204,6 +204,8 @@ bool TaneCommon::ComputeDependencies(LevelAttributeSetsData& level,
             /* COMPUTE_DEPENDENCIES, 5' */
             lhs_attribute_mask.reset(rhs_index);
             model::PLI const* lhs_pli = prev_level.find(lhs_attribute_mask)->second.pli.get();
+            // LHS is a superkey from the previous level, already processed.
+            if (lhs_pli == nullptr) return;
             model::PLI const* rhs_pli = relation_->GetColumnData(rhs_index).GetPositionListIndex();
             config::ErrorType error = CalculateFdError(lhs_pli, rhs_pli, pli.get());
             if (error > max_error_) {
@@ -279,6 +281,7 @@ auto TaneCommon::GenerateNextLevel(LevelAttributeSetsData const& level) -> Level
         for (auto outer_it = prev_level_combinations.begin(),
                   end_it = std::prev(prev_level_combinations.end());
              outer_it != end_it; ++outer_it) {
+            assert(outer_it->info->pli == nullptr || !outer_it->info->pli->AllValuesAreUnique());
             /* GENERATE_NEXT_LEVEL, 4 */
             new_combination.set(outer_it->non_suffix_column);
             for (auto inner_it = std::next(outer_it); inner_it != prev_level_combinations.end();
@@ -291,7 +294,12 @@ auto TaneCommon::GenerateNextLevel(LevelAttributeSetsData const& level) -> Level
                 /* COMPUTE_DEPENDENCIES, 2 */
                 boost::dynamic_bitset<> next_candidates =
                         inner_it->info->rhs_candidates & outer_it->info->rhs_candidates;
-                bool is_superkey = inner_it->info->IsSuperkey() || outer_it->info->IsSuperkey();
+                assert(inner_it->info->pli == nullptr ||
+                       !inner_it->info->pli->AllValuesAreUnique());
+                bool any_child_superkey =
+                        outer_it->info->IsMarkedSuperkey() || inner_it->info->IsMarkedSuperkey();
+                bool all_children_superkey =
+                        outer_it->info->IsMarkedSuperkey() && inner_it->info->IsMarkedSuperkey();
 
                 bool in_next_level = true;
                 // No point in checking anything earlier, we already know they exist because we got
@@ -308,12 +316,27 @@ auto TaneCommon::GenerateNextLevel(LevelAttributeSetsData const& level) -> Level
                         in_next_level = false;
                         break;
                     }
-                    if (it->second.IsSuperkey()) is_superkey = true;
+                    if (it->second.IsMarkedSuperkey()) {
+                        any_child_superkey = true;
+                    } else {
+                        all_children_superkey = false;
+                    }
                 }
                 if (in_next_level) {
-                    std::unique_ptr<model::PLI> pli =
-                            is_superkey ? nullptr
-                                        : outer_it->info->pli->Intersect(inner_it->info->pli.get());
+                    std::unique_ptr<model::PLI> pli;
+                    if (max_error_ == 0.0) {
+                        pli = any_child_superkey
+                                      ? nullptr
+                                      : outer_it->info->pli->Intersect(inner_it->info->pli.get());
+                    } else {
+                        if (all_children_superkey) {
+                            pli = nullptr;
+                        } else if (any_child_superkey) {
+                            pli = model::PLI::MakeSuperkeyPLI(relation_->GetNumRows());
+                        } else {
+                            pli = outer_it->info->pli->Intersect(inner_it->info->pli.get());
+                        }
+                    }
                     /* GENERATE_NEXT_LEVEL, 6 */
                     next_level.try_emplace(new_combination, next_candidates, std::move(pli));
                 }

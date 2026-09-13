@@ -166,6 +166,8 @@ void TaneCommon::ComputeDependenciesLevel2KeysNotZeroaryAfdRhs(
         std::vector<model::Index> const& non_key_attrs_0afd,
         std::vector<model::Index> const& key_attrs_0afd,
         boost::dynamic_bitset<>& superkey_rhs_candidates, LevelAttributeSetsData& current_level) {
+    RelationalSchema const* schema = relation_->GetSchema();
+
     for (auto it = key_attrs_not_0afd.begin(); it != key_attrs_not_0afd.end();) {
         model::Index const key_attr = *it++;
         auto add_superkey = [&](model::Index other_attr) {
@@ -177,13 +179,55 @@ void TaneCommon::ComputeDependenciesLevel2KeysNotZeroaryAfdRhs(
         superkey_rhs_candidates.set(key_attr);
         // Case 1
         for (model::Index i : non_key_attrs_not_0afd) {
-            add_superkey(i);
+            if (max_error_ == 0.0) {
+                add_superkey(i);
+                continue;
+            }
+            model::PLI const* pli_other = relation_->GetColumnData(i).GetPositionListIndex();
+            model::PLI const* pli_key = relation_->GetColumnData(key_attr).GetPositionListIndex();
+            std::unique_ptr<model::PLI> joint_pli = pli_other->Intersect(pli_key);
+
+            config::ErrorType error = CalculateFdError(pli_other, pli_key, joint_pli.get());
+            assert(error != 0.0);
+            if (error <= max_error_) {
+                RegisterAfd(AFD(schema->GetVertical(std::move(CreateEmptyColumnMask().set(i))),
+                                *schema->GetColumn(key_attr), error,
+                                relation_->GetSharedPtrSchema()));
+                superkey_rhs_candidates.reset(key_attr);
+                // Is it possible that this doesn't hold?
+                if (superkey_rhs_candidates.any()) add_superkey(i);
+                superkey_rhs_candidates.set(key_attr);
+            } else {
+                add_superkey(i);
+            }
         }
         // Case 2
         for (model::Index i : non_key_attrs_0afd) {
             assert(superkey_rhs_candidates.test(i));
             superkey_rhs_candidates.reset(i);
-            add_superkey(i);
+            if (max_error_ == 0.0) {
+                add_superkey(i);
+                superkey_rhs_candidates.set(i);
+                continue;
+            }
+            model::PLI const* pli_other = relation_->GetColumnData(i).GetPositionListIndex();
+            model::PLI const* pli_key = relation_->GetColumnData(key_attr).GetPositionListIndex();
+            std::unique_ptr<model::PLI> joint_pli = pli_other->Intersect(pli_key);
+
+            config::ErrorType error = CalculateFdError(pli_other, pli_key, joint_pli.get());
+            assert(error != 0.0);
+            if (error <= max_error_) {
+                RegisterAfd(AFD(schema->GetVertical(std::move(CreateEmptyColumnMask().set(i))),
+                                *schema->GetColumn(key_attr), error,
+                                relation_->GetSharedPtrSchema()));
+                superkey_rhs_candidates.reset(key_attr);
+                // TODO: is it possible for this not to hold?
+                if (superkey_rhs_candidates.any()) add_superkey(i);
+                superkey_rhs_candidates.set(key_attr);
+            } else {
+                add_superkey(i);
+            }
+
             superkey_rhs_candidates.set(i);
         }
         superkey_rhs_candidates.reset(key_attr);
@@ -213,6 +257,8 @@ void TaneCommon::ComputeDependenciesLevel2KeysZeroaryAfdRhs(
         std::vector<model::Index> const& non_key_attrs_0afd,
         std::vector<model::Index> const& key_attrs_0afd,
         boost::dynamic_bitset<>& superkey_rhs_candidates, LevelAttributeSetsData& current_level) {
+    RelationalSchema const* schema = relation_->GetSchema();
+
     for (auto it = key_attrs_0afd.begin(); it != key_attrs_0afd.end();) {
         model::Index const key_attr = *it++;
         auto add_superkey = [&](model::Index other_attr) {
@@ -234,6 +280,22 @@ void TaneCommon::ComputeDependenciesLevel2KeysZeroaryAfdRhs(
             }
             // Case 7
             for (model::Index i : non_key_attrs_not_0afd) {
+                if (max_error_ == 0.0) {
+                    add_superkey(i);
+                    continue;
+                }
+                model::PLI const* pli_other = relation_->GetColumnData(i).GetPositionListIndex();
+                model::PLI const* pli_key =
+                        relation_->GetColumnData(key_attr).GetPositionListIndex();
+                std::unique_ptr<model::PLI> joint_pli = pli_other->Intersect(pli_key);
+
+                config::ErrorType error = CalculateFdError(pli_other, pli_key, joint_pli.get());
+                assert(error != 0.0);
+                if (error <= max_error_) {
+                    RegisterAfd(AFD(schema->GetVertical(std::move(CreateEmptyColumnMask().set(i))),
+                                    *schema->GetColumn(key_attr), error,
+                                    relation_->GetSharedPtrSchema()));
+                }
                 add_superkey(i);
             }
         }
@@ -280,9 +342,6 @@ void TaneCommon::ComputeDependenciesLevel2NonKeysZeroaryAfdRhsPairs(
     }
 }
 
-// Unlike the other cases, we can find new FDs here, C^+(X)'s can get modified further in what
-// corresponds to steps from COMPUTE_DEPENDENCIES.
-//
 // Case 9: non_key_attrs_0afd, non_key_attrs_not_0afd
 // C^+(X) = (R \ {A}) ⋂ R = R \ {A}
 //

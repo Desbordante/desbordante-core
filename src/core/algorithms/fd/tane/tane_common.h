@@ -14,8 +14,15 @@ class TaneCommon : public PliBasedAFDAlgorithm {
         boost::dynamic_bitset<> rhs_candidates;
         std::unique_ptr<model::PLI> pli;
 
-        bool IsSuperkey() const noexcept {
+        // pli == nullptr means:
+        //   max_error_ == 0.0: this set is a superkey and has been marked/pruned.
+        //   max_error_ != 0.0: all children of this set are superkeys.
+        bool IsMarkedSuperkey() const noexcept {
             return pli == nullptr;
+        }
+
+        bool IsSuperkey() const noexcept {
+            return pli == nullptr || pli->AllValuesAreUnique();
         }
 
         void MarkSuperkey() noexcept {
