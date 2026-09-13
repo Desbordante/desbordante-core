@@ -8,7 +8,7 @@ namespace gspan {
 
 struct ExtendedEdge {
 private:
-    bool PairSmallerThan(int x1, int x2, int y1, int y2) const;
+    bool PairSmallerThan(int x1, int x2, int y1, int y2) const noexcept;
 
 public:
     Vertex vertex1;
@@ -21,7 +21,7 @@ public:
     ExtendedEdge(Vertex const& v1, Vertex const& v2, int label)
         : vertex1(v1), vertex2(v2), label(label) {}
 
-    bool SmallerThan(ExtendedEdge const& other) const;
+    bool SmallerThan(ExtendedEdge const& other) const noexcept;
 
     bool operator==(ExtendedEdge const& other) const = default;
     bool operator!=(ExtendedEdge const& other) const = default;
@@ -42,14 +42,14 @@ public:
 };
 
 struct ExtendedEdgeProjectCompare {
-    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const {
+    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const noexcept {
         return std::tuple{first.vertex1.label, first.label, first.vertex2.label} <
                std::tuple{second.vertex1.label, second.label, second.vertex2.label};
     }
 };
 
 struct ExtendedEdgeBackwardCompare {
-    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const {
+    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const noexcept {
         if (first.vertex2.id != second.vertex2.id) {
             return first.vertex2.id < second.vertex2.id;
         }
@@ -58,7 +58,7 @@ struct ExtendedEdgeBackwardCompare {
 };
 
 struct ExtendedEdgeForwardCompare {
-    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const {
+    bool operator()(ExtendedEdge const& first, ExtendedEdge const& second) const noexcept {
         if (first.vertex1.id != second.vertex1.id) {
             return first.vertex1.id > second.vertex1.id;
         }

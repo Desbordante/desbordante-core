@@ -6,31 +6,8 @@
 
 namespace gspan {
 
-namespace {
-
-int CountSupport(Projection const& projection) {
-    int prev_id = -1;
-    int support = 0;
-
-    for (auto const& entry : projection) {
-        if (prev_id != entry.graph_id) {
-            prev_id = entry.graph_id;
-            support++;
-        }
-    }
-
-    return support;
-}
-
-}  // namespace
-
 void SubgraphMiner::MineChild(Projection const& projection, ExtendedEdge const& new_edge,
-                              DFSCode code) {
-    int support = CountSupport(projection);
-    if (static_cast<size_t>(support) < min_sup_) {
-        return;
-    }
-
+                              DFSCode code, size_t const support) {
     code.Add(new_edge);
 
     // If the resulting graph is canonical (it means that the graph is non redundant)
@@ -47,12 +24,10 @@ void SubgraphMiner::MineChild(Projection const& projection, ExtendedEdge const& 
                                          std::move(original_graph_ids), support);
         MineSubgraph(projection, code);
     }
-
-    code.Pop();
 }
 
 void SubgraphMiner::MineSubgraph(Projection const& projection, DFSCode const& code) {
-    if (code.Size() == static_cast<size_t>(max_number_of_edges_)) {
+    if (code.Size() == max_number_of_edges_) {
         LOG_TRACE("Maximum pattern size reached, backtracking");
         return;
     }
@@ -64,35 +39,30 @@ void SubgraphMiner::MineSubgraph(Projection const& projection, DFSCode const& co
 
     std::atomic<int> pending{0};
 
+    auto dispatch = [this, code, &pending](Projection&& proj, ExtendedEdge const& ee) {
+        size_t const support = proj.GetSupport();
+        if (support < min_sup_) {
+            return;
+        }
+
+        auto p_ptr = std::make_shared<Projection>(std::move(proj));
+        thread_pool_.Spawn(
+                [this, p_ptr = std::move(p_ptr), ee, code, support](int t_id) mutable {
+                    miners_[t_id]->MineChild(std::move(*p_ptr), ee, std::move(code), support);
+                },
+                pending);
+    };
+
     for (auto& [ee, proj] : backward_pmap) {
-        if (thread_pool_) {
-            auto p_ptr = std::make_shared<Projection>(std::move(proj));
-            thread_pool_->Spawn(
-                    [this, p_ptr = std::move(p_ptr), ee, code](int t_id) {
-                        (*miners_)[t_id]->MineChild(std::move(*p_ptr), ee, code);
-                    },
-                    pending);
-        } else {
-            MineChild(std::move(proj), ee, code);
-        }
-    }
-    for (auto it = forward_pmap.rbegin(); it != forward_pmap.rend(); it++) {
-        auto& [ee, proj] = *it;
-        if (thread_pool_) {
-            auto p_ptr = std::make_shared<Projection>(std::move(proj));
-            thread_pool_->Spawn(
-                    [this, p_ptr = std::move(p_ptr), ee, code](int t_id) {
-                        (*miners_)[t_id]->MineChild(std::move(*p_ptr), ee, code);
-                    },
-                    pending);
-        } else {
-            MineChild(std::move(proj), ee, code);
-        }
+        dispatch(std::move(proj), ee);
     }
 
-    if (thread_pool_) {
-        thread_pool_->Wait(pending, thread_id_);
+    for (auto it = forward_pmap.rbegin(); it != forward_pmap.rend(); ++it) {
+        auto& [ee, proj] = *it;
+        dispatch(std::move(proj), ee);
     }
+
+    thread_pool_.Wait(pending, thread_id_);
 }
 
 void SubgraphMiner::Enumerate(DFSCode const& code, Projection const& projection,
@@ -111,21 +81,24 @@ void SubgraphMiner::Enumerate(DFSCode const& code, Projection const& projection,
 
 void SubgraphMiner::GetBackward(ProjectionEntry const& entry, csr_graph_t const& graph,
                                 DFSCode const& code, ProjectionMapBackward& backward_pmap) {
-    auto rm_vertex_id = code[rightmost_path_[0]].vertex2.id;
-    auto last_edge = history_.GetEdge(rightmost_path_[0]);
-    auto last_node = boost::target(last_edge, graph);
+    // guaranteed non-empty since it initialized with 0 in IsCanonical,
+    // and UpdateRightmostPath always restores at least the root forward edge
+    assert(!rightmost_path_.empty());
+    auto const rm_vertex_id = code[rightmost_path_[0]].vertex2.id;
+    auto const last_edge = history_.GetEdge(rightmost_path_[0]);
+    auto const last_node = boost::target(last_edge, graph);
 
-    for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
+    for (auto const ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
         if (history_.HasEdge(graph[ln_edge].id)) {
             continue;
         }
 
-        auto ln_edge_to = boost::target(ln_edge, graph);
+        auto const ln_edge_to = boost::target(ln_edge, graph);
         for (size_t i = rightmost_path_.size() - 1; i > 0; i--) {
             ExtendedEdge const& path_ee = code[rightmost_path_[i]];
-            auto edge = history_.GetEdge(rightmost_path_[i]);
-            auto edge_source = boost::source(edge, graph);
-            auto edge_target = boost::target(edge, graph);
+            auto const edge = history_.GetEdge(rightmost_path_[i]);
+            auto const edge_source = boost::source(edge, graph);
+            auto const edge_target = boost::target(edge, graph);
 
             if (graph[ln_edge_to].id != graph[edge_source].id) {
                 continue;
@@ -136,7 +109,7 @@ void SubgraphMiner::GetBackward(ProjectionEntry const& entry, csr_graph_t const&
                 ExtendedEdge ee(Vertex{rm_vertex_id, graph[last_node].label},
                                 Vertex{path_ee.vertex1.id, graph[edge_source].label},
                                 graph[ln_edge].label);
-                backward_pmap[ee].emplace_back(entry.graph_id, ln_edge, &entry);
+                backward_pmap[ee].PushBack(entry.graph_id, ln_edge, &entry);
             }
 
             break;
@@ -146,14 +119,14 @@ void SubgraphMiner::GetBackward(ProjectionEntry const& entry, csr_graph_t const&
 
 void SubgraphMiner::GetFirstForward(ProjectionEntry const& entry, csr_graph_t const& graph,
                                     DFSCode const& code, ProjectionMapForward& forward_pmap) {
-    int min_label = code[0].vertex1.label;
-    auto rm_vertex_id = code[rightmost_path_[0]].vertex2.id;
+    int const min_label = code[0].vertex1.label;
+    auto const rm_vertex_id = code[rightmost_path_[0]].vertex2.id;
 
-    auto last_edge = history_.GetEdge(rightmost_path_[0]);
-    auto last_node = boost::target(last_edge, graph);
+    auto const last_edge = history_.GetEdge(rightmost_path_[0]);
+    auto const last_node = boost::target(last_edge, graph);
 
-    for (auto ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
-        auto ln_edge_to = boost::target(ln_edge, graph);
+    for (auto const ln_edge : boost::make_iterator_range(boost::out_edges(last_node, graph))) {
+        auto const ln_edge_to = boost::target(ln_edge, graph);
         // Partial pruning: if this label is less than the minimum label, then there
         // should exist another lexicographical order which renders the same letters, but
         // in the asecending order.
@@ -165,23 +138,24 @@ void SubgraphMiner::GetFirstForward(ProjectionEntry const& entry, csr_graph_t co
 
         ExtendedEdge ee(Vertex{rm_vertex_id, graph[last_node].label},
                         Vertex{rm_vertex_id + 1, graph[ln_edge_to].label}, graph[ln_edge].label);
-        forward_pmap[ee].emplace_back(entry.graph_id, ln_edge, &entry);
+        forward_pmap[ee].PushBack(entry.graph_id, ln_edge, &entry);
     }
 }
 
 void SubgraphMiner::GetOtherForward(ProjectionEntry const& entry, csr_graph_t const& graph,
                                     DFSCode const& code, ProjectionMapForward& forward_pmap) {
-    int min_label = code[0].vertex1.label;
-    auto to_id = code[rightmost_path_[0]].vertex2.id;
-    for (auto i : rightmost_path_) {
-        int from_id = code[i].vertex1.id;
+    int const min_label = code[0].vertex1.label;
+    auto const to_id = code[rightmost_path_[0]].vertex2.id;
+    for (auto const i : rightmost_path_) {
+        int const from_id = code[i].vertex1.id;
 
-        auto current_edge = history_.GetEdge(i);
-        auto current_node = boost::source(current_edge, graph);
-        auto node_neighbor = boost::target(current_edge, graph);
+        auto const current_edge = history_.GetEdge(i);
+        auto const current_node = boost::source(current_edge, graph);
+        auto const node_neighbor = boost::target(current_edge, graph);
 
-        for (auto cn_edge : boost::make_iterator_range(boost::out_edges(current_node, graph))) {
-            vertex_t to_node = boost::target(cn_edge, graph);
+        for (auto const cn_edge :
+             boost::make_iterator_range(boost::out_edges(current_node, graph))) {
+            vertex_t const to_node = boost::target(cn_edge, graph);
             if (history_.HasVertex(graph[to_node].id) || graph[to_node].label < min_label) {
                 continue;
             }
@@ -190,7 +164,7 @@ void SubgraphMiner::GetOtherForward(ProjectionEntry const& entry, csr_graph_t co
                 std::tuple{graph[cn_edge].label, graph[to_node].label}) {
                 ExtendedEdge ee(Vertex{from_id, graph[current_node].label},
                                 Vertex{to_id + 1, graph[to_node].label}, graph[cn_edge].label);
-                forward_pmap[ee].emplace_back(entry.graph_id, cn_edge, &entry);
+                forward_pmap[ee].PushBack(entry.graph_id, cn_edge, &entry);
             }
         }
     }
@@ -198,7 +172,6 @@ void SubgraphMiner::GetOtherForward(ProjectionEntry const& entry, csr_graph_t co
 
 bool SubgraphMiner::IsCanonical(DFSCode const& code) {
     LOG_TRACE("Checking canonicity: pattern size={}", code.Size());
-    min_graph_.BuildFromDFSCode(code);
     rightmost_path_.clear();
     rightmost_path_.push_back(0);
 
@@ -206,6 +179,7 @@ bool SubgraphMiner::IsCanonical(DFSCode const& code) {
         return true;
     }
 
+    min_graph_.BuildFromDFSCode(code);
     min_projection_.clear();
 
     // The first edge in the sequence must be the
@@ -214,8 +188,8 @@ bool SubgraphMiner::IsCanonical(DFSCode const& code) {
 
     for (auto const& vertex : min_graph_) {
         for (auto const& edge : vertex.edges) {
-            int source_label = vertex.label;
-            int target_label = min_graph_[edge.to].label;
+            int const source_label = vertex.label;
+            int const target_label = min_graph_[edge.to].label;
 
             if (source_label <= target_label) {
                 ExtendedEdge ee(Vertex(0, source_label), Vertex(1, target_label), edge.label);
@@ -240,7 +214,7 @@ bool SubgraphMiner::IsProjectionMin(DFSCode const& code) {
     // index 0 was already validated on previous step
     for (size_t i = 1; i < code.Size(); i++) {
         ExtendedEdge const& ee = code[i];
-        size_t projection_end_index = min_projection_.size();
+        size_t const projection_end_index = min_projection_.size();
 
         // If a forward and a backward edge can be both be used to extend
         // the code, then the backward edge must be smaller.
@@ -271,11 +245,15 @@ bool SubgraphMiner::IsProjectionMin(DFSCode const& code) {
 
 bool SubgraphMiner::IsBackwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
                                   size_t projection_start_index) {
-    size_t projection_end_index = min_projection_.size();
+    // guaranteed non-empty since it initialized with 0 in IsCanonical,
+    // and UpdateRightmostPath always restores at least the root forward edge
+    assert(!rightmost_path_.empty());
+
+    size_t const projection_end_index = min_projection_.size();
 
     ExtendedEdge const& rightmost_edge = code[rightmost_path_[0]];
 
-    int from_id = rightmost_edge.vertex2.id;
+    int const from_id = rightmost_edge.vertex2.id;
     for (size_t j = projection_start_index; j < projection_end_index; j++) {
         history_.ReconstructEdges(min_projection_, min_graph_, j);
 
@@ -289,7 +267,7 @@ bool SubgraphMiner::IsBackwardMin(gspan::DFSCode const& code, ExtendedEdge const
 
             for (size_t i = rightmost_path_.size() - 1; i > 0; i--) {
                 ExtendedEdge const& path_ee = code[rightmost_path_[i]];
-                int to_id = path_ee.vertex1.id;
+                int const to_id = path_ee.vertex1.id;
                 auto const& edge = history_.GetMinEdge(rightmost_path_[i]);
                 auto const& edge_from = min_graph_[edge.from];
                 auto const& edge_to = min_graph_[edge.to];
@@ -316,10 +294,10 @@ bool SubgraphMiner::IsBackwardMin(gspan::DFSCode const& code, ExtendedEdge const
 
 bool SubgraphMiner::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const& ee,
                                  size_t projection_start_index) {
-    size_t projection_end_index = min_projection_.size();
+    size_t const projection_end_index = min_projection_.size();
 
-    int min_label = code[0].vertex1.label;
-    int max_id = code[rightmost_path_[0]].vertex2.id;
+    int const min_label = code[0].vertex1.label;
+    int const max_id = code[rightmost_path_[0]].vertex2.id;
 
     for (size_t i = projection_start_index; i < projection_end_index; i++) {
         history_.ReconstructVertices(min_projection_, min_graph_, i);
@@ -351,8 +329,8 @@ bool SubgraphMiner::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const&
             continue;
         }
 
-        for (auto j : rightmost_path_) {
-            int from_id = code[j].vertex1.id;
+        for (auto const j : rightmost_path_) {
+            int const from_id = code[j].vertex1.id;
 
             auto const& current_edge = history_.GetMinEdge(j);
             auto const& current_node = min_graph_[current_edge.from];
@@ -387,7 +365,11 @@ bool SubgraphMiner::IsForwardMin(gspan::DFSCode const& code, ExtendedEdge const&
 }
 
 bool SubgraphMiner::ExistsBackwards(size_t projection_start_index) {
-    size_t projection_end_index = min_projection_.size();
+    // guaranteed non-empty since it initialized with 0 in IsCanonical,
+    // and UpdateRightmostPath always restores at least the root forward edge
+    assert(!rightmost_path_.empty());
+
+    size_t const projection_end_index = min_projection_.size();
 
     for (auto j = projection_start_index; j < projection_end_index; j++) {
         history_.ReconstructEdges(min_projection_, min_graph_, j);
@@ -425,7 +407,7 @@ void SubgraphMiner::UpdateRightmostPath(gspan::DFSCode const& code, size_t size)
 
     // Go in reverse, since we need to first look for the edge that discovered
     // the rightmost vertex
-    for (auto i = size; i > 0; --i) {
+    for (size_t i = size; i > 0; --i) {
         // Only consider forward edges (as by definition the rightmost path only
         // consists of edges 'discovering' new nodes). The first forward edge (or
         // equivalently, the last forward edge in DFSCode) is the edge discovering

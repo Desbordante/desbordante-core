@@ -19,16 +19,15 @@ struct FrequentSubgraph {
     // The ids of graphs where the subgraph appears
     boost::unordered_flat_set<int> graphs_ids;
 
-    int support;
+    size_t support;
 
     FrequentSubgraph(size_t id, DFSCode const& dfs_code, boost::unordered_flat_set<int> graphs_ids,
-                     int support)
+                     size_t support)
         : id(id), dfs_code(dfs_code), graphs_ids(std::move(graphs_ids)), support(support) {}
 
-    int CompareTo(FrequentSubgraph const& other) {
-        long dif = support - other.support;
-        if (dif > 0) return 1;
-        if (dif < 0) return -1;
+    int CompareTo(FrequentSubgraph const& other) const noexcept {
+        if (support > other.support) return 1;
+        if (support < other.support) return -1;
 
         return 0;
     }

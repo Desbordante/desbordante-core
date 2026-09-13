@@ -61,7 +61,7 @@ public:
         return *min_edges_[edge_size_ - index - 1];
     }
 
-    void Clear() {
+    void Clear() noexcept {
         current_ = nullptr;
     }
 };

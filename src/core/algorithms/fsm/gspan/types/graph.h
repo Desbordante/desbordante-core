@@ -25,7 +25,8 @@ using graph_t =
 using vertex_t = boost::graph_traits<graph_t>::vertex_descriptor;
 using edge_t = boost::graph_traits<graph_t>::edge_descriptor;
 
-using csr_graph_t = boost::compressed_sparse_row_graph<boost::directedS, Vertex, Edge, GraphProps>;
+using csr_graph_t = boost::compressed_sparse_row_graph<boost::directedS, Vertex, Edge, GraphProps,
+                                                       uint32_t, uint32_t>;
 using csr_vertex_t = boost::graph_traits<csr_graph_t>::vertex_descriptor;
 using csr_edge_t = boost::graph_traits<csr_graph_t>::edge_descriptor;
 

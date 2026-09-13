@@ -4,7 +4,7 @@
 
 namespace gspan {
 
-bool ExtendedEdge::PairSmallerThan(int x1, int x2, int y1, int y2) const {
+bool ExtendedEdge::PairSmallerThan(int x1, int x2, int y1, int y2) const noexcept {
     bool x_forward = x1 < x2;
     bool y_forward = y1 < y2;
     if (x_forward && y_forward)
@@ -17,7 +17,7 @@ bool ExtendedEdge::PairSmallerThan(int x1, int x2, int y1, int y2) const {
         return x1 < y2;
 }
 
-bool ExtendedEdge::SmallerThan(ExtendedEdge const& other) const {
+bool ExtendedEdge::SmallerThan(ExtendedEdge const& other) const noexcept {
     if (PairSmallerThan(vertex1.id, vertex2.id, other.vertex1.id, other.vertex2.id)) return true;
 
     if (vertex1.id != other.vertex1.id || vertex2.id != other.vertex2.id) return false;

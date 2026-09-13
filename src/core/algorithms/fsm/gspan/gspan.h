@@ -18,7 +18,7 @@ namespace algos {
 class GSpan : public Algorithm {
 protected:
     // The minimum support represented as a count (number of subgraph occurrences)
-    int min_sup_;
+    size_t min_sup_;
 
     // The minimum support represented as a frequency (a value between 0 and 1)
     double min_frequency_;
@@ -60,13 +60,13 @@ protected:
 public:
     GSpan();
 
-    void Launch();
+    void MineSubgraphs();
 
-    std::vector<gspan::FrequentSubgraph> const& GetFrequentSubgraphs() const {
+    std::vector<gspan::FrequentSubgraph> const& GetFrequentSubgraphs() const noexcept {
         return frequent_subgraphs_;
     }
 
-    int GetMinSup() const {
+    int GetMinSup() const noexcept {
         return min_sup_;
     }
 };

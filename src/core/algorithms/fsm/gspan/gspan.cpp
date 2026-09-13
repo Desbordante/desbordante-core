@@ -21,7 +21,7 @@ GSpan::GSpan() : Algorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::names::kGraphDatabase, config::names::kGSpanMinimumSupport,
                           config::names::kOutputSingleVertices, config::names::kMaxNumberOfEdges,
-                          config::names::kGSpanOutputPath, config::names::kThreads});
+                          config::names::kGSpanOutputPath});
 }
 
 void GSpan::MakeExecuteOptsAvailable() {
@@ -75,9 +75,9 @@ void GSpan::ResetState() {
 }
 
 void GSpan::ExecuteInternal() {
-    min_sup_ = static_cast<int>(std::ceil(min_frequency_ * raw_dataset_.size()));
+    min_sup_ = static_cast<size_t>(std::ceil(min_frequency_ * raw_dataset_.size()));
 
-    Launch();
+    MineSubgraphs();
     LOG_DEBUG("Mining complete: {} frequent subgraphs found", frequent_subgraphs_.size());
 
     if (!output_path_.empty()) {
@@ -87,7 +87,7 @@ void GSpan::ExecuteInternal() {
     }
 }
 
-void GSpan::Launch() {
+void GSpan::MineSubgraphs() {
     LOG_INFO("Starting GSpan algorithm: {} graphs, min_sup_={}", raw_dataset_.size(), min_sup_);
 
     LOG_DEBUG("Searching for frequent vertex labels");
@@ -106,12 +106,12 @@ void GSpan::Launch() {
 
     ProjectionMap embeddings = GetInitialEdges();
 
-    ThreadPool pool(threads_num_);
+    int const pool_threads = threads_num_ - 1;
+    ThreadPool pool(pool_threads);
     std::vector<std::unique_ptr<SubgraphMiner>> miners;
-    for (size_t i = 0; i < threads_num_ + 1; ++i) {
-        auto miner =
-                std::make_unique<SubgraphMiner>(pruned_csr_graphs_, min_sup_, max_number_of_edges_);
-        miner->SetParallelContext(&pool, &miners, i);
+    for (auto i = 0; i < pool_threads + 1; ++i) {
+        auto miner = std::make_unique<SubgraphMiner>(pruned_csr_graphs_, min_sup_,
+                                                     max_number_of_edges_, pool, miners, i);
         miners.push_back(std::move(miner));
     }
 
@@ -121,7 +121,7 @@ void GSpan::Launch() {
                    pending);
     }
 
-    pool.Wait(pending, threads_num_);
+    pool.Wait(pending, pool_threads);
 
     for (auto& miner : miners) {
         for (auto& fs : miner->GetFrequentSubgraphs()) {
@@ -185,18 +185,18 @@ ProjectionMap GSpan::GetInitialEdges() {
     ProjectionMap result;
     for (size_t i = 0; i < pruned_csr_graphs_.size(); i++) {
         auto const& graph = pruned_csr_graphs_[i];
-        for (auto v1 : boost::make_iterator_range(boost::vertices(graph))) {
-            for (auto edge : boost::make_iterator_range(boost::out_edges(v1, graph))) {
-                vertex_t v2 = boost::target(edge, graph);
-                int source_label = graph[v1].label;
-                int target_label = graph[v2].label;
+        for (auto const v1 : boost::make_iterator_range(boost::vertices(graph))) {
+            for (auto const edge : boost::make_iterator_range(boost::out_edges(v1, graph))) {
+                vertex_t const v2 = boost::target(edge, graph);
+                int const source_label = graph[v1].label;
+                int const target_label = graph[v2].label;
                 // Partial pruning: if the first label is greater than the
                 // second label, then there must be another graph whose second
                 // label is greater than the first label.
                 if (source_label <= target_label) {
                     ExtendedEdge ee = ExtendedEdge(Vertex(0, source_label), Vertex(1, target_label),
                                                    graph[edge].label);
-                    result[ee].emplace_back(i, edge, nullptr);
+                    result[ee].PushBack(i, edge, nullptr);
                 }
             }
         }
@@ -224,26 +224,26 @@ void GSpan::RemoveInfrequentVertexPairs() {
             already_seen_pair;
     SparseTriangularMatrix matrix;
     boost::unordered_flat_set<int> already_seen_edge_label;
-    boost::unordered_flat_map<int, int> edge_label_to_support;
+    boost::unordered_flat_map<int, size_t> edge_label_to_support;
 
     // Calculate the support of each entry
     for (graph_t& graph : pruned_graphs_) {
-        for (auto v1 : boost::make_iterator_range(boost::vertices(graph))) {
-            int v1_label = graph[v1].label;
-            for (auto edge : boost::make_iterator_range(boost::out_edges(v1, graph))) {
-                vertex_t v2 = boost::target(edge, graph);
-                int v2_label = graph[v2].label;
+        for (auto const v1 : boost::make_iterator_range(boost::vertices(graph))) {
+            int const v1_label = graph[v1].label;
+            for (auto const edge : boost::make_iterator_range(boost::out_edges(v1, graph))) {
+                vertex_t const v2 = boost::target(edge, graph);
+                int const v2_label = graph[v2].label;
 
                 // Update vertex pair count
-                auto pair = std::minmax(v1_label, v2_label);
-                bool seen = already_seen_pair.contains(pair);
+                auto const pair = std::minmax(v1_label, v2_label);
+                bool const seen = already_seen_pair.contains(pair);
                 if (!seen) {
                     matrix.IncrementCount(v1_label, v2_label);
                     already_seen_pair.insert(pair);
                 }
 
                 // Update edge label count
-                int edge_label = graph[edge].label;
+                int const edge_label = graph[edge].label;
                 if (!already_seen_edge_label.contains(edge_label)) {
                     already_seen_edge_label.insert(edge_label);
                     edge_label_to_support[edge_label]++;
@@ -262,11 +262,11 @@ void GSpan::RemoveInfrequentVertexPairs() {
     for (gspan::graph_t& graph : pruned_graphs_) {
         boost::remove_edge_if(
                 [&](gspan::edge_t e) {
-                    auto v1 = boost::source(e, graph);
-                    auto v2 = boost::target(e, graph);
-                    int label1 = graph[v1].label;
-                    int label2 = graph[v2].label;
-                    int count = matrix.GetSupport(label1, label2);
+                    auto const v1 = boost::source(e, graph);
+                    auto const v2 = boost::target(e, graph);
+                    int const label1 = graph[v1].label;
+                    int const label2 = graph[v2].label;
+                    size_t const count = matrix.GetSupport(label1, label2);
 
                     if (count < min_sup_) {
                         return true;
@@ -280,13 +280,13 @@ void GSpan::RemoveInfrequentVertexPairs() {
 
         // Remove isolated vertices
         std::vector<vertex_t> isolated;
-        for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
+        for (auto const vertex : boost::make_iterator_range(boost::vertices(graph))) {
             if (boost::out_degree(vertex, graph) == 0) {
                 isolated.push_back(vertex);
             }
         }
         std::sort(isolated.rbegin(), isolated.rend());
-        for (auto vertex : isolated) {
+        for (auto const vertex : isolated) {
             boost::clear_vertex(vertex, graph);
             boost::remove_vertex(vertex, graph);
         }
@@ -303,9 +303,9 @@ void GSpan::FindAllOnlyOneVertex() {
 
     for (size_t i = 0; i < pruned_graphs_.size(); i++) {
         auto const& graph = pruned_graphs_[i];
-        for (auto vertex : boost::make_iterator_range(boost::vertices(graph))) {
+        for (auto const vertex : boost::make_iterator_range(boost::vertices(graph))) {
             if (boost::out_degree(vertex, graph) != 0) {
-                int label = graph[vertex].label;
+                int const label = graph[vertex].label;
                 label_map[label].insert(i);
             }
         }
@@ -313,7 +313,7 @@ void GSpan::FindAllOnlyOneVertex() {
     LOG_DEBUG("Found {} distinct vertex labels", label_map.size());
 
     for (auto const& [label, temp_sup_g] : label_map) {
-        int sup = temp_sup_g.size();
+        size_t const sup = temp_sup_g.size();
         if (sup >= min_sup_) {
             frequent_vertex_labels_.push_back(label);
             LOG_TRACE("Vertex label {} is frequent (support={})", label, sup);

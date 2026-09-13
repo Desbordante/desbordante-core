@@ -3,7 +3,7 @@ desbordante_add_lib(NAME)
 target_sources(
     ${NAME}
     PRIVATE gspan.cpp parser/graph_parser.cpp types/extended_edge.cpp types/history.cpp
-            miner/subgraph_miner.cpp
+            miner/subgraph_miner.cpp utils/utils.cpp
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
 target_link_libraries(
