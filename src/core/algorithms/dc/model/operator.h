@@ -43,6 +43,10 @@ public:
         return op_;
     }
 
+    void Inverse() noexcept {
+        op_ = kInverseMap.At(op_);
+    }
+
     static constexpr util::StaticMap<OperatorType, std::string_view, 6> kOperatorTypeToString{
             {{{OperatorType::kEqual, "=="},
               {OperatorType::kUnequal, "!="},
@@ -58,6 +62,15 @@ public:
               {"<", OperatorType::kLess},
               {">=", OperatorType::kGreaterEqual},
               {"<=", OperatorType::kLessEqual}}}};
+
+    static constexpr util::StaticMap<OperatorType, OperatorType, 6> kInverseMap{{{
+            {OperatorType::kEqual, OperatorType::kUnequal},
+            {OperatorType::kUnequal, OperatorType::kEqual},
+            {OperatorType::kGreater, OperatorType::kLessEqual},
+            {OperatorType::kLess, OperatorType::kGreaterEqual},
+            {OperatorType::kGreaterEqual, OperatorType::kLess},
+            {OperatorType::kLessEqual, OperatorType::kGreater},
+    }}};
 };
 
 }  // namespace algos::dc

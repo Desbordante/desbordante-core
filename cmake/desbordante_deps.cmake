@@ -48,6 +48,42 @@ CPMAddPackage(
     SYSTEM YES
 )
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+endif()
+
+set(_desbordante_warn_deprecated "${CMAKE_WARN_DEPRECATED}")
+if(DEFINED CMAKE_WARN_DEPRECATED)
+    set(_desbordante_warn_deprecated_defined TRUE)
+else()
+    set(_desbordante_warn_deprecated_defined FALSE)
+endif()
+set(CMAKE_WARN_DEPRECATED
+    OFF
+    CACHE BOOL "" FORCE
+)
+CPMAddPackage(
+    NAME roaring
+    GITHUB_REPOSITORY RoaringBitmap/CRoaring
+    GIT_TAG v2.1.2
+    OPTIONS "ENABLE_ROARING_TESTS OFF"
+    SYSTEM YES
+)
+if(_desbordante_warn_deprecated_defined)
+    set(CMAKE_WARN_DEPRECATED
+        "${_desbordante_warn_deprecated}"
+        CACHE BOOL "" FORCE
+    )
+else()
+    unset(CMAKE_WARN_DEPRECATED CACHE)
+endif()
+unset(_desbordante_warn_deprecated)
+unset(_desbordante_warn_deprecated_defined)
+
+if(TARGET roaring AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(roaring PRIVATE -Wno-error)
+endif()
+
 if(DESBORDANTE_BUILD_TESTS)
     CPMAddPackage(
         NAME googletest

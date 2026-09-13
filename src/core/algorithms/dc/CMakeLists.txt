@@ -1,5 +1,6 @@
 add_subdirectory(FastADC)
 add_subdirectory(verifier)
+add_subdirectory(weever)
 
 set(NAME dc.model)
 desbordante_add_lib(NAME OBJECT)
