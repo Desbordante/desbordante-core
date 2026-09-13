@@ -19,9 +19,9 @@ namespace tests {
 namespace config_names = config::names;
 namespace rfd = algos::rfd;
 
-auto const lev = rfd::LevenshteinMetric();
-auto const eq = rfd::EqualityMetric();
-auto const abs_diff = rfd::AbsoluteDifferenceMetric();
+auto const kLev = rfd::LevenshteinMetric();
+auto const kEq = rfd::EqualityMetric();
+auto const kAbsDiff = rfd::AbsoluteDifferenceMetric();
 
 // Helper to build params with a vector of similarity thresholds
 static algos::StdParamsMap MakeParams(
@@ -59,7 +59,7 @@ static algos::StdParamsMap MakeParams(
 }
 
 static std::vector<std::shared_ptr<rfd::SimilarityMetric>> EqualityMetrics(std::size_t n) {
-    return std::vector<std::shared_ptr<rfd::SimilarityMetric>>(n, eq);
+    return std::vector<std::shared_ptr<rfd::SimilarityMetric>>(n, kEq);
 }
 
 // -----------------------------------------------------------
@@ -72,8 +72,8 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
     config::InputTable table = std::make_shared<CSVParser>(kIris);
 
     std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics;
-    for (int i = 0; i < 4; ++i) metrics.push_back(abs_diff);
-    metrics.push_back(eq);
+    for (int i = 0; i < 4; ++i) metrics.push_back(kAbsDiff);
+    metrics.push_back(kEq);
 
     // Create per-attribute thresholds (all same for simplicity)
     std::vector<double> sim_vec(5, min_similarity);
@@ -186,8 +186,8 @@ INSTANTIATE_TEST_SUITE_P(VariousDatasets, GaRfdDatasetTest,
                                            RFDTestParams{kTestLong, 1.0, 0.9, 30, 5, true, 1},
                                            RFDTestParams{kTestWide, 1.0, 0.9, 30, 5, true, 0},
                                            RFDTestParams{kRfdTwoRows, 1.0, 0.9, 10, 1, true, 0}),
-                         [](testing::TestParamInfo<RFDTestParams> const& info) {
-                             return std::to_string(info.index);
+                         [](testing::TestParamInfo<RFDTestParams> const& test_param) {
+                             return std::to_string(test_param.index);
                          });
 
 TEST(GARfdFunctional, IrisAllSimilarYieldsNonEmpty) {
@@ -200,7 +200,7 @@ TEST(GARfdFunctional, IrisAllSimilarYieldsNonEmpty) {
 }
 
 TEST(GARfdMetric, LevenshteinMetricOnIris) {
-    auto metrics = std::vector<std::shared_ptr<rfd::SimilarityMetric>>{lev, lev, lev, lev, eq};
+    auto metrics = std::vector<std::shared_ptr<rfd::SimilarityMetric>>{kLev, kLev, kLev, kLev, kEq};
     auto params = MakeParams(kIris, 0.8, 0.9, 30, 5, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
     algo->Execute();

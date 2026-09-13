@@ -78,7 +78,7 @@ void BindGaRfd(py::module_& main_module) {
             .def_property_readonly("lhs",
                                    [](RFD const& r) {
                                        std::vector<int> indices;
-                                       for (std::size_t i = 0; i < algos::rfd::kMaxAttributes;
+                                       for (std::size_t i = 0; i <= algos::rfd::kMaxAttributes;
                                             ++i) {
                                            if (r.lhs_mask & (1u << i))
                                                indices.push_back(static_cast<int>(i));

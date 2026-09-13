@@ -42,7 +42,7 @@ namespace algos::rfd {
 std::string RFD::ToString() const {
     std::string res = "[";
     bool first = true;
-    for (uint8_t i = 0; i < kMaxAttributes; i++) {
+    for (uint8_t i = 0; i <= algos::rfd::kMaxAttributes; ++i) {
         if (lhs_mask & (1u << i)) {
             if (!first) res += ", ";
             res += std::to_string(i);
@@ -260,7 +260,7 @@ GaRfd::Individual GaRfd::Evaluate(Individual const& ind) const {
     uint32_t const both_mask = lhs_mask | (1u << rhs);
     double support_both = static_cast<double>(ComputeSupport(both_mask)) / total_pairs_;
     double confidence = support_both / support_lhs;
-    return {lhs_mask, rhs, confidence, support_both};
+    return {lhs_mask, rhs, confidence, support_lhs};
 }
 
 void GaRfd::EvaluatePopulation(std::unordered_set<Individual, IndividualHash>& pop) const {

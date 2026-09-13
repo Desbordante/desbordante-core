@@ -28,7 +28,7 @@ double LevenshteinSimilarity(std::string const& a, std::string const& b) {
         }
         dp[m] = prev;
     }
-    double max_len = std::max(n, m);
+    double max_len = static_cast<double>(std::max(n, m));
     return 1.0 - static_cast<double>(dp[m]) / max_len;
 }
 }  // namespace
