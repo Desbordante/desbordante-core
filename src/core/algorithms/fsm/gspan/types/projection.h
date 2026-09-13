@@ -17,7 +17,32 @@ struct ProjectionEntry {
 };
 
 // A projection is a collection of entries across multiple graphs
-using Projection = std::vector<ProjectionEntry>;
+class Projection {
+    std::vector<ProjectionEntry> entries_;
+    size_t support_ = 0;
+    int prev_graph_id_ = -1;
+
+public:
+    void PushBack(int graph_id, csr_edge_t edge, ProjectionEntry const* prev) {
+        if (graph_id != prev_graph_id_) {
+            support_++;
+            prev_graph_id_ = graph_id;
+        }
+        entries_.push_back({graph_id, edge, prev});
+    }
+
+    auto begin() const noexcept {
+        return entries_.begin();
+    }
+
+    auto end() const noexcept {
+        return entries_.end();
+    }
+
+    size_t GetSupport() const noexcept {
+        return support_;
+    }
+};
 
 struct MinEdge;
 

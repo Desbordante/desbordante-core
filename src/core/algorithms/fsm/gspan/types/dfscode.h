@@ -52,15 +52,15 @@ public:
         return false;
     }
 
-    size_t Size() const {
+    size_t Size() const noexcept {
         return extended_edges_.size();
     }
 
-    bool Empty() const {
+    bool Empty() const noexcept {
         return extended_edges_.empty();
     }
 
-    std::vector<ExtendedEdge> const& GetExtendedEdges() const {
+    std::vector<ExtendedEdge> const& GetExtendedEdges() const noexcept {
         return extended_edges_;
     }
 

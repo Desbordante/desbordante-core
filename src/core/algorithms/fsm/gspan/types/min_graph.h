@@ -55,19 +55,19 @@ public:
         return vertices_[i];
     }
 
-    size_t NumVertices() const {
+    size_t NumVertices() const noexcept {
         return vertices_.size();
     }
 
-    int NumEdges() const {
+    int NumEdges() const noexcept {
         return num_edges_;
     }
 
-    auto begin() const {
+    auto begin() const noexcept {
         return vertices_.begin();
     }
 
-    auto end() const {
+    auto end() const noexcept {
         return vertices_.end();
     }
 };

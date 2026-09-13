@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <exception>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -51,8 +52,13 @@ public:
         pending_counter.fetch_add(1, std::memory_order_relaxed);
         {
             std::unique_lock<std::mutex> lock(mutex_);
-            tasks_.emplace_back([f = std::forward<F>(f), &pending_counter](int thread_id) {
-                f(thread_id);
+            tasks_.emplace_back([f = std::forward<F>(f), &pending_counter](int thread_id) mutable {
+                try {
+                    f(thread_id);
+                } catch (...) {
+                    pending_counter.fetch_sub(1, std::memory_order_release);
+                    throw;
+                }
                 pending_counter.fetch_sub(1, std::memory_order_release);
             });
         }

@@ -493,4 +493,45 @@ TEST_F(GSpanCorrectnessTest, CanonicalFormConsistency) {
     }
 }
 
+TEST_F(GSpanCorrectnessTest, ThreadCountConsistency) {
+    auto run = [](std::filesystem::path const& path, double support,
+                  config::ThreadNumType threads) {
+        auto algorithm = algos::CreateAndLoadAlgorithm<algos::GSpan>(
+                CreateGSpanParams(path, support, true, INT_MAX, true, threads));
+        algorithm->Execute();
+        auto const& subgraphs = algorithm->GetFrequentSubgraphs();
+        return boost::unordered_flat_set<gspan::FrequentSubgraph, gspan::FrequentSubgraph::Hash>{
+                subgraphs.begin(), subgraphs.end()};
+    };
+
+    for (auto const& [path, support] :
+         std::initializer_list<std::pair<std::filesystem::path, double>>{
+                 {kGSpanTestSimple, 0.4}, {kGSpanTestTriangle, 0.4}, {kGSpanTestChain, 0.6}}) {
+        auto const reference = run(path, support, 1);
+        for (config::ThreadNumType threads : {2, 4, 8, 12}) {
+            auto const result = run(path, support, threads);
+            EXPECT_EQ(result, reference)
+                    << "Results differ between 1 and " << threads << " threads";
+        }
+    }
+}
+
+TEST_F(GSpanCorrectnessTest, ThreadCountConsistencyLargeGraph) {
+    auto run = [](config::ThreadNumType threads) {
+        auto algorithm = algos::CreateAndLoadAlgorithm<algos::GSpan>(
+                CreateGSpanParams(kGSpanLargeGraph, 0.5, true, INT_MAX, true, threads));
+        algorithm->Execute();
+        auto const& subgraphs = algorithm->GetFrequentSubgraphs();
+        return boost::unordered_flat_set<gspan::FrequentSubgraph, gspan::FrequentSubgraph::Hash>{
+                subgraphs.begin(), subgraphs.end()};
+    };
+
+    auto const reference = run(1);
+    for (config::ThreadNumType threads : {2, 4, 8, 12}) {
+        auto const result = run(threads);
+        EXPECT_EQ(result, reference)
+                << "Results differ between 1 and " << threads << " threads on MUTAG";
+    }
+}
+
 }  // namespace tests

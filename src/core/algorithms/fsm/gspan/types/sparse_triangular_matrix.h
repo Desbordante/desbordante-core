@@ -12,7 +12,7 @@ namespace gspan {
 // and the value is the count of the pair {I, J}.
 class SparseTriangularMatrix {
     using Key = std::pair<int, int>;
-    boost::unordered_flat_map<Key, int, boost::hash<Key>> matrix_;
+    boost::unordered_flat_map<Key, size_t, boost::hash<Key>> matrix_;
 
     static Key Normalize(int i, int j) noexcept {
         return std::minmax(i, j);
@@ -30,11 +30,11 @@ public:
         return it == matrix_.end() ? 0 : it->second;
     }
 
-    void SetSupport(int i, int j, int sup) {
+    void SetSupport(int i, int j, size_t sup) {
         matrix_[Normalize(i, j)] = sup;
     }
 
-    void RemoveInfrequent(int minsup) {
+    void RemoveInfrequent(size_t minsup) {
         boost::unordered::erase_if(matrix_, [&](auto const& kv) { return kv.second < minsup; });
     }
 };

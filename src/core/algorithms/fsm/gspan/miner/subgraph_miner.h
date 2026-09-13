@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "types/dfscode.h"
 #include "types/frequent_subgraph.h"
 #include "types/graph.h"
@@ -19,13 +21,14 @@ class SubgraphMiner {
     MinGraph min_graph_;
     MinProjection min_projection_;
 
-    size_t min_sup_;
-    size_t max_number_of_edges_;
-    ThreadPool* thread_pool_ = nullptr;
-    std::vector<std::unique_ptr<SubgraphMiner>>* miners_ = nullptr;
-    int thread_id_ = 0;
+    size_t const min_sup_;
+    size_t const max_number_of_edges_;
+    ThreadPool& thread_pool_;
+    std::vector<std::unique_ptr<SubgraphMiner>>& miners_;
+    int thread_id_;
 
-    void MineChild(Projection const& projection, ExtendedEdge const& new_edge, DFSCode code);
+    void MineChild(Projection const& projection, ExtendedEdge const& new_edge, DFSCode code,
+                   size_t const support);
     void MineSubgraph(Projection const& projection, DFSCode const& code);
 
     void Enumerate(DFSCode const& code, Projection const& projection,
@@ -46,24 +49,20 @@ class SubgraphMiner {
     void UpdateRightmostPath(DFSCode const& code, size_t size);
 
 public:
-    void SetParallelContext(ThreadPool* pool, std::vector<std::unique_ptr<SubgraphMiner>>* miners,
-                            int thread_id) {
-        thread_pool_ = pool;
-        miners_ = miners;
-        thread_id_ = thread_id;
-    }
-
-    SubgraphMiner(std::vector<csr_graph_t> const& graph_database, int min_sup,
-                  int max_number_of_edges)
+    SubgraphMiner(std::vector<csr_graph_t> const& graph_database, size_t min_sup,
+                  size_t max_number_of_edges, ThreadPool& thread_pool,
+                  std::vector<std::unique_ptr<SubgraphMiner>>& miners, int thread_id)
         : graph_database_(graph_database),
           min_sup_(min_sup),
-          max_number_of_edges_(max_number_of_edges) {
-        int max_edges = 0;
-        int max_vertices = 0;
-        for (size_t i = 0; i < graph_database_.size(); i++) {
-            auto& graph = graph_database_[i];
-            max_edges = std::max(max_edges, static_cast<int>(boost::num_edges(graph)));
-            max_vertices = std::max(max_vertices, static_cast<int>(boost::num_vertices(graph)));
+          max_number_of_edges_(max_number_of_edges),
+          thread_pool_(thread_pool),
+          miners_(miners),
+          thread_id_(thread_id) {
+        uint32_t max_edges = 0;
+        uint32_t max_vertices = 0;
+        for (auto const& graph : graph_database_) {
+            max_edges = std::max(max_edges, boost::num_edges(graph));
+            max_vertices = std::max(max_vertices, boost::num_vertices(graph));
         }
 
         history_.Reset(max_edges, max_vertices);
@@ -71,7 +70,10 @@ public:
 
     void MineFromSeed(Projection const& projection, ExtendedEdge const& seed) {
         DFSCode code;
-        MineChild(projection, seed, code);
+        size_t const support = projection.GetSupport();
+        if (support >= min_sup_) {
+            MineChild(projection, seed, code, support);
+        }
     }
 
     std::vector<FrequentSubgraph>& GetFrequentSubgraphs() {
