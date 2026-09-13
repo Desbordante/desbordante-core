@@ -19,15 +19,8 @@ set(MODULE_NAME
 
 pybind11_add_module(${MODULE_NAME} bind_main_classes.cpp bindings.cpp)
 target_link_libraries(
-    ${MODULE_NAME}
-    PRIVATE pybind11::module
-            Desbordante::algos
-            magic_enum::magic_enum
-            spdlog::spdlog_header_only
-            Boost::headers
-            Desbordante.bindlib.util
-            Desbordante.bindlib.data
-            ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    ${MODULE_NAME} PRIVATE pybind11::module Desbordante::algos spdlog::spdlog_header_only
+                           Boost::headers Desbordante.bindlib.util Desbordante.bindlib.data
 )
 
 # Uncomment to debug linker issues

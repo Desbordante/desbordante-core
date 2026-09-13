@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -123,7 +124,9 @@ public:
     }
 
     [[nodiscard]] std::vector<RFD> GetRfds() const {
-        return {discovered_.begin(), discovered_.end()};
+        std::vector<RFD> rfds(discovered_.begin(), discovered_.end());
+        std::sort(rfds.begin(), rfds.end());
+        return rfds;
     }
 };
 
