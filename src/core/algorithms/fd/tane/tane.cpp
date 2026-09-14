@@ -95,13 +95,13 @@ config::ErrorType Tane::CalculateFdError(model::PLI const* lhs_pli, model::PLI c
                                                                                        joint_pli);
         case AfdErrorMeasure::kFi:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateFI(
-                               lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
+                               lhs_pli, rhs_pli, relation_.get()->GetNumRows());
         case AfdErrorMeasure::kG2:
             return afd_metric_calculator::AFDMetricCalculator::CalculateG2Error(
-                    lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
+                    lhs_pli, rhs_pli, relation_.get()->GetNumRows());
         case AfdErrorMeasure::kG3:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG3(
-                               lhs_pli, rhs_pli, relation_.get()->GetNumTuplePairs());
+                               lhs_pli, rhs_pli, relation_.get()->GetNumRows());
         case AfdErrorMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateG1Error(
                     lhs_pli, joint_pli, relation_.get()->GetNumTuplePairs());

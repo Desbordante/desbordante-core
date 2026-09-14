@@ -68,7 +68,7 @@ void AFDMetricCalculator::ExecuteInternal() {
             break;
         case AFDMetric::kG1:
             result_ = CalculateG1Error(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get(),
-                                       num_rows);
+                                       relation_->GetNumTuplePairs());
             break;
         case AFDMetric::kG3:
             result_ = CalculateG3(lhs_pli.get(), rhs_pli.get(), num_rows);
