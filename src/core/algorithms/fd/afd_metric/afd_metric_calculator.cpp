@@ -55,7 +55,7 @@ void AFDMetricCalculator::ExecuteInternal() {
 
     switch (metric_) {
         case AFDMetric::kG2:
-            result_ = CalculateG2Error(lhs_pli.get(), rhs_pli.get(), num_rows);
+            result_ = 1 - CalculateG2Error(lhs_pli.get(), rhs_pli.get(), num_rows);
             break;
         case AFDMetric::kTau:
             result_ = CalculateTau(lhs_pli.get(), rhs_pli.get());
@@ -67,8 +67,8 @@ void AFDMetricCalculator::ExecuteInternal() {
             result_ = CalculateFI(lhs_pli.get(), rhs_pli.get(), num_rows);
             break;
         case AFDMetric::kG1:
-            result_ = CalculateG1Error(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get(),
-                                       relation_->GetNumTuplePairs());
+            result_ = 1 - CalculateG1Error(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get(),
+                                           relation_->GetNumTuplePairs());
             break;
         case AFDMetric::kG3:
             result_ = CalculateG3(lhs_pli.get(), rhs_pli.get(), num_rows);
