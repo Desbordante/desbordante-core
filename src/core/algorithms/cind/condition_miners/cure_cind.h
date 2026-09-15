@@ -1,6 +1,7 @@
 #pragma once
 
-#include <sys/types.h>
+#include <cstddef>
+#include <vector>
 
 #include "core/algorithms/cind/condition_miners/cind_miner.h"
 
@@ -10,7 +11,7 @@ class CureCind final : public CindMiner {
 private:
     friend class CindAlgorithm;
 
-    uint min_support_{2};
+    unsigned int min_support_{2};
 
     struct CureAttributes {
         AttrsType lhs_inclusion, rhs_inclusion, lhs_conditional, rhs_conditional;

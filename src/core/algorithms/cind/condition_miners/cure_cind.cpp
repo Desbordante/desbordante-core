@@ -1,5 +1,9 @@
 #include "core/algorithms/cind/condition_miners/cure_cind.h"
 
+#include <algorithm>
+#include <functional>
+#include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -77,6 +81,15 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
     }
 
     std::size_t const lhs_rows = attrs.lhs_inclusion.front()->GetNumRows();
+
+    std::vector<std::vector<std::size_t> const*> matching_rhs_rows(lhs_rows, nullptr);
+    for (std::size_t lhs_row = 0; lhs_row < lhs_rows; ++lhs_row) {
+        auto it = rhs_index.find(utils::MakeKey(lhs_row, attrs.lhs_inclusion));
+        if (it != rhs_index.end()) {
+            matching_rhs_rows[lhs_row] = &it->second;
+        }
+    }
+
     std::vector<PatternPair> patterns;
 
     for (std::size_t li = 0; li < attrs.lhs_conditional.size(); ++li) {
@@ -88,11 +101,11 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
             std::unordered_map<std::pair<int, int>, std::size_t, PairIntHash> pair_counts;
 
             for (std::size_t lhs_row = 0; lhs_row < lhs_rows; ++lhs_row) {
-                auto it = rhs_index.find(utils::MakeKey(lhs_row, attrs.lhs_inclusion));
-                if (it == rhs_index.end()) continue;
+                std::vector<std::size_t> const* rhs_rows_for_lhs = matching_rhs_rows[lhs_row];
+                if (rhs_rows_for_lhs == nullptr) continue;
 
                 int const lv = lhs_attr->GetValue(lhs_row);
-                for (std::size_t rhs_row : it->second) {
+                for (std::size_t rhs_row : *rhs_rows_for_lhs) {
                     int const rv = rhs_attr->GetValue(rhs_row);
                     ++pair_counts[{lv, rv}];
                 }
@@ -106,6 +119,11 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
         }
     }
 
+    std::ranges::sort(patterns, [](PatternPair const& a, PatternPair const& b) {
+        return std::tie(a.lhs_attr_idx, a.lhs_value, a.rhs_attr_idx, a.rhs_value) <
+               std::tie(b.lhs_attr_idx, b.lhs_value, b.rhs_attr_idx, b.rhs_value);
+    });
+
     return patterns;
 }
 
@@ -115,58 +133,55 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
     std::size_t const rhs_cond_size = attrs.rhs_conditional.size();
     std::size_t const total_attrs = lhs_cond_size + rhs_cond_size;
 
-    struct CoverEntry {
-        std::vector<std::string> values;
-        std::size_t support{0};
-    };
-
-    using CoverKey = std::pair<std::size_t, int>;
-    std::unordered_map<CoverKey, CoverEntry, PairIntHash> cover;
-
     std::size_t total_joined = 0;
     for (PatternPair const& p : patterns) {
         total_joined += p.support;
     }
 
-    for (PatternPair const& p : patterns) {
-        CoverKey key{p.lhs_attr_idx, p.lhs_value};
-        auto it = cover.find(key);
+    struct CoverEntry {
+        std::vector<std::string> values;
+        std::vector<std::unordered_set<std::string>> rhs_seen;
+        std::size_t support{0};
 
-        if (it == cover.end()) {
-            CoverEntry entry;
-            entry.values.resize(total_attrs, kAnyValue);
+        CoverEntry(std::size_t total_attrs, std::size_t rhs_cond_size)
+            : values(total_attrs, kAnyValue), rhs_seen(rhs_cond_size) {}
+    };
+
+    using CoverKey = std::pair<std::size_t, int>;
+    std::unordered_map<CoverKey, CoverEntry, PairIntHash> cover;
+
+    for (PatternPair const& p : patterns) {
+        auto [it, inserted] = cover.try_emplace(CoverKey{p.lhs_attr_idx, p.lhs_value}, total_attrs,
+                                                rhs_cond_size);
+        CoverEntry& entry = it->second;
+        if (inserted) {
             entry.values[p.lhs_attr_idx] =
                     attrs.lhs_conditional[p.lhs_attr_idx]->DecodeValue(p.lhs_value);
-            entry.values[lhs_cond_size + p.rhs_attr_idx] =
-                    attrs.rhs_conditional[p.rhs_attr_idx]->DecodeValue(p.rhs_value);
-            entry.support = p.support;
-            cover.emplace(std::move(key), std::move(entry));
-        } else {
-            CoverEntry& entry = it->second;
-            std::size_t const rhs_pos = lhs_cond_size + p.rhs_attr_idx;
-            std::string const rhs_decoded =
-                    attrs.rhs_conditional[p.rhs_attr_idx]->DecodeValue(p.rhs_value);
-
-            if (entry.values[rhs_pos] == kAnyValue) {
-                entry.values[rhs_pos] = rhs_decoded;
-            } else if (entry.values[rhs_pos].find(rhs_decoded) == std::string::npos) {
-                // Disjunction: append with comma
-                entry.values[rhs_pos] += ", " + rhs_decoded;
-            }
-            entry.support += p.support;
         }
+
+        std::string rhs_decoded = attrs.rhs_conditional[p.rhs_attr_idx]->DecodeValue(p.rhs_value);
+        if (entry.rhs_seen[p.rhs_attr_idx].insert(rhs_decoded).second) {
+            std::string& slot = entry.values[lhs_cond_size + p.rhs_attr_idx];
+            if (slot == kAnyValue) {
+                slot = std::move(rhs_decoded);
+            } else {
+                slot += ", " + rhs_decoded;
+            }
+        }
+
+        entry.support += p.support;
     }
 
     std::vector<Condition> conditions;
     conditions.reserve(cover.size());
 
     for (auto& [_, entry] : cover) {
-        double const validity =
+        double const share =
                 (total_joined > 0) ? static_cast<double>(entry.support) / total_joined : 0.0;
-        double const completeness =
-                (total_joined > 0) ? static_cast<double>(entry.support) / total_joined : 0.0;
-        conditions.emplace_back(std::move(entry.values), validity, completeness);
+        conditions.emplace_back(std::move(entry.values), share, share);
     }
+
+    std::ranges::sort(conditions, std::less{}, &Condition::condition_attrs_values);
 
     return conditions;
 }

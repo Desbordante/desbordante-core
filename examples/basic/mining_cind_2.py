@@ -100,7 +100,7 @@ banner("Discovering CINDs with the Cure algorithm")
 printlns(
     "In this example we discover Conditional Inclusion Dependencies with the "
     "Cure algorithm [3], an alternative to the CINDERELLA / PLI-CIND miners "
-    "shown in mining_cind.py. Cure is controlled by a single support "
+    "shown in mining_cind_1.py. Cure is controlled by a single support "
     "threshold and produces compact patterns with disjunctive RHS values."
 )
 
@@ -109,7 +109,7 @@ prints(
     "A Conditional Inclusion Dependency restricts an IND R1[X] subseteq R2[Y] "
     "to R1 rows that match a pattern on the remaining columns of R1 (the "
     "conditional attributes). Pattern entries are concrete values or a "
-    "wildcard (\"_\" or \"-\") meaning any value. See mining_cind.py for the "
+    "wildcard (\"_\" or \"-\") meaning any value. See mining_cind_1.py for the "
     "full definition and the validity/completeness metrics used by other "
     "miners."
 )
@@ -325,7 +325,7 @@ printlns(
 banner("See also")
 
 print("Related primitives in Desbordante:")
-print("  * CIND mining (CINDERELLA, PLI-CIND) -  examples/basic/mining_cind.py")
+print("  * CIND mining (CINDERELLA, PLI-CIND) -  examples/basic/mining_cind_1.py")
 print("  * CIND verification                  -  examples/basic/verifying_cind.py")
 print("  * IND mining                         -  examples/basic/mining_ind.py")
 print("  * AIND mining                        -  examples/basic/mining_aind.py")
