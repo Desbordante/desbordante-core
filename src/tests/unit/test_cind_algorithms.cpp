@@ -174,7 +174,7 @@ TEST(TestCureCindConditions, KnownConditionsAtSupport2) {
     CheckCondition(cinds,
                    {{"-", "-", "-", "Schauspieler", "18", "SA", "USA", "Actor"}, 0.2449, 0.2449});
     CheckCondition(cinds,
-                   {{"-", "-", "-", "Actor", "18", "Sud, Kap", "USA, Cal, LA", "Schauspieler"},
+                   {{"-", "-", "-", "Actor", "18", "Kap, Sud", "LA, Cal, USA", "Schauspieler"},
                     0.2449,
                     0.2449});
     CheckCondition(cinds, {{"-", "18", "-", "Mel Sheppard", "18", "Athlette"}, 1.0, 1.0});

@@ -62,17 +62,18 @@ void CindAlgorithm::RegisterCindMinerOptions() {
     RegisterOption(config::kCompletenessOpt(&cind_miner_->min_completeness_));
     RegisterOption(config::kConditionTypeOpt(&cind_miner_->condition_type_));
 
-    if (algo_type_._value == AlgoType::cure_cind) {
+    if (algo_type_ == AlgoType::kCureCind) {
         auto* cure = static_cast<CureCind*>(cind_miner_.get());
-        config::Option<unsigned int> support_opt{&cure->min_support_,
-                                                 config::names::kCindMinSupport,
-                                                 config::descriptions::kDCindMinSupport, 2u};
-        support_opt.SetValueCheck([](unsigned int support) {
+
+        auto check_support = [](unsigned int support) {
             if (support < 1) {
-                throw config::ConfigurationError("ERROR: support must be >= 1.");
+                throw config::ConfigurationError("Support must be >= 1.");
             }
-        });
-        RegisterOption(std::move(support_opt));
+        };
+
+        RegisterOption(config::Option{&cure->min_support_, config::names::kCindMinSupport,
+                                      config::descriptions::kDCindMinSupport, 2u}
+                               .SetValueCheck(check_support));
     }
 }
 
@@ -80,7 +81,7 @@ void CindAlgorithm::MakeExecuteOptsAvailable() {
     std::vector<std::string_view> opts{config::kValidityOpt.GetName(),
                                        config::kCompletenessOpt.GetName(),
                                        config::kConditionTypeOpt.GetName()};
-    if (algo_type_._value == AlgoType::cure_cind) {
+    if (algo_type_ == AlgoType::kCureCind) {
         opts.push_back(config::names::kCindMinSupport);
     }
     MakeOptionsAvailable(opts);
