@@ -3391,11 +3391,10 @@ reproducible results.
 
 \x1b[1;33mSetting up similarity metrics\x1b[0m
   Finally, to invoke the algorithm, you must specify which similarity metrics
-should be used by the target RFDs. For this, we employ the set_metrics() method,
-which takes a list of metric functions — one per column in the mined table. For
-example:
+should be used by the target RFDs. For this, use the metrics option, which takes
+a list of metric functions — one per column in the mined table. For example:
 
-  \x1b[1malgo.set_metrics([abs_diff, abs_diff, equality])\x1b[0m
+  \x1b[1malgo.execute(metrics=[abs_diff, abs_diff, equality], ...)\x1b[0m
 
   This assigns absolute difference metric to the first two columns and equality
 metric to the third column.

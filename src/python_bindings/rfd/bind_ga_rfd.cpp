@@ -2,42 +2,31 @@
 
 #include <pybind11/stl.h>
 
+#include "core/algorithms/rfd/distance_metric.h"
 #include "core/algorithms/rfd/ga_rfd/ga_rfd.h"
-#include "core/algorithms/rfd/similarity_metric.h"
+#include "core/util/custom_metric/custom_metric.h"
 #include "python_bindings/py_util/bind_primitive.h"
-#include "python_bindings/rfd/py_similarity_metric.h"
 
 namespace py = pybind11;
 using algos::rfd::GaRfd;
 using algos::rfd::RFD;
 using algos::rfd::RFDHash;
-using algos::rfd::SimilarityMetric;
 
 namespace python_bindings {
-
-std::vector<std::shared_ptr<SimilarityMetric>> ConvertMetrics(std::vector<py::object> const& objs) {
-    std::vector<std::shared_ptr<SimilarityMetric>> metrics;
-    metrics.reserve(objs.size());
-    for (py::object obj : objs) {
-        if (py::isinstance<py::function>(obj)) {
-            metrics.push_back(std::make_shared<PySimilarityMetric>(std::move(obj)));
-        } else {
-            metrics.push_back(obj.cast<std::shared_ptr<SimilarityMetric>>());
-        }
-    }
-    return metrics;
-}
 
 void BindGaRfd(py::module_& main_module) {
     auto rfd_module = main_module.def_submodule("rfd");
 
-    py::class_<SimilarityMetric, std::shared_ptr<SimilarityMetric>>(rfd_module, "SimilarityMetric")
-            .def("__call__", &SimilarityMetric::Compare);
+    // User-facing similarity facade over core distances: both names refer to
+    // the same metric type; Python callables are wrapped similarity -> distance.
+    rfd_module.attr("SimilarityMetric") = main_module.attr("metrics").attr("CustomMetric");
+    rfd_module.attr("DistanceMetric") = rfd_module.attr("SimilarityMetric");
 
     rfd_module.def("levenshtein_metric", &algos::rfd::LevenshteinMetric);
     rfd_module.def("equality_metric", &algos::rfd::EqualityMetric);
     rfd_module.def("abs_diff_metric", &algos::rfd::AbsoluteDifferenceMetric);
-    rfd_module.def("abs_threshold_metric", &algos::rfd::AbsoluteThresholdMetric);
+    rfd_module.def("abs_threshold_metric", &algos::rfd::AbsoluteThresholdMetricFactory,
+                   py::arg("tolerance"));
 
     py::class_<RFD>(rfd_module, "RFD")
             .def(py::init<>())
@@ -100,30 +89,20 @@ void BindGaRfd(py::module_& main_module) {
             .def("__gt__", [](RFD const& a, RFD const& b) { return a > b; })
             .def("__ge__", [](RFD const& a, RFD const& b) { return a >= b; })
             .def("__hash__", [](RFD const& r) { return RFDHash{}(r); })
-            .def("__getstate__",
-                 [](RFD const& r) {
-                     py::dict d;
-                     d["lhs_mask"] = r.lhs_mask;
-                     d["rhs_index"] = r.rhs_index;
-                     d["support"] = r.support;
-                     d["confidence"] = r.confidence;
-                     return d;
-                 })
-            .def("__setstate__", [](RFD& r, py::dict state) {
-                r.lhs_mask = state["lhs_mask"].cast<uint32_t>();
-                r.rhs_index = state["rhs_index"].cast<uint8_t>();
-                r.support = state["support"].cast<double>();
-                r.confidence = state["confidence"].cast<double>();
-            });
+            .def(py::pickle(
+                    [](RFD const& rfd) {
+                        return py::make_tuple(rfd.lhs_mask, rfd.rhs_index, rfd.support,
+                                              rfd.confidence);
+                    },
+                    [](py::tuple state) {
+                        if (state.size() != 4) {
+                            throw std::runtime_error("Invalid state for RFD pickle");
+                        }
+                        return RFD{state[0].cast<uint32_t>(), state[1].cast<uint8_t>(),
+                                   state[2].cast<double>(), state[3].cast<double>()};
+                    }));
 
     auto ga_cls = BindPrimitiveNoBase<GaRfd>(rfd_module, "GaRfd");
-
-    ga_cls.def(
-            "set_metrics",
-            [](GaRfd& self, std::vector<py::object> const& metrics) {
-                self.SetMetrics(ConvertMetrics(metrics));
-            },
-            "Set list of similarity metrics (built-in metric objects or Python callables)");
 
     ga_cls.def("get_rfds", &GaRfd::GetRfds);
 }

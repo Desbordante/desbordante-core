@@ -13,7 +13,6 @@ TABLE_ONLY_CONTAINER = OptionContainer(
     "WDC_satellites.csv", {}, {}
 )
 
-# GaRfd enforces a hard limit of 31 attributes (WDC_satellites.csv has 57).
 GA_RFD_CONTAINER = OptionContainer("TestWide.csv", {}, {})
 
 

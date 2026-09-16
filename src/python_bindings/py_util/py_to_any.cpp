@@ -45,7 +45,6 @@
 #include "python_bindings/py_util/create_dataframe_reader.h"
 #include "python_bindings/py_util/iterable_sequence_stream.h"
 #include "python_bindings/py_util/py_custom_metrics.h"
-#include "python_bindings/rfd/py_similarity_metric.h"
 
 namespace {
 
@@ -221,6 +220,48 @@ boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
     return result;
 }
 
+boost::any GaRfdMetricsToAny(std::string_view option_name, py::handle obj) {
+    auto metric_handles = CastAndReplaceCastError<std::vector<py::handle>>(option_name, obj);
+    config::CustomMetricsType result(metric_handles.size());
+    py::list rest;
+    std::vector<std::size_t> rest_indices;
+    for (std::size_t i = 0; i < metric_handles.size(); ++i) {
+        py::handle handle = metric_handles[i];
+        if (handle.is_none()) {
+            result[i] = nullptr;
+            continue;
+        }
+        try {
+            result[i] = handle.cast<config::CustomMetricType>();
+            continue;
+        } catch (py::cast_error const&) {
+        }
+        PyObject* call_attr = PyObject_GetAttrString(handle.ptr(), "__call__");
+        bool const is_callable = call_attr != nullptr || py::isinstance<py::function>(handle);
+        Py_XDECREF(call_attr);
+        if (!is_callable) {
+            throw config::ConfigurationError(std::string("Option \"") + option_name.data() +
+                                             "\": each metric must be a built-in metric, "
+                                             "a Python callable f(a, b) -> similarity in "
+                                             "[0, 1], or None");
+        }
+        rest.append(handle);
+        rest_indices.push_back(i);
+    }
+    if (!rest_indices.empty()) {
+        config::CustomMetricsType base =
+                boost::any_cast<config::CustomMetricsType>(CustomMetricsToAny(option_name, rest));
+        for (std::size_t k = 0; k < rest_indices.size(); ++k) {
+            config::CustomMetricType adapted = base[k];
+            if (auto inner = std::dynamic_pointer_cast<python_bindings::PyCustomMetric>(base[k])) {
+                adapted = std::make_shared<python_bindings::PySimilarityMetric>(std::move(*inner));
+            }
+            result[rest_indices[k]] = std::move(adapted);
+        }
+    }
+    return result;
+}
+
 boost::any CustomVectorMetricToAny(std::string_view, py::handle obj) {
     return config::CustomVectorMetricType{
             new python_bindings::PyCustomVectorMetric(py::reinterpret_borrow<py::object>(obj))};
@@ -272,21 +313,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<algos::cfd::RawCFD>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
         {typeid(config::CustomMetricType), CustomMetricToAny},
-        {typeid(config::CustomMetricsType), CustomMetricsToAny},
+        {typeid(config::CustomMetricsType), GaRfdMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
-        {typeid(std::vector<std::shared_ptr<algos::rfd::SimilarityMetric>>),
-         [](std::string_view, py::handle obj) {
-             std::vector<std::shared_ptr<algos::rfd::SimilarityMetric>> metrics;
-             for (py::handle item : obj) {
-                 if (py::isinstance<py::function>(item)) {
-                     metrics.push_back(std::make_shared<python_bindings::PySimilarityMetric>(
-                             py::reinterpret_borrow<py::object>(item)));
-                 } else {
-                     metrics.push_back(item.cast<std::shared_ptr<algos::rfd::SimilarityMetric>>());
-                 }
-             }
-             return metrics;
-         }},
         kNormalConvPair<std::vector<double>>,
 };
 
