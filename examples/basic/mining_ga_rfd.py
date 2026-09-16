@@ -285,11 +285,11 @@ printlns(
 print(f"{YELLOW}Setting up similarity metrics{RESET}")
 printlns(
     f"  Finally, to invoke the algorithm, you must specify which similarity metrics " +
-    "should be used by the target RFDs. For this, we employ the set_metrics() method, " +
+    "should be used by the target RFDs. For this, use the metrics option, " +
     "which takes a list of metric functions — one per column in the mined table. For example:"
 )
 printlns(
-    "  " + f"{BOLD}algo.set_metrics([abs_diff, abs_diff, equality]){RESET}"
+    "  " + f"{BOLD}algo.execute(metrics=[abs_diff, abs_diff, equality], ...){RESET}"
 )
 printlns(
     "  This assigns absolute difference metric to the first two columns " +
@@ -349,8 +349,8 @@ printlns(
 print_table(df)
 algo_rfd = desbordante.rfd.algorithms.GaRfd()
 algo_rfd.load_data(table=(DATA_PATH, ",", True))
-algo_rfd.set_metrics([abs_diff, abs_diff, abs_diff])
-algo_rfd.execute(min_similarity=[0.95], minconf=0.7, max_generations=500, seed=42)
+algo_rfd.execute(metrics=[abs_diff, abs_diff, abs_diff],
+                 min_similarity=[0.95], minconf=0.7, max_generations=500, seed=42)
 rfds = algo_rfd.get_rfds()
 
 highlight_key = make_rfd_key(COL_NAMES, ["height_cm", "weight_kg"], "shoe_size_eu")
@@ -390,8 +390,8 @@ printlns(
 print_table(df)
 algo_abs = desbordante.rfd.algorithms.GaRfd()
 algo_abs.load_data(table=(DATA_PATH, ",", True))
-algo_abs.set_metrics([abs_thresh(1.0), abs_thresh(10.0), abs_thresh(1.0)])
-algo_abs.execute(min_similarity=[1.0], minconf=0.5, max_generations=500, seed=42)
+algo_abs.execute(metrics=[abs_thresh(1.0), abs_thresh(10.0), abs_thresh(1.0)],
+                 min_similarity=[1.0], minconf=0.5, max_generations=500, seed=42)
 abs_rfds = algo_abs.get_rfds()
 
 highlight_key = make_rfd_key(COL_NAMES, ["height_cm", "weight_kg"], "shoe_size_eu")
@@ -459,8 +459,8 @@ def jaccard_2gram(a, b) -> float:
 
 algo_eq = desbordante.rfd.algorithms.GaRfd()
 algo_eq.load_data(table=(JACCARD_DATA_PATH, ",", True))
-algo_eq.set_metrics([eq, eq, eq])
-algo_eq.execute(min_similarity=[1.0], minconf=0.0001, max_generations=150,
+algo_eq.execute(metrics=[eq, eq, eq],
+                min_similarity=[1.0], minconf=0.0001, max_generations=150,
                 population_size=2000, seed=42)
 eq_rfds = algo_eq.get_rfds()
 
@@ -478,8 +478,8 @@ printlns(
 
 algo_jac = desbordante.rfd.algorithms.GaRfd()
 algo_jac.load_data(table=(JACCARD_DATA_PATH, ",", True))
-algo_jac.set_metrics([jaccard_2gram, eq, eq])
-algo_jac.execute(min_similarity=[0.3], minconf=0.0001, max_generations=150,
+algo_jac.execute(metrics=[jaccard_2gram, eq, eq],
+                 min_similarity=[0.3], minconf=0.0001, max_generations=150,
                  population_size=2000, seed=42)
 jac_rfds = algo_jac.get_rfds()
 
@@ -563,8 +563,8 @@ def run_garfd(table):
         algo.load_data(table=(table, ",", True))
     else:
         algo.load_data(table=table)
-    algo.set_metrics([jaccard_2gram, eq, eq])
     algo.execute(
+        metrics=[jaccard_2gram, eq, eq],
         min_similarity=MIN_SIMILARITY,
         minconf=DISCOVERY_MINCONF,
         max_generations=500,

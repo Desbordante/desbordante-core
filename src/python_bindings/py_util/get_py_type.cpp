@@ -33,6 +33,7 @@
 #include "core/config/tabular_data/input_tables_type.h"
 #include "core/model/table/column_combination.h"
 #include "core/model/transaction/input_format_type.h"
+#include "core/util/custom_metric/custom_metric.h"
 
 namespace py = pybind11;
 
@@ -145,6 +146,8 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<std::vector<double>, &PyList_Type, &PyFloat_Type>,
             {typeid(std::shared_ptr<pac::model::IDomain>),
              []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
+            {typeid(config::CustomMetricsType),
+             []() { return MakeTypeTuple(&PyList_Type, py::type::of<util::ICustomMetric>()); }},
             kPyTypePair<config::CustomMetricType, &PyFunction_Type>,
             kPyTypePair<config::CustomMetricsType, &PyList_Type, &PyFunction_Type>,
             kPyTypePair<config::CustomVectorMetricType, &PyFunction_Type>,

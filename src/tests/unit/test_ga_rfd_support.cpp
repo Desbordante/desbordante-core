@@ -4,19 +4,21 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/rfd/distance_metric.h"
 #include "core/algorithms/rfd/ga_rfd/ga_rfd.h"
-#include "core/algorithms/rfd/similarity_metric.h"
 #include "core/config/names.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "core/util/custom_metric/custom_metric.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace rfd = algos::rfd;
+namespace util = ::util;
 
 class GaRfdTester {
 public:
-    static void BuildSimilarityBitsets(rfd::GaRfd& algo) {
-        algo.BuildSimilarityBitsets();
+    static void BuildMatchBitsets(rfd::GaRfd& algo) {
+        algo.BuildMatchBitsets();
     }
 
     static std::size_t ComputeSupport(rfd::GaRfd const& algo, uint32_t mask) {
@@ -24,11 +26,10 @@ public:
     }
 };
 
-static algos::StdParamsMap MakeParams(
-        config::InputTable const& table,
-        std::vector<double> const& min_sim,  // per-attribute thresholds
-        double beta, std::size_t pop_size, std::size_t max_gen,
-        std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics = {}) {
+static algos::StdParamsMap MakeParams(config::InputTable const& table,
+                                      std::vector<double> const& min_sim, double beta,
+                                      std::size_t pop_size, std::size_t max_gen,
+                                      config::CustomMetricsType metrics = {}) {
     algos::StdParamsMap params{{config::names::kTable, table},
                                {config::names::kRfdMinSimilarity, min_sim},
                                {config::names::kRfdMinimumConfidence, beta},
@@ -46,17 +47,14 @@ static algos::StdParamsMap MakeParams(
 TEST(GARfdSupport, SupportComputationOnIris) {
     config::InputTable table = std::make_shared<CSVParser>(kIris);
 
-    std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics(5);
+    config::CustomMetricsType metrics(5);
     for (int i = 0; i < 5; ++i) metrics[i] = rfd::EqualityMetric();
 
-    std::vector<double> sim_vec(5, 1.0);  // thresholds for all attributes
+    std::vector<double> sim_vec(5, 1.0);
 
-    auto algo = std::make_unique<rfd::GaRfd>();
     auto params = MakeParams(table, sim_vec, 0.5, 10, 1, metrics);
-    algos::ConfigureFromMap(*algo, params);
-    algo->LoadData();
-
-    GaRfdTester::BuildSimilarityBitsets(*algo);
+    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    algo->Execute();
 
     constexpr std::size_t total_pairs = 150 * 149 / 2;
 
@@ -77,14 +75,13 @@ TEST(GARfdSupport, SupportComputationOnIris) {
 
 TEST(GARfdSupport, CacheReuse) {
     config::InputTable table = std::make_shared<CSVParser>(kIris);
-    std::vector<std::shared_ptr<rfd::SimilarityMetric>> metrics(5, rfd::EqualityMetric());
+    config::CustomMetricsType metrics(5, rfd::EqualityMetric());
     std::vector<double> sim_vec(5, 1.0);
 
-    auto algo = std::make_unique<rfd::GaRfd>();
     auto params = MakeParams(table, sim_vec, 0.5, 10, 1, metrics);
-    algos::ConfigureFromMap(*algo, params);
-    algo->LoadData();
-    GaRfdTester::BuildSimilarityBitsets(*algo);
+    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    algo->Execute();
+    GaRfdTester::BuildMatchBitsets(*algo);
 
     uint32_t mask = 1u << 4;
     std::size_t first = GaRfdTester::ComputeSupport(*algo, mask);

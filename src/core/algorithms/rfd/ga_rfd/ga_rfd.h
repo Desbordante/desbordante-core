@@ -18,8 +18,9 @@
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/rfd/ga_rfd/util/lru_cache.h"
 #include "core/algorithms/rfd/rfd.h"
-#include "core/algorithms/rfd/similarity_metric.h"
+#include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace tests {
 class GaRfdTester;
@@ -41,18 +42,18 @@ private:
     };
 
     struct IndividualHash {
-        std::size_t operator()(Individual const& ind) const {
-            return (static_cast<std::size_t>(ind.lhs_mask) << 8) | ind.rhs_index;
+        std::size_t operator()(Individual const& individual) const {
+            return (static_cast<std::size_t>(individual.lhs_mask) << 8) | individual.rhs_index;
         }
     };
 
     // Input
     config::InputTable input_table_;
-    std::vector<std::shared_ptr<SimilarityMetric>> metrics_;
+    config::CustomMetricsType metrics_;
 
     // Internal state
-    std::vector<std::vector<std::string>> column_data_;
-    uint8_t num_attrs_ = 0;
+    std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
+    std::size_t num_attributes_ = 0;
     std::size_t num_rows_ = 0;
     std::size_t total_pairs_ = 0;
 
@@ -60,14 +61,14 @@ private:
     uint32_t full_mask_ = 0;
 
     // separate bin column on chunk of 64 bit
-    std::vector<std::vector<uint64_t>> attr_similarity_bits_;
+    std::vector<std::vector<uint64_t>> attribute_match_bits_;
 
     std::size_t cache_max_size_ = 10000;
     mutable std::unique_ptr<util::LRUCache<uint32_t, std::size_t>> support_cache_;
 
     // Parameters
-    std::vector<double> min_similarity_;  // similarity thresholds per attribute
-    double eps_ = 1.0;                    // minimum confidence for RFD
+    std::vector<double> min_similarity_;  // similarity thresholds per attribute in [0, 1]
+    double min_confidence_ = 1.0;         // minimum confidence for RFD
     std::size_t max_generations_ = 32;
     std::size_t population_size_ = 1024;
     double crossover_probability_ = 1.0;
@@ -84,44 +85,39 @@ private:
     void ResetState() final;
 
     // helper methods
-    // Expands per-attribute parameters (min_similarity, metrics) to match
-    // num_attrs_, filling defaults where unset; called at load and before
-    // every execution.
-    void NormalizeSimilarityConfig();
-    void BuildSimilarityBitsets();
-    [[nodiscard]] std::size_t ComputeSupport(uint32_t attrs_mask) const;
+    void BuildMatchBitsets();
+    std::size_t ComputeSupport(uint32_t attributes_mask) const;
     // Computes conf and supp for a single individual
-    [[nodiscard]] Individual Evaluate(Individual const& ind) const;
+    Individual Evaluate(Individual const& individual) const;
     // Computes conf and supp for all individuals
-    void EvaluatePopulation(std::unordered_set<Individual, IndividualHash>& pop) const;
-    // Checks each individual threshold satisfies conf
-    [[nodiscard]] bool AllOf(std::unordered_set<Individual, IndividualHash> const& pop) const;
-    // Computes fitness from conf: 1.0 if confidence >= beta, else confidence / beta.
-    [[nodiscard]] double Fitness(double confidence) const noexcept;
+    void EvaluatePopulation(std::unordered_set<Individual, IndividualHash>& population) const;
+    // Checks every individual's confidence meets the threshold
+    bool AllConfidencesAboveThreshold(
+            std::unordered_set<Individual, IndividualHash> const& population) const;
+    // Computes fitness from confidence: 1.0 if confidence >= min_confidence_, else scaled.
+    double Fitness(double confidence) const noexcept;
 
     // GA methods
-    [[nodiscard]] std::unordered_set<Individual, IndividualHash> InitializePopulation(
-            std::mt19937& rng) const;
-    [[nodiscard]] std::unordered_set<Individual, IndividualHash> Select(
-            std::unordered_set<Individual, IndividualHash> const& pop, std::mt19937& rng) const;
-    [[nodiscard]] std::unordered_set<Individual, IndividualHash> Crossover(
+    std::unordered_set<Individual, IndividualHash> InitializePopulation(
+            std::mt19937& random_generator) const;
+    std::unordered_set<Individual, IndividualHash> Select(
+            std::unordered_set<Individual, IndividualHash> const& population,
+            std::mt19937& random_generator) const;
+    std::unordered_set<Individual, IndividualHash> Crossover(
             std::unordered_set<Individual, IndividualHash> const& selected,
-            std::mt19937& rng) const;
-    [[nodiscard]] std::unordered_set<Individual, IndividualHash> Mutate(
-            std::unordered_set<Individual, IndividualHash> const& pop, std::mt19937& rng) const;
+            std::mt19937& random_generator) const;
+    std::unordered_set<Individual, IndividualHash> Mutate(
+            std::unordered_set<Individual, IndividualHash> const& population,
+            std::mt19937& random_generator) const;
 
-    [[nodiscard]] std::unordered_set<RFD, RFDHash> Finalize(
-            std::unordered_set<Individual, IndividualHash> const& pop) const;
+    std::unordered_set<RFD, RFDHash> Finalize(
+            std::unordered_set<Individual, IndividualHash> const& population) const;
 
     friend class tests::GaRfdTester;
 
 public:
     GaRfd();
     ~GaRfd() override;
-
-    void SetMetrics(std::vector<std::shared_ptr<SimilarityMetric>> metrics) noexcept {
-        metrics_ = std::move(metrics);
-    }
 
     [[nodiscard]] std::vector<RFD> GetRfds() const {
         std::vector<RFD> rfds(discovered_.begin(), discovered_.end());

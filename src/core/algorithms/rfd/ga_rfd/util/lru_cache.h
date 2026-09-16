@@ -21,14 +21,14 @@ class LRUCache {
 public:
     explicit LRUCache(std::size_t max_size) noexcept : max_size_(max_size) {}
 
-    std::optional<V> get(K const& key) {
+    std::optional<V> Get(K const& key) {
         auto it = map_.find(key);
         if (it == map_.end()) return std::nullopt;
         list_.splice(list_.end(), list_, it->second.it);
         return it->second.value;
     }
 
-    void put(K const& key, V const& value) {
+    void Put(K const& key, V const& value) {
         if (max_size_ == 0) return;
 
         auto it = map_.find(key);
@@ -46,12 +46,12 @@ public:
         map_[key] = {value, std::prev(list_.end())};
     }
 
-    void clear() noexcept {
+    void Clear() noexcept {
         map_.clear();
         list_.clear();
     }
 
-    std::size_t max_size() const noexcept {
+    std::size_t MaxSize() const noexcept {
         return max_size_;
     }
 };
