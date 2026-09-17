@@ -103,7 +103,7 @@ jobs:
         shell: bash --noprofile --norc -o pipefail {0}
         run: |
           # 256 Kb should be enough to exit gracefully
-          MEMORY_LIMIT="$((16 * 1024 - 256))"
+          MEMORY_LIMIT="$((16 * 1024 * 1024 - 256))K"
           TIME_LIMIT='5400' # 1.5 hours
 
           if [[ -a 'baseline.json' ]]; then
