@@ -23,6 +23,7 @@ jobs:
     env:
       # Number of run IDs to select
       num-runs: 10
+      force-upload-current-results: false
     steps:
       - uses: actions/checkout@v6
       - name: Install dependencies
@@ -40,11 +41,11 @@ jobs:
         run: |
           echo ${{ secrets.PERFORMANCEREGRESSIONTESTING }} | gh auth login --with-token
 
+          mkdir -p old-results
           gh run list --repo "${{ github.repository }}" --limit ${{ env.num-runs }} \
             --workflow "${{ github.workflow }}" --json 'databaseId' --jq '[.[].databaseId]' \
             --branch "${{ github.ref_name }}" >ids.json
 
-          mkdir -p old-results
           for (( i = 0; i < ${{ env.num-runs }}; i = $i + 1 )); do
             ID=$(jq ".[$i]" ids.json)
             if [[ "$ID" = 'null' ]]; then
@@ -83,6 +84,9 @@ jobs:
           run-id: ${{ env.LastSuccID }}
           github-token: ${{ secrets.PERFORMANCEREGRESSIONTESTING }}
         if: ${{ env.LastSuccID != '' }}
+      # All next steps should be ran even if this one has failed
+      # Some of them may fail in that case, but it's not a problem
+
       - name: Check baseline results
         # Each successful run must have a "baseline" attached.
         # If not, there's no baseline at all; use latest instead.
@@ -95,7 +99,9 @@ jobs:
             cp $FILENAME baseline.json
           else
             echo 'Warning: no baseline and no latest results found'
+            echo 'force-upload-current-results=true' >> "$GITHUB_ENV"
           fi
+        if: ${{ !cancelled() }}
 
       - name: Test
         working-directory: ${{github.workspace}}/build/target
@@ -122,9 +128,8 @@ jobs:
             echo '::error::Killed by timeout'
           fi
           exit "$EXIT_CODE"
+        if: ${{ !cancelled() }}
 
-      # All next steps should be ran even if this one has failed
-      # Some of them may fail in that case, but it's not a problem
       - uses: actions/upload-artifact@v6
         with:
           name: results-v2
@@ -143,8 +148,8 @@ jobs:
             .venv/bin/python3 -m uv run src/tests/benchmark/display_benchmarks.py \
               --old_results old-results --curr_results curr-results.json --output plots.pdf
           fi
-
         if: ${{ !cancelled() }}
+
       - uses: actions/upload-artifact@v6
         with:
           name: plots.pdf
@@ -156,9 +161,10 @@ jobs:
       # Otherwise, baseline is simply being duplicated.
       - name: Update baseline
         run: cp curr-results.json baseline.json
-        if: success()
+        if: success() || env.force-upload-current-results == 'true'
       - name: Upload baseline
         uses: actions/upload-artifact@v6
         with:
           name: baseline-v2
           path: baseline.json
+        if: ${{ !cancelled() }}
