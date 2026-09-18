@@ -12,7 +12,8 @@
 #include <boost/tokenizer.hpp>
 
 inline std::string& CSVParser::Rtrim(std::string& s) {
-    boost::trim_right(s);
+    if (!s.empty() && s.back() == '\n') s.pop_back();
+    if (!s.empty() && s.back() == '\r') s.pop_back();
     return s;
 }
 
