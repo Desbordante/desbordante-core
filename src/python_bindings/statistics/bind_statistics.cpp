@@ -214,8 +214,6 @@ void BindStatistics(pybind11::module_& main_module) {
             .def("get_false_count", &DataStats::GetFalseCount,
                  "Returns number of false values in a boolean column.", py::arg("index"))
             .def("get_zero_percent", &DataStats::GetZeroPercent,
-                 "Returns fraction of zero values in a numeric column.", py::arg("index"))
-            .def("get_number_of_diacritic_chars", &DataStats::GetNumberOfDiacriticChars,
-                 "Returns number of diacritic characters in a string column.", py::arg("index"));
+                 "Returns fraction of zero values in a numeric column.", py::arg("index"));
 }
 }  // namespace python_bindings

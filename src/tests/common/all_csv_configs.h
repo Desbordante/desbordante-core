@@ -81,7 +81,6 @@ extern CSVConfig const kTestCINDEn;
 extern CSVConfig const kTestCINDDe;
 extern CSVConfig const kTestBool;
 extern CSVConfig const kTestDataStats;
-extern CSVConfig const kTestDiacritics;
 extern CSVConfig const kTestDC;
 extern CSVConfig const kTestDC1;
 extern CSVConfig const kTestDC2;
