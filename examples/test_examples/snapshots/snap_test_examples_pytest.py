@@ -655,7 +655,6 @@ Entropy: 3.897238028127207
 Gini coefficient: 0.9324285434338342
 
 Column num = 0
-num_diacritic_chars = 0
 entropy = 9.884171
 vocab = -0123456789abcdef
 num_non_letter_chars = 22912
@@ -692,7 +691,6 @@ type = String
 first_char_freq = e:77
 
 Column num = 1
-num_diacritic_chars = 0
 entropy = 9.884171
 vocab =  ABCDEGHJKLMNPRSTWYabcdefghiklmnoprstuvwyz
 num_non_letter_chars = 945
@@ -729,7 +727,6 @@ type = String
 first_char_freq = D:123
 
 Column num = 2
-num_diacritic_chars = 0
 entropy = 2.327574
 vocab =  ACDGJPSadefhilnorsuvy
 num_non_letter_chars = 945
@@ -766,7 +763,6 @@ type = String
 first_char_freq = S:204
 
 Column num = 3
-num_diacritic_chars = 0
 entropy = 2.317970
 vocab = AMSTVWYabceghiklnopqrstu
 num_non_letter_chars = 0
@@ -831,7 +827,6 @@ max = 2036
 sum = 880984
 
 Column num = 5
-num_diacritic_chars = 0
 entropy = 3.897238
 vocab =  -ACDEFJLMOPRSTWacdeghijklmnoprstuvy
 num_non_letter_chars = 1225
