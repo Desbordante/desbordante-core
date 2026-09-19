@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <unordered_map>
 
 #include "core/algorithms/fd/fd_algorithm.h"
 #include "core/algorithms/statistics/statistic.h"
@@ -8,9 +9,10 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/types/numeric_type.h"
 
 namespace algos {
-
+namespace mo = model;
 class DataStats : public Algorithm {
     config::EqNullsType is_null_equal_null_;
     config::ThreadNumType threads_num_;
@@ -40,6 +42,8 @@ class DataStats : public Algorithm {
     static size_t GetNumberOfWordsInString(std::string line);
     // Returns a vector of words in a string
     static std::vector<std::string> GetWordsInString(std::string line);
+    // Returns ranks of values in a numeric column
+    static std::vector<double> GetRanks(std::vector<double> const& data);
 
     // Calculates values via a certain predivate and returns the minimal of them
     template <class Pred>
@@ -70,6 +74,42 @@ class DataStats : public Algorithm {
 
 protected:
     config::InputTable input_table_;
+
+    mutable std::map<std::pair<size_t, size_t>, Statistic> pearson_cache_;
+    mutable std::map<std::pair<size_t, size_t>, Statistic> spearman_cache_;
+    mutable std::map<std::pair<size_t, size_t>, Statistic> kendall_cache_;
+    mutable std::map<std::pair<size_t, size_t>, Statistic> cramers_v_cache_;
+    mutable size_t cache_generation_ = 0;
+    size_t data_generation_ = 0;
+    void InvalidateCache() const;
+
+    template <typename CalcFunc>
+    Statistic GetOrCalcCorrelation(size_t i1, size_t i2,
+                                   std::map<std::pair<size_t, size_t>, Statistic>& cache,
+                                   bool numeric_only, CalcFunc calc_func) const {
+        if (numeric_only) {
+            if (!col_data_[i1].GetType().IsNumeric() || !col_data_[i2].GetType().IsNumeric()) {
+                return {};
+            }
+        }
+
+        auto key = std::make_pair(std::min(i1, i2), std::max(i1, i2));
+        if (auto it = cache.find(key); it != cache.end()) {
+            return it->second;
+        }
+
+        if (i1 == i2) {
+            mo::DoubleType double_type;
+            return Statistic(double_type.MakeValue(1.0), &double_type, false);
+        }
+
+        Statistic result = calc_func(i1, i2);
+        cache[key] = result;
+        return result;
+    }
+
+    std::vector<std::pair<double, double>> ExtractNumericPairs(
+            model::TypedColumnData const& col1, model::TypedColumnData const& col2) const;
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
@@ -196,6 +236,14 @@ public:
     Statistic GetFirstCharFrequency(size_t index) const;
     // Returns the most frequent last character.
     Statistic GetLastCharFrequency(size_t index) const;
+    // Returns the Pearson correlation coefficient between two numeric columns.
+    Statistic GetPearsonCorrelation(size_t index1, size_t index2) const;
+    // Returns the Spearman's rank correlation coefficient between two numeric columns.
+    Statistic GetSpearmanCorrelation(size_t index1, size_t index2) const;
+    // Returns the Kendall's tau correlation coefficient between two numeric columns.
+    Statistic GetKendallCorrelation(size_t index1, size_t index2) const;
+    // Returns the Cramer's V statistic between two columns.
+    Statistic GetCramersVCorrelation(size_t index1, size_t index2) const;
     // Returns minimal number of whitespaces in a string column.
     Statistic GetMinWhiteSpaces(size_t index) const;
     // Returns maximal number of whitespaces in a string column.
