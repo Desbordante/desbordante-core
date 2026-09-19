@@ -103,10 +103,12 @@ desbordante_add_bind(
 desbordante_add_bind(
     dc
     SRCS
+    dc/bind_adc_verification.cpp
     dc/bind_dc_verification.cpp
     dc/bind_fastadc.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::dc::verifier
+    ${DESBORDANTE_PREFIX}::dc::adc_verifier
+    ${DESBORDANTE_PREFIX}::dc::dc_verifier
     ${DESBORDANTE_PREFIX}::dc::fastadc
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only

@@ -4,7 +4,7 @@
 
 #include <pybind11/stl.h>
 
-#include "core/algorithms/dc/FastADC/fastadc.h"
+#include "core/algorithms/dc/fast_adc/fastadc.h"
 #include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"

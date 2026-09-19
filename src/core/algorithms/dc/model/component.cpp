@@ -42,8 +42,8 @@ bool Component::operator<(Component const& rhs) const {
     if (val_type_ != ValType::kFinite) return true;
 
     if (type_->IsNumeric()) {
-        auto l_type = dynamic_cast<mo::INumericType const*>(type_);
-        auto r_type = dynamic_cast<mo::INumericType const*>(rhs.type_);
+        auto l_type = static_cast<mo::INumericType const*>(type_);
+        auto r_type = static_cast<mo::INumericType const*>(rhs.type_);
         return l_type->EvalComparison(val_, l_type, rhs.val_, r_type, mo::CompareResult::kLess);
     }
 
@@ -59,8 +59,8 @@ bool Component::operator==(Component const& rhs) const {
     if (val_type_ != ValType::kFinite) return true;
 
     if (type_->IsNumeric()) {
-        auto l_type = dynamic_cast<mo::INumericType const*>(type_);
-        auto r_type = dynamic_cast<mo::INumericType const*>(rhs.type_);
+        auto l_type = static_cast<mo::INumericType const*>(type_);
+        auto r_type = static_cast<mo::INumericType const*>(rhs.type_);
         return l_type->EvalComparison(val_, l_type, rhs.val_, r_type, mo::CompareResult::kEqual);
     }
 

@@ -15,7 +15,6 @@ private:
     std::vector<std::string> str_operators_;
     ColumnLayoutRelationData const* relation_;
     std::vector<model::TypedColumnData> const& data_;
-    static constexpr std::string_view const kSep = " and ";
     std::string dc_string_;
     bool has_next_predicate_;
     std::string next_pred_;
