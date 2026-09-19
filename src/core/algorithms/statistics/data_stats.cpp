@@ -324,7 +324,7 @@ Statistic DataStats::GetNumberOfZeros(size_t index) const {
 }
 
 Statistic DataStats::GetZeroPercent(size_t index) const {
-    if (all_stats_[index].num_diacritic_chars.HasValue()) return all_stats_[index].zero_percent;
+    if (all_stats_[index].zero_percent.HasValue()) return all_stats_[index].zero_percent;
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
