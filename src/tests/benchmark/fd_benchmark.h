@@ -37,6 +37,18 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
     comparer.SetThreshold(pyro_name, 22);
 
     for (auto measure : magic_enum::enum_values<algos::AfdErrorMeasure>()) {
+        switch (measure) {
+            // These measures require more memory than GitHub-hosted runners have
+            // TODO(#836): Investigate Tane memory consumption and enable these benchmarks
+            case algos::AfdErrorMeasure::kRho:
+            case algos::AfdErrorMeasure::kFi:
+            case algos::AfdErrorMeasure::kG2:
+            case algos::AfdErrorMeasure::kG3:
+                continue;
+            default:
+                break;
+        }
+
         // mu_plus is much slower than other measures
         auto dataset = measure == algos::AfdErrorMeasure::kMuPlus ? tests::kMushroomPlus2attr1500
                                                                   : tests::kMushroomPlus3attr1300;
