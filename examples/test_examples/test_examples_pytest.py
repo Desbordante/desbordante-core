@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import re
 import subprocess
 import pytest
 import snapshottest
@@ -58,5 +59,16 @@ def test_example(snapshot, script, input_file, output):
         raise AssertionError(error_msg)
 
     result_output = result.stdout
+    if script == 'basic/mining_afd.py':
+        result_output = re.sub(
+            r'(\|.+(?:Pyro|Tane).+\|.+\|.+)\d+\.\d{3} s',
+            r'\1<runtime>',
+            result_output,
+        )
+        result_output = re.sub(
+            r'was \d+\.\d{2} times faster',
+            'was <speedup> times faster',
+            result_output,
+        )
 
     snapshottest.assert_match_snapshot(result_output, output)
