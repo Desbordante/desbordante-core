@@ -3,7 +3,9 @@ add_subdirectory(fd_first)
 
 set(NAME cfd.model)
 desbordante_add_lib(NAME OBJECT)
-target_sources(${NAME} PRIVATE model/cfd_relation_data.cpp model/raw_cfd.cpp)
+target_sources(
+    ${NAME} PRIVATE model/cfd_relation_data.cpp model/raw_cfd.cpp model/partition_tidlist.cpp
+)
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only Boost::headers
 )
