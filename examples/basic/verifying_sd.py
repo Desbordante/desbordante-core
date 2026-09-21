@@ -132,7 +132,7 @@ def scenario_network_monitoring():
           "This may indicate missing data due to an unresponsive router,\n"
           "or spurious measurements.")
     print()
-    print("Let's run a simple python function to automatically fix the \n"
+    print("Let's run a simple python function to automatically fix the\n"
           "dataset by deleting extra records and inserting missing ones.\n")
 
     print(clean_fixed)
@@ -154,7 +154,7 @@ if __name__ == '__main__':
           "(SDs) using the Desbordante library. Algorithm is based on the\n"
           "article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,\n"
           "and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB\n"
-          "Endow. 2, 1 (August 2009), 574–585. \n")
+          "Endow. 2, 1 (August 2009), 574–585.\n")
     print()
     print("An SD expresses a relationship between ordered attributes,\n"
           "written as X -> [g1, g2] Y. This means that when the dataset\n"
@@ -163,24 +163,23 @@ if __name__ == '__main__':
           "interval [g1, g2].")
     print()
     print("Validation checks whether a user-specified SD holds for a given\n"
-          "dataset, utilizing an edit-distance based confidence metric. \n"
+          "dataset, utilizing an edit-distance based confidence metric.\n"
           "Confidence is determined by the minimum number of operations\n"
           "(OPS) — record insertions or deletions — required to make the\n"
           "sequence completely valid.")
     print()
     print("Confidence = (N - OPS) / N, where N is the number of rows in the\n"
-          "dataset. If confidence = 1, the dependency is a perfect fit for \n"
+          "dataset. If confidence = 1, the dependency is a perfect fit for\n"
           "the pattern with no outliers or exceptions. Confidence can't be\n"
-          "exactly 0, because in the worst case we need to delete all but \n"
+          "exactly 0, because in the worst case we need to delete all but\n"
           "one record so the SD holds; thus, confidence is at least 1/N.")
     print()
     print("Desbordante detects SD violations, pinpointing exactly which\n"
           "rows must be deleted and where virtual records should be\n"
-          "inserted to restore the correct sequence. Right now, X and \n"
+          "inserted to restore the correct sequence. Right now, X and\n"
           "Y can be represented by a single column each; however, it\n"
           "can be expanded in the future.")
     scenario_network_monitoring()
     print()
     print("In conclusion, we've learned about SDs and how to verify them in\n"
           "your own datasets. Now, let's experiment with your own data!")
-
