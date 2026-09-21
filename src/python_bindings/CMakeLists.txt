@@ -85,6 +85,7 @@ desbordante_add_bind(
     cfd/bind_cfd_verification.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::cfd::fdfirst
+    ${DESBORDANTE_PREFIX}::cfd::ctane
     ${DESBORDANTE_PREFIX}::cfd::verifier
     Boost::headers
 )

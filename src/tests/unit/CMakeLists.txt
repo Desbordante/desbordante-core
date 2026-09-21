@@ -65,6 +65,28 @@ desbordante_add_test(
 )
 
 desbordante_add_test(
+    cfd.ctane
+    SRCS
+    test_ctane.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cfd::ctane
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    ${DESBORDANTE_PREFIX}::testlib::common
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+desbordante_add_test(
+    cfd.ctane_first_level
+    SRCS
+    test_ctane_first_level.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cfd::ctane
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    Boost::headers
+)
+desbordante_add_test(
     cfd.verifier
     SRCS
     test_cfd_verifier.cpp

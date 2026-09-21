@@ -61,6 +61,7 @@ extend-ignore-re = [
     # These strings contain words that are often legitimate typos on their own,
     # but they are not typos in the context here, they're just used as dummy strings.
     '"(ba|helo|abd)"', # typos for "by/be", "hello", "and/bad"
+    '"PN"', # name of column "Phone Number"
     "// Частоты: abc:2, abd:1", # "abd" is a typo for "and/bad"
     
     # For GDD, `rela` is an abbreviation for `relation`
