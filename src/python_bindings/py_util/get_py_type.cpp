@@ -145,9 +145,9 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<std::vector<double>, &PyList_Type, &PyFloat_Type>,
             {typeid(std::shared_ptr<pac::model::IDomain>),
              []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
-            kPyTypePair<config::CustomMetricType, &PyFunction_Type>,
-            kPyTypePair<config::CustomMetricsType, &PyList_Type, &PyFunction_Type>,
-            kPyTypePair<config::CustomVectorMetricType, &PyFunction_Type>,
+            kPyTypePair<config::CustomMetricOptionType, &PyFunction_Type>,
+            kPyTypePair<config::CustomMetricsOptionType, &PyList_Type, &PyFunction_Type>,
+            kPyTypePair<config::CustomVectorMetricOptionType, &PyFunction_Type>,
             {typeid(algos::cfd::RawCFD),
              [] { return MakeTypeTuple(py::type::of<algos::cfd::RawCFD>()); }},
     };

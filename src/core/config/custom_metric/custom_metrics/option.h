@@ -21,11 +21,11 @@ private:
     std::string_view name_;
     std::string_view description_;
 
-    static CustomMetricsType MakeDefaultMetrics(std::size_t indices_count) {
-        return CustomMetricsType(indices_count, nullptr);
+    static CustomMetricsOptionType MakeDefaultMetrics(std::size_t indices_count) {
+        return CustomMetricsOptionType(indices_count, nullptr);
     }
 
-    static void CheckMetrics(CustomMetricsType const& value, std::size_t indices_count) {
+    static void CheckMetrics(CustomMetricsOptionType const& value, std::size_t indices_count) {
         if (value.size() != indices_count) {
             std::ostringstream msg;
             msg << "Expected " << indices_count << " user-defined metrics, got " << value.size();
@@ -34,7 +34,7 @@ private:
     }
 
     /// User can pass @c nullptr to use the default metric explicitly
-    static void NormalizeMetrics(CustomMetricsType& value) {
+    static void NormalizeMetrics(CustomMetricsOptionType& value) {
         auto default_metric = std::make_shared<util::DefaultCustomMetric>();
 
         std::ranges::replace_if(value, std::logical_not{}, default_metric);
@@ -47,7 +47,7 @@ public:
 
     // NOTE: This option should depend on indices option (see @c SetConditionalOpts)
     // to properly get column count
-    [[nodiscard]] Option<CustomMetricsType> operator()(
-            CustomMetricsType* value_ptr, std::function<IndexType()> get_col_count) const;
+    [[nodiscard]] Option<CustomMetricsOptionType> operator()(
+            CustomMetricsOptionType* value_ptr, std::function<IndexType()> get_col_count) const;
 };
 }  // namespace config
