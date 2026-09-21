@@ -134,6 +134,7 @@ jobs:
           os: ${{ matrix.os }}
           toolset: ${{ matrix.toolset }}
           boost-libraries: ''
+          install-uv: false
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1

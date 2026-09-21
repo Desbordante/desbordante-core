@@ -275,19 +275,21 @@ python3 -m pip install .
 Now it is possible to `import desbordante` as a module from within the created virtual environment. 
 
 #### Building tests & the Python module manually
-Build the tests themselves:
+The recommended way to build tests is using a wrapper script and let [uv](https://docs.astral.sh/uv/) manage its dependencies.
+Alternatively, you can install the dependencies manually and run `build.py` as a regular Python script,
+or invoke `cmake` directly.
 ```sh
-./build.sh
+uv run build.py
 ```
 
 The Python module can be built by providing the `--pybind` switch:
 ```sh
-./build.sh --pybind 
+uv run build.py --pybind 
 ```
 
-See `./build.sh --help` for more available options.
+See `uv run build.py --help` for more available options.
 
-The `./build.sh` script generates the following file structure in `/path/to/desbordante-core/build/target`:
+The `build.py` script generates the following file structure in `/path/to/desbordante-core/build/target`:
 ```
 ├───input_data
 │   └───some-sample-csv\'s.csv
