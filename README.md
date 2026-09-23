@@ -78,19 +78,17 @@ The discovered patterns can have many uses:
 * For training data used in machine learning applications the found patterns can help in feature engineering and in choosing the direction for the ablation study.
 * For database data, found patterns can help with defining (recovering) primary and foreign keys, setting up (checking) all kinds of integrity constraints.
 
-Desbordante can be used via three interfaces:
+Desbordante can be used via two interfaces:
 * **Console application.** This is a classic command-line interface that aims to provide basic profiling functionality, i.e. discovery and validation of patterns. A user can specify pattern type, task type, algorithm, input file(s) and output results to the screen or into a file.
 * **Python bindings.** Desbordante functionality can be accessed from within Python programs by employing the Desbordante Python library. This interface offers everything that is currently provided by the console version and allows advanced use, such as building interactive applications and designing scenarios for solving a particular real-life task. Relational data processing algorithms accept pandas DataFrames as input, allowing the user to conveniently preprocess the data before mining patterns.
-* **Web application.** There is a web application that provides discovery and validation tasks with a rich interactive interface where results can be conveniently visualized. However, currently it supports a limited number of patterns and should be considered more as an interactive demo.
 
-A brief introduction to the tool and its use cases can be found [here](https://medium.com/@chernishev/exploratory-data-analysis-with-desbordante-4b97299cce07) (in English) and [here](https://habr.com/ru/company/unidata/blog/667636/) (in Russian). Next, a list of various articles and guides can be found [here](https://desbordante.unidata-platform.ru/papers) <!-- currently unreachable -->. Finally, an extensive list of tutorial examples that cover each supported pattern is available [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
+A brief introduction to the tool and its use cases can be found [here](https://medium.com/@chernishev/exploratory-data-analysis-with-desbordante-4b97299cce07) (in English) and [here](https://habr.com/ru/company/unidata/blog/667636/) (in Russian). Also, an extensive list of tutorial examples that cover each supported pattern is available [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
 
 ## Table of Contents
 
 - [General](#general)
 - [Console](#console)
 - [Python bindings](#python-bindings)
-- [Web interface](#web-interface)
 - [I still don't understand how to use Desbordante and patterns :(](#i-still-dont-understand-how-to-use-desbordante-and-patterns-)
 - [Papers about patterns](#papers-about-patterns)
 - [Installation](#installation)
@@ -130,21 +128,13 @@ Finally, Desbordante allows end users to solve various data quality problems by 
 
 [There is](https://desbordante.streamlit.app/) also an interactive demo for all of them <!-- currently unreachable -->, and all of these python scripts are [here](https://github.com/Desbordante/desbordante-core/tree/main/examples/expert). The ideas behind them are briefly discussed in this [preprint](https://arxiv.org/abs/2307.14935) (Section 3).
 
-
-## Web interface
-
-While the Python interface makes building interactive applications possible, Desbordante also offers a web interface which is aimed specifically for interactive tasks. Such tasks typically involve multiple steps and require substantial user input on each of them. Interactive tasks usually originate from Python scenarios, i.e. we select the most interesting ones and implement them in the web version. Currently, only the typo detection scenario is implemented. The web interface is also useful for pattern discovery and validation tasks: a user may specify parameters, browse results, employ advanced visualizations and filters, all in a convenient way.
-
-You can try the deployed web version [here](https://desbordante.unidata-platform.ru/) <!-- currently unreachable -->. You have to register in order to process your own datasets. Keep in mind that due to high demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/Desbordante/desbordante-web).
-
 ## I still don't understand how to use Desbordante and patterns :(
 
 No worries! Desbordante offers a novel type of data profiling, which may require that you first familiarize yourself with its concepts and usage. The most challenging part of Desbordante are the primitives: their definitions and applications in practice. To help you get started, here’s a step-by-step guide:
 
-1) First of all, explore the guides on our [website](https://desbordante.unidata-platform.ru/papers) <!-- currently unreachable -->. Since our team currently does not include technical writers, it's possible that some guides may be missing.
-2) To compensate for the lack of guides, we provide several examples for each supported pattern. These examples illustrate both the pattern itself and how to use it in Python. You can check them out [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
-3) Each of our patterns was introduced in a research paper. These papers typically provide a formal definition of the pattern, examples of use, and its application scope. We recommend at least skimming through them. Don't be discouraged by the complexity of the papers! To effectively use the patterns, you only need to read the more accessible parts, such as the introduction and the example sections.
-4) Finally, do not hesitate to ask questions in the mailing list (link below) or create an issue.
+1) First of all, we provide several examples for each supported pattern. These examples illustrate both the pattern itself and how to use it in Python. You can check them out [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
+2) Each of our patterns was introduced in a research paper. These papers typically provide a formal definition of the pattern, examples of use, and its application scope. We recommend at least skimming through them. Don't be discouraged by the complexity of the papers! To effectively use the patterns, you only need to read the more accessible parts, such as the introduction and the example sections.
+3) Finally, do not hesitate to ask questions in the mailing list (link below) or create an issue.
 
 ### Papers about patterns
 
