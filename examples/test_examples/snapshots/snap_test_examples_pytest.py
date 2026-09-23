@@ -435,8 +435,8 @@ too.
 Let us try to check their presence in the same dataset.
 
 \x1b[1;33mFound 4 AFD(s) with minconf>=0.6\x1b[0m
- 1. [weight_kg] -> [height_cm]                  (conf=1.000, supp=0.071)
- 2. [shoe_size_eu] -> [height_cm]               (conf=0.750, supp=0.143)
+ 1. [shoe_size_eu] -> [height_cm]               (conf=0.750, supp=0.143)
+ 2. [weight_kg] -> [height_cm]                  (conf=1.000, supp=0.071)
  3. [weight_kg, shoe_size_eu] -> [height_cm]    (conf=1.000, supp=0.036)
 \x1b[1;33m 4. [height_cm] -> [shoe_size_eu]        (conf=0.750, supp=0.143)\x1b[0m
 
@@ -466,8 +466,8 @@ AFD discovered by GA-RFD and compare the g1 error with the confidence value.
 |                   rule                   | conf   | supp   | g1 error   | 1 - conf   |
 |------------------------------------------+--------+--------+------------+------------|
 |        [weight_kg] -> [height_cm]        | 1      | 0.071  | 0          | 0          |
-|      [shoe_size_eu] -> [height_cm]       | 0.75   | 0.143  | 0.036      | 0.25       |
 | [weight_kg, shoe_size_eu] -> [height_cm] | 1      | 0.036  | 0          | 0          |
+|      [shoe_size_eu] -> [height_cm]       | 0.75   | 0.143  | 0.036      | 0.25       |
 |      [height_cm] -> [shoe_size_eu]       | 0.75   | 0.143  | 0.036      | 0.25       |
 +------------------------------------------+--------+--------+------------+------------+
 
@@ -518,7 +518,6 @@ Related patterns in Desbordante:
   * RFD mining    -  examples/basic/mining_ga_rfd.py
 
 '''
-
 snapshots['test_example[advanced/md_semantic_checks.py-None-md_semantic_checks_output] md_semantic_checks_output'] = '''In this example we find a meaningful MD and try to use it to enforce data integrity.
 We are going to use a dataset of flights between cities.
  id Source             From               To  Distance (km)
@@ -3374,7 +3373,7 @@ The main parameters you can set:
                           Accepts a single value (applied to all columns)
                           or a list of values (one per column). Values 
                           must be in [0,1]. (default {1.0, 1.0, ...})
-  seed                  - seed for reproducible results (default 123)
+  seed                  - seed for reproducible results (default: random)
   cache_size            - maximum number of cached comparisons, the bigger 
                           the faster the algorithm will be (default 10000)
 
@@ -3452,8 +3451,8 @@ holds on this table.
 Let's run the algorithm to discover suitable RFDs.
 
 \x1b[1;33mFound 4 RFDs with min_similarity=[0.95], minconf>=0.7\x1b[0m
- 1. [weight_kg] -> [height_cm]                  (conf=1.000, supp=0.286)
- 2. [shoe_size_eu] -> [height_cm]               (conf=1.000, supp=0.714)
+ 1. [shoe_size_eu] -> [height_cm]               (conf=1.000, supp=0.714)
+ 2. [weight_kg] -> [height_cm]                  (conf=1.000, supp=0.286)
  3. [weight_kg, shoe_size_eu] -> [height_cm]    (conf=1.000, supp=0.143)
  4. [height_cm] -> [shoe_size_eu]               (conf=0.750, supp=0.952)
 
@@ -3495,12 +3494,12 @@ Let's rerun the algorithm with these parameters.
 
 \x1b[1;33mRFDs with absolute thresholds (minconf=0.5)\x1b[0m
  1. [weight_kg, shoe_size_eu] -> [height_cm]           (conf=0.600, supp=0.476)
- 2. [height_cm] -> [weight_kg]                         (conf=0.857, supp=0.333)
- 3. [shoe_size_eu] -> [weight_kg]                      (conf=0.769, supp=0.619)
- 4. [height_cm, shoe_size_eu] -> [weight_kg]           (conf=1.000, supp=0.286)
- 5. [height_cm] -> [shoe_size_eu]                      (conf=0.857, supp=0.333)
- 6. [weight_kg] -> [shoe_size_eu]                      (conf=0.625, supp=0.762)
-\x1b[1;32m 7. [height_cm, weight_kg] -> [shoe_size_eu]    (conf=1.000, supp=0.286)\x1b[0m
+ 2. [height_cm] -> [shoe_size_eu]                      (conf=0.857, supp=0.333)
+\x1b[1;32m 3. [height_cm, weight_kg] -> [shoe_size_eu]    (conf=1.000, supp=0.286)\x1b[0m
+ 4. [weight_kg] -> [shoe_size_eu]                      (conf=0.625, supp=0.762)
+ 5. [height_cm] -> [weight_kg]                         (conf=0.857, supp=0.333)
+ 6. [height_cm, shoe_size_eu] -> [weight_kg]           (conf=1.000, supp=0.286)
+ 7. [shoe_size_eu] -> [weight_kg]                      (conf=0.769, supp=0.619)
 
   The key dependency \x1b[1;32m[height_cm, weight_kg] -> [shoe_size_eu]\x1b[0m has
 \x1b[1mconfidence=1.000\x1b[0m and \x1b[1msupport=0.286\x1b[0m. It tells us: among pairs
@@ -3564,15 +3563,15 @@ names, which are all unique due to typos, never appear in any found RFD.
 Let's try again using fuzzy matching with Jaccard metric.
 
 \x1b[1;33mRFDs with Jaccard on restaurant (min_similarity=0.3)\x1b[0m
- 1. [cuisine] -> [restaurant]              (conf=0.750, supp=0.145)
- 2. [district] -> [restaurant]             (conf=0.353, supp=0.309)
- 3. [cuisine, district] -> [restaurant]    (conf=0.750, supp=0.145)
-\x1b[1;32m 4. [restaurant] -> [cuisine]       (conf=0.857, supp=0.127)\x1b[0m
- 5. [district] -> [cuisine]                (conf=0.471, supp=0.309)
- 6. [restaurant, district] -> [cuisine]    (conf=1.000, supp=0.109)
- 7. [restaurant] -> [district]             (conf=0.857, supp=0.127)
- 8. [cuisine] -> [district]                (conf=1.000, supp=0.145)
- 9. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.109)
+ 1. [district] -> [cuisine]                (conf=0.471, supp=0.309)
+\x1b[1;32m 2. [restaurant] -> [cuisine]       (conf=0.857, supp=0.127)\x1b[0m
+ 3. [restaurant, district] -> [cuisine]    (conf=1.000, supp=0.109)
+ 4. [cuisine] -> [district]                (conf=1.000, supp=0.145)
+ 5. [restaurant] -> [district]             (conf=0.857, supp=0.127)
+ 6. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.109)
+ 7. [cuisine] -> [restaurant]              (conf=0.750, supp=0.145)
+ 8. [cuisine, district] -> [restaurant]    (conf=0.750, supp=0.145)
+ 9. [district] -> [restaurant]             (conf=0.353, supp=0.309)
 
   Now 'restaurant' appears in the dependencies! For instance,
 \x1b[1;32m[restaurant] -> [cuisine]\x1b[0m tells us that restaurants with similar
@@ -3615,15 +3614,15 @@ similarity metric. This leads us to working with the following RFD:
 \x1b[1;33mStep 1: First, let's mine RFDs on the dirty dataset\x1b[0m
 
 \x1b[1;33mRFDs found on the dirty dataset (minconf=0.01)\x1b[0m
- 1. [cuisine] -> [restaurant]              (conf=0.667, supp=0.109)
- 2. [district] -> [restaurant]             (conf=0.308, supp=0.236)
- 3. [cuisine, district] -> [restaurant]    (conf=0.600, supp=0.091)
- 4. [restaurant] -> [cuisine]              (conf=0.571, supp=0.127)
- 5. [district] -> [cuisine]                (conf=0.385, supp=0.236)
- 6. [restaurant, district] -> [cuisine]    (conf=0.750, supp=0.073)
- 7. [restaurant] -> [district]             (conf=0.571, supp=0.127)
-\x1b[1;31m 8. [cuisine] -> [district]         (conf=0.833, supp=0.109)\x1b[0m
- 9. [restaurant, cuisine] -> [district]    (conf=0.750, supp=0.073)
+ 1. [district] -> [cuisine]                (conf=0.385, supp=0.236)
+ 2. [restaurant] -> [cuisine]              (conf=0.571, supp=0.127)
+ 3. [restaurant, district] -> [cuisine]    (conf=0.750, supp=0.073)
+\x1b[1;31m 4. [cuisine] -> [district]         (conf=0.833, supp=0.109)\x1b[0m
+ 5. [restaurant] -> [district]             (conf=0.571, supp=0.127)
+ 6. [restaurant, cuisine] -> [district]    (conf=0.750, supp=0.073)
+ 7. [cuisine] -> [restaurant]              (conf=0.667, supp=0.109)
+ 8. [cuisine, district] -> [restaurant]    (conf=0.600, supp=0.091)
+ 9. [district] -> [restaurant]             (conf=0.308, supp=0.236)
 
   GA-RFD found the rule \x1b[1m[cuisine] -> [district]\x1b[0m with confidence
 \x1b[1;31m0.83\x1b[0m.
@@ -3679,15 +3678,15 @@ cleaned dataset printed in Step 4.
 +-----+-----------------+-----------+------------+
 
 \x1b[1;33mRFDs found on the cleaned dataset (minconf=0.01)\x1b[0m
- 1. [cuisine] -> [restaurant]              (conf=0.600, supp=0.139)
- 2. [district] -> [restaurant]             (conf=0.300, supp=0.278)
- 3. [cuisine, district] -> [restaurant]    (conf=0.600, supp=0.139)
- 4. [restaurant] -> [cuisine]              (conf=0.750, supp=0.111)
- 5. [district] -> [cuisine]                (conf=0.500, supp=0.278)
- 6. [restaurant, district] -> [cuisine]    (conf=1.000, supp=0.083)
- 7. [restaurant] -> [district]             (conf=0.750, supp=0.111)
-\x1b[1;32m 8. [cuisine] -> [district]         (conf=1.000, supp=0.139)\x1b[0m
- 9. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.083)
+ 1. [district] -> [cuisine]                (conf=0.500, supp=0.278)
+ 2. [restaurant] -> [cuisine]              (conf=0.750, supp=0.111)
+ 3. [restaurant, district] -> [cuisine]    (conf=1.000, supp=0.083)
+\x1b[1;32m 4. [cuisine] -> [district]         (conf=1.000, supp=0.139)\x1b[0m
+ 5. [restaurant] -> [district]             (conf=0.750, supp=0.111)
+ 6. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.083)
+ 7. [cuisine] -> [restaurant]              (conf=0.600, supp=0.139)
+ 8. [cuisine, district] -> [restaurant]    (conf=0.600, supp=0.139)
+ 9. [district] -> [restaurant]             (conf=0.300, supp=0.278)
 
   On the cleaned dataset, the rule \x1b[1m[cuisine] -> [district]\x1b[0m has
 confidence \x1b[1;32m1.00\x1b[0m.
@@ -3751,7 +3750,6 @@ Related patterns in Desbordante:
 \x1b[1;32mNext: try GA-RFD on your own dataset!\x1b[0m
 
 '''
-
 snapshots['test_example[basic/mining_gfd/mining_gfd1.py-None-mining_gfd1_output] mining_gfd1_output'] = '''Our profiler supports two tasks related to graph functional dependencies (GFDs): validation and mining (discovery). In this example, we will focus on the mining task (for validation, we refer the reader to another example). The mining algorithm used in our profiler is described in the article "Discovering Graph Functional Dependencies" by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Pinge, presented at SIGMOD \'18.
 
 GFDs are functional dependencies that consist of a pattern - a graph that specifies the scope - and a rule. The nature of this object will become clearer through the example that follows.

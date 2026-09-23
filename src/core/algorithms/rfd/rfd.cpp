@@ -6,15 +6,11 @@ namespace algos::rfd {
 
 std::string RFD::ToString() const {
     std::string result = "[";
-    bool first = true;
-    for (uint8_t attribute = 0; attribute <= kMaxAttributes; ++attribute) {
-        if ((lhs_mask & (1u << attribute)) == 0) continue;
-        if (!first) result += ", ";
-
-        result += std::to_string(attribute);
-        first = false;
+    for (std::size_t i = 0; i < lhs.size(); ++i) {
+        if (i != 0) result += ", ";
+        result += lhs[i];
     }
-    result += "] -> " + std::to_string(rhs_index) + " (conf=" + std::to_string(confidence) +
+    result += "] -> [" + rhs + "] (conf=" + std::to_string(confidence) +
               ", supp=" + std::to_string(support) + ")";
     return result;
 }

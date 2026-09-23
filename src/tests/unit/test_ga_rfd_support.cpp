@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -12,81 +14,94 @@
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {
-namespace rfd = algos::rfd;
+using namespace algos::rfd;
+using namespace config::names;
 namespace util = ::util;
 
-class GaRfdTester {
-public:
-    static void BuildMatchBitsets(rfd::GaRfd& algo) {
-        algo.BuildMatchBitsets();
-    }
-
-    static std::size_t ComputeSupport(rfd::GaRfd const& algo, uint32_t mask) {
-        return algo.ComputeSupport(mask);
-    }
-};
-
 static algos::StdParamsMap MakeParams(config::InputTable const& table,
-                                      std::vector<double> const& min_sim, double beta,
+                                      std::vector<double> const& min_sim, double min_confidence,
                                       std::size_t pop_size, std::size_t max_gen,
                                       config::CustomMetricsType metrics = {}) {
-    algos::StdParamsMap params{{config::names::kTable, table},
-                               {config::names::kRfdMinSimilarity, min_sim},
-                               {config::names::kRfdMinimumConfidence, beta},
-                               {config::names::kPopulationSize, pop_size},
-                               {config::names::kRfdMaxGenerations, max_gen},
-                               {config::names::kRfdCrossoverProbability, 0.85},
-                               {config::names::kRfdMutationProbability, 0.3},
-                               {config::names::kSeed, std::uint32_t{42}}};
+    algos::StdParamsMap params{{kTable, table},
+                               {kRfdMinSimilarity, min_sim},
+                               {kRfdMinimumConfidence, min_confidence},
+                               {kPopulationSize, pop_size},
+                               {kRfdMaxGenerations, max_gen},
+                               {kRfdCrossoverProbability, 0.85},
+                               {kRfdMutationProbability, 0.3},
+                               {kSeed, std::uint32_t{42}}};
     if (!metrics.empty()) {
-        params["metrics"] = metrics;
+        params[kCustomMetrics] = metrics;
     }
     return params;
 }
 
-TEST(GARfdSupport, SupportComputationOnIris) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
+TEST(GARfdSupport, MixedPlaceholdersNeverMatch) {
+    auto run_and_collect = [](std::shared_ptr<util::ICustomMetric> column_a_metric,
+                              double min_sim) {
+        config::InputTable table = std::make_shared<CSVParser>(kRfdMixedNulls);
+        config::CustomMetricsType metrics{column_a_metric, EqualityMetric()};
+        std::vector<double> sim_vec{min_sim, 1.0};
 
-    config::CustomMetricsType metrics(5);
-    for (int i = 0; i < 5; ++i) metrics[i] = rfd::EqualityMetric();
+        auto params = MakeParams(table, sim_vec, 0.5, 10, 1, metrics);
+        auto algo = algos::CreateAndLoadAlgorithm<GaRfd>(params);
+        algo->Execute();
+        return algo->GetRfds();
+    };
 
-    std::vector<double> sim_vec(5, 1.0);
-
-    auto params = MakeParams(table, sim_vec, 0.5, 10, 1, metrics);
-    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
-    algo->Execute();
-
-    constexpr std::size_t total_pairs = 150 * 149 / 2;
-
-    EXPECT_EQ(GaRfdTester::ComputeSupport(*algo, 0), total_pairs);
-
-    uint32_t species_mask = 1u << 4;
-    constexpr std::size_t expected_species_support = 3 * (50 * 49 / 2);
-    std::size_t actual_species = GaRfdTester::ComputeSupport(*algo, species_mask);
-    EXPECT_EQ(actual_species, expected_species_support)
-            << "Support for species should be 3675 (3 classes of 50)";
-
-    uint32_t all_attrs_mask = (1u << 5) - 1;
-    std::size_t all_support = GaRfdTester::ComputeSupport(*algo, all_attrs_mask);
-    EXPECT_GT(all_support, 0) << "There are duplicate rows in this Iris version";
-
-    EXPECT_EQ(GaRfdTester::ComputeSupport(*algo, species_mask), expected_species_support);
+    for (auto const& [metric, min_sim] : {std::pair{LevenshteinMetric(), 1.0},
+                                          {AbsoluteDifferenceMetric(), 0.9},
+                                          {AbsoluteThresholdMetricFactory(10.0), 1.0}}) {
+        for (auto const& rfd : run_and_collect(metric, min_sim)) {
+            EXPECT_TRUE(std::find(rfd.lhs.begin(), rfd.lhs.end(), "a") == rfd.lhs.end())
+                    << rfd.ToString();
+        }
+    }
 }
 
-TEST(GARfdSupport, CacheReuse) {
-    config::InputTable table = std::make_shared<CSVParser>(kIris);
-    config::CustomMetricsType metrics(5, rfd::EqualityMetric());
+static std::size_t BruteForceSupport(std::vector<std::vector<std::string>> const& rows,
+                                     std::vector<std::size_t> const& attrs) {
+    std::size_t support = 0;
+    for (std::size_t i = 0; i < rows.size(); ++i) {
+        for (std::size_t j = i + 1; j < rows.size(); ++j) {
+            bool match = true;
+            for (std::size_t a : attrs) match = match && (rows[i][a] == rows[j][a]);
+            if (match) ++support;
+        }
+    }
+    return support;
+}
+
+TEST(GARfdSupport, ReportedSupportsAreExact) {
+    config::InputTable table = std::make_shared<CSVParser>(kRfdDuplicates);
+    config::CustomMetricsType metrics(5, EqualityMetric());
     std::vector<double> sim_vec(5, 1.0);
 
-    auto params = MakeParams(table, sim_vec, 0.5, 10, 1, metrics);
-    auto algo = algos::CreateAndLoadAlgorithm<rfd::GaRfd>(params);
+    auto params = MakeParams(table, sim_vec, 0.0, 30, 5, metrics);
+    auto algo = algos::CreateAndLoadAlgorithm<GaRfd>(params);
     algo->Execute();
-    GaRfdTester::BuildMatchBitsets(*algo);
+    auto rfds = algo->GetRfds();
+    ASSERT_FALSE(rfds.empty());
 
-    uint32_t mask = 1u << 4;
-    std::size_t first = GaRfdTester::ComputeSupport(*algo, mask);
-    std::size_t second = GaRfdTester::ComputeSupport(*algo, mask);
-    EXPECT_EQ(first, second);
+    auto parser = std::make_shared<CSVParser>(kRfdDuplicates);
+    std::vector<std::vector<std::string>> rows;
+    while (parser->HasNextRow()) rows.push_back(parser->GetNextRow());
+    ASSERT_EQ(rows.size(), 15u);
+    std::size_t const total_pairs = rows.size() * (rows.size() - 1) / 2;
+
+    for (auto const& rfd : rfds) {
+        std::size_t const support_lhs = BruteForceSupport(rows, rfd.lhs_indices);
+        if (support_lhs == 0) {
+            EXPECT_DOUBLE_EQ(rfd.support, 0.0);
+            EXPECT_DOUBLE_EQ(rfd.confidence, 0.0);
+            continue;
+        }
+        std::vector<std::size_t> both = rfd.lhs_indices;
+        both.push_back(rfd.rhs_index);
+        std::size_t const support_both = BruteForceSupport(rows, both);
+        EXPECT_DOUBLE_EQ(rfd.support, static_cast<double>(support_lhs) / total_pairs);
+        EXPECT_DOUBLE_EQ(rfd.confidence, static_cast<double>(support_both) / support_lhs);
+    }
 }
 
 }  // namespace tests

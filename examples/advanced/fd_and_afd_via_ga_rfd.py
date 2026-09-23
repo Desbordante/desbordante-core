@@ -74,12 +74,8 @@ def print_table(df, title=None, show_index=True, highlight_rows=None):
     print()
 
 
-def make_rfd_key(col_names, lhs_list, rhs):
-    mask = 0
-    for col in lhs_list:
-        mask |= 1 << col_names.index(col)
-    rhs_idx = col_names.index(rhs)
-    return (mask, rhs_idx)
+def make_rfd_key(lhs_list, rhs):
+    return (tuple(lhs_list), rhs)
 
 
 def print_rfds_table(rfds, col_names, title=None, highlight=None, color=YELLOW):
@@ -93,13 +89,11 @@ def print_rfds_table(rfds, col_names, title=None, highlight=None, color=YELLOW):
         highlight = set()
 
     raw_lines = []
-    for idx, rfd in enumerate(sorted(rfds, key=lambda r: (r.rhs_index, r.lhs_mask)), start=1):
-        lhs_cols = [col_names[i] for i in range(len(col_names)) if rfd.lhs_mask & (1 << i)]
-        lhs_str = ", ".join(lhs_cols) if lhs_cols else "()"
-        rhs_col = col_names[rfd.rhs_index]
-        line = f"[{lhs_str}] -> [{rhs_col}]  (conf={rfd.confidence:.3f}, supp={rfd.support:.3f})"
+    for idx, rfd in enumerate(sorted(rfds, key=lambda r: (r.rhs, r.lhs)), start=1):
+        lhs_str = ", ".join(rfd.lhs) if rfd.lhs else "()"
+        line = f"[{lhs_str}] -> [{rfd.rhs}]  (conf={rfd.confidence:.3f}, supp={rfd.support:.3f})"
         numbered_line = f"{idx:>2}. {line}"
-        if (rfd.lhs_mask, rfd.rhs_index) in highlight:
+        if (tuple(rfd.lhs), rfd.rhs) in highlight:
             raw_lines.append(f"{color}" + numbered_line + f"{RESET}")
         else:
             raw_lines.append(numbered_line)
@@ -149,7 +143,7 @@ printlns(
 # ------------------------------------------------------------
 banner("Dataset", num=2)
 
-DATA_PATH = "examples/datasets/sample_height_weight.csv"
+DATA_PATH = "examples/datasets/rfd/sample_height_weight.csv"
 COL_NAMES = ["height_cm", "weight_kg", "shoe_size_eu"]
 
 df = pd.read_csv(DATA_PATH, header=0)
@@ -181,7 +175,7 @@ algo_fd.load_data(table=(DATA_PATH, ",", True))
 algo_fd.execute(max_generations=100, seed=42)
 fds = algo_fd.get_rfds()
 
-highlight_fd = make_rfd_key(COL_NAMES, ["weight_kg"], "height_cm")
+highlight_fd = make_rfd_key(["weight_kg"], "height_cm")
 
 printlns("Now lets try to mine dependencies with these settings.")
 print_rfds_table(fds, COL_NAMES, title=f"Found {len(fds)} exact FD(s) with minconf=1.0",
@@ -214,7 +208,7 @@ algo_afd.load_data(table=(DATA_PATH, ",", True))
 algo_afd.execute(minconf=0.6, max_generations=100, seed=42)
 afds = algo_afd.get_rfds()
 
-highlight_afd = make_rfd_key(COL_NAMES, ["height_cm"], "shoe_size_eu")
+highlight_afd = make_rfd_key(["height_cm"], "shoe_size_eu")
 printlns("Let us try to check their presence in the same dataset.")
 print_rfds_table(afds, COL_NAMES, title=f"Found {len(afds)} AFD(s) with minconf>=0.6",
                  highlight={highlight_afd})
@@ -246,8 +240,8 @@ verifier = desbordante.afd_verification.algorithms.Default()
 verifier.load_data(table=(DATA_PATH, ",", True))
 
 table_data = []
-for rfd in sorted(afds, key=lambda r: (r.rhs_index, r.lhs_mask)):
-    lhs_indices = [i for i in range(len(COL_NAMES)) if rfd.lhs_mask & (1 << i)]
+for rfd in sorted(afds, key=lambda r: (r.rhs_index, r.lhs_indices)):
+    lhs_indices = list(rfd.lhs_indices)
     rhs_index = rfd.rhs_index
     if not lhs_indices:
         continue

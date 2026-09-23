@@ -74,12 +74,8 @@ def print_table(df, title=None, show_index=True, highlight_rows=None, keep_index
         print(line)
     print()
 
-def make_rfd_key(col_names, lhs_list, rhs):
-    mask = 0
-    for col in lhs_list:
-        mask |= 1 << col_names.index(col)
-    rhs_idx = col_names.index(rhs)
-    return (mask, rhs_idx)
+def make_rfd_key(lhs_list, rhs):
+    return (tuple(lhs_list), rhs)
 
 def print_rfds_table(rfds, col_names, title=None, highlight=None, color=YELLOW):
     if title:
@@ -92,13 +88,11 @@ def print_rfds_table(rfds, col_names, title=None, highlight=None, color=YELLOW):
         highlight = set()
 
     raw_lines = []
-    for idx, rfd in enumerate(sorted(rfds, key=lambda r: (r.rhs_index, r.lhs_mask)), start=1):
-        lhs_cols = [col_names[i] for i in range(len(col_names)) if rfd.lhs_mask & (1 << i)]
-        lhs_str = ", ".join(lhs_cols) if lhs_cols else "()"
-        rhs_col = col_names[rfd.rhs_index]
-        line = f"[{lhs_str}] -> [{rhs_col}]  (conf={rfd.confidence:.3f}, supp={rfd.support:.3f})"
+    for idx, rfd in enumerate(sorted(rfds, key=lambda r: (r.rhs, r.lhs)), start=1):
+        lhs_str = ", ".join(rfd.lhs) if rfd.lhs else "()"
+        line = f"[{lhs_str}] -> [{rfd.rhs}]  (conf={rfd.confidence:.3f}, supp={rfd.support:.3f})"
         numbered_line = f"{idx:>2}. {line}"
-        if (rfd.lhs_mask, rfd.rhs_index) in highlight:
+        if (tuple(rfd.lhs), rfd.rhs) in highlight:
             raw_lines.append(f"{color}" + numbered_line + f"{RESET}")
         else:
             raw_lines.append(numbered_line)
@@ -215,7 +209,7 @@ printlns(
 # ------------------------------------------------------------
 banner("Dataset", num=3)
 
-DATA_PATH = "examples/datasets/sample_original_from_paper.csv"
+DATA_PATH = "examples/datasets/rfd/sample_from_GARFD_paper.csv"
 COL_NAMES = ["height_cm", "weight_kg", "shoe_size_eu"]
 
 df = pd.read_csv(DATA_PATH, header=0)
@@ -264,7 +258,7 @@ print("""
                           Accepts a single value (applied to all columns)
                           or a list of values (one per column). Values 
                           must be in [0,1]. (default {1.0, 1.0, ...})
-  seed                  - seed for reproducible results (default 123)
+  seed                  - seed for reproducible results (default: random)
   cache_size            - maximum number of cached comparisons, the bigger 
                           the faster the algorithm will be (default 10000)
 """)
@@ -353,7 +347,7 @@ algo_rfd.execute(metrics=[abs_diff, abs_diff, abs_diff],
                  min_similarity=[0.95], minconf=0.7, max_generations=500, seed=42)
 rfds = algo_rfd.get_rfds()
 
-highlight_key = make_rfd_key(COL_NAMES, ["height_cm", "weight_kg"], "shoe_size_eu")
+highlight_key = make_rfd_key(["height_cm", "weight_kg"], "shoe_size_eu")
 printlns("Let's run the algorithm to discover suitable RFDs.")
 print_rfds_table(rfds, COL_NAMES,
                  title=f"Found {len(rfds)} RFDs with min_similarity=[0.95], minconf>=0.7")
@@ -394,7 +388,7 @@ algo_abs.execute(metrics=[abs_thresh(1.0), abs_thresh(10.0), abs_thresh(1.0)],
                  min_similarity=[1.0], minconf=0.5, max_generations=500, seed=42)
 abs_rfds = algo_abs.get_rfds()
 
-highlight_key = make_rfd_key(COL_NAMES, ["height_cm", "weight_kg"], "shoe_size_eu")
+highlight_key = make_rfd_key(["height_cm", "weight_kg"], "shoe_size_eu")
 printlns("Let's rerun the algorithm with these parameters.")
 print_rfds_table(abs_rfds, COL_NAMES,
                  title="RFDs with absolute thresholds (minconf=0.5)",
@@ -441,7 +435,7 @@ prints(
     "share many 2-grams, so their Jaccard similarity is > 0."
 )
 
-JACCARD_DATA_PATH = "examples/datasets/jaccard_err_data.csv"
+JACCARD_DATA_PATH = "examples/datasets/rfd/jaccard_err_data.csv"
 COL_NAMES_STR = ["restaurant", "cuisine", "district"]
 jaccard_df = pd.read_csv(JACCARD_DATA_PATH)
 print_table(jaccard_df, title="String dataset with a typo:")
@@ -483,7 +477,7 @@ algo_jac.execute(metrics=[jaccard_2gram, eq, eq],
                  population_size=2000, seed=42)
 jac_rfds = algo_jac.get_rfds()
 
-highlight_key = make_rfd_key(COL_NAMES_STR, ["restaurant"], "cuisine")
+highlight_key = make_rfd_key(["restaurant"], "cuisine")
 printlns(
     "Let's try again using fuzzy matching with Jaccard metric."
 )
@@ -509,7 +503,7 @@ printlns(
 # ------------------------------------------------------------
 banner("Error detection and data cleaning with GA-RFD", num=9)
 
-DIRTY_DATA_PATH = "examples/datasets/jaccard_typo_data.csv"
+DIRTY_DATA_PATH = "examples/datasets/rfd/jaccard_typo_data.csv"
 dirty_df = pd.read_csv(DIRTY_DATA_PATH).reset_index(drop=True)
 
 prints(
@@ -531,7 +525,7 @@ print_table(
 TARGET_LHS = ["cuisine"]
 TARGET_RHS = "district"
 RFD_TEXT = f"[{', '.join(TARGET_LHS)}] -> [{TARGET_RHS}]"
-TARGET_KEY = make_rfd_key(COL_NAMES_STR, TARGET_LHS, TARGET_RHS)
+TARGET_KEY = make_rfd_key(TARGET_LHS, TARGET_RHS)
 
 DISCOVERY_MINCONF = 0.01
 
@@ -576,7 +570,7 @@ def run_garfd(table):
 
 def get_rfd_by_key(rfds, key):
     for rfd in rfds:
-        if (rfd.lhs_mask, rfd.rhs_index) == key:
+        if (tuple(rfd.lhs), rfd.rhs) == key:
             return rfd
     return None
 

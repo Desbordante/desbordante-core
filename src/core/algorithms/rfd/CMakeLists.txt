@@ -7,6 +7,7 @@ target_sources(${NAME} PRIVATE rfd.cpp distance_metric.cpp)
 
 target_link_libraries(
     ${NAME}
-    PUBLIC ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::config ${DESBORDANTE_PREFIX}::util
-    PRIVATE Boost::headers
+    PUBLIC ${DESBORDANTE_PREFIX}::util
+    PRIVATE ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::config
+            ${DESBORDANTE_PREFIX}::model::types Boost::headers
 )
