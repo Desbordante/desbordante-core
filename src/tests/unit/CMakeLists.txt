@@ -721,7 +721,8 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
 )
-# GA-RFD
+
+# --- GA-RFD ---
 desbordante_add_test(
     rfd.ga
     SRCS
@@ -733,6 +734,5 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::model::types
     spdlog::spdlog_header_only
-    magic_enum::magic_enum
     Boost::headers
 )
