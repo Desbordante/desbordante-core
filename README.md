@@ -29,6 +29,7 @@ The currently supported data patterns are:
 * Dynamic validation of exact and approximate ($g_1$) functional dependencies
 * Numerical dependencies (validation)
 * Graph functional dependencies (discovery and validation)
+* Graph differential dependencies (validation)
 * Conditional functional dependencies (discovery and validation)
 * Conditional inclusion dependencies (discovery and validation)
 * Inclusion dependencies
@@ -155,12 +156,11 @@ Here is a list of papers about patterns, organized in the recommended reading or
     - [Zhang, Y., Kwashie, S., Bewong, M., Hu, J., Mahboubi, A., Guo, X., & Feng, Z. Discovering graph differential dependencies. Australasian Database Conference (ADC), 2023.](https://link.springer.com/chapter/10.1007/978-3-031-47843-7_18)
 * Conditional functional dependencies
     - [Rammelaere, J., Geerts, F. (2019). Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”. Machine Learning and Knowledge Discovery in Databases. ECML PKDD 2018. ](https://link.springer.com/chapter/10.1007/978-3-030-10928-8_33)
-* Exact and approximate inclusion dependencies
     - [Falco Dürsch et al. 2019. Inclusion Dependency Discovery: An Experimental Evaluation of Thirteen Algorithms. In Proceedings of the 28th ACM International Conference on Information and Knowledge Management (CIKM '19). Association for Computing Machinery, New York, NY, USA, 219–228.](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2019_duersch_inclusion.pdf)
     - [Sebastian Kruse, et al. Fast Approximate Discovery of Inclusion Dependencies. BTW 2017: 207-226](http://btw2017.informatik.uni-stuttgart.de/slidesandpapers/F4-10-47/paper_web.pdf)
     - [Marchi, F.D., Lopes, S. & Petit, JM. Unary and n-ary inclusion dependency discovery in relational databases. J Intell Inf Syst 32, 53–73 (2009)](https://liris.cnrs.fr/Documents/Liris-3034.pdf)
 * Conditional Inclusion Dependencies
-    - M. Grundke, Discovering interesting conditional functional dependencies, Master's thesis, Information Systems Chair Hasso-Plattner-Institute, Potsdam, 2018.
+    - [Jana Bauckmann, Ziawasch Abedjan, Ulf Leser, Heiko Müller, and Felix Naumann. 2012. Discovering conditional inclusion dependencies. In Proceedings of the 21st ACM international conference on Information and knowledge management (CIKM '12). Association for Computing Machinery, New York, NY, USA, 2094–2098.](https://dl.acm.org/doi/10.1145/2396761.2398580)
 * Order dependencies:
    - [Jaroslaw Szlichta et al. 2017. Effective and complete discovery of order dependencies via set-based axiomatization. Proc. VLDB Endow. 10, 7 (March 2017), 721–732.](http://www.vldb.org/pvldb/vol10/p721-szlichta.pdf)
    - [Langer, P., Naumann, F. Efficient order dependency detection. The VLDB Journal 25, 223–241 (2016)](https://link.springer.com/article/10.1007/s00778-015-0412-3)
