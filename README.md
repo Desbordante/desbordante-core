@@ -151,17 +151,27 @@ Here is a list of papers about patterns, organized in the recommended reading or
 * Graph functional dependencies
     - [Wenfei Fan, Yinghui Wu, and Jingbo Xu. 2016. Functional Dependencies for Graphs. In Proceedings of the 2016 International Conference on Management of Data (SIGMOD '16). Association for Computing Machinery, New York, NY, USA, 1843–1857.](https://dl.acm.org/doi/pdf/10.1145/2882903.2915232)
     - [Wenfei Fan, Chunming Hu, Xueli Liu, and Ping Lu. 2020. Discovering Graph Functional Dependencies. ACM Trans. Database Syst. 45, 3, Article 15 (September 2020), 42 pages.](https://doi.org/10.1145/3397198)
+* Graph differential dependencies
+    - [Zhang, Y., Kwashie, S., Bewong, M., Hu, J., Mahboubi, A., Guo, X., & Feng, Z. Discovering graph differential dependencies. Australasian Database Conference (ADC), 2023.](https://link.springer.com/chapter/10.1007/978-3-031-47843-7_18)
 * Conditional functional dependencies
     - [Rammelaere, J., Geerts, F. (2019). Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”. Machine Learning and Knowledge Discovery in Databases. ECML PKDD 2018. ](https://link.springer.com/chapter/10.1007/978-3-030-10928-8_33)
 * Exact and approximate inclusion dependencies
     - [Falco Dürsch et al. 2019. Inclusion Dependency Discovery: An Experimental Evaluation of Thirteen Algorithms. In Proceedings of the 28th ACM International Conference on Information and Knowledge Management (CIKM '19). Association for Computing Machinery, New York, NY, USA, 219–228.](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2019_duersch_inclusion.pdf)
     - [Sebastian Kruse, et al. Fast Approximate Discovery of Inclusion Dependencies. BTW 2017: 207-226](http://btw2017.informatik.uni-stuttgart.de/slidesandpapers/F4-10-47/paper_web.pdf)
     - [Marchi, F.D., Lopes, S. & Petit, JM. Unary and n-ary inclusion dependency discovery in relational databases. J Intell Inf Syst 32, 53–73 (2009)](https://liris.cnrs.fr/Documents/Liris-3034.pdf)
+* Conditional Inclusion Dependencies
+    - M. Grundke, Discovering interesting conditional functional dependencies, Master's thesis, Information Systems Chair Hasso-Plattner-Institute, Potsdam, 2018.
 * Order dependencies:
    - [Jaroslaw Szlichta et al. 2017. Effective and complete discovery of order dependencies via set-based axiomatization. Proc. VLDB Endow. 10, 7 (March 2017), 721–732.](http://www.vldb.org/pvldb/vol10/p721-szlichta.pdf)
    - [Langer, P., Naumann, F. Efficient order dependency detection. The VLDB Journal 25, 223–241 (2016)](https://link.springer.com/article/10.1007/s00778-015-0412-3)
+* Approximate order dependencies 
+   - [R. Karegar, P. Godfrey, L. Golab, M. Kargar, D. Srivastava, J Szlichta Efficient Discovery of Approximate Order Dependencies. EDBT 2021: 427-432](https://openproceedings.org/2021/conf/edbt/p217.pdf)
+* Sequential dependencies:
+   - [Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha, and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB Endow. 2, 1 (August 2009), 574–585.](https://dl.acm.org/doi/10.14778/1687627.1687693)
 * Metric functional dependencies
    - [N. Koudas et al. "Metric Functional Dependencies," 2009 IEEE 25th International Conference on Data Engineering, Shanghai, China, 2009, pp. 1275-1278.](https://ieeexplore.ieee.org/document/4812519)
+* Domain Probabilistic and Approximate Constraints
+   - [Flip Korn, S. Muthukrishnan, and Yunyue Zhu. Checks and balances: monitoring data quality problems in network traffic databases. VLDB '03, Vol. 29. VLDB Endowment, 536–547.](https://www.vldb.org/conf/2003/papers/S17P01.pdf)
 * Fuzzy algebraic constraints
    - [Paul G. Brown and Peter J. Hass. 2003. BHUNT: automatic discovery of Fuzzy algebraic constraints in relational data. In Proceedings of the 29th international conference on Very large data bases - Volume 29 (VLDB '03), Vol. 29. VLDB Endowment, 668–679.](https://www.vldb.org/conf/2003/papers/S20P03.pdf)
 * Differential dependencies
@@ -184,6 +194,9 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia Floratou. 2024. Rapidash: Efficient Detection of Constraint Violations. Proc. VLDB Endow. 17, 8 (April 2024), 2009–2021.](https://arxiv.org/pdf/2309.12436)
    - [Renjie Xiao, Zijing Tan, Haojin Wang, and Shuai Ma. 2022. Fast approximate denial constraint discovery. Proc. VLDB Endow. 16, 2 (October 2022), 269–281.](https://doi.org/10.14778/3565816.3565828)
    - [Meifan Zhang, Hongzhi Wang, Jianzhong Li, and Hong Gao, "One-Pass Inconsistency Detection Algorithms for Big Data," in IEEE Access, vol. 7, pp. 22377-22394, 2019](https://ieeexplore.ieee.org/document/8641478)
+* Frequent sub-graphs
+   - [Xifeng Yan and Jiawei Han, "gSpan: graph-based substructure pattern mining," 2002 IEEE International Conference on Data Mining, 2002. Proceedings., Maebashi City, Japan, 2002, pp. 721-724.](https://ieeexplore.ieee.org/document/1184038)
+
 
 ## Installation (this is what you probably want if you are not a project maintainer)
 Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
