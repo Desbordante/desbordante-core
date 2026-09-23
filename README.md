@@ -332,7 +332,7 @@ pip install desbordante-stubs
 **NOTE**: Stubs may not fully support current version of `desbordante` package, as they are updated independently.
 
 ## Cite
-If you use this software for research, please cite our core paper:
+If you use this software for research, please cite our [core](https://dl.acm.org/doi/10.1145/3703323.3703725) paper:
 
 ```bibtex
 @inproceedings{10.1145/3703323.3703725,
@@ -354,13 +354,16 @@ If you use this software for research, please cite our core paper:
 ```
 
 or cite one of our papers, if you use a particular part:
-1) George Chernishev, et al. Solving Data Quality Problems with Desbordante: a Demo. CoRR abs/2307.14935 (2023).
-2) M. Strutovskiy, N. Bobrov, K. Smirnov and G. Chernishev, "Desbordante: a Framework for Exploring Limits of Dependency Discovery Algorithms," 2021 29th Conference of Open Innovations Association (FRUCT), 2021, pp. 344-354, doi: 10.23919/FRUCT52173.2021.9435469.
-3) A. Smirnov, A. Chizhov, I. Shchuckin, N. Bobrov and G. Chernishev, "Fast Discovery of Inclusion Dependencies with Desbordante," 2023 33rd Conference of Open Innovations Association (FRUCT), Zilina, Slovakia, 2023, pp. 264-275, doi: 10.23919/FRUCT58615.2023.10143047.
-4) Y. Kuzin, D. Shcheka, M. Polyntsov, K. Stupakov, M. Firsov and G. Chernishev, "Order in Desbordante: Techniques for Efficient Implementation of Order Dependency Discovery Algorithms," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 413-424.
-5) I. Barutkin, M. Fofanov, S. Belokonny, V. Makeev and G. Chernishev, "Extending Desbordante with Probabilistic Functional Dependency Discovery Support," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 158-169.
-6) A. Shlyonskikh, M. Sinelnikov, D. Nikolaev, Y. Litvinov and G. Chernishev, "Lightning Fast Matching Dependency Discovery with Desbordante," 2024 36th Conference of Open Innovations Association (FRUCT), Lappeenranta, Finland, 2024, pp. 729-740.
+1) George Chernishev, et al. [Solving Data Quality Problems with Desbordante: a Demo](https://arxiv.org/abs/2307.14935). CoRR abs/2307.14935 (2023).
+2) M. Strutovskiy, N. Bobrov, K. Smirnov and G. Chernishev, "Desbordante: a Framework for Exploring Limits of Dependency Discovery Algorithms," 2021 29th Conference of Open Innovations Association (FRUCT), 2021, pp. 344-354.
+3) A. Smirnov, A. Chizhov, I. Shchuckin, N. Bobrov and G. Chernishev, "[Fast Discovery of Inclusion Dependencies with Desbordante](https://arxiv.org/abs/2608.02213)," 2023 33rd Conference of Open Innovations Association (FRUCT), Zilina, Slovakia, 2023, pp. 264-275.
+4) A. Chernikov, Y. Litvinov, K. Smirnov, and G. Chernishev, "[FastGFDs: Efficient Validation of Graph Functional Dependencies with Desbordante](https://arxiv.org/abs/2608.02321)," 2023 33rd Conference of Open Innovations Association (FRUCT), Zilina, Slovakia, 2023, Issue 2 (Works in Progress), pp. 346-352.
+5) Y. Kuzin, D. Shcheka, M. Polyntsov, K. Stupakov, M. Firsov and G. Chernishev, "[Order in Desbordante: Techniques for Efficient Implementation of Order Dependency Discovery Algorithms](https://arxiv.org/abs/2607.23632)," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 413-424.
+6) I. Barutkin, M. Fofanov, S. Belokonny, V. Makeev and G. Chernishev, "[Extending Desbordante with Probabilistic Functional Dependency Discovery Support](https://arxiv.org/abs/2607.23636)," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 158-169.
+7) A. Shlyonskikh, M. Sinelnikov, D. Nikolaev, Y. Litvinov and G. Chernishev, "[Lightning Fast Matching Dependency Discovery with Desbordante](https://arxiv.org/abs/2607.10771)," 2024 36th Conference of Open Innovations Association (FRUCT), Lappeenranta, Finland, 2024, pp. 729-740.
+8) M. Ivanov, M. Smirnov, A. Strazdina and G. Chernishev, "[Scalable Maximal Frequent Episode Mining with Desbordante](https://arxiv.org/abs/2607.03188)," 2026 39th Conference of Open Innovations Association (FRUCT), Helsinki, Finland, 2026, pp. 102-113.
+9) I. Kozhukov et al., "[Efficient Discovery of Conditional Dependencies with Desbordante](https://arxiv.org/abs/2607.04030)," 2026 39th Conference of Open Innovations Association (FRUCT), Helsinki, Finland, 2026, pp. 130-141.
 
 ## Contacts and Q&A
 
-If you have any questions regarding the tool usage you can ask it in our [google group](https://groups.google.com/g/desbordante). To contact dev team email George Chernishev, Maxim Strutovsky or Nikita Bobrov.
+If you have any questions regarding the tool usage you can ask it in our [google group](https://groups.google.com/g/desbordante). To contact dev team email George Chernishev, Alexey Shlyonskikh or Michael Polyntsov.
