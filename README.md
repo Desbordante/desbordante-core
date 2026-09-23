@@ -16,7 +16,13 @@ The **Validation** task is different: it is designed to check whether a specifie
 
 For some patterns Desbordante supports a **dynamic** task variant. The distinguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
 
-The currently supported data patterns are:
+Desbordante support four data types:
+* Tabular
+* Graph
+* Transactional
+* Event sequences
+
+The currently supported tabular data patterns are:
 * Exact functional dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Functional_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Functional_Dependencies_Verification.ipynb))
 * Approximate functional dependencies, with 
     - $g_1$ metric — classic AFDs ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Functional_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Functional_Dependencies_Verification.ipynb))
@@ -28,17 +34,16 @@ The currently supported data patterns are:
 * Classic soft functional dependencies (with correlations), with $\rho$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Soft_Functional_Dependencies_Mining.ipynb) and validation)
 * Dynamic validation of exact and approximate ($g_1$) functional dependencies
 * Numerical dependencies (validation)
-* Graph functional dependencies (discovery and validation)
-* Graph differential dependencies (validation)
 * Conditional functional dependencies (discovery and validation)
-* Conditional inclusion dependencies (discovery and validation)
 * Inclusion dependencies
    - Exact inclusion dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Inclusion_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
    - Approximate inclusion dependencies, with $g^{'}_{3}$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Inclusion_Dependencies%20Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
+* Conditional inclusion dependencies (discovery and validation)
 * Order dependencies:
-   - set-based axiomatization (discovery and validation including approximate)
+   - set-based axiomatization (discovery and validation)
    - list-based axiomatization (discovery)
-   - Approximate order dependencies (validation)
+* Approximate order dependencies:
+   - set-based axiomatization (discovery and validation)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Algebraic_Constraints.ipynb))
 * Differential Dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Differential_Dependencies.ipynb) and validation)
@@ -46,16 +51,26 @@ The currently supported data patterns are:
 * Unique column combinations:
    - Exact unique column combination ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Unique_Column_Combinations_Mining.ipynb) and validation)
    - Approximate unique column combination, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Unique_Column_Combinations_Mining.ipynb) and validation)
-* Association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Association_Rules.ipynb) and [validation](https://github.com/Desbordante/desbordante-core/blob/main/examples/basic/verifying_ar.py))
 * Numerical association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Numerical_Association_Rules.ipynb))
 * Matching dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Matching_Dependencies.ipynb) and validation)
 * Denial constraints
    - Exact denial constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
     - Approximate denial constraints, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
 * Sequential dependencies (validation)
-* Frequent episodes, all/maximal/top-k (discovery)
-* Frequent subgraphs (discovery)
 * Relaxed functional dependencies (discovery)
+
+The currently supported graph data patterns are:
+* Graph functional dependencies (discovery and validation)
+* Graph differential dependencies (validation)
+* Frequent subgraphs (discovery)
+
+The currently supported transactional data patterns are:
+* Association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Association_Rules.ipynb) and [validation](https://github.com/Desbordante/desbordante-core/blob/main/examples/basic/verifying_ar.py))
+
+The currently supported event sequence data patterns are:
+* Frequent episode mining episode (discovery)
+* Maximal frequent episode (discovery)
+* Top-k frequent episode (discovery)
 
 The discovered patterns can have many uses:
 * For scientific data, especially those obtained experimentally, an interesting pattern allows to formulate a hypothesis that could lead to a scientific discovery. In some cases it even allows to draw conclusions immediately, if there is enough data. At the very least, the found pattern can provide a direction for further study. 
