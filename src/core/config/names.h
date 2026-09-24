@@ -84,6 +84,14 @@ constexpr auto kMinimumSharedValue = "minimum_shared_value";
 constexpr auto kShardLength = "shard_length";
 // FastOD
 constexpr auto kTimeLimitSeconds = "time_limit";
+// GA-RFD
+constexpr auto kMetrics = "metrics";
+constexpr auto kRfdMinSimilarity = "min_similarity";
+constexpr auto kRfdMinimumConfidence = "minconf";
+constexpr auto kRfdCrossoverProbability = "crossover_probability";
+constexpr auto kRfdMutationProbability = "mutation_probability";
+constexpr auto kRfdMaxGenerations = "max_generations";
+constexpr auto kCacheMaxSize = "cache_size";
 // GFD
 constexpr auto kGfdData = "gfd";
 constexpr auto kGraphData = "graph";
