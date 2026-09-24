@@ -8,17 +8,17 @@
 #include "core/algorithms/dc/model/dc.h"
 #include "core/algorithms/dc/model/operator.h"
 #include "core/algorithms/dc/model/predicate.h"
-#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/relational_schema.h"
 #include "core/model/table/typed_column_data.h"
 
 namespace mo = model;
 
 namespace algos::dc {
 
-DCParser::DCParser(std::string dc_string, ColumnLayoutRelationData const* relation,
-                   std::vector<model::TypedColumnData> const& data)
-    : relation_(relation),
-      data_(data),
+DCParser::DCParser(std::string dc_string, RelationalSchema const* schema,
+                   std::vector<model::Type const*> const& types)
+    : schema_(schema),
+      types_(types),
       dc_string_(std::move(dc_string)),
       has_next_predicate_(true),
       cur_(0) {
@@ -45,7 +45,9 @@ DCParser::DCParser(std::string dc_string, ColumnLayoutRelationData const* relati
 DC DCParser::Parse() {
     boost::trim(dc_string_);
 
+    if (dc_string_.empty()) throw std::invalid_argument("Empty DC is not allowed");
     if (dc_string_.front() != '!') throw std::invalid_argument("Missing logic negation sign");
+
     dc_string_.erase(dc_string_.begin());
     boost::trim_left(dc_string_);
 
@@ -55,7 +57,7 @@ DC DCParser::Parse() {
     dc_string_.erase(dc_string_.begin());
     dc_string_.erase(std::prev(dc_string_.end()));
 
-    if (dc_string_.empty()) throw std::invalid_argument("Empty DC is not allowed");
+    if (dc_string_.empty()) throw std::invalid_argument("DC doesn't contain predicates");
 
     std::vector<Predicate> res;
     while (has_next_predicate_) {
@@ -138,8 +140,8 @@ bool DCParser::IsVarOperand(std::string op) const {
 ColumnOperand DCParser::ConvertToVariableOperand(std::string const& operand) const {
     dc::Tuple tuple = operand.front() == 't' ? dc::Tuple::kT : dc::Tuple::kS;
     std::string name = operand.substr(2);
-    std::vector<std::unique_ptr<Column>> const& cols = relation_->GetSchema()->GetColumns();
-    std::vector<std::unique_ptr<Column>>::const_iterator it;
+    std::vector<std::unique_ptr<Column>> const& cols = schema_->GetColumns();
+    std::vector<std::unique_ptr<Column>>::const_iterator it = cols.end();
     if (!cols.front()->GetName().empty()) {  // Has header
         auto pred = [&name](auto const& col) { return name == col->GetName(); };
         it = std::ranges::find_if(cols, pred);
@@ -149,7 +151,8 @@ ColumnOperand DCParser::ConvertToVariableOperand(std::string const& operand) con
     if (it == cols.end()) {
         try {
             std::string str_ind = operand.substr(2);
-            size_t ind = static_cast<mo::ColumnIndex>(std::stoi(str_ind));
+            size_t ind = static_cast<mo::ColumnIndex>(std::stoul(str_ind));
+            if (ind >= cols.size()) throw std::out_of_range("Column index out of range");
             column = cols[ind].get();
         } catch (std::exception const& e) {
             throw std::invalid_argument("Unknown column index or name");
@@ -159,7 +162,7 @@ ColumnOperand DCParser::ConvertToVariableOperand(std::string const& operand) con
     }
 
     size_t col_ind = column->GetIndex();
-    return {column, tuple, &data_[col_ind].GetType()};
+    return {column, tuple, types_[col_ind]};
 }
 
 }  // namespace algos::dc
