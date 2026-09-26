@@ -102,11 +102,14 @@ def show_available_algorithms():
     """Display information about available CFD algorithms."""
     print(f"{Colors.BLUE_FG}=== Available CFD Algorithms ==={Colors.RESET}\n")
 
-    print("Desbordante provides the following CFD mining algorithm:")
+    print("Desbordante provides the following CFD mining algorithms:")
     print("* FDFirst (by J. Rammelaere and F. Geerts): The primary algorithm for CFD discovery")
     print("  - Based on the FD-first approach")
     print("  - Discovers FDs first, then adds conditions")
     print("  - Efficient for datasets with clear functional relationships")
+    print("* CFDMiner (by W. Fan, F. Geerts, J. Li, and M. Xiong): Exact constant CFD discovery")
+    print("  - Based on frequent free itemsets and their closures")
+    print("  - Discovers only constant CFDs with confidence equal to 1")
     print()
 
     algo = desbordante.cfd.algorithms.Default()

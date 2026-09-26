@@ -2156,11 +2156,14 @@ indicates how strictly the dependency is followed:
 
 \x1b[1;34m=== Available CFD Algorithms ===\x1b[0m
 
-Desbordante provides the following CFD mining algorithm:
+Desbordante provides the following CFD mining algorithms:
 * FDFirst (by J. Rammelaere and F. Geerts): The primary algorithm for CFD discovery
   - Based on the FD-first approach
   - Discovers FDs first, then adds conditions
   - Efficient for datasets with clear functional relationships
+* CFDMiner (by W. Fan, F. Geerts, J. Li, and M. Xiong): Exact constant CFD discovery
+  - Based on frequent free itemsets and their closures
+  - Discovers only constant CFDs with confidence equal to 1
 
 Default algorithm: FDFirst
 
@@ -2297,6 +2300,118 @@ This iterative process helps discover:
 \x1b[1;32mCFD mining example completed!\x1b[0m
 
 \x1b[1;32mSee verifying_cfd.py for CFD validation examples.\x1b[0m
+
+'''
+
+snapshots['test_example[basic/mining_cfd_miner.py-None-mining_cfd_miner_output] mining_cfd_miner_output'] = '''========================================================================================
+Discovering exact constant CFDs with CFDMiner
+========================================================================================
+A constant conditional functional dependency (constant CFD) has the form (X -> A, (t_p |
+a)). Here, X -> A is the underlying functional dependency, t_p is a set of constants for
+X, and a is a constant for A. Whenever a row matches t_p on the columns in X, its value
+in column A must be a. For example: ([Milk] -> Class, (yes | mammal)). This means that
+Milk=yes implies Class=mammal.
+
+CFDMiner was developed by W. Fan, F. Geerts, J. Li, and M. Xiong. It first finds
+frequent free itemsets and their closures, then uses them to construct minimal constant
+CFDs. The algorithm discovers exact dependencies only: no row covered by the left-hand
+side of a discovered CFD may violate it.
+
+Algorithm parameters:
+  cfd_minsup   - minimum support expressed as a number of rows
+  cfd_max_lhs  - maximum number of items on the left-hand side of a CFD
+
+The support of a CFD is the number of table rows that satisfy it. A higher cfd_minsup
+requires a rule to be backed by more rows, so fewer rules remain in the result.
+Increasing cfd_max_lhs allows more complex combinations of attributes, but also expands
+the search space and usually increases the number of discovered rules.
+
+========================================================================================
+Datasets
+========================================================================================
+Tic-Tac-Toe Endgame contains 138 records and 10 columns. Each row describes a terminal
+position on a 3x3 board, while X_Wins indicates whether X won. Positions that can be
+transformed into one another by rotating or reflecting the board were merged, leaving
+138 distinct configurations.
+
+Zoo contains 101 rows and 17 columns describing animal traits and one of seven
+biological classes.
+
+========================================================================================
+Scenario 1. Finding winning patterns
+========================================================================================
+A winning line is defined by the values of three cells. We therefore allow up to three
+items on the left-hand side of a CFD and set the minimum support to 10. After running
+CFDMiner, we inspect the dependencies whose right-hand side is X_Wins=yes.
+
+CFDMiner found 49 CFDs in total.
+The right-hand side determines the game outcome in 16 of them.
+Here are four frequent rules corresponding to a win by X:
+  (Bottom_Left=x, Bottom_Middle=x, Bottom_Right=x) -> (X_Wins=yes) [support: 27]
+  (Middle_Left=x, Center=x, Middle_Right=x) -> (X_Wins=yes) [support: 23]
+  (Top_Right=x, Middle_Right=x, Bottom_Right=x) -> (X_Wins=yes) [support: 16]
+  (Top_Right=x, Center=x, Bottom_Left=x) -> (X_Wins=yes) [support: 28]
+
+In this sense, the algorithm reconstructs the underlying logic of the game directly from
+the dataset.
+
+========================================================================================
+Scenario 2. Choosing the left-hand-side size limit
+========================================================================================
+The cfd_max_lhs parameter affects more than execution time: it determines which patterns
+the algorithm can express at all. A winning pattern occupies three cells, so a two-item
+limit cannot describe it completely.
+
+  cfd_max_lhs=2: 15 CFDs in total, CFDs for X_Wins: 0
+  cfd_max_lhs=3: 49 CFDs in total, CFDs for X_Wins: 16
+
+With cfd_max_lhs=2, the algorithm finds no exact rule for X_Wins with support of at
+least 10.
+
+========================================================================================
+Scenario 3. Examining biological patterns
+========================================================================================
+For Zoo, we limit the left-hand side to one item and set the minimum support to 20. To
+make the resulting dependencies easier to interpret, we examine several of the most
+illustrative ones in groups.
+
+CFDMiner found 54 CFDs in total.
+A pair of converse rules for mammals:
+  (Milk=yes) -> (Class=mammal) [support: 41]
+  (Class=mammal) -> (Milk=yes) [support: 41]
+
+Each rule has support 41. In other words, the rows with Milk=yes are exactly the rows
+with Class=mammal in the Zoo dataset.
+
+Now consider the dependencies that describe birds:
+  (Feathers=yes) -> (Class=bird) [support: 20]
+  (Class=bird) -> (Feathers=yes) [support: 20]
+  (Feathers=yes) -> (Eggs=yes) [support: 20]
+  (Feathers=yes) -> (Legs=2) [support: 20]
+
+In Zoo, every animal with Feathers=yes belongs to the bird class, and every bird has
+feathers: both dependencies describe the same group of 20 rows. In addition, every
+animal in this group has Eggs=yes and Legs=2. The discovered rules therefore describe
+several shared traits at once.
+
+Patterns not tied to a single class:
+  (Toothed=yes) -> (Backbone=yes) [support: 61]
+  (Airborne=yes) -> (Breathes=yes) [support: 24]
+
+This example shows that a useful CFD for this dataset does not have to include the Class
+column. Toothed animals belong to different classes, yet Backbone=yes in all 61
+corresponding rows. Similarly, Breathes=yes in all 24 rows with Airborne=yes. The
+converse dependencies do not hold for every row.
+
+========================================================================================
+Summary
+========================================================================================
+CFDMiner is designed to find exact dependencies tied to specific values. The cfd_minsup
+parameter sets the required amount of supporting data, while cfd_max_lhs limits the
+complexity of the context. The discovered dependencies are easier to understand when
+analyzed in groups and interpreted using domain knowledge. For CFDs with wildcards or
+rules that allow violations, use the other algorithms shown in
+examples/basic/mining_cfd.py.
 
 '''
 

@@ -65,6 +65,18 @@ desbordante_add_test(
 )
 
 desbordante_add_test(
+    cfd.cfdminer
+    SRCS
+    test_cfd_miner.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cfd::cfdminer
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::testlib::common
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+
+desbordante_add_test(
     cfd.verifier
     SRCS
     test_cfd_verifier.cpp
