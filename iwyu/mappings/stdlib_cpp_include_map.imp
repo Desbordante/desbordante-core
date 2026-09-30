@@ -1,0 +1,15 @@
+# Exported from IWYU internal mappings at 2026-03-11T12:20:16Z
+[
+  { "include": ["<ios>", "public", "<istream>", "public"] },
+  { "include": ["<ios>", "public", "<ostream>", "public"] },
+  { "include": ["<iosfwd>", "public", "<ios>", "public"] },
+  { "include": ["<iosfwd>", "public", "<streambuf>", "public"] },
+  { "include": ["<istream>", "public", "<fstream>", "public"] },
+  { "include": ["<istream>", "public", "<iostream>", "public"] },
+  { "include": ["<istream>", "public", "<sstream>", "public"] },
+  { "include": ["<ostream>", "public", "<fstream>", "public"] },
+  { "include": ["<ostream>", "public", "<iostream>", "public"] },
+  { "include": ["<ostream>", "public", "<istream>", "public"] },
+  { "include": ["<ostream>", "public", "<sstream>", "public"] },
+  { "include": ["<streambuf>", "public", "<ios>", "public"] },
+]
