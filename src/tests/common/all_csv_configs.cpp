@@ -47,6 +47,7 @@ CSVConfig const kIris = CreateCsvConfig("iris.csv", ',', false);
 CSVConfig const kLegacyPayors = CreateCsvConfig("LegacyPayors.csv", '|', true);
 CSVConfig const kLetter = CreateCsvConfig("letter.csv", ',', false);
 CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
+CSVConfig const kMDTrivial = CreateCsvConfig("md_trivial.csv", ',', true);
 CSVConfig const kMixedWithNulls = CreateCsvConfig("MixedWithNulls.csv", ',', true);
 CSVConfig const kMushroom = CreateCsvConfig("cfd_data/mushroom.csv", ',', true);
 CSVConfig const kMushroom50 = CreateCsvConfig("cfd_data/mushroom50.csv", ',', true);
@@ -74,6 +75,11 @@ CSVConfig const kOdTestNormSmall3x3 = CreateCsvConfig("od_norm_data/small_3x3.cs
 CSVConfig const kPlista1k = CreateCsvConfig("plista_1k.csv", ';', false);
 CSVConfig const kProbeTest1 = CreateCsvConfig("ProbeTest1.csv", ',', true);
 CSVConfig const kProbeTest2 = CreateCsvConfig("ProbeTest2.csv", ',', true);
+CSVConfig const kRfd32Attrs = CreateCsvConfig("rfd/rfd_32_attrs.csv", ',', true);
+CSVConfig const kRfdDuplicates = CreateCsvConfig("rfd/rfd_duplicates.csv", ',', true);
+CSVConfig const kRfdMixedNulls = CreateCsvConfig("rfd/rfd_mixed_nulls.csv", ',', true);
+CSVConfig const kRfdSingleRow = CreateCsvConfig("rfd/rfd_single_row.csv", ',', true);
+CSVConfig const kRfdTwoRows = CreateCsvConfig("rfd/rfd_two_rows.csv", ',', true);
 CSVConfig const kRulesBook = CreateCsvConfig("transactional_data/rules-book.csv", ',', false);
 CSVConfig const kRulesBookRows =
         CreateCsvConfig("transactional_data/rules-book-rows.csv", ',', false);
@@ -149,5 +155,4 @@ CSVConfig const kWdcPlanetz = CreateCsvConfig("WDC_planetz.csv", ',', true);
 CSVConfig const kWdcSatellites = CreateCsvConfig("WDC_satellites.csv", ',', true);
 CSVConfig const kWdcScience = CreateCsvConfig("WDC_science.csv", ',', true);
 CSVConfig const kWdcSymbols = CreateCsvConfig("WDC_symbols.csv", ',', true);
-CSVConfig const kMDTrivial = CreateCsvConfig("md_trivial.csv", ',', true);
 }  // namespace tests

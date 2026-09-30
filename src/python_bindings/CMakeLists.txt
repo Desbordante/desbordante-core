@@ -300,6 +300,16 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    rfd
+    SRCS
+    rfd/bind_ga_rfd.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::rfd::ga_rfd
+    ${DESBORDANTE_PREFIX}::rfd
+    Boost::headers
+)
+
+desbordante_add_bind(
     sfd
     SRCS
     sfd/bind_sfd.cpp
