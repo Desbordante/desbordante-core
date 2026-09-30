@@ -20,13 +20,13 @@ private:
         VertexT pattern_vertex;
         std::size_t qvo_index;  // position of pattern_vertex in qvo_
         Direction direction;
-        std::string edge_label;
+        std::string_view edge_label;
     };
 
     struct NeighborKey {
         VertexT graph_vertex;
         Direction direction;
-        std::string edge_label;
+        std::string_view edge_label;
 
         bool operator==(NeighborKey const&) const = default;
     };
@@ -63,7 +63,7 @@ private:
             width = 0;
         }
 
-        void Reset(std::size_t w) {
+        void Reset(std::size_t w) noexcept {
             data.clear();
             width = w;
         }
@@ -72,12 +72,12 @@ private:
             return width != 0 ? data.size() / width : 0;
         }
 
-        VertexT const* Row(std::size_t i) const noexcept {
-            return data.data() + i * width;
+        std::span<VertexT const> Row(std::size_t i) const noexcept {
+            return std::span{data.begin() + i * width, width};
         }
 
-        void PushRow(VertexT const* parent, std::size_t parent_width, VertexT appended) {
-            data.insert(data.end(), parent, parent + parent_width);
+        void PushRow(std::span<VertexT const> parent, VertexT appended) {
+            data.insert(data.end(), parent.begin(), parent.end());
             data.push_back(appended);
         }
     };
@@ -112,10 +112,10 @@ private:
     std::vector<AdjacencyDescriptor> BuildDescriptorsFor(VertexT new_pv, std::size_t level) const;
     // partial_match points to a FlatLevel row
     std::vector<VertexT> const& ComputeExtensionSet(
-            VertexT const* partial_match, VertexT new_pv,
+            std::span<VertexT const> partial_match, VertexT new_pv,
             std::vector<AdjacencyDescriptor> const& descriptors);
     std::vector<VertexT> const& GetNeighbors(VertexT graph_vertex, Direction direction,
-                                             std::string const& edge_label);
+                                             std::string_view edge_label);
 
     // set intersections is in hot path, the optimal way to deal with them
     // is "Leapfrog join for unary predicates"; see https://arxiv.org/pdf/1210.0481
@@ -145,6 +145,7 @@ protected:
                             std::span<GddHoldsResult> output) final;
 
     virtual std::unique_ptr<GddValidator> CreateWorker() const final;
+    virtual void ResetWorkerState() final;
 
 public:
     WcojGddValidator() = default;

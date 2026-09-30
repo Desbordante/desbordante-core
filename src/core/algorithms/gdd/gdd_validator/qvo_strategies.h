@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <string_view>
 #include <vector>
 
 #include "core/algorithms/gdd/gdd.h"
@@ -57,7 +58,7 @@ private:
     struct ExtensionListDescriptor {
         VertexT from;  // placed in order pattern vertex
         Direction direction;
-        std::string edge_label;
+        std::string_view edge_label;
     };
 
     static constexpr std::size_t kExhaustiveLimit = 7;
@@ -66,12 +67,12 @@ private:
     GraphT const& pattern_;
     DomainT const& domain_;
 
-    std::unordered_map<std::string, double> avg_out_size_;
-    std::unordered_map<std::string, double> avg_in_size_;
+    std::unordered_map<std::string_view, double> avg_out_size_;
+    std::unordered_map<std::string_view, double> avg_in_size_;
     void ComputeAvgListSizes();
 
     std::size_t VertexDomainSize(VertexT pattern_vertex) const;
-    double AvgListSize(std::string const& edge_label, Direction direction) const;
+    double AvgListSize(std::string_view edge_label, Direction direction) const;
 
     bool ConnectsToPlaced(VertexT vertex,
                           std::unordered_map<VertexT, std::size_t> const& placed) const;
