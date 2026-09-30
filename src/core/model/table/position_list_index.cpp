@@ -73,6 +73,11 @@ std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>
                                                inv_ent, gini_impurity);
 }
 
+std::unique_ptr<PositionListIndex> PositionListIndex::MakeSuperkeyPLI(std::size_t num_rows) {
+    return std::make_unique<PositionListIndex>(std::deque<Cluster>{}, 0, log(num_rows), 0, num_rows,
+                                               0, (num_rows - 1) / static_cast<double>(num_rows));
+}
+
 std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
         Cluster const& cluster, std::vector<int> const& probing_table) {
     std::unordered_map<int, unsigned> frequencies;
