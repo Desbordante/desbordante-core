@@ -143,7 +143,8 @@ double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
 }
 
 std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderExhaustive() const {
-    std::vector pattern_vertices(boost::vertices(pattern_).first, boost::vertices(pattern_).second);
+    std::vector<VertexT> pattern_vertices(boost::vertices(pattern_).first,
+                                          boost::vertices(pattern_).second);
     std::ranges::sort(pattern_vertices, pattern_vertices_comparator_);
 
     std::vector<VertexT> best;
@@ -193,8 +194,8 @@ std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderExhaustive
 }
 
 std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderGreedy() const {
-    std::vector const pattern_vertices(boost::vertices(pattern_).first,
-                                       boost::vertices(pattern_).second);
+    std::vector<VertexT> const pattern_vertices(boost::vertices(pattern_).first,
+                                                boost::vertices(pattern_).second);
     if (pattern_vertices.empty()) {
         return {};
     }
