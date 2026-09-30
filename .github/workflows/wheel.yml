@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install cibuildwheel
-        run: pipx install cibuildwheel==4.1.0
+        run: pipx install cibuildwheel==4.2.1
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install cibuildwheel
-        run: pipx install cibuildwheel==3.2.1
+        run: pipx install cibuildwheel==4.2.1
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -136,7 +136,7 @@ jobs:
           boost-libraries: ''
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v4.2.1
         with:
           only: ${{ matrix.only }}
         env:
