@@ -45,6 +45,7 @@ jobs:
         with:
           os: ubuntu-latest
           toolset: gcc
+          install-uv: false
 
       - name: Build pip package
         shell: bash
