@@ -15,8 +15,6 @@ using DynamicBits = boost::dynamic_bitset<>;
 
 constexpr int NPOS = -1;
 
-enum class BitsetType { Small, Medium, Dynamic };
-
 struct Bitset {
     std::variant<SmallBits, MediumBits, DynamicBits> data;
     std::size_t size;

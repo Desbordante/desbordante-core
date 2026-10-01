@@ -341,9 +341,11 @@ void LatticeAlgorithm::BuildNextLevel() {
     next_level_.clear();
     std::unordered_set<Bitset, BitsetHash> already_added;
     for (std::size_t i = 0; i < current_level_.size(); ++i) {
+        auto const& node1 = current_level_[i];
+        if (node1.is_redundant) continue;
         for (std::size_t j = i + 1; j < current_level_.size(); ++j) {
-            auto const& node1 = current_level_[i];
             auto const& node2 = current_level_[j];
+            if (node2.is_redundant) continue;
 
             Bitset new_partition = bit_and(node1.partition_, node2.partition_);
             if (bit_count(new_partition) <= tuple_pair_threshold_) continue;
@@ -447,7 +449,7 @@ void LatticeAlgorithm::Combine(DFTreeNode* root, Bitset const& lhs) {
     }
 }
 
-void LatticeAlgorithm::CheckAndCombine(DFTreeNode* root, Bitset const& lhs) {
+bool LatticeAlgorithm::CheckAndCombine(DFTreeNode* root, Bitset const& lhs) {
     auto* curr_node = root;
     DFIdx curr_df = find_first(lhs);
 
@@ -459,7 +461,7 @@ void LatticeAlgorithm::CheckAndCombine(DFTreeNode* root, Bitset const& lhs) {
         curr_df = find_next(lhs, curr_df);
     }
 
-    if (curr_node->left_children_.empty() && curr_node->left_idx_.has_value()) return;
+    if (curr_node->left_children_.empty() && curr_node->left_idx_.has_value()) return false;
 
     while (curr_df != NPOS) {
         auto new_node = std::make_unique<DFTreeNode>(curr_df);
@@ -469,6 +471,7 @@ void LatticeAlgorithm::CheckAndCombine(DFTreeNode* root, Bitset const& lhs) {
     }
 
     Combine(root, lhs);
+    return true;
 }
 
 void LatticeAlgorithm::minDD() {
@@ -496,8 +499,11 @@ void LatticeAlgorithm::minDD() {
                     FindRhs(node_partition, B, B_interval);
 
                     if (bit_none(B_interval)) continue;
+
                     auto* DD_tree = &trees_.try_emplace(B_interval).first->second;
-                    CheckAndCombine(DD_tree, node_df);
+
+                    if (CheckAndCombine(DD_tree, node_df)) it->is_redundant = false;
+
                     if (bit_count(B_interval) == 1) node_dds.insert(bit_or(B_interval, node_df));
                 }
             }

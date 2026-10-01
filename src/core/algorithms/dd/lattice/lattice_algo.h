@@ -94,9 +94,10 @@ private:
     void CalculateTuplePairs();
 
     struct LatticeNode {
-        Bitset df_;
-        Bitset partition_;
         DDSet dds_;
+        Bitset partition_;
+        Bitset df_;
+        bool is_redundant = true;
 
         LatticeNode(std::size_t df_size, Bitset const& partition)
             : df_(make_bitset(df_size)), partition_(partition) {}
@@ -113,8 +114,8 @@ private:
     void FindRhs(Bitset const& df_partition, model::ColumnIndex col, Bitset& col_intervals);
 
     struct DFTreeNode {
-        std::optional<DFIdx> left_idx_, right_idx_;
         std::map<DFIdx, std::unique_ptr<DFTreeNode>> left_children_;
+        std::optional<DFIdx> left_idx_, right_idx_;
 
         DFTreeNode() : left_idx_(std::nullopt), right_idx_(std::nullopt) {}
 
@@ -123,7 +124,7 @@ private:
 
     bool SameSubtrees(DFTreeNode* subtree_a, DFTreeNode* subtree_b);
     void Combine(DFTreeNode* root, Bitset const& lhs);
-    void CheckAndCombine(DFTreeNode* root, Bitset const& lhs);
+    bool CheckAndCombine(DFTreeNode* root, Bitset const& lhs);
 
     void minDD();
 
