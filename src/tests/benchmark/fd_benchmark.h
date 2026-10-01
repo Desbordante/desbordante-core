@@ -44,6 +44,10 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
             case algos::AfdErrorMeasure::kFi:
             case algos::AfdErrorMeasure::kG2:
             case algos::AfdErrorMeasure::kG3:
+            case algos::AfdErrorMeasure::kG1S:
+            // RFI measures are prohibitively expensive on broad lattice searches.
+            case algos::AfdErrorMeasure::kRfiPlus:
+            case algos::AfdErrorMeasure::kRfiPrimePlus:
                 continue;
             default:
                 break;
