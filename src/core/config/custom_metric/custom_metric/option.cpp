@@ -6,16 +6,17 @@
 namespace config {
 
 namespace {
-void Normalize(CustomMetricType& value) {
+void Normalize(CustomMetricOptionType& value) {
     if (!value) {
         value = std::make_shared<util::DefaultCustomMetric>();
     }
 }
 }  // namespace
 
-Option<CustomMetricType> MetricOption(CustomMetricType* value_ptr, std::string_view name,
-                                      std::string_view description) {
-    Option<CustomMetricType> option{value_ptr, name, description, CustomMetricType{nullptr}};
+Option<CustomMetricOptionType> MetricOption(CustomMetricOptionType* value_ptr,
+                                            std::string_view name, std::string_view description) {
+    Option<CustomMetricOptionType> option{value_ptr, name, description,
+                                          CustomMetricOptionType{nullptr}};
     option.SetNormalizeFunc(&Normalize);
     return option;
 }
