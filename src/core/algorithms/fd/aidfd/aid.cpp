@@ -276,7 +276,7 @@ std::vector<size_t> Aid::GetAttributesSortedByFrequency(
     }
 
     std::sort(attr_indices.begin(), attr_indices.end(),
-              [&frequency](size_t lhs, size_t rhs) { return frequency[lhs] > frequency[rhs]; });
+              [&frequency](size_t lhs, size_t rhs) { return frequency[lhs] < frequency[rhs]; });
 
     return attr_indices;
 }
