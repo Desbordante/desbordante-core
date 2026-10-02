@@ -21,6 +21,8 @@ void Aid::LoadDataInternal() {
 
     schema_ = RelationalSchema::CreateFrom(*input_table_);
 
+    std::vector<std::unordered_map<std::string, size_t>> value_dictionaries(number_of_attributes_);
+
     while (input_table_->HasNextRow()) {
         std::vector<std::string> const& next_line = input_table_->GetNextRow();
         if (next_line.empty()) {
@@ -29,7 +31,9 @@ void Aid::LoadDataInternal() {
 
         tuples_.emplace_back(std::vector<size_t>(number_of_attributes_));
         for (size_t i = 0; i < number_of_attributes_; ++i) {
-            tuples_.back()[i] = std::hash<std::string>{}(next_line[i]);
+            auto& dictionary = value_dictionaries[i];
+            auto [it, inserted] = dictionary.try_emplace(next_line[i], dictionary.size());
+            tuples_.back()[i] = it->second;
         }
     }
     number_of_tuples_ = tuples_.size();
