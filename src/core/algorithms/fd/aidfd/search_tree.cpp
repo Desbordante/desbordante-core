@@ -107,7 +107,7 @@ bool SearchTree::Remove(Bitset const& set) {
 void SearchTree::CollectSubsets(Bitset const& set, std::shared_ptr<Node> const& current_node,
                                 BitsetConsumer const& collect, bool& go_further) const {
     if (current_node->IsLeaf()) {
-        auto node_set = current_node->set_;
+        auto const& node_set = current_node->set_;
         if (node_set.is_subset_of(set)) {
             collect(node_set);
         }
