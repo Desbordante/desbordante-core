@@ -214,10 +214,13 @@ void Aid::InvertNegativeCover() {
 
         attributes[rhs] = false;
         SearchTree pos_cover_tree(attributes);
+        SearchTree maximal_neg_cover(number_of_attributes_);
         for (auto const& neg_cover_el : neg_cover_vector) {
-            if (!neg_cover_el[rhs]) {
-                HandleInvalidFd(neg_cover_el, pos_cover_tree, rhs);
+            if (neg_cover_el[rhs] || maximal_neg_cover.ContainsAnySupersetOf(neg_cover_el)) {
+                continue;
             }
+            maximal_neg_cover.Add(neg_cover_el);
+            HandleInvalidFd(neg_cover_el, pos_cover_tree, rhs);
         }
 
         size_t real_rhs = attr_indices[rhs];
