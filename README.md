@@ -324,17 +324,19 @@ Now it is possible to `import desbordante` as a module from within the created v
 #### Building tests & the Python module manually
 Build the tests themselves:
 ```sh
-./build.sh
+cmake --preset release
+cmake --build --preset release
 ```
 
-The Python module can be built by providing the `--pybind` switch:
+The Python module can be built by providing the `-DDESBORDANTE_BINDINGS=BUILD` option:
 ```sh
-./build.sh --pybind 
+cmake --preset release -DDESBORDANTE_BINDINGS=BUILD
+cmake --build --preset release
 ```
 
-See `./build.sh --help` for more available options.
+See `cmake --list-presets` for more available presets.
 
-The `./build.sh` script generates the following file structure in `/path/to/desbordante-core/build/target`:
+The build generates the following file structure in `/path/to/desbordante-core/build/release/target`:
 ```
 ├───input_data
 │   └───some-sample-csv\'s.csv
@@ -344,13 +346,13 @@ The `./build.sh` script generates the following file structure in `/path/to/desb
 The `input_data` directory contains several .csv files that are used by unit tests.
 You can run tests with CTest from any directory in the `Desbordante` tree:
 ```sh
-ctest --test-dir build --exclude-regex ".*HeavyDatasets.*" -j $JOBS
+ctest --preset release -j $JOBS
 ```
 where `$JOBS` is the desired number of concurrent jobs.
 
 `desbordante.cpython-*.so` is a Python module, packaging Python bindings for the Desbordante core library. In order to use it, simply `import` it:
 ```sh
-cd build/target
+cd build/release/target
 python3
 >>> import desbordante
 ```
