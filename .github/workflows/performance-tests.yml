@@ -32,6 +32,7 @@ jobs:
           os: ubuntu-latest
           toolset: gcc
           boost-libraries: 'container,thread,graph,program_options'
+          install-uv: true
       - name: Build
         run: |
           export CXX=g++-14

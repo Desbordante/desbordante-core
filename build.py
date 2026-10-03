@@ -6,14 +6,16 @@
 # ]
 # ///
 
-import shlex
 import subprocess
 from pathlib import Path
 
 import click
 
 
-@click.command()
+MULTIPLE_OPTION_HELP = "Can be passed multiple times"
+
+
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option("-p", "--pybind", is_flag=True, help="Compile Python bindings")
 @click.option("-n", "--no-tests", is_flag=True, help="Don't build tests")
 @click.option("-b", "--benchmark", is_flag=True, help="Build benchmarks")
@@ -53,14 +55,16 @@ import click
 @click.option(
     "-C",
     "--cmake-opts",
-    metavar="OPTS",
-    help="Forward options to CMake",
+    multiple=True,
+    metavar="OPT",
+    help="Forward options to CMake. " + MULTIPLE_OPTION_HELP,
 )
 @click.option(
     "-B",
     "--build-opts",
-    metavar="OPTS",
-    help="Forward options to the build system",
+    multiple=True,
+    metavar="OPT",
+    help="Forward options to the build system. " + MULTIPLE_OPTION_HELP,
 )
 def main(
     pybind: bool,
@@ -73,9 +77,13 @@ def main(
     gdb_debug: bool,
     no_fetch_datasets: bool,
     log_level: str | None,
-    cmake_opts: str,
-    build_opts: str,
+    cmake_opts: list[str],
+    build_opts: list[str],
 ) -> None:
+    """Build Desbordante"""
+
+    desbordante_root = Path(__file__).resolve().parent
+
     cmake_args = ["-G", "Ninja"]
 
     if no_tests:
@@ -106,7 +114,7 @@ def main(
         cmake_args.append(f"-DDESBORDANTE_LOG_LEVEL={log_level}")
 
     if cmake_opts:
-        cmake_args.extend(shlex.split(cmake_opts))
+        cmake_args.extend(cmake_opts)
 
     build_args: list[str] = []
 
@@ -114,17 +122,17 @@ def main(
         build_args.extend(["-j", str(parallel)])
 
     if build_opts:
-        build_args.extend(shlex.split(build_opts))
+        build_args.extend(build_opts)
 
-    Path("build/CMakeCache.txt").unlink(missing_ok=True)
+    (desbordante_root / "build" / "CMakeCache.txt").unlink(missing_ok=True)
 
     subprocess.run(
-        ["cmake", "-S", ".", "-B", "build", *cmake_args],
+        ["cmake", "-S", ".", "-B", desbordante_root / "build", *cmake_args],
         check=True,
     )
 
     subprocess.run(
-        ["cmake", "--build", "build", *build_args],
+        ["cmake", "--build", desbordante_root / "build", *build_args],
         check=True,
     )
 

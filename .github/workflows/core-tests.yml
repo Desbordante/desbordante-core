@@ -83,6 +83,7 @@ jobs:
         with:
           os: ${{ matrix.system.os }}
           toolset: ${{ matrix.system.toolset }}
+          install-uv: true
       - name: Build
         shell: bash
         run: |

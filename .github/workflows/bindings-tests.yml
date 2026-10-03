@@ -73,7 +73,6 @@ jobs:
         with:
           os: ${{ matrix.os }}
           toolset: ${{ matrix.toolset }}
-          install-uv: false
       - name: Build pip package
         shell: bash
         run: |

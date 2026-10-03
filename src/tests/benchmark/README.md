@@ -83,7 +83,7 @@ For example, see `md_benchmark.h`.
 If you want to run these tests locally for some reason, you should do the following:
 1. Build benchmarks:
 ```bash
-./build.sh --benchmark
+./build.py --benchmark
 ```
 2. Run them:
 ```bash
