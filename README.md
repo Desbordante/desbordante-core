@@ -322,35 +322,46 @@ python3 -m pip install .
 Now it is possible to `import desbordante` as a module from within the created virtual environment. 
 
 #### Building tests & the Python module manually
-Build the tests themselves:
+The build is driven by [CMake presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html). To list available presets run: `cmake --list-presets`.
+
+Configure the preset once:
 ```sh
-./build.sh
+cmake --preset release
 ```
 
-The Python module can be built by providing the `--pybind` switch:
+Then build and test as often as needed:
 ```sh
-./build.sh --pybind 
+cmake --build --preset release    # build
+ctest --preset release -j $JOBS   # run tests, where $JOBS is the number of concurrent jobs
 ```
 
-See `./build.sh --help` for more available options.
-
-The `./build.sh` script generates the following file structure in `/path/to/desbordante-core/build/target`:
-```
-├───input_data
-│   └───some-sample-csv\'s.csv
-├───desbordante.cpython-*.so
-```
-
-The `input_data` directory contains several .csv files that are used by unit tests.
-You can run tests with CTest from any directory in the `Desbordante` tree:
+Each preset has its own default build directory, `build/<preset>`, so switching between presets doesn't trigger a full rebuild.
+It is possible to explicitly specify a build directory to the configure step. For example, to build the `release` preset with `clang` without influencing the default build in `build/release`:
 ```sh
-ctest --test-dir build --exclude-regex ".*HeavyDatasets.*" -j $JOBS
+CXX=clang++ cmake --preset release -B build/release-clang # just once per options change
+cmake --build build/release-clang
+ctest --test-dir build/release-clang --exclude-regex "HeavyDatasets" -j $JOBS
 ```
-where `$JOBS` is the desired number of concurrent jobs.
+Note that the compiler is picked when a build directory is first configured and **is not changed by further reconfigures** unless `--fresh` is provided.
+
+Changes to CMake files are picked up by the build automatically, so re-configure only to change options.
+Options are passed to the configure step with `-D`, e.g. to build the Python bindings:
+```sh
+cmake --preset release -DDESBORDANTE_BINDINGS=BUILD
+cmake --build --preset release
+```
+All options can be listed with `cmake -N -LH build/release`, including those of dependencies. Desbordante's own options are prefixed with `DESBORDANTE_`. The configuration is tied to the build directory, so you can create as many build directories with different options as needed.
+For commonly used sets of options it is advised to create personal presets in `CMakeUserPresets.json` using `CMakePresets.json` as a reference. User presets can inherit presets from `CMakePresets.json`, so there is no need to redefine anything from scratch. User presets are specified using the same `--preset` switch.
+
+Options supplied to the configure step are remembered in the build directory's cache (`CMakeCache.txt`). Re-configure with `--fresh` to drop them and start over from the preset's defaults:
+```sh
+cmake --preset release --fresh
+```
+Note that changing options doesn't require `--fresh`. Options passed with `-D` override their cached values, and the rest stay unchanged.
 
 `desbordante.cpython-*.so` is a Python module, packaging Python bindings for the Desbordante core library. In order to use it, simply `import` it:
 ```sh
-cd build/target
+cd build/release/target
 python3
 >>> import desbordante
 ```

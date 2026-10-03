@@ -10,7 +10,7 @@ namespace tests {
 namespace mo = model;
 
 // to run tests:
-// ctest --test-dir build --tests-regex="^TestDataStats\..*"
+// ctest --test-dir build/<preset> --tests-regex="^TestDataStats\..*"
 
 static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config,
                                        bool const is_null_equal_null = true,
