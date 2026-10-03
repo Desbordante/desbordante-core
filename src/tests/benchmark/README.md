@@ -83,11 +83,12 @@ For example, see `md_benchmark.h`.
 If you want to run these tests locally for some reason, you should do the following:
 1. Build benchmarks:
 ```bash
-./build.sh --benchmark
+cmake --preset benchmark
+cmake --build --preset benchmark
 ```
 2. Run them:
 ```bash
-cd build/target
+cd build/benchmark/target
 ./Desbordante_benchmark
 ```
 Optionally you can specify file with previous results to compare to and filename to save current results:

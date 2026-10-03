@@ -1,0 +1,133 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "common",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "ubsan",
+            "displayName": "Undefined Behavior Sanitizer",
+            "inherits": "debug",
+            "cacheVariables": {
+                "DESBORDANTE_SANITIZER": "UB",
+                "CMAKE_CXX_FLAGS_DEBUG": "-O1"
+            }
+        },
+        {
+            "name": "asan",
+            "displayName": "Address Sanitizer",
+            "inherits": "debug",
+            "cacheVariables": {
+                "DESBORDANTE_SANITIZER": "ADDRESS",
+                "CMAKE_CXX_FLAGS_DEBUG": "-O1"
+            }
+        },
+        {
+            "name": "benchmark",
+            "displayName": "Benchmarks",
+            "inherits": "release",
+            "cacheVariables": {
+                "DESBORDANTE_BUILD_BENCHMARKS": "ON",
+                "DESBORDANTE_BUILD_TESTS": "OFF"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "configurePreset": "debug",
+            "displayName": "Debug build"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "displayName": "Release build"
+        },
+        {
+            "name": "ubsan",
+            "configurePreset": "ubsan",
+            "displayName": "Undefined Behavior Sanitizer build"
+        },
+        {
+            "name": "asan",
+            "configurePreset": "asan",
+            "displayName": "Address Sanitizer build"
+        },
+        {
+            "name": "benchmark",
+            "configurePreset": "benchmark",
+            "displayName": "Benchmarks build"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "common",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "light",
+            "hidden": true,
+            "inherits": "common",
+            "filter": {
+                "exclude": {
+                    "name": ".*HeavyDatasets.*"
+                }
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Test debug build excluding heavy tests",
+            "configurePreset": "debug",
+            "inherits": "light"
+        },
+        {
+            "name": "release",
+            "displayName": "Test release build excluding heavy tests",
+            "configurePreset": "release",
+            "inherits": "light"
+        },
+        {
+            "name": "release-all",
+            "displayName": "Test release build with heavy tests (might be very slow)",
+            "configurePreset": "release",
+            "inherits": "common"
+        },
+        {
+            "name": "ubsan",
+            "displayName": "Test UBSan build excluding heavy tests",
+            "configurePreset": "ubsan",
+            "inherits": "light"
+        },
+        {
+            "name": "asan",
+            "displayName": "Test ASan build excluding heavy tests",
+            "configurePreset": "asan",
+            "inherits": "light"
+        }
+    ]
+}

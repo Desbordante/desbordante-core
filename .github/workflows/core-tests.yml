@@ -70,10 +70,11 @@ jobs:
             env: CXX=clang++
 
         cfg:
-          - { BUILD_TYPE: Release }
-          - { BUILD_TYPE: Debug, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
-          - { BUILD_TYPE: Debug, SANITIZER : ADDRESS, CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
-          - { BUILD_TYPE: Debug, SANITIZER : UB, CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
+          - { BUILD_TYPE: Release, PRESET: release }
+          # SANITIZER is used only in the name, I guess we have required checks expect specific name, we can change this and remove SANITIZER from here
+          - { BUILD_TYPE: Debug, PRESET: debug, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
+          - { BUILD_TYPE: Debug, SANITIZER : ADDRESS, PRESET: asan, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
+          - { BUILD_TYPE: Debug, SANITIZER : UB, PRESET: ubsan, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
 
     runs-on: ${{ matrix.system.os }}
     steps:
@@ -88,14 +89,10 @@ jobs:
         run: |
           export ${{ matrix.system.env }}
 
-          if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
-            ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }} \
-              --cmake-opt='${{ matrix.cfg.CMAKE_OPTS }}'
-          else
-            ./build.sh
-          fi
+          cmake --preset ${{ matrix.cfg.PRESET }} ${{ matrix.cfg.CMAKE_OPTS }}
+          cmake --build --preset ${{ matrix.cfg.PRESET }}
       - name: Test
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{github.workspace}}/build/${{ matrix.cfg.PRESET }}
         shell: bash
         run: |
           export ${{ matrix.system.runtime-env }}

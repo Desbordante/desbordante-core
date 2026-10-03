@@ -43,7 +43,6 @@ exclude = [
     "images/*",
     "pull_datasets.sh",
     "docs/*",
-    "build.sh",
     "build.bat",
     "test_input_data/",
     "src/tests/*",
