@@ -99,6 +99,7 @@ extern CSVConfig const kTestDif2;
 extern CSVConfig const kTestDif3;
 extern CSVConfig const kTestDif4;
 extern CSVConfig const kTestDif5;
+extern CSVConfig const kTestDif6;
 extern CSVConfig const kTestDynamicFDEmpty;
 extern CSVConfig const kTestDynamicFDInit;
 extern CSVConfig const kTestDynamicFDInsert;

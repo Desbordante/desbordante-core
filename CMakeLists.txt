@@ -202,6 +202,7 @@ endif()
 
 if(DESBORDANTE_GDB_SYMBOLS)
     add_compile_options(-ggdb3)
+    add_compile_options(-gdwarf)
 endif()
 
 add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
