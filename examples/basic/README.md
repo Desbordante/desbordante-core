@@ -22,6 +22,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_md.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_md.py) — a scenario showing how to discover matching dependencies.
 + [mining_nar.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_nar.py) — a scenario showing how to discover numerical association rules.
 + [mining_pfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_pfd.py) — a scenario showing how to discover probabilistic functional dependencies.
++ [mining_sd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_sd.py) — a scenario showing how to discover sequential-dependency tableaux.
 + [mining_set_od_1.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_set_od_1.py) — a scenario showing how to discover order dependencies based on set axiomatization, part 1.
 + [mining_set_od_2.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_set_od_2.py) — a scenario showing how to discover order dependencies based on set axiomatization, part 2.
 + [mining_sfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_sfd.py) — a scenario showing how to discover soft functional dependencies.
