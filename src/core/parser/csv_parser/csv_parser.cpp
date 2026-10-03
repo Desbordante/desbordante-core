@@ -1,182 +1,101 @@
 #include "core/parser/csv_parser/csv_parser.h"
 
-#include <cassert>
-#include <cstddef>
-#include <filesystem>
-#include <fstream>
-#include <string>
-#include <utility>
-#include <vector>
+#include <internal/csv_reader.hpp>
+#include <internal/csv_row.hpp>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
+class CSVParser::Reader {
+public:
+    Reader(std::filesystem::path const& path, char separator, bool has_header) {
+        Reset(path, separator, has_header);
+    }
 
-inline std::string& CSVParser::Rtrim(std::string& s) {
-    boost::trim_right(s);
-    return s;
-}
+    void Reset(std::filesystem::path const& path, char separator, bool has_header) {
+        value.emplace(path.string(),
+                      csv::CSVFormat().delimiter(separator).header_row(has_header ? 0 : -1));
+    }
 
-CSVParser::CSVParser(std::filesystem::path const& path) : CSVParser(path, ',', true) {}
+    std::optional<csv::CSVReader> value;
+};
+
+CSVParser::CSVParser(std::filesystem::path const& path)
+    : CSVParser(CSVConfig::GetDefaultFor(path)) {}
 
 CSVParser::CSVParser(std::filesystem::path const& path, char separator, bool has_header)
-    : source_(path),
-      separator_(separator),
-      has_header_(has_header),
-      has_next_(true),
-      next_line_(),
-      number_of_columns_(),
-      column_names_(),
-      relation_name_(path.filename().string()) {
-    // Wrong path
-    if (!source_) {
-        throw std::runtime_error("Error: couldn't find file " + path.string());
-    }
-    if (separator == '\0') {
-        throw std::invalid_argument("Invalid separator");
-    }
-    if (has_header) {
-        GetNext();
-    } else {
-        PeekNext();
-    }
-
-    std::vector<std::string> next_parsed = CSVParser::GetNextRow();
-    number_of_columns_ = next_parsed.size();
-    column_names_ = std::move(next_parsed);
-
-    if (!has_header) {
-        for (int i = 0; i < number_of_columns_; i++) {
-            column_names_[i] = std::to_string(i);
-        }
-    }
-}
+    : CSVParser(CSVConfig{path, separator, has_header}) {}
 
 CSVParser::CSVParser(CSVConfig const& csv_config)
-    : CSVParser(csv_config.path, csv_config.separator, csv_config.has_header) {}
-
-void CSVParser::GetNext() {
-    next_line_ = "";
-    std::getline(source_, next_line_);
-    Rtrim(next_line_);
+    : path_(csv_config.path),
+      separator_(csv_config.separator),
+      has_header_(csv_config.has_header),
+      relation_name_(csv_config.path.filename()) {
+    InitializeReader();
 }
 
-void CSVParser::PeekNext() {
-    int len = source_.tellg();
-    GetNext();
-    source_.seekg(len, std::ios_base::beg);
-}
+CSVParser::CSVParser(CSVParser&&) noexcept = default;
 
-void CSVParser::SkipLine() {
-    source_.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
+CSVParser& CSVParser::operator=(CSVParser&&) noexcept = default;
 
-void CSVParser::Reset() {
-    source_.clear();
-    source_.seekg(0);
+CSVParser::~CSVParser() = default;
 
-    next_line_.clear();
-    has_next_ = true;
-
-    // Skip header
+void CSVParser::InitializeReader() {
+    if (reader_) {
+        reader_->Reset(path_, separator_, has_header_);
+    } else {
+        reader_ = std::make_unique<Reader>(path_, separator_, has_header_);
+    }
+    next_row_.reset();
     if (has_header_) {
-        SkipLine();
+        column_names_ = reader_->value->get_col_names();
+        return;
     }
 
-    // For correctness of GetNextRow() after this method
-    GetNextIfHas();
-}
-
-void CSVParser::GetLine(unsigned long long const line_index) {
-    Reset();
-
-    // Index is less than the line number by one. Skip line_index lines
-    for (unsigned long long i = 0; i < line_index; ++i) {
-        SkipLine();
+    if (!HasNextRow()) {
+        column_names_.clear();
+        return;
     }
-
-    std::getline(source_, next_line_);
-
-    Rtrim(next_line_);
-}
-
-void CSVParser::GetNextIfHas() {
-    has_next_ = !source_.eof();
-
-    if (has_next_) {
-        if (source_.peek() == std::ifstream::traits_type::eof()) {  // Check for the last newline
-            has_next_ = false;
-            return;
-        }
-        GetNext();
+    column_names_.resize(next_row_->size());
+    for (std::size_t i = 0; i != column_names_.size(); ++i) {
+        column_names_[i] = std::to_string(i);
     }
-}
-
-std::string CSVParser::GetUnparsedLine(unsigned long long const line_index) {
-    GetLine(line_index);
-    std::string line = next_line_;
-
-    // For correctness of GetNextRow() after this method
-    GetNextIfHas();
-
-    return line;
-}
-
-std::vector<std::string> CSVParser::ParseString(std::string const& s) const {
-    std::size_t const length = s.size();
-    std::string t;
-    for (std::size_t index = 0; index < length; ++index) {
-        if (s[index] == '\\') {  // preserve \ through boost parsing
-            t.append(2, '\\');
-        } else if (s[index] == '"') {  // preserve " through boost parsing
-            t.append("\\\"\"");
-        } else {
-            t.push_back(s[index]);
-        }
-    }
-
-    std::vector<std::string> tokens;
-    tokens.reserve(number_of_columns_);
-    boost::escaped_list_separator<char> list_sep(escape_symbol_, separator_, quote_);
-    boost::tokenizer<boost::escaped_list_separator<char>> tokenizer(t, list_sep);
-
-    for (auto& token : tokenizer) {
-        std::size_t const token_length = token.size();
-        bool is_enclosed =
-                token_length >= 2 && token.front() == '"' &&
-                token.back() == '"';  // states whether a field is enclosed in double-quotes
-
-        std::string new_token;
-        for (std::size_t index = 0; index < token_length; ++index) {
-            if (token[index] == '"') {
-                if (is_enclosed && index > 0 && index < token_length - 2 &&
-                    token[index + 1] == '"') {  // transfer "" to " if the current field is enclosed
-                                                // in double-quotes
-                    new_token.push_back(token[index]);
-                    ++index;
-                }
-            } else {
-                new_token.push_back(token[index]);
-            }
-        }
-        tokens.push_back(std::move(new_token));
-    }
-
-    return tokens;
-}
-
-std::vector<std::string> CSVParser::ParseLine(unsigned long long const line_index) {
-    std::string unparsed_line = GetUnparsedLine(line_index);
-    std::vector<std::string> parsed = ParseString(unparsed_line);
-    return parsed;
 }
 
 std::vector<std::string> CSVParser::GetNextRow() {
-    std::vector<std::string> result = ParseString(next_line_);
-    if (number_of_columns_ == 1 && result.empty()) {
-        result = {""};
+    if (!HasNextRow()) {
+        return {};
     }
+    auto row = std::move(*next_row_);
+    next_row_.reset();
+    return row;
+}
 
-    GetNextIfHas();
+bool CSVParser::HasNextRow() const {
+    if (next_row_.has_value()) {
+        return true;
+    }
+    csv::CSVRow row;
+    if (!reader_->value->read_row(row)) {
+        return false;
+    }
+    next_row_ = static_cast<std::vector<std::string>>(row);
+    return true;
+}
 
-    return result;
+char CSVParser::GetSeparator() const {
+    return separator_;
+}
+
+size_t CSVParser::GetNumberOfColumns() const {
+    return column_names_.size();
+}
+
+std::string CSVParser::GetColumnName(size_t index) const {
+    return column_names_.at(index);
+}
+
+std::string CSVParser::GetRelationName() const {
+    return relation_name_;
+}
+
+void CSVParser::Reset() {
+    InitializeReader();
 }
