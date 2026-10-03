@@ -35,7 +35,8 @@ jobs:
       - name: Build
         run: |
           export CXX=g++-14
-          ./build.sh --benchmark --no-tests
+          cmake --preset benchmark
+          cmake --build --preset benchmark
 
       - name: Get previous results
         run: |
@@ -104,7 +105,7 @@ jobs:
         if: ${{ !cancelled() }}
 
       - name: Test
-        working-directory: ${{github.workspace}}/build/target
+        working-directory: ${{github.workspace}}/build/benchmark/target
         # Disable '-e' in this step
         shell: bash --noprofile --norc -o pipefail {0}
         run: |
