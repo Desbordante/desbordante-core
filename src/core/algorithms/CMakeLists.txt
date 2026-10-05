@@ -41,4 +41,5 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::model::sequence
             spdlog::spdlog_header_only
             Boost::headers
+            roaring
 )

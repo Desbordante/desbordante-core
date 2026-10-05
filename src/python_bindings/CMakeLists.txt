@@ -19,8 +19,14 @@ set(MODULE_NAME
 
 pybind11_add_module(${MODULE_NAME} bind_main_classes.cpp bindings.cpp)
 target_link_libraries(
-    ${MODULE_NAME} PRIVATE pybind11::module Desbordante::algos spdlog::spdlog_header_only
-                           Boost::headers Desbordante.bindlib.util Desbordante.bindlib.data
+    ${MODULE_NAME}
+    PRIVATE pybind11::module
+            Desbordante::algos
+            spdlog::spdlog_header_only
+            Boost::headers
+            Desbordante.bindlib.util
+            Desbordante.bindlib.data
+            roaring
 )
 
 # Uncomment to debug linker issues
@@ -105,12 +111,15 @@ desbordante_add_bind(
     SRCS
     dc/bind_dc_verification.cpp
     dc/bind_fastadc.cpp
+    dc/bind_weever.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::dc::verifier
     ${DESBORDANTE_PREFIX}::dc::fastadc
+    ${DESBORDANTE_PREFIX}::dc::weever
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers
+    roaring
 )
 
 desbordante_add_bind(
@@ -170,6 +179,7 @@ desbordante_add_bind(
     magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
+    roaring
 )
 
 desbordante_add_bind(
