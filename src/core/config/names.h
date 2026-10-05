@@ -76,6 +76,10 @@ constexpr auto kMaximumArity = "max_arity";
 constexpr auto kSequence = "sequence";
 constexpr auto kWindowSize = "window_size";
 constexpr auto kEpisodesNum = "episodes_num";
+// HUE
+constexpr auto kUtilitySequence = "utility_sequence";
+constexpr auto kMinUtility = "min_utility";
+constexpr auto kMaxDuration = "max_duration";
 // FastADC
 constexpr auto kAllowCrossColumns = "allow_cross_columns";
 constexpr auto kComparableThreshold = "comparable_threshold";
