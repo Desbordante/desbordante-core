@@ -96,7 +96,7 @@ jobs:
           export ${{ matrix.system.runtime-env }}
 
           if [[ "${{ inputs.parallel-tests }}" != "false" ]]; then
-            export CTEST_ARGS="-j ${nproc}"
+            export CTEST_ARGS="-j $(nproc)"
           fi
 
           ctest --preset ${{ matrix.cfg.PRESET }} $CTEST_ARGS
