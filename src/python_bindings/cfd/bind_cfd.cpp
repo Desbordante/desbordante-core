@@ -9,6 +9,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 
+#include "core/algorithms/cfd/cfd_miner/cfd_miner.h"
 #include "core/algorithms/cfd/fd_first/fd_first_algorithm.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
 #include "python_bindings/py_util/bind_primitive.h"
@@ -104,7 +105,7 @@ void BindCfd(py::module_& main_module) {
                         return RawCFD(std::move(lhs), std::move(rhs));
                     }));
 
-    BindPrimitive<FDFirstAlgorithm>(cfd_module, &CFDDiscovery::GetCfds, "CfdAlgorithm", "get_cfds",
-                                    {"FDFirst"});
+    BindPrimitive<FDFirstAlgorithm, CFDMiner>(cfd_module, &CFDDiscovery::GetCfds, "CfdAlgorithm",
+                                              "get_cfds", {"FDFirst", "CFDMiner"});
 }
 }  // namespace python_bindings
