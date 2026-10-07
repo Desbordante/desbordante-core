@@ -1,9 +1,9 @@
-#include "core/algorithms/fd/tane/tane_common.h"
+#include "core/algorithms/fd/tane/tane.h"
 
 // The code for the initial stages of TANE as implemented here is long and involved, so it is
 // separated into this file for readability of the main file.
 
-namespace algos::tane {
+namespace algos {
 // COMPUTE_DEPENDENCIES(L_1)
 // Lines 1 and 2 are pointless, C^+({A}) is exactly R at this point
 // Lines 3 and 4 reduce to "for each attribute"
@@ -11,7 +11,7 @@ namespace algos::tane {
 // If the condition on line 8' holds, the attribute set will be pruned (C^+({A}) = ∅), which is
 // exactly the same as if there was no such attribute set in the first place, so we can just not add
 // it.
-auto TaneCommon::ComputeDependenciesLevel1() -> FirstLevelComputeDependenciesResult {
+auto Tane::ComputeDependenciesLevel1() -> FirstLevelComputeDependenciesResult {
     RelationalSchema const* schema = relation_->GetSchema();
     std::vector<model::Index> inexact_zeroary_afd_rhss;  // C^+({A}) = R \ {A}
     std::vector<model::Index> not_zeroary_afd_rhss;      // C^+({A}) = R
@@ -82,9 +82,9 @@ auto TaneCommon::ComputeDependenciesLevel1() -> FirstLevelComputeDependenciesRes
 // 3. AFD RHSs with non-zero error, not keys: C^+({A}) = R \ {A}
 // 4. Not AFD RHSs, not keys: C^+({A}) = R
 // Any FD from key to a column has error 0.0, so that's output.
-auto TaneCommon::PruneLevel1(std::vector<model::Index> const& inexact_zeroary_afd_rhss,
-                             std::vector<model::Index> const& not_zeroary_afd_rhss,
-                             boost::dynamic_bitset<> const& not_exact_zeroary_afd_rhss)
+auto Tane::PruneLevel1(std::vector<model::Index> const& inexact_zeroary_afd_rhss,
+                       std::vector<model::Index> const& not_zeroary_afd_rhss,
+                       boost::dynamic_bitset<> const& not_exact_zeroary_afd_rhss)
         -> FirstLevelPruneResults {
     RelationalSchema const* schema = relation_->GetSchema();
 
@@ -160,7 +160,7 @@ auto TaneCommon::PruneLevel1(std::vector<model::Index> const& inexact_zeroary_af
 // Case 4: key_attrs_not_0afd, key_attrs_not_0afd
 // C^+(X) = (R \ ({A | C^+({A}) = R} \ {B})) ⋂ (R \ ({A | C^+({A}) = R} \ {C})) =
 //   R \ {A | C^+({A}) = R}
-void TaneCommon::ComputeDependenciesLevel2KeysNotZeroaryAfdRhs(
+void Tane::ComputeDependenciesLevel2KeysNotZeroaryAfdRhs(
         std::vector<model::Index> const& non_key_attrs_not_0afd,
         std::vector<model::Index> const& key_attrs_not_0afd,
         std::vector<model::Index> const& non_key_attrs_0afd,
@@ -252,7 +252,7 @@ void TaneCommon::ComputeDependenciesLevel2KeysNotZeroaryAfdRhs(
 //
 // Case 7: key_attrs_0afd, non_key_attrs_not_0afd
 // C^+(X) = (R \ {A | C^+({A}) = R}) ⋂ R = R \ {A | C^+({A}) = R}
-void TaneCommon::ComputeDependenciesLevel2KeysZeroaryAfdRhs(
+void Tane::ComputeDependenciesLevel2KeysZeroaryAfdRhs(
         std::vector<model::Index> const& non_key_attrs_not_0afd,
         std::vector<model::Index> const& non_key_attrs_0afd,
         std::vector<model::Index> const& key_attrs_0afd,
@@ -304,12 +304,12 @@ void TaneCommon::ComputeDependenciesLevel2KeysZeroaryAfdRhs(
 
 // ComputeDependencies skips superkeys, so no FDs have to be accounted for, so the final C^+(X)
 // is just the intersection of the corresponding columns' C^+(X) (see above).
-void TaneCommon::ComputeDependenciesLevel2Keys(
-        std::vector<model::Index> const& non_key_attrs_not_0afd,
-        std::vector<model::Index> const& key_attrs_not_0afd,
-        std::vector<model::Index> const& non_key_attrs_0afd,
-        std::vector<model::Index> const& key_attrs_0afd,
-        boost::dynamic_bitset<>& superkey_rhs_candidates, LevelAttributeSetsData& current_level) {
+void Tane::ComputeDependenciesLevel2Keys(std::vector<model::Index> const& non_key_attrs_not_0afd,
+                                         std::vector<model::Index> const& key_attrs_not_0afd,
+                                         std::vector<model::Index> const& non_key_attrs_0afd,
+                                         std::vector<model::Index> const& key_attrs_0afd,
+                                         boost::dynamic_bitset<>& superkey_rhs_candidates,
+                                         LevelAttributeSetsData& current_level) {
     ComputeDependenciesLevel2KeysNotZeroaryAfdRhs(non_key_attrs_not_0afd, key_attrs_not_0afd,
                                                   non_key_attrs_0afd, key_attrs_0afd,
                                                   superkey_rhs_candidates, current_level);
@@ -320,7 +320,7 @@ void TaneCommon::ComputeDependenciesLevel2Keys(
 
 // Case 8: non_key_attrs_0afd, non_key_attrs_0afd
 // C^+(X) = (R \ {A}) ⋂ (R \ {B}) = R \ {A, B}
-void TaneCommon::ComputeDependenciesLevel2NonKeysZeroaryAfdRhsPairs(
+void Tane::ComputeDependenciesLevel2NonKeysZeroaryAfdRhsPairs(
         boost::dynamic_bitset<> const& not_exact_zeroary_afd_rhss,
         std::vector<model::Index> const& non_key_attrs_0afd,
         LevelAttributeSetsData& current_level) {
@@ -347,7 +347,7 @@ void TaneCommon::ComputeDependenciesLevel2NonKeysZeroaryAfdRhsPairs(
 //
 // Case 10: non_key_attrs_not_0afd, non_key_attrs_not_0afd
 // C^+(X) = R ⋂ R = R
-void TaneCommon::ComputeDependenciesLevel2NonKeysNotBothZeroaryAfdRhs(
+void Tane::ComputeDependenciesLevel2NonKeysNotBothZeroaryAfdRhs(
         boost::dynamic_bitset<> const& not_exact_zeroary_afd_rhss,
         std::vector<model::Index> const& non_key_attrs_not_0afd,
         std::vector<model::Index> const& non_key_attrs_0afd,
@@ -489,7 +489,7 @@ void TaneCommon::ComputeDependenciesLevel2NonKeysNotBothZeroaryAfdRhs(
     }
 }
 
-void TaneCommon::ComputeDependenciesLevel2NonKeys(
+void Tane::ComputeDependenciesLevel2NonKeys(
         boost::dynamic_bitset<> const& not_exact_zeroary_afd_rhss,
         std::vector<model::Index> const& non_key_attrs_not_0afd,
         std::vector<model::Index> const& non_key_attrs_0afd,
@@ -511,13 +511,13 @@ void TaneCommon::ComputeDependenciesLevel2NonKeys(
 // procedure. We have to process 10 cases.
 // COMPUTE_DEPENDENCIES(L_2)
 // All of C^+(X) are known, so we skip lines 1 and 2.
-auto TaneCommon::ComputeDependenciesLevel2(
-        boost::dynamic_bitset<> const& not_exact_zeroary_afd_rhss,
-        std::vector<model::Index> const& non_key_attrs_not_0afd,
-        std::vector<model::Index> const& key_attrs_not_0afd,
-        std::vector<model::Index> const& non_key_attrs_0afd,
-        std::vector<model::Index> const& key_attrs_0afd,
-        boost::dynamic_bitset<>& superkey_rhs_candidates) -> LevelAttributeSetsData {
+auto Tane::ComputeDependenciesLevel2(boost::dynamic_bitset<> const& not_exact_zeroary_afd_rhss,
+                                     std::vector<model::Index> const& non_key_attrs_not_0afd,
+                                     std::vector<model::Index> const& key_attrs_not_0afd,
+                                     std::vector<model::Index> const& non_key_attrs_0afd,
+                                     std::vector<model::Index> const& key_attrs_0afd,
+                                     boost::dynamic_bitset<>& superkey_rhs_candidates)
+        -> LevelAttributeSetsData {
     // TODO: use collection emptiness information better, be more concise.
     LevelAttributeSetsData current_level;
 
@@ -530,4 +530,4 @@ auto TaneCommon::ComputeDependenciesLevel2(
 
     return current_level;
 }
-}  // namespace algos::tane
+}  // namespace algos

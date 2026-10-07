@@ -154,8 +154,7 @@ desbordante_add_bind(
     SRCS
     fd/bind_afd.cpp
     LIBS
-    ${DESBORDANTE_PREFIX}::fd::tane
-    ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::afd::tane
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers

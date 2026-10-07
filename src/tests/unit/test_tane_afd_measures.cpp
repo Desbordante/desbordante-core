@@ -345,6 +345,11 @@ INSTANTIATE_TEST_SUITE_P(
                 TaneMiningParams(47878, 0.01, algos::AfdErrorMeasure::kRho, kIris),
                 TaneMiningParams(41837, 0.1, algos::AfdErrorMeasure::kRho, kNeighbors10k),
                 TaneMiningParams(41837, 0.01, algos::AfdErrorMeasure::kRho, kNeighbors10k),
-                TaneMiningParams(12408, 0.2, algos::AfdErrorMeasure::kG3, kG3LRKey)));
+                TaneMiningParams(12408, 0.2, algos::AfdErrorMeasure::kG3, kG3LRKey),
+                TaneMiningParams(44381, 0.3, algos::AfdErrorMeasure::kPerValue, kTestFD),
+                TaneMiningParams(19266, 0.1, algos::AfdErrorMeasure::kPerValue, kIris),
+                TaneMiningParams(10695, 0.01, algos::AfdErrorMeasure::kPerValue, kIris),
+                TaneMiningParams(44088, 0.1, algos::AfdErrorMeasure::kPerValue, kNeighbors10k),
+                TaneMiningParams(41837, 0.01, algos::AfdErrorMeasure::kPerValue, kNeighbors10k)));
 
 }  // namespace tests
