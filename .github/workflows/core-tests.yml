@@ -83,16 +83,21 @@ jobs:
         with:
           os: ${{ matrix.system.os }}
           toolset: ${{ matrix.system.toolset }}
+          install-uv: true
       - name: Build
         shell: bash
         run: |
           export ${{ matrix.system.env }}
 
           if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
-            ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }} \
-              --cmake-opt='${{ matrix.cfg.CMAKE_OPTS }}'
+            SANITIZER_OPT=''
+            if [[ -n "${{ matrix.cfg.SANITIZER }}" ]]; then
+              SANITIZER_OPT="--sanitizer=${{ matrix.cfg.SANITIZER }}"
+            fi
+
+            uv run build.py --debug $SANITIZER_OPT --cmake-opts='${{ matrix.cfg.CMAKE_OPTS }}'
           else
-            ./build.sh
+            uv run build.py
           fi
       - name: Test
         working-directory: ${{github.workspace}}/build
