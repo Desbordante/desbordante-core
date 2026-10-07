@@ -41,8 +41,7 @@ public:
                 std::byte const* second) const override {
         double const similarity = inner_.Dist(type, first, second);
         if (!(similarity >= 0.0 && similarity <= 1.0)) {
-            throw config::ConfigurationError(
-                    "Python similarity metric must return a value in [0, 1]");
+            throw config::ConfigurationError("Similarity metric must return a value in [0, 1]");
         }
         return 1.0 - similarity;
     }

@@ -45,15 +45,6 @@ public:
         list_.push_back(key);
         map_[key] = {value, std::prev(list_.end())};
     }
-
-    void Clear() noexcept {
-        map_.clear();
-        list_.clear();
-    }
-
-    std::size_t MaxSize() const noexcept {
-        return max_size_;
-    }
 };
 
 }  // namespace algos::rfd::util
