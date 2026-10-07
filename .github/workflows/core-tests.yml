@@ -97,7 +97,10 @@ jobs:
           export ${{ matrix.system.runtime-env }}
 
           if [[ "${{ inputs.parallel-tests }}" != "false" ]]; then
-            export CTEST_ARGS="-j ${nproc}"
+            JOBS="$(getconf _NPROCESSORS_ONLN)"
+            CTEST_ARGS="-j ${JOBS}"
           fi
 
+          ctest --version
+          echo "Running ctest with ${CTEST_ARGS:-no parallelism}"
           ctest --preset ${{ matrix.cfg.PRESET }} $CTEST_ARGS
