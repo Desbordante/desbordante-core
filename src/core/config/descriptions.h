@@ -128,6 +128,17 @@ constexpr auto kDShardLength =
         "segmentation of rows for parallel processing in the FastADC algorithm";
 // FastOD
 constexpr auto kDTimeLimitSeconds = "max running time of the algorithm. Pass 0 to remove limit";
+// GA-RFD
+constexpr auto kDRfdMetrics = "List of similarity metrics, one per column";
+constexpr auto kDRfdMinSimilarity =
+        "minimum similarity in [0, 1] for two values to be considered similar. "
+        "Pass 1 for exact match only";
+constexpr auto kDRfdMinimumConfidence =
+        "minimum confidence in [0, 1] describes the coverage percentage";
+constexpr auto kDRfdCrossoverProbability = "probability of applying crossover between individuals";
+constexpr auto kDRfdMutationProbability = "probability of mutating an individual";
+constexpr auto kDRfdMaxGenerations = "maximum number of genetic algorithm generations";
+constexpr auto kDCacheMaxSize = "maximum size of the support cache";
 // GFD
 constexpr auto kDGfdData = "Path to file with GFD";
 constexpr auto kDGraphData = "Path to dot-file with graph";

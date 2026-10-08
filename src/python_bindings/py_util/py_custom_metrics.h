@@ -9,6 +9,7 @@
 
 #include <pybind11/pytypes.h>
 
+#include "core/config/exceptions.h"
 #include "core/model/types/type.h"
 #include "core/util/custom_metric/custom_metric.h"
 #include "core/util/custom_metric/custom_vector_metric.h"
@@ -39,6 +40,26 @@ public:
     std::unique_ptr<ITypedMetric> SetType(model::Type const* type,
                                           std::string const&) const override {
         return std::make_unique<TypedMetric>(metric_, type);
+    }
+};
+
+// the user provides a similarity function
+// f(a, b) -> similarity in [0, 1], the core uses distances.
+// conversion: distance = 1 - similarity.
+class PySimilarityMetric : public util::ICustomMetric {
+private:
+    PyCustomMetric inner_;
+
+public:
+    explicit PySimilarityMetric(PyCustomMetric inner) : inner_(std::move(inner)) {}
+
+    double Dist(model::Type const* type, std::byte const* first,
+                std::byte const* second) const override {
+        double const similarity = inner_.Dist(type, first, second);
+        if (!(similarity >= 0.0 && similarity <= 1.0)) {
+            throw config::ConfigurationError("Similarity metric must return a value in [0, 1]");
+        }
+        return 1.0 - similarity;
     }
 };
 
