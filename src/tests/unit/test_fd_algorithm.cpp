@@ -9,7 +9,6 @@
 #include "core/algorithms/fd/fdep/fdep.h"
 #include "core/algorithms/fd/fun/fun.h"
 #include "core/algorithms/fd/hyfd/hyfd.h"
-#include "core/algorithms/fd/pyro/pyro.h"
 #include "core/algorithms/fd/tane/pfdtane.h"
 #include "core/algorithms/fd/tane/tane.h"
 #include "core/model/table/relational_schema.h"
@@ -122,7 +121,7 @@ void MaxLhsTestFun(CSVConfig config, std::list<FD> const& fds_list, config::MaxL
             {kError, config::ErrorType{0.0}},
             {kMaximumLhs, max_lhs},
     };
-    auto verify_algo = algos::CreateAndLoadAlgorithm<algos::Pyro>(verify_params);
+    auto verify_algo = algos::CreateAndLoadAlgorithm<algos::hyfd::HyFD>(verify_params);
     verify_algo->Execute();
     auto verify_list = FDsToSet(verify_algo->FdList());
     ASSERT_TRUE(CheckFdListEquality(verify_list, fds_list));
@@ -149,8 +148,8 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using Algorithms = ::testing::Types<algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,
-                                    algos::FDep, algos::FUN, algos::hyfd::HyFD>;
+using Algorithms = ::testing::Types<algos::FastFDs, algos::DFD, algos::Depminer, algos::FDep,
+                                    algos::FUN, algos::hyfd::HyFD>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
 }  // namespace tests
