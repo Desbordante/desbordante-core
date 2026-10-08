@@ -7,8 +7,6 @@
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/fd_mine/fd_mine.h"
 #include "core/algorithms/fd/pyro/pyro.h"
-#include "core/algorithms/fd/tane/pfdtane.h"
-#include "core/algorithms/fd/tane/tane.h"
 #include "core/config/error/type.h"
 #include "core/config/names.h"
 #include "core/model/table/relational_schema.h"
