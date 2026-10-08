@@ -234,6 +234,8 @@ constexpr auto kDCompleteness =
         "Percentage of rows/groups from IND that satisfies the pattern tuple";
 extern std::string_view const kDConditionType;
 extern std::string_view const kDAlgoType;
+constexpr auto kDCindMinSupport =
+        "Minimum support threshold (number of joined tuples) for the Cure algorithm";
 constexpr auto kDCindCondValues =
         "Condition values aligned with conditional attributes order. "
         "Use '-' or '_' as wildcard. If empty => all wildcards.";
