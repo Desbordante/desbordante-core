@@ -1,4 +1,4 @@
-#include "core/algorithms/cfd/fd_first/model/partition_tidlist.h"
+#include "core/algorithms/cfd/model/partition_tidlist.h"
 
 #include <algorithm>
 #include <map>
@@ -17,6 +17,11 @@ bool PartitionTIdList::operator!=(PartitionTIdList const& b) const {
 
 bool PartitionTIdList::operator<(PartitionTIdList const& b) const {
     return sets_number < b.sets_number || (sets_number == b.sets_number && tids < b.tids);
+}
+
+PartitionTIdList PartitionTIdList::Intersection(PartitionTIdList const& rhs) const {
+    auto intersections = Intersection(std::vector<PartitionTIdList const*>{&rhs});
+    return std::move(intersections.front());
 }
 
 std::vector<PartitionTIdList> PartitionTIdList::Intersection(
