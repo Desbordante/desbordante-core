@@ -56,6 +56,15 @@ public:
     static long double CalculateFI(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                    size_t num_rows);
 
+    static long double CalculateG1SMeasure(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                           std::size_t num_rows);
+
+    static long double CalculateRfiPlusMeasure(model::PLI const* lhs_pli,
+                                               model::PLI const* rhs_pli);
+
+    static long double CalculateRfiPrimePlusMeasure(model::PLI const* lhs_pli,
+                                                    model::PLI const* rhs_pli);
+
     static config::ErrorType CalculateZeroAryG1(ColumnData const* rhs,
                                                 unsigned long long num_tuple_pairs);
 

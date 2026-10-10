@@ -51,6 +51,12 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
         case AfdErrorMeasure::kPdep:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(
                                rhs->GetPositionListIndex());
+        case AfdErrorMeasure::kG1S: {
+            config::ErrorType const entropy = rhs->GetPositionListIndex()->GetEntropy();
+            if (entropy < 0.0) return 0.0;
+            if (entropy > 1.0) return 1.0;
+            return entropy;
+        }
         /*
          * The probability that a tuple participates in a violating pair is 0 if there is an FD,
          * otherwise it is 1 for an empty LHS and non-constant RHS.
@@ -73,6 +79,8 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
          * as well in that case.
          */
         case AfdErrorMeasure::kMuPlus:
+        case AfdErrorMeasure::kRfiPlus:
+        case AfdErrorMeasure::kRfiPrimePlus:
             return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
     }
     assert(false);
@@ -105,6 +113,15 @@ config::ErrorType Tane::CalculateFdError(model::PLI const* lhs_pli, model::PLI c
         case AfdErrorMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateG1Error(
                     lhs_pli, joint_pli, relation_.get()->GetNumTuplePairs());
+        case AfdErrorMeasure::kG1S:
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG1SMeasure(
+                               lhs_pli, rhs_pli, relation_.get()->GetNumRows());
+        case AfdErrorMeasure::kRfiPlus:
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateRfiPlusMeasure(lhs_pli,
+                                                                                           rhs_pli);
+        case AfdErrorMeasure::kRfiPrimePlus:
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateRfiPrimePlusMeasure(
+                               lhs_pli, rhs_pli);
     }
     assert(false);
     __builtin_unreachable();
