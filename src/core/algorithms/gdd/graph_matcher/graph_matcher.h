@@ -32,6 +32,9 @@ public:
 
     virtual ~GraphMatcher() = default;
 
+    // resets caches if needed
+    virtual void Reset() {}
+
     // enumerates matches of pattern in the graph and calls OnMatch on every match
     // returns false if the search was stopped by the callback
     bool Match(Graph const& pattern, Semantics semantics = Semantics::kHomomorphism) {

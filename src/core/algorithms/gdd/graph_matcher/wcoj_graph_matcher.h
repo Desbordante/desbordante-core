@@ -59,6 +59,13 @@ public:
     // column i of a row is the image of pattern vertex Order()[i]
     MatchLevel const& FindAll(Graph const& pattern, Domain domain, bool injective);
 
+    void InvalidateIndex() noexcept {
+        adjacency_index_.clear();
+        intersection_cache_.last_isect_key.clear();
+        intersection_cache_.last_isect_set.clear();
+        intersection_cache_.last_isect_valid = false;
+    }
+
     std::vector<Vertex> const& Order() const noexcept {
         return qvo_;
     }
@@ -159,6 +166,10 @@ class WcojGraphMatcher final : public GraphMatcher<Callback>,
                                private virtual model::gdd::GraphTypes {
 public:
     using GraphMatcher<Callback>::GraphMatcher;
+
+    virtual void Reset() final {
+        core_.InvalidateIndex();
+    }
 
 private:
     detail::WcojCore core_{this->graph_};
