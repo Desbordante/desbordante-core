@@ -11,10 +11,10 @@
 
 namespace algos {
 
-class GddValidator : public Algorithm {
+class GddValidator : public Algorithm, protected model::gdd::GraphTypes {
 private:
     std::filesystem::path graph_path_;
-    model::gdd::graph_t graph_;
+    Graph graph_;
     std::vector<model::Gdd> gdds_;
     std::vector<model::Gdd> result_;
     std::vector<std::size_t> matches_count_;
@@ -42,23 +42,26 @@ private:
     virtual void MakeExecuteOptsAvailable() final;
 
 protected:
-    using VertexT = model::gdd::detail::VertexT;
-    using EdgeT = model::gdd::detail::EdgeT;
-    using DomainT = model::gdd::detail::DomainT;
-    using MappingT = model::gdd::detail::MappingT;
-
-    static DomainT BuildDomain(model::gdd::graph_t const& pattern,
-                               model::gdd::graph_t const& graph);
-
     struct GddHoldsResult {
         std::optional<GddCounterexample> ce;
         std::size_t match_count = 0;
     };
 
+    // GraphMatcher callback: checks every GDD of the group on a match
+    // returns false when every GDD of the group has a counterexample
+    struct GroupCheck {
+        std::span<model::Gdd const* const> group;
+        Graph const* graph = nullptr;
+        std::span<GddHoldsResult> output;
+        std::size_t remaining = 0;
+
+        bool operator()(Mapping const& match);
+    };
+
     // every GDD in a group shares the same pattern, so we want to match it once if it
     // is possible
-    virtual void HoldsGroup(std::span<model::Gdd const* const> group,
-                            model::gdd::graph_t const& graph, std::span<GddHoldsResult> output) = 0;
+    virtual void HoldsGroup(std::span<model::Gdd const* const> group, Graph const& graph,
+                            std::span<GddHoldsResult> output) = 0;
 
     virtual std::unique_ptr<GddValidator> CreateWorker() const = 0;
 
@@ -66,10 +69,6 @@ protected:
 
 public:
     GddValidator();
-
-    static bool LabelsMatch(std::string_view lhs, std::string_view rhs) noexcept {
-        return lhs == rhs;  // TODO: wildcards
-    }
 
     std::vector<model::Gdd> const& GetResult() const noexcept {
         return result_;

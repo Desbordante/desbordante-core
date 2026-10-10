@@ -5,12 +5,11 @@ target_sources(
     PRIVATE gdd_validator.cpp
             naive_gdd_validator.cpp
             wcoj_gdd_validator.cpp
-            bfs_qvo_strategy.cpp
-            cost_based_qvo_strategy.cpp
             gdd_validation_executor.cpp
             gdd_pattern_grouping.cpp
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::parser::graph spdlog::spdlog_header_only
-                    ${DESBORDANTE_PREFIX}::gdd ${DESBORDANTE_PREFIX}::algos Boost::headers
+                    ${DESBORDANTE_PREFIX}::gdd ${DESBORDANTE_PREFIX}::gdd::graph_matcher
+                    ${DESBORDANTE_PREFIX}::algos Boost::headers
 )

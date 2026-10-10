@@ -1,3 +1,4 @@
+add_subdirectory(graph_matcher)
 add_subdirectory(gdd_validator)
 
 set(NAME gdd)

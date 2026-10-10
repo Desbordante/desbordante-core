@@ -47,7 +47,7 @@ void CostBasedQvoStrategy::ComputeAvgListSizes() {
     }
 }
 
-std::size_t CostBasedQvoStrategy::VertexDomainSize(VertexT pattern_vertex) const {
+std::size_t CostBasedQvoStrategy::VertexDomainSize(Vertex pattern_vertex) const {
     auto const it = domain_.find(pattern_vertex);
     return it == domain_.end() ? 0 : it->second.size();
 }
@@ -59,7 +59,7 @@ double CostBasedQvoStrategy::AvgListSize(std::string_view edge_label, Direction 
 }
 
 bool CostBasedQvoStrategy::ConnectsToPlaced(
-        VertexT vertex, std::unordered_map<VertexT, std::size_t> const& placed) const {
+        Vertex vertex, std::unordered_map<Vertex, std::size_t> const& placed) const {
     for (auto const edge : boost::make_iterator_range(boost::out_edges(vertex, pattern_))) {
         if (placed.contains(boost::target(edge, pattern_))) {
             return true;
@@ -74,11 +74,11 @@ bool CostBasedQvoStrategy::ConnectsToPlaced(
 }
 
 std::vector<CostBasedQvoStrategy::ExtensionListDescriptor> CostBasedQvoStrategy::ExtensionListsFor(
-        VertexT to, std::unordered_map<VertexT, std::size_t> const& placed) const {
+        Vertex to, std::unordered_map<Vertex, std::size_t> const& placed) const {
     std::vector<ExtensionListDescriptor> lists;
 
     for (auto const edge : boost::make_iterator_range(boost::in_edges(to, pattern_))) {
-        if (VertexT const from = boost::source(edge, pattern_); placed.contains(from)) {
+        if (Vertex const from = boost::source(edge, pattern_); placed.contains(from)) {
             lists.push_back(ExtensionListDescriptor{
                     .from = from,
                     .direction = Direction::kOut,
@@ -88,7 +88,7 @@ std::vector<CostBasedQvoStrategy::ExtensionListDescriptor> CostBasedQvoStrategy:
     }
 
     for (auto const edge : boost::make_iterator_range(boost::out_edges(to, pattern_))) {
-        if (VertexT const from = boost::target(edge, pattern_); placed.contains(from)) {
+        if (Vertex const from = boost::target(edge, pattern_); placed.contains(from)) {
             lists.push_back(ExtensionListDescriptor{
                     .from = from,
                     .direction = Direction::kIn,
@@ -99,8 +99,8 @@ std::vector<CostBasedQvoStrategy::ExtensionListDescriptor> CostBasedQvoStrategy:
     return lists;
 }
 
-double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
-                                      std::unordered_map<VertexT, std::size_t> const& placed,
+double CostBasedQvoStrategy::StepCost(Vertex next, std::size_t level,
+                                      std::unordered_map<Vertex, std::size_t> const& placed,
                                       std::vector<double> const& card_by_level,
                                       double& match_estimate) const {
     std::vector<ExtensionListDescriptor> const& lists = ExtensionListsFor(next, placed);
@@ -142,16 +142,16 @@ double CostBasedQvoStrategy::StepCost(VertexT next, std::size_t level,
     return cost;
 }
 
-std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderExhaustive() const {
-    std::vector<VertexT> pattern_vertices(boost::vertices(pattern_).first,
-                                          boost::vertices(pattern_).second);
+std::vector<CostBasedQvoStrategy::Vertex> CostBasedQvoStrategy::OrderExhaustive() const {
+    std::vector<Vertex> pattern_vertices(boost::vertices(pattern_).first,
+                                         boost::vertices(pattern_).second);
     std::ranges::sort(pattern_vertices, pattern_vertices_comparator_);
 
-    std::vector<VertexT> best;
+    std::vector<Vertex> best;
     best.reserve(pattern_vertices.size());
     double best_cost = std::numeric_limits<double>::infinity();
 
-    std::unordered_map<VertexT, std::size_t> placed;
+    std::unordered_map<Vertex, std::size_t> placed;
     placed.reserve(pattern_vertices.size());
     std::vector<double> card_by_level;
     card_by_level.reserve(pattern_vertices.size());
@@ -165,7 +165,7 @@ std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderExhaustive
         bool valid = true;
 
         for (std::size_t level = 0; level < pattern_vertices.size(); ++level) {
-            VertexT const pv = pattern_vertices[level];
+            Vertex const pv = pattern_vertices[level];
 
             if (level == 0) {
                 match_estimate = static_cast<double>(VertexDomainSize(pv));
@@ -193,21 +193,21 @@ std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderExhaustive
     return best;
 }
 
-std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderGreedy() const {
-    std::vector<VertexT> const pattern_vertices(boost::vertices(pattern_).first,
-                                                boost::vertices(pattern_).second);
+std::vector<CostBasedQvoStrategy::Vertex> CostBasedQvoStrategy::OrderGreedy() const {
+    std::vector<Vertex> const pattern_vertices(boost::vertices(pattern_).first,
+                                               boost::vertices(pattern_).second);
     if (pattern_vertices.empty()) {
         return {};
     }
 
-    std::vector<VertexT> order;
+    std::vector<Vertex> order;
     order.reserve(pattern_vertices.size());
-    std::unordered_map<VertexT, std::size_t> placed;
+    std::unordered_map<Vertex, std::size_t> placed;
     placed.reserve(pattern_vertices.size());
 
     // greedy choose first vertex
-    VertexT root = pattern_vertices.front();
-    for (VertexT const pv : pattern_vertices) {
+    Vertex root = pattern_vertices.front();
+    for (Vertex const pv : pattern_vertices) {
         std::size_t const pv_size = VertexDomainSize(pv);
         std::size_t const root_size = VertexDomainSize(root);
 
@@ -234,11 +234,11 @@ std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderGreedy() c
     // minimize plan cost greedy as well
     while (order.size() < pattern_vertices.size()) {
         bool found = false;
-        VertexT best{};
+        Vertex best{};
         double best_cost = std::numeric_limits<double>::infinity();
         double best_estimate_after = match_estimate;
 
-        for (VertexT pv : pattern_vertices) {
+        for (Vertex pv : pattern_vertices) {
             if (placed.contains(pv) || !ConnectsToPlaced(pv, placed)) {
                 continue;
             }
@@ -256,14 +256,14 @@ std::vector<CostBasedQvoStrategy::VertexT> CostBasedQvoStrategy::OrderGreedy() c
             LOG_WARN(
                     "Disconnected pattern passed to cost-based qvo strategy. Fall back to id "
                     "order");
-            std::vector<VertexT> rest;
-            for (VertexT v : pattern_vertices) {
+            std::vector<Vertex> rest;
+            for (Vertex v : pattern_vertices) {
                 if (!placed.contains(v)) {
                     rest.push_back(v);
                 }
             }
             std::ranges::sort(rest, pattern_vertices_comparator_);
-            for (VertexT v : rest) {
+            for (Vertex v : rest) {
                 order.push_back(v);
                 placed.emplace(v, order.size() - 1);
             }

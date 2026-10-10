@@ -1,8 +1,11 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
+#include <vector>
 
+#include <boost/container/flat_map.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_selectors.hpp>
 
@@ -18,9 +21,18 @@ struct EdgeProperties {
     std::string label;
 };
 
-using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                                      VertexProperties, EdgeProperties>;
-using vertex_t = boost::graph_traits<graph_t>::vertex_descriptor;
-using edge_t = boost::graph_traits<graph_t>::edge_descriptor;
+// inheritance provides aliases to the child class
+struct GraphTypes {
+    using Graph = boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
+                                        VertexProperties, EdgeProperties>;
+    using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
+    using Edge = boost::graph_traits<Graph>::edge_descriptor;
+    using Domain = std::unordered_map<Vertex, std::vector<Vertex>>;
+    using Mapping = boost::container::flat_map<Vertex, Vertex>;
+};
+
+inline bool LabelsMatch(std::string_view lhs, std::string_view rhs) noexcept {
+    return lhs == rhs;  // TODO: wildcards
+}
 
 }  // namespace model::gdd
