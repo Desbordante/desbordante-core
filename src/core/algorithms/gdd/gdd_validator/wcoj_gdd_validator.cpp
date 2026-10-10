@@ -18,7 +18,7 @@ void WcojGddValidator::HoldsGroup(std::span<model::Gdd const* const> group, Grap
     check_ = GroupCheck{
             .group = group, .graph = &graph, .output = output, .remaining = group.size()};
     // matching runs once for the pattern shared by the group
-    if (!matcher_) {
+    if (!matcher_.has_value()) {
         matcher_.emplace(graph, std::ref(check_));
     }
     matcher_->Match(group.front()->GetPattern());

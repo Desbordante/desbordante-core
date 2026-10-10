@@ -12,11 +12,11 @@ namespace parser::graph_parser {
 
 namespace gfd {
 
-model::graph_t ReadGraph(std::istream& stream);
-model::graph_t ReadGraph(std::filesystem::path const& path);
+model::gfd::graph_t ReadGraph(std::istream& stream);
+model::gfd::graph_t ReadGraph(std::filesystem::path const& path);
 
-void WriteGraph(std::ostream& stream, model::graph_t const& result);
-void WriteGraph(std::filesystem::path const& path, model::graph_t const& result);
+void WriteGraph(std::ostream& stream, model::gfd::graph_t const& result);
+void WriteGraph(std::filesystem::path const& path, model::gfd::graph_t const& result);
 
 model::Gfd ReadGfd(std::istream& stream);
 model::Gfd ReadGfd(std::filesystem::path const& path);

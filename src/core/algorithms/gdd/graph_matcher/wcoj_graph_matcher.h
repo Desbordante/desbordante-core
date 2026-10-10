@@ -163,7 +163,7 @@ public:
 private:
     detail::WcojCore core_{this->graph_};
 
-    bool DoMatch(Graph const& pattern, Domain domain, bool injective) final {
+    virtual bool DoMatch(Graph const& pattern, Domain domain, bool injective) final {
         auto const& matches = core_.FindAll(pattern, std::move(domain), injective);
         auto const& qvo = core_.Order();
 

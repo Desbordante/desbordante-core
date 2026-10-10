@@ -74,10 +74,9 @@ void WriteLiterals(std::ostream& stream, std::vector<model::Gfd::Literal> const&
 
 namespace graph_parser::gfd {
 
-using AMap =
-        boost::property_map<model::graph_t,
-                            std::unordered_map<std::string, std::string> model::Vertex::*>::type;
-using RMap = boost::property_map<model::graph_t, std::string model::Edge::*>::type;
+using AMap = boost::property_map<model::gfd::graph_t, std::unordered_map<std::string, std::string>
+                                                              model::gfd::Vertex::*>::type;
+using RMap = boost::property_map<model::gfd::graph_t, std::string model::gfd::Edge::*>::type;
 
 namespace {
 struct NewAttr {
@@ -97,8 +96,8 @@ public:
     NewAttr(AMap a) : attrs(a) {}
 
     Ptr operator()(std::string const& name, boost::any const& descr, boost::any const&) const {
-        if (typeid(model::vertex_t) == descr.type())
-            return MakeDyn(boost::make_function_property_map<model::vertex_t>(
+        if (typeid(model::gfd::vertex_t) == descr.type())
+            return MakeDyn(boost::make_function_property_map<model::gfd::vertex_t>(
                     boost::bind(*this, boost::placeholders::_1, name)));
 
         return Ptr();
@@ -106,41 +105,42 @@ public:
 
     using result_type = std::string&;
 
-    std::string& operator()(model::vertex_t v, std::string const& name) const {
+    std::string& operator()(model::gfd::vertex_t v, std::string const& name) const {
         return attrs[v][name];
     }
 };
 }  // namespace
 
-model::graph_t ReadGraph(std::istream& stream) {
-    model::graph_t result;
-    NewAttr newattr(boost::get(&model::Vertex::attributes, result));
+model::gfd::graph_t ReadGraph(std::istream& stream) {
+    model::gfd::graph_t result;
+    NewAttr newattr(boost::get(&model::gfd::Vertex::attributes, result));
     boost::dynamic_properties dp(newattr);
-    dp.property("label", boost::get(&model::Edge::label, result));
-    dp.property("node_id", boost::get(&model::Vertex::node_id, result));
+    dp.property("label", boost::get(&model::gfd::Edge::label, result));
+    dp.property("node_id", boost::get(&model::gfd::Vertex::node_id, result));
     read_graphviz(stream, result, dp);
     return result;
 };
 
-model::graph_t ReadGraph(std::filesystem::path const& path) {
+model::gfd::graph_t ReadGraph(std::filesystem::path const& path) {
     std::ifstream f(path);
-    model::graph_t result = ReadGraph(f);
+    model::gfd::graph_t result = ReadGraph(f);
     f.close();
     return result;
 };
 
-void WriteGraph(std::ostream& stream, model::graph_t const& result) {
+void WriteGraph(std::ostream& stream, model::gfd::graph_t const& result) {
     using ConstAMap =
-            boost::property_map<model::graph_t, std::unordered_map<std::string, std::string>
-                                                        model::Vertex::*>::const_type;
-    using ConstRMap = boost::property_map<model::graph_t, std::string model::Edge::*>::const_type;
+            boost::property_map<model::gfd::graph_t, std::unordered_map<std::string, std::string>
+                                                             model::gfd::Vertex::*>::const_type;
+    using ConstRMap =
+            boost::property_map<model::gfd::graph_t, std::string model::gfd::Edge::*>::const_type;
 
-    boost::attributes_writer<ConstAMap> vw(boost::get(&model::Vertex::attributes, result));
-    boost::label_writer<ConstRMap> ew(boost::get(&model::Edge::label, result));
+    boost::attributes_writer<ConstAMap> vw(boost::get(&model::gfd::Vertex::attributes, result));
+    boost::label_writer<ConstRMap> ew(boost::get(&model::gfd::Edge::label, result));
     write_graphviz(stream, result, vw, ew);
 };
 
-void WriteGraph(std::filesystem::path const& path, model::graph_t const& result) {
+void WriteGraph(std::filesystem::path const& path, model::gfd::graph_t const& result) {
     std::ofstream f(path);
     WriteGraph(f, result);
     f.close();
@@ -164,7 +164,7 @@ model::Gfd ReadGfd(std::filesystem::path const& path) {
 void WriteGfd(std::ostream& stream, model::Gfd const& result) {
     WriteLiterals(stream, result.GetPremises());
     WriteLiterals(stream, result.GetConclusion());
-    model::graph_t pattern = result.GetPattern();
+    model::gfd::graph_t pattern = result.GetPattern();
     WriteGraph(stream, pattern);
 };
 
