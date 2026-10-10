@@ -15,7 +15,7 @@
 #include "core/algorithms/gdd/gdd_validator/wcoj_gdd_validator.h"
 #include "core/config/names.h"
 #include "core/config/thread_number/type.h"
-#include "tests/unit/test_gdd_utils.h"
+#include "test_gdd_utils.h"
 
 using model::Gdd;
 

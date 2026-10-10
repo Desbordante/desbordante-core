@@ -28,8 +28,8 @@ void WriteGfd(std::filesystem::path const& path, model::Gfd const& result);
 
 namespace gdd {
 
-model::gdd::graph_t ReadGraph(std::istream& stream);
-model::gdd::graph_t ReadGraph(std::filesystem::path const& path);
+model::gdd::GraphTypes::Graph ReadGraph(std::istream& stream);
+model::gdd::GraphTypes::Graph ReadGraph(std::filesystem::path const& path);
 
 }  // namespace gdd
 

@@ -9,9 +9,7 @@
 #include <utility>
 #include <variant>
 
-#include <boost/container/flat_map.hpp>
-
-#include "core/algorithms/gdd/gdd_graph_description.h"
+#include "gdd_graph_description.h"
 #include "core/util/export.h"
 
 namespace model {
@@ -60,21 +58,16 @@ struct DistanceConstraint {
     }
 };
 
-bool IsSubgraph(gdd::graph_t const& query, gdd::graph_t const& graph);
-
-using VertexT = model::gdd::vertex_t;
-using EdgeT = model::gdd::edge_t;
-using DomainT = std::unordered_map<VertexT, std::vector<VertexT>>;
-using MappingT = boost::container::flat_map<VertexT, VertexT>;
+bool IsSubgraph(GraphTypes::Graph const& query, GraphTypes::Graph const& graph);
 
 }  // namespace gdd::detail
 
-class DESBORDANTE_EXPORT Gdd {
+class DESBORDANTE_EXPORT Gdd : private gdd::GraphTypes {
 public:
     using Phi = std::vector<gdd::detail::DistanceConstraint>;
 
 private:
-    gdd::graph_t pattern_;
+    Graph pattern_;
     Phi lhs_;
     Phi rhs_;
 
@@ -83,47 +76,43 @@ private:
     static std::optional<std::pair<std::size_t, std::string_view>> TokenAsRelation(
             gdd::detail::DistanceOperand const& operand);
 
-    static std::unordered_set<gdd::vertex_t> CollectRelationTargets(gdd::graph_t const& g,
-                                                                    gdd::vertex_t gv,
-                                                                    std::string_view rel_label);
+    static std::unordered_set<Vertex> CollectRelationTargets(Graph const& g, Vertex gv,
+                                                             std::string_view rel_label);
 
-    std::optional<gdd::vertex_t> FindPatternVertexById(std::size_t id) const;
+    std::optional<Vertex> FindPatternVertexById(std::size_t id) const;
 
-    std::optional<gdd::vertex_t> ResolveGraphVertex(gdd::detail::MappingT const& pg_map,
-                                                    std::size_t pv_id) const;
+    std::optional<Vertex> ResolveGraphVertex(Mapping const& pg_map, std::size_t pv_id) const;
 
     std::optional<gdd::detail::ConstValue> ResolveScalar(
-            gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
-            gdd::detail::DistanceOperand const& op) const;
+            Graph const& g, Mapping const& pg_map, gdd::detail::DistanceOperand const& op) const;
 
-    bool SatisfiesRelationConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+    bool SatisfiesRelationConstraint(Graph const& g, Mapping const& pg_map,
                                      std::pair<std::size_t, std::string_view> const& lhs_rel,
                                      gdd::detail::DistanceOperand const& rhs) const;
 
-    bool SatisfiesAttributeConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+    bool SatisfiesAttributeConstraint(Graph const& g, Mapping const& pg_map,
                                       gdd::detail::DistanceConstraint const& constraint) const;
 
-    bool SatisfiesConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+    bool SatisfiesConstraint(Graph const& g, Mapping const& pg_map,
                              gdd::detail::DistanceConstraint const& constraint) const;
 
-    bool SatisfiesPhi(gdd::graph_t const& g, gdd::detail::MappingT const& map,
-                      Phi const& phi) const {
+    bool SatisfiesPhi(Graph const& g, Mapping const& map, Phi const& phi) const {
         return std::ranges::all_of(phi, [this, &g, &map](gdd::detail::DistanceConstraint const& c) {
             return SatisfiesConstraint(g, map, c);
         });
     }
 
 public:
-    template <class GraphT, class LhsT, class RhsT>
-        requires std::constructible_from<gdd::graph_t, GraphT&&> &&
+    template <class PatternT, class LhsT, class RhsT>
+        requires std::constructible_from<Graph, PatternT&&> &&
                          std::constructible_from<Phi, LhsT&&> &&
                          std::constructible_from<Phi, RhsT&&>
-    Gdd(GraphT&& pattern, LhsT&& lhs, RhsT&& rhs)
-        : pattern_(std::forward<GraphT>(pattern)),
+    Gdd(PatternT&& pattern, LhsT&& lhs, RhsT&& rhs)
+        : pattern_(std::forward<PatternT>(pattern)),
           lhs_(std::forward<LhsT>(lhs)),
           rhs_(std::forward<RhsT>(rhs)) {}
 
-    gdd::graph_t const& GetPattern() const noexcept {
+    Graph const& GetPattern() const noexcept {
         return pattern_;
     }
 
@@ -143,7 +132,7 @@ public:
                gdd::detail::IsSubgraph(other.pattern_, pattern_);
     }
 
-    bool Satisfies(gdd::graph_t const& graph, gdd::detail::MappingT const& map) const {
+    bool Satisfies(Graph const& graph, Mapping const& map) const {
         if (SatisfiesPhi(graph, map, lhs_)) {
             return SatisfiesPhi(graph, map, rhs_);
         }
@@ -165,7 +154,8 @@ struct GddCounterexample {
     std::vector<GddCounterexampleVertex> match;
 };
 
-GddCounterexample BuildCounterexample(gdd::graph_t const& pattern, gdd::graph_t const& graph,
-                                      gdd::detail::MappingT const& mapping);
+GddCounterexample BuildCounterexample(gdd::GraphTypes::Graph const& pattern,
+                                      gdd::GraphTypes::Graph const& graph,
+                                      gdd::GraphTypes::Mapping const& mapping);
 
 }  // namespace model

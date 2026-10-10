@@ -26,8 +26,7 @@ inline std::string SanitizeParamName(std::string name) {
 }
 
 using model::Gdd;
-using model::gdd::graph_t;
-using model::gdd::vertex_t;
+using model::gdd::GraphTypes;
 
 using model::gdd::detail::AttrTag;
 using model::gdd::detail::CmpOp;
@@ -39,14 +38,14 @@ using model::gdd::detail::RelTag;
 
 // Graph utility
 
-inline graph_t ReadGraphFromDot(std::string const& dot) {
+inline GraphTypes::Graph ReadGraphFromDot(std::string const& dot) {
     std::stringstream ss;
     ss << dot;
     return parser::graph_parser::gdd::ReadGraph(ss);
 }
 
-inline vertex_t AddVertex(graph_t& g, std::size_t id, std::string label,
-                          std::unordered_map<std::string, std::string> attrs = {}) {
+inline GraphTypes::Vertex AddVertex(GraphTypes::Graph& g, std::size_t id, std::string label,
+                                    std::unordered_map<std::string, std::string> attrs = {}) {
     auto const v = boost::add_vertex(g);
     g[v].id = id;
     g[v].label = std::move(label);
@@ -54,13 +53,14 @@ inline vertex_t AddVertex(graph_t& g, std::size_t id, std::string label,
     return v;
 }
 
-inline void AddEdge(graph_t& g, vertex_t from, vertex_t to, std::string label) {
+inline void AddEdge(GraphTypes::Graph& g, GraphTypes::Vertex from, GraphTypes::Vertex to,
+                    std::string label) {
     auto [e, ok] = boost::add_edge(from, to, g);
     ASSERT_TRUE(ok);
     g[e].label = std::move(label);
 }
 
-inline vertex_t FindVertexById(graph_t const& g, std::uint64_t id) {
+inline GraphTypes::Vertex FindVertexById(GraphTypes::Graph const& g, std::uint64_t id) {
     for (auto const v : boost::make_iterator_range(boost::vertices(g))) {
         if (g[v].id == id) {
             return v;
@@ -71,38 +71,39 @@ inline vertex_t FindVertexById(graph_t const& g, std::uint64_t id) {
 
 // Pattern builders
 
-inline graph_t MakeSingleVertexPattern(std::size_t id, std::string label) {
-    graph_t g;
+inline GraphTypes::Graph MakeSingleVertexPattern(std::size_t id, std::string label) {
+    GraphTypes::Graph g;
     AddVertex(g, id, std::move(label));
     return g;
 }
 
-inline graph_t MakeTwoVertexPattern(std::size_t id1, std::size_t id2, std::string label1,
-                                    std::string label2) {
-    graph_t g;
+inline GraphTypes::Graph MakeTwoVertexPattern(std::size_t id1, std::size_t id2, std::string label1,
+                                              std::string label2) {
+    GraphTypes::Graph g;
     AddVertex(g, id1, std::move(label1));
     AddVertex(g, id2, std::move(label2));
     return g;
 }
 
-inline graph_t MakeArrowPattern(std::size_t src_id, std::string src_label, std::size_t dst_id,
-                                std::string dst_label, std::string edge_label) {
-    graph_t g;
+inline GraphTypes::Graph MakeArrowPattern(std::size_t src_id, std::string src_label,
+                                          std::size_t dst_id, std::string dst_label,
+                                          std::string edge_label) {
+    GraphTypes::Graph g;
     auto const src = AddVertex(g, src_id, std::move(src_label));
     auto const dst = AddVertex(g, dst_id, std::move(dst_label));
     AddEdge(g, src, dst, std::move(edge_label));
     return g;
 }
 
-inline graph_t MakePatternPersonCity(std::string const& edge_label = "lives_in") {
+inline GraphTypes::Graph MakePatternPersonCity(std::string const& edge_label = "lives_in") {
     return MakeArrowPattern(0, "Person", 1, "City", edge_label);
 }
 
-inline graph_t MakePatternCityCountry(std::string const& edge_label = "in_country") {
+inline GraphTypes::Graph MakePatternCityCountry(std::string const& edge_label = "in_country") {
     return MakeArrowPattern(0, "City", 1, "Country", edge_label);
 }
 
-inline graph_t MakePatternCompanyCity(std::string const& edge_label = "hq_in") {
+inline GraphTypes::Graph MakePatternCompanyCity(std::string const& edge_label = "hq_in") {
     return MakeArrowPattern(0, "Company", 1, "City", edge_label);
 }
 
@@ -356,7 +357,7 @@ inline std::string DblpLikeGraphDot() {
     })";
 }
 
-inline graph_t PatternDblpStrong() {
+inline GraphTypes::Graph PatternDblpStrong() {
     return ReadGraphFromDot(R"(digraph P {
         0 [label="Author"];
         1 [label="Author"];
@@ -374,7 +375,7 @@ inline graph_t PatternDblpStrong() {
     })");
 }
 
-inline graph_t PatternDblpWeak() {
+inline GraphTypes::Graph PatternDblpWeak() {
     return ReadGraphFromDot(R"(digraph P {
         0 [label="Author"];
         1 [label="Author"];
