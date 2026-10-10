@@ -34,7 +34,7 @@ public:
 private:
     Domain domain_;
 
-    bool DoMatch(Graph const& pattern, Domain domain, bool injective) final {
+    virtual bool DoMatch(Graph const& pattern, Domain domain, bool injective) final {
         if (domain_ = std::move(domain); domain_.size() != boost::num_vertices(pattern)) {
             return true;
         }

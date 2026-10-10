@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <memory>
 #include <optional>
 #include <span>
 
@@ -14,7 +14,7 @@ private:
     // the matcher outlives a group (its adjacency index is reused), while the check state is
     // per group: the matcher calls check_ by reference, and HoldsGroup refills it
     GroupCheck check_;
-    std::optional<WcojGraphMatcher<std::reference_wrapper<GroupCheck>>> matcher_;
+    std::optional<WcojGraphMatcher<GroupCheck&>> matcher_;
 
 protected:
     virtual void HoldsGroup(std::span<model::Gdd const* const> group, Graph const& graph,

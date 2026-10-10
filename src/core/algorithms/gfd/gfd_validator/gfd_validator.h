@@ -11,8 +11,8 @@ namespace algos {
 
 namespace gfd_validator {
 
-using Request = std::tuple<int, model::vertex_t, int, std::vector<model::vertex_t>>;
-using Message = std::tuple<int, model::vertex_t, model::vertex_t>;
+using Request = std::tuple<int, model::gfd::vertex_t, int, std::vector<model::gfd::vertex_t>>;
+using Message = std::tuple<int, model::gfd::vertex_t, model::gfd::vertex_t>;
 
 }  // namespace gfd_validator
 
@@ -21,12 +21,12 @@ private:
     config::ThreadNumType threads_num_;
 
 public:
-    std::vector<model::Gfd> GenerateSatisfiedGfds(model::graph_t const& graph,
+    std::vector<model::Gfd> GenerateSatisfiedGfds(model::gfd::graph_t const& graph,
                                                   std::vector<model::Gfd> const& gfds);
 
     GfdValidator();
 
-    GfdValidator(model::graph_t graph_, std::vector<model::Gfd> gfds_)
+    GfdValidator(model::gfd::graph_t graph_, std::vector<model::Gfd> gfds_)
         : GfdHandler(graph_, gfds_) {}
 };
 
