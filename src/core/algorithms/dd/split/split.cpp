@@ -27,7 +27,7 @@
 
 namespace algos::dd {
 
-Split::Split() : Algorithm() {
+Split::Split() : DDAlgorithm() {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
@@ -155,6 +155,7 @@ void Split::ExecuteInternal() {
     LOG_DEBUG("Cycles: {}", num_cycles);
     LOG_INFO("Search space size: {}", search_size);
 
+    std::ranges::for_each(dds_, [this](auto const& dd) { RegisterDD(DDToDDString(dd)); });
     PrintResults();
 }
 
@@ -199,7 +200,7 @@ unsigned Split::ReduceDDs() {
                     default:
                         break;
                 }
-                dd_collection_.splice(dd_collection_.end(), reduced);
+                dds_.splice(dds_.end(), reduced);
             }
             LOG_DEBUG("{}", cnt);
         }
@@ -217,10 +218,10 @@ unsigned Split::RemoveRedundantDDs() {
         num_cycles++;
         dd_collection_copy.clear();
         std::size_t left_dd_index = 0;
-        for (auto& left_dd : dd_collection_) {
+        for (auto& left_dd : dds_) {
             bool is_redundant = false;
             std::size_t right_dd_index = 0;
-            for (auto& right_dd : dd_collection_) {
+            for (auto& right_dd : dds_) {
                 if (left_dd_index != right_dd_index) {
                     if (Subsume(right_dd.lhs, left_dd.lhs)) {
                         if (Subsume(left_dd.rhs, right_dd.rhs)) {
@@ -234,8 +235,8 @@ unsigned Split::RemoveRedundantDDs() {
             if (!is_redundant) dd_collection_copy.push_back(left_dd);
             left_dd_index++;
         }
-        if (dd_collection_copy.size() == dd_collection_.size()) break;
-        dd_collection_ = dd_collection_copy;
+        if (dd_collection_copy.size() == dds_.size()) break;
+        dds_ = dd_collection_copy;
     }
     return num_cycles;
 }
@@ -248,10 +249,10 @@ unsigned Split::RemoveTransitiveDDs() {
         num_cycles++;
         results_copy.clear();
         bool is_removable = false;
-        for (auto& dd3 : dd_collection_) {
+        for (auto& dd3 : dds_) {
             bool remove = false;
-            for (auto& dd1 : dd_collection_) {
-                for (auto& dd2 : dd_collection_) {
+            for (auto& dd1 : dds_) {
+                for (auto& dd2 : dds_) {
                     if (Subsume(dd2.lhs, dd1.rhs) && dd1.lhs == dd3.lhs && dd2.rhs == dd3.rhs) {
                         if (!is_removable) remove = true;
                         is_removable = true;
@@ -262,8 +263,8 @@ unsigned Split::RemoveTransitiveDDs() {
             }
             if (!remove) results_copy.push_back(dd3);
         }
-        if (results_copy.size() == dd_collection_.size()) break;
-        dd_collection_ = results_copy;
+        if (results_copy.size() == dds_.size()) break;
+        dds_ = results_copy;
     }
     return num_cycles;
 }
@@ -694,7 +695,7 @@ std::list<DD> Split::InstanceExclusionReduce(std::vector<std::size_t> const& tup
 }
 
 void Split::PrintResults() {
-    std::list<model::DDString> const result_strings = GetDDStringList();
+    std::list<model::DDString> const& result_strings = DDList();
     LOG_INFO("Minimal cover size: {}", result_strings.size());
     for (auto const& result_str : result_strings) {
         LOG_DEBUG("{}", result_str.ToString());
@@ -702,7 +703,7 @@ void Split::PrintResults() {
 }
 
 std::list<DD> const& Split::GetDDs() const {
-    return dd_collection_;
+    return dds_;
 }
 
 std::vector<model::DFConstraint> const& Split::GetMinMaxDif() const {
@@ -725,14 +726,6 @@ model::DDString Split::DDToDDString(DD const& dd) const {
         }
     }
     return dd_string;
-}
-
-std::list<model::DDString> Split::GetDDStringList() const {
-    std::list<model::DDString> dd_strings;
-    for (auto const& result_dd : dd_collection_) {
-        dd_strings.emplace_back(DDToDDString(result_dd));
-    }
-    return dd_strings;
 }
 
 }  // namespace algos::dd
