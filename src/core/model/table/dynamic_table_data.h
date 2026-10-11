@@ -14,7 +14,7 @@ namespace model {
 struct DynamicTableData {
 private:
     std::vector<std::vector<std::string>> columns_;
-    std::unordered_set<size_t> deleted_rows_{};
+    std::unordered_set<size_t> deleted_rows_;
 
 public:
     DynamicTableData(IDatasetStream& input_table) {

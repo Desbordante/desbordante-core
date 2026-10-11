@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "core/algorithms/dc/model/component.h"
 #include "core/algorithms/dc/model/tuple.h"
 #include "core/model/table/column.h"
 #include "core/model/table/relation_data.h"
@@ -103,6 +104,10 @@ public:
         return column_;
     }
 
+    model::ColumnIndex GetColumnIndex() const noexcept {
+        return column_->GetIndex();
+    }
+
     Tuple GetTuple() const {
         assert(tuple_.has_value());
         return tuple_.value();
@@ -134,6 +139,12 @@ public:
         }
 
         return res;
+    }
+
+    dc::Component Eval(std::vector<std::byte const*> const& row = {}) const {
+        if (IsConstant()) return {val_, type_};
+        assert(!row.empty());
+        return {row[column_->GetIndex()], type_};
     }
 
     ~ColumnOperand() {

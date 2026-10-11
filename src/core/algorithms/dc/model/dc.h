@@ -43,7 +43,7 @@ public:
     DC() = default;
 
     template <class Iter>
-    DC(Iter first, Iter last) : predicates_(first, last) {};
+    DC(Iter first, Iter last) : predicates_(first, last) {}
 
     // returns unique columns indices from each Predicate which satisfy the given predicate
     template <class Pred>
@@ -59,6 +59,11 @@ public:
         }
 
         return {res.begin(), res.end()};
+    }
+
+    std::vector<Column::IndexType> GetColumnIndicesWithOperator(OperatorType type) const {
+        return GetColumnIndicesWithOperator(
+                [type](Operator const& op) { return op.GetType() == type; });
     }
 
     std::vector<Column::IndexType> GetColumnIndices() const {
@@ -83,6 +88,12 @@ public:
 
     // Convert all two-tuple equality predicates: s.A == t.B -> (s.A <= t.B and s.A >= t.B)
     void ConvertEqualities();
+
+    void Canonize() {
+        for (auto& pred : predicates_) {
+            pred.Canonize();
+        }
+    }
 };
 
 }  // namespace algos::dc
