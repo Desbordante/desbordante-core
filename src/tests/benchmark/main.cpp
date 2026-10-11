@@ -55,11 +55,16 @@ int main(int argc, char* argv[]) {
     }
 
     if (var_map.contains(kNameLongOption)) {
-        std::regex pattern(var_map[kNameLongOption].as<std::string>());
-        auto func = [&](const std::string& name) -> bool {
-            return std::regex_search(name, pattern);
-        };
-        bm_runner.Execute(func);
+        try {
+            std::regex pattern(var_map[kNameLongOption].as<std::string>());
+            auto func = [&](std::string const& name) -> bool {
+                return std::regex_search(name, pattern);
+            };
+            bm_runner.Execute(func);
+        } catch (const std::regex_error& e) {
+            std::cerr << "Invalid regex: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
     } else {
         bm_runner.ExecuteAll();
     }
