@@ -3,6 +3,7 @@
 #include <chrono>
 #include <functional>
 #include <iostream>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -75,7 +76,14 @@ public:
 
     /// @brief Run all registered benchmarks
     void ExecuteAll() {
+        // an extra lambda wont introduce a significant overhead
+        Execute([](auto) { return true; });
+    }
+
+    /// @brief Execute benchmarks which satisfy a condition
+    void Execute(std::function<bool(const std::string&)> cond) {
         for (auto& [name, benchmark_body] : benchmarks_) {
+            if (!cond(name)) continue;
             std::cout << "** " << name << "... **\n";
             auto start = std::chrono::steady_clock::now();
             benchmark_body();
@@ -90,6 +98,11 @@ public:
     /// @brief Get results of all benchmarks that've been already executed
     std::unordered_map<std::string, long long> const& BenchmarkResults() const {
         return bm_results_;
+    }
+
+    /// @brief Get a list of all benchmarks registered
+    auto BenchmarkNames() const {
+        return std::ranges::views::keys(benchmarks_);
     }
 };
 }  // namespace benchmark

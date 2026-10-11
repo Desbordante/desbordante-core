@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <iostream>
+#include <regex>
+#include <string>
 #include <unordered_map>
 
 #include <boost/program_options.hpp>
@@ -33,11 +35,6 @@ int main(int argc, char* argv[]) {
         std::cout << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
     }
-    auto const& var_map = benchmark_cli.GetVariablesMap();
-    if (var_map.contains(kHelpLongOption)) {
-        benchmark_cli.PrintHelp();
-        return EXIT_SUCCESS;
-    }
 
     BenchmarkRunner bm_runner;
     BenchmarkComparer bm_comparer;
@@ -45,7 +42,27 @@ int main(int argc, char* argv[]) {
          {ADCBenchmark, DDBenchmark, INDBenchmark, FDBenchmark, MDBenchmark, NARBenchmark}) {
         test_register_func(bm_runner, bm_comparer);
     }
-    bm_runner.ExecuteAll();
+
+    auto const& var_map = benchmark_cli.GetVariablesMap();
+    if (var_map.contains(kHelpLongOption)) {
+        benchmark_cli.PrintHelp();
+        return EXIT_SUCCESS;
+    } else if (var_map.contains(kListLongOption)) {
+        for (auto bench : bm_runner.BenchmarkNames()) {
+            std::cout << bench << std::endl;
+        }
+        return EXIT_SUCCESS;
+    }
+
+    if (var_map.contains(kNameLongOption)) {
+        std::regex pattern(var_map[kNameLongOption].as<std::string>());
+        auto func = [&](const std::string& name) -> bool {
+            return std::regex_search(name, pattern);
+        };
+        bm_runner.Execute(func);
+    } else {
+        bm_runner.ExecuteAll();
+    }
 
     auto results = bm_runner.BenchmarkResults();
 

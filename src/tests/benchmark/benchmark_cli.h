@@ -14,13 +14,17 @@ constexpr static auto kBaselineOption = "baseline,b";
 constexpr static auto kBaselineLongOption = "baseline";
 constexpr static auto kOutputOption = "output,o";
 constexpr static auto kOutputLongOption = "output";
+constexpr static auto kNameOption = "name,n";
+constexpr static auto kNameLongOption = "name";
+constexpr static auto kListOption = "list,l";
+constexpr static auto kListLongOption = "list";
 
 class BenchmarkCLI {
 private:
     constexpr static auto kHelpMsg =
             "Benchmark runner and comparer\n"
             "Usage: Desbordante_benchmark [--baseline <baseline filename>] [--output <output "
-            "filename>]\n"
+            "filename>] [--name <benchmark to run(regex)>] [--list]\n"
             "Available options";
 
     boost::program_options::options_description description_{kHelpMsg};
