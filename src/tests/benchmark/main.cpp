@@ -26,16 +26,6 @@ int main(int argc, char* argv[]) {
 
     ::util::logging::Initialize();
 
-    BenchmarkRunner bm_runner;
-    BenchmarkComparer bm_comparer;
-    for (auto test_register_func :
-         {ADCBenchmark, DDBenchmark, INDBenchmark, FDBenchmark, MDBenchmark, NARBenchmark}) {
-        test_register_func(bm_runner, bm_comparer);
-    }
-    bm_runner.ExecuteAll();
-
-    auto results = bm_runner.BenchmarkResults();
-
     BenchmarkCLI benchmark_cli;
     try {
         benchmark_cli.ParseOptions(argc, argv);
@@ -48,6 +38,16 @@ int main(int argc, char* argv[]) {
         benchmark_cli.PrintHelp();
         return EXIT_SUCCESS;
     }
+
+    BenchmarkRunner bm_runner;
+    BenchmarkComparer bm_comparer;
+    for (auto test_register_func :
+         {ADCBenchmark, DDBenchmark, INDBenchmark, FDBenchmark, MDBenchmark, NARBenchmark}) {
+        test_register_func(bm_runner, bm_comparer);
+    }
+    bm_runner.ExecuteAll();
+
+    auto results = bm_runner.BenchmarkResults();
 
     // Succeed if there's nothing to compare
     auto success = true;
