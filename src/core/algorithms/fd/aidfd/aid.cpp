@@ -18,6 +18,10 @@ void Aid::LoadDataInternal() {
     if (number_of_attributes_ == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
+    if (number_of_attributes_ > 64) {
+        throw std::runtime_error(
+                "This experimental AID-FD version supports at most 64 attributes.");
+    }
 
     schema_ = RelationalSchema::CreateFrom(*input_table_);
 
@@ -129,18 +133,18 @@ void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
             size_t another_index_in_cluster =
                     GenerateSecondClusterIndex(index_in_cluster, iteration_num);
             size_t another_tuple_num = cluster[another_index_in_cluster];
-            auto tuples_agree_set = BuildAgreeSet(tuple_num, another_tuple_num);
-            neg_cover_.insert(std::move(tuples_agree_set));
+            neg_cover_.insert(BuildAgreeSet(tuple_num, another_tuple_num));
         }
     }
 }
 
-boost::dynamic_bitset<> Aid::BuildAgreeSet(size_t t1, size_t t2) {
-    boost::dynamic_bitset<> equal_attr(number_of_attributes_);
+uint64_t Aid::BuildAgreeSet(size_t t1, size_t t2) {
+    std::vector<size_t> const& row1 = tuples_[t1];
+    std::vector<size_t> const& row2 = tuples_[t2];
+    uint64_t equal_attr = 0;
+
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
-        if (tuples_[t1][attr_num] == tuples_[t2][attr_num]) {
-            equal_attr.set(attr_num);
-        }
+        equal_attr |= static_cast<uint64_t>(row1[attr_num] == row2[attr_num]) << attr_num;
     }
 
     return equal_attr;
@@ -193,7 +197,10 @@ void Aid::InvertNegativeCover() {
     HandleConstantColumns(attributes);
 
     std::vector<boost::dynamic_bitset<>> neg_cover_vector;
-    neg_cover_vector.insert(neg_cover_vector.end(), neg_cover_.begin(), neg_cover_.end());
+    neg_cover_vector.reserve(neg_cover_.size());
+    for (uint64_t mask : neg_cover_) {
+        neg_cover_vector.emplace_back(number_of_attributes_, mask);
+    }
     auto comp_by_card = [](boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<> const& rhs) {
         return lhs.count() > rhs.count();
     };
