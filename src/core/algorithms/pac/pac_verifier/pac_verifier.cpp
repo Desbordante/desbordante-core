@@ -19,7 +19,7 @@
 #include "core/util/logger.h"
 
 namespace algos::pac_verifier {
-void PACVerifier::RegisterOptions() {
+void PACVerifier::RegisterCommonOptions(bool has_min_delta_option, bool has_max_delta_option) {
     DESBORDANTE_OPTION_USING;
 
     auto min_eps_not_negative = [](double x) {
@@ -35,9 +35,9 @@ void PACVerifier::RegisterOptions() {
         }
     };
 
-    auto min_delta_le1 = [](double x) {
-        if (x > 1) {
-            throw config::ConfigurationError("Min delta must be less or equal to 1");
+    auto delta_bounds = [](double x) {
+        if (x > 1 || x < 0) {
+            throw config::ConfigurationError("Min delta and max delta must be in [0, 1]");
         }
     };
 
@@ -48,17 +48,51 @@ void PACVerifier::RegisterOptions() {
         return kDefaultMinDelta;
     };
 
-    auto delta_steps_calc_default = [this]() { return std::round((1 - min_delta_) * 1000); };
+    auto max_delta_calc_default = [this]() {
+        if (min_epsilon_ > 0 || max_epsilon_ >= 0) {
+            return 1.0;
+        }
+        return kDefaultMaxDelta;
+    };
+
+    auto delta_steps_calc_default = [this]() {
+        return std::round((max_delta_ - min_delta_) * 1000);
+    };
+
+    std::vector<std::string_view> options_dependant_on_eps;
+    if (has_min_delta_option) {
+        options_dependant_on_eps.push_back(kMinDelta);
+    }
+    if (has_max_delta_option) {
+        options_dependant_on_eps.push_back(kMaxDelta);
+    }
+    if (options_dependant_on_eps.empty()) {
+        options_dependant_on_eps.push_back(kDeltaSteps);
+    }
 
     RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, 0.0)
                            .SetValueCheck(min_eps_not_negative)
                            .SetConditionalOpts({{nullptr, {kMaxEpsilon}}}));
     RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, -1.0)
                            .SetValueCheck(min_eps_le_max_eps)
-                           .SetConditionalOpts({{nullptr, {kMinDelta}}}));
-    RegisterOption(Option<double>(&min_delta_, kMinDelta, kDMinDelta, min_delta_calc_default)
-                           .SetValueCheck(min_delta_le1)
-                           .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
+                           .SetConditionalOpts({{nullptr, std::move(options_dependant_on_eps)}}));
+
+    if (has_min_delta_option) {
+        auto min_delta_option =
+                Option<double>(&min_delta_, kMinDelta, kDMinDelta, min_delta_calc_default)
+                        .SetValueCheck(delta_bounds);
+        if (!has_max_delta_option) {
+            min_delta_option.SetConditionalOpts({{nullptr, {kDeltaSteps}}});
+        }
+        RegisterOption(std::move(min_delta_option));
+    }
+
+    if (has_max_delta_option) {
+        RegisterOption(Option<double>(&max_delta_, kMaxDelta, kDMaxDelta, max_delta_calc_default)
+                               .SetValueCheck(delta_bounds)
+                               .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
+    }
+
     RegisterOption(Option<unsigned long>(&delta_steps_, kDeltaSteps, kDDeltaSteps,
                                          delta_steps_calc_default));
     RegisterOption(Option(&diagonal_threshold_, kDiagonalThreshold, kDDiagonalThreshold,
@@ -66,16 +100,15 @@ void PACVerifier::RegisterOptions() {
 }
 
 void PACVerifier::LogCommonOptions() const {
-    LOG_DEBUG(
-            "Common PAC verifier options: min delta: {}, min eps: {}, max eps: {}, delta steps: {}",
-            min_delta_, min_epsilon_, max_epsilon_, delta_steps_);
+    LOG_DEBUG("Common PAC verifier options: epsilon: [{}, {}], delta: [{}, {}], delta steps: {}",
+              min_epsilon_, max_epsilon_, min_delta_, max_delta_, delta_steps_);
 }
 
 std::optional<PACVerifier::EpsilonDelta> PACVerifier::TryValidatePAC(
         std::vector<EpsilonDelta> const& empirical_probabilities) const {
     // It's convenient to call delta validation like min_eps = max_eps = 0, delta = delta,
-    // so this check should be first
-    if (max_epsilon_ >= 0) {
+    // so these checks should be first
+    if (max_epsilon_ >= 0 && min_delta_ > 0) {
         // Both epsilon and delta bounds are passed explicitly. It may be "delta validation"
         auto first_delta_it =
                 std::ranges::lower_bound(empirical_probabilities, min_delta_, {}, GetDelta);
@@ -86,6 +119,18 @@ std::optional<PACVerifier::EpsilonDelta> PACVerifier::TryValidatePAC(
             return *first_delta_it;
         }
     }
+    if (min_epsilon_ > 0 && max_delta_ < 1) {
+        auto after_last_delta_it =
+                std::ranges::upper_bound(empirical_probabilities, max_delta_, {}, GetDelta);
+        auto last_delta_it = std::prev(after_last_delta_it);
+        if (last_delta_it->epsilon < min_epsilon_) {
+            LOG_DEBUG(
+                    "Min eps and max delta cannot be both satisfied. Taking last pair with max "
+                    "delta.");
+            return *last_delta_it;
+        }
+    }
+
     if (max_epsilon_ >= 0 && min_epsilon_ > 0 && max_epsilon_ - min_epsilon_ < kDistThreshold) {
         LOG_DEBUG("Got min_epsilon == max_epsilon, entering epsilon validation mode");
         return GetEpsilonDeltaForEpsilon(min_epsilon_);
@@ -144,12 +189,11 @@ PACVerifier::BuildECDF(std::vector<EpsilonDelta>& empirical_probabilities) const
         // (where j is the index of the first "good" element)
         begin = std::ranges::upper_bound(begin, end, min_epsilon_, {}, GetEpsilon);
         auto eps_delta_pair = GetEpsilonDeltaForEpsilon(min_epsilon_);
-        LOG_TRACE("Extra pair: ({}, {})", eps_delta_pair.epsilon, eps_delta_pair.delta);
         // We've already checked that there are pairs between min_epsilon and max_epsilon
         if (max_epsilon_ >= 0) {
             assert(eps_delta_pair.epsilon <= max_epsilon_);
         }
-        if (eps_delta_pair.delta > MinDelta() - kDistThreshold || begin == end) {
+        if (eps_delta_pair.delta > min_delta_ - kDistThreshold || begin == end) {
             LOG_DEBUG("Adding ({}, {}) to the beginning", eps_delta_pair.epsilon,
                       eps_delta_pair.delta);
             std::advance(begin, -1);
@@ -183,14 +227,18 @@ PACVerifier::BuildECDF(std::vector<EpsilonDelta>& empirical_probabilities) const
 
 PACVerifier::EpsilonDelta PACVerifier::FindEpsilonDelta(
         std::vector<EpsilonDelta>&& empirical_probabilities) const {
-    assert(!empirical_probabilities.empty());
-    assert(empirical_probabilities.front().delta > MinDelta() - kDistThreshold);
-    assert(empirical_probabilities.back().delta < 1 + kDistThreshold);
-
     LOG_TRACE("Empirical probabilities:");
     for ([[maybe_unused]] auto const& [eps, delta] : empirical_probabilities) {
         LOG_TRACE("\t{}, {}", eps, delta);
     }
+
+    assert(!empirical_probabilities.empty());
+    if (empirical_probabilities.size() == 1) {
+        LOG_DEBUG("Empirical probabilities contains a single pair");
+        return empirical_probabilities.front();
+    }
+    assert(empirical_probabilities.front().delta > min_delta_ - kDistThreshold);
+    assert(empirical_probabilities.back().delta < max_delta_ + kDistThreshold);
 
     auto maybe_eps_delta = TryValidatePAC(empirical_probabilities);
     if (maybe_eps_delta) {
@@ -205,15 +253,14 @@ PACVerifier::EpsilonDelta PACVerifier::FindEpsilonDelta(
 
     auto stripped_emp_prob = BuildECDF(empirical_probabilities);
 
-    assert(!stripped_emp_prob.empty());
-    if (stripped_emp_prob.size() == 1) {
-        LOG_DEBUG("Empirical probabilities contains a single pair");
-        return stripped_emp_prob.front();
-    }
-
     LOG_DEBUG("Stripped empirical probabilities:");
     for ([[maybe_unused]] auto const& [eps, delta] : stripped_emp_prob) {
         LOG_DEBUG("\t{}, {}", eps, delta);
+    }
+
+    assert(!stripped_emp_prob.empty());
+    if (stripped_emp_prob.size() == 1) {
+        return stripped_emp_prob.front();
     }
 
     double max_eps_diff = -1;
