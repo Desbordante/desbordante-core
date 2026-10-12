@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -200,10 +199,9 @@ std::vector<DataFrame::ValueIndices> DataFrame::ExtractRangesFromColumn(
 std::optional<size_t> DataFrame::FindRangeIndexByItem(
         size_t item, std::vector<DataFrame::ValueIndices> const& ranges) {
     auto iter = std::upper_bound(
-            ranges.cbegin(), ranges.cend(),
-            std::make_pair(-1, std::make_pair(item, std::numeric_limits<int>::max())),
-            [](DataFrame::ValueIndices a, DataFrame::ValueIndices b) {
-                return a.second.first < b.second.first;
+            ranges.cbegin(), ranges.cend(), item,
+            [](size_t value, DataFrame::ValueIndices const& range) {
+                return value < range.second.first;
             });
 
     if (iter != ranges.begin()) {
