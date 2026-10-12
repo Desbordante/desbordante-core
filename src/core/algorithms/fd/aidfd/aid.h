@@ -23,7 +23,8 @@ private:
     config::InputTable input_table_;
 
     std::shared_ptr<RelationalSchema> schema_{};
-    std::vector<std::vector<size_t>> tuples_;
+    // Row-major table of dictionary-encoded values: tuples_[tuple * number_of_attributes_ + attr].
+    std::vector<uint32_t> tuples_;
 
     size_t number_of_attributes_{};
     size_t number_of_tuples_{};

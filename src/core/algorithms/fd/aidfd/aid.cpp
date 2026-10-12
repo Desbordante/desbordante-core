@@ -33,14 +33,13 @@ void Aid::LoadDataInternal() {
             break;
         }
 
-        tuples_.emplace_back(std::vector<size_t>(number_of_attributes_));
         for (size_t i = 0; i < number_of_attributes_; ++i) {
             auto& dictionary = value_dictionaries[i];
             auto [it, inserted] = dictionary.try_emplace(next_line[i], dictionary.size());
-            tuples_.back()[i] = it->second;
+            tuples_.push_back(static_cast<uint32_t>(it->second));
         }
     }
-    number_of_tuples_ = tuples_.size();
+    number_of_tuples_ = tuples_.size() / number_of_attributes_;
     constant_columns_ = boost::dynamic_bitset<>(number_of_attributes_);
 }
 
@@ -68,9 +67,9 @@ void Aid::BuildClusters() {
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
         std::unordered_map<size_t, Cluster>& column_values = clusters_[attr_num];
         bool is_constant = true;
-        size_t first_value = tuples_[0][attr_num];
+        size_t first_value = tuples_[attr_num];
         for (size_t tuple_num = 0; tuple_num < number_of_tuples_; ++tuple_num) {
-            size_t entry_value = tuples_[tuple_num][attr_num];
+            size_t entry_value = tuples_[tuple_num * number_of_attributes_ + attr_num];
             if (entry_value != first_value) {
                 is_constant = false;
             }
@@ -127,7 +126,7 @@ void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
         size_t index_in_cluster = indices_in_clusters_[attr_num][tuple_num];
         if (iteration_num <= index_in_cluster) {
-            size_t value = tuples_[tuple_num][attr_num];
+            size_t value = tuples_[tuple_num * number_of_attributes_ + attr_num];
             assert(clusters_[attr_num].find(value) != clusters_[attr_num].end());
             Cluster const& cluster = clusters_[attr_num].find(value)->second;
             size_t another_index_in_cluster =
@@ -139,8 +138,8 @@ void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
 }
 
 uint64_t Aid::BuildAgreeSet(size_t t1, size_t t2) {
-    std::vector<size_t> const& row1 = tuples_[t1];
-    std::vector<size_t> const& row2 = tuples_[t2];
+    uint32_t const* row1 = tuples_.data() + t1 * number_of_attributes_;
+    uint32_t const* row2 = tuples_.data() + t2 * number_of_attributes_;
     uint64_t equal_attr = 0;
 
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
