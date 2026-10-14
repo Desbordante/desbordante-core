@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "core/algorithms/fd/hycommon/util/pli_util.h"
+#include "core/model/table/create_stripped_partitions.h"
 
 namespace algos::hy::util {
 
@@ -14,7 +15,7 @@ std::vector<ClusterId> SortAndGetMapping(PLIs& plis) {
                    [&id](auto& pli) { return std::make_pair(std::move(pli), id++); });
 
     auto const cluster_quantity_descending = [](auto const& pli1, auto const& pli2) {
-        return pli1.first->GetNumCluster() > pli2.first->GetNumCluster();
+        return pli1.first.GetNumCluster() > pli2.first.GetNumCluster();
     };
     std::sort(plis_sort_ids.begin(), plis_sort_ids.end(), cluster_quantity_descending);
 
@@ -32,8 +33,8 @@ Columns BuildInvertedPlis(PLIs const& plis) {
 
     for (auto const& pli : plis) {
         ClusterId cluster_id = 0;
-        std::vector<ClusterId> current(pli->GetRelationSize(), PLIUtil::kSingletonClusterId);
-        for (auto const& cluster : pli->GetIndex()) {
+        std::vector<ClusterId> current(pli.GetRelationSize(), PLIUtil::kSingletonClusterId);
+        for (auto const& cluster : pli.GetIndex()) {
             for (int value : cluster) {
                 current[value] = cluster_id;
             }
@@ -59,21 +60,14 @@ Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_plis) {
     return pli_records;
 }
 
-PLIs BuildPLIs(ColumnLayoutRelationData* relation) {
-    PLIs plis;
-    std::transform(relation->GetColumnData().begin(), relation->GetColumnData().end(),
-                   std::back_inserter(plis),
-                   [](auto& column_data) { return column_data.GetPositionListIndex(); });
-    return plis;
-}
-
 }  // namespace algos::hy::util
 
 namespace algos::hy {
 using namespace util;
 
-std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationData* relation) {
-    PLIs plis = BuildPLIs(relation);
+std::tuple<PLIsPtr, RowsPtr, std::vector<ClusterId>> Preprocess(
+        model::IDatasetStream& data_stream) {
+    PLIs plis = model::CreateStrippedPartitions(data_stream);
 
     auto og_mapping = SortAndGetMapping(plis);
 
@@ -81,7 +75,8 @@ std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationDa
 
     auto pli_records = BuildRecordRepresentation(inverted_plis);
 
-    return std::make_tuple(std::move(plis), std::move(pli_records), std::move(og_mapping));
+    return std::make_tuple(std::make_shared<PLIs>(std::move(plis)),
+                           std::make_shared<Rows>(std::move(pli_records)), std::move(og_mapping));
 }
 
 boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,

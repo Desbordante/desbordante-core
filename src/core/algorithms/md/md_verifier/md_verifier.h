@@ -40,7 +40,6 @@ private:
     void ResetState() override;
 
     void RegisterOptions();
-    void VerifyMD();
 
     MDValidationCalculator CreateValidator() const;
 
@@ -50,7 +49,7 @@ private:
 protected:
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     MDVerifier();

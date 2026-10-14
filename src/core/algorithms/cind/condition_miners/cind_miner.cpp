@@ -4,7 +4,6 @@
 
 #include "core/algorithms/cind/types.h"
 #include "core/model/table/encoded_tables.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables)
@@ -48,14 +47,11 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
     return result;
 }
 
-unsigned long long CindMiner::Execute(std::list<model::IND> const& aind_list) {
-    auto const execute = [&] {
-        cind_collection_.Clear();
-        for (auto const& aind : aind_list) {
-            cind_collection_.Register(ExecuteSingle(aind));
-        }
-    };
-    return util::TimedInvoke(execute);
+void CindMiner::Execute(std::list<model::IND> const& aind_list) {
+    cind_collection_.Clear();
+    for (auto const& aind : aind_list) {
+        cind_collection_.Register(ExecuteSingle(aind));
+    }
 }
 
 std::vector<std::string> CindMiner::GetConditionalAttributesNames(

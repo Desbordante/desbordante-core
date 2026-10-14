@@ -18,8 +18,6 @@ public:
                                        std::vector<ColumnType> column_data) noexcept
         : AbstractRelationData(std::move(schema), std::move(column_data)) {}
 
-    static constexpr int kNullValueId = 0;
-
     [[nodiscard]] size_t GetNumRows() const final {
         if (column_data_.empty()) {
             return 0;

@@ -37,7 +37,7 @@ private:
 
     config::InputTable input_table_;
 
-    Binop bin_operation_ = magic_enum::enum_values<Binop>().front();
+    Binop bin_operation_;
     /* Desired ratio of exceptions. Value lies in (0, 1] */
     double fuzziness_;
     /* Value lies in (0, 1]. Closer to 0 - many short intervals.
@@ -114,7 +114,7 @@ public:
         ac_exception_finder_->CollectExceptions(this);
     }
 
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
     ACAlgorithm();
 };

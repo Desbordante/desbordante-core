@@ -430,7 +430,7 @@ TYPED_TEST_P(BitsetTest, FindFirst_libstdcxxExtensions) {
     typename TypeParam::Custom c{kVal1};
     typename TypeParam::STL s{kVal1};
 
-    EXPECT_EQ(c._Find_first(), s._Find_first());
+    EXPECT_EQ(model::FindFirst(c), model::FindFirst(s));
 #else
     GTEST_SKIP() << "SGI extensions unavailable";
 #endif
@@ -441,7 +441,7 @@ TYPED_TEST_P(BitsetTest, FindNext_libstdcxxExtensions) {
     typename TypeParam::Custom c{kVal1};
     typename TypeParam::STL s{kVal1};
 
-    EXPECT_EQ(c._Find_next(2), s._Find_next(2));
+    EXPECT_EQ(model::FindNext(c, 2), model::FindNext(s, 2));
 #else
     GTEST_SKIP() << "SGI extensions unavailable";
 #endif

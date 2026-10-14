@@ -18,7 +18,6 @@
 #include "core/model/table/dataset_stream_projection.h"
 #include "core/model/table/table_index.h"
 #include "core/model/table/tuple_index.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos {
 
@@ -78,7 +77,7 @@ void INDVerifier::LoadDataInternal() {
     /* Do nothing, we don't prepocess any data before executing. */
 }
 
-void INDVerifier::VerifyIND() {
+void INDVerifier::ExecuteInternal() {
     /* Ensure, that all rows have model::IDatasetStream::GetNumberOfColumns() values. */
     using FixedStream = model::DatasetStreamFixed<model::IDatasetStream*>;
     /* Perform a projection of the fixed dataset stream. */
@@ -134,10 +133,6 @@ void INDVerifier::VerifyIND() {
 
     model::TupleIndex lhs_cardinality = lhs_rows.size();
     error_ = static_cast<Error>(GetViolatingClustersCount()) / lhs_cardinality;
-}
-
-unsigned long long INDVerifier::ExecuteInternal() {
-    return util::TimedInvoke(&INDVerifier::VerifyIND, this);
 }
 
 }  // namespace algos

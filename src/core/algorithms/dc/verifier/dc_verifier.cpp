@@ -1,7 +1,6 @@
 #include "core/algorithms/dc/verifier/dc_verifier.h"
 
 #include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <cstring>
 #include <ctime>
@@ -64,15 +63,14 @@ void DCVerifier::LoadDataInternal() {
     relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
 }
 
-unsigned long long int DCVerifier::ExecuteInternal() {
-    auto start = std::chrono::system_clock::now();
+void DCVerifier::ExecuteInternal() {
     dc::DC dc;
     try {
         dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
         dc = parser.Parse();
     } catch (std::exception const& e) {
         LOG_INFO("{}", e.what());
-        return 0;
+        return;
     }
 
     std::string col_name = relation_->GetSchema()->GetColumns().front().get()->GetName();
@@ -80,11 +78,6 @@ unsigned long long int DCVerifier::ExecuteInternal() {
     bool has_header = !boost::regex_match(col_name, re);
     index_offset_ = 1 + static_cast<size_t>(has_header);
     result_ = Verify(dc);
-
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start);
-
-    return elapsed_time.count();
 }
 
 bool DCVerifier::Verify(dc::DC dc) {

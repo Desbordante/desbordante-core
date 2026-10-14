@@ -326,16 +326,16 @@ TEST_F(FastADC, DifferentColumnPredicateSpace) {
         }
     };
 
-    check_preds(predicate_builder_->GetPredicates(), different_column_predicates_expected,
+    check_preds(predicate_builder_->GetPredicates(), kDifferentColumnPredicatesExpected,
                 "all predicates");
     check_preds(predicate_builder_->GetNumSingleColumnPredicates(),
-                num_single_column_predicate_group_expected, "numeric single column predicates");
+                kNumSingleColumnPredicateGroupExpected, "numeric single column predicates");
     check_preds(predicate_builder_->GetNumCrossColumnPredicates(),
-                num_cross_column_predicate_group_expected, "numeric cross column predicates");
+                kNumCrossColumnPredicateGroupExpected, "numeric cross column predicates");
     check_preds(predicate_builder_->GetStrSingleColumnPredicates(),
-                str_single_column_predicate_group_expected, "string single column predicates");
+                kStrSingleColumnPredicateGroupExpected, "string single column predicates");
     check_preds(predicate_builder_->GetStrCrossColumnPredicates(),
-                str_cross_column_predicate_group_expected, "string cross column predicates");
+                kStrCrossColumnPredicateGroupExpected, "string cross column predicates");
 }
 
 TEST_F(FastADC, InverseAndMutexMaps) {
@@ -426,18 +426,18 @@ TEST_F(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
     auto correction_map = evidence_aux_structures_builder_->GetCorrectionMap();
 
     for (size_t i = 0; i < packs.size(); ++i) {
-        EXPECT_EQ(packs[i].left_idx, expected_column_indices[i].first);
-        EXPECT_EQ(packs[i].right_idx, expected_column_indices[i].second);
-        ASSERT_EQ(expected_eq_masks[i].size(), 1);
-        EXPECT_EQ(packs[i].eq_pos, expected_eq_masks[i][0]);
-        if (!expected_gt_masks[i].empty()) {
-            ASSERT_EQ(expected_gt_masks[i].size(), 1);
-            EXPECT_EQ(packs[i].gt_pos, expected_gt_masks[i][0]);
+        EXPECT_EQ(packs[i].left_idx, kExpectedColumnIndices[i].first);
+        EXPECT_EQ(packs[i].right_idx, kExpectedColumnIndices[i].second);
+        ASSERT_EQ(kExpectedEqMasks[i].size(), 1);
+        EXPECT_EQ(packs[i].eq_pos, kExpectedEqMasks[i][0]);
+        if (!kExpectedGtMasks[i].empty()) {
+            ASSERT_EQ(kExpectedGtMasks[i].size(), 1);
+            EXPECT_EQ(packs[i].gt_pos, kExpectedGtMasks[i][0]);
         }
     }
 
     for (size_t i = 0; i < correction_map.size(); ++i) {
-        EXPECT_EQ(correction_map[i], VectorToBitset(expected_correction_map[i]));
+        EXPECT_EQ(correction_map[i], VectorToBitset(kExpectedCorrectionMap[i]));
     }
 }
 
@@ -452,7 +452,7 @@ TEST_F(FastADC, ClueSet) {
     ClueSet clue_set = BuildClueSet(pli_shard_builder_->pli_shards,
                                     evidence_aux_structures_builder_->GetPredicatePacks());
 
-    for (auto const& [expected_clue, expected_count] : expected_clue_set) {
+    for (auto const& [expected_clue, expected_count] : kExpectedClueSet) {
         auto found = clue_set.find(PredicateBitset(expected_clue));
         ASSERT_NE(found, clue_set.end()) << "Expected clue " << expected_clue << " not found!";
         ASSERT_EQ(found->second, expected_count) << "Count mismatch for clue " << expected_clue;
@@ -461,7 +461,7 @@ TEST_F(FastADC, ClueSet) {
     // Check that no additional clues are present
     for (auto const& [generated_clue, count] : clue_set) {
         uint64_t clue_value = generated_clue.to_ullong();
-        ASSERT_NE(expected_clue_set.find(clue_value), expected_clue_set.end())
+        ASSERT_NE(kExpectedClueSet.find(clue_value), kExpectedClueSet.end())
                 << "Unexpected clue " << clue_value << " found!";
     }
 }
@@ -475,7 +475,7 @@ TEST_F(FastADC, CardinalityMask) {
     evidence_aux_structures_builder_->BuildAll();
 
     EXPECT_EQ(evidence_aux_structures_builder_->GetCardinalityMask(),
-              VectorToBitset(expected_cardinality_mask));
+              VectorToBitset(kExpectedCardinalityMask));
 }
 
 TEST_F(FastADC, EvidenceSet) {
@@ -492,7 +492,7 @@ TEST_F(FastADC, EvidenceSet) {
     auto evidence_set = std::move(evidence_set_builder_->evidence_set);
 
     std::unordered_set<PredicateBitset> expected_set;
-    for (auto const& expected_vec : expected_evidence_set) {
+    for (auto const& expected_vec : kExpectedEvidenceSet) {
         expected_set.insert(VectorToBitset(expected_vec));
     }
 
@@ -525,7 +525,7 @@ TEST_F(FastADC, TransformedEvidenceSetAndMutexMap) {
     std::vector<Evidence> transformed_evidence_set = organizer.TransformEvidenceSet();
 
     std::unordered_set<PredicateBitset> expected;
-    for (auto const& expected_vec : expected_transformed_evidence_set) {
+    for (auto const& expected_vec : kExpectedTransformedEvidenceSet) {
         expected.insert(VectorToBitset(expected_vec));
     }
 
@@ -537,7 +537,7 @@ TEST_F(FastADC, TransformedEvidenceSetAndMutexMap) {
 
     std::vector<PredicateBitset> transformed_mutex_map = organizer.TransformMutexMap();
     for (size_t i = 0; i < transformed_mutex_map.size(); i++) {
-        EXPECT_EQ(transformed_mutex_map[i], VectorToBitset(expected_mutex_map[i]));
+        EXPECT_EQ(transformed_mutex_map[i], VectorToBitset(kExpectedMutexMap[i]));
     }
 }
 
@@ -568,9 +568,9 @@ TEST_F(FastADC, DenialConstraints) {
     std::set<DenialConstraint, ToStringComparator> ordered_result(
             std::make_move_iterator(result.begin()), std::make_move_iterator(result.end()));
 
-    for (size_t i = 0; i < expected_denial_constraints.size(); i++) {
+    for (size_t i = 0; i < kExpectedDenialConstraints.size(); i++) {
         std::string dc = std::next(ordered_result.begin(), i)->ToString();
-        EXPECT_EQ(dc, expected_denial_constraints[i]) << "Unexpected denial constraint: " << dc;
+        EXPECT_EQ(dc, kExpectedDenialConstraints[i]) << "Unexpected denial constraint: " << dc;
     }
 }
 

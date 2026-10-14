@@ -5,7 +5,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/ind/ind.h"
-#include "core/algorithms/ind/verification_algorithms.h"
+#include "core/algorithms/ind/ind_verifier/ind_verifier.h"
 #include "python_bindings/bind_main_classes.h"
 #include "python_bindings/py_util/bind_primitive.h"
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <magic_enum/magic_enum.hpp>
-
 #include "core/algorithms/od/order/sorted_partitions.h"
 
 namespace algos::order {

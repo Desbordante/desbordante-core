@@ -3,13 +3,17 @@
 namespace config::names {
 // Common
 constexpr auto kCsvConfig = "csv_config";
+constexpr auto kCustomMetric = "metric";
+constexpr auto kCustomMetrics = "metrics";
 constexpr auto kEqualNulls = "is_null_equal_null";
 constexpr auto kError = "error";
 constexpr auto kLhsIndices = "lhs_indices";
 constexpr auto kMaximumLhs = "max_lhs";
+constexpr auto kMinimumSupport = "minsup";
 constexpr auto kRhsIndices = "rhs_indices";
 constexpr auto kSeed = "seed";
 constexpr auto kTable = "table";
+constexpr auto kTasksNumMultiplier = "tasks_num_multiplier";
 constexpr auto kThreads = "threads";
 // AC
 constexpr auto kACSeed = "ac_seed";
@@ -30,14 +34,11 @@ constexpr auto kTIdColumnIndex = "tid_column_index";
 constexpr auto kArLhsRule = "lhs_rule";
 constexpr auto kArRhsRule = "rhs_rule";
 // CFD
-constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
 constexpr auto kCfdMinimumConfidence = "cfd_minconf";
 constexpr auto kCfdMinimumSupport = "cfd_minsup";
-constexpr auto kCFDRuleLeft = "cfd_rule_left";
-constexpr auto kCFDRuleRight = "cfd_rule_right";
+constexpr auto kCFDRule = "cfd_rule";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
-constexpr auto kCfdTuplesNumber = "tuples_number";
 // CORDS
 constexpr auto kDelta = "delta";
 constexpr auto kFixedSample = "fixed_sample";
@@ -71,6 +72,10 @@ constexpr auto kIgnoreNullCols = "ignore_null_cols";
 constexpr auto kSampleSize = "sample_size";
 // FAIDA, MIND
 constexpr auto kMaximumArity = "max_arity";
+// FEM
+constexpr auto kSequence = "sequence";
+constexpr auto kWindowSize = "window_size";
+constexpr auto kEpisodesNum = "episodes_num";
 // FastADC
 constexpr auto kAllowCrossColumns = "allow_cross_columns";
 constexpr auto kComparableThreshold = "comparable_threshold";
@@ -112,6 +117,14 @@ constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
+// PAC
+constexpr auto kColumnIndices = "column_indices";
+constexpr auto kDeltaSteps = "delta_steps";
+constexpr auto kDiagonalThreshold = "diagonal_threshold";
+constexpr auto kDomain = "domain";
+constexpr auto kMinDelta = "min_delta";
+constexpr auto kMaxEpsilon = "max_epsilon";
+constexpr auto kMinEpsilon = "min_epsilon";
 // Pyro
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider
@@ -141,12 +154,14 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
-
 // CIND
 constexpr auto kValidity = "validity";
 constexpr auto kCompleteness = "completeness";
 constexpr auto kConditionType = "condition_type";
 constexpr auto kAlgoType = "algo_type";
 constexpr auto kCindCondValues = "cind_condition_values";
-
+// SD verifier
+constexpr auto kSdG1 = "g1";
+constexpr auto kSdG2 = "g2";
+constexpr auto kSdIndices = "indices";
 }  // namespace config::names

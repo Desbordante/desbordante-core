@@ -1,5 +1,4 @@
 set(SUBDIRS
-    afd_metric
     aidfd
     depminer
     dfd
@@ -16,11 +15,32 @@ set(SUBDIRS
     pyrocommon
     sfd
     tane
+    afd_metric
 )
 
 foreach(dir IN LISTS SUBDIRS)
     add_subdirectory(${dir})
 endforeach()
+
+# --- AFD ---
+set(NAME afd)
+desbordante_add_lib(NAME OBJECT)
+target_sources(${NAME} PRIVATE afd_algorithm.cpp)
+target_link_libraries(
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::fd
+    PRIVATE ${DESBORDANTE_PREFIX}::model::table Boost::headers
+)
+
+# --- PliBasedAFD ---
+set(NAME afd.pli)
+desbordante_add_lib(NAME OBJECT)
+target_sources(${NAME} PRIVATE pli_based_afd_algorithm.cpp)
+target_link_libraries(
+    ${NAME}
+    PUBLIC ${DESBORDANTE_PREFIX}::afd
+    PRIVATE Boost::headers
+)
 
 # --- FD ---
 set(NAME fd)

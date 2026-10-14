@@ -1,7 +1,5 @@
 #pragma once
 
-#include <magic_enum/magic_enum.hpp>
-
 namespace algos::dd {
 
 // Defines what strategy of reducing dependencies will be used in the algorithm

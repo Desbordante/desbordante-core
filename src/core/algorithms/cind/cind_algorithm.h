@@ -23,10 +23,9 @@ private:
     std::unique_ptr<Spider> spider_algo_;
     std::unique_ptr<CindMiner> cind_miner_;
     AlgoType algo_type_{AlgoType::kPliCind};
-    StageTimings timings_{};
 
     void LoadDataInternal() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetState() final;
 
     void CreateSpiderAlgo();
@@ -40,10 +39,6 @@ private:
 
 public:
     CindAlgorithm();
-
-    [[nodiscard]] std::uint64_t TimeTaken() const noexcept {
-        return timings_.total;
-    }
 
     [[nodiscard]] auto const& AINDList() const noexcept {
         return spider_algo_->INDList();

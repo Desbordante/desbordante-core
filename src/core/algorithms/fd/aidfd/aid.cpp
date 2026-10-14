@@ -19,12 +19,7 @@ void Aid::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-
-    for (size_t i = 0; i < number_of_attributes_; ++i) {
-        std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
-        schema_->AppendColumn(column_name);
-    }
+    schema_ = RelationalSchema::CreateFrom(*input_table_);
 
     while (input_table_->HasNextRow()) {
         std::vector<std::string> const& next_line = input_table_->GetNextRow();
@@ -49,19 +44,12 @@ void Aid::ResetStateFd() {
     sum_ = double{kWindowSize};
 }
 
-unsigned long long Aid::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
+void Aid::ExecuteInternal() {
     BuildClusters();
 
     CreateNegativeCover();
 
     InvertNegativeCover();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-
-    return elapsed_milliseconds.count();
 }
 
 void Aid::BuildClusters() {
@@ -130,14 +118,15 @@ void Aid::CreateNegativeCover() {
 void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
         size_t value = tuples_[tuple_num][attr_num];
-        Cluster const& cluster = clusters_[attr_num].at(value);
+        assert(clusters_[attr_num].find(value) != clusters_[attr_num].end());
+        Cluster const& cluster = clusters_[attr_num].find(value)->second;
         size_t index_in_cluster = indices_in_clusters_[attr_num][tuple_num];
         if (iteration_num <= index_in_cluster) {
             size_t another_index_in_cluster =
                     GenerateSecondClusterIndex(index_in_cluster, iteration_num);
             size_t another_tuple_num = cluster[another_index_in_cluster];
             auto tuples_agree_set = BuildAgreeSet(tuple_num, another_tuple_num);
-            neg_cover_.insert(tuples_agree_set);
+            neg_cover_.insert(std::move(tuples_agree_set));
         }
     }
 }
@@ -177,6 +166,9 @@ void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTre
     }
 
     for (auto& subset : subsets) {
+        if (subset.count() == max_lhs_) continue;
+        assert(subset.count() < max_lhs_);
+
         for (size_t add_attr = 0; add_attr < number_of_attributes_; ++add_attr) {
             if (add_attr == rhs || neg_cover_el[add_attr] || constant_columns_[add_attr]) {
                 continue;
@@ -186,7 +178,6 @@ void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTre
             if (!pos_cover_tree.ContainsAnySubsetOf(subset)) {
                 pos_cover_tree.Add(subset);
             }
-
             subset[add_attr] = false;
         }
     }

@@ -113,7 +113,7 @@ protected:
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     DataStats();
@@ -256,8 +256,6 @@ public:
     Statistic GetFalseCount(size_t index) const;
     // Returns percentage of zero values in a numeric column.
     Statistic GetZeroPercent(size_t index) const;
-    // Returns number of characters with diacritical marks in a string column.
-    Statistic GetNumberOfDiacriticChars(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;

@@ -1,9 +1,6 @@
 #include "core/algorithms/statistics/data_stats.h"
 
 #include <set>
-#include <unicode/normlzr.h>
-#include <unicode/uchar.h>
-#include <unicode/unistr.h>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -328,7 +325,7 @@ Statistic DataStats::GetNumberOfZeros(size_t index) const {
 }
 
 Statistic DataStats::GetZeroPercent(size_t index) const {
-    if (all_stats_[index].num_diacritic_chars.HasValue()) return all_stats_[index].zero_percent;
+    if (all_stats_[index].zero_percent.HasValue()) return all_stats_[index].zero_percent;
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
@@ -808,43 +805,6 @@ Statistic DataStats::GetNumberOfWords(size_t index) const {
                           [](std::string const& line) { return GetNumberOfWordsInString(line); });
 }
 
-Statistic DataStats::GetNumberOfDiacriticChars(size_t index) const {
-    if (all_stats_[index].num_diacritic_chars.HasValue())
-        return all_stats_[index].num_diacritic_chars;
-    mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != mo::TypeId::kString) return {};
-
-    UErrorCode err = U_ZERO_ERROR;
-    icu::Normalizer2 const* norm = icu::Normalizer2::getNFDInstance(err);
-
-    if (U_FAILURE(err) || norm == nullptr) return {};
-
-    size_t count = 0;
-
-    for (size_t i = 0; i < col.GetNumRows(); ++i) {
-        if (col.IsNullOrEmpty(i)) continue;
-
-        std::string const& str = mo::Type::GetValue<std::string>(col.GetValue(i));
-
-        icu::UnicodeString ustr = icu::UnicodeString::fromUTF8(str);
-
-        icu::UnicodeString decomposed = norm->normalize(ustr, err);
-
-        for (int32_t pos = 0; pos < decomposed.length();) {
-            UChar32 c = decomposed.char32At(pos);
-            pos += U16_LENGTH(c);
-
-            if (u_charType(c) == U_NON_SPACING_MARK) {
-                count++;
-            }
-        }
-    }
-
-    mo::IntType int_type;
-    std::byte const* res = int_type.MakeValue(count);
-    return Statistic(res, &int_type, false);
-}
-
 std::vector<char> DataStats::GetTopKChars(size_t index, size_t k) const {
     mo::TypedColumnData const& col = col_data_[index];
     if (col.GetTypeId() != mo::TypeId::kString) return {};
@@ -1119,13 +1079,12 @@ Statistic DataStats::GetLastCharFrequency(size_t index) const {
     return GetCharFrequency(index, CharPosition::kLast);
 }
 
-unsigned long long DataStats::ExecuteInternal() {
+void DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
-        return 0;
+        return;
     }
 
-    auto start_time = std::chrono::system_clock::now();
     auto task = [this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
         if (this->col_data_[index].GetTypeId() != mo::TypeId::kMixed) {
@@ -1178,7 +1137,6 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].last_char_freq = GetLastCharFrequency(index);
             all_stats_[index].min_white_spaces = GetMinWhiteSpaces(index);
             all_stats_[index].max_white_spaces = GetMaxWhiteSpaces(index);
-            all_stats_[index].num_diacritic_chars = GetNumberOfDiacriticChars(index);
             // boolean counts
             all_stats_[index].true_count = GetTrueCount(index);
             all_stats_[index].false_count = GetFalseCount(index);
@@ -1197,10 +1155,6 @@ unsigned long long DataStats::ExecuteInternal() {
     } else {
         for (size_t i = 0; i < all_stats_.size(); ++i) task(i);
     }
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 size_t DataStats::GetNumNulls(size_t index) const {

@@ -6,8 +6,6 @@
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 #include "core/util/logger.h"
 
-unsigned long long FdG1Strategy::nanos_ = 0;
-
 double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
     unsigned long long num_violations = 0;
     std::unordered_map<int, int> value_counts;

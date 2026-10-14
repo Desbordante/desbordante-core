@@ -41,7 +41,7 @@ jobs:
         include:
           - os: ubuntu-latest
             toolset: gcc
-            env: CXX=g++-10
+            env: CXX=g++-14
 
           - os: ubuntu-latest
             toolset: llvm-clang
@@ -51,7 +51,7 @@ jobs:
 
           # Uncomment this to enable macOS gcc tests:
           # - os: macos-latest
-          #   toolset: gcc 
+          #   toolset: gcc
           #   env: CXX=g++-14 BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
 
@@ -73,8 +73,6 @@ jobs:
         with:
           os: ${{ matrix.os }}
           toolset: ${{ matrix.toolset }}
-          download-googletest: false
-          download-pybind: true
       - name: Build pip package
         shell: bash
         run: |
@@ -94,6 +92,7 @@ jobs:
           cp test_input_data/TestLong.csv src/python_bindings/
           cp test_input_data/TestWide.csv src/python_bindings/
           cp test_input_data/transactional_data/rules-kaggle-rows.csv src/python_bindings/
+          cp test_input_data/sequence_data/maxfem_baseline.txt src/python_bindings/
 
           cd src/python_bindings
           python test_bindings.py
@@ -107,6 +106,5 @@ jobs:
 
           cp test_input_data/TestDataStats.csv src/python_bindings
           cp test_input_data/TestBool.csv src/python_bindings
-          cp test_input_data/TestDiacritics.csv src/python_bindings
           cd src/python_bindings
           python test_pybind_data_stats.py

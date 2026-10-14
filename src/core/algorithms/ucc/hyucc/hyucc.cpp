@@ -1,7 +1,5 @@
 #include "core/algorithms/ucc/hyucc/hyucc.h"
 
-#include <chrono>
-
 #include "core/algorithms/fd/hycommon/types.h"
 #include "core/algorithms/ucc/hyucc/inductor.h"
 #include "core/algorithms/ucc/hyucc/preprocessor.h"
@@ -12,27 +10,23 @@
 namespace algos {
 
 void HyUCC::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_);
+    schema_ = RelationalSchema::CreateFrom(*input_table_);
 
-    if (relation_->GetColumnData().empty()) {
+    std::tie(plis_, pli_records_, og_mapping_) = hy::Preprocess(*input_table_);
+    if (plis_->empty()) {
         throw std::runtime_error("Got an empty dataset: UCC mining is meaningless.");
     }
 }
 
-unsigned long long HyUCC::ExecuteInternal() {
+void HyUCC::ExecuteInternal() {
     using namespace hy;
     using namespace hyucc;
-    auto const start_time = std::chrono::system_clock::now();
 
-    auto [plis, pli_records, og_mapping] = Preprocess(relation_.get());
-    auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
-    auto const pli_records_shared = std::make_shared<Rows>(std::move(pli_records));
+    hyucc::Sampler sampler(plis_, pli_records_, threads_num_);
 
-    hyucc::Sampler sampler(plis_shared, pli_records_shared, threads_num_);
-
-    auto ucc_tree = std::make_unique<UCCTree>(relation_->GetNumColumns());
+    auto ucc_tree = std::make_unique<UCCTree>(schema_->GetNumColumns());
     Inductor inductor(ucc_tree.get());
-    Validator validator(ucc_tree.get(), plis_shared, pli_records_shared, threads_num_);
+    Validator validator(ucc_tree.get(), plis_, pli_records_, threads_num_);
 
     IdPairs comparison_suggestions;
 
@@ -52,25 +46,20 @@ unsigned long long HyUCC::ExecuteInternal() {
     }
 
     auto uccs = ucc_tree->FillUCCs();
-    RegisterUCCs(std::move(uccs), og_mapping);
+    RegisterUCCs(std::move(uccs), og_mapping_);
 
     LOG_DEBUG("Mined UCCs:");
     for (model::UCC const& ucc : UCCList()) {
         LOG_DEBUG("{}", ucc.ToString());
     }
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
 void HyUCC::RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,
                          std::vector<hy::ClusterId> const& og_mapping) {
-    std::shared_ptr<RelationalSchema const> const& schema = relation_->GetSharedPtrSchema();
     for (auto&& ucc : uccs) {
         boost::dynamic_bitset<> mapped_ucc =
-                hy::RestoreAgreeSet(ucc, og_mapping, schema->GetNumColumns());
-        ucc_collection_.Register(schema, std::move(mapped_ucc));
+                hy::RestoreAgreeSet(ucc, og_mapping, schema_->GetNumColumns());
+        ucc_collection_.Register(schema_, std::move(mapped_ucc));
     }
 }
 

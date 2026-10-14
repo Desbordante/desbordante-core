@@ -26,7 +26,7 @@ private:
     void MakeExecuteOptsAvailable() final;
 
     void ResetUCCAlgorithmState() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void LoadDataInternal() final;
 
 public:

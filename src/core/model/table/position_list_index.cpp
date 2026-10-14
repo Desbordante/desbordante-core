@@ -6,7 +6,6 @@
 #include "core/model/table/position_list_index.h"
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <deque>
 #include <map>
@@ -21,10 +20,6 @@
 
 namespace model {
 
-int const PositionListIndex::kSingletonValueId = 0;
-unsigned long long PositionListIndex::micros_ = 0;
-int PositionListIndex::intersection_count_ = 0;
-
 PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigned int size,
                                      double entropy, unsigned long long nep,
                                      unsigned int relation_size, double inverted_entropy,
@@ -38,7 +33,7 @@ PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigne
       nep_(nep),
       probing_table_cache_() {}
 
-std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>& data) {
+std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int> const& data) {
     std::unordered_map<int, std::vector<int>> index;
     for (unsigned long position = 0; position < data.size(); ++position) {
         int value_id = data[position];
@@ -154,7 +149,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
 
     std::unordered_map<int, std::vector<int>> partial_index;
 
-    for (auto& positions : index_) {
+    for (auto const& positions : index_) {
         for (int position : positions) {
             if (probing_table == nullptr) LOG_DEBUG("NULLPTR");
             if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {
@@ -165,7 +160,6 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
             }
             int probing_table_value_id = (*probing_table)[position];
             if (probing_table_value_id == kSingletonValueId) continue;
-            intersection_count_++;
             partial_index[probing_table_value_id].push_back(position);
         }
 

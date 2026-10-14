@@ -6,7 +6,6 @@
 #include "condition_miners/cinderella.h"
 #include "condition_miners/pli_cind.h"
 #include "core/algorithms/cind/types.h"
-#include "core/algorithms/create_algorithm.h"
 #include "core/config/conditions/algo_type/option.h"
 #include "core/config/conditions/completeness/option.h"
 #include "core/config/conditions/condition_type/option.h"
@@ -16,7 +15,6 @@
 #include "core/config/mem_limit/option.h"
 #include "core/config/tabular_data/input_tables/option.h"
 #include "core/config/thread_number/option.h"
-#include "core/util/timed_invoke.h"
 
 namespace algos::cind {
 CindAlgorithm::CindAlgorithm() {
@@ -28,7 +26,7 @@ CindAlgorithm::CindAlgorithm() {
 }
 
 void CindAlgorithm::CreateSpiderAlgo() {
-    spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::kSpider);
+    spider_algo_ = std::make_unique<Spider>();
 }
 
 void CindAlgorithm::RegisterSpiderOptions() {
@@ -40,8 +38,7 @@ void CindAlgorithm::RegisterSpiderOptions() {
 }
 
 void CindAlgorithm::LoadDataInternal() {
-    timings_.load =
-            static_cast<std::uint64_t>(util::TimedInvoke(&Algorithm::LoadData, spider_algo_));
+    spider_algo_->LoadData();
     CreateCindMinerAlgo();
 }
 
@@ -80,20 +77,10 @@ void CindAlgorithm::AddSpecificNeededOptions(
     previous_options.insert(spider_options.begin(), spider_options.end());
 }
 
-unsigned long long CindAlgorithm::ExecuteInternal() {
-    auto const spider_exec_time = static_cast<std::uint64_t>(spider_algo_->Execute());
-    auto const cind_exec_time =
-            static_cast<std::uint64_t>(cind_miner_->Execute(spider_algo_->INDList()));
-
-    timings_.compute = spider_exec_time + cind_exec_time;
-    timings_.total = timings_.load + timings_.compute;
-
-    return static_cast<unsigned long long>(timings_.total);
+void CindAlgorithm::ExecuteInternal() {
+    spider_algo_->Execute();
+    cind_miner_->Execute(spider_algo_->INDList());
 }
 
-void CindAlgorithm::ResetState() {
-    timings_.load = 0;
-    timings_.compute = 0;
-    timings_.total = 0;
-}
+void CindAlgorithm::ResetState() {}
 }  // namespace algos::cind

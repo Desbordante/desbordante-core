@@ -154,23 +154,13 @@ void HyMD::RegisterOptions() {
 void HyMD::ResetStateMd() {}
 
 void HyMD::LoadDataInternal() {
-    left_schema_ = std::make_shared<RelationalSchema>(left_table_->GetRelationName());
-    std::size_t const left_table_cols = left_table_->GetNumberOfColumns();
-    for (Index i : utility::IndexRange(left_table_cols)) {
-        left_schema_->AppendColumn(left_table_->GetColumnName(i));
-    }
+    left_schema_ = RelationalSchema::CreateFrom(*left_table_);
 
     if (right_table_ == nullptr) {
         right_schema_ = left_schema_;
-
         records_info_ = indexes::RecordsInfo::CreateFrom(*left_table_);
     } else {
-        right_schema_ = std::make_unique<RelationalSchema>(right_table_->GetRelationName());
-        std::size_t const right_table_cols = right_table_->GetNumberOfColumns();
-        for (Index i : utility::IndexRange(right_table_cols)) {
-            right_schema_->AppendColumn(right_table_->GetColumnName(i));
-        }
-
+        right_schema_ = RelationalSchema::CreateFrom(*right_table_);
         records_info_ = indexes::RecordsInfo::CreateFrom(*left_table_, *right_table_);
     }
 
@@ -180,18 +170,14 @@ void HyMD::LoadDataInternal() {
     }
 }
 
-unsigned long long HyMD::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
-
+void HyMD::ExecuteInternal() {
     auto pool_holder = threads_ > 1 ? PoolHolder{threads_} : PoolHolder{};
 
     auto [similarity_data, short_sampling_enable] = SimilarityData::CreateFrom(
             records_info_.get(), column_matches_option_, pool_holder.GetPtr());
     if (similarity_data.GetColumnMatchNumber() == 0) {
         RegisterResults(similarity_data, {});
-        return std::chrono::duration_cast<std::chrono::milliseconds>(
-                       std::chrono::system_clock::now() - start_time)
-                .count();
+        return;
     }
 
     lattice::MdLattice lattice{GetLevelDefinitionFunc(level_definition_),
@@ -218,10 +204,6 @@ unsigned long long HyMD::ExecuteInternal() {
     }
 
     RegisterResults(similarity_data, lattice.GetAll());
-
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                                 start_time)
-            .count();
 }
 
 // Only serves to name parts of HyMD::RegisterResults.

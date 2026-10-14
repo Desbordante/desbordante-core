@@ -20,7 +20,7 @@ private:
     void RegisterOptions();
 
     void ResetStateFd() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     DFD();

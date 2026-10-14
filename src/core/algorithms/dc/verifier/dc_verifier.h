@@ -121,7 +121,7 @@ public:
     };
 
     void LoadDataInternal() final;
-    unsigned long long int ExecuteInternal() final;
+    void ExecuteInternal() final;
 };
 
 }  // namespace algos

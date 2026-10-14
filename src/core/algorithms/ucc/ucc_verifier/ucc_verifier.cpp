@@ -1,6 +1,5 @@
 #include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 
-#include <chrono>
 #include <numeric>
 #include <stdexcept>
 
@@ -44,12 +43,10 @@ void UCCVerifier::LoadDataInternal() {
     }
 }
 
-unsigned long long UCCVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-    VerifyUCC();
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
+void UCCVerifier::ExecuteInternal() {
+    std::shared_ptr<model::PLI const> pli = CalculatePLI();
+    stats_calculator_ = std::make_unique<UCCStatsCalculator>(relation_);
+    stats_calculator_->CalculateStatistics(pli->GetIndex());
 }
 
 std::shared_ptr<model::PLI const> UCCVerifier::CalculatePLI() {
@@ -59,12 +56,6 @@ std::shared_ptr<model::PLI const> UCCVerifier::CalculatePLI() {
         pli = pli->Intersect(relation_->GetColumnData(column_indices_[i]).GetPositionListIndex());
     }
     return pli;
-}
-
-void UCCVerifier::VerifyUCC() {
-    std::shared_ptr<model::PLI const> pli = CalculatePLI();
-    stats_calculator_ = std::make_unique<UCCStatsCalculator>(relation_);
-    stats_calculator_->CalculateStatistics(pli->GetIndex());
 }
 
 }  // namespace algos

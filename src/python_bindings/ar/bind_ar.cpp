@@ -4,8 +4,8 @@
 
 #include <pybind11/stl.h>
 
+#include "core/algorithms/ar/apriori/apriori.h"
 #include "core/algorithms/ar/ar.h"
-#include "core/algorithms/ar/mining_algorithms.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace {

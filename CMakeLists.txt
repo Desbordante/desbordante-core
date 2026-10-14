@@ -58,14 +58,7 @@ option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
 # This option only takes effect if DESBORDANTE_BUILD_TESTS or DESBORDANTE_BUILD_BENCHMARKS is ON
 option(DESBORDANTE_FETCH_DATASETS "Fetch datasets for tests or benchmarks" ON)
 option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
-# ---- Vertical Hashing Optimization ----
-# Performance/functionality trade-off:
-# - Disabled by default for maximum performance
-# - Enabled for wide datasets (>32 columns) with potential performance penalty
-option(DESBORDANTE_SAFE_VERTICAL_HASHING
-       "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
-       at the cost of reduced performance. Recommended for exploratory data analysis." ON
-)
+option(DESBORDANTE_CI_REDUCED_DEBUG_INFO "Use reduced debug info intended for CI builds" OFF)
 option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
 
@@ -125,13 +118,19 @@ endif()
 set(RELEASE_BUILD_OPTS ${BUILD_OPTS})
 set(DEBUG_BUILD_OPTS "${BUILD_OPTS}")
 
+if(DESBORDANTE_CI_REDUCED_DEBUG_INFO)
+    set(DESBORDANTE_DEBUG_INFO_FLAG "-g1")
+else()
+    set(DESBORDANTE_DEBUG_INFO_FLAG "-g")
+endif()
+
 # Set common DEBUG build options
 string(
     JOIN
     ";"
     DEBUG_BUILD_OPTS
     "${DEBUG_BUILD_OPTS}"
-    "-g"
+    "${DESBORDANTE_DEBUG_INFO_FLAG}"
     "-Wall"
     "-Wextra"
     "-Werror"

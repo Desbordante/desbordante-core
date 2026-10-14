@@ -25,12 +25,7 @@ void EulerFD::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-
-    for (size_t i = 0; i < number_of_attributes_; ++i) {
-        std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
-        schema_->AppendColumn(column_name);
-    }
+    schema_ = RelationalSchema::CreateFrom(*input_table_);
 
     // In each column mapping string values into integer values.
     // Using only hash isn't good idea because collisions don't processing.
@@ -372,9 +367,9 @@ size_t EulerFD::GenerateResults() {
     return fd_num;
 }
 
-unsigned long long EulerFD::ExecuteInternal() {
+void EulerFD::ExecuteInternal() {
     if (number_of_attributes_ == 1) {
-        return 0;
+        return;
     }
 
     // Choose random strategy (it is necessary for stable unit tests)
@@ -386,13 +381,11 @@ unsigned long long EulerFD::ExecuteInternal() {
         rand_function_ = std::rand;
     }
 
-    auto start_time = std::chrono::system_clock::now();
-
     BuildPartition();
     if (clusters_.empty()) {
         // In small datasets sometimes after clusters stripping there are no clusters for sampling
         std::cout << "number of clusters is 0*\n";
-        return 0;
+        return;
     }
 
     InitCovers();
@@ -420,9 +413,5 @@ unsigned long long EulerFD::ExecuteInternal() {
 
     // Convert answer from pcover trees to list of fd
     SaveAnswer();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 }  // namespace algos

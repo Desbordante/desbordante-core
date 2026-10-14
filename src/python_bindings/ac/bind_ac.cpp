@@ -6,7 +6,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/algebraic_constraints/ac.h"
-#include "core/algorithms/algebraic_constraints/mining_algorithms.h"
+#include "core/algorithms/algebraic_constraints/ac_algorithm.h"
 #include "core/model/types/create_type.h"
 #include "python_bindings/py_util/bind_primitive.h"
 

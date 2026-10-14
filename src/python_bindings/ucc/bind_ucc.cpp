@@ -10,7 +10,9 @@
 
 #include <pybind11/stl.h>
 
-#include "core/algorithms/ucc/mining_algorithms.h"
+#include "core/algorithms/ucc/hpivalid/hpivalid.h"
+#include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/pyroucc/pyroucc.h"
 #include "core/algorithms/ucc/ucc.h"
 #include "core/config/indices/type.h"
 #include "core/model/table/column.h"

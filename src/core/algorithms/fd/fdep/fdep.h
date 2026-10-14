@@ -24,7 +24,6 @@ private:
 
     std::shared_ptr<RelationalSchema> schema_{};
 
-    std::vector<std::string> column_names_;
     size_t number_attributes_{};
 
     std::unique_ptr<FDTreeElement> neg_cover_tree_{};
@@ -37,7 +36,7 @@ private:
     void LoadDataInternal() final;
 
     void ResetStateFd() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     // Building negative cover via violated dependencies
     void BuildNegativeCover();

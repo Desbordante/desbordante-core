@@ -5,7 +5,6 @@
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
-#include "core/algorithms/fd/tane/afd_measures.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/fd/tane/tane.h"
 #include "core/config/names.h"
@@ -62,9 +61,9 @@ TEST_P(TestTanePdepSelfValidation, SelfCalculationTest) {
     auto table = std::make_shared<CSVParser>(p.csv_config);
     auto relation = ColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [column_id, expected_error] : p.errors) {
-        auto const& column_pli = relation->GetColumnData(column_id).GetPLWSIndex();
-        config::ErrorType error = algos::PdepSelf(column_pli);
-        error = algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(column_pli);
+        auto const& column_pli = relation->GetColumnData(column_id).GetPositionListIndex();
+        config::ErrorType error =
+                algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(column_pli);
         EXPECT_NEAR(error, expected_error, eps)
                 << "column_id = " << column_id << "\n"
                 << "error = " << error << "\n"
@@ -78,21 +77,24 @@ TEST_P(TestTaneAfdMeasuresValidation, ErrorCalculationTest) {
     auto table = std::make_shared<CSVParser>(p.csv_config);
     auto relation = ColumnLayoutRelationData::CreateFrom(*table);
     for (auto const& [lhs_id, rhs_id, expected_error] : p.afds) {
-        auto const& lhs = relation->GetColumnData(lhs_id).GetPLWSIndex();
-        auto const& rhs = relation->GetColumnData(rhs_id).GetPLWSIndex();
+        auto const& lhs = relation->GetColumnData(lhs_id).GetPositionListIndex();
+        auto const& rhs = relation->GetColumnData(rhs_id).GetPositionListIndex();
         config::ErrorType error;
         switch (p.error_measure) {
             case algos::AfdErrorMeasure::kPdep:
-                error = algos::CalculatePdepMeasure(lhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(
+                        lhs, rhs);
                 break;
             case algos::AfdErrorMeasure::kTau:
-                error = algos::CalculateTauMeasure(lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs, rhs);
                 break;
             case algos::AfdErrorMeasure::kMuPlus:
-                error = algos::CalculateMuPlusMeasure(lhs, rhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs,
+                                                                                           rhs);
                 break;
             case algos::AfdErrorMeasure::kRho:
-                error = algos::CalculateRhoMeasure(lhs, lhs->Intersect(rhs).get());
+                error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateRhoMeasure(
+                        lhs, lhs->Intersect(rhs).get());
                 break;
             default:
                 FAIL();
@@ -323,25 +325,25 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
         AfdMeasuresTaneMiningSuite, TestTaneAfdMeasuresMining,
         ::testing::Values(
-                TaneMiningParams(3325, 0.3, algos::AfdErrorMeasure::kPdep, kTestFD),
+                TaneMiningParams(29253, 0.3, algos::AfdErrorMeasure::kPdep, kTestFD),
                 TaneMiningParams(19266, 0.174, algos::AfdErrorMeasure::kPdep, kIris),
                 TaneMiningParams(18528, 0.1, algos::AfdErrorMeasure::kPdep, kIris),
-                TaneMiningParams(31178, 0.15, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
-                TaneMiningParams(1182, 0.21, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kTau, kTestFD),
+                TaneMiningParams(53657, 0.15, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
+                TaneMiningParams(44088, 0.21, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
+                TaneMiningParams(21731, 0.01, algos::AfdErrorMeasure::kTau, kTestFD),
                 TaneMiningParams(11680, 0.1, algos::AfdErrorMeasure::kTau, kIris),
                 TaneMiningParams(60896, 0.01, algos::AfdErrorMeasure::kTau, kIris),
-                TaneMiningParams(52638, 0.1, algos::AfdErrorMeasure::kTau, kNeighbors10k),
-                TaneMiningParams(44991, 0.01, algos::AfdErrorMeasure::kTau, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kMuPlus, kTestFD),
+                TaneMiningParams(41837, 0.1, algos::AfdErrorMeasure::kTau, kNeighbors10k),
+                TaneMiningParams(57486, 0.01, algos::AfdErrorMeasure::kTau, kNeighbors10k),
+                TaneMiningParams(21731, 0.01, algos::AfdErrorMeasure::kMuPlus, kTestFD),
                 TaneMiningParams(60841, 0.1, algos::AfdErrorMeasure::kMuPlus, kIris),
                 TaneMiningParams(60896, 0.01, algos::AfdErrorMeasure::kMuPlus, kIris),
-                TaneMiningParams(12185, 0.1, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
-                TaneMiningParams(12185, 0.01, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kRho, kTestFD),
+                TaneMiningParams(43368, 0.1, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
+                TaneMiningParams(43368, 0.01, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
+                TaneMiningParams(21731, 0.01, algos::AfdErrorMeasure::kRho, kTestFD),
                 TaneMiningParams(11873, 0.1, algos::AfdErrorMeasure::kRho, kIris),
                 TaneMiningParams(47878, 0.01, algos::AfdErrorMeasure::kRho, kIris),
-                TaneMiningParams(52638, 0.1, algos::AfdErrorMeasure::kRho, kNeighbors10k),
-                TaneMiningParams(52638, 0.01, algos::AfdErrorMeasure::kRho, kNeighbors10k)));
+                TaneMiningParams(41837, 0.1, algos::AfdErrorMeasure::kRho, kNeighbors10k),
+                TaneMiningParams(41837, 0.01, algos::AfdErrorMeasure::kRho, kNeighbors10k)));
 
 }  // namespace tests

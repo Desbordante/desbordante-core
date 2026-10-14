@@ -9,6 +9,5 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::algos
             ${DESBORDANTE_PREFIX}::util
             spdlog::spdlog_header_only
-            magic_enum::magic_enum
             Boost::headers
 )

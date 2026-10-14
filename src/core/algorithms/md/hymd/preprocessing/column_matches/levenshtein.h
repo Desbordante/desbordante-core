@@ -8,7 +8,6 @@
 #include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
 #include "core/algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "core/algorithms/md/hymd/preprocessing/similarity.h"
-#include "core/algorithms/md/hymd/utility/make_unique_for_overwrite.h"
 #include "core/model/types/builtin.h"
 
 namespace algos::hymd::preprocessing::column_matches {
@@ -33,8 +32,7 @@ public:
         : min_sim_(min_sim), buf_len_(GetLargestStringSize(*left_elements) + 1) {}
 
     Comparer operator()() const {
-        // TODO: replace with std::make_unique_for_overwrite when GCC in CI is upgraded
-        auto buf = utility::MakeUniqueForOverwrite<unsigned[]>(buf_len_ * 2);
+        auto buf = std::make_unique_for_overwrite<unsigned[]>(buf_len_ * 2);
         auto* buf_ptr = buf.get();
         return {std::move(buf), buf_ptr + buf_len_, min_sim_};
     }

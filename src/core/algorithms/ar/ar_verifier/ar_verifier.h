@@ -33,7 +33,7 @@ private:
     void RegisterOptions();
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
     void ResetState() override {
         stats_calculator_.ResetState();
@@ -67,7 +67,8 @@ public:
     }
 
     /* Returns clusters where the AR is violated. */
-    std::unordered_map<std::string, ::model::PLI::Cluster> const& GetClustersViolatingAR() const {
+    std::unordered_map<std::string_view, ::model::PLI::Cluster> const& GetClustersViolatingAR()
+            const {
         return stats_calculator_.GetClustersViolatingAR();
     }
 

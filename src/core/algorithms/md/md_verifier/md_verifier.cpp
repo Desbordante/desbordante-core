@@ -15,7 +15,6 @@
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
-#include "core/util/timed_invoke.h"
 #include "core/util/worker_thread_pool.h"
 
 namespace {
@@ -33,15 +32,6 @@ public:
         return pool_ptr_;
     }
 };
-
-auto CreateSchema(config::InputTable const& table) {
-    auto schema = std::make_shared<RelationalSchema>(table->GetRelationName());
-    std::size_t const cols = table->GetNumberOfColumns();
-    for (model::Index i : algos::hymd::utility::IndexRange(cols)) {
-        schema->AppendColumn(table->GetColumnName(i));
-    }
-    return schema;
-}
 }  // namespace
 
 namespace algos::md {
@@ -56,8 +46,8 @@ void MDVerifier::ResetState() {
 }
 
 void MDVerifier::LoadDataInternal() {
-    left_schema_ = CreateSchema(left_table_);
-    right_schema_ = right_table_ ? CreateSchema(right_table_) : left_schema_;
+    left_schema_ = RelationalSchema::CreateFrom(*left_table_);
+    right_schema_ = right_table_ ? RelationalSchema::CreateFrom(*right_table_) : left_schema_;
 }
 
 void MDVerifier::RegisterOptions() {
@@ -95,10 +85,6 @@ void MDVerifier::RegisterOptions() {
 void MDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({kRightTable, kLeftTable, kMDLHS, kMDRHS, kThreads});
-}
-
-unsigned long long MDVerifier::ExecuteInternal() {
-    return util::TimedInvoke(&MDVerifier::VerifyMD, this);
 }
 
 model::MD MDVerifier::BuildMD(std::vector<ColumnSimilarityClassifier> const& lhs,
@@ -152,7 +138,7 @@ MDValidationCalculator MDVerifier::CreateValidator() const {
     return validator;
 }
 
-void MDVerifier::VerifyMD() {
+void MDVerifier::ExecuteInternal() {
     input_md_ = BuildMD(lhs_, rhs_);
     highlights_ = std::make_shared<MDHighlights>(input_md_->GetDescription().rhs);
 

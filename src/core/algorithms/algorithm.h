@@ -35,7 +35,7 @@ private:
     void ExcludeOptions(std::string_view parent_option) noexcept;
     void ClearOptions() noexcept;
     virtual void LoadDataInternal() = 0;
-    virtual unsigned long long ExecuteInternal() = 0;
+    virtual void ExecuteInternal() = 0;
     bool AllRequiredOptionsAreSet() const noexcept;
 
 protected:
@@ -77,7 +77,7 @@ public:
 
     void LoadData();
 
-    unsigned long long Execute();
+    void Execute();
 
     void SetOption(std::string_view option_name, boost::any const& value = {});
     bool OptionIsRequired(std::string_view option_name) const;

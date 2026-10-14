@@ -27,8 +27,8 @@ def get_pfds():
 pfds = OrderedSet(get_pfds())
 afds = OrderedSet(get_afds())
 
-print("pFDs \ AFDs =", stringify(pfds - afds))
-print("AFDs \ pFDs =", stringify(afds - pfds))
+print("pFDs \\ AFDs =", stringify(pfds - afds))
+print("AFDs \\ pFDs =", stringify(afds - pfds))
 print("AFDs ∩ pFDs =", stringify(afds & pfds))
 
 print("1 - PerValue([DeviceId] -> Data) =", 0.1714285714)

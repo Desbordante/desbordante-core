@@ -1,15 +1,9 @@
 #include "core/algorithms/fd/fdep/fdep.h"
 
-#include <chrono>
-
 #include "core/config/equal_nulls/option.h"
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_relation_data.h"
 #include "core/model/types/bitset.h"
-
-// #ifndef PRINT_FDS
-// #define PRINT_FDS
-// #endif
 
 namespace algos {
 
@@ -27,14 +21,8 @@ void FDep::LoadDataInternal() {
     if (number_attributes_ == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
-    column_names_.resize(number_attributes_);
 
-    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-
-    for (size_t i = 0; i < number_attributes_; ++i) {
-        column_names_[i] = input_table_->GetColumnName(static_cast<int>(i));
-        schema_->AppendColumn(column_names_[i]);
-    }
+    schema_ = RelationalSchema::CreateFrom(*input_table_);
 
     std::vector<std::string> next_line;
     while (input_table_->HasNextRow()) {
@@ -53,9 +41,7 @@ void FDep::ResetStateFd() {
     pos_cover_tree_.reset();
 }
 
-unsigned long long FDep::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-
+void FDep::ExecuteInternal() {
     BuildNegativeCover();
 
     this->tuples_.shrink_to_fit();
@@ -67,15 +53,6 @@ unsigned long long FDep::ExecuteInternal() {
     CalculatePositiveCover(*this->neg_cover_tree_, active_path);
 
     pos_cover_tree_->FillFdCollection(this->schema_, FdList(), max_lhs_);
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-
-#ifdef PRINT_FDS
-    pos_cover_tree_->printDep("recent_call_result.txt", this->column_names_);
-#endif
-
-    return elapsed_milliseconds.count();
 }
 
 void FDep::BuildNegativeCover() {
@@ -97,8 +74,8 @@ void FDep::AddViolatedFDs(std::vector<size_t> const& t1, std::vector<size_t> con
     }
 
     equal_attr &= (~diff_attr);
-    for (size_t attr = diff_attr._Find_first(); attr != FDTreeElement::kMaxAttrNum;
-         attr = diff_attr._Find_next(attr)) {
+    for (size_t attr = model::FindFirst(diff_attr); attr != FDTreeElement::kMaxAttrNum;
+         attr = model::FindNext(diff_attr, attr)) {
         this->neg_cover_tree_->AddFunctionalDependency(equal_attr, attr);
     }
 }

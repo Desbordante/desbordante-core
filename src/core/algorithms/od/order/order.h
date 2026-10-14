@@ -44,7 +44,7 @@ public:
     void UpdateCandidateSets();
     void MergePrune();
     void PrintValidOD();
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
 public:
     OrderDependencies const& GetValidODs() const {

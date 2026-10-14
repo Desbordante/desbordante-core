@@ -8,10 +8,6 @@ set(DESBORDANTE_PREFIX
 set(NAME "${DESBORDANTE_PREFIX}.compile_feats")
 add_library(${NAME} INTERFACE)
 target_compile_features(${NAME} INTERFACE cxx_std_20)
-target_compile_definitions(
-    ${NAME}
-    INTERFACE $<$<BOOL:${DESBORDANTE_SAFE_VERTICAL_HASHING}>:DESBORDANTE_SAFE_VERTICAL_HASHING>
-)
 
 #[=[
     Brief
@@ -103,8 +99,6 @@ function(desbordante_add_bind name)
 
     target_sources(${bind_name} PRIVATE ${arg_SRCS})
 
-    set_target_properties(${bind_name} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
-
     list(APPEND arg_LIBS pybind11::pybind11 ${DESBORDANTE_PREFIX}.compile_feats)
     target_link_libraries(${bind_name} PRIVATE ${arg_LIBS})
 
@@ -147,5 +141,7 @@ function(desbordante_add_test name)
         Desbordante.copy_test_input_data
     )
 
-    gtest_discover_tests(${name} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    gtest_discover_tests(
+        ${name} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DISCOVERY_MODE PRE_TEST
+    )
 endfunction()

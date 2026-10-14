@@ -11,7 +11,6 @@
 #include "core/algorithms/cind/cind.h"
 #include "core/algorithms/cind/cind_algorithm.h"
 #include "core/algorithms/cind/condition.h"
-#include "core/algorithms/ind/mining_algorithms.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;

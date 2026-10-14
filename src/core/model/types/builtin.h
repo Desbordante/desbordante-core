@@ -5,9 +5,6 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/serialization/strong_typedef.hpp>
 
-#define MAGIC_ENUM_ENABLE_HASH
-#include <magic_enum/magic_enum.hpp>
-
 namespace model {
 
 /* Aliases below are used to describe types containing in ColumnData and a ColumnData type itself.
@@ -48,8 +45,7 @@ using AllValueTypes = std::tuple<Int, Double, BigInt, String, Null, Empty>;
  * Maybe we need to use separate enums to describe column types and value types to
  * avoid confusion.
  */
-// clang-format off
-enum class TypeId : char  {
+enum class TypeId : char {
     kInt = 0,   /* Except for nulls and empties column contains only ints
                  * (fixed-precision integer value) */
     kDouble,    /* Except for nulls and empties column contains only doubles
@@ -66,7 +62,6 @@ enum class TypeId : char  {
     kUndefined, /* Column contains only nulls and empties */
     kMixed      /* Except for nulls and empties column contains more than one type */
 };
-// clang-format on
 
 template <typename T>
 struct TypeConverter {};

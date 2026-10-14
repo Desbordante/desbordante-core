@@ -83,26 +83,26 @@ TEST_P(TestCINDConditions, SimpleTest) {
 // clang-format off
 INSTANTIATE_TEST_SUITE_P(
     CINDTestSuite, TestCINDConditions, ::testing::Values(
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::row, 0.0, 0.01, 61),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::row, 0.0, 0.15, 23),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::row, 0.0, 0.56, 3),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::row, 1.0, 0.01, 56),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::row, 1.0, 0.15, 18),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::row, 1.0, 0.56, 2),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::row, 0.0, 0.01, 61),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::row, 0.0, 0.15, 23),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::row, 0.0, 0.56, 3),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::row, 1.0, 0.01, 56),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::row, 1.0, 0.15, 18),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::row, 1.0, 0.56, 2),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::group, 0.1, 0.4, 61),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::group, 0.1, 0.6, 1),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::group, 0.75, 0.4, 56),
-        CINDConditionsParams(algos::cind::AlgoType::cinderella, algos::cind::CondType::group, 0.75, 0.6, 0),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::group, 0.1, 0.4, 61),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::group, 0.1, 0.6, 1),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::group, 0.75, 0.4, 56),
-        CINDConditionsParams(algos::cind::AlgoType::pli_cind, algos::cind::CondType::group, 0.75, 0.6, 0)
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kRow, 0.0, 0.01, 61),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kRow, 0.0, 0.15, 23),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kRow, 0.0, 0.56, 3),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kRow, 1.0, 0.01, 56),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kRow, 1.0, 0.15, 18),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kRow, 1.0, 0.56, 2),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kRow, 0.0, 0.01, 61),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kRow, 0.0, 0.15, 23),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kRow, 0.0, 0.56, 3),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kRow, 1.0, 0.01, 56),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kRow, 1.0, 0.15, 18),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kRow, 1.0, 0.56, 2),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kGroup, 0.1, 0.4, 61),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kGroup, 0.1, 0.6, 1),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kGroup, 0.75, 0.4, 56),
+        CINDConditionsParams(algos::cind::AlgoType::kCinderella, algos::cind::CondType::kGroup, 0.75, 0.6, 0),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kGroup, 0.1, 0.4, 61),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kGroup, 0.1, 0.6, 1),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kGroup, 0.75, 0.4, 56),
+        CINDConditionsParams(algos::cind::AlgoType::kPliCind, algos::cind::CondType::kGroup, 0.75, 0.6, 0)
     ));
 // clang-format on
 

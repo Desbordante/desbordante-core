@@ -6,6 +6,7 @@
 
 #include "core/algorithms/gdd/gdd_graph_description.h"
 #include "core/util/levenshtein_distance.h"
+#include "gdd_validator/gdd_validator.h"
 
 namespace model {
 
@@ -15,12 +16,12 @@ bool IsSubgraph(gdd::graph_t const& query, gdd::graph_t const& graph) {
     bool result = false;
 
     auto vcmp = [&query, &graph](gdd::vertex_t const& query_v, gdd::vertex_t const& graph_v) {
-        return ::model::Gdd::LabelsMatch(query[query_v].label, graph[graph_v].label) &&
+        return ::algos::GddValidator::LabelsMatch(query[query_v].label, graph[graph_v].label) &&
                query[query_v].attributes == graph[graph_v].attributes;
     };
 
     auto ecmp = [&query, &graph](gdd::edge_t const& query_e, gdd::edge_t const& graph_e) {
-        return ::model::Gdd::LabelsMatch(query[query_e].label, graph[graph_e].label);
+        return ::algos::GddValidator::LabelsMatch(query[query_e].label, graph[graph_e].label);
     };
 
     auto callback = [&result](auto, auto) {
@@ -116,8 +117,8 @@ std::optional<gdd::vertex_t> Gdd::FindPatternVertexById(std::size_t id) const {
     return it == verts.end() ? std::nullopt : std::optional{*it};
 }
 
-std::optional<gdd::vertex_t> Gdd::ResolveGraphVertex(
-        std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map, std::size_t pv_id) const {
+std::optional<gdd::vertex_t> Gdd::ResolveGraphVertex(gdd::detail::MappingT const& pg_map,
+                                                     std::size_t pv_id) const {
     if (auto const pv = FindPatternVertexById(pv_id); pv) {
         auto const gv_it = pg_map.find(*pv);
         if (gv_it == pg_map.end()) {
@@ -129,7 +130,7 @@ std::optional<gdd::vertex_t> Gdd::ResolveGraphVertex(
     return std::nullopt;
 }
 
-std::optional<std::pair<std::size_t, std::string>> Gdd::TokenAsRelation(
+std::optional<std::pair<std::size_t, std::string_view>> Gdd::TokenAsRelation(
         gdd::detail::DistanceOperand const& operand) {
     using namespace gdd::detail;
 
@@ -141,16 +142,18 @@ std::optional<std::pair<std::size_t, std::string>> Gdd::TokenAsRelation(
     if (!std::holds_alternative<RelTag>(field)) {
         return std::nullopt;
     }
-    return std::make_pair(pattern_vertex_id, std::get<RelTag>(field).name);
+    return std::pair<std::size_t, std::string_view>{pattern_vertex_id,
+                                                    std::get<RelTag>(field).name};
 }
 
 std::unordered_set<gdd::vertex_t> Gdd::CollectRelationTargets(gdd::graph_t const& g,
                                                               gdd::vertex_t gv,
-                                                              std::string const& rel_label) {
+                                                              std::string_view rel_label) {
     std::unordered_set<gdd::vertex_t> targets;
 
     for (auto [edge_it, eend] = boost::out_edges(gv, g); edge_it != eend; ++edge_it) {
-        if (std::string const& lab = g[*edge_it].label; LabelsMatch(lab, rel_label)) {
+        if (std::string const& lab = g[*edge_it].label;
+            ::algos::GddValidator::LabelsMatch(lab, rel_label)) {
             targets.insert(boost::target(*edge_it, g));
         }
     }
@@ -158,7 +161,7 @@ std::unordered_set<gdd::vertex_t> Gdd::CollectRelationTargets(gdd::graph_t const
 }
 
 std::optional<gdd::detail::ConstValue> Gdd::ResolveScalar(
-        gdd::graph_t const& g, std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
+        gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
         gdd::detail::DistanceOperand const& op) const {
     using namespace gdd::detail;
 
@@ -191,10 +194,9 @@ std::optional<gdd::detail::ConstValue> Gdd::ResolveScalar(
     return it->second;
 }
 
-bool Gdd::SatisfiesRelationConstraint(
-        gdd::graph_t const& g, std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
-        std::pair<std::size_t, std::string> const& lhs_rel,
-        gdd::detail::DistanceOperand const& rhs) const {
+bool Gdd::SatisfiesRelationConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+                                      std::pair<std::size_t, std::string_view> const& lhs_rel,
+                                      gdd::detail::DistanceOperand const& rhs) const {
     using namespace gdd::detail;
 
     auto const& [lhs_pid, lhs_relname] = lhs_rel;
@@ -217,7 +219,7 @@ bool Gdd::SatisfiesRelationConstraint(
     // 2. both nodes have edge with same label that ends at the same node
     if (auto const rhs_rel = TokenAsRelation(rhs)) {
         auto const& [rhs_pid, rhs_relname] = *rhs_rel;
-        if (!LabelsMatch(lhs_relname, rhs_relname)) {
+        if (!::algos::GddValidator::LabelsMatch(lhs_relname, rhs_relname)) {
             return false;
         }
 
@@ -235,9 +237,8 @@ bool Gdd::SatisfiesRelationConstraint(
     return false;
 }
 
-bool Gdd::SatisfiesAttributeConstraint(
-        gdd::graph_t const& g, std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
-        gdd::detail::DistanceConstraint const& constraint) const {
+bool Gdd::SatisfiesAttributeConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+                                       gdd::detail::DistanceConstraint const& constraint) const {
     auto const lhs_scalar = ResolveScalar(g, pg_map, constraint.lhs);
     auto const rhs_scalar = ResolveScalar(g, pg_map, constraint.rhs);
 
@@ -249,8 +250,7 @@ bool Gdd::SatisfiesAttributeConstraint(
     return CompareDistance(dist, constraint.op, constraint.threshold);
 }
 
-bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
-                              std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& pg_map,
+bool Gdd::SatisfiesConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
                               gdd::detail::DistanceConstraint const& constraint) const {
     if (auto const lhs_rel = TokenAsRelation(constraint.lhs)) {
         return SatisfiesRelationConstraint(g, pg_map, *lhs_rel, constraint.rhs);
@@ -258,9 +258,8 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g,
     return SatisfiesAttributeConstraint(g, pg_map, constraint);
 }
 
-GddCounterexample BuildCounterexample(
-        gdd::graph_t const& pattern, gdd::graph_t const& graph,
-        std::unordered_map<gdd::vertex_t, gdd::vertex_t> const& mapping) {
+GddCounterexample BuildCounterexample(gdd::graph_t const& pattern, gdd::graph_t const& graph,
+                                      gdd::detail::MappingT const& mapping) {
     GddCounterexample ce{};
     ce.match.reserve(mapping.size());
 

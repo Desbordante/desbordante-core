@@ -24,16 +24,12 @@ private:
     bool ignore_const_cols_;
     config::ThreadNumType number_of_threads_;
 
-    size_t prepr_time_ = 0;
-    size_t insert_time_ = 0;
-    size_t check_time_ = 0;
-
     std::unique_ptr<faida::IInclusionTester> inclusion_tester_;
     std::unique_ptr<faida::Preprocessor> data_;
 
     void LoadINDAlgorithmDataInternal() final;
     void MakeExecuteOptsAvailable() final;
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
     void ResetINDAlgorithmState() override;
 
     // Insert rows into InclusionTester
@@ -43,25 +39,7 @@ private:
     void RegisterInds(std::vector<SimpleIND> const& inds);
 
 public:
-    struct TimeStats {
-        size_t preprocessing_time;
-        size_t inserting_time;
-        size_t checking_time;
-    };
-
     Faida();
-
-    TimeStats GetTimeStats() const {
-        return {prepr_time_, insert_time_, check_time_};
-    }
-
-    std::string GetTimeStatsString() const {
-        std::stringstream ss;
-        ss << "Preprocessing time:\t" << prepr_time_ << "ms\n"
-           << "Inserting rows time:\t" << insert_time_ << "ms\n"
-           << "Candidates check time:\t" << check_time_ << "ms\n";
-        return ss.str();
-    }
 
     std::vector<std::shared_ptr<SimpleCC>> CreateUnaryCCs(faida::Preprocessor const& data) const;
     std::vector<SimpleIND> CreateUnaryINDCandidates(

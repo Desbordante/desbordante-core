@@ -35,7 +35,6 @@ private:
 
     std::unordered_map<std::string, int> value_dictionary_{};
     int next_value_id_ = 1;
-    static constexpr int kNullValueId = -1;
 
     void VerifyFD() const;
     void CreateFD();
@@ -53,7 +52,7 @@ private:
 protected:
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
-    unsigned long long ExecuteInternal() override;
+    void ExecuteInternal() override;
 
 public:
     /* Returns true if FD holds */

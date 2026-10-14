@@ -4,6 +4,5 @@ target_sources(${NAME} PRIVATE cinderella.cpp cind_miner.cpp pli_cind.cpp positi
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
-    PRIVATE ${DESBORDANTE_PREFIX}::util magic_enum::magic_enum spdlog::spdlog_header_only
-            Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::util spdlog::spdlog_header_only Boost::headers
 )

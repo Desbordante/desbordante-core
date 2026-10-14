@@ -1,11 +1,9 @@
 #include "core/algorithms/fd/tane/tane_common.h"
 
-#include <chrono>
 #include <iomanip>
 #include <list>
 #include <memory>
 
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
 #include "core/algorithms/fd/tane/model/lattice_level.h"
 #include "core/algorithms/fd/tane/model/lattice_vertex.h"
 #include "core/config/error/option.h"
@@ -19,17 +17,13 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon() : PliBasedFDAlgorithm() {
+TaneCommon::TaneCommon() : PliBasedAFDAlgorithm() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
 double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
                                      ColumnLayoutRelationData const* relation_data) {
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
-}
-
-void TaneCommon::RegisterAndCountFd(Vertical lhs, Column const* rhs) {
-    RegisterFd(std::move(lhs), *rhs, relation_->GetSharedPtrSchema());
 }
 
 void TaneCommon::Prune(model::LatticeLevel* level) {
@@ -66,7 +60,8 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
                             }
                             // Found fd: vertex->rhs => register it
                             if (is_rhs_candidate) {
-                                RegisterAndCountFd(columns, schema->GetColumn(rhs_index));
+                                RegisterAfd(AFD(columns, *schema->GetColumn(rhs_index), ucc_error,
+                                                relation_->GetSharedPtrSchema()));
                             }
                         }
                     }
@@ -93,14 +88,14 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
         Vertical xa = xa_vertex->GetVertical();
         // Calculate XA PLI
         if (xa_vertex->GetPositionListIndex() == nullptr) {
-            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndexWithSingletons();
-            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndexWithSingletons();
-            xa_vertex->AcquirePLIWithSingletons(parent_pli_1->Intersect(parent_pli_2));
+            auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndex();
+            auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndex();
+            xa_vertex->AcquirePositionListIndex(parent_pli_1->Intersect(parent_pli_2));
         }
 
         dynamic_bitset<> xa_indices = xa.GetColumnIndices();
         dynamic_bitset<> a_candidates = xa_vertex->GetRhsCandidates();
-        auto xa_pli = xa_vertex->GetPositionListIndexWithSingletons();
+        auto xa_pli = xa_vertex->GetPositionListIndex();
         for (auto const& x_vertex : xa_vertex->GetParents()) {
             Vertical const& lhs = x_vertex->GetVertical();
 
@@ -110,14 +105,14 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             if (!a_candidates[a_index]) {
                 continue;
             }
-            auto x_pli = x_vertex->GetPositionListIndexWithSingletons();
-            auto a_pli = relation_->GetColumnData(a_index).GetPLWSIndex();
+            auto x_pli = x_vertex->GetPositionListIndex();
+            auto a_pli = relation_->GetColumnData(a_index).GetPositionListIndex();
             // Check X -> A
             config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
             if (error <= max_fd_error_) {
                 Column const* rhs = schema->GetColumns()[a_index].get();
 
-                RegisterAndCountFd(lhs, rhs);
+                RegisterAfd(AFD(lhs, *rhs, error, relation_->GetSharedPtrSchema()));
                 xa_vertex->GetRhsCandidates().set(rhs->GetIndex(), false);
                 if (error == 0) {
                     xa_vertex->GetRhsCandidates() &= lhs.GetColumnIndices();
@@ -127,8 +122,7 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
     }
 }
 
-unsigned long long TaneCommon::ExecuteInternal() {
-    long apriori_millis = 0;
+void TaneCommon::ExecuteInternal() {
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
 
@@ -143,7 +137,6 @@ unsigned long long TaneCommon::ExecuteInternal() {
         LOG_DEBUG("*{}: every tuple has {:2} partners on average.", column->ToString(),
                   avg_partners);
     }
-    auto start_time = std::chrono::system_clock::now();
 
     // Initialize level 0
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
@@ -164,13 +157,14 @@ unsigned long long TaneCommon::ExecuteInternal() {
         vertex->AddRhsCandidates(schema->GetColumns());
         vertex->GetParents().push_back(empty_vertex);
         vertex->SetKeyCandidate(true);
-        vertex->SetPLIWithSingletons(column_data.GetPLWSIndex());
+        vertex->SetPositionListIndex(column_data.GetPositionListIndex());
 
         // check FDs: 0->A
         double fd_error = CalculateZeroAryFdError(&column_data);
         if (fd_error <= max_fd_error_) {  // TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
-            RegisterAndCountFd(schema->CreateEmptyVertical(), column.get());
+            RegisterAfd(AFD(schema->CreateEmptyVertical(), *column, fd_error,
+                            relation_->GetSharedPtrSchema()));
 
             vertex->GetRhsCandidates().set(column->GetIndex(), false);
             if (fd_error == 0) {
@@ -197,7 +191,8 @@ unsigned long long TaneCommon::ExecuteInternal() {
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
                     if (rhs_index != column.GetColumnIndices().find_first()) {
-                        RegisterAndCountFd(column, schema->GetColumn(rhs_index));
+                        RegisterAfd(AFD(column, *schema->GetColumn(rhs_index), ucc_error,
+                                        relation_->GetSharedPtrSchema()));
                     }
                 }
                 vertex->GetRhsCandidates() &= column.GetColumnIndices();
@@ -232,17 +227,8 @@ unsigned long long TaneCommon::ExecuteInternal() {
         // TODO: printProfilingData
     }
 
-    std::chrono::milliseconds elapsed_milliseconds =
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                                  start_time);
-    apriori_millis += elapsed_milliseconds.count();
-
-    LOG_DEBUG("Time: {} milliseconds", apriori_millis);
-    LOG_DEBUG("Intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
-    LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
-    LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
+    LOG_DEBUG("Total FD count: {}", afd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
-    return apriori_millis;
 }
 
 }  // namespace tane

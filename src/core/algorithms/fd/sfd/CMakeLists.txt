@@ -4,5 +4,5 @@ target_sources(${NAME} PRIVATE contingency_table.cpp cords.cpp frequency_handler
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config ${DESBORDANTE_PREFIX}::model::table
-    PRIVATE ${DESBORDANTE_PREFIX}::fd magic_enum::magic_enum Boost::headers
+    PRIVATE ${DESBORDANTE_PREFIX}::fd Boost::headers
 )

@@ -25,7 +25,7 @@ protected:
 
     std::vector<model::Gfd> gfds_;
 
-    unsigned long long ExecuteInternal();
+    void ExecuteInternal();
 
     void ResetState() final;
     void LoadDataInternal() final;
