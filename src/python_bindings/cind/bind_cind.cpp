@@ -3,8 +3,6 @@
 
 #include <pybind11/pybind11.h>
 
-#include <vector>
-
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
@@ -12,20 +10,9 @@
 #include "core/algorithms/cind/cind_algorithm.h"
 #include "core/algorithms/cind/condition.h"
 #include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/vector_to_tuple.h"
 
 namespace py = pybind11;
-
-namespace {
-template <typename ElementType>
-py::tuple VectorToTuple(std::vector<ElementType> vec) {
-    std::size_t const size = vec.size();
-    py::tuple tuple(size);
-    for (std::size_t i = 0; i < size; ++i) {
-        tuple[i] = std::move(vec[i]);
-    }
-    return tuple;
-}
-}  // namespace
 
 namespace python_bindings {
 void BindCind(py::module_& main_module) {
@@ -76,6 +63,9 @@ void BindCind(py::module_& main_module) {
                  })
             .def("get_condition_attributes",
                  [](CIND const& cind) { return VectorToTuple(cind.conditional_attributes); })
+            .def(
+                    "get_ind", [](CIND const& cind) -> IND const& { return cind.ind; },
+                    py::return_value_policy::reference_internal)
             .def("get_ind_string", [](CIND const& cind) { return cind.ind.ToLongString(); });
 
     BindPrimitiveNoBase<CindAlgorithm>(cind_module, "Cinderella")
