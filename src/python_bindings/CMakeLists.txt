@@ -335,7 +335,16 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
-    sd SRCS sd/bind_sd_verification.cpp LIBS ${DESBORDANTE_PREFIX}::sd::verifier Boost::headers
+    sd
+    SRCS
+    sd/bind_sd.cpp
+    sd/bind_sd_verification.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::sd::miner
+    ${DESBORDANTE_PREFIX}::sd::verifier
+    ${DESBORDANTE_PREFIX}::bindlib::util
+    magic_enum::magic_enum
+    Boost::headers
 )
 
 # ---- Installation Setup ----
