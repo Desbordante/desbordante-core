@@ -2,6 +2,7 @@
 .venv/
 build/
 cmake-build-debug/
+CMakeUserPresets.json
 dist/
 lib/
 venv/
