@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -22,12 +23,13 @@ private:
     config::InputTable input_table_;
 
     std::shared_ptr<RelationalSchema> schema_{};
-    std::vector<std::vector<size_t>> tuples_;
+    // Row-major table of dictionary-encoded values: tuples_[tuple * number_of_attributes_ + attr].
+    std::vector<uint32_t> tuples_;
 
     size_t number_of_attributes_{};
     size_t number_of_tuples_{};
 
-    std::unordered_set<boost::dynamic_bitset<>> neg_cover_{};
+    std::unordered_set<uint64_t> neg_cover_{};
 
     constexpr static double const kGrowthThreshold = 0.01;
     constexpr static size_t const kWindowSize = 10;
@@ -66,7 +68,7 @@ private:
     std::vector<size_t> GetAttributesSortedByFrequency(
             std::vector<boost::dynamic_bitset<>> const& neg_cover_vector) const;
 
-    boost::dynamic_bitset<> BuildAgreeSet(size_t t1, size_t t2);
+    uint64_t BuildAgreeSet(size_t t1, size_t t2);
 
 public:
     Aid();

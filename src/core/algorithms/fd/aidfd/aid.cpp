@@ -18,8 +18,14 @@ void Aid::LoadDataInternal() {
     if (number_of_attributes_ == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
+    if (number_of_attributes_ > 64) {
+        throw std::runtime_error(
+                "This experimental AID-FD version supports at most 64 attributes.");
+    }
 
     schema_ = RelationalSchema::CreateFrom(*input_table_);
+
+    std::vector<std::unordered_map<std::string, size_t>> value_dictionaries(number_of_attributes_);
 
     while (input_table_->HasNextRow()) {
         std::vector<std::string> const& next_line = input_table_->GetNextRow();
@@ -27,12 +33,13 @@ void Aid::LoadDataInternal() {
             break;
         }
 
-        tuples_.emplace_back(std::vector<size_t>(number_of_attributes_));
         for (size_t i = 0; i < number_of_attributes_; ++i) {
-            tuples_.back()[i] = std::hash<std::string>{}(next_line[i]);
+            auto& dictionary = value_dictionaries[i];
+            auto [it, inserted] = dictionary.try_emplace(next_line[i], dictionary.size());
+            tuples_.push_back(static_cast<uint32_t>(it->second));
         }
     }
-    number_of_tuples_ = tuples_.size();
+    number_of_tuples_ = tuples_.size() / number_of_attributes_;
     constant_columns_ = boost::dynamic_bitset<>(number_of_attributes_);
 }
 
@@ -60,9 +67,9 @@ void Aid::BuildClusters() {
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
         std::unordered_map<size_t, Cluster>& column_values = clusters_[attr_num];
         bool is_constant = true;
-        size_t first_value = tuples_[0][attr_num];
+        size_t first_value = tuples_[attr_num];
         for (size_t tuple_num = 0; tuple_num < number_of_tuples_; ++tuple_num) {
-            size_t entry_value = tuples_[tuple_num][attr_num];
+            size_t entry_value = tuples_[tuple_num * number_of_attributes_ + attr_num];
             if (entry_value != first_value) {
                 is_constant = false;
             }
@@ -117,26 +124,26 @@ void Aid::CreateNegativeCover() {
 
 void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
-        size_t value = tuples_[tuple_num][attr_num];
-        assert(clusters_[attr_num].find(value) != clusters_[attr_num].end());
-        Cluster const& cluster = clusters_[attr_num].find(value)->second;
         size_t index_in_cluster = indices_in_clusters_[attr_num][tuple_num];
         if (iteration_num <= index_in_cluster) {
+            size_t value = tuples_[tuple_num * number_of_attributes_ + attr_num];
+            assert(clusters_[attr_num].find(value) != clusters_[attr_num].end());
+            Cluster const& cluster = clusters_[attr_num].find(value)->second;
             size_t another_index_in_cluster =
                     GenerateSecondClusterIndex(index_in_cluster, iteration_num);
             size_t another_tuple_num = cluster[another_index_in_cluster];
-            auto tuples_agree_set = BuildAgreeSet(tuple_num, another_tuple_num);
-            neg_cover_.insert(std::move(tuples_agree_set));
+            neg_cover_.insert(BuildAgreeSet(tuple_num, another_tuple_num));
         }
     }
 }
 
-boost::dynamic_bitset<> Aid::BuildAgreeSet(size_t t1, size_t t2) {
-    boost::dynamic_bitset<> equal_attr(number_of_attributes_);
+uint64_t Aid::BuildAgreeSet(size_t t1, size_t t2) {
+    uint32_t const* row1 = tuples_.data() + t1 * number_of_attributes_;
+    uint32_t const* row2 = tuples_.data() + t2 * number_of_attributes_;
+    uint64_t equal_attr = 0;
+
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
-        if (tuples_[t1][attr_num] == tuples_[t2][attr_num]) {
-            equal_attr.set(attr_num);
-        }
+        equal_attr |= static_cast<uint64_t>(row1[attr_num] == row2[attr_num]) << attr_num;
     }
 
     return equal_attr;
@@ -189,7 +196,10 @@ void Aid::InvertNegativeCover() {
     HandleConstantColumns(attributes);
 
     std::vector<boost::dynamic_bitset<>> neg_cover_vector;
-    neg_cover_vector.insert(neg_cover_vector.end(), neg_cover_.begin(), neg_cover_.end());
+    neg_cover_vector.reserve(neg_cover_.size());
+    for (uint64_t mask : neg_cover_) {
+        neg_cover_vector.emplace_back(number_of_attributes_, mask);
+    }
     auto comp_by_card = [](boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<> const& rhs) {
         return lhs.count() > rhs.count();
     };
@@ -214,10 +224,13 @@ void Aid::InvertNegativeCover() {
 
         attributes[rhs] = false;
         SearchTree pos_cover_tree(attributes);
+        SearchTree maximal_neg_cover(number_of_attributes_);
         for (auto const& neg_cover_el : neg_cover_vector) {
-            if (!neg_cover_el[rhs]) {
-                HandleInvalidFd(neg_cover_el, pos_cover_tree, rhs);
+            if (neg_cover_el[rhs] || maximal_neg_cover.ContainsAnySupersetOf(neg_cover_el)) {
+                continue;
             }
+            maximal_neg_cover.Add(neg_cover_el);
+            HandleInvalidFd(neg_cover_el, pos_cover_tree, rhs);
         }
 
         size_t real_rhs = attr_indices[rhs];
@@ -273,7 +286,7 @@ std::vector<size_t> Aid::GetAttributesSortedByFrequency(
     }
 
     std::sort(attr_indices.begin(), attr_indices.end(),
-              [&frequency](size_t lhs, size_t rhs) { return frequency[lhs] > frequency[rhs]; });
+              [&frequency](size_t lhs, size_t rhs) { return frequency[lhs] < frequency[rhs]; });
 
     return attr_indices;
 }

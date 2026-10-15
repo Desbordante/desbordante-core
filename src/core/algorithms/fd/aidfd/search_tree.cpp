@@ -107,7 +107,7 @@ bool SearchTree::Remove(Bitset const& set) {
 void SearchTree::CollectSubsets(Bitset const& set, std::shared_ptr<Node> const& current_node,
                                 BitsetConsumer const& collect, bool& go_further) const {
     if (current_node->IsLeaf()) {
-        auto node_set = current_node->set_;
+        auto const& node_set = current_node->set_;
         if (node_set.is_subset_of(set)) {
             collect(node_set);
         }
@@ -131,6 +131,30 @@ bool SearchTree::ContainsAnySubsetOf(Bitset const& set) const {
     }
 
     return !go_further;
+}
+
+bool SearchTree::HasSuperset(Bitset const& set, std::shared_ptr<Node> const& current_node) const {
+    if (current_node->IsLeaf()) {
+        return set.is_subset_of(current_node->set_);
+    }
+
+    if (!set.is_subset_of(current_node->union_)) {
+        return false;
+    }
+
+    if (set[current_node->bit_]) {
+        return HasSuperset(set, current_node->right_);
+    }
+
+    return HasSuperset(set, current_node->left_) || HasSuperset(set, current_node->right_);
+}
+
+bool SearchTree::ContainsAnySupersetOf(Bitset const& set) const {
+    if (!root_) {
+        return false;
+    }
+
+    return HasSuperset(set, root_);
 }
 
 void SearchTree::ForEach(std::shared_ptr<Node> const& current_node,
