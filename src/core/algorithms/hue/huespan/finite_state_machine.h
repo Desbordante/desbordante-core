@@ -22,10 +22,6 @@ public:
         pos_++;
     }
 
-    std::vector<int> const& WaitForEvents() const {
-        return fsa_[pos_];
-    }
-
     bool IsEnd() const {
         return pos_ == fsa_.size();
     }

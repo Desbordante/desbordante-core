@@ -4,8 +4,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "complex_util_sequence.h"
+#include "complex_utility_sequence.h"
 #include "core/algorithms/algorithm.h"
+#include "episode_info.h"
 #include "high_utility_episode.h"
 
 namespace algos::huespan {
@@ -24,35 +25,26 @@ private:
     std::unordered_map<int, std::unordered_map<int, int>> cooccurence_matrix_simult_;
     std::unordered_map<int, std::unordered_map<int, int>> cooccurence_matrix_serial_;
 
-    std::unordered_map<int, EpisodeMinimalOccsUtilities> single_candidates_minimal_occurs_utility_;
+    std::unordered_map<int, EventMOs> single_candidates_minimal_occurs_utility_;
 
     std::vector<HighUtilityEpisode> high_utility_episodes_;
 
     void BuildCoocurenceMatrix();
 
     std::pair<int, int> CalculateMOsUtilityAndUpperBound(
-            int beta, std::vector<int> const& beta_start_timepoints,
-            std::vector<int> const& beta_end_timepoints, std::vector<int> beta_prev_utility,
-            std::vector<int> beta_utility);
+            int beta, EpisodeMinimalOccurences const& occurences);
 
-    void MineHUE(std::vector<std::vector<int>>& alpha_episode,
-                 std::vector<int>& alpha_start_timepoints, std::vector<int>& alpha_end_timepoints,
-                 std::vector<int>& alpha_prev_utilities, std::vector<int>& alpha_utilities) {
-        MineSimultHUE(alpha_episode, alpha_start_timepoints, alpha_end_timepoints,
-                      alpha_prev_utilities, alpha_utilities);
-        MineSerialHUE(alpha_episode, alpha_start_timepoints, alpha_end_timepoints,
-                      alpha_prev_utilities, alpha_utilities);
+    void MineHUE(std::vector<std::vector<int>> const& alpha_episode,
+                 EpisodeMinimalOccurences const& occurences) {
+        MineSimultHUE(alpha_episode, occurences);
+        MineSerialHUE(alpha_episode, occurences);
     }
 
-    void MineSimultHUE(std::vector<std::vector<int>>& alpha_episode,
-                       std::vector<int>& alpha_start_timepoints,
-                       std::vector<int>& alpha_end_timepoints,
-                       std::vector<int>& alpha_prev_utilities, std::vector<int>& alpha_utilities);
+    void MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
+                       EpisodeMinimalOccurences const& occurences);
 
-    void MineSerialHUE(std::vector<std::vector<int>>& alpha_episode,
-                       std::vector<int>& alpha_start_timepoints,
-                       std::vector<int>& alpha_end_timepoints,
-                       std::vector<int>& alpha_prev_utilities, std::vector<int>& alpha_utilities);
+    void MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
+                       EpisodeMinimalOccurences const& occurences);
 
     void LoadDataInternal() override {
         ScanFile();

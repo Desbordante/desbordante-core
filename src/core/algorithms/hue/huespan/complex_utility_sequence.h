@@ -46,14 +46,14 @@ private:
 public:
     ComplexSequence() = default;
 
-    void AddEvent(int timestamp, int event, int utility) {
-        if (!sequence_.contains(timestamp)) {
-            last_timestamp_ = std::max(last_timestamp_, static_cast<size_t>(timestamp));
+    void AddEvent(int timepoint, int event, int utility) {
+        if (!sequence_.contains(timepoint)) {
+            last_timestamp_ = std::max(last_timestamp_, static_cast<size_t>(timepoint));
         }
-        sequence_[timestamp].AddEvent(event, utility);
+        sequence_[timepoint].AddEvent(event, utility);
     }
 
-    std::vector<std::pair<int, int>> GetTimepointEvents(int timepoint) const {
+    std::vector<std::pair<int, int>> GetEventsByTimepoint(int timepoint) const {
         auto it = sequence_.find(timepoint);
         if (it != sequence_.end()) {
             return it->second.GetEventsUtilityPairs();
@@ -67,12 +67,12 @@ public:
 
     void PruneSingleEvents(
             int max_duration, double min_utility_absolute,
-            std::unordered_map<int, EpisodeMinimalOccsUtilities>& EpisodesMinimalOccsUtilities);
+            std::unordered_map<int, EventMOs>& events_mos);
     int GetUtilityOfDuration(int start_timepoint, int end_timepoint);
     int GetRemainingUtility(int timepoint, int event) const;
 
     int GetEventsUtilityByTimepoint(std::vector<int> const& eventset, int timepoint) const;
-    int GetMaximallUtility(std::vector<std::vector<int>> episode, int start_timepoint,
+    int GetMaximallUtility(std::vector<std::vector<int>> const& episode, int start_timepoint,
                            int end_timepoint);
     std::vector<std::pair<int, int>> GetExtentionEvents(int timepoint, int last_event) const;
 };

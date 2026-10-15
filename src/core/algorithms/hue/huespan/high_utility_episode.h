@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -15,7 +14,6 @@ public:
 
     HighUtilityEpisode(std::vector<std::vector<int>> event_sets, int utility)
         : event_sets_(std::move(event_sets)), utility_(utility) {}
-    
 
     int GetUtility() const {
         return utility_;
@@ -29,14 +27,8 @@ public:
         return event_sets_.size();
     }
 
-    void Print(){
-        for(int i = 0; i < event_sets_.size(); ++i) {
-            std::cout << "[ ";
-            for(int j = 0; j < event_sets_[i].size(); ++j) {
-                std::cout << event_sets_[i][j] << ' ';
-            }
-            std::cout << "] ";
-        }
+    bool operator==(HighUtilityEpisode const& other) const {
+        return utility_ == other.utility_ && event_sets_ == other.event_sets_;
     }
 };
 }  // namespace algos::huespan

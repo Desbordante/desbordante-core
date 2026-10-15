@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace algos::huespan::util {
-std::vector<std::string> SplitString(std::string str, char delimeter) {
+inline std::vector<std::string> SplitString(std::string str, char delimeter) {
     std::stringstream ss(str);
     std::string token;
     std::vector<std::string> tokens;

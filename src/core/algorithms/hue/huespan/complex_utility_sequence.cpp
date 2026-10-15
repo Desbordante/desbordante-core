@@ -1,12 +1,12 @@
+#include "complex_utility_sequence.h"
+
 #include <algorithm>
 
-#include "complex_util_sequence.h"
 #include "finite_state_machine.h"
 
 namespace algos::huespan {
-void ComplexSequence::PruneSingleEvents(
-        int max_duration, double min_utility_absolute,
-        std::unordered_map<int, EpisodeMinimalOccsUtilities>& EpisodesMinimalOccsUtilities) {
+void ComplexSequence::PruneSingleEvents(int max_duration, double min_utility_absolute,
+                                        std::unordered_map<int, EventMOs>& events_mos) {
     std::unordered_map<int, int> events_awu;
     for (auto& [timepoint, events_utility_pairs] : sequence_) {
         int awu = GetUtilityOfDuration(timepoint - max_duration + 1, timepoint + max_duration - 1);
@@ -15,12 +15,11 @@ void ComplexSequence::PruneSingleEvents(
         }
     }
 
-    for (auto it = EpisodesMinimalOccsUtilities.begin();
-         it != EpisodesMinimalOccsUtilities.end();) {
+    for (auto it = events_mos.begin(); it != events_mos.end();) {
         auto awu_it = events_awu.find(it->first);
 
         if (awu_it == events_awu.end() || awu_it->second < min_utility_absolute) {
-            it = EpisodesMinimalOccsUtilities.erase(it);
+            it = events_mos.erase(it);
         } else {
             ++it;
         }
@@ -34,7 +33,7 @@ void ComplexSequence::PruneSingleEvents(
 
         for (int i = pairs.size() - 1; i >= 0; --i) {
             int event = pairs[i].first;
-            if (EpisodesMinimalOccsUtilities.find(event) == EpisodesMinimalOccsUtilities.end()) {
+            if (events_mos.find(event) == events_mos.end()) {
                 removed_utility_sum += pairs[i].second;
                 pairs.erase(pairs.begin() + i);
             }
@@ -55,7 +54,7 @@ void ComplexSequence::PruneSingleEvents(
 
 int ComplexSequence::GetUtilityOfDuration(int start_timepoint, int end_timepoint) {
     if (start_timepoint > static_cast<int>(last_timestamp_)) return 0;
-    if (end_timepoint > static_cast<int>(last_timestamp_)) end_timepoint = sequence_.size();
+    if (end_timepoint > static_cast<int>(last_timestamp_)) end_timepoint = last_timestamp_;
 
     int total_utility = 0;
     for (int timepoint = start_timepoint; timepoint <= end_timepoint; ++timepoint) {
@@ -107,8 +106,8 @@ int ComplexSequence::GetEventsUtilityByTimepoint(std::vector<int> const& eventse
     return index == eventset.size() ? utility : 0;
 }
 
-int ComplexSequence::GetMaximallUtility(std::vector<std::vector<int>> episode, int start_timepoint,
-                                        int end_timepoint) {
+int ComplexSequence::GetMaximallUtility(std::vector<std::vector<int>> const& episode,
+                                        int start_timepoint, int end_timepoint) {
     int max_utility = 0;
     std::vector<FiniteStateMachine> state_machines;
 
