@@ -33,6 +33,7 @@
 #include "core/config/tabular_data/input_tables_type.h"
 #include "core/model/table/column_combination.h"
 #include "core/model/transaction/input_format_type.h"
+#include "core/util/custom_metric/custom_metric.h"
 
 namespace py = pybind11;
 

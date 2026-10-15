@@ -37,6 +37,7 @@ ALGO_CORRECT_OPTIONS_INFO = [
     (desb.fd.algorithms.FdMine, [TABLE_ONLY_CONTAINER]),
     (desb.fd.algorithms.HyFD, [TABLE_ONLY_CONTAINER]),
     (desb.fd.algorithms.EulerFD, [TABLE_ONLY_CONTAINER]),
+    (desb.rfd.algorithms.GaRfd, [OptionContainer("TestWide.csv", {}, {})]),
     (desb.afd.algorithms.Pyro, [
         get_common_option_container(
             {"seed": 1, "max_lhs": 12, "threads": 5, "error": 0.015}
@@ -262,6 +263,38 @@ class TestMaxFEM(unittest.TestCase):
         try:
             result = self._run(tmp_path)
             self.assertEqual(result, self._EXPECTED)
+        finally:
+            tmp_path.unlink()
+
+
+class TestGaRfdPythonMetric(unittest.TestCase):
+    # Python callables need the GIL, which C++ worker threads never hold
+    # (the module sets mod_gil_not_used). This locks the similarity-metric
+    # plumbing and determinism for user-provided Python metrics.
+    _ROWS = ["a,b", "x,1", "x,1", "y,2", "y,2"]
+
+    def _run(self, path):
+        def equality(a, b):
+            return 1.0 if str(a) == str(b) else 0.0
+
+        alg = desb.rfd.algorithms.GaRfd()
+        alg.load_data(table=(str(path), ",", True))
+        alg.execute(metrics=[equality, desb.rfd.equality_metric()],
+                    min_similarity=[1.0], minconf=0.5, max_generations=3,
+                    population_size=30, seed=42)
+        rfds = alg.get_rfds()
+        assert rfds, "expected RFDs on duplicated rows"
+        for r in rfds:
+            assert r.lhs and r.rhs
+            assert len(r.lhs) == len(r.lhs_indices)
+        return {(tuple(r.lhs), r.rhs) for r in rfds}
+
+    def test_python_metric_deterministic(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("\n".join(self._ROWS) + "\n")
+            tmp_path = pathlib.Path(f.name)
+        try:
+            self.assertEqual(self._run(tmp_path), self._run(tmp_path))
         finally:
             tmp_path.unlink()
 
