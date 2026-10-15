@@ -51,10 +51,10 @@ private:
     }
 
     void ResetState() override;
-
     void ExecuteInternal() override;
 
     void ScanFile();
+    void RegisterOptions();
 
 protected:
     void MakeExecuteOptsAvailable() override;

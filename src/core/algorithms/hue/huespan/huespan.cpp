@@ -8,24 +8,44 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/hue/huespan/episode_info.h"
+#include "core/config/exceptions.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
 #include "utils.h"
 
 namespace algos::huespan {
 Huespan::Huespan() : Algorithm() {
-    RegisterOption(
-            config::Option{&sequence_path_, config::names::kUtilitySequence, "Utility sequence"});
-    RegisterOption(config::Option{&min_utility_ratio_, config::names::kMinUtilityRatio,
-                                  "Minimum utility", 1.0});
-    RegisterOption(
-            config::Option{&max_duration_, config::names::kMaxDuration, "Maximum duration", 5ul});
+    RegisterOptions();
     MakeOptionsAvailable({config::names::kUtilitySequence});
 }
 
 void Huespan::MakeExecuteOptsAvailable() {
     Algorithm::MakeExecuteOptsAvailable();
     MakeOptionsAvailable({config::names::kMinUtilityRatio, config::names::kMaxDuration});
+}
+
+void Huespan::RegisterOptions() {
+    auto check_minutility_ratio = [](double value) {
+        if (value < 0 || value > 1) {
+            throw config::ConfigurationError(
+                    "Minimum utility ration must be a value between 0 and 1");
+        }
+    };
+
+    auto check_maxduration = [](size_t value) {
+        if (value < 1) {
+            throw config::ConfigurationError("Maximum duration must be natural number");
+        }
+    };
+
+    RegisterOption(
+            config::Option{&sequence_path_, config::names::kUtilitySequence, "Utility sequence"});
+    RegisterOption(config::Option{&min_utility_ratio_, config::names::kMinUtilityRatio,
+                                  "Minimum utility", 1.0}
+                           .SetValueCheck(check_minutility_ratio));
+    RegisterOption(
+            config::Option{&max_duration_, config::names::kMaxDuration, "Maximum duration", 5ul}
+                    .SetValueCheck(check_maxduration));
 }
 
 void Huespan::ResetState() {}
