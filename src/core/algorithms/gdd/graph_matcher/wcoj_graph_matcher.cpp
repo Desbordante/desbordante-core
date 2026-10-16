@@ -44,7 +44,7 @@ WcojCore::MatchLevel const& WcojCore::FindAll(Graph const& pattern, Domain domai
 
     OperationResult result = Scan();
     while (result == OperationResult::kProduced) {
-        result = ExtendIntersect();
+        result = ExtendIntersect(pattern);
     }
 
     if (result == OperationResult::kEmpty) {
@@ -57,8 +57,6 @@ WcojCore::MatchLevel const& WcojCore::FindAll(Graph const& pattern, Domain domai
 void WcojCore::Prepare(Graph const& pattern, Domain domain) {
     // adjacency_index_ is keyed by (graph vertex, direction, edge label) only, so it
     // stays valid across every pattern matched in the same graph
-    pattern_ = &pattern;
-
     cur_level_.Clear();
     next_level_.Clear();
     level_count_ = 0;
@@ -68,27 +66,23 @@ void WcojCore::Prepare(Graph const& pattern, Domain domain) {
         std::ranges::sort(set);
     }
 
-    if (IsPatternWeaklyConnected()) {
-        qvo_ = BuildQueryVertexOrder<CostBasedQvoStrategy>();
+    if (IsWeaklyConnected(pattern)) {
+        qvo_ = BuildQueryVertexOrder<CostBasedQvoStrategy>(pattern);
     } else {
-        qvo_ = BuildQueryVertexOrder<BfsQvoStrategy>();
+        qvo_ = BuildQueryVertexOrder<BfsQvoStrategy>(pattern);
     }
 }
 
-bool WcojCore::IsPatternWeaklyConnected() const {
-    if (pattern_ == nullptr) {
-        return false;
-    }
-
-    std::size_t const n = boost::num_vertices(*pattern_);
+bool WcojCore::IsWeaklyConnected(Graph const& graph) {
+    std::size_t const n = boost::num_vertices(graph);
     if (n == 0) {
         return true;
     }
 
     using UndirectedGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS>;
     UndirectedGraph undirected(n);
-    for (auto const e : boost::make_iterator_range(boost::edges(*pattern_))) {
-        boost::add_edge(boost::source(e, *pattern_), boost::target(e, *pattern_), undirected);
+    for (auto const e : boost::make_iterator_range(boost::edges(graph))) {
+        boost::add_edge(boost::source(e, graph), boost::target(e, graph), undirected);
     }
 
     std::vector<int> component(n);
@@ -96,12 +90,9 @@ bool WcojCore::IsPatternWeaklyConnected() const {
 }
 
 WcojCore::OperationResult WcojCore::Scan() {
-    if (qvo_.empty()) {
-        return OperationResult::kEmpty;
-    }
+    assert(!qvo_.empty());
 
     auto const first_pv = qvo_.front();
-
     auto const domain_it = domain_.find(first_pv);
     if (domain_it == domain_.end() || domain_it->second.empty()) {
         return OperationResult::kEmpty;
@@ -116,7 +107,7 @@ WcojCore::OperationResult WcojCore::Scan() {
     return OperationResult::kProduced;
 }
 
-WcojCore::OperationResult WcojCore::ExtendIntersect() {
+WcojCore::OperationResult WcojCore::ExtendIntersect(Graph const& pattern) {
     intersection_cache_.last_isect_valid = false;
 
     assert(level_count_ > 0 && "Scan call is required before ExtendIntersect call");
@@ -131,7 +122,7 @@ WcojCore::OperationResult WcojCore::ExtendIntersect() {
     // at least one child per parent
     next_level_.data.reserve(cur_level_.data.size() + parent_count);
 
-    auto const& descriptors = BuildDescriptorsFor(new_pv, level_count_);
+    auto const& descriptors = BuildDescriptorsFor(pattern, new_pv, level_count_);
     for (std::size_t i = 0; i < parent_count; ++i) {
         std::span<Vertex const> const parent = cur_level_.Row(i);
         std::vector<Vertex> const& extension_set = ComputeExtensionSet(parent, new_pv, descriptors);
@@ -155,7 +146,8 @@ WcojCore::OperationResult WcojCore::ExtendIntersect() {
     return level_count_ == qvo_.size() ? OperationResult::kFinished : OperationResult::kProduced;
 }
 
-std::vector<WcojCore::AdjacencyDescriptor> WcojCore::BuildDescriptorsFor(Vertex new_pv,
+std::vector<WcojCore::AdjacencyDescriptor> WcojCore::BuildDescriptorsFor(Graph const& pattern,
+                                                                         Vertex new_pv,
                                                                          std::size_t level) const {
     assert(level <= qvo_.size() && "BuildDescriptorsFor level is greater than qvo_.size()");
 
@@ -163,24 +155,24 @@ std::vector<WcojCore::AdjacencyDescriptor> WcojCore::BuildDescriptorsFor(Vertex 
     for (std::size_t i = 0; i < level; ++i) {
         Vertex const old_pv = qvo_[i];
 
-        for (auto const edge : boost::make_iterator_range(boost::out_edges(old_pv, *pattern_))) {
-            if (boost::target(edge, *pattern_) == new_pv) {
+        for (auto const edge : boost::make_iterator_range(boost::out_edges(old_pv, pattern))) {
+            if (boost::target(edge, pattern) == new_pv) {
                 descriptors.push_back(AdjacencyDescriptor{
                         .pattern_vertex = old_pv,
                         .qvo_index = i,
                         .direction = Direction::kOut,
-                        .edge_label = (*pattern_)[edge].label,
+                        .edge_label = (pattern)[edge].label,
                 });
             }
         }
 
-        for (auto const edge : boost::make_iterator_range(boost::in_edges(old_pv, *pattern_))) {
-            if (boost::source(edge, *pattern_) == new_pv) {
+        for (auto const edge : boost::make_iterator_range(boost::in_edges(old_pv, pattern))) {
+            if (boost::source(edge, pattern) == new_pv) {
                 descriptors.push_back(AdjacencyDescriptor{
                         .pattern_vertex = old_pv,
                         .qvo_index = i,
                         .direction = Direction::kIn,
-                        .edge_label = (*pattern_)[edge].label,
+                        .edge_label = (pattern)[edge].label,
                 });
             }
         }
@@ -192,17 +184,16 @@ std::vector<WcojCore::AdjacencyDescriptor> WcojCore::BuildDescriptorsFor(Vertex 
 std::vector<WcojCore::Vertex> const& WcojCore::GetNeighbors(Vertex graph_vertex,
                                                             Direction direction,
                                                             std::string_view edge_label) {
-    NeighborKey const key{
-            .graph_vertex = graph_vertex,
-            .direction = direction,
-            .edge_label = edge_label,
-    };
+    NeighborKeyLookup const lookup(graph_vertex, direction, edge_label);
 
-    if (auto const it = adjacency_index_.find(key); it != adjacency_index_.end()) {
+    if (auto const it = adjacency_index_.find(lookup); it != adjacency_index_.end()) {
         return it->second;
     }
 
-    auto [it, inserted] = adjacency_index_.emplace(key, std::vector<Vertex>{});
+    NeighborKey key{.graph_vertex = lookup.graph_vertex,
+                    .direction = lookup.direction,
+                    .edge_label = std::string(lookup.edge_label_view)};
+    auto [it, inserted] = adjacency_index_.emplace(std::move(key), std::vector<Vertex>{});
     std::vector<Vertex>& neighbors = it->second;
 
     if (direction == Direction::kOut) {

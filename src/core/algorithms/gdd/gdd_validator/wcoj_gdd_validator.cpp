@@ -34,7 +34,9 @@ std::unique_ptr<GddValidator> WcojGddValidator::CreateWorker() const {
 // algo.load_data(graph=g, gdd=gdd2)
 // algo.execute()
 void WcojGddValidator::ResetWorkerState() {
-    matcher_->Reset();
+    if (matcher_.has_value()) {
+        matcher_->Reset();
+    }
 }
 
 }  // namespace algos

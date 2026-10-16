@@ -9,8 +9,8 @@
 #include <utility>
 #include <variant>
 
-#include "gdd_graph_description.h"
 #include "core/util/export.h"
+#include "gdd_graph_description.h"
 
 namespace model {
 

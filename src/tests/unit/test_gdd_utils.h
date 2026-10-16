@@ -252,7 +252,7 @@ inline Gdd MakeGddCompanyHqInAmsterdamNoCompanyInGraph() {
 
 inline Gdd MakeGddPersonAge25ImpliesLivesInAmsterdamAsRelationConstraint() {
     auto pattern = MakePatternPersonCity("lives_in");
-    Gdd::Phi lhs{AbsDiffLeAttrToConst(0, "age", model::gdd::detail::ConstValue{25LL}, 0.0)};
+    Gdd::Phi lhs{AbsDiffLeAttrToConst(0, "age", ConstValue{25LL}, 0.0)};
     Gdd::Phi rhs{RelToConst(0, "lives_in", 101)};
     return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
 }

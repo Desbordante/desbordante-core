@@ -1,6 +1,5 @@
 #include <cassert>
 
-#include "core/util/logger.h"
 #include "qvo_strategies.h"
 
 namespace algos {
@@ -186,10 +185,7 @@ std::vector<CostBasedQvoStrategy::Vertex> CostBasedQvoStrategy::OrderExhaustive(
         }
     } while (std::ranges::next_permutation(pattern_vertices, pattern_vertices_comparator_).found);
 
-    if (best.empty()) {
-        LOG_WARN("Disconnected pattern passed to cost-based qvo strategy. Fall back to id order");
-        best = pattern_vertices;
-    }
+    assert(!best.empty());
     return best;
 }
 
@@ -252,24 +248,7 @@ std::vector<CostBasedQvoStrategy::Vertex> CostBasedQvoStrategy::OrderGreedy() co
             }
         }
 
-        if (!found) {
-            LOG_WARN(
-                    "Disconnected pattern passed to cost-based qvo strategy. Fall back to id "
-                    "order");
-            std::vector<Vertex> rest;
-            for (Vertex v : pattern_vertices) {
-                if (!placed.contains(v)) {
-                    rest.push_back(v);
-                }
-            }
-            std::ranges::sort(rest, pattern_vertices_comparator_);
-            for (Vertex v : rest) {
-                order.push_back(v);
-                placed.emplace(v, order.size() - 1);
-            }
-            break;
-        }
-
+        assert(found);
         match_estimate = best_estimate_after;
         order.push_back(best);
         placed.emplace(best, order.size() - 1);
