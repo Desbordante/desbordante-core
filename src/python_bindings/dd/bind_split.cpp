@@ -70,7 +70,9 @@ void BindSplit(py::module_& main_module) {
             .def(pybind11::self == pybind11::self)
             .def(pybind11::self != pybind11::self)
             .def("__hash__", [](DDString const& dd) { return py::hash(py::str(dd.ToString())); })
-            .def("to_json", &model::DDString::ToJSON);
+            .def("to_json", &model::DDString::ToJSON)
+            .def_property_readonly("left", [](model::DDString const& dd) { return dd.left; })
+            .def_property_readonly("right", [](model::DDString const& dd) { return dd.right; });
     BindPrimitiveNoBase<dd::Split>(dd_module, "Split").def("get_dds", &dd::Split::GetDDStringList);
 }
 }  // namespace python_bindings
