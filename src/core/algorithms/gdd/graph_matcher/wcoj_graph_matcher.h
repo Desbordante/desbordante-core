@@ -8,7 +8,6 @@
 
 #include "graph_matcher.h"
 #include "qvo_strategies.h"
-#include "core/util/logger.h"
 
 namespace algos {
 
@@ -55,6 +54,8 @@ public:
 
     explicit WcojCore(Graph const& graph) : graph_(graph) {}
 
+    explicit WcojCore(Graph&&) = delete;
+
     // all matches of pattern, valid until the next call
     // column i of a row is the image of pattern vertex Order()[i]
     MatchLevel const& FindAll(Graph const& pattern, Domain domain, bool injective);
@@ -84,13 +85,34 @@ private:
     struct NeighborKey {
         Vertex graph_vertex;
         Direction direction;
-        std::string_view edge_label;
+        // stored in `adjacency_index_` which may outlive pattern lifetime, copy label
+        std::string edge_label;
 
-        bool operator==(NeighborKey const&) const = default;
+        bool operator==(NeighborKey const&) const noexcept = default;
+    };
+
+    // lookup in `adjacency_index_` without allocations
+    struct NeighborKeyLookup {
+        Vertex graph_vertex;
+        Direction direction;
+        std::string_view edge_label_view;
+
+        NeighborKeyLookup(Vertex gv, Direction dir, std::string_view label)
+            : graph_vertex(gv), direction(dir), edge_label_view(label) {}
+
+        // implicit for unordered_map<NeighborKey, ...>::find
+        NeighborKeyLookup(NeighborKey const& key)
+            : graph_vertex(key.graph_vertex),
+              direction(key.direction),
+              edge_label_view(key.edge_label) {}
+
+        bool operator==(NeighborKeyLookup const&) const noexcept = default;
     };
 
     struct NeighborKeyHash {
-        std::size_t operator()(NeighborKey const& key) const {
+        using is_transparent = void;
+
+        std::size_t operator()(NeighborKeyLookup const& key) const noexcept {
             using boost::hash_combine;
             using boost::hash_value;
 
@@ -99,14 +121,13 @@ private:
             hash_combine(seed, hash_value(key.graph_vertex));
             hash_combine(seed,
                          hash_value(static_cast<std::underlying_type_t<Direction>>(key.direction)));
-            hash_combine(seed, hash_value(key.edge_label));
+            hash_combine(seed, hash_value(key.edge_label_view));
 
             return seed;
         }
     };
 
     Graph const& graph_;
-    Graph const* pattern_ = nullptr;
     bool injective_ = false;
     Domain domain_;
     MatchLevel cur_level_;
@@ -115,21 +136,18 @@ private:
     std::vector<Vertex> qvo_;
 
     OperationResult Scan();  // differs from paper - builds 1-match, not 2-match.
-    OperationResult ExtendIntersect();
+    OperationResult ExtendIntersect(Graph const& pattern);
 
     void Prepare(Graph const& pattern, Domain domain);
-    bool IsPatternWeaklyConnected() const;
+    static bool IsWeaklyConnected(Graph const& graph);
 
     template <QvoStrategy Strategy>
-    std::vector<Vertex> BuildQueryVertexOrder() const {
-        if (pattern_ == nullptr) {
-            LOG_WARN("Calling BuildQueryVertexOrder while pattern_ == nullptr");
-            return {};
-        }
-        return Strategy(graph_, *pattern_, domain_).Order();
+    std::vector<Vertex> BuildQueryVertexOrder(Graph const& pattern) const {
+        return Strategy(graph_, pattern, domain_).Order();
     }
 
-    std::vector<AdjacencyDescriptor> BuildDescriptorsFor(Vertex new_pv, std::size_t level) const;
+    std::vector<AdjacencyDescriptor> BuildDescriptorsFor(Graph const& pattern, Vertex new_pv,
+                                                         std::size_t level) const;
     std::vector<Vertex> const& ComputeExtensionSet(
             std::span<Vertex const> partial_match, Vertex new_pv,
             std::vector<AdjacencyDescriptor> const& descriptors);
@@ -149,7 +167,8 @@ private:
     std::vector<ListCursor> cursors_;
     void LeapFrogJoin(std::vector<std::vector<Vertex> const*>& lists, std::vector<Vertex>& out);
 
-    std::unordered_map<NeighborKey, std::vector<Vertex>, NeighborKeyHash> adjacency_index_;
+    std::unordered_map<NeighborKey, std::vector<Vertex>, NeighborKeyHash, std::equal_to<>>
+            adjacency_index_;
 
     struct IntersectionCache {
         // mapped graph vertices in the same order descriptors are
@@ -175,6 +194,11 @@ private:
     detail::WcojCore core_{this->graph_};
 
     virtual bool DoMatch(Graph const& pattern, Domain domain, bool injective) final {
+        // empty pattern matches on empty subgraph
+        if (boost::num_vertices(pattern) == 0) {
+            return this->OnMatch(Mapping{});
+        }
+
         auto const& matches = core_.FindAll(pattern, std::move(domain), injective);
         auto const& qvo = core_.Order();
 
