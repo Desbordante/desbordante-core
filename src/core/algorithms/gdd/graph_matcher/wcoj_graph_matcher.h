@@ -58,7 +58,7 @@ public:
 
     // all matches of pattern, valid until the next call
     // column i of a row is the image of pattern vertex Order()[i]
-    MatchLevel const& FindAll(Graph const& pattern, Domain domain, bool injective);
+    MatchLevel const& FindAll(Graph const& pattern, Domain domain, MatchSemantics semantics);
 
     void InvalidateIndex() noexcept {
         adjacency_index_.clear();
@@ -128,7 +128,7 @@ private:
     };
 
     Graph const& graph_;
-    bool injective_ = false;
+    MatchSemantics semantics_ = MatchSemantics::kHomomorphism;
     Domain domain_;
     MatchLevel cur_level_;
     MatchLevel next_level_;
@@ -193,13 +193,13 @@ public:
 private:
     detail::WcojCore core_{this->graph_};
 
-    virtual bool DoMatch(Graph const& pattern, Domain domain, bool injective) final {
+    virtual bool DoMatch(Graph const& pattern, Domain domain, MatchSemantics semantics) final {
         // empty pattern matches on empty subgraph
         if (boost::num_vertices(pattern) == 0) {
             return this->OnMatch(Mapping{});
         }
 
-        auto const& matches = core_.FindAll(pattern, std::move(domain), injective);
+        auto const& matches = core_.FindAll(pattern, std::move(domain), semantics);
         auto const& qvo = core_.Order();
 
         std::size_t const matches_size = matches.Count();
@@ -221,5 +221,8 @@ private:
         return true;
     }
 };
+
+template <typename F>
+WcojGraphMatcher(model::gdd::GraphTypes::Graph const&, F&&) -> WcojGraphMatcher<std::decay_t<F>>;
 
 }  // namespace algos

@@ -21,7 +21,7 @@ void WcojGddValidator::HoldsGroup(std::span<model::Gdd const* const> group, Grap
     if (!matcher_.has_value()) {
         matcher_.emplace(graph, std::ref(check_));
     }
-    matcher_->Match(group.front()->GetPattern());
+    matcher_->Run(group.front()->GetPattern());
 }
 
 std::unique_ptr<GddValidator> WcojGddValidator::CreateWorker() const {

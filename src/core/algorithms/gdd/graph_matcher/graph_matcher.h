@@ -16,6 +16,8 @@ namespace algos {
 template <typename F>
 concept MatchCallback = std::predicate<F, model::gdd::GraphTypes::Mapping const&>;
 
+enum class MatchSemantics : std::uint8_t { kHomomorphism, kIsomorphism };
+
 // this graph matcher works with gdd property graphs (directed, with labels on each vertex and edge)
 // callback receives a match (pattern vertex -> graph vertex), returns false to stop the search,
 // true to continue searching
@@ -26,8 +28,6 @@ concept MatchCallback = std::predicate<F, model::gdd::GraphTypes::Mapping const&
 template <MatchCallback Callback>
 class GraphMatcher : private virtual model::gdd::GraphTypes {
 public:
-    enum class Semantics : std::uint8_t { kHomomorphism, kIsomorphism };
-
     template <typename F>
         requires std::constructible_from<Callback, F>
     GraphMatcher(Graph const& graph, F&& callback)
@@ -44,13 +44,12 @@ public:
 
     // enumerates matches of pattern in the graph and calls OnMatch on every match
     // returns false if the search was stopped by the callback
-    bool Match(Graph const& pattern, Semantics semantics = Semantics::kHomomorphism) {
+    bool Run(Graph const& pattern, MatchSemantics semantics = MatchSemantics::kHomomorphism) {
         assert(!is_matching_ && "Match inner call from callback is prohibited");
         is_matching_ = true;
         bool not_stopped = false;
         try {
-            not_stopped = DoMatch(pattern, BuildDomain(pattern, graph_),
-                                  semantics == Semantics::kIsomorphism);
+            not_stopped = DoMatch(pattern, BuildDomain(pattern, graph_), semantics);
             is_matching_ = false;
         } catch (...) {
             is_matching_ = false;
@@ -70,7 +69,7 @@ private:
     Callback callback_;
     bool is_matching_ = false;
 
-    virtual bool DoMatch(Graph const& pattern, Domain domain, bool injective) = 0;
+    virtual bool DoMatch(Graph const& pattern, Domain domain, MatchSemantics semantics) = 0;
 
     static bool HasLoop(Graph const& graph, Vertex v, std::string_view label) {
         for (auto const e : boost::make_iterator_range(boost::out_edges(v, graph))) {
