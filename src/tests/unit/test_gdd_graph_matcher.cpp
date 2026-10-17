@@ -44,17 +44,13 @@ using Matches = std::multiset<Tuple>;  // repeated matches must not be ignored
 
 using Callback = std::function<bool(Mapping const&)>;
 using Matcher = algos::GraphMatcher<Callback>;
-using Semantics = Matcher::Semantics;
+using algos::MatchSemantics;
 
 std::unique_ptr<Matcher> MakeMatcher(Kind kind, Graph const& g, Callback cb) {
     if (kind == Kind::kBacktracking) {
         return std::make_unique<algos::BacktrackingGraphMatcher<Callback>>(g, std::move(cb));
     }
     return std::make_unique<algos::WcojGraphMatcher<Callback>>(g, std::move(cb));
-}
-
-Semantics ToSemantics(bool inj) {
-    return inj ? Semantics::kIsomorphism : Semantics::kHomomorphism;
 }
 
 // apply mapping and retrieve id's in pattern vertex id's order
@@ -70,13 +66,13 @@ Tuple ToTuple(Graph const& p, Graph const& g, Mapping const& f) {
     return t;
 }
 
-Matches CollectMatches(Kind kind, Graph const& g, Graph const& p, bool inj) {
+Matches CollectMatches(Kind kind, Graph const& g, Graph const& p, MatchSemantics semantics) {
     Matches out;
     auto const matcher = MakeMatcher(kind, g, [&](Mapping const& f) {
         out.insert(ToTuple(p, g, f));
         return true;
     });
-    EXPECT_TRUE(matcher->Match(p, ToSemantics(inj)));
+    EXPECT_TRUE(matcher->Run(p, semantics));
     return out;
 }
 
@@ -277,9 +273,9 @@ TEST_P(GraphMatcherCases, MatchesDefinition) {
     auto const& [kind, tc] = GetParam();
     Graph const p = ReadGraphFromDot(tc.pattern_dot);
     Graph const g = ReadGraphFromDot(tc.graph_dot);
-    EXPECT_EQ(CollectMatches(kind, g, p, false), tc.homomorphisms)
+    EXPECT_EQ(CollectMatches(kind, g, p, MatchSemantics::kHomomorphism), tc.homomorphisms)
             << tc.name << ", " << kind << ", homomorphism";
-    EXPECT_EQ(CollectMatches(kind, g, p, true), tc.isomorphisms)
+    EXPECT_EQ(CollectMatches(kind, g, p, MatchSemantics::kIsomorphism), tc.isomorphisms)
             << tc.name << ", " << kind << ", isomorphism";
 }
 
@@ -304,7 +300,7 @@ TEST_P(GraphMatcherContract, EarlyStop) {
         return ++calls != stop_at;
     });
 
-    EXPECT_FALSE(matcher->Match(p));
+    EXPECT_FALSE(matcher->Run(p));
     EXPECT_EQ(calls, 1);
     ASSERT_EQ(out.size(), 1);
     EXPECT_TRUE(kOutStarHomomorphisms.contains(*out.begin()));
@@ -312,14 +308,14 @@ TEST_P(GraphMatcherContract, EarlyStop) {
     out.clear();
     calls = 0;
     stop_at = 4;
-    EXPECT_FALSE(matcher->Match(p));
+    EXPECT_FALSE(matcher->Run(p));
     EXPECT_EQ(calls, 4);
     EXPECT_EQ(out, kOutStarHomomorphisms);
 
     out.clear();
     calls = 0;
     stop_at = 0;
-    EXPECT_TRUE(matcher->Match(p));
+    EXPECT_TRUE(matcher->Run(p));
     EXPECT_EQ(out, kOutStarHomomorphisms);
 }
 
@@ -334,17 +330,17 @@ TEST_P(GraphMatcherContract, Reuse) {
         out.insert(ToTuple(*cur, g, f));
         return true;
     });
-    auto run = [&](Graph const& p, bool inj) {
+    auto run = [&](Graph const& p, MatchSemantics semantics) {
         cur = &p;
         out.clear();
-        EXPECT_TRUE(matcher->Match(p, ToSemantics(inj)));
+        EXPECT_TRUE(matcher->Run(p, semantics));
         return out;
     };
 
-    EXPECT_EQ(run(p_star, false), kOutStarHomomorphisms);
-    EXPECT_EQ(run(p_star, true), kOutStarIsomorphisms);
-    EXPECT_EQ(run(p_m, true), Matches{});
-    EXPECT_EQ(run(p_l, false), (Matches{{1, 2}, {1, 3}}));
+    EXPECT_EQ(run(p_star, MatchSemantics::kHomomorphism), kOutStarHomomorphisms);
+    EXPECT_EQ(run(p_star, MatchSemantics::kIsomorphism), kOutStarIsomorphisms);
+    EXPECT_EQ(run(p_m, MatchSemantics::kIsomorphism), Matches{});
+    EXPECT_EQ(run(p_l, MatchSemantics::kHomomorphism), (Matches{{1, 2}, {1, 3}}));
 }
 
 TEST_P(GraphMatcherContract, Reset) {
@@ -357,20 +353,20 @@ TEST_P(GraphMatcherContract, Reset) {
     });
 
     matcher->Reset();
-    EXPECT_TRUE(matcher->Match(p));
+    EXPECT_TRUE(matcher->Run(p));
     EXPECT_EQ(out, (Matches{{1, 2}}));
 
     Vertex const v3 = AddVertex(g, 3, "B");
     AddEdge(g, FindVertexById(g, 1), v3, "l");
     matcher->Reset();
     out.clear();
-    EXPECT_TRUE(matcher->Match(p));
+    EXPECT_TRUE(matcher->Run(p));
     EXPECT_EQ(out, (Matches{{1, 2}, {1, 3}}));
 
     matcher->Reset();
     matcher->Reset();
     out.clear();
-    EXPECT_TRUE(matcher->Match(p));
+    EXPECT_TRUE(matcher->Run(p));
     EXPECT_EQ(out, (Matches{{1, 2}, {1, 3}}));
 }
 
@@ -391,9 +387,9 @@ TEST_P(GraphMatcherContract, CallbackThrows) {
         return true;
     });
 
-    EXPECT_THROW(matcher->Match(p), GraphMatcherTestError);
+    EXPECT_THROW(matcher->Run(p), GraphMatcherTestError);
     should_throw = false;
-    EXPECT_TRUE(matcher->Match(p));
+    EXPECT_TRUE(matcher->Run(p));
     EXPECT_EQ(out, kOutStarHomomorphisms);
 }
 
@@ -411,7 +407,7 @@ TEST_P(GraphMatcherContract, PatternLifetime) {
         auto const p = std::make_unique<Graph>(MakeArrowPattern(i, "A", i + 1, "B", label));
         cur = p.get();
         out.clear();
-        EXPECT_TRUE(matcher->Match(*p));
+        EXPECT_TRUE(matcher->Run(*p));
         EXPECT_EQ(out, (Matches{{1, 2}}));
     }
 }

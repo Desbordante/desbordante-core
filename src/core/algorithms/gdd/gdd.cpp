@@ -6,37 +6,15 @@
 
 #include "core/algorithms/gdd/gdd_graph_description.h"
 #include "core/util/levenshtein_distance.h"
+#include "graph_matcher/wcoj_graph_matcher.h"
 
 namespace model {
 
 namespace gdd::detail {
 
 bool IsSubgraph(GraphTypes::Graph const& query, GraphTypes::Graph const& graph) {
-    bool result = false;
-
-    auto vcmp = [&query, &graph](GraphTypes::Vertex const& query_v,
-                                 GraphTypes::Vertex const& graph_v) {
-        return gdd::LabelsMatch(query[query_v].label, graph[graph_v].label) &&
-               query[query_v].attributes == graph[graph_v].attributes;
-    };
-
-    auto ecmp = [&query, &graph](GraphTypes::Edge const& query_e, GraphTypes::Edge const& graph_e) {
-        return gdd::LabelsMatch(query[query_e].label, graph[graph_e].label);
-    };
-
-    auto callback = [&result](auto, auto) {
-        result = true;
-        return false;
-    };
-
-    using PropertyMapT = boost::property_map<GraphTypes::Graph, boost::vertex_index_t>::type;
-    PropertyMapT const query_index_map = boost::get(boost::vertex_index, query);
-    PropertyMapT const graph_index_map = boost::get(boost::vertex_index, graph);
-    std::vector<GraphTypes::Vertex> const query_vertex_order = boost::vertex_order_by_mult(query);
-
-    boost::vf2_subgraph_iso(query, graph, callback, query_index_map, graph_index_map,
-                            query_vertex_order, ecmp, vcmp);
-    return result;
+    algos::WcojGraphMatcher matcher(graph, [](auto) { return false; });
+    return !matcher.Run(query, algos::MatchSemantics::kIsomorphism);
 }
 
 }  // namespace gdd::detail
@@ -45,7 +23,7 @@ namespace {
 
 bool CompareDistance(double dist, gdd::detail::CmpOp op, double threshold) {
     constexpr double eps = std::numeric_limits<double>::epsilon();
-    using ::model::gdd::detail::CmpOp;
+    using gdd::detail::CmpOp;
 
     switch (op) {
         case CmpOp::kLe:

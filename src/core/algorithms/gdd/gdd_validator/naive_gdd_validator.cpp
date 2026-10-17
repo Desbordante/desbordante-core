@@ -21,7 +21,7 @@ void NaiveGddValidator::HoldsGroup(std::span<model::Gdd const* const> group, Gra
             graph,
             GroupCheck{
                     .group = group, .graph = &graph, .output = output, .remaining = group.size()});
-    matcher.Match(group.front()->GetPattern());
+    matcher.Run(group.front()->GetPattern());
 }
 
 std::unique_ptr<GddValidator> NaiveGddValidator::CreateWorker() const {

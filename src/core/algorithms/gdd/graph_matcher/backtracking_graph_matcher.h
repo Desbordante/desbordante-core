@@ -20,7 +20,7 @@ public:
                                             Vertex graph_src, Vertex graph_dst);
     static bool CanExtendMapping(Graph const& graph, Mapping const& partial_map,
                                  Graph const& pattern, Vertex pattern_var, Vertex graph_vertex,
-                                 bool injective);
+                                 MatchSemantics semantics);
 };
 
 }  // namespace detail
@@ -34,18 +34,18 @@ public:
 private:
     Domain domain_;
 
-    virtual bool DoMatch(Graph const& pattern, Domain domain, bool injective) final {
+    virtual bool DoMatch(Graph const& pattern, Domain domain, MatchSemantics semantics) final {
         if (domain_ = std::move(domain); domain_.size() != boost::num_vertices(pattern)) {
             return true;
         }
 
         Mapping partial_map;
         partial_map.reserve(boost::num_vertices(pattern));
-        return Extend(pattern, partial_map, injective);
+        return Extend(pattern, partial_map, semantics);
     }
 
     // returns false if the search was stopped by the callback
-    bool Extend(Graph const& pattern, Mapping& partial_map, bool injective) {
+    bool Extend(Graph const& pattern, Mapping& partial_map, MatchSemantics semantics) {
         if (partial_map.size() == domain_.size()) {
             return this->OnMatch(partial_map);
         }
@@ -58,7 +58,7 @@ private:
             for (Vertex graph_vertex : graph_vertex_candidates) {
                 if (!detail::BacktrackingCore::CanExtendMapping(this->graph_, partial_map, pattern,
                                                                 pattern_var, graph_vertex,
-                                                                injective)) {
+                                                                semantics)) {
                     continue;
                 }
 
@@ -67,7 +67,7 @@ private:
                     continue;
                 }
 
-                if (!Extend(pattern, partial_map, injective)) {
+                if (!Extend(pattern, partial_map, semantics)) {
                     return false;
                 }
 
@@ -79,5 +79,9 @@ private:
         return true;
     }
 };
+
+template <typename F>
+BacktrackingGraphMatcher(model::gdd::GraphTypes::Graph const&, F&&)
+        -> BacktrackingGraphMatcher<std::decay_t<F>>;
 
 }  // namespace algos

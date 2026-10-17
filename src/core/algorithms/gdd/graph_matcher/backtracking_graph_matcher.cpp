@@ -41,11 +41,11 @@ bool BacktrackingCore::AllPatternEdgesArePreserved(Graph const& graph, Graph con
 
 bool BacktrackingCore::CanExtendMapping(Graph const& graph, Mapping const& partial_map,
                                         Graph const& pattern, Vertex pattern_var,
-                                        Vertex graph_vertex, bool injective) {
+                                        Vertex graph_vertex, MatchSemantics semantics) {
     return std::ranges::all_of(partial_map, [&](auto const& mapped_pair) {
         auto const& [mapped_pattern_var, mapped_graph_vertex] = mapped_pair;
 
-        if (injective && mapped_graph_vertex == graph_vertex) {
+        if (semantics == MatchSemantics::kIsomorphism && mapped_graph_vertex == graph_vertex) {
             return false;
         }
 

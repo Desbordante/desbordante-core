@@ -38,8 +38,9 @@ T const* LeapFrogSeek(T const* first, T const* last, T target) {
 
 }  // namespace
 
-WcojCore::MatchLevel const& WcojCore::FindAll(Graph const& pattern, Domain domain, bool injective) {
-    injective_ = injective;
+WcojCore::MatchLevel const& WcojCore::FindAll(Graph const& pattern, Domain domain,
+                                              MatchSemantics semantics) {
+    semantics_ = semantics;
     Prepare(pattern, std::move(domain));
 
     OperationResult result = Scan();
@@ -129,7 +130,8 @@ WcojCore::OperationResult WcojCore::ExtendIntersect(Graph const& pattern) {
 
         for (Vertex const graph_vertex : extension_set) {
             // after the intersection cache lookup, so the cache is not affected
-            if (injective_ && std::ranges::find(parent, graph_vertex) != parent.end()) {
+            if (semantics_ == MatchSemantics::kIsomorphism &&
+                std::ranges::find(parent, graph_vertex) != parent.end()) {
                 continue;
             }
             next_level_.PushRow(parent, graph_vertex);
