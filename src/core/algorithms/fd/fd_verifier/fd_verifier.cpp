@@ -1,9 +1,12 @@
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
 
 #include <memory>
+#include <numeric>
 #include <stdexcept>
 
+#include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
 #include "core/config/equal_nulls/option.h"
+#include "core/config/error_measure/option.h"
 #include "core/config/indices/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
@@ -25,12 +28,14 @@ void FDVerifier::RegisterOptions() {
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
+    RegisterOption(config::kAfdErrorMeasureOpt(&afd_error_measure_));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({config::kLhsIndicesOpt.GetName(), config::kRhsIndicesOpt.GetName()});
+    MakeOptionsAvailable({config::kLhsIndicesOpt.GetName(), config::kRhsIndicesOpt.GetName(),
+                          config::kAfdErrorMeasureOpt.GetName()});
 }
 
 void FDVerifier::LoadDataInternal() {
@@ -61,7 +66,51 @@ void FDVerifier::VerifyFD() const {
         return;
     }
 
-    stats_calculator_->CalculateStatistics(lhs_pli.get(), rhs_pli.get());
+    stats_calculator_->CalculateStatistics(
+            lhs_pli.get(), rhs_pli.get(),
+            CalculateError(lhs_pli.get(), rhs_pli.get(), intersection_pli.get()));
+}
+
+long double FDVerifier::CalculateError(model::PLI const* lhs, model::PLI const* rhs,
+                                       model::PLI const* joint) const {
+    using Calculator = afd_metric_calculator::AFDMetricCalculator;
+    auto const num_rows = relation_->GetNumRows();
+    switch (afd_error_measure_) {
+        case AfdErrorMeasure::kG1:
+            return Calculator::CalculateG1Error(lhs, joint, relation_->GetNumTuplePairs());
+        case AfdErrorMeasure::kG2:
+            return Calculator::CalculateG2Error(lhs, rhs, num_rows);
+        case AfdErrorMeasure::kG3:
+            return 1.L - Calculator::CalculateG3(lhs, rhs, num_rows);
+        case AfdErrorMeasure::kG1Prime: {
+            config::IndicesType indices(relation_->GetNumColumns());
+            std::iota(indices.begin(), indices.end(), 0);
+            auto full_pli = relation_->CalculatePLI(indices);
+            return Calculator::CalculateG1PrimeError(
+                    lhs, joint, relation_->GetNumTuplePairs() - full_pli->GetNepAsLong());
+        }
+        case AfdErrorMeasure::kG3Prime:
+            return Calculator::CalculateG3PrimeError(lhs, rhs, num_rows);
+        case AfdErrorMeasure::kPdep:
+            return 1.L - Calculator::CalculatePdepMeasure(lhs, rhs);
+        case AfdErrorMeasure::kTau:
+            return 1.L - Calculator::CalculateTau(lhs, rhs);
+        case AfdErrorMeasure::kMuPlus:
+            return 1.L - Calculator::CalculateMuPlus(lhs, rhs);
+        case AfdErrorMeasure::kRho:
+            return 1.L - Calculator::CalculateRhoMeasure(lhs, joint);
+        case AfdErrorMeasure::kFi:
+            return 1.L - Calculator::CalculateFI(lhs, rhs, num_rows);
+        case AfdErrorMeasure::kG1S:
+            return 1.L - Calculator::CalculateG1SMeasure(lhs, rhs, num_rows);
+        case AfdErrorMeasure::kRfiPlus:
+            return 1.L - Calculator::CalculateRfiPlusMeasure(lhs, rhs);
+        case AfdErrorMeasure::kRfiPrimePlus:
+            return 1.L - Calculator::CalculateRfiPrimePlusMeasure(lhs, rhs);
+        case AfdErrorMeasure::kSfi:
+            return 1.L - Calculator::CalculateSfiMeasure(lhs, rhs);
+    }
+    throw std::logic_error("Unknown AFD error measure");
 }
 
 void FDVerifier::SortHighlightsByProportionAscending() const {

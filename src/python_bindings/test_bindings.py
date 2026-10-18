@@ -66,7 +66,8 @@ ALGO_CORRECT_OPTIONS_INFO = [
     ]),
     (desb.fd_verification.algorithms.FDVerifier, [
         get_common_option_container(
-            {"lhs_indices": [1, 2, 3], "rhs_indices": [1, 2, 3]}
+            {"lhs_indices": [1, 2, 3], "rhs_indices": [1, 2, 3],
+             "afd_error_measure": "g3_prime"}
         ),
     ]),
     (desb.ar.algorithms.Apriori, [
