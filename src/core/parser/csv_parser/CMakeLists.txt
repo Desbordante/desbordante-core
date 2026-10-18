@@ -4,10 +4,10 @@ include(FetchContent)
 FetchContent_Declare(
   csv
   GIT_REPOSITORY https://github.com/vincentlaucsb/csv-parser.git
-  GIT_SHALLOW TRUE 
+  GIT_SHALLOW TRUE
   GIT_TAG 2.2.1
   SYSTEM
-) 
+)
 
 FetchContent_MakeAvailable(csv)
 
