@@ -22,6 +22,12 @@ inputs:
     type: string
     default: 'container,thread,graph'
 
+  # Since we use uv heavily, it's easier to install it runner-wise rather than into venv
+  install-uv:
+    type: boolean
+    description: 'Install uv'
+    default: true
+
 runs:
   using: 'composite'
   steps:
@@ -136,3 +142,8 @@ runs:
       run: brew install boost
       shell: bash
       if: inputs.boost-libraries != '' && inputs.toolset == 'apple-clang'
+
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      shell: bash
+      if: inputs.install-uv == 'true'

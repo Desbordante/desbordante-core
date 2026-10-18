@@ -62,9 +62,9 @@ option(DESBORDANTE_CI_REDUCED_DEBUG_INFO "Use reduced debug info intended for CI
 option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
 
-set(DESBORDANTE_SANITIZER
+set(DESBORDANTE_SANITIZERS
     ""
-    CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB"
+    CACHE STRING "Semicolon-separated list of sanitizers, possible values: ADDRESS, UB"
 )
 set(DESBORDANTE_LOG_LEVEL
     ""
@@ -82,15 +82,19 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(DESBORDANTE_SANITIZER)
-    if(DESBORDANTE_SANITIZER STREQUAL "ADDRESS")
+foreach(SANITIZER IN LISTS DESBORDANTE_SANITIZERS)
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message(WARNING "Sanitizers are enabled only in Debug mode")
+    endif()
+
+    if(SANITIZER STREQUAL "ADDRESS")
         set(ASAN ON)
-    elseif(DESBORDANTE_SANITIZER STREQUAL "UB")
+    elseif(SANITIZER STREQUAL "UB")
         set(UBSAN ON)
     else()
-        message(FATAL_ERROR "Unknown sanitizer '${DESBORDANTE_SANITIZER}', try cmake -LH")
+        message(FATAL_ERROR "Unknown sanitizer '${SANITIZER}', try cmake -LH")
     endif()
-endif()
+endforeach()
 
 if(ASAN AND DESBORDANTE_BINDINGS)
     message(
@@ -148,9 +152,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION
     list(APPEND DEBUG_BUILD_OPTS "-Wno-deprecated-declarations")
 endif()
 
+set(ENABLED_SANITIZERS "")
+set(DISABLED_SANITIZERS "")
+
 if(ASAN)
     # Set DEBUG build options specific for build with ASAN
-    set(ASAN_OPTS "-fsanitize=address")
+    list(APPEND ENABLED_SANITIZERS "address")
 
     execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
     if(IS_UBUNTU EQUAL 0 AND CMAKE_CXX_FLAGS MATCHES "-stdlib=libc\\+\\+")
@@ -164,40 +171,42 @@ if(ASAN)
                 check or consider using another distro or higher libc++ version for full ASAN coverage"
         )
     endif()
+endif()
 
-    string(
-        JOIN
-        ";"
-        DEBUG_BUILD_OPTS
-        "${DEBUG_BUILD_OPTS}"
-        "-Wno-error" # Use of -Werror is discouraged with sanitizers
-        # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
-        "${ASAN_OPTS}"
-    )
-    set(DEBUG_LINK_OPTS "${ASAN_OPTS}")
-elseif(UBSAN)
+if(UBSAN)
     # Set DEBUG build options specific for build with UBSAN
-    string(
-        JOIN
-        ";"
-        UBSAN_OPTS
-        "-fsanitize=undefined"
-        "-fsanitize=float-divide-by-zero"
-        "-Wno-error" # Use of -Werror is discouraged with sanitizers
-        # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
-        "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
-        "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
-        "-fno-sanitize-recover=all"
-    ) # For tests to fail if UBSan finds an error
+    list(APPEND ENABLED_SANITIZERS "undefined" "float-divide-by-zero")
+    # Remove this when CustomRandom gets fixed
+    list(APPEND DISABLED_SANITIZERS "signed-integer-overflow" "shift")
+
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_HOST_APPLE)
         # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
         # because libraries (STL, googletest, boost, etc.) are somehow broken
-        string(JOIN ";" UBSAN_OPTS ${UBSAN_OPTS}
-               "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt"
+        list(APPEND DEBUG_BUILD_OPTS
+             "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt"
         )
     endif()
-    string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "${UBSAN_OPTS}")
-    set(DEBUG_LINK_OPTS "${UBSAN_OPTS}")
+endif()
+
+if(ENABLED_SANITIZERS OR DISABLED_SANITIZERS)
+    # Fail tests on sanitizer error (this is default behavior for ASAN, but it won't hurt)
+    list(APPEND SANITIZERS_OPT "-fno-sanitize-recover=all" "-fno-omit-frame-pointer")
+
+    if(ENABLED_SANITIZERS)
+        list(JOIN ENABLED_SANITIZERS "," ENABLED_SANITIZERS_OPT)
+        message(STATUS "Building with sanitizers: ${ENABLED_SANITIZERS_OPT}")
+        list(APPEND SANITIZERS_OPT "-fsanitize=${ENABLED_SANITIZERS_OPT}")
+    endif()
+    if(DISABLED_SANITIZERS)
+        list(JOIN DISABLED_SANITIZERS "," DISABLED_SANITIZERS_OPT)
+        message(STATUS "Building without sanitizers: ${DISABLED_SANITIZERS_OPT}")
+        list(APPEND SANITIZERS_OPT "-fno-sanitize=${DISABLED_SANITIZERS_OPT}")
+    endif()
+
+    # Use of -Werror is discouraged with sanitizers
+    # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
+    list(APPEND DEBUG_BUILD_OPTS "${SANITIZERS_OPT}" "-Wno-error")
+    list(APPEND DEBUG_LINK_OPTS "${SANITIZERS_OPT}")
 endif()
 
 if(DESBORDANTE_GDB_SYMBOLS)
