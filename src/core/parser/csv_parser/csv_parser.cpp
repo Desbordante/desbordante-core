@@ -1,5 +1,8 @@
 #include "core/parser/csv_parser/csv_parser.h"
 
+#include <fstream>
+#include <stdexcept>
+
 #include <internal/csv_reader.hpp>
 #include <internal/csv_row.hpp>
 
@@ -10,6 +13,13 @@ public:
     }
 
     void Reset(std::filesystem::path const& path, char separator, bool has_header) {
+        if (std::filesystem::file_size(path) == 0) {
+            if (!std::ifstream(path).is_open()) {
+                throw std::runtime_error("Cannot open file " + path.string());
+            }
+            value.reset();
+            return;
+        }
         value.emplace(path.string(),
                       csv::CSVFormat().delimiter(separator).header_row(has_header ? 0 : -1));
     }
@@ -44,6 +54,10 @@ void CSVParser::InitializeReader() {
         reader_ = std::make_unique<Reader>(path_, separator_, has_header_);
     }
     next_row_.reset();
+    if (!reader_->value) {
+        column_names_.clear();
+        return;
+    }
     if (has_header_) {
         column_names_ = reader_->value->get_col_names();
         return;
@@ -71,6 +85,9 @@ std::vector<std::string> CSVParser::GetNextRow() {
 bool CSVParser::HasNextRow() const {
     if (next_row_.has_value()) {
         return true;
+    }
+    if (!reader_->value) {
+        return false;
     }
     csv::CSVRow row;
     if (!reader_->value->read_row(row)) {
