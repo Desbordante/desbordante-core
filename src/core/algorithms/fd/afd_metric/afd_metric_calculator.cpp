@@ -1,7 +1,10 @@
 #include "afd_metric_calculator.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <map>
+#include <numeric>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -16,6 +19,158 @@
 namespace algos::afd_metric_calculator {
 
 using Cluster = model::PositionListIndex::Cluster;
+
+namespace {
+
+using ClusterSizeCounts = std::map<std::size_t, std::size_t>;
+
+constexpr long double kSfiAlpha = 0.5L;
+
+ClusterSizeCounts GetClusterSizeCounts(model::PLI const* pli) {
+    ClusterSizeCounts size_counts;
+    for (Cluster const& cluster : pli->GetIndex()) {
+        ++size_counts[cluster.size()];
+    }
+
+    std::size_t const singleton_count = pli->GetRelationSize() - pli->GetSize();
+    if (singleton_count != 0) size_counts[1] = singleton_count;
+    return size_counts;
+}
+
+long double ExpectedMutualInformationCell(std::size_t num_rows, std::size_t lhs_size,
+                                          std::size_t rhs_size) {
+    // max(0, lhs_size + rhs_size - num_rows), written without unsigned underflow.
+    std::size_t const rows_outside_rhs = num_rows - rhs_size;
+    std::size_t const min_intersection =
+            lhs_size > rows_outside_rhs ? lhs_size - rows_outside_rhs : 0;
+    std::size_t const max_intersection = std::min(lhs_size, rhs_size);
+    std::size_t mode = static_cast<std::size_t>((static_cast<long double>(lhs_size) + 1) *
+                                                (static_cast<long double>(rhs_size) + 1) /
+                                                (static_cast<long double>(num_rows) + 2));
+    mode = std::clamp(mode, min_intersection, max_intersection);
+
+    auto lower_weight = [=](long double weight, std::size_t intersection) {
+        return weight * intersection * (num_rows - rhs_size - lhs_size + intersection) /
+               ((rhs_size - intersection + 1.L) * (lhs_size - intersection + 1.L));
+    };
+    auto upper_weight = [=](long double weight, std::size_t intersection) {
+        return weight * (rhs_size - intersection) * (lhs_size - intersection) /
+               ((intersection + 1.L) * (num_rows - rhs_size - lhs_size + intersection + 1.L));
+    };
+    auto mutual_information_term = [=](std::size_t intersection) {
+        if (intersection == 0) return 0.L;
+        long double const count = intersection;
+        return count / num_rows *
+               std::log(count * num_rows / (static_cast<long double>(lhs_size) * rhs_size));
+    };
+
+    // Relative weights centered at the hypergeometric mode avoid underflow.
+    long double total_weight = 1.L;
+    long double weighted_term = mutual_information_term(mode);
+    long double weight = 1.L;
+    for (std::size_t intersection = mode; intersection > min_intersection; --intersection) {
+        weight = lower_weight(weight, intersection);
+        total_weight += weight;
+        weighted_term += weight * mutual_information_term(intersection - 1);
+    }
+
+    weight = 1.L;
+    for (std::size_t intersection = mode; intersection < max_intersection; ++intersection) {
+        weight = upper_weight(weight, intersection);
+        total_weight += weight;
+        weighted_term += weight * mutual_information_term(intersection + 1);
+    }
+    return weighted_term / total_weight;
+}
+
+long double CalculateExpectedMutualInformation(model::PLI const* lhs_pli,
+                                               model::PLI const* rhs_pli) {
+    std::size_t const num_rows = lhs_pli->GetRelationSize();
+    ClusterSizeCounts const lhs_size_counts = GetClusterSizeCounts(lhs_pli);
+    ClusterSizeCounts const rhs_size_counts = GetClusterSizeCounts(rhs_pli);
+
+    long double expected_mutual_information = 0.L;
+    for (auto const& [lhs_size, lhs_count] : lhs_size_counts) {
+        for (auto const& [rhs_size, rhs_count] : rhs_size_counts) {
+            expected_mutual_information +=
+                    static_cast<long double>(lhs_count) * rhs_count *
+                    ExpectedMutualInformationCell(num_rows, lhs_size, rhs_size);
+        }
+    }
+    return expected_mutual_information;
+}
+
+long double CalculateConditionalEntropy(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                        std::size_t num_rows) {
+    long double conditional_entropy = 0.L;
+    for (Cluster const& x : lhs_pli->GetIndex()) {
+        long double const x_size = x.size();
+        long double const log_x = std::log(x_size);
+
+        std::size_t non_singleton_records = 0;
+        for (Cluster const& y : rhs_pli->GetIndex()) {
+            model::PositionListIndex::Cluster xy;
+            std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::back_inserter(xy));
+
+            long double const size = xy.size();
+            if (size == 0.L) continue;
+            non_singleton_records += size;
+            conditional_entropy -= size * (std::log(size) - log_x);
+        }
+
+        conditional_entropy += (x.size() - non_singleton_records) * log_x;
+    }
+    return conditional_entropy / num_rows;
+}
+
+bool IsExactFd(model::PLI const* lhs_pli, model::PLI const* rhs_pli) {
+    // The paper defines every exact FD as measure 1. The general RFI formulas
+    // may be below 1 or undefined for exact keys and constant RHSs.
+    return AFDMetricCalculator::CalculateG2Error(lhs_pli, rhs_pli, lhs_pli->GetRelationSize()) ==
+           0.L;
+}
+
+long double CalculateSmoothedMarginalEntropy(ClusterSizeCounts const& size_counts,
+                                             long double pseudocount,
+                                             long double smoothed_num_rows) {
+    long double weighted_log_sum = 0.L;
+    for (auto const& [size, count] : size_counts) {
+        long double const smoothed_size = size + pseudocount;
+        weighted_log_sum += count * smoothed_size * std::log(smoothed_size);
+    }
+    return std::log(smoothed_num_rows) - weighted_log_sum / smoothed_num_rows;
+}
+
+std::size_t CalculateMaxFdHoldsRows(model::PLI const* lhs_pli, model::PLI const* rhs_pli) {
+    std::size_t max_fd_holds_rows = lhs_pli->GetRelationSize() - lhs_pli->GetSize();
+    std::shared_ptr<std::vector<int> const> probing_table = rhs_pli->CalculateAndGetProbingTable();
+    for (Cluster const& cluster : lhs_pli->GetIndex()) {
+        auto frequencies = model::PLI::CreateFrequencies(cluster, *probing_table);
+        std::size_t max_fd_holds_in_cluster = 1;
+        for (auto const& [rhs_value, rhs_cluster_size] : frequencies) {
+            max_fd_holds_in_cluster =
+                    std::max(max_fd_holds_in_cluster, static_cast<std::size_t>(rhs_cluster_size));
+        }
+        max_fd_holds_rows += max_fd_holds_in_cluster;
+    }
+    return max_fd_holds_rows;
+}
+
+long double CalculateExpectedFi(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                long double rhs_entropy) {
+    long double const expected_mutual_information =
+            std::max(CalculateExpectedMutualInformation(lhs_pli, rhs_pli), 0.L);
+    return expected_mutual_information / rhs_entropy;
+}
+
+unsigned long long CalculateG1PrimeNormalization(ColumnLayoutRelationData const& relation) {
+    config::IndicesType all_indices(relation.GetNumColumns());
+    std::iota(all_indices.begin(), all_indices.end(), 0);
+    auto full_tuple_pli = relation.CalculatePLI(all_indices);
+    return relation.GetNumTuplePairs() - full_tuple_pli->GetNepAsLong();
+}
+
+}  // namespace
 
 AFDMetricCalculator::AFDMetricCalculator() : Algorithm() {
     RegisterOptions();
@@ -79,6 +234,27 @@ void AFDMetricCalculator::ExecuteInternal() {
         case AFDMetric::kRho:
             result_ = CalculateRhoMeasure(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
             break;
+        case AFDMetric::kRfiPlus:
+            result_ = CalculateRfiPlusMeasure(lhs_pli.get(), rhs_pli.get());
+            break;
+        case AFDMetric::kG1S:
+            result_ = CalculateG1SMeasure(lhs_pli.get(), rhs_pli.get(), num_rows);
+            break;
+        case AFDMetric::kRfiPrimePlus:
+            result_ = CalculateRfiPrimePlusMeasure(lhs_pli.get(), rhs_pli.get());
+            break;
+        case AFDMetric::kSfi:
+            result_ = CalculateSfiMeasure(lhs_pli.get(), rhs_pli.get());
+            break;
+        case AFDMetric::kG1Prime: {
+            result_ = 1.L - CalculateG1PrimeError(lhs_pli.get(),
+                                                  lhs_pli->Intersect(rhs_pli.get()).get(),
+                                                  *relation_);
+            break;
+        }
+        case AFDMetric::kG3Prime:
+            result_ = 1.L - CalculateG3PrimeError(lhs_pli.get(), rhs_pli.get(), num_rows);
+            break;
     }
 }
 
@@ -103,25 +279,22 @@ long double AFDMetricCalculator::CalculateG2Error(model::PLI const* lhs_pli,
 long double AFDMetricCalculator::CalculateG3(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                              std::size_t num_rows) {
     if (num_rows <= 0) throw std::invalid_argument("received non-positive number of rows");
+    return CalculateMaxFdHoldsRows(lhs_pli, rhs_pli) / static_cast<long double>(num_rows);
+}
 
-    std::size_t const lhs_singleton_rows = lhs_pli->GetRelationSize() - lhs_pli->GetSize();
-    std::size_t max_fd_holds_rows = lhs_singleton_rows;
-
-    std::deque<model::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
-    std::shared_ptr<std::vector<int> const> probing_table_ptr =
-            rhs_pli->CalculateAndGetProbingTable();
-    std::vector<int> const& probing_table = *probing_table_ptr;
-    for (model::PLI::Cluster const& cluster : lhs_clusters) {
-        auto frequencies = model::PLI::CreateFrequencies(cluster, probing_table);
-        std::size_t max_fd_holds_in_cluster = 1;
-        for (auto const& [rhs_value, rhs_cluster_size] : frequencies) {
-            if (rhs_cluster_size > max_fd_holds_in_cluster)
-                max_fd_holds_in_cluster = rhs_cluster_size;
-        }
-        max_fd_holds_rows += max_fd_holds_in_cluster;
+long double AFDMetricCalculator::CalculateG3PrimeError(model::PLI const* lhs_pli,
+                                                       model::PLI const* rhs_pli,
+                                                       std::size_t num_rows) {
+    if (num_rows == 0 || lhs_pli->GetRelationSize() != num_rows ||
+        rhs_pli->GetRelationSize() != num_rows) {
+        throw std::invalid_argument("received empty or incompatible PLIs");
     }
 
-    return max_fd_holds_rows / static_cast<long double>(num_rows);
+    std::size_t const max_fd_holds_rows = CalculateMaxFdHoldsRows(lhs_pli, rhs_pli);
+    if (max_fd_holds_rows == num_rows) return 0.L;
+
+    std::size_t const lhs_domain_size = lhs_pli->GetNumCluster();
+    return static_cast<long double>(num_rows - max_fd_holds_rows) / (num_rows - lhs_domain_size);
 }
 
 config::ErrorType AFDMetricCalculator::CalculateRhoMeasure(model::PLI const* x_pli,
@@ -223,28 +396,94 @@ long double AFDMetricCalculator::CalculateFI(model::PLI const* lhs_pli, model::P
         return 0.L;
     }
 
-    auto entropy = rhs_pli->GetEntropy();
+    long double const entropy = rhs_pli->GetEntropy();
+    long double const conditional_entropy = CalculateConditionalEntropy(lhs_pli, rhs_pli, num_rows);
+    return (entropy - conditional_entropy) / entropy;
+}
 
-    auto conditional_entropy = 0.L;
-    for (Cluster const& x : lhs_pli->GetIndex()) {
-        auto log_x = std::log(x.size());
-
-        size_t non_singleton_records = 0;
-        for (Cluster const& y : rhs_pli->GetIndex()) {
-            model::PositionListIndex::Cluster xy;
-            std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::back_inserter(xy));
-
-            auto size = (long double)xy.size();
-            if (size == 0.L) continue;
-            non_singleton_records += size;
-            conditional_entropy -= size * (std::log(size) - log_x);
-        }
-
-        conditional_entropy -= (long double)(x.size() - non_singleton_records) * (-log_x);
+long double AFDMetricCalculator::CalculateG1SMeasure(model::PLI const* lhs_pli,
+                                                     model::PLI const* rhs_pli,
+                                                     std::size_t num_rows) {
+    if (num_rows == 0 || lhs_pli->GetRelationSize() != num_rows ||
+        rhs_pli->GetRelationSize() != num_rows) {
+        throw std::invalid_argument("received empty or incompatible PLIs");
     }
-    conditional_entropy /= num_rows;
-    auto mutual_information = entropy - conditional_entropy;
-    return mutual_information / entropy;
+
+    long double const conditional_entropy = CalculateConditionalEntropy(lhs_pli, rhs_pli, num_rows);
+    return std::max(1.L - conditional_entropy, 0.L);
+}
+
+long double AFDMetricCalculator::CalculateRfiPlusMeasure(model::PLI const* lhs_pli,
+                                                         model::PLI const* rhs_pli) {
+    std::size_t const num_rows = lhs_pli->GetRelationSize();
+    if (num_rows == 0 || rhs_pli->GetRelationSize() != num_rows) {
+        throw std::invalid_argument("received empty or incompatible PLIs");
+    }
+
+    // The paper defines every exact FD, including keys and constant RHSs, as one.
+    if (IsExactFd(lhs_pli, rhs_pli)) return 1.L;
+
+    long double const rhs_entropy = rhs_pli->GetEntropy();
+    long double const observed_fi = CalculateFI(lhs_pli, rhs_pli, num_rows);
+    long double const expected_fi = CalculateExpectedFi(lhs_pli, rhs_pli, rhs_entropy);
+    return std::max(observed_fi - expected_fi, 0.L);
+}
+
+long double AFDMetricCalculator::CalculateRfiPrimePlusMeasure(model::PLI const* lhs_pli,
+                                                              model::PLI const* rhs_pli) {
+    std::size_t const num_rows = lhs_pli->GetRelationSize();
+    if (num_rows == 0 || rhs_pli->GetRelationSize() != num_rows) {
+        throw std::invalid_argument("received empty or incompatible PLIs");
+    }
+
+    if (IsExactFd(lhs_pli, rhs_pli)) return 1.L;
+
+    long double const rhs_entropy = rhs_pli->GetEntropy();
+    long double const observed_fi = CalculateFI(lhs_pli, rhs_pli, num_rows);
+    long double const expected_fi = CalculateExpectedFi(lhs_pli, rhs_pli, rhs_entropy);
+    long double const normalization = 1.L - expected_fi;
+    if (normalization <= 0.L) return 0.L;
+    return std::clamp((observed_fi - expected_fi) / normalization, 0.L, 1.L);
+}
+
+long double AFDMetricCalculator::CalculateSfiMeasure(model::PLI const* lhs_pli,
+                                                     model::PLI const* rhs_pli) {
+    std::size_t const num_rows = lhs_pli->GetRelationSize();
+    if (num_rows == 0 || rhs_pli->GetRelationSize() != num_rows) {
+        throw std::invalid_argument("received empty or incompatible PLIs");
+    }
+
+    // SFI_ a=0.5 is the variant used in the paper's evaluation. Exact FDs are defined as one
+    // before smoothing, since smoothing itself adds non-observed Cartesian-product cells.
+    if (IsExactFd(lhs_pli, rhs_pli)) return 1.L;
+
+    std::size_t const lhs_domain_size = lhs_pli->GetNumCluster();
+    std::size_t const rhs_domain_size = rhs_pli->GetNumCluster();
+    long double const smoothed_num_rows =
+            num_rows + kSfiAlpha * static_cast<long double>(lhs_domain_size) * rhs_domain_size;
+
+    long double const lhs_entropy = CalculateSmoothedMarginalEntropy(
+            GetClusterSizeCounts(lhs_pli), kSfiAlpha * rhs_domain_size, smoothed_num_rows);
+    long double const rhs_entropy = CalculateSmoothedMarginalEntropy(
+            GetClusterSizeCounts(rhs_pli), kSfiAlpha * lhs_domain_size, smoothed_num_rows);
+
+    std::unique_ptr<model::PLI> joint_pli = lhs_pli->Intersect(rhs_pli);
+    ClusterSizeCounts const joint_size_counts = GetClusterSizeCounts(joint_pli.get());
+    long double joint_weighted_log_sum = 0.L;
+    for (auto const& [size, count] : joint_size_counts) {
+        long double const smoothed_size = size + kSfiAlpha;
+        joint_weighted_log_sum += count * smoothed_size * std::log(smoothed_size);
+    }
+
+    long double const cartesian_size = static_cast<long double>(lhs_domain_size) * rhs_domain_size;
+    long double const absent_cells = cartesian_size - joint_pli->GetNumCluster();
+    joint_weighted_log_sum += absent_cells * kSfiAlpha * std::log(kSfiAlpha);
+    long double const joint_entropy =
+            std::log(smoothed_num_rows) - joint_weighted_log_sum / smoothed_num_rows;
+    long double const conditional_entropy = joint_entropy - lhs_entropy;
+
+    if (rhs_entropy <= 0.L) return 0.L;
+    return std::clamp((rhs_entropy - conditional_entropy) / rhs_entropy, 0.L, 1.L);
 }
 
 config::ErrorType AFDMetricCalculator::CalculateZeroAryG1(ColumnData const* rhs,
@@ -264,6 +503,41 @@ config::ErrorType AFDMetricCalculator::CalculateG1Error(model::PLI const* lhs_pl
     // regression tests were written against it. Fixing it changes those hashes.
     return static_cast<config::ErrorType>((lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
                                           static_cast<config::ErrorType>(num_tuple_pairs));
+}
+
+config::ErrorType AFDMetricCalculator::CalculateG1PrimeError(
+        model::PLI const* lhs_pli, model::PLI const* joint_pli,
+        ColumnLayoutRelationData const& relation) {
+    return CalculateG1PrimeError(lhs_pli, joint_pli, CalculateG1PrimeNormalization(relation));
+}
+
+config::ErrorType AFDMetricCalculator::CalculateZeroAryG1Prime(
+        ColumnData const* rhs, ColumnLayoutRelationData const& relation) {
+    return CalculateZeroAryG1Prime(rhs, relation.GetNumTuplePairs(),
+                                   CalculateG1PrimeNormalization(relation));
+}
+
+config::ErrorType AFDMetricCalculator::CalculateG1PrimeError(model::PLI const* lhs_pli,
+                                                             model::PLI const* joint_pli,
+                                                             unsigned long long normalization) {
+    unsigned long long const violating_pairs = lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong();
+    if (violating_pairs == 0) return 0.L;
+    if (normalization == 0) {
+        throw std::invalid_argument("received zero G1-prime normalization for a non-exact FD");
+    }
+    return violating_pairs / static_cast<config::ErrorType>(normalization);
+}
+
+config::ErrorType AFDMetricCalculator::CalculateZeroAryG1Prime(ColumnData const* rhs,
+                                                               unsigned long long num_tuple_pairs,
+                                                               unsigned long long normalization) {
+    unsigned long long const violating_pairs =
+            num_tuple_pairs - rhs->GetPositionListIndex()->GetNepAsLong();
+    if (violating_pairs == 0) return 0.L;
+    if (normalization == 0) {
+        throw std::invalid_argument("received zero G1-prime normalization for a non-exact FD");
+    }
+    return violating_pairs / static_cast<config::ErrorType>(normalization);
 }
 
 }  // namespace algos::afd_metric_calculator
