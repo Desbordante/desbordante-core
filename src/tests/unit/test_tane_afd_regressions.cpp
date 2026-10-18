@@ -11,18 +11,18 @@ TEST(TestTanePrimeAfdMeasures, G1PrimeUsesFullTupleMultiplicity) {
     EXPECT_NEAR(afd->GetThreshold(), 1.0 / 63.0, kTaneTolerance);
 }
 
-TEST(TestTaneAfdBehavior, G1PreservesUndefinedZeroAryErrorForOneRow) {
+TEST(TestTaneAfdBehavior, G1RejectsZeroAryDependenciesForOneRow) {
     CSVConfig const one_row{kTestDataDir / "RfiPlusOneRow.csv", ',', true};
-    // Legacy G1 divides by the number of tuple pairs, which is zero for one row.
-    // Its undefined error does not pass the threshold, even though the RHS is constant.
+    // With zero tuple pairs, G1 returns positive infinity even for a constant RHS.
+    // No dependency passes the maximum supported threshold.
     auto tane = RunTane(algos::AfdErrorMeasure::kG1, 1.0, 0, one_row);
     EXPECT_TRUE(tane->AfdList().empty());
 }
 
-TEST(TestTaneAfdBehavior, G1PreservesUndefinedOrdinaryErrorForOneRow) {
+TEST(TestTaneAfdBehavior, G1RejectsOrdinaryDependenciesForOneRow) {
     CSVConfig const one_row{kTestDataDir / "RfiPlusOneRow.csv", ',', true};
     // With no zero-ary dependencies accepted, ordinary candidates are still evaluated.
-    // Their G1 errors are also undefined, rather than overridden to zero by exactness.
+    // Their G1 errors are also positive infinity, rather than overridden to zero by exactness.
     auto tane = RunTane(algos::AfdErrorMeasure::kG1, 1.0, 1, one_row);
     EXPECT_TRUE(tane->AfdList().empty());
 }

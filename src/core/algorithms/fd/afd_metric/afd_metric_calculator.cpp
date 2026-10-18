@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <limits>
 #include <map>
 #include <numeric>
 #include <stdexcept>
@@ -357,7 +358,7 @@ long double AFDMetricCalculator::CalculatePdepMeasure(model::PLI const* x_pli,
         }
 
         // Singleton A values represent distinct joint clusters of size one.
-        sum += singleton_records / x_cluster_size;
+        sum += static_cast<config::ErrorType>(singleton_records) / x_cluster_size;
     }
 
     return sum / n;
@@ -491,6 +492,8 @@ config::ErrorType AFDMetricCalculator::CalculateZeroAryG1(ColumnData const* rhs,
     // "g1 zero-ary" variant for empty-LHS FDs (->A). TANE needs this to evaluate
     // constant-column candidates before building the lattice. It does not require
     // intersecting with an LHS PLI, unlike CalculateG1Error below.
+    // Zero-pair errors must exceed every supported threshold, including for exact FDs.
+    if (num_tuple_pairs == 0) return std::numeric_limits<config::ErrorType>::infinity();
     return 1 - rhs->GetPositionListIndex()->GetNepAsLong() /
                        static_cast<config::ErrorType>(num_tuple_pairs);
 }
@@ -501,6 +504,8 @@ config::ErrorType AFDMetricCalculator::CalculateG1Error(model::PLI const* lhs_pl
     // Non-standard g1: divides by num_tuple_pairs instead of (n choose 2). Kept
     // intentionally — Tane originally used this variant and all hash-based
     // regression tests were written against it. Fixing it changes those hashes.
+    // Zero-pair errors must exceed every supported threshold, including for exact FDs.
+    if (num_tuple_pairs == 0) return std::numeric_limits<config::ErrorType>::infinity();
     return static_cast<config::ErrorType>((lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
                                           static_cast<config::ErrorType>(num_tuple_pairs));
 }

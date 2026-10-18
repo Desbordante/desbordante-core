@@ -1,6 +1,7 @@
 #include "core/algorithms/fd/tane/tane_common.h"
 
 #include <iomanip>
+#include <limits>
 #include <list>
 #include <memory>
 
@@ -23,7 +24,9 @@ TaneCommon::TaneCommon() : PliBasedAFDAlgorithm() {
 
 double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
                                      ColumnLayoutRelationData const* relation_data) {
-    return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
+    auto const num_tuple_pairs = relation_data->GetNumTuplePairs();
+    if (num_tuple_pairs == 0) return std::numeric_limits<double>::infinity();
+    return pli->GetNepAsLong() / static_cast<double>(num_tuple_pairs);
 }
 
 void TaneCommon::Prune(model::LatticeLevel* level) {

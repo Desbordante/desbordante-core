@@ -46,8 +46,8 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
             return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1(
                     rhs, relation_.get()->GetNumTuplePairs());
         case AfdErrorMeasure::kG1Prime:
-            return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1Prime(
-                    rhs, *relation_);
+            return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1Prime(rhs,
+                                                                                       *relation_);
         /*
          * dom_{empty_set}(R) needs some care in its definition. If that care is taken, we get
          * |dom_{empty_set}(R)| = 1.

@@ -8,13 +8,12 @@
 
 namespace tests {
 
-inline CSVConfig const kRfiMeasures{kTestDataDir / "RfiPlus.csv", ',', true};
 inline constexpr config::ErrorType kTaneTolerance = 1e-10;
 
 inline std::unique_ptr<algos::Tane> RunTane(algos::AfdErrorMeasure measure,
                                             config::ErrorType max_error,
-                                            config::MaxLhsType max_lhs = 1,
-                                            CSVConfig const& csv_config = kRfiMeasures) {
+                                            config::MaxLhsType max_lhs,
+                                            CSVConfig const& csv_config) {
     namespace onam = config::names;
     algos::StdParamsMap params{{onam::kCsvConfig, csv_config},
                                {onam::kError, max_error},

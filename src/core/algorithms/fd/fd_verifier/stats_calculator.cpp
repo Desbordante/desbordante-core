@@ -58,11 +58,11 @@ void StatsCalculator::PrintStatistics() const {
     }
 }
 
-void StatsCalculator::CalculateStatistics(model::PLI const* lhs_pli, model::PLI const* rhs_pli) {
+void StatsCalculator::CalculateStatistics(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                          long double error) {
     std::deque<model::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
     std::shared_ptr<model::PLI::Cluster const> pt_shared = rhs_pli->CalculateAndGetProbingTable();
     model::PLI::Cluster const& pt = *pt_shared.get();
-    size_t num_tuples_conflicting_on_rhs = 0.;
 
     for (auto& cluster : lhs_clusters) {
         std::unordered_map<ClusterIndex, unsigned> frequencies =
@@ -71,16 +71,13 @@ void StatsCalculator::CalculateStatistics(model::PLI const* lhs_pli, model::PLI 
         if (num_distinct_rhs_values == 1) {
             continue;
         }
-        num_tuples_conflicting_on_rhs +=
-                CalculateNumTuplesConflictingOnRhsInCluster(frequencies, cluster.size());
         num_error_rows_ += cluster.size();
         highlights_.emplace_back(std::move(cluster), num_distinct_rhs_values,
                                  CalculateNumMostFrequentRhsValue(frequencies));
     }
     assert(!highlights_.empty());
 
-    size_t num_rows = relation_->GetNumRows();
-    error_ = (double)num_tuples_conflicting_on_rhs / (num_rows * num_rows - num_rows);
+    error_ = error;
 }
 
 size_t StatsCalculator::CalculateNumMostFrequentRhsValue(
@@ -90,18 +87,6 @@ size_t StatsCalculator::CalculateNumMostFrequentRhsValue(
     }
     auto comp = [](auto const& a, auto const& b) { return a.second < b.second; };
     return std::max_element(frequencies.begin(), frequencies.end(), comp)->second;
-}
-
-size_t StatsCalculator::CalculateNumTuplesConflictingOnRhsInCluster(
-        std::unordered_map<ClusterIndex, unsigned> const& frequencies, size_t cluster_size) {
-    size_t num_tuples_conflicting_on_rhs = cluster_size * (cluster_size - 1);
-    for (auto const& pair : frequencies) {
-        // Frequency can be 1 if lhs cluster intersects with some rhs cluster by one value
-        if (pair.second > 1) {
-            num_tuples_conflicting_on_rhs -= pair.second * (pair.second - 1);
-        }
-    }
-    return num_tuples_conflicting_on_rhs;
 }
 
 size_t StatsCalculator::CalculateNumDistinctRhsValues(
