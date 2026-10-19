@@ -20,6 +20,9 @@ using Item = int;
 // Set of items
 using Itemset = std::vector<Item>;
 
+// Row indices supporting an item or a pattern
+using SimpleTIdList = std::vector<Item>;
+
 // Representation of CFD of the form left items -> right item
 using ItemsetCFD = std::pair<Itemset, Item>;
 using CFDList = std::list<RawCFD>;
