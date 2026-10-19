@@ -3739,7 +3739,7 @@ These found NARs are less striking, but nevertheless they represent some thought
 
 snapshots['test_example[basic/mining_pfd.py-None-mining_pfd_output] mining_pfd_output'] = '''per_value pFDs:
 [Y] -> X
-per_tuple pFDs:
+g3 pFDs:
 '''
 
 snapshots['test_example[basic/mining_set_od_1.py-None-mining_set_od_1_output] mining_set_od_1_output'] = '''+----+--------+------------------+--------------+

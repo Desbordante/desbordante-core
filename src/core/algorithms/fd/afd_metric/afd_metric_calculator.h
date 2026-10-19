@@ -56,6 +56,9 @@ public:
     static long double CalculateFI(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                    size_t num_rows);
 
+    static double CalculatePerValue(model::PositionListIndex const* x_pli,
+                                    model::PositionListIndex const* xa_pli);
+
     static config::ErrorType CalculateZeroAryG1(ColumnData const* rhs,
                                                 unsigned long long num_tuple_pairs);
 
