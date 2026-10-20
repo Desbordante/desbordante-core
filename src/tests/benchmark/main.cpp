@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
                 return std::regex_search(name, pattern);
             };
             bm_runner.Execute(func);
-        } catch (const std::regex_error& e) {
+        } catch (std::regex_error const& e) {
             std::cerr << "Invalid regex: " << e.what() << std::endl;
             return EXIT_FAILURE;
         }
