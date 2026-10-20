@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     if (var_map.contains(kNameLongOption)) {
         try {
             std::regex pattern(var_map[kNameLongOption].as<std::string>());
-            auto func = [&](std::string const& name) -> bool {
+            auto func = [&pattern](std::string const& name) -> bool {
                 return std::regex_search(name, pattern);
             };
             bm_runner.Execute(func);
