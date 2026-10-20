@@ -24,7 +24,9 @@ private:
     constexpr static auto kHelpMsg =
             "Benchmark runner and comparer\n"
             "Usage: Desbordante_benchmark [--baseline <baseline filename>] [--output <output "
-            "filename>] [--name <benchmark to run(regex)>] [--list]\n"
+            "filename>] [--name <name regex>]\n"
+            "       Desbordante_benchmark --help\n"
+            "       Desbordante_benchmark --list\n"
             "Available options";
 
     boost::program_options::options_description description_{kHelpMsg};
