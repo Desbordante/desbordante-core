@@ -36,6 +36,12 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    auto const& var_map = benchmark_cli.GetVariablesMap();
+    if (var_map.contains(kHelpLongOption)) {
+        benchmark_cli.PrintHelp();
+        return EXIT_SUCCESS;
+    }
+
     BenchmarkRunner bm_runner;
     BenchmarkComparer bm_comparer;
     for (auto test_register_func :
@@ -43,11 +49,7 @@ int main(int argc, char* argv[]) {
         test_register_func(bm_runner, bm_comparer);
     }
 
-    auto const& var_map = benchmark_cli.GetVariablesMap();
-    if (var_map.contains(kHelpLongOption)) {
-        benchmark_cli.PrintHelp();
-        return EXIT_SUCCESS;
-    } else if (var_map.contains(kListLongOption)) {
+    if (var_map.contains(kListLongOption)) {
         for (auto bench : bm_runner.BenchmarkNames()) {
             std::cout << bench << std::endl;
         }
