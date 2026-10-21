@@ -4,9 +4,9 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "desbordante"
-version = "2.4.1"
+version = "2.5.0"
 description = "Science-intensive high-performance data profiler"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 readme = "README_PYPI.md"
 license = { text = "AGPL-3.0-only" }
 
@@ -14,18 +14,18 @@ classifiers = [
     "License :: OSI Approved :: GNU Affero General Public License v3",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Programming Language :: Python :: Free Threading :: 2 - Beta",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/desbordante/desbordante-core", issues = "https://github.com/desbordante/desbordante-core/issues" }
+urls = { homepage = "https://github.com/desbordante/desbordante-core", repository = "https://github.com/desbordante/desbordante-core", issues = "https://github.com/desbordante/desbordante-core/issues" }
 
 [tool.scikit-build.cmake.define]
 DESBORDANTE_BINDINGS = "INSTALL"
@@ -55,6 +55,7 @@ exclude = [
 extend-exclude = [
     # We only want to check code for now, skip datasets.
     "test_input_data/",
+    "examples/datasets/",
 ]
 [tool.typos.default]
 extend-ignore-re = [
@@ -64,6 +65,9 @@ extend-ignore-re = [
     # but they are not typos in the context here, they're just used as dummy strings.
     '"(ba|helo|abd)"', # typos for "by/be", "hello", "and/bad"
     "// Частоты: abc:2, abd:1", # "abd" is a typo for "and/bad"
+    
+    # For GDD, `rela` is an abbreviation for `relation`
+    "x'?\\.rela", 
 
     # "nd" is a common typo for "and", but Numerical Dependency, abbreviated as "ND",
     # is a legitimate pattern type. These are the strings referring to it.
@@ -80,7 +84,12 @@ extend-ignore-re = [
     "BA thesis\\.pdf", # "BA" is Bachelor of Arts (typo for "BY" or "BE")
     "Comput\\. J\\.", # "Comput" is short for Computer (typo for "Compute")
     "Peter J\\. Hass", # "Hass" is a surname (typo for "Hash")
+    "Sebastiaan Weytjens", # Author's name; "Sebastiaan" is flagged as "Sebastian"
 ]
+
+[tool.typos.default.extend-words]
+# TKE is the name of the algorithm, considered to be a typo for "take"
+tke = "tke"
 
 [tool.typos.default.extend-identifiers]
 # These are identifiers related to Numerical Dependencies, abbreviated as ND,

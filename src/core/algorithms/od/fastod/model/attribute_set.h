@@ -52,7 +52,7 @@ public:
     static AttributeSet FromVector(std::vector<int> const& indices) {
         model::Bitset<kBitsNum> bs;
         for (int idx : indices) {
-            bs._Unchecked_set(static_cast<std::size_t>(idx));
+            bs.set(static_cast<std::size_t>(idx));
         }
         return AttributeSet(std::move(bs));
     }
@@ -112,11 +112,11 @@ public:
     }
 
     model::ColumnIndex FindFirst() const noexcept {
-        return bitset_._Find_first();
+        return model::FindFirst(bitset_);
     }
 
     model::ColumnIndex FindNext(model::ColumnIndex pos) const noexcept {
-        return bitset_._Find_next(pos);
+        return model::FindNext(bitset_, pos);
     }
 
     std::string ToString() const;

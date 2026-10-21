@@ -7,7 +7,6 @@
 #include "core/algorithms/ucc/hpivalid/hypergraph.h"
 #include "core/algorithms/ucc/raw_ucc.h"
 #include "core/algorithms/ucc/ucc_algorithm.h"
-#include "core/model/table/column_layout_relation_data.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

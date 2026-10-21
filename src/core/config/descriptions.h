@@ -1,49 +1,11 @@
 #pragma once
 
-#include <sstream>
-#include <string>
-
-#include "core/algorithms/cfd/enums.h"
-#include "core/algorithms/cind/types.h"
-#include "core/algorithms/fd/afd_metric/afd_metric.h"
-#include "core/algorithms/fd/tane/enums.h"
-#include "core/algorithms/md/hymd/enums.h"
-#include "core/algorithms/metric/enums.h"
-#include "core/algorithms/nar/des/enums.h"
-#include "core/algorithms/od/fastod/od_ordering.h"
-#include "core/util/enum_to_available_values.h"
+#include <string_view>
 
 namespace config::descriptions {
-
-namespace details {
-std::string const kDMetricString =
-        "metric to use\n" + util::EnumToAvailableValues<algos::metric::Metric>();
-std::string const kDAFDMetricString =
-        "AFD metric to calculate\n" +
-        util::EnumToAvailableValues<algos::afd_metric_calculator::AFDMetric>();
-std::string const kDMetricAlgorithmString =
-        "MFD algorithm to use\n" + util::EnumToAvailableValues<algos::metric::MetricAlgo>();
-std::string const kDCfdSubstrategyString = "CFD lattice traversal strategy to use\n" +
-                                           util::EnumToAvailableValues<algos::cfd::Substrategy>();
-std::string const kDPfdErrorMeasureString =
-        "PFD error measure to use\n" + util::EnumToAvailableValues<algos::PfdErrorMeasure>();
-std::string const kDAfdErrorMeasureString =
-        "AFD error measure to use\n" + util::EnumToAvailableValues<algos::AfdErrorMeasure>();
-std::string const kDLevelDefinitionString =
-        "MD lattice level definition to use\n" +
-        util::EnumToAvailableValues<algos::hymd::LevelDefinition>();
-std::string const kDDifferentialStrategyString =
-        "DES mutation strategy to use\n" +
-        util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
-std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
-                                     util::EnumToAvailableValues<algos::od::Ordering>();
-std::string const kDConditionTypeString =
-        "CIND condition types to use\n" + util::EnumToAvailableValues<algos::cind::CondType>();
-std::string const kDAlgoTypeString =
-        "CIND algorithm types to use\n" + util::EnumToAvailableValues<algos::cind::AlgoType>();
-}  // namespace details
-
 // Common
+constexpr auto kDCustomMetric = "user-defined metric";
+constexpr auto kDCustomMetrics = "user-defined metrics";
 constexpr auto kDEqualNulls = "specify whether two NULLs should be considered equal";
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
 constexpr auto kDLhsIndices = "LHS column indices";
@@ -76,20 +38,13 @@ constexpr auto kDArLhsRule = "left part of association rule to verify";
 constexpr auto kDArRhsRule = "right part of association rule to verify";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 // CFD
-constexpr auto kDCfdColumnsNumber =
-        "Number of columns in the part of the dataset if you "
-        "want to use algo not on the full dataset, but on its part";
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
 constexpr auto kDCfdMinimumSupport =
         "minimum support value (integer number "
         "between 1 and number of tuples in dataset)";
-constexpr auto kDCFDRuleLeft = "CFD left rule";
-constexpr auto kDCFDRuleRight = "CFD right rule";
-auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
-constexpr auto kDCfdTuplesNumber =
-        "Number of tuples in the part of the dataset if you "
-        "want to use algo not on the full dataset, but on its part";
+constexpr auto kDCFDRule = "CFD rule";
+extern std::string_view const kDCfdSubstrategy;
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "
@@ -133,7 +88,7 @@ constexpr auto kDDDudm = "map, that contains udm for verifying dd";
 // DES
 constexpr auto kDCrossoverProbability = "probability of a gene getting mutated in a new individual";
 constexpr auto kDDifferentialScale = "the magnitude of mutations";
-auto const kDDifferentialStrategy = details::kDDifferentialStrategyString.c_str();
+extern std::string_view const kDDifferentialStrategy;
 constexpr auto kDMaxFitnessEvaluations =
         "the algorithm will be stopped after calculating the fitness "
         "function this many times";
@@ -196,7 +151,7 @@ constexpr auto kDGddData = "List of GDD objects";
 // HyMD
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDLeftTable = "first table processed by the algorithm";
-auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
+extern std::string_view const kDLevelDefinition;
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
 constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
 constexpr auto kDPruneNonDisjoint =
@@ -205,18 +160,37 @@ constexpr auto kDPruneNonDisjoint =
 constexpr auto kDRightTable = "second table processed by the algorithm";
 // IND
 constexpr auto kDTables = "table collection processed by the algorithm";
-// Metric verifier
-auto const kDMetric = details::kDMetricString.c_str();
-auto const kDAFDMetric = details::kDAFDMetricString.c_str();
+extern std::string_view const kDMetric;
+extern std::string_view const kDAFDMetric;
 constexpr auto kDRhsIndex = "RHS column index";
 constexpr auto kDParameter = "metric FD parameter";
 constexpr auto kDDistFromNullIsInfinity =
         "specify whether distance from NULL value is infinity "
         "(if not, it is 0)";
-auto const kDMetricAlgorithm = details::kDMetricAlgorithmString.c_str();
+extern std::string_view const kDMetricAlgorithm;
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
 // ND
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+// PAC
+constexpr auto kDColumnIndices = "Column indices.";
+constexpr auto kDDeltaSteps =
+        "Select how many delta values to check while verifying PAC. "
+        "0 has special meaning: make (1 - min_delta) * 1000 steps, i. e. 10 steps per cent. "
+        "Default is 0.";
+constexpr auto kDDiagonalThreshold =
+        "Maximal k such that diagonal segment of ECDF with slope coefficient of k is considered "
+        "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
+        "containing N rows is not considered a change (default is 1e-5).";
+constexpr auto kDDomain = "Ordered domain for Domain PAC.";
+constexpr auto kDMaxEpsilon =
+        "Maximal value of epsilon, which shows how much values deviate from exact dependency "
+        "(default is +infinity).";
+constexpr auto kDMinEpsilon =
+        "Minimal value of epsilon, which shows how much values deviate from exact dependency "
+        "(default is 0).";
+constexpr auto kDMinDelta =
+        "Minimal value of delta, which is a probability at which values satisfy the dependency "
+        "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";
 // Pyro
 constexpr auto kDCustomRandom =
         "seed for the custom random generator. Used for consistency of results across platforms.";
@@ -227,9 +201,9 @@ constexpr auto kDDifferenceTable = "CSV table containing difference limits for e
 constexpr auto kDNumColumns = "Use only first N columns of the table";
 constexpr auto kDNumRows = "Use only first N rows of the table";
 // Tane
-auto const kDAfdErrorMeasure = details::kDAfdErrorMeasureString.c_str();
+extern std::string_view const kDAfdErrorMeasure;
 // Tane, Pfd verifier
-auto const kDPfdErrorMeasure = details::kDPfdErrorMeasureString.c_str();
+extern std::string_view const kDPfdErrorMeasure;
 // Typo miner
 constexpr auto kDApproximateAlgorithm = "Algorithm which gets approximate FDs for typo miner";
 constexpr auto kDPreciseAlgorithm =
@@ -250,7 +224,7 @@ constexpr auto kDMDRHS = "Right-hand side of Matching Dependency";
 constexpr auto kDOcContext = "Context of the OC to verify";
 constexpr auto kDOcLeftIndex = "Index of the left attribute of the OC to verify";
 constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verify";
-auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
+extern std::string_view const kDODLeftOrdering;
 constexpr auto kDOFDContext = "Context of the OFD to verify";
 constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
 // CIND
@@ -258,8 +232,8 @@ constexpr auto kDValidity =
         "Percentage of rows/groups that form IND when the pattern tuple is satisfied";
 constexpr auto kDCompleteness =
         "Percentage of rows/groups from IND that satisfies the pattern tuple";
-auto const kDConditionType = details::kDConditionTypeString.c_str();
-auto const kDAlgoType = details::kDAlgoTypeString.c_str();
+extern std::string_view const kDConditionType;
+extern std::string_view const kDAlgoType;
 constexpr auto kDCindCondValues =
         "Condition values aligned with conditional attributes order. "
         "Use '-' or '_' as wildcard. If empty => all wildcards.";

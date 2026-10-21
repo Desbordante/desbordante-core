@@ -9,12 +9,18 @@
 #include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
+#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/config/custom_metric/custom_metric/type.h"
+#include "core/config/custom_metric/custom_metrics/type.h"
+#include "core/config/custom_metric/custom_vector_metric/type.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/error/type.h"
@@ -43,8 +49,10 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kNormalConvPair<double>,
         kNormalConvPair<long double>,
         kNormalConvPair<unsigned int>,
+        kNormalConvPair<unsigned long>,
         kNormalConvPair<bool>,
         kNormalConvPair<std::vector<std::string>>,
+        kNormalConvPair<std::vector<double>>,
         kNormalConvPair<config::ThreadNumType>,
         kNormalConvPair<config::CustomRandomSeedType>,
         kNormalConvPair<config::MaxLhsType>,
@@ -52,12 +60,18 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kNormalConvPair<config::IndicesType>,
         kNormalConvPair<model::DDString>,
         kNormalConvPair<model::Gdd>,
+        kNormalConvPair<algos::cfd::RawCFD>,
+        kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        kNormalConvPair<config::CustomMetricOptionType>,
+        kNormalConvPair<config::CustomMetricsOptionType>,
+        kNormalConvPair<config::CustomVectorMetricOptionType>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<model::InputFormatType>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::des::DifferentialStrategy>,
-        kEnumConvPair<algos::od::Ordering>};
+        kEnumConvPair<algos::od::Ordering>,
+        kEnumConvPair<algos::AfdErrorMeasure>};
 }  // namespace
 
 namespace python_bindings {

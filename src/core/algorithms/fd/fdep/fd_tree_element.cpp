@@ -45,7 +45,7 @@ bool FDTreeElement::ContainsGeneralization(model::Bitset<FDTreeElement::kMaxAttr
         return true;
     }
 
-    size_t next_set_attr = lhs._Find_next(current_attr);
+    size_t next_set_attr = model::FindNext(lhs, current_attr);
     if (next_set_attr == kMaxAttrNum) {
         return false;
     }
@@ -71,7 +71,7 @@ bool FDTreeElement::GetGeneralizationAndDelete(
         return true;
     }
 
-    size_t next_set_attr = lhs._Find_next(current_attr);
+    size_t next_set_attr = model::FindNext(lhs, current_attr);
     if (next_set_attr == kMaxAttrNum) {
         return false;
     }
@@ -104,7 +104,7 @@ bool FDTreeElement::GetSpecialization(
 
     bool found = false;
     size_t attr = (current_attr > 1 ? current_attr : 1);
-    size_t next_set_attr = lhs._Find_next(current_attr);
+    size_t next_set_attr = model::FindNext(lhs, current_attr);
 
     if (next_set_attr == kMaxAttrNum) {
         while (!found && attr <= this->max_attribute_number_) {
@@ -154,7 +154,7 @@ void FDTreeElement::AddFunctionalDependency(model::Bitset<FDTreeElement::kMaxAtt
     FDTreeElement* current_node = this;
     this->AddRhsAttribute(attr_num);
 
-    for (size_t i = lhs._Find_first(); i != kMaxAttrNum; i = lhs._Find_next(i)) {
+    for (size_t i = model::FindFirst(lhs); i != kMaxAttrNum; i = model::FindNext(lhs, i)) {
         if (current_node->children_[i - 1] == nullptr) {
             current_node->children_[i - 1] =
                     std::make_unique<FDTreeElement>(this->max_attribute_number_);
@@ -196,55 +196,6 @@ void FDTreeElement::FilterSpecializationsHelper(
     }
 }
 
-void FDTreeElement::PrintDep(std::string const& file_name,
-                             std::vector<std::string>& column_names) const {
-    std::ofstream file;
-    file.open(file_name);
-    model::Bitset<kMaxAttrNum> active_path;
-    PrintDependencies(active_path, file, column_names);
-    file.close();
-}
-
-void FDTreeElement::PrintDependencies(model::Bitset<FDTreeElement::kMaxAttrNum>& active_path,
-                                      std::ofstream& file,
-                                      std::vector<std::string>& column_names) const {
-    std::string column_id;
-    if (std::isdigit(column_names[0][0])) {
-        column_id = "column";
-    }
-    std::string out;
-    for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
-        if (this->is_fd_[attr - 1]) {
-            out = "{";
-
-            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
-                 i = active_path._Find_next(i)) {
-                if (!column_id.empty())
-                    out += column_id + std::to_string(std::stoi(column_names[i - 1]) + 1) + ",";
-                else
-                    out += column_names[i - 1] + ",";
-            }
-
-            if (out.size() > 1) {
-                out = out.substr(0, out.size() - 1);
-            }
-            if (!column_id.empty())
-                out += "} -> " + column_id + std::to_string(std::stoi(column_names[attr - 1]) + 1);
-            else
-                out += "} -> " + column_id + column_names[attr - 1];
-            file << out << std::endl;
-        }
-    }
-
-    for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
-        if (this->children_[attr - 1]) {
-            active_path.set(attr);
-            this->children_[attr - 1]->PrintDependencies(active_path, file, column_names);
-            active_path.reset(attr);
-        }
-    }
-}
-
 void FDTreeElement::FillFdCollection(std::shared_ptr<RelationalSchema> const& scheme,
                                      std::list<FD>& fd_collection, unsigned int max_lhs) const {
     model::Bitset<kMaxAttrNum> active_path;
@@ -259,8 +210,8 @@ void FDTreeElement::TransformTreeFdCollection(
     for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
         if (this->is_fd_[attr - 1]) {
             boost::dynamic_bitset<> lhs_bitset(kMaxAttrNum);
-            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
-                 i = active_path._Find_next(i)) {
+            for (size_t i = model::FindFirst(active_path); i != kMaxAttrNum;
+                 i = model::FindNext(active_path, i)) {
                 if (i > 0) {
                     lhs_bitset.set(i - 1);
                 }

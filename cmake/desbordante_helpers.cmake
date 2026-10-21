@@ -141,5 +141,7 @@ function(desbordante_add_test name)
         Desbordante.copy_test_input_data
     )
 
-    gtest_discover_tests(${name} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    gtest_discover_tests(
+        ${name} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DISCOVERY_MODE PRE_TEST
+    )
 endfunction()

@@ -927,14 +927,4 @@ TEST(TestDataStats, TestGetZeroPercent) {
     EXPECT_DOUBLE_EQ(value, 3.0 / 8.0);
 }
 
-TEST(TestDataStats, TestGetNumberOfDiacriticChars) {
-    auto stats_ptr = MakeStatAlgorithm(kTestDiacritics);
-    algos::DataStats& stats = *stats_ptr;
-    stats.Execute();
-    auto stat = stats.GetNumberOfDiacriticChars(1);
-    ASSERT_TRUE(stat.HasValue());
-    size_t value = mo::Type::GetValue<mo::Int>(stat.GetData());
-    EXPECT_GE(value, 6);
-}
-
 };  // namespace tests

@@ -5,7 +5,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/metric/highlight.h"
-#include "core/algorithms/metric/verification_algorithms.h"
+#include "core/algorithms/metric/metric_verifier.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace {

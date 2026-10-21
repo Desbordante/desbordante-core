@@ -4,7 +4,9 @@
 
 #include <pybind11/stl.h>
 
-#include "core/algorithms/gfd/gfd_validator/verification_algorithms.h"
+#include "core/algorithms/gfd/gfd_validator/egfd_validator.h"
+#include "core/algorithms/gfd/gfd_validator/gfd_validator.h"
+#include "core/algorithms/gfd/gfd_validator/naivegfd_validator.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace {

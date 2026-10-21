@@ -24,7 +24,6 @@ private:
 
     std::shared_ptr<RelationalSchema> schema_{};
 
-    std::vector<std::string> column_names_;
     size_t number_attributes_{};
 
     std::unique_ptr<FDTreeElement> neg_cover_tree_{};

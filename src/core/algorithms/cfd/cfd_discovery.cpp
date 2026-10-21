@@ -1,27 +1,20 @@
 #include "core/algorithms/cfd/cfd_discovery.h"
 
-#include <iterator>
-#include <thread>
-
-#include "core/algorithms/cfd/util/cfd_output_util.h"
-#include "core/algorithms/cfd/util/set_util.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-
-// see algorithms/cfd/LICENSE
 
 namespace algos::cfd {
 
 CFDDiscovery::CFDDiscovery() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kTable, kCfdColumnsNumber, kCfdTuplesNumber});
+    MakeOptionsAvailable({kTable});
 }
 
 void CFDDiscovery::LoadDataInternal() {
-    relation_ = CFDRelationData::CreateFrom(*input_table_, columns_number_, tuples_number_);
+    relation_ = CFDRelationData::CreateFrom(*input_table_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty .csv file: CFD mining is meaningless.");
@@ -37,53 +30,9 @@ void CFDDiscovery::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&columns_number_, kCfdColumnsNumber, kDCfdColumnsNumber, 0u});
-    RegisterOption(Option{&tuples_number_, kCfdTuplesNumber, kDCfdTuplesNumber, 0u});
 }
 
-int CFDDiscovery::NrCfds() const {
-    return (int)cfd_list_.size();
-}
-
-ItemsetCFDList const& CFDDiscovery::GetItemsetCfds() const {
+CFDList const& CFDDiscovery::GetCfds() const {
     return cfd_list_;
-}
-
-CFDList CFDDiscovery::GetCfds() const {
-    CFDList list;
-
-    auto to_cfd = [&rel = *relation_](ItemsetCFD const& dep) -> RawCFD {
-        auto& [lhs, rhs] = dep;
-
-        RawCFD::RawItems cfd_lhs;
-        for (unsigned int i = 0; i < lhs.size(); i++) {
-            Item item = lhs[i];
-            AttributeIndex attr = (item == 0) ? static_cast<AttributeIndex>(i)
-                                              : Output::ItemToAttrIndex(item, rel);
-            std::optional<std::string> pattern_opt = Output::ItemToPatternOpt(item, rel);
-            cfd_lhs.push_back({.attribute = attr, .value = pattern_opt});
-        }
-
-        RawCFD::RawItem cfd_rhs = {.attribute = Output::ItemToAttrIndex(rhs, rel),
-                                   .value = Output::ItemToPatternOpt(rhs, rel)};
-        return RawCFD{cfd_lhs, cfd_rhs};
-    };
-
-    for (ItemsetCFD const& dep : GetItemsetCfds()) {
-        list.push_back(to_cfd(dep));
-    }
-    return list;
-}
-
-std::string CFDDiscovery::GetCfdString(ItemsetCFD const& cfd) const {
-    return Output::CFDToString(cfd, relation_);
-}
-
-std::string CFDDiscovery::GetRelationString(char delim) const {
-    return relation_->GetStringFormat(delim);
-}
-
-std::string CFDDiscovery::GetRelationString(SimpleTIdList const& subset, char delim) const {
-    return relation_->GetStringFormat(subset, delim);
 }
 }  // namespace algos::cfd

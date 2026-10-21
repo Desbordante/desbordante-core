@@ -4,8 +4,10 @@
 //
 
 #pragma once
+#include <cstddef>
 #include <deque>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -39,7 +41,6 @@ private:
     double gini_impurity_;
     unsigned long long nep_;
     std::shared_ptr<std::vector<int> const> probing_table_cache_;
-    unsigned int freq_ = 0;
 
 public:
     static constexpr int kSingletonValueId = 0;
@@ -48,7 +49,7 @@ public:
                       unsigned long long nep, unsigned int relation_size,
                       double inverted_entropy = 0, double gini_impurity = 0);
 
-    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data);
+    static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int> const& data);
 
     static std::unordered_map<int, unsigned> CreateFrequencies(
             Cluster const& cluster, std::vector<int> const& probing_table);
@@ -98,10 +99,6 @@ public:
         return index_.size() + relation_size_ - size_;
     }
 
-    unsigned int GetFreq() const {
-        return freq_;
-    }
-
     unsigned int GetSize() const {
         return size_;
     }
@@ -136,10 +133,6 @@ public:
 
     bool IsConstant() const {
         return relation_size_ <= 1 || (GetNumNonSingletonCluster() == 1 && size_ == relation_size_);
-    }
-
-    void IncFreq() {
-        freq_++;
     }
 
     std::unique_ptr<PositionListIndex> Intersect(PositionListIndex const* that) const;

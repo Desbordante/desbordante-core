@@ -31,7 +31,6 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     // is PLI already cached?
     model::PositionListIndex* pli = Get(vertical);
     if (pli != nullptr) {
-        pli->IncFreq();
         LOG_DEBUG("Served from PLI cache.");
         // addToUsageCounter
         return pli;
@@ -58,7 +57,6 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     boost::dynamic_bitset<> cover(relation_data_->GetNumColumns());
     boost::dynamic_bitset<> cover_tester(relation_data_->GetNumColumns());
     if (smallest_pli_rank) {
-        smallest_pli_rank->pli_->IncFreq();
         operands.push_back(*smallest_pli_rank);
         cover |= smallest_pli_rank->vertical_->GetColumnIndices();
 
@@ -84,7 +82,6 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
             }
 
             if (best_rank) {
-                best_rank->pli_->IncFreq();
                 operands.push_back(*best_rank);
                 cover |= best_rank->vertical_->GetColumnIndices();
             }
@@ -98,7 +95,6 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
             vertical_columns.push_back(std::make_unique<Vertical>(static_cast<Vertical>(*column)));
             auto column_pli = index_->Get(**vertical_columns.rbegin());
             operands.emplace_back(vertical_columns.rbegin()->get(), column_pli, 1);
-            column_pli->IncFreq();
         }
     }
     // sort operands by ascending order

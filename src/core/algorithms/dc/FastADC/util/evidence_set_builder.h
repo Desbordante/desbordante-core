@@ -7,6 +7,7 @@
 
 #include "core/algorithms/dc/FastADC/model/evidence_set.h"
 #include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
+#include "core/model/types/bitset.h"
 #include "core/util/logger.h"
 #include "core/util/worker_thread_pool.h"
 
@@ -27,8 +28,8 @@ public:
             clues_.reserve(clue_set.size());
             for (auto const& [clue, count] : clue_set) {
                 PredicateBitset bitset;
-                for (size_t pos = clue._Find_first(); pos < clue.size();
-                     pos = clue._Find_next(pos)) {
+                for (size_t pos = model::FindFirst(clue); pos < clue.size();
+                     pos = model::FindNext(clue, pos)) {
                     bitset.set(pos);
                 }
                 clues_.emplace_back(bitset, count);

@@ -489,6 +489,304 @@ We have now fixed our data.
 We can see that there are new dependencies in the result. They are not getting pruned by the support requirement like before, and they also are not meaningful. With larger data quantities they will disappear naturally. We may also try increasing the minimum support threshold, but unfortunately not in this particular case, as the amount of data is small.
 '''
 
+snapshots['test_example[advanced/verifying_pac/verifying_domain_pac_custom_domain.py-None-verifying_domain_pac_custom_domain_output] verifying_domain_pac_custom_domain_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+A Domain PAC on a column set X and domain D, with given ε and δ means that \x1b[1;37mPr(x ∈ D±ε) ≥ δ\x1b[0m.
+For more information, see "Checks and Balances: Monitoring Data Quality Problems in Network
+Traffic Databases" by Flip Korn et al (Proceedings of the 29th VLDB Conference, Berlin, 2003).
+If you have not read the basic Domain PAC examples yet (see the \x1b[36mexamples/basic/verifying_pac/\x1b[0m
+directory), it is recommended to start there.
+
+In this example we will learn how to use a custom metric with the Domain PAC verifier.
+
+Assume we have a dataset of user preferences, where each user's interest in several topics is
+encoded as values in [0, 1], where 0 is "not interested at all" and 1 is "very interested":
+\x1b[1;37m  Databases    Networks    Machine learning
+-----------  ----------  ------------------
+     0.7           0.2                1
+     0.4           0.9                0.2
+     0.85          0.4                0
+     0.91          0.38               0.05
+     0.75          0.41               0.1
+     0.3           0.2                0.7
+     0.77          0.2                0.01
+     1             0.5                0.1
+     0.885         0.41               0.02
+     0.9009        0.4                0.037\x1b[0m
+
+We need to estimate whether this group of users will be interested in the original Domain PAC paper
+("Checks and Balances: ...").
+
+To do this, we represent each user profile as a vector in a multi-dimensional topic space:
+
+     ^ Topic 2
+     |
+     |   user
+     |  x
+     | /
+     |/    Topic 1
+    -+------->
+     |
+
+A "perfect" target reader might have the profile: \x1b[34m(0.9, 0.4, 0.05)\x1b[0m.
+This corresponds to:
+    * high interest in Databases;
+    * moderate interest in Networks;
+    * low interest in Machine Learning.
+Our goal is to measure how close real users are to this ideal profile.
+
+We use cosine distance, which measures the angle between two vectors rather then their absolute
+length. This is useful because we care about interest proportions, not total magnitude.
+    \x1b[1;37mdist(x, y) = 1 - cos(angle between x and y) = 1 - (x, y)/(|x| * |y|)\x1b[0m,
+where (x, y) is a dot product between x and y.
+
+A custom domain is defined by two parameters:
+    1. Distance function -- takes a value tuple and returns the distance to the domain.
+    2. Domain name (optional) -- used for readable output.
+In this example:
+    * distance function: \x1b[34mdist(x, (0.9, 0.4, 0.05))\x1b[0m;
+    * domain name: \x1b[34m"(0.9, 0.4, 0.05)"\x1b[0m.
+This effectively defines the domain as "users close to the ideal profile".
+
+We run the Domain PAC verifier with domain=\x1b[34m(0.9, 0.4, 0.05)\x1b[0m.
+Algorithm result:
+    \x1b[32mDomain PAC Pr(x ∈ (0.9, 0.4, 0.05)±0.37695) ≥ 0.9 on columns [Databases Networks Machine learning]\x1b[0m
+
+Now we lower the required probability threshold: min_delta=\x1b[34m0.6\x1b[0m.
+Algorithm result:
+    \x1b[32mDomain PAC Pr(x ∈ (0.9, 0.4, 0.05)±0.0141436) ≥ 0.7 on columns [Databases Networks Machine learning]\x1b[0m
+
+Interpretation:
+    * With a larger ε (\x1b[34m0.377\x1b[0m), nearly all users show some level of interest
+    * With a very small ε (\x1b[34m0.014\x1b[0m), only \x1b[34m70%\x1b[0m of users closely match the ideal reader.
+
+You can check outliers to identify which users are closer to or farther from the ideal profile.
+For an introduction to outliers, see \x1b[36mexamples/basic/verifying_pac/verifying_domain_pac1.py\x1b[0m.
+
+You now know how to use Domain PACs with built-in domains as well as custom ones.
+Try applying them to your own data and see what insights you can uncover.
+'''
+
+snapshots['test_example[advanced/afd_measures_interpretation.py-None-afd_measures_interpretation_output] afd_measures_interpretation_output'] = '''\x1b[1m\x1b[93mPreliminaries\x1b[0m
+Functional dependencies (FDs) are a classic concept in databases.
+An FD is an expression X -> A, where X is a set of attributes, and A is an
+attribute.
+
+We call X "left-hand side" (LHS) and we call A "right-hand side" (RHS).
+We say that an FD holds if we can determine the value of the RHS attribute
+purely from the value of the LHS attributes.
+
+However, for real-world data this requirement may be too strict. There are
+several ways to relax it. In this example, you will be shown one of them.
+
+We define an approximate functional dependency (AFD). Essentially, it lets some
+LHS values not determine the RHS value. This is done by using an AFD measure
+that determines "how strongly" an FD holds.
+
+Strictly, we say that an AFD holds if its value is not below a threshold,
+however, for this example, we will omit it and just use the output of the
+various measures.
+
+\x1b[1m\x1b[93mAFD measures\x1b[0m
+An AFD measure takes an FD and data, returning a value in the [0, 1] range,
+where 1 means the FD holds exactly, and values closer to 0 mean a weaker
+dependency.
+
+This also lets us speak of an inverse of the measure, referred to as an error,
+which is just '1 - measure value'. The inverse of the error, conversely, is the
+measure value.
+
+Here we will showcase 8 different measures. These measures have been listed in
+\x1b[1m\x1b[92mMeasuring Approximate Functional Dependencies: a Comparative Study.\x1b[0m by Marcel
+Parciak, Sebastiaan Weytjens, Niel Hens, Frank Neven, Liesbet M. Peeters, Stijn
+Vansummeren CoRR abs/2312.06296 (2023). If precise definitions are needed,
+consult the article.
+
+We've found that some measures are easier to explain through their corresponding
+error values. The following measures are showcased:
+- \x1b[92mrho\x1b[0m: the ratio of LHS values relative to the number of combined LHS and RHS
+        values;
+- \x1b[92mpdep\x1b[0m: probability that a random pair of records has equal RHS values, given it
+        has equal LHS values;
+- \x1b[92mtau\x1b[0m error: the probability that, when making two guesses about the RHS value
+        of a randomly drawn tuple, one when not supplied information about its
+        LHS values and one when we are, given that the former guess was
+        incorrect, the latter one is incorrect as well;
+- \x1b[92mmu_plus\x1b[0m error: tau error adjusted according to the number of records and the
+        number of unique LHS values (increased when there are many unique
+        values);
+- \x1b[92mfi\x1b[0m error: how much uncertainty (as measured by Shannon entropy) is left about
+        the RHS values once the LHS values have been supplied;
+- \x1b[92mg1\x1b[0m error: the share of record pairs that show an FD violation;
+- \x1b[92mg2\x1b[0m error: the share of records that participate in a violating pair;
+- \x1b[92mg3\x1b[0m error: the minimum share of records that need to be taken out for the FD to
+        hold.
+
+\x1b[1m\x1b[93mData context\x1b[0m
+For the purposes of demonstration, we are going to use a "LINEITEM" table
+similar to what would be generated using DBGen. DBGen is part of the decision
+support benchmark called TPC-H. A line item table generated by it models a
+plausible database table tracking the statuses of various shipments.
+
+\x1b[92mTable sample\x1b[0m
+Here is a sample of the records:
+
+ ORDERKEY RETURNFLAG LINESTATUS   SHIPDATE RECEIPTDATE SHIPMODE
+        1          N          O 1996-03-13  1996-03-22    TRUCK
+        1          N          O 1996-04-12  1996-04-20     MAIL
+        1          N          O 1996-01-29  1996-01-31  REG AIR
+        1          N          O 1996-04-21  1996-05-16      AIR
+        3          A          F 1993-12-04  1994-01-01    TRUCK
+       98          A          F 1994-10-23  1994-11-09     RAIL
+       99          A          F 1994-05-18  1994-05-23     RAIL
+       99          R          F 1994-05-06  1994-05-20     RAIL
+      487          R          F 1992-10-19  1992-11-11    TRUCK
+      519          N          O 1997-12-01  1997-12-23  REG AIR
+      519          N          O 1998-02-19  1998-03-19      FOB
+      519          N          O 1998-01-09  1998-02-06      AIR
+
+SHIPDATE here represents the date shipping started, with RECEIPTDATE being
+the date an item was or is projected to be received.
+
+\x1b[92mRETURNFLAG and LINESTATUS values\x1b[0m
+Let's take a closer look at two other columns: RETURNFLAG and LINESTATUS. We
+will inspect their value distributions.
+
+RETURNFLAG
+N    275
+A    132
+R    129
+
+If an item has the value "N" in this column, we can interpret that it was "not
+received" (though shipping may have started). "A" here means the item was
+"accepted" (i.e. received and not returned) and "R" means the item was (received
+and) "returned".
+
+LINESTATUS
+O    272
+F    264
+
+For LINESTATUS, "O" can be interpreted as "open" (not shipped yet), and
+"F" can be interpreted as "fulfilled" (shipping started).
+
+\x1b[1m\x1b[93mRelationiship between RETURNFLAG and LINESTATUS\x1b[0m
+This data contains an AFD [RETURNFLAG] -> LINESTATUS. Suppose we found it during
+AFD discovery and selected it for further examination. As part of it, we could
+calculate AFD measure values to get an idea of "how" it holds and what it might
+mean. Let's take a look at what various measures output:
+
+\x1b[92mrho\x1b[0m = 0.750000
+\x1b[92mpdep\x1b[0m = 0.988928
+\x1b[92mtau\x1b[0m = 0.977851
+\x1b[92mmu_plus\x1b[0m = 0.977768
+\x1b[92mfi\x1b[0m = 0.955479
+\x1b[92mg1\x1b[0m = 0.994309
+\x1b[92mg2\x1b[0m = 0.486940
+\x1b[92mg3\x1b[0m = 0.994403
+
+Notice that none of them return 1, but many are quite close, >0.95.
+
+We see the value for g2 being much lower than the others, with rho's value
+also being considerably lower than 0.95. This tells us that while other measures
+indicate that there is some kind of dependency, there are many pairs where the
+exact FD is violated. Meanwhile, we know that there are three values in the
+RETURNFLAG column, and the value for rho is exactly 3 / 4, which means that
+there are only four combinations of RETURNFLAG and LINESTATUS.
+
+\x1b[93m\x1b[1mExamining combined values\x1b[0m
+Since there are only four value combinations, we can take a look at exactly
+what they are:
+
+RETURNFLAG  LINESTATUS
+N           O             272
+A           F             132
+R           F             129
+N           F               3
+
+We see that there is a single uncommon "N" and "F" combination. If "N"
+means the item has been neither returned nor accepted, and "F" means that
+shipping started, then the combination means the shipping is ongoing but the
+item has not arrived at the destination, i.e. it is in transit.
+
+The other combinations mean that either the item is still in the warehouse ("N"
+and "O") or that it has already been received. Therefore, in this table, most
+items are denoted to not be in transit, which is about what we would expect from
+a slice of data representing recent deliveries.
+
+\x1b[93m\x1b[1mAn explanation of the measure values\x1b[0m
+For educational purposes, let's try to roughly explain why the measure values
+ended up being what they are, in accordance with the explanations given at the
+start.
+
+\x1b[92mg2\x1b[0m (measure value is 0.486940, error is 0.513060)
+Firstly, the g2 measure reports a value around 50% because most records (i.e.
+all that have the "N" return flag) participate in a violating pair, with the
+precise error value being 0.513060. The g2 measure's criterion ends up being far
+too strict for this case.
+
+\x1b[92mrho\x1b[0m (measure value is 0.750000)
+The rho measure has already been explained. This measure only takes into account
+how many unique value combinations there are, and with there being 3 RETURNFLAG
+values, and 4 possible combinations of RETURNFLAG and LINESTATUS, the measure's
+value is exactly the ratio.
+
+\x1b[92mg3\x1b[0m (measure value is 0.994403, error is 0.005597)
+Only three records need to be taken out for there to be an exact FD from
+RETURNFLAG to LINESTATUS.
+
+\x1b[92mg1\x1b[0m (measure value is 0.994309, error is 0.005691)
+The share of violating record pairs is small.
+
+\x1b[92mfi\x1b[0m (measure value is 0.955479, error is 0.044521)
+When observing "A" and "R", we know the return flag is "F", and when observing
+"N" we can be pretty confident that the return flag is "O".
+
+\x1b[92mpdep\x1b[0m (measure value is 0.988928)
+When taking two records, if they have the same RETURNFLAG value, we know the
+LINESTATUS for "A" and "R" is certainly "F". If RETURNFLAG for both is "N", it
+is very likely that their LINESTATUS values are both "O", and there is also a
+small chance that both records have "F" as their LINESTATUS.
+
+\x1b[92mtau\x1b[0m (measure value is 0.977851, error is 0.022149)
+For the precise guess strategy, see the article. Basically, we guess a value X
+with probability P if X's share is P.
+
+There are two cases here.
+
+Suppose we guessed LINESTATUS to be "O" and it is actually "F" (according to the
+measure definition, we don't get to know that before the second guess). Then, if
+we are supplied the information that RETURNFLAG\'s value is either "A" or "R", we
+will know for certain that the value of LINESTATUS is "F". If RETURNFLAG\'s value
+is "N", then we are likely to incorrectly guess the LINESTATUS value to be "O",
+but this situation is quite rare.
+
+On the other hand, suppose we guessed LINESTATUS to be "F" and it is actually
+"O". Then we would be supplied RETURNFLAG "N" and are likely to guess LINESTATUS
+to be "O" and be correct.
+
+Thus, the probability of the second guess remaining incorrect is quite low, so
+the measure's value ends up being high.
+
+\x1b[92mmu_plus\x1b[0m (measure value is 0.977768, error is 0.022232)
+There are only three unique values of RETURNFLAG with there being 536 records,
+thus the tau error is barely adjusted.
+
+\x1b[93m\x1b[1mAdditional information\x1b[0m
+Just like FDs, there can be multiple columns in the LHS. In that case the
+measures treat the LHS as if it was a single column that combined the values of
+the specified ones. Adding more columns can refine the dependency and increase
+AFD measure values.
+
+\x1b[93m\x1b[1mOther examples\x1b[0m
+- Discovering AFDs automatically.
+    \x1b[92mexamples/basic/mining_afd.py\x1b[0m
+- Discovering exact FDs.
+    \x1b[92mexamples/basic/mining_fd.py\x1b[0m
+- Checking if FDs hold and inspecting violations.
+    \x1b[92mexamples/basic/verifying_fd_afd.py\x1b[0m
+- Discovering CFDs (another way to generalize FDs).
+    \x1b[92mexamples/basic/mining_cfd.py\x1b[0m
+'''
+
 snapshots['test_example[basic/data_stats.py-None-data_stats_output] data_stats_output'] = '''Columns with null: []
 Columns with all unique values: [0, 1]
 Number of columns: 6
@@ -578,7 +876,6 @@ Entropy: 3.897238028127207
 Gini coefficient: 0.9324285434338342
 
 Column num = 0
-num_diacritic_chars = 0
 entropy = 9.884171
 vocab = -0123456789abcdef
 num_non_letter_chars = 22912
@@ -615,7 +912,6 @@ type = String
 first_char_freq = e:77
 
 Column num = 1
-num_diacritic_chars = 0
 entropy = 9.884171
 vocab =  ABCDEGHJKLMNPRSTWYabcdefghiklmnoprstuvwyz
 num_non_letter_chars = 945
@@ -652,7 +948,6 @@ type = String
 first_char_freq = D:123
 
 Column num = 2
-num_diacritic_chars = 0
 entropy = 2.327574
 vocab =  ACDGJPSadefhilnorsuvy
 num_non_letter_chars = 945
@@ -689,7 +984,6 @@ type = String
 first_char_freq = S:204
 
 Column num = 3
-num_diacritic_chars = 0
 entropy = 2.317970
 vocab = AMSTVWYabceghiklnopqrstu
 num_non_letter_chars = 0
@@ -754,7 +1048,6 @@ max = 2036
 sum = 880984
 
 Column num = 5
-num_diacritic_chars = 0
 entropy = 3.897238
 vocab =  -ACDEFJLMOPRSTWacdeghijklmnoprstuvy
 num_non_letter_chars = 1225
@@ -1293,26 +1586,80 @@ Those violations occur in pairs like \x1b[31m(6, 9), (7, 9), (8, 9)\x1b[0m,
 where each number is a record index in the dataset.
 '''
 
-snapshots['test_example[basic/mining_afd.py-None-mining_afd_output] mining_afd_output'] = '''==============================================
-In Desbordante we consider an approximate functional dependency (AFD)
-any kind of functional dependency (FD) that employs an error metric and is not named
-(e.g. soft functional dependencies). This metric is used to calculate the extent of
-violation for a given exact FD and lies within [0, 1] range (the lower, the less violations
-are found in data). For the discovery task a user can specify the threshold and Desbordante
-will find all AFDs, which have their error equal or less than the threshold, according to the selected metric.
+snapshots['test_example[basic/mining_afd.py-None-mining_afd_output] mining_afd_output'] = '''
+\x1b[1m\x1b[92mApproximate Functional Dependency (AFD) Discovery Example\x1b[0m
 
-Currently, Desbordante supports:
-1) Five metrics: g1, pdep, tau, mu+, rho.
-2) Two algorithms for discovery of AFDs: Tane and Pyro, with Pyro being the fastest. 
-Unfortunately, Pyro can handle only the g1 metric, for the rest use Tane.
+\x1b[1m\x1b[93mIntroduction\x1b[0m
 
-For more information consider:
-1) Measuring Approximate Functional Dependencies: A Comparative Study by M. Parciak et al.
-2) Efficient Discovery of Approximate Dependencies by S. Kruse and F. Naumann.
-3) TANE: An Efficient Algorithm for Discovering Functional and Approximate Dependencies by Y. Huhtala et al.
-==============================================
+The definitions and explanations in this example are based on the
+following works:
 
-Now, we are going to demonstrate how to discover AFDs. First, consider the dataset:
+\x1b[1m\x1b[93mReferences\x1b[0m
+  [1] Marcel Parciak, Sebastiaan Weytjens, Niel Hens,
+      Frank Neven, Liesbet M. Peeters, Stijn Vansummeren:
+      \x1b[1m\x1b[92mMeasuring Approximate Functional Dependencies:
+      a Comparative Study.\x1b[0m CoRR abs/2312.06296 (2023)
+
+  [2] Sebastian Kruse, Felix Naumann: Efficient Discovery
+      of \x1b[1m\x1b[92mApproximate Dependencies.\x1b[0m Published in PVLDB
+      Vol 11, Issue 7 (2018)
+
+  [3] Ykä Huhtala, Juha Kärkkäinen, Pasi Porkka and
+      Hannu Toivonen: \x1b[1m\x1b[92mTANE: An Efficient Algorithm for
+      Discovering Functional and Approximate Dependencies.\x1b[0m
+      The Computer Journal (Oxford University Press) (1999)
+
+\x1b[1m\x1b[93mFunctional Dependencies\x1b[0m
+A functional dependency is a rule X -> Y according to which the values
+of the attributes on the left-hand side (LHS, X) uniquely determine the
+values of the attributes on the right-hand side (RHS, Y). In other words,
+if we know the values of the columns on the left-hand side, we know exactly
+what values are in the columns on the right-hand side.
+
+An approximate functional dependency is a generalization of a
+functional dependency. An AFD measure indicates how closely the
+dependency resembles an exact functional dependency. When the measure
+value is high, the values on the left-hand side allow us to determine
+the values of the columns on the right-hand side with a high degree of
+certainty.
+
+\x1b[1m\x1b[93mAFD Measures\x1b[0m
+All AFD measures report the value in the [0, 1] range, where 1
+corresponds to an exact functional dependency and 0 corresponds to the
+greatest degree of deviation from it. Currently, the project supports
+the following AFD measures:
+  \x1b[92m- g1\x1b[0m (fraction of tuple pairs that do not violate the FD),
+  \x1b[92m- pdep\x1b[0m (probability of equal RHS values given equal
+    LHS values),
+  \x1b[92m- tau\x1b[0m (improvement in predicting the RHS when the LHS
+    is known),
+  \x1b[92m- mu_plus\x1b[0m (pdep corrected for its expected value under
+    random permutations),
+  \x1b[92m- rho\x1b[0m (ratio of distinct LHS values to distinct
+    LHS-RHS combinations).
+
+\x1b[1m\x1b[93mAFD Discovery Algorithms\x1b[0m
+Desbordante supports AFD discovery and verification, and this example
+focuses on discovery. Several algorithms are available for this task;
+from a user’s perspective, they differ mainly in performance and the
+AFD measures they support.
+
+The core AFD search algorithms in Desbordante are Pyro and Tane. In terms
+of the characteristics mentioned, they can be briefly described as
+follows: Pyro is a fast AFD mining algorithm that supports only the g1
+error measure; Tane is a slower algorithm that supports all error
+measures available in Desbordante.
+
+Let’s now move on to an example of AFD mining.
+
+\x1b[1m\x1b[94m----------------------------------------------------------------------
+1. Using Different Error Measures to Mine AFDs
+----------------------------------------------------------------------\x1b[0m
+
+\x1b[1m\x1b[93mDataset\x1b[0m
+For this AFD mining example, we will use the following dataset:
+\x1b[96mexamples/datasets/inventory_afd.csv\x1b[0m
+
 +------+---------------+---------+
 |   Id | ProductName   |   Price |
 |------+---------------+---------|
@@ -1330,41 +1677,164 @@ Now, we are going to demonstrate how to discover AFDs. First, consider the datas
 |   12 | Notebook      |    3000 |
 +------+---------------+---------+
 
-AFDs mined by Pyro with g1 measure:
-[Price] -> Id
-[Price] -> ProductName
-[ProductName] -> Id
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+\x1b[1m\x1b[93mPyro with g1\x1b[0m
+Let’s start with the default search algorithm --- Pyro. To run the
+algorithm, you must specify an error threshold. It limits the discovery
+results to dependencies with error values that do not exceed the
+specified threshold. An error measure is defined as `1 - AFD measure`.
 
-AFDs mined by Tane
-g1:
-[Price] -> Id
-[Price] -> ProductName
-[ProductName] -> Id
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+We will use a threshold value of 0.3. This way, we allow approximate
+dependencies that deviate only slightly from exact FDs.
 
-pdep:
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+\x1b[1m\x1b[93mFound AFDs by \x1b[96mPyro\x1b[0m:
+  \x1b[1mMeasure:\x1b[0m \x1b[92mg1\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 6 AFDs
+    \x1b[92m[Price] -> Id\x1b[0m
+    \x1b[92m[Price] -> ProductName\x1b[0m
+    \x1b[92m[ProductName] -> Id\x1b[0m
+    \x1b[92m[ProductName] -> Price\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m
+    \x1b[92m[Id] -> Price\x1b[0m
 
-tau:
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+\x1b[1m\x1b[93mPyro Results\x1b[0m
+As we can see, the algorithm found six AFDs. Based on the results, we
+can make the following observations: knowing the ProductName, we can
+determine the Price of the item with a high degree of certainty, and
+vice versa.
 
-mu_plus:
-[Id] -> ProductName
-[Id] -> Price
+AFDs can aid in a variety of data quality tasks [1-3]. In this dataset,
+for example, one Laptop has a Price of 300, whereas the other Laptop
+entries have a Price of 3000. This inconsistency may indicate a
+data-entry error. FD and AFD discovery and verification can help detect
+such cases automatically.
 
-rho:
-[ProductName] -> Price
-[Id] -> ProductName
-[Id] -> Price
+An example of using AFDs to identify potential data errors can be found
+here:
+    \x1b[96mexamples/expert/mine_typos.py\x1b[0m
+
+\x1b[1m\x1b[93mTane with Multiple Measures\x1b[0m
+As mentioned in the introduction, there are many ways to measure the
+deviation of AFDs from exact FDs, each of which reflects a specific
+characteristic of the relationship. Therefore, the choice of AFD
+measure should be based on the task requirements. Now let’s consider
+discovering AFDs using the other available AFD measures in
+Desbordante. To do this, we need to use the Tane algorithm. In addition
+to the threshold value, we must provide the error_measure parameter,
+which determines the AFD measure used: ‘g1’, ‘pdep’, ‘tau’, ‘mu_plus’,
+or ‘rho’.
+
+Unlike Pyro, Tane also reports the error value of each discovered
+AFD. This value is shown next to the corresponding dependency below.
+
+\x1b[1m\x1b[93mFound AFDs by \x1b[96mTane\x1b[0m:
+  \x1b[1mMeasure:\x1b[0m \x1b[92mg1\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 6 AFDs
+    \x1b[92m[Price] -> Id\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.2121\x1b[0m
+    \x1b[92m[Price] -> ProductName\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.1061\x1b[0m
+    \x1b[96m...\x1b[0m
+
+  \x1b[1mMeasure:\x1b[0m \x1b[92mpdep\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 3 AFDs
+    \x1b[92m[ProductName] -> Price\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.2167\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0000\x1b[0m
+    \x1b[96m...\x1b[0m
+
+  \x1b[1mMeasure:\x1b[0m \x1b[92mtau\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 3 AFDs
+    \x1b[92m[ProductName] -> Price\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.3000\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0000\x1b[0m
+    \x1b[96m...\x1b[0m
+
+  \x1b[1mMeasure:\x1b[0m \x1b[92mmu_plus\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 2 AFDs
+    \x1b[92m[Id] -> ProductName\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0000\x1b[0m
+    \x1b[92m[Id] -> Price\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0000\x1b[0m
+
+  \x1b[1mMeasure:\x1b[0m \x1b[92mrho\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 3 AFDs
+    \x1b[92m[ProductName] -> Price\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.2500\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0000\x1b[0m
+    \x1b[96m...\x1b[0m
+
+\x1b[1m\x1b[93mComparing Error Measures\x1b[0m
+As you can see, depending on the method used to calculate the error, we
+obtain different numbers of AFDs. Therefore, it is important to choose
+an error measure based on the task requirements. A larger number of AFDs
+found does not always mean a better result: some of them may be
+uninformative. The meaning and definition of each error measure are
+discussed in detail in [1]. Also, keep in mind that if a particular
+measure allows you to find more AFDs, this does not mean that it allows
+you to find all AFDs detected by another measure: the resulting sets are
+not necessarily subsets of one another. The most you can hope for in
+such a case is the detection of all minimal [1] exact FDs.
+
+Let’s now compare the mining algorithms rather than the error measures.
+
+\x1b[1m\x1b[94m----------------------------------------------------------------------
+2. Comparison of Mining Algorithms
+----------------------------------------------------------------------\x1b[0m
+
+\x1b[1m\x1b[93mBenchmark Setup\x1b[0m
+As mentioned earlier, Pyro is faster than Tane but is a less flexible
+algorithm. Let’s compare their execution times.
+
+\x1b[1mDataset:\x1b[0m \x1b[96mexamples/datasets/adult.csv\x1b[0m
+\x1b[1mColumns used:\x1b[0m 11
+
++-------------+-----------+----------------+
+|  Algorithm  |  Measure  |  Average time  |
+|-------------+-----------+----------------|
+|    \x1b[96mPyro\x1b[0m     |    \x1b[92mg1\x1b[0m     |    \x1b[92m<runtime>\x1b[0m     |
+|    \x1b[96mTane\x1b[0m     |    \x1b[92mg1\x1b[0m     |    \x1b[93m<runtime>\x1b[0m     |
++-------------+-----------+----------------+
+
+\x1b[1m\x1b[93mBenchmark Results\x1b[0m
+On this dataset, Pyro was <speedup> times faster than Tane on average.
+The reported values are averages over three runs and exclude data loading.
+
+However, these results should not be treated as universal. Execution
+time depends on the dataset, the selected threshold, and the available
+hardware. Pyro is designed specifically for the g1 error measure,
+whereas Tane is more flexible and supports all error measures available
+in Desbordante. Therefore, the algorithm should be selected based not
+only on speed, but also on the measure required for the task.
+
+\x1b[1m\x1b[94m----------------------------------------------------------------------
+3. Recommendations for Further Study
+----------------------------------------------------------------------\x1b[0m
+
+After studying this example, we recommend reviewing the following
+materials to deepen your understanding:
+\x1b[96m*\x1b[0m AFD Measures Interpretation: Explaining various AFD measures.
+    \x1b[96mexamples/advanced/afd_measures_interpretation.py\x1b[0m
+
+\x1b[96m*\x1b[0m Exact FD Mining: Finding rules that have zero violations.
+    \x1b[96mexamples/basic/mining_fd.py\x1b[0m
+
+\x1b[96m*\x1b[0m Conditional Functional Dependencies (CFD): Rules that hold
+  only for a specific subset of data (e.g., Price depends on
+  Name only for 'Electronics').
+    \x1b[96mexamples/basic/verifying_cfd.py\x1b[0m
+
+\x1b[96m*\x1b[0m Dynamic Dependency Verification: Re-evaluating known FDs
+  and AFDs while the underlying dataset changes.
+    \x1b[96mexamples/basic/dynamic_verifying_fd.py\x1b[0m
+    \x1b[96mexamples/basic/dynamic_verifying_afd.py\x1b[0m
+
+\x1b[96m*\x1b[0m Approximate FD Discovery: Using faster approximate algorithms
+  to discover exact FDs in large datasets.
+    \x1b[96mexamples/basic/mining_fd_approximate.py\x1b[0m
+
+\x1b[96m*\x1b[0m Matching Dependencies (MD): Discovering dependencies in dirty
+  data using a configurable similarity measure for each attribute.
+    \x1b[96mexamples/basic/mining_md.py\x1b[0m
+
+\x1b[96m*\x1b[0m Differential Dependencies (DD): Working with dirty data by
+  defining acceptable value differences for individual attributes.
+    \x1b[96mexamples/basic/mining_dd.py\x1b[0m
+
+\x1b[96m*\x1b[0m Probabilistic Functional Dependencies (PFD): An AFD variant
+  with dedicated error measures.
+    \x1b[96mexamples/basic/mining_pfd.py\x1b[0m
+    \x1b[96mexamples/basic/verifying_pfd.py\x1b[0m
+
+\x1b[96m*\x1b[0m Soft Functional Dependencies (SFD): An AFD variant based on
+  the rho measure.
+    \x1b[96mexamples/basic/mining_sfd.py\x1b[0m
 
 '''
 
@@ -1629,129 +2099,204 @@ Found UCCs:
 Now we can use \x1b[1m\x1b[36mName\x1b[0m as a key
 '''
 
-snapshots['test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output'] = '''options: 
-MINIMUM SUPPORT = 8 , MINIMUM CONFIDENCE = 0.7 , MAXIMUM LHS COUNT = 3
-displaying the first five (or fewer) discovered CFDs:
+snapshots['test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output'] = '''\x1b[1;34mCFD Mining Example - Desbordante \x1b[0m
 
-CFD:
-{(3, False)} -> (4, True) :
+\x1b[1;34m=== Understanding Conditional Functional Dependencies ===\x1b[0m
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;41m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;49m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;42m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;42m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;49m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;49m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;41m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;49m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;49m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;49m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  1
-support:  8 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
+Conditional functional dependency (CFD) extends a classic functional
+dependency by introducing additional conditions on attributes.
 
+For example, consider employee data (a table), containing “Department”, “Head”, “Position”,
+and “Location” attributes. In this case:
 
+* An FD Department -> Head means that the head is unambiguously determined by the 
+  department, indicating that each department (mentioned in the table) has exactly one head.
 
-CFD:
-{(2, _)} -> (4, _) :
+* On the other hand, a CFD: (Department=IT) -> (Head=Smith) means that the IT department
+  has Smith as its head. Other departments may or may not follow suit.
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;42m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;41m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;42m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;42m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;41m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;42m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  1
-support:  14 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 10 \x1b[1;37m/ 14  =  0.7143
+* Finally, there is a mixed CFD: (Department=IT, Position=_) -> (Location=_). The wildcard
+  symbol allows any values in its place. Therefore, this CFD means that the location is
+  unambiguously determined by position for the IT department.
 
+\x1b[1;32m=== Formal Definition ===\x1b[0m
 
+Conditional functional dependency is a very popular concept in the database community, and
+there are several alternative definitions of CFD. In this example, we will rely on the definition
+provided by J. Rammelaere and F. Geerts in 'Revisiting Conditional Functional Dependency
+Discovery: Splitting the “C” from the “FD”', ECML PKDD 2018.
 
-CFD:
-{(4, _)} -> (2, _) :
+A template tuple t is a tuple where each attribute can either have:
+* A fixed constant value
+* A wildcard symbol ('_'), allowing for generalization across different data records.
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;42m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;41m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;42m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;42m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;41m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;42m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  1
-support:  14 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 10 \x1b[1;37m/ 14  =  0.7143
+The wildcard in the RHS determines the TYPE of CFD:
+* Constant CFD - the RHS has a fixed value, e.g. (Department=HR) -> (Location=LA).
+  Such a CFD constrains a single value and is essentially an association rule (AR).
+* Variable CFD - the RHS holds a wildcard, e.g. (Position=_) -> (Salary=_). It states that
+  the RHS is functionally determined by the LHS for the records matching the LHS pattern.
+  A fully-wildcarded variable CFD, e.g. (Position=_) -> (Salary=_), is essentially an AFD.
+* Mixed CFD - the LHS mixes constants and wildcards while the RHS is a wildcard, e.g.
+  (Department=IT, Position=_) -> (Location=_). This case is specific to CFDs: it is neither
+  a plain AR nor a plain AFD, since the dependency holds only on the subset of records
+  fixed by the constant part of the LHS.
 
+See mining_ar.py and mining_afd.py for the AR and AFD primitives referenced above.
 
+\x1b[1;32m=== Key Metrics for CFD ===\x1b[0m
+Support: The number of records satisfying the condition X (LHS part)
+Confidence: The fraction of records where Y occurs given X
 
-CFD:
-{(3, _),(2, _)} -> (4, _) :
+A CFD is considered to HOLD (is discovered) when both its support and confidence are
+greater than or equal to the specified minimum thresholds. The confidence value also
+indicates how strictly the dependency is followed:
+* confidence = 1.0 means the CFD holds exactly, with no violating records;
+* confidence < 1.0 means there are violations - the lower the confidence, the more records
+  break the dependency.
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;42m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;41m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;42m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;42m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;41m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;42m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  2
-support:  14 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 10 \x1b[1;37m/ 14  =  0.7143
+\x1b[1;34m=== Available CFD Algorithms ===\x1b[0m
 
+Desbordante provides the following CFD mining algorithm:
+* FDFirst (by J. Rammelaere and F. Geerts): The primary algorithm for CFD discovery
+  - Based on the FD-first approach
+  - Discovers FDs first, then adds conditions
+  - Efficient for datasets with clear functional relationships
 
+Default algorithm: FDFirst
 
-CFD:
-{(2, _),(3, False)} -> (4, _) :
+\x1b[1;34m=== Algorithm Parameters Explanation ===\x1b[0m
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;49m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;49m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;49m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;49m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;49m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;49m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  2
-support:  8 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
+CFD mining parameters:
+* cfd_minsup (minimum support):
+  - Range: 1 to number of rows in dataset
 
+* cfd_minconf (minimum confidence):
+  - Range: 0.0 to 1.0
 
+* cfd_max_lhs (maximum LHS size):
+  - Maximum number of attributes in left-hand side
+  - Range: 1 to number of columns
+
+\x1b[1;34m=== Dataset Explanation ===\x1b[0m
+
+Let’s consider an example dataset containing employee data.
+
+  Department    Position Location  Salary
+0         IT     Manager      NYC    High
+1         IT   Developer      NYC  Medium
+2         HR     Manager       LA    High
+3         HR  Specialist       LA     Low
+4    Finance     Manager  Chicago    High
+5         IT   Developer      NYC  Medium
+6         HR  Specialist   Boston     Low
+7    Finance     Analyst  Chicago  Medium
+
+Expected patterns in this dataset:
+1. We can see that each position has the same salary level. This can be expressed in the
+   following CFD: (Position=_) -> (Salary=_). All managers have high salaries, all developers
+   have average salaries, etc.
+2. We might expect certain positions to be department-specific, but examining the data reveals
+   that Managers work across multiple departments (IT, HR, Finance). This violates the potential
+   CFD: (Position=_) -> (Department=_), showing that management roles span organizational boundaries.
+3. Looking at the data, one can note that all HR specialists reside in LA, except for one. This
+   fact can be expressed by the following CFD: (Department=HR) -> (Location=LA). However, an HR
+   specialist in Boston (row 6) violates this location pattern. Therefore, this CFD does not hold in
+   the dataset.
+
+\x1b[1;34m=== Detailed CFD Analysis ===\x1b[0m
+
+Now let's discover all conditional functional dependencies in our dataset...
+
+Running CFD mining with the following parameters:
+* Minimum Support (cfd_minsup): 7
+* Minimum Confidence (cfd_minconf): 0.75
+* Maximum LHS Count (cfd_max_lhs): 2
+
+Discovered 9 CFDs:
+  1. {(1, _)} -> (3, _)
+  2. {(3, _)} -> (1, _)
+  3. {(3, _),(2, _)} -> (1, _)
+  4. {(1, _)} -> (0, _)
+  5. {(3, _),(0, _)} -> (1, _)
+  6. {(0, _)} -> (2, _)
+  7. {(2, _)} -> (0, _)
+  8. {(3, _),(0, _)} -> (2, _)
+  9. {(1, _),(0, _)} -> (2, _)
+
+Column mapping: {0: 'Department', 1: 'Position', 2: 'Location', 3: 'Salary'}
+
+Let's analyze some of the discovered CFDs:
+
+\x1b[1;32mCFD: {(1, _)} -> (3, _)\x1b[0m
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 8
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: This CFD represents Position -> Salary dependency.
+As we expected, each position has a consistent salary level.
+All Managers earn High salary, Developers get Medium, and Specialists receive Low.
+This confirms our compensation structure is working correctly - no violations found.
+
+\x1b[1;32mCFD: {(1, _)} -> (0, _)\x1b[0m
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 8
+Confidence: 0.75
+Violations: \x1b[1;31m2 rows\x1b[0m
+Number of clusters violating FD: 1
+
+Violating rows: \x1b[1;31m[0, 2]\x1b[0m
+  Cluster #1 violations:
+    Row 0: \x1b[1;31m['Manager'] -> IT\x1b[0m
+    Row 2: \x1b[1;31m['Manager'] -> HR\x1b[0m
+
+Analysis: This CFD represents Position -> Department dependency.
+We suspected this might not hold perfectly, and indeed it doesn't.
+The violations show that Managers work across multiple departments (IT, HR, Finance).
+This actually makes business sense - management roles often span organizational boundaries.
+
+\x1b[1;32mCFD: {(0, _)} -> (2, _)\x1b[0m
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 8
+Confidence: 0.88
+Violations: \x1b[1;31m1 rows\x1b[0m
+Number of clusters violating FD: 1
+
+Violating rows: \x1b[1;31m[6]\x1b[0m
+  Cluster #1 violations:
+    Row 6: \x1b[1;31m['HR'] -> Boston\x1b[0m
+
+Analysis: This CFD represents Department -> Location dependency.
+Just as we suspected - there's likely a data entry error here.
+The violation shows an HR employee in Boston, but we expected all HR staff in LA.
+This Boston HR specialist is probably a mistake that needs to be corrected.
+
+Note: These CFDs use wildcards (_) indicating they apply to any value in those positions.
+This happens because our dataset is small (8 rows) and we're using relatively low thresholds.
+On larger datasets with higher confidence/support thresholds, you'd see more specific
+CFDs with fixed constant values like (Department=IT) -> (Location=NYC).
+
+\x1b[1;34m=== Experimentation Workflow ===\x1b[0m
+
+CFD mining typically requires experimentation to find meaningful patterns:
+1. Start with conservative parameters (high confidence, low support)
+2. Examine discovered CFDs for domain relevance
+3. Adjust parameters based on findings:
+   - Too few CFDs? Lower confidence or support
+   - Too many CFDs? Raise thresholds or limit LHS size
+   - Irrelevant patterns? Focus on specific attributes
+4. Use CFDs to identify and fix data quality issues
+5. Re-run mining on cleaned data for better patterns
+
+This iterative process helps discover:
+* Business rules encoded in the data
+* Data quality issues and outliers
+* Constraints that should be enforced
+
+\x1b[1;32mCFD mining example completed!\x1b[0m
+
+\x1b[1;32mSee verifying_cfd.py for CFD validation examples.\x1b[0m
 
 '''
 
@@ -2233,6 +2778,527 @@ AID-FD:
 [age gender medicine] -> name
 [age blood gender] -> name
 In the advanced section, a more complex example will showcase additional features of the algorithms.
+'''
+
+snapshots['test_example[basic/mining_fem/afem.py-None-afem_output] afem_output'] = '''================================================================================
+\x1b[1;36mDiscovering All Frequent Episodes (AFEM)\x1b[0m
+================================================================================
+AFEM (All Frequent Episode Miner) finds every episode - every subsequence of
+events - that occurs often enough in a sequence of timestamped events.
+
+AFEM (and the other FEM algorithms) mine sequential data.
+
+Frequent episode mining problem along with the core definitions and concepts was
+introduced in:
+
+    H. Mannila, H. Toivonen, A. I. Verkamo. Discovery of Frequent
+    Episodes in Event Sequences. Data Mining and Knowledge Discovery
+    1(3), 259-289, 1997.
+
+The AFEM algorithm itself was introduced later, in:
+
+    P. Fournier-Viger, M. S. Nawaz, Y. He, Y. Wu, F. Nouioua, U. Yun.
+    MaxFEM: Mining Maximal Frequent Episodes in Complex Event
+    Sequences. MIWAI 2022, pp. 86-98.
+
+\x1b[1;36mKey definitions\x1b[0m
+--------------------------------------------------------------------------------
+  * event set                a subset of E = {1, 2, ..., m}, the finite set of
+                             events. The events in one event set are assumed to
+                             fire together, so it is also called a simultaneous
+                             event set.
+
+  * complex event sequence   a time-ordered list of (event set, timestamp)
+                             pairs S = <(SE_t1, t1), (SE_t2, t2), ..., (SE_tn, tn)>.
+
+  * episode                  an ordered list of event sets X1 -> X2 -> ... -> Xp,
+                             where Xi appears before Xj for i < j. An episode with
+                             a single event set is a parallel episode (p=1); one
+                             where every event set is a single event is a serial
+                             episode (|Xi|=1); the general case is also called
+                             a composite episode.
+
+  * occurrence               a time interval [ts, te] such that the episode's
+                             event sets X1, ..., Xp appear, in order, at
+                             increasing timestamps within [ts, te]. occSet(episode)
+                             is the set of occurrences shorter than window_size.
+
+  * support                  the number of distinct start points ts among an
+                             episode's occurrences: sup(episode) = |{ts : [ts, te]
+                             in occSet(episode)}| (also called head frequency).
+
+  * frequent episode mining  given a complex event sequence, a threshold
+                             minsup > 0 and a window_size > 0, enumerate all
+                             episodes with sup(episode) >= minsup.
+
+\x1b[1;36mDataset\x1b[0m
+--------------------------------------------------------------------------------
+Four kinds of events, numbered 1 to 4, occur over 11 timestamps below.
+
+The whole stream below is a single complex event sequence. {1, 2} at t=3 and t=7
+is a parallel event set: it occurs, in full, at exactly those two timestamps, so
+the parallel episode {1, 2} has support 2. Event 1 alone fires at five different
+timestamps (1, 2, 3, 6, 7), so the single-event episode 1 has support 5.
+Chaining that single event into the parallel pair gives 1 -> {1, 2}, a composite
+episode. Its occurrences are: {[2, 3], [6, 7]}.
+
+    t | event set
+  ----+-------------------------------
+    1 | {1, 3}
+    2 | {1}
+    3 | {1, 2}
+    6 | {1}
+    7 | {1, 2}
+    8 | {3}
+    9 | {2}
+   11 | {4}
+
+\x1b[1;36mDataset format\x1b[0m
+--------------------------------------------------------------------------------
+examples/datasets/fem/episodes_1.txt uses the simple SPMF-style sequence format
+all FEM datasets in Desbordante share: one line per timestamp, listing its event
+set as ascending, space-separated, duplicate-free event ids, then a '|', then
+the timestamp itself - both non-negative integers, e.g. '1 2|7' means events 1
+and 2 fire at t=7. The '|timestamp' suffix may be omitted for every line at
+once, in which case Desbordante numbers the lines 0, 1, 2, ... itself; a single
+file cannot mix both styles. Across the whole file, timestamps must be strictly
+increasing.
+
+\x1b[1;36mAlgorithm parameters\x1b[0m
+--------------------------------------------------------------------------------
+  * sequence              path to a sequence file, or an in-memory Python
+                          iterable of (event set, timestamp) pairs (see
+                          Scenario 3 below).
+
+  * minsup                minimum support an episode must reach to be
+                          reported. Positive integer, default 1.
+
+  * window_size           an occurrence longer than this (in timestamp
+                          units) is not counted. Positive integer, default 5.
+
+  * threads               number of worker threads for the composite-episode
+                          search. 0 (default) uses all available CPU cores.
+
+  * tasks_num_multiplier  ratio of parallel tasks to threads (default 3.0),
+                          a scheduling setting that only affects speed. Must
+                          be positive; roughly 1-8 is meaningful - much
+                          lower leaves threads idle near the end of the
+                          search, much higher creates so many tiny tasks
+                          that scheduling overhead dominates.
+
+================================================================================
+\x1b[1;36mScenario 1. Mining example\x1b[0m
+================================================================================
+Let's mine the event stream above with parameters minsup=2, window_size=2.
+
+Found 7 frequent episode(s):
+
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+  #4  {1, 2}   (support: 2)
+  #5  3   (support: 2)
+  #6  1 -> {1, 2}   (support: 2)
+  #7  1 -> 2   (support: 2)
+
+Reading the list: '->' chains event sets into successive, later-in-time steps
+(e.g. 1 -> 2 means event 1 occurs, then later event 2); braces group events that
+must fire together into one parallel event set (e.g. {1, 2}). 1 -> {1, 2} chains
+a single-event step into a parallel one and is therefore a composite episode.
+
+================================================================================
+\x1b[1;36mScenario 2. Raising minsup to 3\x1b[0m
+================================================================================
+Raising minsup from 2 to 3 removes less frequent episodes from the result: only
+three of the seven episodes from Scenario 1 satisfy this stricter condition.
+
+  found 3 frequent episode(s):
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+
+minsup must be chosen without prior knowledge of the data, so there is no way to
+determine an appropriate value in advance. examples/basic/mining_fem/tke.py's
+TKE algorithm avoids this: instead of minsup, it takes the number of episodes to
+return as a parameter.
+
+================================================================================
+\x1b[1;36mScenario 3. Loading the same data as a Python iterable\x1b[0m
+================================================================================
+The sequence parameter does not have to be a file path: Desbordante also accepts
+any Python iterable of (event set, timestamp) pairs, which is useful when the
+events are already available in memory, for example after being read from a
+database.
+
+  found 7 frequent episode(s), matching Scenario 1: True
+
+Passing the same 8 event sets as Python tuples instead of a file produces an
+identical result. examples/basic/mining_fem/maxfem.py and
+examples/basic/mining_fem/tke.py accept sequences the same way; refer back here
+for how to build the in-memory iterable.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related primitives in Desbordante:
+  * Maximal frequent episode mining -  examples/basic/mining_fem/maxfem.py
+  * Top-k frequent episode mining   -  examples/basic/mining_fem/tke.py
+
+'''
+
+snapshots['test_example[basic/mining_fem/maxfem.py-None-maxfem_output] maxfem_output'] = '''================================================================================
+\x1b[1;36mDiscovering Maximal Frequent Episodes (MaxFEM)\x1b[0m
+================================================================================
+The AFEM example (examples/basic/mining_fem/afem.py) showed that AFEM reports
+every frequent episode, including many that are sub-episodes of longer ones also
+present in the output. MaxFEM reports only the frequent episodes that are not
+contained in any other frequent episode - the maximal frequent episodes - of
+which there are typically far fewer.
+
+MaxFEM algorithm was introduced in:
+
+    P. Fournier-Viger, M. S. Nawaz, Y. He, Y. Wu, F. Nouioua, U. Yun.
+    MaxFEM: Mining Maximal Frequent Episodes in Complex Event
+    Sequences. MIWAI 2022, pp. 86-98.
+
+Read the AFEM example first if you have not already: it introduces the terms
+this example builds on.
+
+\x1b[1;36mKey definitions\x1b[0m
+--------------------------------------------------------------------------------
+  * strict inclusion         an episode Y1 -> ... -> Yi is strictly included in
+                             an episode X1 -> ... -> Xp (written Y ⊑ X) if and
+                             only if Y1 ⊆ X_k1, Y2 ⊆ X_k2, ..., Yi ⊆ X_ki for
+                             some integers 1 <= k1 < k2 < ... < ki <= p.
+
+  * maximal frequent         given a complex event sequence, minsup > 0
+    episode mining           and window_size > 0, enumerate all frequent episodes
+                             that are not strictly included in another frequent
+                             episode.
+
+\x1b[1;36mDataset\x1b[0m
+--------------------------------------------------------------------------------
+The same event sequence used in examples/basic/mining_fem/afem.py.
+
+    t | event set
+  ----+-------------------------------
+    1 | {1, 3}
+    2 | {1}
+    3 | {1, 2}
+    6 | {1}
+    7 | {1, 2}
+    8 | {3}
+    9 | {2}
+   11 | {4}
+
+\x1b[1;36mAlgorithm parameters\x1b[0m
+--------------------------------------------------------------------------------
+MaxFEM takes the same four parameters as AFEM: minsup, window_size, threads and
+tasks_num_multiplier (see examples/basic/mining_fem/afem.py for details on
+each).
+
+================================================================================
+\x1b[1;36mScenario 1. AFEM vs. MaxFEM (minsup=2, window_size=2)\x1b[0m
+================================================================================
+Let's compare AFEM and MaxFEM on the sequence above.
+
+  AFEM found 7 frequent episode(s):
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+  #4  {1, 2}   (support: 2)
+  #5  3   (support: 2)
+  #6  1 -> {1, 2}   (support: 2)
+  #7  1 -> 2   (support: 2)
+
+  MaxFEM found 2 maximal frequent episode(s):
+  #1  3   (support: 2)
+  #2  1 -> {1, 2}   (support: 2)
+
+Five of AFEM's seven episodes - #1, #2, #3, #4, #7 - are sub-episodes of the
+chain 1 -> {1, 2}. MaxFEM keeps only that chain and event 3, which is not
+contained in any other frequent episode. These two episodes are the maximal
+front for minsup=2.
+
+================================================================================
+\x1b[1;36mScenario 2. Checking maximality against Scenario 1\x1b[0m
+================================================================================
+Maximal frequent episode mining implies that every frequent episode is a sub-
+episode of some maximal one. This is verified below against Scenario 1's output:
+each of AFEM's 7 episodes should be included in one of MaxFEM's 2 maximal
+episodes.
+
+  1   (support: 5)                 included in 1 -> {1, 2}   (support: 2)
+  2   (support: 3)                 included in 1 -> {1, 2}   (support: 2)
+  1 -> 1   (support: 3)            included in 1 -> {1, 2}   (support: 2)
+  {1, 2}   (support: 2)            included in 1 -> {1, 2}   (support: 2)
+  3   (support: 2)                 included in 3   (support: 2)
+  1 -> {1, 2}   (support: 2)       included in 1 -> {1, 2}   (support: 2)
+  1 -> 2   (support: 2)            included in 1 -> {1, 2}   (support: 2)
+
+Each of the 7 episodes is included in one of the 2 maximal episodes, as
+expected. The maximal front is a lossless summary of the full set of frequent
+episodes.
+
+Note: episode 1 has support 5, but the maximal episode that includes it, 1 ->
+{1, 2}, has support only 2 - MaxFEM does not report the higher support value,
+only that episode 1 is not maximal.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related primitives in Desbordante:
+  * All frequent episode mining   -  examples/basic/mining_fem/afem.py
+  * Top-k frequent episode mining -  examples/basic/mining_fem/tke.py
+
+'''
+
+snapshots['test_example[basic/mining_fem/tke.py-None-tke_output] tke_output'] = '''================================================================================
+\x1b[1;36mDiscovering the Top-K Frequent Episodes (TKE)\x1b[0m
+================================================================================
+The AFEM example (examples/basic/mining_fem/afem.py) showed that AFEM requires a
+minsup threshold: too low a value produces an unmanageably large result and a
+slower search, too high a value omits relevant episodes, and there is no way to
+determine an appropriate value without already knowing the data. TKE finds the k
+most frequent episodes instead, without requiring minsup: it takes the number k
+of episodes to return directly.
+
+This example follows:
+
+    P. Fournier-Viger, Y. Yang, P. Yang, J. C.-W. Lin, U. Yun. TKE:
+    Mining Top-K Frequent Episodes. IEA/AIE 2020, pp. 832-845.
+
+Read examples/basic/mining_fem/afem.py first if you have not already: it
+introduces the terms this example builds on.
+
+\x1b[1;36mKey definitions\x1b[0m
+--------------------------------------------------------------------------------
+  * top-k frequent           given a complex event sequence, a
+    episode mining           window_size and an integer k > 0, find a set T of k
+                             episodes such that their support is greater than or
+                             equal to that of any episode not in T. If several
+                             episodes are tied on the cutoff support value, more
+                             than one such set exists; TKE breaks ties by
+                             discovery order (see the note on threads below).
+
+\x1b[1;33m>>> A note on determinism.\x1b[0m
+TKE is not a randomized algorithm: support counting is exact, as in AFEM and
+MaxFEM. However, its search runs in parallel, and thread scheduling can affect
+the result in two ways. First, when several episodes are tied on the support
+value at the k-th position, which one is reported depends on which thread
+reaches it first. Second, all three algorithms prune an episode as soon as it
+appears infrequent and do not search its super-episodes further, even though a
+specific super-episode could still be frequent; which episode gets pruned before
+its super-episodes are explored can depend on thread scheduling. To keep this
+example's output reproducible, every call below uses threads=1.
+
+\x1b[1;36mDataset\x1b[0m
+--------------------------------------------------------------------------------
+The same event sequence used in examples/basic/mining_fem/afem.py.
+
+    t | event set
+  ----+-------------------------------
+    1 | {1, 3}
+    2 | {1}
+    3 | {1, 2}
+    6 | {1}
+    7 | {1, 2}
+    8 | {3}
+    9 | {2}
+   11 | {4}
+
+\x1b[1;36mAlgorithm parameters\x1b[0m
+--------------------------------------------------------------------------------
+  * sequence     path to a sequence file, or an in-memory Python iterable
+                 of (event set, timestamp) pairs - see AFEM example's
+                 Scenario 3 (examples/basic/mining_fem/afem.py) for how
+                 to build one.
+
+  * episodes_num the number k of top episodes to return. Positive integer,
+                 default 10. This replaces minsup entirely.
+
+  * window_size  same meaning as in AFEM/MaxFEM: an occurrence longer than
+                 this (in timestamp units) is not counted. Positive integer,
+                 default 5.
+
+  * threads      number of worker threads. 0 uses all available CPU cores;
+                 see the determinism note above for why this example fixes
+                 it to 1. Unlike AFEM/MaxFEM, TKE has no tasks_num_multiplier
+                 option.
+
+\x1b[1;36mExample\x1b[0m
+--------------------------------------------------------------------------------
+Let's search the sequence above for its top-3 most frequent episodes.
+
+  top-3 episodes (window_size=2):
+  #1  1   (support: 5)
+  #2  2   (support: 3)
+  #3  1 -> 1   (support: 3)
+
+examples/basic/mining_fem/afem.py's Scenario 2 obtains the same three episodes
+by setting minsup=3; here no support threshold is specified.
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
+================================================================================
+Related primitives in Desbordante:
+  * All frequent episode mining     -  examples/basic/mining_fem/afem.py
+  * Maximal frequent episode mining -  examples/basic/mining_fem/maxfem.py
+
+'''
+
+snapshots['test_example[basic/mining_frequent_subgraphs.py-None-mining_frequent_subgraphs_output] mining_frequent_subgraphs_output'] = '''\x1b[95m
+=== Introduction ===\x1b[0m
+In this example, we will explore the gSpan algorithm (Graph-Based Substructure Pattern Mining).
+This algorithm is defined in the following paper:
+Xifeng Yan and Jiawei Han. gSpan: Graph-Based Substructure Pattern Mining.
+IEEE International Conference on Data Mining, ICDM'02. 721-724. 10.1109/ICDM.2002.1184038.
+
+Suppose you have a large collection of graphs — molecules, social networks, or program flow graphs — and you want
+to find common substructures that appear frequently across this collection. This is exactly what Frequent
+Subgraph Mining (FSM) does.
+
+Unlike verification primitives that check if a specific rule holds (like Functional Dependencies), FSM is a
+discovery primitive. It searches the entire search space to find all subgraphs that appear in at least a
+minimum percentage of the graphs in your database. This percentage is called 'minimum support' (minsup).
+
+For instance, in chemoinformatics, vertices might represent atoms and edges chemical bonds.
+FSM can automatically discover common functional groups (like a benzene ring) that appear in many compounds.
+
+It is important to note that gSpan operates on graphs with numeric labels on both vertices and edges.
+The algorithm considers two vertices to be identical only if they share the same numeric label.
+Similarly, edges are matched based on their numeric labels and the labels of the vertices they connect.
+
+gSpan is an exact algorithm, meaning it guarantees finding ALL subgraphs that meet the criteria.
+\x1b[95m
+=== Parameters ===\x1b[0m
+When running gSpan, the most critical parameter is `minsup` (minimum support).
+This value, ranging from 0 to 1, sets the threshold for what counts as 'frequent'.
+For example, a minsup of 0.6 requires a pattern to be present in 60% of the graphs in your database.
+
+You can also fine-tune the output:
+  - output_single_vertices=False  — exclude single-vertex patterns from results
+  - max_number_of_edges=N         — limit discovered patterns to at most N edges
+  - output_graph_ids=True         — include IDs of graphs containing each pattern
+\x1b[95m
+=== Dataset ===\x1b[0m
+We will use the following dataset for this example:
+\x1b[96m  File: examples/datasets/fsm/gspan_test_simple.txt\x1b[0m
+
+Dataset format:
+  t # N          — graph with ID N
+  v ID LABEL     — vertex
+  e ID1 ID2 LABEL — edge between two vertices
+\x1b[95m
+=== Execution ===\x1b[0m
+Running gSpan with minsup = 0.9 (patterns must appear in at least 90% of graphs).
+\x1b[94m  Running...\x1b[0m
+\x1b[92m  Done!\x1b[0m
+\x1b[95m
+=== Results (raw format) ===\x1b[0m
+Found \x1b[1m3\x1b[0m frequent subgraph(s).
+
+Format legend:
+  t # <id> * <support>     — pattern ID and support count
+  v <id> <label>           — vertex
+  e <v1> <v2> <label>      — edge
+  x <graph_ids...>         — graphs containing this pattern
+\x1b[96m
+--- Subgraph #1 ---\x1b[0m
+t # 0 * 3
+v 0 10
+x 0 1 2
+\x1b[96m
+--- Subgraph #2 ---\x1b[0m
+t # 1 * 3
+v 0 11
+x 0 1 2
+\x1b[96m
+--- Subgraph #3 ---\x1b[0m
+t # 2 * 3
+v 0 10
+v 1 11
+e 0 1 20
+x 0 1 2
+\x1b[95m
+=== Results (structured access) ===\x1b[0m
+Each FrequentSubgraph has a .edge_list field.
+You can iterate over it to inspect edges and see vertex IDs/labels and edge labels.
+\x1b[96m
+  Pattern #1\x1b[0m  support=\x1b[1m3\x1b[0m  graphs=[0, 1, 2]
+\x1b[94m  Vertices:\x1b[0m
+    v0  label=10
+\x1b[93m  (single-vertex pattern, no edges)\x1b[0m
+\x1b[96m
+  Pattern #2\x1b[0m  support=\x1b[1m3\x1b[0m  graphs=[0, 1, 2]
+\x1b[94m  Vertices:\x1b[0m
+    v0  label=11
+\x1b[93m  (single-vertex pattern, no edges)\x1b[0m
+\x1b[96m
+  Pattern #3\x1b[0m  support=\x1b[1m3\x1b[0m  graphs=[0, 1, 2]
+\x1b[94m  Vertices:\x1b[0m
+    v0  label=10
+    v1  label=11
+\x1b[94m  Edges:\x1b[0m
+    v0(label=10)  --[20]--  v1(label=11)
+\x1b[95m
+=== Analysis ===\x1b[0m
+Why did we find these specific patterns? Let's take a closer look.
+With our high support threshold of 90%, a pattern must appear in all 3 graphs in our dataset.
+
+First, we see single vertices with labels '10' and '11'. This is expected —
+every graph contains at least one node with each of these labels.
+
+More interestingly, we found the edge pattern `10 --[20]-- 11`:
+  - Graph #0: edge between node 0 (label 10) and node 1 (label 11), edge label 20
+  - Graph #1: edge between node 4 (label 10) and node 5 (label 11), edge label 20
+  - Graph #2: edge between node 7 (label 10) and node 9 (label 11), edge label 20
+
+Other edges, like `11 --[23]-- 10`, appear in Graph #0 and Graph #2, but are missing from Graph #1.
+Their support is 66%, which is below our 90% threshold — so they didn't make the cut.
+\x1b[95m
+Visualizing Input Graphs and Discovered Patterns...\x1b[0m
+\x1b[96mOpening visualization window...\x1b[0m
+\x1b[95m
+=== Behavior Change: Lowering Support ===\x1b[0m
+Let's re-run with minsup = 0.6 to see how many more patterns emerge.
+\x1b[94m  Running with minsup = 0.6...\x1b[0m
+\x1b[92m  Done!\x1b[0m
+
+  Found \x1b[1m7\x1b[0m patterns (+4 compared to minsup=0.9).
+
+New patterns (showing up to 3 of 4):
+\x1b[96m
+  --- New Pattern ---\x1b[0m
+t # 3 * 2
+v 0 10
+v 1 11
+e 0 1 23
+x 0 2
+\x1b[96m
+  --- New Pattern ---\x1b[0m
+t # 4 * 2
+v 0 11
+v 1 11
+e 0 1 22
+x 0 2
+\x1b[96m
+  --- New Pattern ---\x1b[0m
+t # 5 * 2
+v 0 10
+v 1 11
+v 2 11
+e 0 1 20
+e 1 2 22
+x 0 2
+  ...
+\x1b[95m
+Visualizing all patterns found at the lower support threshold...\x1b[0m
+\x1b[96mOpening visualization window...\x1b[0m
+\x1b[95m
+=== Conclusion ===\x1b[0m
+You have now learned the fundamentals of Frequent Subgraph Mining with the gSpan algorithm.
+Feel free to experiment with different datasets and minsup values.
 '''
 
 snapshots['test_example[basic/mining_gfd/mining_gfd1.py-None-mining_gfd1_output] mining_gfd1_output'] = '''Our profiler supports two tasks related to graph functional dependencies (GFDs): validation and mining (discovery). In this example, we will focus on the mining task (for validation, we refer the reader to another example). The mining algorithm used in our profiler is described in the article "Discovering Graph Functional Dependencies" by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Pinge, presented at SIGMOD \'18.
@@ -3127,6 +4193,122 @@ try verifying other AODs, or even load your own datasets to see what you can
 discover!
 '''
 
+snapshots['test_example[basic/verifying_ar.py-None-verifying_ar_output] verifying_ar_output'] = '''This example demonstrates how to validate Association Rules (AR) using the Desbordante library. Association rules discover relationships between itemsets in data (X -> Y). AR validation checks if rules hold by calculating Support (frequency of \'X union Y\') and Confidence (how often Y appears in transactions with X), comparing them to thresholds. More details on association rules can be found in "Frequent Pattern Mining" by Charu C. Aggarwal.
+
+Desbordante can be particularly helpful when association rules have already been mined, and changes occur in the data, potentially altering or invalidating existing rules. To understand what's happening with the data, Desbordante provides several types of clusters to categorize records, based on the completeness of the left and right-hand sides of the rule within each record: 
+1) Transaction has a complete left side of the rule and an incomplete right side; 
+2) Full left side, no right side; 
+3) Incomplete left side, full right side; 
+4) Incomplete left side, incomplete right side; 
+5) Incomplete left side, no right side;
+Note that if either part of the rule consists of a single element, cluster types where the corresponding part is incomplete will be empty.
+
+As the first example, let\'s look at the dataset containing receipts from some supermarket using input_format="tabular". In this format, each table row lists all items participating in the same transaction. Note that, in this table, some rows may be shorter than others.
+
+|--:|:------:|:------:|:------:|:----:|
+| 0 | Bread  | Butter |  Milk  | nan  |
+| 1 |  Eggs  |  Milk  | Yogurt | nan  |
+| 2 | Bread  | Cheese |  Eggs  | Milk |
+| 3 |  Eggs  |  Milk  | Yogurt | nan  |
+| 4 | Cheese |  Milk  | Yogurt | nan  |
+
+Let's check if the rule [Bread] -> [Butter] holds for the given confidence 0.6 and support 0.2:
+
+AR holds: \x1b[1;31mFalse\x1b[0m
+actual confidence: \x1b[1;33m0.50 \x1b[0m
+actual support: \x1b[1;32m0.20 \x1b[0m
+Total number of transactions satisfying AR: 4
+Total number of transactions violating AR: 1
+Number of clusters violating AR: 1
+Clusters violating AR:
+full_left_no_right : [2]
+
+
+You can see that the actual values of support and confidence are different from those requested. Let's examine the clusters that exhibit this violation: transaction #2 contains the entire left side of the association rule but is missing the right side, indicating a potential error:
+
+['Bread', 'Cheese', 'Eggs', 'Milk']
+
+Assume we are certain that the data is corrupted and that the transaction #2 should contain 'Butter'. We will fix this record and re-validate the rule.
+|--:|:------:|:------:|:------:|:----:|:------:|
+| 0 | Bread  | Butter |  Milk  | nan  |  nan   |
+| 1 |  Eggs  |  Milk  | Yogurt | nan  |  nan   |
+| 2 | Bread  | Cheese |  Eggs  | Milk | Butter |
+| 3 |  Eggs  |  Milk  | Yogurt | nan  |  nan   |
+| 4 | Cheese |  Milk  | Yogurt | nan  |  nan   |
+
+AR holds: \x1b[1;32mTrue\x1b[0m
+actual confidence: \x1b[1;32m1.00 \x1b[0m
+actual support: \x1b[1;32m0.40 \x1b[0m
+
+Now, with the corrected data, we see the association rule [Bread] -> [Butter] holds with the given support and confidence values.
+
+
+Let's look at a rule whose left side consists of several elements. Rule [Milk, Yogurt] -> [Eggs] with support = 0.6, confidence = 0.6
+|--:|:------:|:------:|:------:|:----:|
+| 0 | Bread  | Butter |  Milk  | nan  |
+| 1 |  Eggs  |  Milk  | Yogurt | nan  |
+| 2 | Bread  | Cheese |  Eggs  | Milk |
+| 3 |  Eggs  |  Milk  | Yogurt | nan  |
+| 4 | Cheese |  Milk  | Yogurt | nan  |
+
+AR holds: \x1b[1;31mFalse\x1b[0m
+actual confidence: \x1b[1;32m0.67 \x1b[0m
+actual support: \x1b[1;33m0.40 \x1b[0m
+Total number of transactions satisfying AR: 2
+Total number of transactions violating AR: 3
+Number of clusters violating AR: 3
+Clusters violating AR:
+full_left_no_right : [4]
+partial_left_full_right : [2]
+partial_left_no_right : [0]
+
+As you can see, this rule doesn't hold well on this dataset. We have several clusters of violating transactions, suggesting a mismatch.
+Observed exceptions suggest that the minimum support or confidence level needs to be changed, or that the entire rule needs to be revised.
+Let's try modifying the rule. We will remove 'Yogurt' from the left side and re-validate the rule [Milk] -> [Eggs]. This represents a scenario where we weaken the rule to see if it better fits the data.
+
+AR holds: \x1b[1;32mTrue\x1b[0m
+actual confidence: \x1b[1;32m0.60 \x1b[0m
+actual support: \x1b[1;32m0.60 \x1b[0m
+
+This highlights that our initial AR, with these parameters, might not be suitable for this dataset. We've chosen to modify the rule (by removing 'Yogurt'), which is just one approach. We could also decrease the minimum support value instead.
+
+
+For the second example, let\'s take a dataset with the same receipts from the same supermarket, changing the input format to input_format="singular". This is a two-column format, where the first column contains the transaction number, and the second column specifies the item that belongs to that transaction.
+
+This way of representing the original data can sometimes be useful. Desbordante offers the same rule validation capabilities for this format and produces the same clusters of exceptions.
+
+Lets re-run the first example over the same data represented in singular data format. We are checking the same rule [Bread] -> [Butter], support = 0.2 and confidence = 0.6:
+
+|--:|:------:|
+| 1 | Bread  |
+| 1 | Butter |
+| 3 | Cheese |
+| 2 |  Eggs  |
+| 1 |  Milk  |
+| 2 |  Milk  |
+| 2 | Yogurt |
+| 3 | Bread  |
+| 3 |  Eggs  |
+| 3 |  Milk  |
+| 4 |  Eggs  |
+| 4 |  Milk  |
+| 4 | Yogurt |
+| 5 | Cheese |
+| 5 |  Milk  |
+| 5 | Yogurt |
+
+AR holds: \x1b[1;31mFalse\x1b[0m
+actual confidence: \x1b[1;33m0.50 \x1b[0m
+actual support: \x1b[1;32m0.20 \x1b[0m
+Total number of transactions satisfying AR: 4
+Total number of transactions violating AR: 1
+Number of clusters violating AR: 1
+Clusters violating AR:
+full_left_no_right : [3]
+
+Everything is the same, except the transaction numbers, used in clusters (3 in singular vs 2 in tabular). This format offers explicit transaction IDs, therefore we use them instead of row numbers.
+'''
+
 snapshots['test_example[basic/verifying_aucc.py-None-verifying_aucc_output] verifying_aucc_output'] = '''Dataset AUCC_example.csv:
    ID  name  card_num  card_active
 0   1  Alex       665         True
@@ -3193,15 +4375,101 @@ UCC holds, showing stats for AUCC is useless
 --------------------------------------------------------------------------------
 '''
 
-snapshots['test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output'] = '''This example demonstrates how to validate Conditional Functional Dependencies (CFDs) using the Desbordante library.
-The definitions are taken from the paper 'Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”' (ECML PKDD 2018).
-CFD expresses a relationship in which a subset of attributes X defines Y, written as (X -> Y, t), where t is a certain template tuple.
-A template tuple t is a tuple where each attribute can either have a fixed constant value or a wildcard symbol ('_'), allowing for generalization across different data records.
-Validation checks whether a user-specified CFD holds for a given dataset, based on the specified values for support and confidence thresholds. Support is the quantity of records satisfying the condition, and confidence is the fraction of records where Y occurs given X.
-Desbordante detects CFD violations and classifies records based on rule compliance.
+snapshots['test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output'] = '''\x1b[1;34mCFD Validation Example - Desbordante\x1b[0m
 
+\x1b[1;34m=== Understanding Conditional Functional Dependencies ===\x1b[0m
 
-In the first example, let's look at a dataset containing real estate properties in different cities.
+Conditional functional dependency (CFD) extends a classic functional
+dependency by introducing additional conditions on attributes.
+
+For example, consider employee data (a table), containing “Department”, “Head”, “Position”,
+and “Location” attributes. In this case:
+
+* An FD Department -> Head means that the head is unambiguously determined by the 
+  department, indicating that each department (mentioned in the table) has exactly one head.
+
+* On the other hand, a CFD: (Department=IT) -> (Head=Smith) means that the IT department
+  has Smith as its head. Other departments may or may not follow suit.
+
+* Finally, there is a mixed CFD: (Department=IT, Position=_) -> (Location=_). The wildcard
+  symbol allows any values in its place. Therefore, this CFD means that the location is
+  unambiguously determined by position for the IT department.
+
+\x1b[1;32m=== Formal Definition ===\x1b[0m
+
+Conditional functional dependency is a very popular concept in the database community, and
+there are several alternative definitions of CFD. In this example, we will rely on the definition
+provided by J. Rammelaere and F. Geerts in 'Revisiting Conditional Functional Dependency
+Discovery: Splitting the “C” from the “FD”', ECML PKDD 2018.
+
+A template tuple t is a tuple where each attribute can either have:
+* A fixed constant value
+* A wildcard symbol ('_'), allowing for generalization across different data records.
+
+The wildcard in the RHS determines the TYPE of CFD:
+* Constant CFD - the RHS has a fixed value, e.g. (Department=HR) -> (Location=LA).
+  Such a CFD constrains a single value and is essentially an association rule (AR).
+* Variable CFD - the RHS holds a wildcard, e.g. (Position=_) -> (Salary=_). It states that
+  the RHS is functionally determined by the LHS for the records matching the LHS pattern.
+  A fully-wildcarded variable CFD, e.g. (Position=_) -> (Salary=_), is essentially an AFD.
+* Mixed CFD - the LHS mixes constants and wildcards while the RHS is a wildcard, e.g.
+  (Department=IT, Position=_) -> (Location=_). This case is specific to CFDs: it is neither
+  a plain AR nor a plain AFD, since the dependency holds only on the subset of records
+  fixed by the constant part of the LHS.
+
+See mining_ar.py and mining_afd.py for the AR and AFD primitives referenced above.
+
+\x1b[1;32m=== Key Metrics for CFD ===\x1b[0m
+Support: The number of records satisfying the condition X (LHS part)
+Confidence: The fraction of records where Y occurs given X
+
+A CFD is considered to HOLD (is discovered) when both its support and confidence are
+greater than or equal to the specified minimum thresholds. The confidence value also
+indicates how strictly the dependency is followed:
+* confidence = 1.0 means the CFD holds exactly, with no violating records;
+* confidence < 1.0 means there are violations - the lower the confidence, the more records
+  break the dependency.
+
+\x1b[1;34m=== Algorithm Parameters Explanation ===\x1b[0m
+
+CFD verification parameters:
+* cfd_rule: the CFD to verify
+  - CFD object with LHS and RHS
+  - Required parameter
+  - Example: CFD(lhs=[(0, 'Los Angeles'), (3, '_')], rhs=(4, 'high')), where 0,3,4 are attribute indices
+
+* cfd_minconf: minimum confidence threshold
+  - Lower values: more tolerant of violations
+  - Range: 0.0 to 1.0
+
+\x1b[1;34m=== CFD Object Operations ===\x1b[0m
+CFDs are objects that support comparison, sets, and decomposition:
+
+\x1b[1;32m1. String Representation:\x1b[0m
+   CFD1: {(0, Los Angeles)} -> (4, high)
+   CFD2: {(0, Los Angeles)} -> (4, high) \x1b[1;32m(same as CFD1)\x1b[0m
+   CFD3: {(0, New York)} -> (4, high)
+   CFD4: {(3, House)} -> (4, high)
+
+\x1b[1;32m2. Decomposition:\x1b[0m
+   CFD1 LHS: [(0, Los Angeles)]
+   CFD1 RHS: (4, high)
+   First LHS item - attribute: 0, value: Los Angeles
+   RHS - attribute: 4, value: high
+
+\x1b[1;32m3. Equality Comparison:\x1b[0m
+   CFD1 == CFD2: True
+   CFD1 == CFD3: False
+
+\x1b[1;32m4. Set Operations:\x1b[0m
+   Discovered CFDs (duplicates removed): 3 unique
+     1. {(0, Los Angeles)} -> (4, high)
+     2. {(0, New York)} -> (4, high)
+     3. {(3, House)} -> (4, high)
+
+\x1b[1;34m=== Dataset Explanation ===\x1b[0m
+
+Real estate dataset containing property information across major US cities:
 
            City          Street  PostalCode BuildingType BuildingCost
 0   Los Angeles  Hollywood Blvd       90029    Apartment         high
@@ -3220,21 +4488,38 @@ In the first example, let's look at a dataset containing real estate properties 
 13      Chicago    Michigan Ave       60611       Office       medium
 14     New York     Wall Street       10005       Office         high
 
-Let's say we want to check whether highly priced buildings in Los Angeles are determined by (depend on) a specific building type.
+Let's put forward some business hypotheses about this dataset: 
+* Los Angeles properties should consistently have high building costs due to premium market
+* All house-type properties should be expensive regardless of location
+* New York apartments should command high prices in the competitive NYC market
+* Apartment pricing may vary significantly across different cities
 
-This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")
+We'll use CFD verification to test these assumptions and identify any data anomalies.
+This approach helps validate business rules and discover data quality issues.
 
-\x1b[1;49mCFD: [('City', 'Los Angeles'), ('BuildingType', '_')] -> ('BuildingCost', 'high')
+\x1b[1;34m=== Scenario 1: Finding RHS Violations ===\x1b[0m
+Let's verify our first hypothesis: Los Angeles properties should consistently have high building costs.
+
+CFD to verify: [City='Los Angeles'] -> BuildingCost='high'
+Verifying with minimum confidence (cfd_minconf): 0.9
 CFD holds: \x1b[1;31mFalse\x1b[0m
 Support: 5
 Confidence: 0.80
+Violations: \x1b[1;31m1 rows\x1b[0m
 Number of clusters violating FD: 1
-\x1b[1;34m #1 cluster: \x1b[0m
-\x1b[0m0: ['Los Angeles', 'Apartment'] -> ['high']\x1b[0m
-\x1b[1;41m6: ['Los Angeles', 'Apartment'] -> ['low']\x1b[0m
-\x1b[0m9: ['Los Angeles', 'Apartment'] -> ['high']\x1b[0m
 
-We can see that the rule is violated in line 6, which may indicate incorrect data entry. Let's fix them.
+Violating rows: \x1b[1;31m[6]\x1b[0m
+  Cluster #1 violations:
+    Row 6: \x1b[1;31m['Los Angeles'] -> low\x1b[0m
+
+Analysis: Our hypothesis is violated! There is one LA property with a non-high cost.
+This suggests either data quality issues or exceptions to the premium market rule.
+
+Let's investigate and fix potential data quality issues:
+Found 1 LA properties with non-high costs:
+  6: Los Angeles, Hollywood Blvd, 90028, Apartment, low
+
+Assuming these are data entry errors, let's correct them:
 
            City          Street  PostalCode BuildingType BuildingCost
 0   Los Angeles  Hollywood Blvd       90029    Apartment         high
@@ -3243,7 +4528,7 @@ We can see that the rule is violated in line 6, which may indicate incorrect dat
 3   Los Angeles     Sunset Blvd       90001        House         high
 4       Chicago    Michigan Ave       60611       Office         high
 5      New York     Wall Street       10005       Office         high
-\x1b[1;42m6   Los Angeles  Hollywood Blvd       90028    Apartment         high\x1b[0m
+\x1b[1;42m6   Los Angeles  Hollywood Blvd       90028    Apartment         high (FIXED)\x1b[0m
 7       Chicago    State Street       60602    Apartment          low
 8      New York        Broadway       10001    Apartment         high
 9   Los Angeles  Hollywood Blvd       90028    Apartment         high
@@ -3252,13 +4537,181 @@ We can see that the rule is violated in line 6, which may indicate incorrect dat
 12  Los Angeles     Sunset Blvd       90001        House         high
 13      Chicago    Michigan Ave       60611       Office       medium
 14     New York     Wall Street       10005       Office         high
-\x1b[1;49mCFD: [('City', 'Los Angeles'), ('BuildingType', '_')] -> ('BuildingCost', 'high')
+Verifying with minimum confidence (cfd_minconf): 0.9
 CFD holds: \x1b[1;32mTrue\x1b[0m
 Support: 5
 Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
 Number of clusters violating FD: 0
 
-Thats all for CFD validation. Desbordante is also capable of CFD discovery, which is discussed in "mining_cfd.py".
+CFD now holds perfectly after correction.
+All Los Angeles properties now have 'high' building costs as expected.
+The violation was indeed a data entry error, not a business exception.
+
+This example demonstrates CFDs as powerful data quality tools:
+* Automatically identify inconsistent data patterns
+* Spot outliers that violate business rules
+* Find encoding errors (e.g., 'Low' vs 'low' vs 'LOW')
+
+\x1b[1;34m=== Scenario 2: Analyzing Different LHS Conditions ===\x1b[0m
+In this scenario, we'll explore how different LHS (Left-Hand Side) conditions
+affect CFD validation.
+
+Let's systematically test our business hypotheses, moving from specific to general conditions.
+
+\x1b[1;32mHypothesis 2: Market Premium for Houses\x1b[0m
+Business Logic: Houses typically require more land and construction, commanding premium prices.
+
+CFD to verify: [BuildingType='House'] -> BuildingCost='high'
+If a property is a house, then its building cost should be high
+
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 2
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: Our house pricing hypothesis is confirmed.
+This CFD holds because houses consistently have high costs across all locations.
+
+\x1b[1;32mHypothesis 3: Location + Type Specificity\x1b[0m
+Business Logic: NYC's competitive market + apartment density = premium pricing.
+
+CFD to verify: [City='New York' AND BuildingType='Apartment'] -> BuildingCost='high'
+If a property is an apartment in New York, then its cost should be high
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 3
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: This demonstrates how combining conditions creates stronger rules.
+Multiple LHS conditions (City + BuildingType) create more precise CFDs.
+
+\x1b[1;43m\x1b[1;37mHypothesis 4: Testing Generalization Effects\x1b[0m
+Business Logic: Do apartments universally command high prices, or is location crucial?
+
+CFD to verify: [BuildingType='Apartment'] -> BuildingCost='high'
+If a property is an apartment, then its cost should be high
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;31mFalse\x1b[0m
+Support: 9
+Confidence: 0.67
+Violations: \x1b[1;31m3 rows\x1b[0m
+Number of clusters violating FD: 1
+
+Violating rows: \x1b[1;31m[1, 7, 10]\x1b[0m
+  Cluster #1 violations:
+    Row 1: \x1b[1;31m['Apartment'] -> medium\x1b[0m
+    Row 7: \x1b[1;31m['Apartment'] -> low\x1b[0m
+    Row 10: \x1b[1;31m['Apartment'] -> medium\x1b[0m
+
+Analysis: This CFD violation reveals important patterns!
+  * Root cause: Location matters - different cities have different apartment pricing
+  * Evidence: 3 violations suggest Chicago has lower apartment costs
+  * Lesson: Single-attribute conditions can be too general for real-world data
+  * Solution: Either add City constraints OR accept ~67% confidence for general trends
+
+\x1b[1;34m=== Learning Summary: LHS Condition Design ===\x1b[0m
+Key lessons from this scenario:
+
+1. SINGLE CONDITIONS can work when the attribute strongly predicts the outcome
+   Example: [BuildingType='House'] -> Cost='high'
+
+2. MULTIPLE CONDITIONS create more precise, reliable rules
+   Example: [City='New York' AND BuildingType='Apartment'] -> Cost='high'
+
+3. OVERGENERALIZATION often leads to violations
+   Example: [BuildingType='Apartment'] -> Cost='high'
+
+4. BUSINESS CONTEXT should guide CFD design
+   * Consider market factors, geographic differences, property characteristics
+   * Start specific, then test if generalization is possible
+
+Next steps in real applications:
+* Experiment with wildcards (_) for partial generalization
+* Test different confidence thresholds for noisy data
+* Use violation analysis to discover hidden business rules
+
+\x1b[1;34m=== Scenario 3: Variable and Mixed CFDs ===\x1b[0m
+The previous scenarios used constant CFDs, where the RHS has a fixed value.
+Now let's explore variable CFDs (wildcard on the RHS) and mixed CFDs (constants
+and wildcards combined on the LHS, wildcard on the RHS).
+
+\x1b[1;32mHypothesis 5: Variable CFD - Street determines BuildingCost\x1b[0m
+Business Logic: Buildings on the same street should have relatively close costs.
+
+CFD to verify: (Street=_) -> (BuildingCost=_)
+For any street, the building cost is uniquely determined by the street name.
+
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;31mFalse\x1b[0m
+Support: 15
+Confidence: 0.87
+Violations: \x1b[1;31m2 rows\x1b[0m
+Number of clusters violating FD: 2
+
+Violating rows: \x1b[1;31m[4, 7]\x1b[0m
+  Cluster #1 violations:
+    Row 4: \x1b[1;31m['Michigan Ave'] -> high\x1b[0m
+  Cluster #2 violations:
+    Row 7: \x1b[1;31m['State Street'] -> low\x1b[0m
+
+Analysis: This variable CFD does not hold.
+Some streets contain buildings with different costs - for example, State Street has
+both medium and low cost apartments, and Michigan Ave has both high and medium cost
+buildings. A single attribute (Street) is not enough to determine the cost.
+
+\x1b[1;32mHypothesis 6: Mixed CFD - City + Street determines BuildingCost\x1b[0m
+Business Logic: The above hypothesis may hold when restricted to a single city.
+Let's check if New York buildings on the same street have consistent costs.
+
+CFD to verify: (City='New York' AND Street=_) -> (BuildingCost=_)
+For buildings in New York, the building cost is uniquely determined by the street.
+
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 5
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: This mixed CFD holds! By fixing the city to New York and keeping the street
+as a wildcard, the dependency becomes valid. This illustrates the key strength of CFDs:
+the constant part of the LHS restricts the rule to a relevant subset of records, while
+the wildcard part expresses a functional dependency within that subset. Neither a plain
+AR nor a plain AFD can capture this kind of dependency.
+
+\x1b[1;34m=== Learning Summary: CFD Types ===\x1b[0m
+Key lessons from this scenario:
+
+1. CONSTANT CFDs (fixed RHS value) act like association rules - they check whether a
+   specific value assignment holds for matching records.
+
+2. VARIABLE CFDs (wildcard RHS) act like approximate functional dependencies - they
+   check whether the RHS is functionally determined by the LHS pattern.
+
+3. MIXED CFDs (constant + wildcard LHS, wildcard RHS) are specific to CFDs: they
+   express a functional dependency that holds only on the subset of records fixed by
+   the constant part of the LHS.
+
+\x1b[1;34m=== Experimentation Workflow ===\x1b[0m
+CFD validation typically requires experimentation to find meaningful patterns:
+1. Start with strict confidence (1.0) to find exact violations
+2. Lower confidence gradually to handle noisy data
+3. Use wildcards (_) strategically to generalize patterns
+4. Combine domain knowledge with statistical validation
+5. Validate CFDs incrementally as you clean your data
+
+Performance considerations:
+* Larger datasets may require sampling for exploration
+* Complex CFDs with many conditions may be slower
+* Consider validating subsets of your data first
+
+\x1b[1;32mCFD verifying example completed!\x1b[0m
+
 '''
 
 snapshots['test_example[basic/verifying_cind.py-None-verifying_cind_output] verifying_cind_output'] = '''================================================================================
@@ -3850,14 +5303,22 @@ Num distinct rhs values: 2
 Most frequent rhs value proportion: 0.6666666666666666
 Num distinct rhs values: 2
 
-We learned that in this case the specified FD does not hold and there are two clusters of rows that contain values that prevent our FD from holding. A \x1b[1;46mcluster\x1b[1;49m (with respect to a fixed FD) is a collection of rows that share the same left-hand side part but differ on the right-hand side one.
+We learned that in this case the specified FD does not hold and there are two
+clusters of rows that contain values that prevent our FD from holding.
+A \x1b[1;46mcluster\x1b[1;49m (with respect to a fixed FD) is a collection
+of rows that share the same left-hand side part but differ on the right-hand side one.
 Let's take a closer look at them.
 
-In the first cluster, three values are "0" and a single one is "nan". This suggests that this single entry with the "nan" value is a result of a mistake by someone who is not familiar with the table population policy. Therefore, it should probably be changed to "0".
+In the first cluster, three values are "0" and a single one is "nan".
+This suggests that this single entry with the "nan" value is a result of a mistake by someone
+who is not familiar with the table population policy. Therefore, it should probably be changed to "0".
 
-Now let\'s take a look at the second cluster. There are two entries: "27" and "28". In this case, it is probably a typo, since buttons 7 and 8 are located close to each other on the keyboard.
+Now let's take a look at the second cluster.
+There are two entries: "27" and "28". In this case, it is probably a typo, since buttons 7 and 8 are located
+close to each other on the keyboard.
 
-Having analyzed these clusters, we can conclude that our FD does not hold due to typos in the data. Therefore, by eliminating them, we can get this FD to hold (and make our dataset error-free).
+Having analyzed these clusters, we can conclude that our FD does not hold due to typos in the data.
+Therefore, by eliminating them, we can get this FD to hold (and make our dataset error-free).
 
 --------------------------------------------------------------------------------
 Now let's look at the DnD.csv to consider the AFD
@@ -3899,6 +5360,413 @@ Num distinct rhs values: 2
 Most frequent rhs value proportion: 0.5
 Num distinct rhs values: 2
 
+
+--------------------------------------------------------------------------------
+Note: This example uses the default error metric internally (g1).
+Desbordante supports several other AFD metrics — g2, tau, mu_plus, fi —
+each offering a different perspective on dependency strength.
+
+A dedicated walkthrough of all available metrics can be found at:
+\x1b[1;42mexamples/basic/verifying_fd_afd_metric.py\x1b[1;49m
+'''
+
+snapshots['test_example[basic/verifying_gdd/verifying_gdd1.py-None-verifying_gdd1_output] verifying_gdd1_output'] = '''This example demonstrates Graph Differential Dependency
+(GDD) validation.
+
+The pattern is defined in the paper
+
+"Zhang, Y., Kwashie, S., Bewong, M., Hu, J., Mahboubi, A.,
+Guo, X., & Feng, Z. Discovering graph differential dependencies.
+Australasian Database Conference (ADC), 2023."
+
+\x1b[95mBasic definition\x1b[0m
+
+A Graph Differential Dependency has the form
+
+    (Q[z], ΦL(X) -> ΦR(Y))
+
+Here Q[z] is a graph pattern, while ΦL(X) and ΦR(Y) are sets of
+distance constraints over the variables of that pattern.
+
+Semantically, a GDD states the following: for every homomorphic match
+of the pattern in the graph, if all constraints from the left-hand
+side hold, then all constraints from the right-hand side must also
+hold.
+
+In simpler terms, a GDD is a formal implication checked on all
+homomorphic matches of the pattern.
+
+The difference between a homomorphic match and an isomorphic match
+will be shown in the next example.
+
+\x1b[95mParameters\x1b[0m
+
+The validator receives two inputs:
+1. the input graph written in DOT;
+2. the list of GDDs to validate.
+
+Each GDD consists of three parts:
+1. a pattern written in DOT;
+2. the left-hand side constraints;
+3. the right-hand side constraints.
+
+In this example we use only attribute-to-constant constraints.
+Currently the Python API also provides relation-based helpers.
+
+\x1b[95mProperty graph definition\x1b[0m
+
+A property graph is a tuple
+
+    G = (V, E, λ, ρ)
+
+where:
+- V is the set of vertices;
+- E is the set of directed edges;
+- λ assigns labels to vertices and edges;
+- ρ stores attribute-value pairs of vertices.
+
+In this example, Person and City are vertex labels.
+Attributes such as "name" and "age" are stored in ρ,
+and "lives_in" is an edge label.
+
+\x1b[95mGraph pattern definition\x1b[0m
+
+A graph pattern Q[z] is a directed graph whose vertices and edges
+also have labels. The list z contains all pattern vertices, that is,
+all pattern variables.
+
+Intuitively, the pattern describes the shape of subgraphs on which
+the dependency is checked.
+
+In this example the pattern is
+
+    Person -[lives_in]-> City
+
+\x1b[95mHomomorphic match definition\x1b[0m
+
+A match of a graph pattern in a graph is a homomorphism h from the
+pattern to the graph such that:
+1. each pattern vertex is mapped to a graph vertex with a matching
+   label;
+2. each pattern edge is mapped to a graph edge with a matching label.
+
+Important: this is a homomorphic match, not necessarily an isomorphic
+one. Distinct pattern vertices may be mapped to the same graph vertex.
+This difference matters in general and will be discussed in the next
+example.
+
+\x1b[95mGDD syntax and semantics\x1b[0m
+
+A Graph Differential Dependency has the form
+
+    (Q[z], ΦL(X) -> ΦR(Y))
+
+where:
+- Q[z] is a graph pattern;
+- ΦL(X) is the left-hand side;
+- ΦR(Y) is the right-hand side;
+- both ΦL(X) and ΦR(Y) are sets of distance constraints.
+
+Let H(Q[z], G) be the set of all matches of Q[z] in graph G.
+Then G satisfies the GDD iff for every match h in H(Q[z], G),
+
+    h |= ΦL(X)  =>  h |= ΦR(Y)
+
+So the left-hand side acts as a precondition, and the right-hand
+side must hold whenever that precondition is satisfied.
+
+\x1b[95mSix forms of distance constraints\x1b[0m
+
+In the paper, distance constraints come in six forms.
+
+1. Attribute-to-constant:
+   δ_A(x.A, c) <= t
+
+2. Attribute-to-attribute:
+   δ_{A1,A2}(x.A1, x'.A2) <= t
+
+3. eid-to-constant:
+   δ_{eid}(x.eid, ce) = 0
+
+4. eid-to-eid:
+   δ_{eid}(x.eid, x'.eid) = 0
+
+5. Relation-to-constant:
+   δ_≡(x.rela, cr) = 0
+
+6. Relation-to-relation:
+   δ_≡(x.rela, x'.rela) = 0
+
+We usually do not use eid constraints, because the identifier of
+the real-world entity is often unknown in the data. It may be
+implemented later.
+
+\x1b[95mHow these constraints are represented in Python\x1b[0m
+
+The current Python bindings conveniently expose these helpers:
+
+1. AttrConst(pid, attr, const, metric, op, threshold)
+   attribute-to-constant
+
+2. AttrAttr(pid1, attr1, pid2, attr2, metric, op, threshold)
+   attribute-to-attribute
+
+3. RelConst(pid, relation, const)
+   relation-to-constant
+
+4. RelRel(pid1, relation1, pid2, relation2)
+   relation-to-relation
+
+For attribute constraints:
+- pid is the pattern vertex id;
+- attr is the attribute name;
+- const is the compared constant, if any;
+- metric is the distance metric;
+- op is the comparison operator;
+- threshold bounds the distance.
+
+Desbordante version of GDD validation implements:
+- EDIT_DISTANCE metric for strings;
+- ABS_DIFF metric for numbers;
+- LE, LT, GE, GT, EQ, NE as the comparison operator.
+
+Note that the original paper describes two comparison operators:
+LE and EQ.
+
+\x1b[95mDataset\x1b[0m
+
+The displayed figure shows a small property graph (on the left).
+
+It contains Person vertices with attributes such as "name" and "age",
+and City vertices with a "name" attribute. The edge "lives_in"
+connects a person to the city where that person lives.
+
+So, informally, the picture describes several people with attributes
+and the cities in which they live. This is the graph on which we will
+validate our dependencies.
+
+\x1b[95mShowcase 1\x1b[0m
+
+Showcase 1. String equality via EDIT_DISTANCE.
+
+We validate the following rule inside the pattern (shown on the right)
+
+    Person -[lives_in]-> City
+
+The concrete dependency says:
+
+    if 0.name = "Misha", then 1.name = "Amsterdam"
+
+Since EDIT_DISTANCE with threshold 0.0 means exact string equality,
+this is simply the implication
+
+    "Misha" -> "Amsterdam"
+
+This dependency is expected not to hold, because not every matched
+person with name "Misha" lives in Amsterdam. One of the two Mishas
+lives in Riga.
+
+\x1b[95mDesbordante > \x1b[0mGDD does not hold.
+
+\x1b[95mShowcase 2\x1b[0m
+
+Showcase 2. Arithmetic distance via ABS_DIFF.
+
+Now we validate another rule on the same pattern (shown on the right
+as well):
+
+    if 0.age < 30, then 1.name = "Amsterdam"
+
+With the current API, ABS_DIFF expresses absolute distance to a
+constant. Therefore, assuming non-negative ages, we encode
+
+    0.age < 30
+
+as
+
+    |0.age - 0| < 30
+
+This is a convenient showcase for ABS_DIFF in this dataset.
+This dependency is expected to hold because, in this graph, every
+matched person younger than 30 lives in Amsterdam. Misha and Bob
+are 25, while the other Misha is 31 and lives in Riga.
+
+\x1b[95mDesbordante > \x1b[0mGDD holds.
+
+\x1b[95mWhat we learned\x1b[0m
+
+In this example we learned how to describe a graph pattern,
+attach distance constraints to its vertices, and validate several GDDs
+in a single validator run on one graph.
+
+We also saw two kinds of constraints in practice:
+exact string equality through EDIT_DISTANCE, and numeric comparison
+through ABS_DIFF.
+
+For a more realistic scenario based on fact checking, read the example
+
+    verifying_gdd2.py
+
+\x1b[93mClose the image window to finish.\x1b[0m
+'''
+
+snapshots['test_example[basic/verifying_gdd/verifying_gdd2.py-None-verifying_gdd2_output] verifying_gdd2_output'] = '''This example demonstrates GDD validation for fact checking.
+
+The pattern is defined in the paper
+
+"Zhang, Y., Kwashie, S., Bewong, M., Hu, J., Mahboubi, A.,
+Guo, X., & Feng, Z. Discovering graph differential dependencies.
+Australasian Database Conference (ADC), 2023."
+
+\x1b[95mGraph\x1b[0m
+
+The figure contains a small fact-checking example.
+
+On the left is the data graph. It stores cities and countries, together
+with two kinds of facts: a city may be a capital of a country, and a
+city may be located in a country.
+
+Here we validate that a country's capital is located on that country's
+territory. In graph terms, for one City vertex, the country reached via
+`capital_of` must coincide with the country reached via `located_in`.
+
+On the right is the graph pattern used by the dependency. Starting from
+one City vertex, it follows both outgoing edges and binds the two
+reached Country variables separately.
+
+
+\x1b[95mHomomorphic matching\x1b[0m
+
+This example is intentionally built around a self-join pattern.
+
+The pattern has one City variable and two Country variables.
+
+It is important to distinguish graph isomorphism from graph homomorphism.
+
+Informally, an isomorphism is a vertex bijection which is both edge-preserving
+and label-preserving mapping. In particular, different pattern vertices must be
+mapped to different graph vertices due to it's injectiveness.
+
+A homomorphism is weaker: it must preserve the labeled edges of the
+pattern, but it does not have to be injective. So two different pattern
+vertices may be mapped to the same graph vertex, as long as all pattern
+edges are still respected in the data graph.
+
+Under the GDD definition from the paper, a match of the pattern is a
+homomorphism, not an isomorphism. Therefore, variables 1 and 2 are not
+required to map to different graph vertices.
+
+So the two Country variables may refer to the same country node.
+Here this is not a corner case but exactly the desired behavior: if
+`capital_of` and `located_in` agree, both variables should be allowed
+to map to the same Country.
+
+
+\x1b[95mPython API used in this example\x1b[0m
+
+This example constructs the dependency with GddFromDotString,
+that is, directly from a DOT string embedded in Python.
+
+This is convenient for compact and self-contained examples. If the
+pattern is already stored in the repository as a DOT file, the same
+idea can be expressed with GddFromDotFile, as in the earlier
+file-based validation example.
+
+Now that the validator can also return counterexamples, we will use
+that functionality on a second dataset where the fact-check fails.
+
+
+\x1b[95mShowcase 1. Consistent dataset\x1b[0m
+
+Showcase 1. Fact checking on a consistent dataset.
+
+We validate the following rule on the pattern:
+
+    if a city has both edges from the pattern,
+    then the countries reached by `capital_of`
+    and `located_in` must have the same name
+
+This is exactly a fact-check that a country's capital is located on the
+territory of that same country.
+
+Formally, the right-hand side is
+
+    1.name = 2.name
+
+implemented as EDIT_DISTANCE == 0.0 between the two country names.
+
+The left-hand side is empty. So the dependency is checked on every
+homomorphic match of the pattern. This is a useful fact-checking
+shape: two different graph paths that start from the same city must
+agree on the country they reach.
+
+In the current graph, Paris reaches France through both edges, and
+Berlin reaches Germany through both edges. Lyon has no `capital_of`
+edge, so it does not instantiate the pattern and does not participate
+in the check. Therefore this dependency is expected to hold.
+
+
+\x1b[95mDesbordante > \x1b[0mGDD holds.
+
+\x1b[93mClose the image window to continue.\x1b[0m
+
+\x1b[95mShowcase 2. Inconsistent dataset\x1b[0m
+
+Showcase 2. Fact checking on an inconsistent dataset.
+
+Now we keep the same schema, the same pattern, and the same GDD, but
+we slightly modify the graph.
+
+Paris is still recorded as the capital of France, but its `located_in`
+edge now points to Germany.
+
+So the dependency is expected not to hold. In this situation, the most
+natural interpretation is that the data are inconsistent: two facts in
+the graph disagree about the same city.
+
+Since the validator can now return counterexamples, we will inspect
+one violating match and see exactly how the pattern was mapped.
+
+
+\x1b[95mDesbordante > \x1b[0mGDD does not hold.
+
+This is likely a data inconsistency: one city is connected to
+different countries through `capital_of` and `located_in`.
+
+\x1b[95mReturned counterexample\x1b[0m
+
+A counterexample is a homomorphic match of the pattern for which
+the implication fails.
+
+Here the left-hand side is empty, so every match satisfies it. Thus a
+counterexample is simply a match for which the right-hand side
+
+    1.name = 2.name
+
+does not hold.
+
+Below we print how each pattern vertex was mapped to the graph.
+
+
+Counterexample match:
+  0 City -> 1 City {'name': 'Paris'}
+  1 Country -> 101 Country {'name': 'France'}
+  2 Country -> 102 Country {'name': 'Germany'}
+
+\x1b[95mWhat we learned\x1b[0m
+
+In this example we used GDD validation as a consistency check
+between two different paths in a graph.
+
+Concretely, we checked that if a city is recorded as the capital of a
+country, then that city is also recorded as being located in the same
+country.
+
+We also saw how a returned counterexample can be interpreted as a
+concrete witness of a likely inconsistency in the data.
+
+
+\x1b[93mClose the image window to finish.\x1b[0m
 '''
 
 snapshots['test_example[basic/verifying_gfd/verifying_gfd1.py-None-verifying_gfd1_output] verifying_gfd1_output'] = '''The graph is depicted in figure. The following abbreviations were used: A - account, B - blog. Vertices labeled A have a "name" attribute showing the nickname; vertices labeled B - "author", indicating who wrote the blog. The values of these attributes are labeled next to the vertices. The edges are also labeled as: "post", which indicates who wrote the blog, and "like", which indicates approval by another person. In the drawing, the edges are marked "post" in bold.
@@ -4825,6 +6693,407 @@ Let's run algorithm again:
 \tND holds: \x1b[32mTrue\x1b[0m
 '''
 
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac1.py-None-verifying_domain_pac1_output] verifying_domain_pac1_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (PACs).
+A Domain PAC on column set X and domain D, with given ε and δ means that all attribute values x fall
+within ε of D with at least probability δ:
+    \x1b[1;37mPr(x ∈ D±ε) ≥ δ\x1b[0m
+For more information consult "Checks and Balances: Monitoring Data Quality Problems in Network
+Traffic Databases" by Flip Korn et al (Proceedings of the 29th VLDB Conference, Berlin, 2003).
+
+This is the first example in the "Basic Domain PAC verification" series. Others can be found in
+\x1b[36mexamples/basic/verifying_pac/\x1b[0m directory.
+
+Suppose we are working on a new model of engine. Its operating temperature range is \x1b[34m[85, 95]\x1b[0m°C.
+The engine is made of high-strength metal, so short-term temperature deviations are acceptable and
+will not cause immediate damage. In other words, engine operates properly when Pr(t ∈ [85, 95]±ε) ≥ δ.
+Based on engineering analysis, the acceptable limits are: ε = \x1b[34m5\x1b[0m, δ = \x1b[34m0.9\x1b[0m.
+
+In terms of Domain PACs, the following constraint should hold: \x1b[34mPr(x ∈ [85, 95]±5) ≥ 0.9\x1b[0m.
+
+The following table contains readings from the engine temperature sensor:
+\x1b[1;37mt: [79, 78, 78, 78, 79, 80, 79, 85, 90, 89, 94, 96, 104, 93, 90, 88, 86, 84, 87, 90, 95, 92]\x1b[0m
+
+We now use the Domain PAC verifier to determine whether the engine is operating safely.
+First, we need to define the domain. Available options are:
+  * \x1b[34mParallelepiped\x1b[0m -- a closed n-ary parallelepiped
+  * \x1b[34mBall\x1b[0m -- a closed n-ary ball
+  * \x1b[34mCustomDomain\x1b[0m -- a domain with user-defined metric
+A segment is simply a one-dimensional parallelepiped, so we use the \x1b[34mParallelepiped\x1b[0m domain here.
+We run algorithm with the following options: domain=\x1b[34m[85, 95]\x1b[0m. All other parameters use default
+values: min_epsilon=\x1b[34m0\x1b[0m, max_epsilon=\x1b[34m∞\x1b[0m, min_delta=\x1b[34m0.9\x1b[0m, delta_steps=\x1b[34m100\x1b[0m.
+
+Algorithm result: \x1b[33mDomain PAC Pr(x ∈ [85, 95]±7) ≥ 0.954545 on columns [t]\x1b[0m.
+
+This result is not directly informative for our goal. Since both ε and δ exceed the required values,
+we cannot determine whether the constraint holds for ε=\x1b[34m5\x1b[0m and δ=\x1b[34m0.9\x1b[0m.
+
+The algorithm provides two special functions: \x1b[1;37mfind_epsilon\x1b[0m and \x1b[1;37mfind_delta\x1b[0m, which give the exact ε for given δ
+and vice versa. Let's call \x1b[1;37mfind_delta\x1b[0m with epsilon=\x1b[34m5\x1b[0m.
+
+Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.681818 on columns [t]\x1b[0m.
+
+This PAC shows that only \x1b[34m68.2%\x1b[0m of the values fall into \x1b[34m[85, 95]±5\x1b[0m, while we require \x1b[34m90%\x1b[0m.
+
+Also, let's check which ε is needed to satisfy δ=\x1b[34m0.9\x1b[0m by calling \x1b[1;37mfind_epsilon\x1b[0m with delta=\x1b[34m0.9\x1b[0m.
+
+Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [85, 95]±7) ≥ 0.954545 on columns [t]\x1b[0m.
+
+Here algorithm gives δ=\x1b[34m0.955\x1b[0m, which is greater than \x1b[34m0.9\x1b[0m, because achieving δ=\x1b[34m0.9\x1b[0m requires
+ε=\x1b[34m7.0\x1b[0m and PAC (\x1b[34m7.0\x1b[0m, \x1b[34m0.955\x1b[0m) holds. So, this means that ε=\x1b[34m7.0\x1b[0m is the minimal ε that satisfies δ=\x1b[34m0.9\x1b[0m.
+
+We can see that desired PAC doesn't hold, so the engine can blow up!
+
+Let's look at values violating PAC. Domain PAC verifier can detect values between eps_1
+and eps_2, i. e. values that lie in D±eps_2 \\ D±eps_1. Such values are called \x1b[1;37moutliers\x1b[0m (or \x1b[1;37mhighlights\x1b[0m).
+Let's find outliers for different eps_1, eps_2 values:
+  eps_1    eps_2  outliers
+-------  -------  ------------------------
+      \x1b[34m0\x1b[0m        \x1b[34m1\x1b[0m  [96, 84]
+      \x1b[34m1\x1b[0m        \x1b[34m2\x1b[0m
+      \x1b[34m2\x1b[0m        \x1b[34m3\x1b[0m
+      \x1b[34m3\x1b[0m        \x1b[34m5\x1b[0m  [80]
+      \x1b[34m5\x1b[0m        \x1b[34m7\x1b[0m  [79, 79, 79, 78, 78, 78]
+      \x1b[34m7\x1b[0m      \x1b[34minf\x1b[0m  [104]
+
+We can see two problems:
+    1. The engine operated at low temperatures for an extended period, slightly below 80°C.
+    2. The peak temperature was too high, but this occurred only once.
+
+The second version of engine has:
+    1. A pre-heating system to prevent operation at low temperatures.
+    2. An emergency cooling system to limit peak temperatures.
+The updated sensor readings (modified values highlighted) are:
+\x1b[1;37mt: [79, \x1b[1;33m80\x1b[1;37m, \x1b[1;33m81\x1b[1;37m, \x1b[1;33m82\x1b[1;37m, \x1b[1;33m81\x1b[1;37m, \x1b[1;33m81\x1b[1;37m, \x1b[1;33m83\x1b[1;37m, 85, 90, 89, 94, 96, \x1b[1;33m100\x1b[1;37m, 93, 90, 88, 86, 84, 87, 90, 95, 92]\x1b[0m
+
+We run the Domain PAC verifier again.
+Algorithm result: \x1b[32mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.954545 on columns [t]\x1b[0m.
+
+The desired PAC now holds, which means the improved engine operates within acceptable limits.
+
+It is recommended to continue with the second example (\x1b[36mexamples/basic/verifying_pac/verifying_domain_pac2.py\x1b[0m),
+which demonstrates more advanced usage of the Parallelepiped domain.
+'''
+
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac2.py-None-verifying_domain_pac2_output] verifying_domain_pac2_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs)
+on multiple columns. It continues the first Domain PAC verification example
+\x1b[36m(examples/basic/verifying_pac/verifying_domain_pac1.py)\x1b[0m. If you have not read the first part yet,
+it is recommended to start there.
+
+In the first example we verified \x1b[34mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9\x1b[0m on engine temperature sensor readings.
+Now, in addition to temperature readings, we also have tachometer data:
+\x1b[1;37m  t    rpm
+---  -----
+ 79    900
+ 78   2000
+ 78   3000
+ 78   2500
+ 79   3600
+ 80   3000
+ 79   2500
+ 85   1500
+ 90   1000
+ 89   1400
+ 94   1700
+ 96   1800
+104   3500
+ 93   2700
+ 90   2100
+ 88   1900
+ 86   1500
+ 84   2000
+ 87   3100
+ 90   3400
+ 95   4000
+ 92   2800\x1b[0m
+
+The normal operating RPM for this engine is \x1b[34m[1500, 3500]\x1b[0m. Values outside this range are
+not harmful by themselves (as long as they are within \x1b[34m[0, 5000]\x1b[0m), but:
+  * A cold engine may stall at low RPM and can be damaged at high RPM.
+  * An overheated engine is especially vulnerable at RPM values outside \x1b[34m[1500, 3500]\x1b[0m, because
+    cooling efficiency depends on RPM.
+As in the first example, we use the Domain PAC verifier to check whether the engine operates properly.
+
+Firstly, we need to create domain. We have a Cartesian product of two segments: \x1b[34m[85, 95] x [1500, 3500]\x1b[0m,
+so it would be natural to use parallelepiped.
+
+We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
+of two segments:
+  * temperature: [85, 95];
+  * RPM: [1500, 3500].
+This forms a two-dimensional parallelepiped domain: \x1b[34m[85, 95] x [1500, 3500]\x1b[0m.
+
+We run the Domain PAC verifier with the following parameters: domain=\x1b[34m[{85, 1500}, {95, 3500}]\x1b[0m,
+max_epsilon=\x1b[34m15\x1b[0m.
+
+Algorithm result: \x1b[31mDomain PAC Pr(x ∈ [{85, 1500}, {95, 3500}]±1) ≥ 0.5 on columns [t rpm]\x1b[0m.
+A result with δ = \x1b[34m0.5\x1b[0m is unexpected. To understand what is happening, we examine the outliers.
+Outliers between \x1b[34m+0.0\x1b[0m and \x1b[34m+1.0\x1b[0m are: \x1b[1;37m[{96, 1800}, {84, 2000}]\x1b[0m.
+
+There are very few outliers, which suggests that the parameters may not be chosen correctly.
+
+The question is: what does ε = \x1b[34m1.0\x1b[0m mean in two-dimensional domain? Should ε correspond to:
+  * 10 degrees of temperature difference, or
+  * 1500 RPM difference?
+To answer this, we need to understand how distance is computed.
+
+The parallelepiped uses the Chebyshev metric to calculate distance between value tuples:
+    \x1b[1;37md(x, y) = max{|x[1] - y[1]|, ..., |x[n] - y[n]|}\x1b[0m
+
+In our case:
+  * temperature differences are on the order of tens;
+  * RPM differences are on the order of thousands.
+As a result, RPM differences dominate the distance computation, making temperature differences
+almost irrelevant. This issue affects all coordinate-wise metric-based domains (currently
+Parallelepiped and Ball, though custom domains can be implemented in C++).
+
+To address this, such domains support \x1b[36mleveling coefficients\x1b[0m, which rescale individual
+dimensions. With leveling coefficients, the distance becomes:
+    \x1b[1;37md(x, y) = max{|x[1] - y[1]| * lc[1], ..., |x[n] - y[n]| * lc[n]}\x1b[0m
+To normalize temperatures and RPM scales, we use leveling_coefficients=\x1b[34m[1, 0.01]\x1b[0m parameter.
+This treats a 100 RPM difference as comparable to a 1°C difference.
+
+With leveling coefficients applied, we rerun the algorithm.
+
+Algorithm result: \x1b[32mDomain PAC Pr(x ∈ [{85, 1500}, {95, 3500}]±7) ≥ 0.954545 on columns [t rpm]\x1b[0m.
+This result is now meaningful and consistent with the findings from the first example.
+
+To better understand the effect of leveling coefficients, let's inspect the outliers.
+Outliers between \x1b[34m+0\x1b[0m and \x1b[34m+5\x1b[0m: \x1b[1;37m[{96, 1800}, {84, 2000}, {89, 1400}, {90, 1000}, {80, 3000}, {95, 4000}]\x1b[0m.
+You can observe that the outliers reflect the normalized distance.
+
+It is recommended to continue with the third example (\x1b[36mexamples/basic/verifying_pac/verifying_domain_pac3.py\x1b[0m),
+which introduces another basic domain type: Ball.
+'''
+
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac3.py-None-verifying_domain_pac3_output] verifying_domain_pac3_output'] = '''This example demonstrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+It is the third example of "Basic Domain PAC verification" series (see the \x1b[36mexamples/basic/verifying_pac/\x1b[0m directory).
+If you haven't read first and second parts yet, it is recommended to start there.
+
+In the first example we verified the following Domain PAC on temperature sensor readings:
+    \x1b[34mDomain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9\x1b[0m
+
+In the second example, we added tachometer readings and validated a Domain PAC on two columns using
+the Parallelepiped domain.
+
+The sensor readings are the same as before:
+\x1b[1;37m  t    rpm
+---  -----
+ 79    900
+ 78   2000
+ 78   3000
+ 78   2500
+ 79   3600
+ 80   3000
+ 79   2500
+ 85   1500
+ 90   1000
+ 89   1400
+ 94   1700
+ 96   1800
+104   3500
+ 93   2700
+ 90   2100
+ 88   1900
+ 86   1500
+ 84   2000
+ 87   3100
+ 90   3400
+ 95   4000
+ 92   2800\x1b[0m
+
+The parallelepiped \x1b[34m[{85, 1500}, {95, 3500}]\x1b[0m is a rectangle in the (temperature, RPM) space:
+    (95, 1500)      (95, 3500)
+            +--------+
+            |        |
+            +--------+
+    (85, 1500)      (85, 3500)
+
+Our task from the second example was:
+    The normal operating RPM for this engine is \x1b[34m[1500, 3500]\x1b[0m. Values outside this range are
+    not harmful by themselves (as long as they are within \x1b[34m[0, 5000]\x1b[0m), but:
+        * A cold engine may stall at low RPM and can be damaged at high RPM.
+        * An overheated engine is especially vulnerable at RPM values outside \x1b[34m[1500, 3500]\x1b[0m, because
+          cooling efficiency depends on RPM.
+
+A rectangle does not perfectly describe these conditions. For example,
+    * (80, 3900) is very harmful,
+    * (80, 1600) is mostly acceptable.
+However, both points have the same distance from the rectangle boundary. This shows that a shape
+with sharp corners does not model the risk accurately.
+What we really want is a smooth shape without corners -- an ellipse.
+
+In this approach, ellipses (and their higher-dimensional equivalents) are represented by the Ball domain.
+You might wonder: a ball has the same radius in all dimensions, while an ellipse has different ones.
+The answer is leveling coefficients.
+
+In metric-space terms, a ball is defined as \x1b[34mB = {x : dist(x, center) < r}.
+The Ball domain uses the Euclidean metric:
+    \x1b[1;37mdist(x, y) = sqrt(((x[1] - y[1]) * lc[1])^2 + ... + ((x[n] - y[n]) * lc[n])^2)\x1b[0m
+Here, lc is the list of leveling coefficients, introduced in the second example. They allow us to
+scale dimensions differently -- effectively turning a circle into an ellipse.
+
+To balance temperature and RPM scales, we use leveling_coefficients=\x1b[34m[1, 0.005]\x1b[0m.
+This treats a 200 RPM difference as roughly equivalent to a 1°C difference.
+
+We now run the Domain PAC verifier with domain=\x1b[34mB({90, 2500}, 5)\x1b[0m.
+Algorithm result:
+    \x1b[32mDomain PAC Pr(x ∈ B({90, 2500}, 5)±7.29837) ≥ 0.909091 on columns [t rpm]\x1b[0m
+Outliers between \x1b[34m+7.3\x1b[0m and \x1b[34m+∞\x1b[0m: \x1b[1;37m[{79, 900}, {104, 3500}]\x1b[0m.
+
+For comparison, the Parallelepiped domain previously produced:
+    \x1b[31mDomain PAC Pr(x ∈ [{85, 1500}, {95, 3500}]±7) ≥ 0.954545 on columns [t rpm]\x1b[0m
+Outliers between \x1b[34m+7.0\x1b[0m and \x1b[34m+∞\x1b[0m: \x1b[1;37m[{104, 3500}]\x1b[0m.
+
+Although the numerical values differ slightly, the Ball domain better reflects the actual operating
+conditions, because it models gradual risk changes instead of sharp rectangular boundaries.
+
+It is recommended to continue with the fourth example (\x1b[36mexamples/basic/verifying_pac/verifying_domain_pac3.py\x1b[0m),
+which demonstrates another practical usage of the Ball domain.
+'''
+
+snapshots['test_example[basic/verifying_pac/verifying_domain_pac4.py-None-verifying_domain_pac4_output] verifying_domain_pac4_output'] = '''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+It is the final example in the "Basic Domain PAC verification" series (see the \x1b[36mexamples/basic/verifying_pac/\x1b[0m directory).
+If you haven't read the first three parts yet, it is recommended to start there.
+
+Consider the following dataset of users' attempts to type a difficult Spanish word:
+\x1b[1;37mQuery
+------------
+Desbordante
+Dezbordante
+Desbordanto
+Deezbardanta
+Desbordant
+Desbordante
+Disbordantah
+Desbbdante
+Desbordante
+desbordante\x1b[0m
+
+We want to show that most users can remember difficult words almost exactly.
+In probabilistic terms, we want to verify the following Domain PAC:
+    \x1b[34mPr(dist(x, "Desbordante") ≤ 3) ≥ 0.9\x1b[0m
+
+To measure the similarity between words, we use the Levenshtein distance, which counts how many
+character insertions, deletions, or substitutions are required to transform one string into another.
+In Desbordante, Levenshtein distance is the default metric for strings, so no additional
+configuration is needed. Based on the previous examples, the most suitable domain here is the Ball
+domain, because we are measuring distance from a single center value.
+
+We run the Domain PAC verifier with the following parameter: domain=\x1b[34mB(Desbordante, 0)\x1b[0m.
+Result: \x1b[32mDomain PAC Pr(x ∈ B(Desbordante, 0)±3) ≥ 0.9 on columns [Query]\x1b[0m.
+This means that \x1b[32m90.0%\x1b[0m of our users make no more than \x1b[32m3.0\x1b[0m typos in the word
+"Desbordante", which satisfies our requirement.
+
+If you would like to see which specific words contain a given number of typos, you can inspect the
+outliers (see previous examples).
+
+Now that you have completed all basic examples, you can continue with the advanced example:
+\x1b[36mexamples/advanced/verifying_pac/verifying_domain_pac_custom_domain.py\x1b[0m.
+This example demonstrates how to define and use a Custom domain.
+'''
+
+snapshots['test_example[basic/verifying_pattern_fd.py-None-verifying_pattern_fd_output] verifying_pattern_fd_output'] = '''Pattern FD validation in Desbordante. This example is based on 'Pattern Functional Dependencies for Data Cleaning' by Abdulhakim Qahtan, Nan Tang, Mourad Ouzzani, Yang Cao, and Michael Stonebraker, Proceedings of the VLDB Endowment (PVLDB), 13(5), 2020. https://www.vldb.org/pvldb/vol13/p684-qahtan.pdf
+
+Imagine that license numbers issued in a city should have a particular prefix followed by three digits. If one number is missing a letter, we can flag that row without knowing the correct number in advance. This is validation: we supply the dependency and its patterns for Desbordante to check.
+
+Formally, a Pattern FD is written (X -> Y, T): X and Y are sets of columns, and T is a pattern tableau. Each row of T assigns patterns to columns in X and Y. Both sides may contain several columns; lhs_indices and rhs_indices are lists of their zero-based column indices. For example, lhs_indices=[2, 3] uses City and Zip, while rhs_indices=[0, 4] checks Licensee Name and Licensee Number. Here we specify a pattern for every listed column. The running example uses one column on each side to keep the output readable.
+
+The paper draws a bar over a constrained part: matching rows must agree on that part. In Desbordante's Regex(pattern), write <...> instead. For example, Regex(r'<\\D{3}>\\D{2}') accepts five digits and compares the first three. The bar and angle brackets are notation for comparison, not characters in the data. Regex(r'BBWLHR\\D{3}') checks only the value's structure: the literal prefix BBWLHR followed by three digits. Here \\D means a digit in Desbordante's pattern language, unlike Python's regex escape \\D.
+
+Token(text, position) specifies a token-position pair: the given text must appear at a zero-based position. Depending on the column's mode, position counts tokens or characters; in this example the whole city name starts at position 0. The paper's bottom symbol (⊥) is Wildcard() in Python. It can be placed in a tableau row as {ZIP: Wildcard()}. It accepts any value; when values are compared within a group, their complete values are used. Regex also supports \\A (any character), \\U (uppercase), \\L (lowercase), and \\S (a non-word symbol), as well as repetitions such as {N}, * and +. Use raw Python strings for patterns containing backslashes.
+
+Options available to this verifier:
+  load_data(table=...): the input table, here a pandas DataFrame
+  load_data(is_null_equal_null=...): whether nulls compare equal (default: True)
+  execute(lhs_indices=...): zero-based indices of the LHS columns
+  execute(rhs_indices=...): zero-based indices of the RHS columns
+  execute(patterns=...): the pattern tableau, a list of column-to-pattern maps
+  execute(min_pattern_fd_coverage=...): minimum distinct rows matching a tableau LHS
+  execute(min_pattern_inclusion=...): minimum LHS matches for every tableau row
+  execute(max_rhs_deviation=...): maximum allowed RHS violation fraction
+
+The licenses dataset contains the following rows. Row numbers on the left are zero-based and will also appear in the validation results:
+
+                          Licensee Name                   Street          City    Zip Licensee Number
+0                   DEL FRISCO'S GRILLE  11800 GRAND PARK AVENUE     ROCKVILLE  20852       BBWLHR856
+1   PALADAR LATIN KITCHEN & RUM BAR - G   203 CROWNE PARK AVENUE  GAITHERSBURG  20878       BBWLHR855
+2                   29 CONVENIENCE MART    10755 COLESVILLE ROAD    GERMANTOWN  20901        BWLCC021
+3                          ASIA NINE II      254 CROWN PARK ROAD  GAITHERSBURG  20878       BBWLHR861
+4                      BLO BLOW DRY BAR  317 ELLINGTON BOULEVARD  GAITHERSBURG  20878       BBWLHR866
+5                       MAKI MAKI SUSHI       8023 WISCONSIN AVE    GERMANTOWN  20814        CBWLC002
+6                CAMBRIA HOTEL & SUITES     1 HELEN HENEGHAN WAY     ROCKVILLE  20850     BBWLHM20442
+7                           CARLUCCIO'S       11826 TRADE STREET    GERMANTOWN  20852       CBWLCC021
+8       BRETTON WOODS RECREATION CENTER         15700 RIVER ROAD    GERMANTOWN  20874       CBWLCC006
+9                         TEDS BULLETIN  220 ELLINGTON BOULEVARD  GAITHERSBURG  20878       BBWLHR185
+10              POOLESVILLE GOLF COURSE  16601 WEST WILLARD ROAD    GERMANTOWN  20837       CBWLCC007
+11                  OLD TOWN POUR HOUSE  212 ELLINGTON BOULEVARD  GAITHERSBURG  20878       BBWLHR187
+
+Our proposed dependency is City -> Licensee Number. The pattern tableau has two rows: for GAITHERSBURG, a license number must start with BBWLHR; for GERMANTOWN, it must start with CBWLCC. Both prefixes are followed by exactly three digits. The Python names Token and Regex correspond to the two kinds of patterns in this tableau. Other cities, such as ROCKVILLE, are outside these tableau rows.
+
+  City = Token('GAITHERSBURG', 0) -> Licensee Number = Regex('BBWLHR\\\\D{3}')
+  City = Token('GERMANTOWN', 0) -> Licensee Number = Regex('CBWLCC\\\\D{3}')
+
+We require at least four LHS matches for each tableau row (min_pattern_inclusion=4) and ten distinct LHS-matching rows overall (min_pattern_fd_coverage=10). For each tableau row, RHS deviation is its violating rows divided by its LHS-matching rows. The reported max_rhs_deviation is the largest such fraction; the allowed limit is 0.2. Desbordante reports the observed values alongside the user-supplied limits; it does not change those limits.
+
+Results on the original data: ['City'] -> ['Licensee Number']
+  Pattern FD holds: False
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.40
+  Violating rows: 2
+  Clusters with violations: 1
+  Cluster 1:
+    row 2: ['GERMANTOWN'] -> ['BWLCC021']  <-- violation
+    row 5: ['GERMANTOWN'] -> ['CBWLC002']  <-- violation
+    row 7: ['GERMANTOWN'] -> ['CBWLCC021']
+    row 8: ['GERMANTOWN'] -> ['CBWLCC006']
+    row 10: ['GERMANTOWN'] -> ['CBWLCC007']
+
+In the original data, both city patterns cover five rows. Two GERMANTOWN license numbers lack a letter in the expected CBWLCC prefix, so that tableau row has deviation 2/5 = 0.4. This exceeds the allowed 0.2.
+
+To illustrate the result, change the two highlighted values in a copy of the table so they match the expected pattern, then run the same validation again. These are illustrative values, not verified license numbers. The CSV file is unchanged.
+
+  row 2: BWLCC021 -> CBWLCC021
+  row 5: CBWLC002 -> CBWLCC002
+
+Results after changing the highlighted values: ['City'] -> ['Licensee Number']
+  Pattern FD holds: True
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.00
+  Violating rows: 0
+  Clusters with violations: 0
+
+Previously highlighted rows no longer highlighted: [2, 5]
+
+The same data can also be checked with a different threshold. If we allow max_rhs_deviation=0.4 on the original table, pattern_fd_holds() becomes true, but the two highlighted rows remain. Changing a threshold changes the acceptance decision, not the data.
+
+Results on original data with a relaxed limit: ['City'] -> ['Licensee Number']
+  Pattern FD holds: True
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.40
+  Violating rows: 2
+  Clusters with violations: 1
+  Cluster 1:
+    row 2: ['GERMANTOWN'] -> ['BWLCC021']  <-- violation
+    row 5: ['GERMANTOWN'] -> ['CBWLC002']  <-- violation
+    row 7: ['GERMANTOWN'] -> ['CBWLCC021']
+    row 8: ['GERMANTOWN'] -> ['CBWLCC006']
+    row 10: ['GERMANTOWN'] -> ['CBWLCC007']
+
+Finally, use two LHS columns: City and Zip. A row must satisfy both the city token and the five-digit Zip pattern to be included. Since Regex(r'\\D{5}') has no <...> part, the complete Zip values are used when grouping LHS rows. This example has two LHS columns, and the API allows more; rhs_indices can likewise list multiple RHS columns, with their patterns included in each tableau row.
+
+Results with two LHS columns: ['City', 'Zip'] -> ['Licensee Number']
+  Pattern FD holds: True
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.00
+  Violating rows: 0
+  Clusters with violations: 0
+
+'''
+
 snapshots['test_example[basic/verifying_pfd.py-None-verifying_pfd_output] verifying_pfd_output'] = '''Dataset: examples/datasets/glitchy_sensor_2.csv
     Id DeviceId  Data
 0    1      D-1  1001
@@ -4880,6 +7149,159 @@ Third violating cluster:
 14  15      D-5  1015
 15  16      D-5  1015
 
+'''
+
+snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
+(SDs) using the Desbordante library. Algorithm is based on the
+article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
+and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB
+Endow. 2, 1 (August 2009), 574–585.
+
+
+An SD expresses a relationship between ordered attributes,
+written as X -> [g1, g2] Y. This means that when the dataset
+is sorted by X, the difference between the Y-values of any
+two consecutive records must fall within the specified
+interval [g1, g2].
+
+Validation checks whether a user-specified SD holds for a given
+dataset, utilizing an edit-distance based confidence metric.
+Confidence is determined by the minimum number of operations
+(OPS) — record insertions or deletions — required to make the
+sequence completely valid.
+
+Confidence = (N - OPS) / N, where N is the number of rows in the
+dataset. If confidence = 1, the dependency is a perfect fit for
+the pattern with no outliers or exceptions. Confidence can't be
+exactly 0, because in the worst case we need to delete all but
+one record so the SD holds; thus, confidence is at least 1/N.
+
+Desbordante detects SD violations, pinpointing exactly which
+rows must be deleted and where virtual records should be
+inserted to restore the correct sequence. Right now, X and
+Y can be represented by a single column each; however, it
+can be expanded in the future.
+
+In this example, let's look at a dataset containing network
+performance statistics. Specifically, network polls probed
+periodically.
+
+Let's say we want to check whether the data collector probes
+the network routers at the expected frequency, e.g., every 9
+to 11 seconds.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         4    70
+4         5    80
+5         6    90
+6         7   100
+7         8   110
+8         9   120
+9        10   130
+10       11   140
+11       12   150
+12       13   152
+13       14   154
+14       15   240
+15       16   250
+16       17   260
+17       18   270
+18       19   280
+19       20   290
+20       21   300
+21       22   310
+22       23   320
+23       24   330
+24       25   340
+25       26   350
+26       27   360
+27       28   370
+28       29   380
+29       30   390
+30       31   890
+--- Original Data Results ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;31mFalse\x1b[0m
+Operations needed (OPS): 14
+Confidence: 0.5484
+
+\x1b[1;34m--- Detected Violations ---\x1b[0m
+  \x1b[1;43m#1 INSERTION:\x1b[0m Gap between row 2 and 3.
+       Values: 30.0 -> 70.0. Number of required insertions: from 3 to 3
+  \x1b[1;31m#2 DELETION:\x1b[0m Row index 12 must be deleted.
+  \x1b[1;31m#3 DELETION:\x1b[0m Row index 13 must be deleted.
+  \x1b[1;43m#4 INSERTION:\x1b[0m Gap between row 11 and 14.
+       Values: 150.0 -> 240.0. Number of required insertions: from 8 to 9
+  \x1b[1;31m#5 DELETION:\x1b[0m Row index 30 must be deleted.
+
+
+We can see that the rule is violated in several places.
+This may indicate missing data due to an unresponsive router,
+or spurious measurements.
+
+Let's run a simple python function to automatically fix the
+dataset by deleting extra records and inserting missing ones.
+
+    PollNum  Time
+0         1    10
+1         2    20
+2         3    30
+3         3    40
+4         3    50
+5         3    60
+6         4    70
+7         5    80
+8         6    90
+9         7   100
+10        8   110
+11        9   120
+12       10   130
+13       11   140
+14       12   150
+15       12   160
+16       12   170
+17       12   180
+18       12   190
+19       12   200
+20       12   210
+21       12   220
+22       12   230
+23       15   240
+24       16   250
+25       17   260
+26       18   270
+27       19   280
+28       20   290
+29       21   300
+30       22   310
+31       23   320
+32       24   330
+33       25   340
+34       26   350
+35       27   360
+36       28   370
+37       29   380
+38       30   390
+
+And now let's verify the fixed data:
+
+--- Verification of Fixed Data ---
+\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
+SD strictly holds: \x1b[1;32mTrue\x1b[0m
+Operations needed (OPS): 0
+Confidence: 1.0000
+
+Note: When inserting missing records to bridge the time gaps,
+we simply duplicate the 'PollNum' of the preceding valid
+record. This choice keeps the fix local and prevents the need
+to shift and rewrite all subsequent 'PollNum' values in the
+entire table.
+
+In conclusion, we've learned about SDs and how to verify them in
+your own datasets. Now, let's experiment with your own data!
 '''
 
 snapshots['test_example[basic/verifying_ucc.py-None-verifying_ucc_output] verifying_ucc_output'] = '''Checking whether (First Name) UCC holds
@@ -5184,158 +7606,4 @@ Typo candidates and context:
                                      id       worker_name supervisor_surname     workshop salary                 job_post
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
-'''
-
-
-snapshots['test_example[basic/verifying_sd.py-None-verifying_sd_output] verifying_sd_output'] = '''This example demonstrates how to validate Sequential Dependencies
-(SDs) using the Desbordante library. Algorithm is based on the
-article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,
-and Divesh Srivastava. 2009. Sequential dependencies. Proc. VLDB
-Endow. 2, 1 (August 2009), 574–585. 
-
-
-An SD expresses a relationship between ordered attributes,
-written as X -> [g1, g2] Y. This means that when the dataset
-is sorted by X, the difference between the Y-values of any
-two consecutive records must fall within the specified
-interval [g1, g2].
-
-Validation checks whether a user-specified SD holds for a given
-dataset, utilizing an edit-distance based confidence metric. 
-Confidence is determined by the minimum number of operations
-(OPS) — record insertions or deletions — required to make the
-sequence completely valid.
-
-Confidence = (N - OPS) / N, where N is the number of rows in the
-dataset. If confidence = 1, the dependency is a perfect fit for 
-the pattern with no outliers or exceptions. Confidence can't be
-exactly 0, because in the worst case we need to delete all but 
-one record so the SD holds; thus, confidence is at least 1/N.
-
-Desbordante detects SD violations, pinpointing exactly which
-rows must be deleted and where virtual records should be
-inserted to restore the correct sequence. Right now, X and 
-Y can be represented by a single column each; however, it
-can be expanded in the future.
-
-In this example, let's look at a dataset containing network
-performance statistics. Specifically, network polls probed
-periodically.
-
-Let's say we want to check whether the data collector probes
-the network routers at the expected frequency, e.g., every 9
-to 11 seconds.
-
-    PollNum  Time
-0         1    10
-1         2    20
-2         3    30
-3         4    70
-4         5    80
-5         6    90
-6         7   100
-7         8   110
-8         9   120
-9        10   130
-10       11   140
-11       12   150
-12       13   152
-13       14   154
-14       15   240
-15       16   250
-16       17   260
-17       18   270
-18       19   280
-19       20   290
-20       21   300
-21       22   310
-22       23   320
-23       24   330
-24       25   340
-25       26   350
-26       27   360
-27       28   370
-28       29   380
-29       30   390
-30       31   890
---- Original Data Results ---
-\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
-SD strictly holds: \x1b[1;31mFalse\x1b[0m
-Operations needed (OPS): 14
-Confidence: 0.5484
-
-\x1b[1;34m--- Detected Violations ---\x1b[0m
-  \x1b[1;43m#1 INSERTION:\x1b[0m Gap between row 2 and 3.
-       Values: 30.0 -> 70.0. Number of required insertions: from 3 to 3
-  \x1b[1;31m#2 DELETION:\x1b[0m Row index 12 must be deleted.
-  \x1b[1;31m#3 DELETION:\x1b[0m Row index 13 must be deleted.
-  \x1b[1;43m#4 INSERTION:\x1b[0m Gap between row 11 and 14.
-       Values: 150.0 -> 240.0. Number of required insertions: from 8 to 9
-  \x1b[1;31m#5 DELETION:\x1b[0m Row index 30 must be deleted.
-
-
-We can see that the rule is violated in several places.
-This may indicate missing data due to an unresponsive router,
-or spurious measurements.
-
-Let's run a simple python function to automatically fix the 
-dataset by deleting extra records and inserting missing ones.
-
-    PollNum  Time
-0         1    10
-1         2    20
-2         3    30
-3         3    40
-4         3    50
-5         3    60
-6         4    70
-7         5    80
-8         6    90
-9         7   100
-10        8   110
-11        9   120
-12       10   130
-13       11   140
-14       12   150
-15       12   160
-16       12   170
-17       12   180
-18       12   190
-19       12   200
-20       12   210
-21       12   220
-22       12   230
-23       15   240
-24       16   250
-25       17   260
-26       18   270
-27       19   280
-28       20   290
-29       21   300
-30       22   310
-31       23   320
-32       24   330
-33       25   340
-34       26   350
-35       27   360
-36       28   370
-37       29   380
-38       30   390
-
-And now let's verify the fixed data:
-
---- Verification of Fixed Data ---
-\x1b[1;49mSD: PollNum -> [9.0, 11.0] Time
-SD strictly holds: \x1b[1;32mTrue\x1b[0m
-Operations needed (OPS): 0
-Confidence: 1.0000
-
-Note: When inserting missing records to bridge the time gaps,
-we simply duplicate the 'PollNum' of the preceding valid
-record. This choice keeps the fix local and prevents the need
-to shift and rewrite all subsequent 'PollNum' values in the
-entire table.
-
-In conclusion, we've learned about SDs and how to verify them in
-your own datasets. Now, let's experiment with your own data!
 '''

@@ -154,23 +154,13 @@ void HyMD::RegisterOptions() {
 void HyMD::ResetStateMd() {}
 
 void HyMD::LoadDataInternal() {
-    left_schema_ = std::make_shared<RelationalSchema>(left_table_->GetRelationName());
-    std::size_t const left_table_cols = left_table_->GetNumberOfColumns();
-    for (Index i : utility::IndexRange(left_table_cols)) {
-        left_schema_->AppendColumn(left_table_->GetColumnName(i));
-    }
+    left_schema_ = RelationalSchema::CreateFrom(*left_table_);
 
     if (right_table_ == nullptr) {
         right_schema_ = left_schema_;
-
         records_info_ = indexes::RecordsInfo::CreateFrom(*left_table_);
     } else {
-        right_schema_ = std::make_unique<RelationalSchema>(right_table_->GetRelationName());
-        std::size_t const right_table_cols = right_table_->GetNumberOfColumns();
-        for (Index i : utility::IndexRange(right_table_cols)) {
-            right_schema_->AppendColumn(right_table_->GetColumnName(i));
-        }
-
+        right_schema_ = RelationalSchema::CreateFrom(*right_table_);
         records_info_ = indexes::RecordsInfo::CreateFrom(*left_table_, *right_table_);
     }
 

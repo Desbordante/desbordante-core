@@ -19,7 +19,7 @@
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "core/algorithms/dd/dd_verifier/highlight.h"
-#include "core/util/create_dd.h"
+#include "python_bindings/dd/create_dd.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace python_bindings {

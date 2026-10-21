@@ -25,12 +25,7 @@ void EulerFD::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
-
-    for (size_t i = 0; i < number_of_attributes_; ++i) {
-        std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
-        schema_->AppendColumn(column_name);
-    }
+    schema_ = RelationalSchema::CreateFrom(*input_table_);
 
     // In each column mapping string values into integer values.
     // Using only hash isn't good idea because collisions don't processing.

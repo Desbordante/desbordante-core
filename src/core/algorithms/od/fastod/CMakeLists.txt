@@ -13,7 +13,6 @@ target_sources(
             util/timer.cpp
             util/type_util.cpp
 )
-target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config

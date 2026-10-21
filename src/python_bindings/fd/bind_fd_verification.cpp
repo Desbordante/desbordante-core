@@ -6,7 +6,6 @@
 
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
 #include "core/algorithms/fd/fd_verifier/highlight.h"
-#include "core/algorithms/fd/verification_algorithms.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace {

@@ -12,12 +12,12 @@ namespace table_serialization {
 
 py::tuple SerializeRelationalSchema(RelationalSchema const* schema) {
     std::vector<std::unique_ptr<Column>> const& columns = schema->GetColumns();
-    std::vector<std::pair<std::string, unsigned int>> col_data;
-    col_data.reserve(columns.size());
+    std::vector<std::string> column_names;
+    column_names.reserve(columns.size());
     for (auto const& col_ptr : columns) {
-        col_data.emplace_back(col_ptr->GetName(), col_ptr->GetIndex());
+        column_names.emplace_back(col_ptr->GetName());
     }
-    return py::make_tuple(schema->GetName(), std::move(col_data));
+    return py::make_tuple(schema->GetName(), std::move(column_names));
 }
 
 std::shared_ptr<RelationalSchema const> DeserializeRelationalSchema(py::tuple t) {
@@ -25,13 +25,8 @@ std::shared_ptr<RelationalSchema const> DeserializeRelationalSchema(py::tuple t)
         throw std::runtime_error("Invalid state for RelationalSchema pickle!");
     }
     auto schema_name = t[0].cast<std::string>();
-    auto col_data = t[1].cast<std::vector<std::pair<std::string, unsigned int>>>();
-    auto schema = std::make_shared<RelationalSchema>(std::move(schema_name));
-    for (auto& [col_name, col_index] : col_data) {
-        Column c(schema.get(), std::move(col_name), col_index);
-        schema->AppendColumn(std::move(c));
-    }
-    return schema;
+    auto column_names = t[1].cast<std::vector<std::string>>();
+    return std::make_shared<RelationalSchema>(std::move(schema_name), std::move(column_names));
 }
 
 // relational schema conversion suitable for py::hash

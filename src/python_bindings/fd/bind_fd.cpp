@@ -9,9 +9,18 @@
 
 #include <pybind11/stl.h>
 
+#include "core/algorithms/fd/aidfd/aid.h"
+#include "core/algorithms/fd/depminer/depminer.h"
+#include "core/algorithms/fd/dfd/dfd.h"
+#include "core/algorithms/fd/eulerfd/eulerfd.h"
+#include "core/algorithms/fd/fastfds/fastfds.h"
 #include "core/algorithms/fd/fd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "core/algorithms/fd/mining_algorithms.h"
+#include "core/algorithms/fd/fd_mine/fd_mine.h"
+#include "core/algorithms/fd/fdep/fdep.h"
+#include "core/algorithms/fd/fun/fun.h"
+#include "core/algorithms/fd/hyfd/hyfd.h"
+#include "core/algorithms/fd/pyro/pyro.h"
 #include "core/config/indices/type.h"
 #include "core/util/bitset_utils.h"
 #include "python_bindings/py_util/bind_primitive.h"
@@ -73,24 +82,10 @@ void BindFd(py::module_& main_module) {
                     }));
 
     static constexpr auto kPyroName = "Pyro";
-    static constexpr auto kTaneName = "Tane";
-    static constexpr auto kPFDTaneName = "PFDTane";
-    auto fd_algos_module = BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep,
-                                         FdMine, FUN, Pyro, Tane, PFDTane>(
-            fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
-            {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine", "FUN",
-             kPyroName, kTaneName, kPFDTaneName});
-
-    auto define_submodule = [&fd_algos_module, &main_module](char const* name,
-                                                             std::vector<char const*> algorithms) {
-        auto algos_module = main_module.def_submodule(name).def_submodule("algorithms");
-        for (auto algo_name : algorithms) {
-            algos_module.attr(algo_name) = fd_algos_module.attr(algo_name);
-        }
-        algos_module.attr("Default") = algos_module.attr(algorithms.front());
-    };
-
-    define_submodule("afd", {kPyroName, kTaneName});
-    define_submodule("pfd", {kPFDTaneName});
+    auto fd_algos_module =
+            BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep, FdMine, FUN,
+                          Pyro>(fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
+                                {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep",
+                                 "FdMine", "FUN", kPyroName});
 }
 }  // namespace python_bindings

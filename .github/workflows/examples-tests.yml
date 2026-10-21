@@ -45,8 +45,6 @@ jobs:
         with:
           os: ubuntu-latest
           toolset: gcc
-          download-googletest: false
-          download-pybind: true
 
       - name: Build pip package
         shell: bash

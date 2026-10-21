@@ -57,19 +57,22 @@ def exact_scenario(table='examples/datasets/duplicates_short.csv'):
 
     algo.execute(lhs_indices=[1], rhs_indices=[2])
     print_results_for_fd(algo, data, 1, 2)
-    print("We learned that in this case the specified FD does not hold and there are two "
-          "clusters of rows that contain values that prevent our FD from holding. "
-          f"A {BLUE_CODE}cluster{DEFAULT_COLOR_CODE} (with respect to a fixed FD) is a collection "
-          "of rows that share the same left-hand side part but differ on the right-hand side one.")
-    print("Let's take a closer look at them.\n")
-    print('In the first cluster, three values are "0" and a single one is "nan". '
-          'This suggests that this single entry with the "nan" value is a result of a mistake by someone '
-          'who is not familiar with the table population policy. Therefore, it should probably be changed to "0".\n')
-    print("Now let's take a look at the second cluster. "
-          'There are two entries: "27" and "28". In this case, it is probably a typo, since buttons 7 and 8 are located '
-          "close to each other on the keyboard.\n")
-    print("Having analyzed these clusters, we can conclude that our FD does not hold due to typos in the data. "
-          "Therefore, by eliminating them, we can get this FD to hold (and make our dataset error-free).")
+    print(f'''We learned that in this case the specified FD does not hold and there are two
+clusters of rows that contain values that prevent our FD from holding.
+A {BLUE_CODE}cluster{DEFAULT_COLOR_CODE} (with respect to a fixed FD) is a collection
+of rows that share the same left-hand side part but differ on the right-hand side one.
+Let's take a closer look at them.
+
+In the first cluster, three values are "0" and a single one is "nan".
+This suggests that this single entry with the "nan" value is a result of a mistake by someone
+who is not familiar with the table population policy. Therefore, it should probably be changed to "0".
+
+Now let's take a look at the second cluster.
+There are two entries: "27" and "28". In this case, it is probably a typo, since buttons 7 and 8 are located
+close to each other on the keyboard.
+
+Having analyzed these clusters, we can conclude that our FD does not hold due to typos in the data.
+Therefore, by eliminating them, we can get this FD to hold (and make our dataset error-free).''')
 
 
 def approximate_scenario(table='examples/datasets/DnD.csv'):
@@ -98,3 +101,10 @@ def approximate_scenario(table='examples/datasets/DnD.csv'):
 exact_scenario()
 print()
 approximate_scenario()
+
+print("\n" + "-" * 80)
+print("Note: This example uses the default error metric internally (g1).")
+print("Desbordante supports several other AFD metrics — g2, tau, mu_plus, fi —")
+print("each offering a different perspective on dependency strength.\n")
+print("A dedicated walkthrough of all available metrics can be found at:")
+print(f"{GREEN_CODE}examples/basic/verifying_fd_afd_metric.py{DEFAULT_COLOR_CODE}")

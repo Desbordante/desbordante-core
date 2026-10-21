@@ -7,7 +7,7 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::sd::util ${DESBORDANTE_PREFIX}::model::table
-                    Boost::headers magic_enum::magic_enum
+                    Boost::headers
 )
 
 set(NAME sd.util)
@@ -17,6 +17,4 @@ target_sources(
     PRIVATE util/data_structures.cpp
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
-target_link_libraries(
-    ${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers magic_enum::magic_enum
-)
+target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers)

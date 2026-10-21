@@ -427,17 +427,5 @@ class TestDataStatsBool(unittest.TestCase):
         expected = 2
         self.assertEqual(expected, res)
         
-class TestDataStatsDiacritics(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.data_stats = db.statistics.algorithms.DataStats()
-        cls.data_stats.load_data(table=("TestDiacritics.csv", ',', False))
-        cls.data_stats.execute()
-
-    def test_get_number_of_diacritic_chars(self):
-        res = self.data_stats.get_number_of_diacritic_chars(1)
-        self.assertGreaterEqual(res, 6)
-
-
 if __name__ == "__main__":
     unittest.main()

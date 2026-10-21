@@ -8,7 +8,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/ucc/ucc.h"
-#include "core/algorithms/ucc/verification_algorithms.h"
+#include "core/algorithms/ucc/ucc_verifier/ucc_verifier.h"
 #include "core/model/table/column.h"
 #include "python_bindings/bind_main_classes.h"
 #include "python_bindings/py_util/bind_primitive.h"

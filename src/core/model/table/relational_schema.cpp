@@ -6,7 +6,31 @@
 #include "core/model/table/vertical.h"
 #include "core/model/table/vertical_map.h"
 
-RelationalSchema::RelationalSchema(std::string name) : columns_(), name_(std::move(name)) {}
+namespace {
+std::vector<std::unique_ptr<Column>> MakeColumns(RelationalSchema const* schema,
+                                                 std::vector<std::string> column_names) {
+    std::vector<std::unique_ptr<Column>> columns;
+    std::size_t const number_of_columns = column_names.size();
+    columns.reserve(number_of_columns);
+    for (model::ColumnIndex i = 0; i != number_of_columns; ++i) {
+        columns.push_back(std::make_unique<Column>(schema, std::move(column_names[i]), i));
+    }
+    return columns;
+}
+}  // namespace
+
+RelationalSchema::RelationalSchema(std::string name, std::vector<std::string> column_names)
+    : columns_(MakeColumns(this, std::move(column_names))), name_(std::move(name)) {}
+
+std::unique_ptr<RelationalSchema> RelationalSchema::CreateFrom(model::IDatasetStream& table) {
+    std::size_t const number_of_columns = table.GetNumberOfColumns();
+    std::vector<std::string> column_names;
+    column_names.reserve(number_of_columns);
+    for (model::ColumnIndex i = 0; i != number_of_columns; ++i) {
+        column_names.push_back(table.GetColumnName(i));
+    }
+    return std::make_unique<RelationalSchema>(table.GetRelationName(), std::move(column_names));
+}
 
 Vertical RelationalSchema::GetVertical(boost::dynamic_bitset<> indices) const {
     return {this, std::move(indices)};
@@ -34,14 +58,6 @@ Column const* RelationalSchema::GetColumn(std::string const& col_name) const {
 
 Column const* RelationalSchema::GetColumn(size_t index) const {
     return columns_.at(index).get();
-}
-
-void RelationalSchema::AppendColumn(std::string const& col_name) {
-    columns_.push_back(std::make_unique<Column>(this, col_name, columns_.size()));
-}
-
-void RelationalSchema::AppendColumn(Column column) {
-    columns_.push_back(std::make_unique<Column>(std::move(column)));
 }
 
 size_t RelationalSchema::GetNumColumns() const {

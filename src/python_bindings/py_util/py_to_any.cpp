@@ -1,6 +1,8 @@
 #include <pybind11/pybind11.h>
 
+#include <algorithm>
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -12,11 +14,13 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
-#include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cfd/fd_first/enums.h"
+#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
+#include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 #include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -25,17 +29,23 @@
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/config/custom_metric/custom_metric/type.h"
+#include "core/config/custom_metric/custom_metrics/type.h"
+#include "core/config/custom_metric/custom_vector_metric/type.h"
+#include "core/config/enum_members_string.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/index.h"
 #include "core/model/transaction/input_format_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
 #include "core/parser/sequence_parser/file_sequence_parser.h"
-#include "core/util/enum_to_available_values.h"
 #include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
 #include "python_bindings/py_util/iterable_sequence_stream.h"
+#include "python_bindings/py_util/py_custom_metrics.h"
 
 namespace {
 
@@ -64,11 +74,13 @@ config::InputTable CreateCsvParser(std::string_view option_name, py::tuple const
             CastAndReplaceCastError<bool>(option_name, arguments[2]));
 }
 
-config::InputTable PythonObjToInputTable(std::string_view option_name, py::handle obj) {
+config::InputTable PythonObjToInputTable(
+        std::string_view option_name, py::handle obj,
+        model::Index object_index = python_bindings::kSingleDataFrame) {
     if (py::isinstance<py::tuple>(obj)) {
         return CreateCsvParser(option_name, py::cast<py::tuple>(obj));
     }
-    return python_bindings::CreateDataFrameReader(obj);
+    return python_bindings::CreateDataFrameReader(obj, object_index);
 }
 
 template <typename Type>
@@ -88,20 +100,12 @@ std::pair<std::type_index, ConvFunc> const kEnumConvPair{
             if (enum_optional) return *enum_optional;
 
             std::stringstream error_message;
-            std::stringstream possible_values;
-
-            possible_values << "[";
-            constexpr auto& values = magic_enum::enum_values<EnumType>();
-            for (size_t i = 0; i < values.size(); ++i) {
-                possible_values << util::EnumToStr(values[i]);
-                if (i < values.size() - 1) {
-                    possible_values << "|";
-                }
-            }
-            possible_values << "]";
+            constexpr auto& values_cstr_chars = config::kEnumMembersCStrBuffer<EnumType>;
+            std::string_view possible_values{values_cstr_chars.data(),
+                                             values_cstr_chars.size() - 1};
 
             error_message << "Incorrect value '" << user_str << "' for option \"" << option_name
-                          << "\". Possible values: " << possible_values.str();
+                          << "\". Possible values: " << possible_values;
 
             throw config::ConfigurationError(error_message.str());
         }};
@@ -171,7 +175,10 @@ boost::any SequenceStreamToAny(std::string_view option_name, py::handle obj) {
 boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     auto tables = CastAndReplaceCastError<std::vector<py::handle>>(option_name, obj);
     std::vector<config::InputTable> parsers;
-    for (auto const& table : tables) parsers.push_back(PythonObjToInputTable(option_name, table));
+    parsers.reserve(tables.size());
+    for (std::size_t i = 0; i != tables.size(); ++i) {
+        parsers.push_back(PythonObjToInputTable(option_name, tables[i], i));
+    }
     return parsers;
 }
 
@@ -195,10 +202,35 @@ boost::any StringVectorToAny(std::string_view option_name, py::handle obj) {
     return out;
 }
 
+boost::any CustomMetricToAny(std::string_view, py::handle obj) {
+    return config::CustomMetricOptionType{
+            new python_bindings::PyCustomMetric(py::reinterpret_borrow<py::object>(obj))};
+}
+
+boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
+    auto metric_handles = CastAndReplaceCastError<std::vector<py::handle>>(option_name, obj);
+    config::CustomMetricsOptionType result(metric_handles.size());
+    std::ranges::transform(metric_handles, result.begin(),
+                           [](py::handle handle) -> config::CustomMetricOptionType {
+                               if (handle.is_none()) {
+                                   return nullptr;
+                               }
+                               return std::make_shared<python_bindings::PyCustomMetric>(
+                                       py::reinterpret_borrow<py::object>(handle));
+                           });
+    return result;
+}
+
+boost::any CustomVectorMetricToAny(std::string_view, py::handle obj) {
+    return config::CustomVectorMetricOptionType{
+            new python_bindings::PyCustomVectorMetric(py::reinterpret_borrow<py::object>(obj))};
+}
+
 std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<double>,
         kNormalConvPair<unsigned int>,
+        kNormalConvPair<unsigned long>,
         kNormalConvPair<long double>,
         kNormalConvPair<std::vector<unsigned int>>,
         kNormalConvPair<unsigned short>,
@@ -238,6 +270,11 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
         kNormalConvPair<algos::pattern_fd::PatternsTable>,
+        kNormalConvPair<algos::cfd::RawCFD>,
+        kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+        {typeid(config::CustomMetricType), CustomMetricToAny},
+        {typeid(config::CustomMetricsType), CustomMetricsToAny},
+        {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
 };
 
 }  // namespace

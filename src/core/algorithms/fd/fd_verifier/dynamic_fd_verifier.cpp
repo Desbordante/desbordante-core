@@ -186,15 +186,11 @@ std::vector<int> DynamicFDVerifier::ParseRowForPLI(
     std::vector<int> result{};
     for (size_t index : indices) {
         std::string const& field = *(row_begin + index);
-        if (field.empty()) {
-            result.emplace_back(kNullValueId);
-        } else {
-            auto [iter, is_value_new] = value_dictionary_.try_emplace(field, next_value_id_);
-            if (is_value_new) {
-                next_value_id_++;
-            }
-            result.emplace_back(iter->second);
+        auto [iter, is_value_new] = value_dictionary_.try_emplace(field, next_value_id_);
+        if (is_value_new) {
+            next_value_id_++;
         }
+        result.emplace_back(iter->second);
     }
     return result;
 }

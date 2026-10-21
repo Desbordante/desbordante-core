@@ -34,7 +34,7 @@ def print_introduction():
         "Imagine that license numbers issued in a city should have a particular prefix "
         "followed by three digits. If one number is missing a letter, we can flag that "
         "row without knowing the correct number in advance. This is validation: we "
-        "supply the dependency and its patterns instead of asking Desbordante to mine them.",
+        "supply the dependency and its patterns for Desbordante to check.",
         "Formally, a Pattern FD is written (X -> Y, T): X and Y are sets of columns, "
         "and T is a pattern tableau. Each row of T assigns patterns to columns in "
         "X and Y. Both sides may contain several columns; lhs_indices and rhs_indices "
@@ -196,7 +196,7 @@ def run_example():
 
     explain(
         "The same data can also be checked with a different threshold. If we "
-        "allow max_rhs_deviation=0.4 on the original, uncorrected table, "
+        "allow max_rhs_deviation=0.4 on the original table, "
         "pattern_fd_holds() becomes true, but the two highlighted rows remain. "
         "Changing a threshold changes the acceptance decision, not the data."
     )

@@ -154,5 +154,4 @@ struct ApproximateDatasets<algos::EulerFD> {
             {tests::kLegacyPayors, 43612},
     }};
 };
-
 }  // namespace tests

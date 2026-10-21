@@ -67,7 +67,8 @@ public:
     }
 
     /* Returns clusters where the AR is violated. */
-    std::unordered_map<std::string, ::model::PLI::Cluster> const& GetClustersViolatingAR() const {
+    std::unordered_map<std::string_view, ::model::PLI::Cluster> const& GetClustersViolatingAR()
+            const {
         return stats_calculator_.GetClustersViolatingAR();
     }
 

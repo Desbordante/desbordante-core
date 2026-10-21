@@ -4,40 +4,12 @@
 
 namespace algos::cfd {
 
-static std::string RawItemToJSON(RawCFD::RawItem const& raw_item) {
+std::string RawCFD::RawItem::ToString() const {
     std::stringstream ss;
-    ss << "{\"attribute\":" << raw_item.attribute;
-    ss << ",\"value\":";
-    if (raw_item.value.has_value()) {
-        ss << '"' << raw_item.value.value() << '"';
-    } else {
-        ss << "null";
-    }
-    ss << "}";
-    return ss.str();
-}
-
-std::string RawCFD::ToJSON() const {
-    std::stringstream ss;
-    ss << "{\"lhs\":";
-    ss << "[";
-    for (auto it = lhs_.begin(); it != lhs_.end(); ++it) {
-        if (it != lhs_.begin()) {
-            ss << ",";
-        }
-        ss << RawItemToJSON(*it);
-    }
-    ss << "]";
-    ss << ",\"rhs\":" + RawItemToJSON(rhs_) + "}";
-    return ss.str();
-}
-
-static std::string RawItemToString(RawCFD::RawItem const& item) {
-    std::stringstream ss;
-    ss << "(" << item.attribute;
+    ss << "(" << attribute;
     ss << ", ";
-    if (item.value.has_value()) {
-        ss << item.value.value();
+    if (value.has_value()) {
+        ss << value.value();
     } else {
         ss << "_";
     }
@@ -52,9 +24,9 @@ std::string RawCFD::ToString() const {
         if (it != lhs_.begin()) {
             ss << ",";
         }
-        ss << RawItemToString(*it);
+        ss << it->ToString();
     }
-    ss << "} -> " << RawItemToString(rhs_);
+    ss << "} -> " << rhs_.ToString();
     return ss.str();
 }
 

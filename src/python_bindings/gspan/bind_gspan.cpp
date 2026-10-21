@@ -2,6 +2,8 @@
 
 #include <pybind11/pybind11.h>
 
+#include <unordered_set>
+
 #include <pybind11/stl.h>
 
 #include "core/algorithms/fsm/gspan/gspan.h"
@@ -52,7 +54,11 @@ void BindGSpan(pybind11::module_& main_module) {
     pybind11::class_<gspan::FrequentSubgraph>(gspan_module, "FrequentSubgraph")
             .def_readonly("edge_list", &gspan::FrequentSubgraph::dfs_code)
             .def_readonly("support", &gspan::FrequentSubgraph::support)
-            .def_readonly("graphs_ids", &gspan::FrequentSubgraph::graphs_ids)
+            .def_property_readonly("graphs_ids",
+                                   [](gspan::FrequentSubgraph const& self) {
+                                       return std::unordered_set<int>(self.graphs_ids.begin(),
+                                                                      self.graphs_ids.end());
+                                   })
             .def("__str__", &gspan::FrequentSubgraph::ToString)
             .def("__hash__",
                  [](gspan::FrequentSubgraph const& self) {

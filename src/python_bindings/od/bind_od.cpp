@@ -6,8 +6,8 @@
 
 #include "core/algorithms/od/fastod/fastod.h"
 #include "core/algorithms/od/fastod/model/canonical_od.h"
-#include "core/algorithms/od/mining_algorithms.h"
 #include "core/algorithms/od/order/list_od.h"
+#include "core/algorithms/od/order/order.h"
 #include "core/config/indices/type.h"
 #include "core/util/bitset_utils.h"
 #include "python_bindings/py_util/bind_primitive.h"

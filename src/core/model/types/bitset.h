@@ -533,7 +533,7 @@ public:
     }
 
     // Here's the only place where users of zero-length bitsets are penalized
-    // This function is unreachable until _Unchecked methods are used
+    // This function is unreachable until Unchecked methods are used
     [[noreturn]] WordT& GetWord([[maybe_unused]] size_t) noexcept {
         // Originally, here is `throw` statement, but it violates `noexcept` specification
         // throw std::out_of_range("BaseBitset::GetWord");
@@ -782,12 +782,12 @@ public:
     }
 
     // These methods starting with underscore are SGI extensions
-    BitsetImpl<NumBits>& _Unchecked_set(size_t pos) noexcept {
+    BitsetImpl<NumBits>& Unchecked_set(size_t pos) noexcept {
         this->GetWord(pos) |= Base::MaskBit(pos);
         return *this;
     }
 
-    BitsetImpl<NumBits>& _Unchecked_set(size_t pos, int val) noexcept {
+    BitsetImpl<NumBits>& Unchecked_set(size_t pos, int val) noexcept {
         if (val) {
             this->GetWord(pos) |= Base::MaskBit(pos);
         } else {
@@ -796,17 +796,17 @@ public:
         return *this;
     }
 
-    BitsetImpl<NumBits>& _Unchecked_reset(size_t pos) noexcept {
+    BitsetImpl<NumBits>& Unchecked_reset(size_t pos) noexcept {
         this->GetWord(pos) &= ~Base::MaskBit(pos);
         return *this;
     }
 
-    BitsetImpl<NumBits>& _Unchecked_flip(size_t pos) noexcept {
+    BitsetImpl<NumBits>& Unchecked_flip(size_t pos) noexcept {
         this->GetWord(pos) ^= Base::MaskBit(pos);
         return *this;
     }
 
-    constexpr bool _Unchecked_test(size_t pos) const noexcept {
+    constexpr bool Unchecked_test(size_t pos) const noexcept {
         return ((this->GetWord(pos) & Base::MaskBit(pos)) != static_cast<WordT>(0));
     }
 
@@ -818,7 +818,7 @@ public:
 
     BitsetImpl<NumBits>& set(size_t position, bool val = true) {
         this->Check(position, "BitsetImpl::set");
-        return _Unchecked_set(position, val);
+        return Unchecked_set(position, val);
     }
 
     BitsetImpl<NumBits>& reset() noexcept {
@@ -828,7 +828,7 @@ public:
 
     BitsetImpl<NumBits>& reset(size_t position) {
         this->Check(position, "BitsetImpl::reset");
-        return _Unchecked_reset(position);
+        return Unchecked_reset(position);
     }
 
     BitsetImpl<NumBits>& flip() noexcept {
@@ -839,7 +839,7 @@ public:
 
     BitsetImpl<NumBits>& flip(size_t position) {
         this->Check(position, "BitsetImpl::flip");
-        return _Unchecked_flip(position);
+        return Unchecked_flip(position);
     }
 
     BitsetImpl<NumBits> operator~() const noexcept {
@@ -851,7 +851,7 @@ public:
     }
 
     constexpr bool operator[](size_t position) const {
-        return _Unchecked_test(position);
+        return Unchecked_test(position);
     }
 
     unsigned long to_ulong() const {
@@ -920,7 +920,7 @@ public:
 
     bool test(size_t position) const {
         this->Check(position, "BitsetImpl::test");
-        return _Unchecked_test(position);
+        return Unchecked_test(position);
     }
 
     bool all() const noexcept {
@@ -943,11 +943,11 @@ public:
         return BitsetImpl<NumBits>(*this) >>= position;
     }
 
-    size_t _Find_first() const noexcept {
+    size_t FindFirst() const noexcept {
         return this->DoFindFirst(NumBits);
     }
 
-    size_t _Find_next(size_t prev) const noexcept {
+    size_t FindNext(size_t prev) const noexcept {
         return this->DoFindNext(prev, NumBits);
     }
 
@@ -1020,7 +1020,7 @@ void BitsetImpl<NumBits>::CopyFromPtr(CharT const* s, size_t len, size_t pos, si
         if (Traits::eq(c, zero)) {
             // Here's already zero
         } else if (Traits::eq(c, one)) {
-            _Unchecked_set(i - 1);
+            Unchecked_set(i - 1);
         } else {
             throw std::invalid_argument("BitsetImpl::CopyFromPtr");
         }
@@ -1032,10 +1032,10 @@ template <typename CharT, typename Traits, typename Alloc>
 void BitsetImpl<NumBits>::CopyToString(std::basic_string<CharT, Traits, Alloc>& s, CharT zero,
                                        CharT one) const {
     s.assign(NumBits, zero);
-    size_t n = this->_Find_first();
+    size_t n = this->FindFirst();
     while (n < NumBits) {
         s[NumBits - n - 1] = one;
-        n = _Find_next(n);
+        n = FindNext(n);
     }
 }
 
@@ -1169,6 +1169,26 @@ struct BitsetSelector<S> {
 
 template <size_t S>
 using Bitset = typename bitset_impl::BitsetSelector<S>::Type;
+
+template <size_t S>
+size_t FindFirst(std::bitset<S> const& bitset) noexcept {
+    return bitset._Find_first();
+}
+
+template <size_t S>
+size_t FindFirst(bitset_impl::BitsetImpl<S> const& bitset) noexcept {
+    return bitset.FindFirst();
+}
+
+template <size_t S>
+size_t FindNext(std::bitset<S> const& bitset, size_t n) noexcept {
+    return bitset._Find_next(n);
+}
+
+template <size_t S>
+size_t FindNext(bitset_impl::BitsetImpl<S> const& bitset, size_t n) noexcept {
+    return bitset.FindNext(n);
+}
 
 }  // namespace model
 

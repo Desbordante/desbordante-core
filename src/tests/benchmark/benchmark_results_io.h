@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
@@ -89,16 +88,8 @@ public:
 
         auto now = std::chrono::system_clock::now();
         std::ostringstream date;
-        // We use ancient GCC in CI, which doesn't support calendars, so I have to use C-style
-        // output.
-        // XXX(senichenkov): remove workaround when we drop GCC-10 support
-#if defined(__cpp_lib_chrono) && (__cpp_lib_chrono >= 201907L)
         std::chrono::year_month_day ymd = std::chrono::floor<std::chrono::days>(now);
         date << ymd;
-#else
-        auto const c_time = std::chrono::system_clock::to_time_t(now);
-        date << std::put_time(std::localtime(&c_time), "%F");
-#endif
         top_level_obj["date"] = date.str();
 
         boost::json::array results_arr;

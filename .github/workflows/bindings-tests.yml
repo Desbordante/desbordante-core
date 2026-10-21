@@ -41,7 +41,7 @@ jobs:
         include:
           - os: ubuntu-latest
             toolset: gcc
-            env: CXX=g++-10
+            env: CXX=g++-14
 
           - os: ubuntu-latest
             toolset: llvm-clang
@@ -50,18 +50,18 @@ jobs:
             env: CC=clang CXX=clang++-20 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
 
           # Uncomment this to enable macOS gcc tests:
-          # - os: macos-15
+          # - os: macos-latest
           #   toolset: gcc
           #   env: CXX=g++-14 BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
 
           # Uncomment this to enable macOS llvm-clang tests:
-          # - os: macos-15
+          # - os: macos-latest
           #   toolset: llvm-clang
           #   env: CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
           
-          - os: macos-15
+          - os: macos-latest
             toolset: apple-clang
             env: CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
             
@@ -73,8 +73,6 @@ jobs:
         with:
           os: ${{ matrix.os }}
           toolset: ${{ matrix.toolset }}
-          download-googletest: false
-          download-pybind: true
       - name: Build pip package
         shell: bash
         run: |
@@ -108,6 +106,5 @@ jobs:
 
           cp test_input_data/TestDataStats.csv src/python_bindings
           cp test_input_data/TestBool.csv src/python_bindings
-          cp test_input_data/TestDiacritics.csv src/python_bindings
           cd src/python_bindings
           python test_pybind_data_stats.py
