@@ -1,6 +1,9 @@
 #pragma once
 
-#include <limits>
+#include <climits>
+#include <map>
+#include <unordered_set>
+#include <utility>
 
 #include "core/algorithms/fd/pattern_fd_verifier/highlight.h"
 #include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
@@ -11,6 +14,9 @@
 
 namespace algos::pattern_fd {
 
+using ClusterKey = std::vector<std::vector<std::string>>;
+using RowClusters = std::map<ClusterKey, std::vector<size_t>>;
+
 class PatternFDStatsCalculator {
 private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
@@ -20,11 +26,8 @@ private:
     config::IndicesType rhs_indices_;
 
     Tokenizer tokenizer_;
-    TokensMap const* tokens_map_;  // maps of tokens for each column
+    std::vector<std::unordered_set<size_t>> lhs_matched_rows_;  // rows for each pattern row
 
-    std::vector<std::unordered_set<size_t>> lhs_matched_rows_;  // rows matched for each LHS index
-
-    std::vector<model::PLI::Cluster> clusters_;
     std::vector<Highlight> highlights_;
     int pattern_fd_coverage_ = 0;
     int min_pattern_inclusion_ = INT_MAX;
@@ -38,31 +41,22 @@ private:
     std::unordered_set<size_t> FindLhsMatchesForRowPattern(
             std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
 
-    std::unordered_set<size_t> FindRegexMatches(
-            config::IndexType lhs_index,
-            std::shared_ptr<RegexPatternInfo> const& regex_pattern_info);
+    bool Matches(config::IndexType column_index, std::shared_ptr<PatternInfo> const& pattern,
+                 std::string const& value) const;
 
-    std::map<std::vector<std::string>, std::vector<size_t>> BuildLhsClusters(
-            std::unordered_set<size_t> const& matched_rows,
-            std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
+    RowClusters BuildLhsClusters(std::unordered_set<size_t> const& matched_rows,
+                                 std::unordered_map<config::IndexType,
+                                                    std::shared_ptr<PatternInfo>> const& patterns);
 
     size_t CheckClustersForDeviations(
-            std::map<std::vector<std::string>, std::vector<size_t>> const& lhs_clusters,
-            std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
-
-    std::vector<size_t> FindDeviationsByPatternCheck(
-            std::vector<size_t> const& cluster_rows,
-            std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
-
-    std::vector<size_t> FindDeviationsByComparison(
-            std::vector<size_t> const& cluster_rows,
-            std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
+            RowClusters const& lhs_clusters,
+            std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns,
+            std::unordered_set<size_t>& error_rows);
 
 public:
     PatternFDStatsCalculator(std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation)
-        : typed_relation_(typed_relation), tokenizer_(typed_relation_) {
-        tokens_map_ = &tokenizer_.GetTokensMap();
-    }
+        : typed_relation_(std::move(typed_relation)),
+          tokenizer_(typed_relation_) {}
 
     void SetParams(PatternsTable const& patterns_table, config::IndicesType const& lhs_indices,
                    config::IndicesType const& rhs_indices) {
@@ -70,10 +64,10 @@ public:
         this->lhs_indices_ = lhs_indices;
         this->rhs_indices_ = rhs_indices;
         for (auto& lhs_index : lhs_indices) {
-            tokenizer_.TokenizeColumn(lhs_index);
+            tokenizer_.PrepareColumn(lhs_index);
         }
         for (auto& rhs_index : rhs_indices) {
-            tokenizer_.TokenizeColumn(rhs_index);
+            tokenizer_.PrepareColumn(rhs_index);
         }
     }
 

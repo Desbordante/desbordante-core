@@ -1,6 +1,8 @@
 #include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 
 #include <charconv>
+#include <stdexcept>
+#include <string_view>
 
 namespace {
 
@@ -15,17 +17,7 @@ namespace algos::pattern_fd {
 
 RegexPatternInfo::RegexPatternInfo(std::string const& pattern) {
     regex_.reserve(pattern.size() * 2);
-    literals_.reserve(pattern.size() / 2);
-
-    std::string current_literal;
-    size_t pos = 0;
-
-    auto flush_literal = [&]() {
-        if (!current_literal.empty()) {
-            literals_.emplace_back(current_literal, pos - current_literal.size());
-            current_literal.clear();
-        }
-    };
+    size_t group_count = 0;
 
     std::string_view p(pattern);
     size_t i = 0;
@@ -34,18 +26,13 @@ RegexPatternInfo::RegexPatternInfo(std::string const& pattern) {
         char c = p[i];
 
         if (c == '<') {
-            flush_literal();
             regex_ += '(';
-            num_constrained_groups_++;
-            pos += 1;
+            constrained_groups_.push_back(++group_count);
             i++;
         } else if (c == '>') {
-            flush_literal();
             regex_ += ')';
-            pos += 1;
             i++;
         } else if (c == '\\') {
-            flush_literal();
             if (i + 1 >= p.size()) {
                 throw std::invalid_argument("Invalid escape sequence at end of pattern");
             }
@@ -69,7 +56,6 @@ RegexPatternInfo::RegexPatternInfo(std::string const& pattern) {
                 default:
                     throw std::invalid_argument(std::string("Invalid escape sequence: \\") + next);
             }
-            pos += 1;
             i += 2;
         } else if (c == '{') {
             size_t end = p.find('}', i);
@@ -84,43 +70,39 @@ RegexPatternInfo::RegexPatternInfo(std::string const& pattern) {
             regex_ += '{';
             regex_.append(p.substr(i + 1, end - i - 1));
             regex_ += '}';
-            pos += count;
             i = end + 1;
         } else if (IsSpecialRegexChar(c)) {
-            flush_literal();
+            if (c == '(' && (i + 1 == p.size() || p[i + 1] != '?')) ++group_count;
             regex_ += c;
-            pos += 1;
             i++;
         } else {
-            current_literal += c;
             regex_ += c;
-            pos += 1;
             i++;
         }
     }
 
-    flush_literal();
     compiled_regex_.assign(regex_, std::regex::optimize);
 }
 
-std::vector<std::string> RegexPatternInfo::ExtractConstrainedParts(std::string const& value) const {
-    std::vector<std::string> parts;
-    if (num_constrained_groups_ == 0) {
-        return parts;
-    }
+bool RegexPatternInfo::Matches(std::string const& value) const {
+    return std::regex_match(value, compiled_regex_);
+}
 
+std::optional<std::vector<std::string>> RegexPatternInfo::MatchAndExtract(
+        std::string const& value) const {
     std::smatch match_results;
+    if (!std::regex_match(value, match_results, compiled_regex_)) return std::nullopt;
 
-    if (std::regex_match(value, match_results, compiled_regex_)) {
-        for (size_t group_index = 1; group_index <= num_constrained_groups_; ++group_index) {
-            if (group_index < match_results.size()) {
-                parts.push_back(match_results[group_index].str());
-            } else {
-                break;
-            }
-        }
+    std::vector<std::string> parts;
+    parts.reserve(constrained_groups_.size());
+    for (size_t group_index : constrained_groups_) {
+        parts.push_back(match_results[group_index].str());
     }
     return parts;
+}
+
+std::vector<std::string> RegexPatternInfo::ExtractConstrainedParts(std::string const& value) const {
+    return MatchAndExtract(value).value_or(std::vector<std::string>{});
 }
 
 }  // namespace algos::pattern_fd

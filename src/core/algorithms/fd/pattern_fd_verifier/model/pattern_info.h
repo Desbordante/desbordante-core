@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
+#include <optional>
 #include <regex>
 #include <string>
 #include <unordered_map>
@@ -59,8 +61,7 @@ class RegexPatternInfo : public PatternInfo {
 private:
     std::string regex_;
     std::regex compiled_regex_;
-    std::vector<std::pair<std::string, size_t>> literals_;
-    size_t num_constrained_groups_ = 0;
+    std::vector<size_t> constrained_groups_;
 
 public:
     explicit RegexPatternInfo(std::string const& pattern);
@@ -73,14 +74,14 @@ public:
         return "RegexPatternInfo";
     }
 
-    std::vector<std::pair<std::string, size_t>> const& GetLiterals() const {
-        return literals_;
-    }
+    bool Matches(std::string const& value) const;
+
+    std::optional<std::vector<std::string>> MatchAndExtract(std::string const& value) const;
 
     std::vector<std::string> ExtractConstrainedParts(std::string const& value) const;
 
     bool HasConstraints() const {
-        return num_constrained_groups_ > 0;
+        return !constrained_groups_.empty();
     }
 };
 

@@ -1,101 +1,232 @@
+"""Explain and validate a Pattern FD on the licenses dataset."""
+
+from pathlib import Path
+
 import desbordante
 import pandas
 
-TABLE_PATH = 'examples/datasets/licenses.csv'
-COLOR_CODES = {
-    'bold_red': '\u001b[1;31m',
-    'bold_green': '\033[1;32m',
-    'default': '\033[0m',
-    'default_bg': '\033[1;49m',
-    'italic': '\033[3m',
-    'red_bg':'\033[1;41m',
-    'blue':'\033[1;34m'
-}
+
+TABLE_PATH = Path(__file__).resolve().parents[1] / "datasets" / "licenses.csv"
+CITY = 2
+ZIP = 3
+LICENSE_NUMBER = 4
+
+MIN_PATTERN_FD_COVERAGE = 10
+MIN_PATTERN_INCLUSION = 4
+MAX_RHS_DEVIATION = 0.2
 
 Token = desbordante.pattern_fd_verification.Token
 Regex = desbordante.pattern_fd_verification.Regex
 Wildcard = desbordante.pattern_fd_verification.Wildcard
 
-def print_clusters(verifier, data, lhs, rhs):
-    print(f"Number of clusters violating Pattern FD: {verifier.get_num_error_clusters()}")
-    lhs_columns = [data.iloc[:, l] for l in lhs]
-    rhs_columns = [data.iloc[:, r] for r in rhs]
 
-    for i, highlight in enumerate(verifier.get_clusters(), start=1):
-        violating_rows = highlight.get_violating_rows
-        print(f"{COLOR_CODES['blue']}#{i} cluster: {COLOR_CODES['default']}")
-        for el in highlight.cluster:
-            color = COLOR_CODES['default']
-            lhs_values = [col.iloc[el] for col in lhs_columns]
-            rhs_values = [col.iloc[el] for col in rhs_columns]
-            if el in violating_rows:
-                color = COLOR_CODES['red_bg']
-            print(f"{color}{el}: {lhs_values} -> {rhs_values}{COLOR_CODES['default']}")
+def explain(*paragraphs):
+    print("\n\n".join(paragraphs), end="\n\n")
 
 
-def print_results(table, pattern_fd_verifier, lhs, rhs):
-    print(f"{COLOR_CODES['default_bg']}Pattern FD Verification Results:{COLOR_CODES['default']}\n")
-    holds = pattern_fd_verifier.pattern_fd_holds()
-    coverage = pattern_fd_verifier.get_real_pattern_fd_coverage()
-    min_pattern_inclusion = pattern_fd_verifier.get_real_min_pattern_inclusion()
-    max_rhs_deviation = pattern_fd_verifier.get_real_max_rhs_deviation()
-    print(f"{COLOR_CODES['default_bg']}Pattern FD: {lhs} -> {rhs}")
-    if holds:
-        print(f"Pattern FD holds: {COLOR_CODES['bold_green']}{holds}{COLOR_CODES['default']}")
-    else:
-        print(f"Pattern FD holds: {COLOR_CODES['bold_red']}{holds}{COLOR_CODES['default']}")
+def print_introduction():
+    explain(
+        "Pattern FD validation in Desbordante. This example is based on "
+        "'Pattern Functional Dependencies for Data Cleaning' by Abdulhakim Qahtan, "
+        "Nan Tang, Mourad Ouzzani, Yang Cao, and Michael Stonebraker, "
+        "Proceedings of the VLDB Endowment (PVLDB), 13(5), 2020. "
+        "https://www.vldb.org/pvldb/vol13/p684-qahtan.pdf",
+        "Imagine that license numbers issued in a city should have a particular prefix "
+        "followed by three digits. If one number is missing a letter, we can flag that "
+        "row without knowing the correct number in advance. This is validation: we "
+        "supply the dependency and its patterns instead of asking Desbordante to mine them.",
+        "Formally, a Pattern FD is written (X -> Y, T): X and Y are sets of columns, "
+        "and T is a pattern tableau. Each row of T assigns patterns to columns in "
+        "X and Y. Both sides may contain several columns; lhs_indices and rhs_indices "
+        "are lists of their zero-based column indices. For example, lhs_indices=[2, 3] "
+        "uses City and Zip, while rhs_indices=[0, 4] checks Licensee Name and "
+        "Licensee Number. Here we specify a pattern for every listed column. "
+        "The running example uses one column on each side to keep the output readable.",
+        r"The paper draws a bar over a constrained part: matching rows must agree on "
+        r"that part. In Desbordante's Regex(pattern), write <...> instead. For example, "
+        r"Regex(r'<\D{3}>\D{2}') accepts five digits and compares the first three. "
+        r"The bar and angle brackets are notation for comparison, not characters in "
+        r"the data. Regex(r'BBWLHR\D{3}') checks only the value's structure: the "
+        r"literal prefix BBWLHR followed by three digits. Here \D means a digit in "
+        r"Desbordante's pattern language, unlike Python's regex escape \D.",
+        "Token(text, position) specifies a token-position pair: the given text must "
+        "appear at a zero-based position. Depending on the column's mode, position "
+        "counts tokens or characters; in this example the whole city name starts at "
+        "position 0. The paper's bottom symbol (\u22a5) is Wildcard() in Python. It "
+        "can be placed in a tableau row as {ZIP: Wildcard()}. It accepts any value; "
+        "when values are compared within a group, their complete values are used. "
+        "Regex also supports \\A (any character), \\U (uppercase), "
+        "\\L (lowercase), and \\S (a non-word symbol), as well as repetitions such "
+        "as {N}, * and +. Use raw Python strings for patterns containing backslashes.",
+    )
 
-    print(f"Coverage: {coverage}")
-    print(f"Min pattern inclusion: {min_pattern_inclusion}")
-    print(f"Max RHS deviation: {max_rhs_deviation}\n")
-    print_clusters(pattern_fd_verifier, table, lhs, rhs)
+
+def print_options():
+    print("Options available to this verifier:")
+    print("  load_data(table=...): the input table, here a pandas DataFrame")
+    print("  load_data(is_null_equal_null=...): whether nulls compare equal (default: True)")
+    print("  execute(lhs_indices=...): zero-based indices of the LHS columns")
+    print("  execute(rhs_indices=...): zero-based indices of the RHS columns")
+    print("  execute(patterns=...): the pattern tableau, a list of column-to-pattern maps")
+    print("  execute(min_pattern_fd_coverage=...): minimum distinct rows matching a tableau LHS")
+    print("  execute(min_pattern_inclusion=...): minimum LHS matches for every tableau row")
+    print("  execute(max_rhs_deviation=...): maximum allowed RHS violation fraction\n")
+
+
+def violating_row_indices(verifier):
+    return {
+        row
+        for highlight in verifier.get_clusters()
+        for row in highlight.get_violating_rows
+    }
+
+
+def print_results(title, table, verifier, lhs_indices, rhs_indices):
+    lhs_names = [table.columns[index] for index in lhs_indices]
+    rhs_names = [table.columns[index] for index in rhs_indices]
+    print(f"{title}: {lhs_names} -> {rhs_names}")
+    print(f"  Pattern FD holds: {verifier.pattern_fd_holds()}")
+    print(f"  Observed coverage: {verifier.get_real_pattern_fd_coverage()}")
+    print(f"  Observed minimum pattern inclusion: {verifier.get_real_min_pattern_inclusion()}")
+    print(f"  Observed maximum RHS deviation: {verifier.get_real_max_rhs_deviation():.2f}")
+    print(f"  Violating rows: {verifier.get_num_error_rows()}")
+    print(f"  Clusters with violations: {verifier.get_num_error_clusters()}")
+
+    for number, highlight in enumerate(verifier.get_clusters(), start=1):
+        violating_rows = set(highlight.get_violating_rows)
+        print(f"  Cluster {number}:")
+        for row in sorted(highlight.cluster):
+            lhs_values = table.iloc[row, lhs_indices].tolist()
+            rhs_values = table.iloc[row, rhs_indices].tolist()
+            label = "  <-- violation" if row in violating_rows else ""
+            print(f"    row {row}: {lhs_values} -> {rhs_values}{label}")
+    print()
+
+
+def verify(table, lhs_indices, rhs_indices, pattern_tableau, max_rhs_deviation, title):
+    verifier = desbordante.pattern_fd_verification.algorithms.Default()
+    verifier.load_data(table=table, is_null_equal_null=True)
+    verifier.execute(
+        lhs_indices=lhs_indices,
+        rhs_indices=rhs_indices,
+        patterns=pattern_tableau,
+        min_pattern_fd_coverage=MIN_PATTERN_FD_COVERAGE,
+        min_pattern_inclusion=MIN_PATTERN_INCLUSION,
+        max_rhs_deviation=max_rhs_deviation,
+    )
+    print_results(title, table, verifier, lhs_indices, rhs_indices)
+    return verifier
+
 
 def run_example():
-    table = pandas.read_csv(TABLE_PATH, header=0, dtype=str)
-    table = table.astype(str)
-    print("\nIn this example, let's look at a dataset with data about companies and their licenses.\n")
-    print(table)
-    print("\nLet's say we want to check if the city of license issuance really determines the license number.\n")
-    algo = desbordante.pattern_fd_verification.algorithms.Default()
-    algo.load_data(table=table)
+    print_introduction()
+    print_options()
 
-    lhs, rhs = [2], [4]
-    print(f'This hypothesis will be expressed as a rule: "City" -> "Licensee Number"\n')
-    patterns = [{2: Token("GAITHERSBURG", 0), 4: Regex("BBWLHR\\D{3}"), }, 
-            {2: Token("GERMANTOWN", 0), 4: Regex("CBWLCC\\D{3}")}]
-    print('And we want to check that such patterns are fulfilled:\n')
-    print('"GAITHERSBURG" -> "BBWLHR\\D{3}"')
-    print('"GERMANTOWN" -> "CBWLCC\\D{3}"\n')
+    table = pandas.read_csv(TABLE_PATH, dtype=str, keep_default_na=False)
+    explain(
+        "The licenses dataset contains the following rows. Row numbers on the left "
+        "are zero-based and will also appear in the validation results:"
+    )
+    print(table.to_string(), end="\n\n")
 
-    min_pattern_fd_coverage=10
-    max_rhs_deviation=0.2
-    min_pattern_inclusion=4
+    city_prefixes = (
+        ("GAITHERSBURG", "BBWLHR"),
+        ("GERMANTOWN", "CBWLCC"),
+    )
+    lhs_indices = [CITY]
+    rhs_indices = [LICENSE_NUMBER]
 
-    print(f"""We want each pattern to appear at least 4 times {COLOR_CODES['italic']}(min_pattern_inclusion = 4){COLOR_CODES['default']}, """
-    f"""with no more than 20% of them matching by City but differing by Licensee Number {COLOR_CODES['italic']}(max_rhs_deviation = 0.2){COLOR_CODES['default']}.\n"""
-    f"""Also, we want the entire functional dependency to cover at least 10 rows {COLOR_CODES['italic']}(min_pattern_fd_coverage = 10){COLOR_CODES['default']}.\n""")
+    # The tableau is separate from the embedded FD, City -> Licensee Number.
+    pattern_tableau = [
+        {CITY: Token(city, 0), LICENSE_NUMBER: Regex(prefix + r"\D{3}")}
+        for city, prefix in city_prefixes
+    ]
 
-    algo.execute(lhs_indices=lhs, rhs_indices=rhs, 
-        min_pattern_fd_coverage=min_pattern_fd_coverage, max_rhs_deviation=max_rhs_deviation, 
-        patterns=patterns, min_pattern_inclusion=min_pattern_inclusion)
+    explain(
+        "Our proposed dependency is City -> Licensee Number. The pattern tableau "
+        "has two rows: for GAITHERSBURG, a license number must start with BBWLHR; "
+        "for GERMANTOWN, it must start with CBWLCC. Both prefixes are followed by "
+        "exactly three digits. The Python names Token and Regex correspond to the "
+        "two kinds of patterns in this tableau. Other cities, such as ROCKVILLE, "
+        "are outside these tableau rows."
+    )
+    for city, prefix in city_prefixes:
+        pattern_text = prefix + r"\D{3}"
+        print(f"  City = Token({city!r}, 0) -> Licensee Number = Regex({pattern_text!r})")
+    print()
 
-    print_results(table, algo, lhs, rhs)
+    explain(
+        "We require at least four LHS matches for each tableau row "
+        "(min_pattern_inclusion=4) and ten distinct LHS-matching rows overall "
+        "(min_pattern_fd_coverage=10). For each tableau row, RHS deviation is "
+        "its violating rows divided by its LHS-matching rows. The reported "
+        "max_rhs_deviation is the largest such fraction; the allowed limit is 0.2. "
+        "Desbordante reports the observed values alongside the user-supplied "
+        "limits; it does not change those limits."
+    )
+
+    first = verify(
+        table, lhs_indices, rhs_indices, pattern_tableau,
+        MAX_RHS_DEVIATION, "Results on the original data"
+    )
+    explain(
+        "In the original data, both city patterns cover five rows. Two GERMANTOWN "
+        "license numbers lack a letter in the expected CBWLCC prefix, so that "
+        "tableau row has deviation 2/5 = 0.4. This exceeds the allowed 0.2.",
+        "To illustrate the result, change the two highlighted values in a copy "
+        "of the table so they match the expected pattern, then run the same "
+        "validation again. These are illustrative values, not verified license "
+        "numbers. The CSV file is unchanged."
+    )
+
+    modified = table.copy()
+    replacements = {2: "CBWLCC021", 5: "CBWLCC002"}
+    for row, replacement in replacements.items():
+        previous = modified.iat[row, LICENSE_NUMBER]
+        modified.iat[row, LICENSE_NUMBER] = replacement
+        print(f"  row {row}: {previous} -> {replacement}")
+    print()
+
+    modified_result = verify(
+        modified, lhs_indices, rhs_indices, pattern_tableau,
+        MAX_RHS_DEVIATION, "Results after changing the highlighted values"
+    )
+    removed = sorted(violating_row_indices(first) - violating_row_indices(modified_result))
+    print(f"Previously highlighted rows no longer highlighted: {removed}\n")
+
+    explain(
+        "The same data can also be checked with a different threshold. If we "
+        "allow max_rhs_deviation=0.4 on the original, uncorrected table, "
+        "pattern_fd_holds() becomes true, but the two highlighted rows remain. "
+        "Changing a threshold changes the acceptance decision, not the data."
+    )
+    verify(
+        table, lhs_indices, rhs_indices, pattern_tableau,
+        0.4, "Results on original data with a relaxed limit"
+    )
+
+    # A second LHS attribute is checked along with City. The RHS remains unchanged.
+    two_lhs_tableau = [
+        {
+            CITY: Token(city, 0),
+            ZIP: Regex(r"\D{5}"),
+            LICENSE_NUMBER: Regex(prefix + r"\D{3}"),
+        }
+        for city, prefix in city_prefixes
+    ]
+    explain(
+        "Finally, use two LHS columns: City and Zip. A row must satisfy both "
+        "the city token and the five-digit Zip pattern to be included. Since "
+        "Regex(r'\\D{5}') has no <...> part, the complete Zip values are used "
+        "when grouping LHS rows. This example has two LHS columns, and the API "
+        "allows more; rhs_indices can likewise list multiple RHS columns, with "
+        "their patterns included in each tableau row."
+    )
+    verify(
+        modified, [CITY, ZIP], rhs_indices, two_lhs_tableau,
+        MAX_RHS_DEVIATION, "Results with two LHS columns"
+    )
 
 
-if __name__ == '__main__':
-    print("This example demonstrates how to validate Pattern Functional Dependencies (Pattern FDs) using the Desbordante library. "
-            "The definitions are taken from the paper 'Pattern Functional Dependencies for Data Cleaning'.\n\n"
-            "Pattern FD expresses a relationship where a set of attributes X determines attribute Y, "
-            "written as (X → Y, T), where T is a pattern table specifying constraints for these attributes.\n"
-            "Patterns in T can be either regular expressions defining value structures "
-            "or token-position pairs capturing partial value characteristics (unlike CFD which uses full attribute values).\n"
-            "Validation verifies whether a user-specified Pattern FD holds in a given dataset based on three key parameters:\n"
-            "  • min_pattern_inclusion: minimum number of records a single pattern must cover\n"
-            "  • min_pattern_fd_coverage: minimum total number of records covered by the entire Pattern FD\n"
-            "  • max_rhs_deviation: maximum allowed violation rate (mismatched Y values for matching X patterns), calculated as the ratio of rows where the left-hand side (X) matches but the right-hand side (Y) doesn't, to all rows where the left-hand side matches.\n"
-            "The formula is:\n"
-            " max_rhs_deviation = (number of violating rows where X matches but Y doesn't) / (total number of rows where X matches)\n\n"
-            "During the validation task, Desbordante not only checks whether a given Pattern FD holds, but it can also 1) adjust the three aforementioned parameters supplied by the user (if their values were overestimated), and 2) present rows that violate this Pattern FD.\n")
-
+if __name__ == "__main__":
     run_example()
-    
