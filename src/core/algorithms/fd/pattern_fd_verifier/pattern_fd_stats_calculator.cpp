@@ -145,8 +145,8 @@ void PatternFDStatsCalculator::CompareRhsValues() {
         if (matched_rows.empty()) continue;
 
         RowClusters lhs_clusters = BuildLhsClusters(matched_rows, patterns_table_[i]);
-        size_t const violations = CheckClustersForDeviations(lhs_clusters, patterns_table_[i],
-                                                            error_rows);
+        size_t const violations =
+                CheckClustersForDeviations(lhs_clusters, patterns_table_[i], error_rows);
         max_rhs_deviation_ =
                 std::max(max_rhs_deviation_, static_cast<double>(violations) / matched_rows.size());
     }

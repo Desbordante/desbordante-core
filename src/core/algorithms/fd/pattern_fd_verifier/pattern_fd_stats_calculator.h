@@ -44,9 +44,9 @@ private:
     bool Matches(config::IndexType column_index, std::shared_ptr<PatternInfo> const& pattern,
                  std::string const& value) const;
 
-    RowClusters BuildLhsClusters(std::unordered_set<size_t> const& matched_rows,
-                                 std::unordered_map<config::IndexType,
-                                                    std::shared_ptr<PatternInfo>> const& patterns);
+    RowClusters BuildLhsClusters(
+            std::unordered_set<size_t> const& matched_rows,
+            std::unordered_map<config::IndexType, std::shared_ptr<PatternInfo>> const& patterns);
 
     size_t CheckClustersForDeviations(
             RowClusters const& lhs_clusters,
@@ -55,8 +55,7 @@ private:
 
 public:
     PatternFDStatsCalculator(std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation)
-        : typed_relation_(std::move(typed_relation)),
-          tokenizer_(typed_relation_) {}
+        : typed_relation_(std::move(typed_relation)), tokenizer_(typed_relation_) {}
 
     void SetParams(PatternsTable const& patterns_table, config::IndicesType const& lhs_indices,
                    config::IndicesType const& rhs_indices) {

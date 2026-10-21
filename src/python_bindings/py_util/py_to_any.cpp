@@ -21,7 +21,6 @@
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
-#include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
