@@ -44,10 +44,6 @@ public:
         return token_ == other.token_ && position_ == other.position_;
     }
 
-    bool operator!=(TokenPatternInfo const& other) const {
-        return !(*this == other);
-    }
-
     TokenNGram const& Token() const {
         return token_;
     }
