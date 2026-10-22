@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "episode_info.h"
+#include "minimal_occurences.h"
 
 namespace algos::huespan {
 
@@ -20,11 +20,11 @@ public:
         total_utility_ += utility;
     };
 
-    void SetTotalUtility(int new_total_utiltiy) {
-        total_utility_ = new_total_utiltiy;
+    void SetTotalUtility(int new_total_utility) {
+        total_utility_ = new_total_utility;
     }
 
-    int GetTotalUtility() {
+    int GetTotalUtility() const {
         return total_utility_;
     }
 
@@ -40,7 +40,6 @@ public:
 class ComplexSequence {
 private:
     std::unordered_map<int, TimepointEvents> sequence_;
-
     size_t last_timestamp_ = 1;
 
 public:
@@ -65,15 +64,14 @@ public:
         return last_timestamp_;
     }
 
-    void PruneSingleEvents(
-            int max_duration, double min_utility_absolute,
-            std::unordered_map<int, EventMOs>& events_mos);
+    void PruneSingleEvents(int max_duration, double min_utility_absolute,
+                           std::unordered_map<int, EventMinimalOccurences>& events_mos);
     int GetUtilityOfDuration(int start_timepoint, int end_timepoint);
     int GetRemainingUtility(int timepoint, int event) const;
 
     int GetEventsUtilityByTimepoint(std::vector<int> const& eventset, int timepoint) const;
-    int GetMaximallUtility(std::vector<std::vector<int>> const& episode, int start_timepoint,
-                           int end_timepoint);
+    int GetMaximalUtility(std::vector<std::vector<int>> const& episode, int start_timepoint,
+                          int end_timepoint);
     std::vector<std::pair<int, int>> GetExtentionEvents(int timepoint, int last_event) const;
 };
 }  // namespace algos::huespan

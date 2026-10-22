@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
-#include "core/algorithms/hue/huespan/episode_info.h"
 #include "core/config/exceptions.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
@@ -48,8 +47,6 @@ void Huespan::RegisterOptions() {
                     .SetValueCheck(check_maxduration));
 }
 
-void Huespan::ResetState() {}
-
 void Huespan::ScanFile() {
     std::ifstream file(sequence_path_);
     if (!file) {
@@ -69,10 +66,10 @@ void Huespan::ScanFile() {
             int event_utility = std::stoi(utilities[i]);
             sequence_.AddEvent(current_timepoint, event, event_utility);
 
-            single_candidates_minimal_occurs_utility_[event].Add(current_timepoint, event_utility);
+            single_candidates_mos_[event].Add(current_timepoint, event_utility);
         }
         current_timepoint++;
-        sequence_utility_ += total_utility;
+        sequence_initial_utility_ += total_utility;
     }
 }
 
@@ -90,18 +87,18 @@ std::pair<int, int> Huespan::CalculateMOsUtilityAndUpperBound(
         int end_timepoint = occurences.end_timepoints[pos];
 
         upper_bound += occurences.utilities[pos] +
-                       sequence_.GetRemainingUtility(end_timepoint, beta) +
-                       sequence_.GetUtilityOfDuration(end_timepoint + 1,
-                                                      start_timepoint + max_duration_ - 1);
+                       pruned_sequence_.GetRemainingUtility(end_timepoint, beta) +
+                       pruned_sequence_.GetUtilityOfDuration(end_timepoint + 1,
+                                                             start_timepoint + max_duration_ - 1);
     }
     return {total_utilty, upper_bound};
 }
 
 void Huespan::BuildCoocurenceMatrix() {
-    for (size_t timepoint = 1; timepoint <= sequence_.GetLastTimepoint(); ++timepoint) {
-        auto pairs = sequence_.GetEventsByTimepoint(timepoint);
-        int utility_simult = sequence_.GetUtilityOfDuration(timepoint - max_duration_ + 1,
-                                                            timepoint + max_duration_ - 1);
+    for (size_t timepoint = 1; timepoint <= pruned_sequence_.GetLastTimepoint(); ++timepoint) {
+        auto pairs = pruned_sequence_.GetEventsByTimepoint(timepoint);
+        int utility_simult = pruned_sequence_.GetUtilityOfDuration(timepoint - max_duration_ + 1,
+                                                                   timepoint + max_duration_ - 1);
         std::unordered_set<int> processed_simult;
         for (auto const& pair : pairs) {
             int event = pair.first;
@@ -113,12 +110,12 @@ void Huespan::BuildCoocurenceMatrix() {
             std::unordered_set<int> processed_serial;
             for (size_t timepoint_serial = timepoint + 1;
                  timepoint_serial <= timepoint + max_duration_ - 1; ++timepoint_serial) {
-                auto pairs_serial = sequence_.GetEventsByTimepoint(timepoint_serial);
+                auto pairs_serial = pruned_sequence_.GetEventsByTimepoint(timepoint_serial);
                 for (auto const& pair_serial : pairs_serial) {
                     int event_serial = pair_serial.first;
                     if (processed_serial.count(event_serial)) continue;
 
-                    int utility_serial = sequence_.GetUtilityOfDuration(
+                    int utility_serial = pruned_sequence_.GetUtilityOfDuration(
                             timepoint_serial - max_duration_ + 1, timepoint + max_duration_ - 1);
                     cooccurence_matrix_serial_[event][event_serial] += utility_serial;
                     processed_serial.insert(event_serial);
@@ -126,6 +123,12 @@ void Huespan::BuildCoocurenceMatrix() {
             }
         }
     }
+}
+
+void Huespan::MineHUE(std::vector<std::vector<int>> const& alpha_episode,
+                      EpisodeMinimalOccurences const& occurences) {
+    MineSimultHUE(alpha_episode, occurences);
+    MineSerialHUE(alpha_episode, occurences);
 }
 
 void Huespan::MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
@@ -141,7 +144,7 @@ void Huespan::MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
         int alpha_prev_utility = occurences.prev_utilities[i];
         int alpha_utility = occurences.utilities[i];
 
-        auto extension_pairs = sequence_.GetExtentionEvents(end_timepoint, last_event);
+        auto extension_pairs = pruned_sequence_.GetExtentionEvents(end_timepoint, last_event);
 
         for (auto const& extention_pair : extension_pairs) {
             int beta = extention_pair.first;
@@ -221,7 +224,7 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
             if (occurences.start_timepoints[j] != start_timepoint) break;
         }
 
-        int next_mo_end_timepoint = sequence_.GetLastTimepoint();
+        int next_mo_end_timepoint = pruned_sequence_.GetLastTimepoint();
         if (j < occurences.end_timepoints.size()) {
             next_mo_end_timepoint = occurences.end_timepoints[j];
         }
@@ -230,12 +233,12 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
 
         int max_alpha_utility = alpha_utility;
         for (int timepoint = end_timepoint + 1; timepoint <= extention_bound; ++timepoint) {
-            for (auto const& pair : sequence_.GetEventsByTimepoint(timepoint)) {
+            for (auto const& pair : pruned_sequence_.GetEventsByTimepoint(timepoint)) {
                 int beta = pair.first;
 
                 if (alpha_episode.size() >= 2) {
-                    max_alpha_utility = sequence_.GetMaximallUtility(alpha_episode, start_timepoint,
-                                                                     timepoint - 1);
+                    max_alpha_utility = pruned_sequence_.GetMaximalUtility(
+                            alpha_episode, start_timepoint, timepoint - 1);
                 }
                 int beta_utility = max_alpha_utility + pair.second;
 
@@ -296,17 +299,18 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
 }
 
 void Huespan::ExecuteInternal() {
-    min_utility_absolute_ = min_utility_ratio_ * sequence_utility_;
+    min_utility_absolute_ = min_utility_ratio_ * sequence_initial_utility_;
 
-    sequence_.PruneSingleEvents(max_duration_, min_utility_absolute_,
-                                single_candidates_minimal_occurs_utility_);
+    pruned_sequence_ = sequence_;
+    auto candidates = single_candidates_mos_;
+    pruned_sequence_.PruneSingleEvents(max_duration_, min_utility_absolute_, candidates);
 
     BuildCoocurenceMatrix();
 
-    for (auto& [candidate, moutility] : single_candidates_minimal_occurs_utility_) {
+    for (auto& [candidate, moutility] : candidates) {
         std::vector<std::vector<int>> alpha_episode = {{candidate}};
         EpisodeMinimalOccurences occurences;
-        occurences.start_timepoints = moutility.GetMinOccurencies();
+        occurences.start_timepoints = moutility.GetOccurences();
         occurences.end_timepoints = occurences.start_timepoints;
         occurences.prev_utilities.assign(occurences.start_timepoints.size(), 0);
         occurences.utilities = moutility.GetUtilities();
@@ -321,5 +325,11 @@ void Huespan::ExecuteInternal() {
             MineHUE(alpha_episode, occurences);
         }
     }
-};
+}
+
+void Huespan::ResetState() {
+    high_utility_episodes_.clear();
+    cooccurence_matrix_serial_.clear();
+    cooccurence_matrix_simult_.clear();
+}
 }  // namespace algos::huespan
