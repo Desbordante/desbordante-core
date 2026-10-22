@@ -6,11 +6,15 @@
 #include <unordered_set>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/constants.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #include "core/algorithms/algorithm.h"
 #include "core/config/exceptions.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
-#include "utils.h"
 
 namespace algos::huespan {
 Huespan::Huespan() : Algorithm() {
@@ -56,10 +60,14 @@ void Huespan::ScanFile() {
     int current_timepoint = 1;
 
     while (getline(file, single_episode)) {
-        auto single_episode_splitted = util::SplitString(single_episode, ':');
-        auto events = util::SplitString(single_episode_splitted[0], ' ');
+        std::vector<std::string> single_episode_splitted;
+        boost::split(single_episode_splitted, single_episode, boost::is_any_of(":"),
+                     boost::token_compress_off);
+        std::vector<std::string> events;
+        std::vector<std::string> utilities;
+        boost::split(events, single_episode_splitted[0], boost::is_any_of(" "));
         int total_utility = std::stoi(single_episode_splitted[1]);
-        auto utilities = util::SplitString(single_episode_splitted[2], ' ');
+        boost::split(utilities, single_episode_splitted[2], boost::is_any_of(" "));
 
         for (int i = 0; i < events.size(); ++i) {
             int event = std::stoi(events[i]);
