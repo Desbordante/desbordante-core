@@ -44,10 +44,7 @@ private:
     void MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
                        EpisodeMinimalOccurences const& occurences);
 
-    void LoadDataInternal() override {
-        ScanFile();
-    }
-
+    void LoadDataInternal() override;
     void ResetState() override;
     void ExecuteInternal() override;
     void ScanFile();

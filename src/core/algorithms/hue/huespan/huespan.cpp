@@ -15,6 +15,7 @@
 #include "core/config/exceptions.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
+#include "core/util/logger.h"
 
 namespace algos::huespan {
 Huespan::Huespan() : Algorithm() {
@@ -49,36 +50,6 @@ void Huespan::RegisterOptions() {
     RegisterOption(
             config::Option{&max_duration_, config::names::kMaxDuration, "Maximum duration", 5ul}
                     .SetValueCheck(check_maxduration));
-}
-
-void Huespan::ScanFile() {
-    std::ifstream file(sequence_path_);
-    if (!file) {
-        throw std::runtime_error("Failed to open file");
-    }
-    std::string single_episode;
-    int current_timepoint = 1;
-
-    while (getline(file, single_episode)) {
-        std::vector<std::string> single_episode_splitted;
-        boost::split(single_episode_splitted, single_episode, boost::is_any_of(":"),
-                     boost::token_compress_off);
-        std::vector<std::string> events;
-        std::vector<std::string> utilities;
-        boost::split(events, single_episode_splitted[0], boost::is_any_of(" "));
-        int total_utility = std::stoi(single_episode_splitted[1]);
-        boost::split(utilities, single_episode_splitted[2], boost::is_any_of(" "));
-
-        for (int i = 0; i < events.size(); ++i) {
-            int event = std::stoi(events[i]);
-            int event_utility = std::stoi(utilities[i]);
-            sequence_.AddEvent(current_timepoint, event, event_utility);
-
-            single_candidates_mos_[event].Add(current_timepoint, event_utility);
-        }
-        current_timepoint++;
-        sequence_initial_utility_ += total_utility;
-    }
 }
 
 std::pair<int, int> Huespan::CalculateMOsUtilityAndUpperBound(
@@ -205,8 +176,7 @@ void Huespan::MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
             beta_episode.push_back(new_last_eventset);
 
             if (total_utility >= min_utility_absolute_) {
-                HighUtilityEpisode hue(beta_episode, total_utility);
-                high_utility_episodes_.push_back(hue);
+                high_utility_episodes_.emplace_back(beta_episode, total_utility);
             }
             MineHUE(beta_episode, info);
         }
@@ -298,8 +268,7 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
             std::vector<std::vector<int>> beta_episode = alpha_episode;
             beta_episode.push_back({beta});
             if (total_utility >= min_utility_absolute_) {
-                HighUtilityEpisode hue(beta_episode, total_utility);
-                high_utility_episodes_.push_back(hue);
+                high_utility_episodes_.emplace_back(beta_episode, total_utility);
             }
             MineHUE(beta_episode, info);
         }
@@ -308,6 +277,7 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
 
 void Huespan::ExecuteInternal() {
     min_utility_absolute_ = min_utility_ratio_ * sequence_initial_utility_;
+    LOG_DEBUG("Min utility: {}. Max duration: {}", min_utility_absolute_, max_duration_);
 
     pruned_sequence_ = sequence_;
     auto candidates = single_candidates_mos_;
@@ -332,6 +302,47 @@ void Huespan::ExecuteInternal() {
             }
             MineHUE(alpha_episode, occurences);
         }
+    }
+    LOG_DEBUG("High utility episodes found: {}", high_utility_episodes_.size());
+}
+
+void Huespan::LoadDataInternal() {
+    std::ifstream file(sequence_path_);
+    if (!file) {
+        throw std::runtime_error("Failed to open file:" + sequence_path_.string());
+    }
+    std::string single_episode;
+    int current_timepoint = 1;
+
+    while (getline(file, single_episode)) {
+        std::vector<std::string> single_episode_splitted;
+        boost::split(single_episode_splitted, single_episode, boost::is_any_of(":"),
+                     boost::token_compress_off);
+        if (single_episode_splitted.size() != 3) {
+            throw std::runtime_error("Line " + std::to_string(current_timepoint) +
+                                     ": expected 3 ':'-separated fields, got " +
+                                     std::to_string(single_episode_splitted.size()));
+        }
+        std::vector<std::string> events;
+        std::vector<std::string> utilities;
+        boost::split(events, single_episode_splitted[0], boost::is_any_of(" "));
+        boost::split(utilities, single_episode_splitted[2], boost::is_any_of(" "));
+        int total_utility = std::stoi(single_episode_splitted[1]);
+        if (events.size() != utilities.size()) {
+            throw std::runtime_error("Line " + std::to_string(current_timepoint) + ": " +
+                                     std::to_string(events.size()) + " events but " +
+                                     std::to_string(utilities.size()) + " utilities");
+        }
+
+        for (size_t i = 0; i < events.size(); ++i) {
+            int event = std::stoi(events[i]);
+            int event_utility = std::stoi(utilities[i]);
+            sequence_.AddEvent(current_timepoint, event, event_utility);
+
+            single_candidates_mos_[event].Add(current_timepoint, event_utility);
+        }
+        ++current_timepoint;
+        sequence_initial_utility_ += static_cast<size_t>(total_utility);
     }
 }
 

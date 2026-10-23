@@ -44,7 +44,7 @@ void ComplexSequence::PruneSingleEvents(
         if (!pairs.empty()) {
             std::sort(pairs.begin(), pairs.end(),
                       [&](std::pair<int, int> const& a, std::pair<int, int> const& b) {
-                          return events_awu[a.first] < events_awu[b.first];
+                          return events_awu.at(a.first) < events_awu.at(b.first);
                       });
             events.SetTotalUtility(events.GetTotalUtility() - removed_utility_sum);
             ++timepoint_it;
