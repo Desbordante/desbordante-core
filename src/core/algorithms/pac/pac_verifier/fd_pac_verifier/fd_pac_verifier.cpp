@@ -57,10 +57,9 @@ double FDPACVerifier::GetDelta(std::size_t num_pairs) const {
 }
 
 void FDPACVerifier::PreparePairs() {
-    auto col_dist = [](config::CustomMetricsType const& metrics, Types const& types,
-                       pac::model::Tuple const& a, pac::model::Tuple const& b,
-                       std::size_t col_num) -> double {
-        return metrics[col_num]->Dist(types[col_num], a[col_num], b[col_num]);
+    auto col_dist = [](config::CustomMetricsType const& metrics, pac::model::Tuple const& a,
+                       pac::model::Tuple const& b, std::size_t col_num) -> double {
+        return (*metrics[col_num])(a[col_num], b[col_num]);
     };
 
     // All pairs have first_idx < second_idx. See "key ideas".
@@ -72,7 +71,7 @@ void FDPACVerifier::PreparePairs() {
             auto const& second_lhs = (*lhs_tuples_)[j];
             bool add_to_gamma = true;
             for (std::size_t col_num = 0; col_num < first_lhs.size(); ++col_num) {
-                auto lhs_dist = col_dist(lhs_metrics_, *lhs_types_, first_lhs, second_lhs, col_num);
+                auto lhs_dist = col_dist(lhs_metrics_, first_lhs, second_lhs, col_num);
                 if (lhs_dist > lhs_Deltas_[col_num]) {
                     add_to_gamma = false;
                     break;
@@ -83,8 +82,8 @@ void FDPACVerifier::PreparePairs() {
                 auto const& second_rhs = (*rhs_tuples_)[j];
                 double max_rhs_dist = 0;
                 for (std::size_t col_num = 0; col_num < first_rhs.size(); ++col_num) {
-                    max_rhs_dist = std::max(max_rhs_dist, col_dist(rhs_metrics_, *rhs_types_,
-                                                                   first_rhs, second_rhs, col_num));
+                    max_rhs_dist = std::max(max_rhs_dist,
+                                            col_dist(rhs_metrics_, first_rhs, second_rhs, col_num));
                 }
                 sorted_gamma_->push_back(TuplePair{i, j, max_rhs_dist});
             }
@@ -109,6 +108,19 @@ void FDPACVerifier::PreparePACTypeData() {
     };
     lhs_types_ = make_types(lhs_indices_);
     rhs_types_ = make_types(rhs_indices_);
+
+    auto set_types = [](config::CustomMetricsType& metrics,
+                        config::CustomMetricsOptionType const& metrics_opt,
+                        std::vector<model::Type const*> const& types) {
+        assert(metrics_opt.size() == types.size());
+
+        metrics.reserve(metrics_opt.size());
+        for (std::size_t i = 0; i < metrics_opt.size(); ++i) {
+            metrics.push_back(metrics_opt[i]->SetType(types[i]));
+        }
+    };
+    set_types(lhs_metrics_, lhs_metrics_opt_, *lhs_types_);
+    set_types(rhs_metrics_, rhs_metrics_opt_, *rhs_types_);
 
     PreparePairs();
 }
@@ -200,9 +212,9 @@ FDPACVerifier::FDPACVerifier() {
                        return input_table_->GetNumberOfColumns();
                    }).SetConditionalOpts({{nullptr, {kRhsMetrics}}}));
     RegisterOption(MetricsOption{kLhsMetrics, kDLhsMetrics}(
-            &lhs_metrics_, [this]() { return lhs_indices_.size(); }));
+            &lhs_metrics_opt_, [this]() { return lhs_indices_.size(); }));
     RegisterOption(MetricsOption{kRhsMetrics, kDRhsMetrics}(
-            &rhs_metrics_, [this]() { return rhs_indices_.size(); }));
+            &rhs_metrics_opt_, [this]() { return rhs_indices_.size(); }));
     RegisterOption(
             Option<std::vector<double>>(&lhs_Deltas_, kLhsDeltas, kDLhsDeltas, lhs_deltas_default)
                     .SetValueCheck(check_lhs_deltas_count));
