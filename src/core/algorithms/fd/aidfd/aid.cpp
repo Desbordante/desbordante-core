@@ -18,10 +18,7 @@ void Aid::LoadDataInternal() {
     if (number_of_attributes_ == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
-    if (number_of_attributes_ > 64) {
-        throw std::runtime_error(
-                "This experimental AID-FD version supports at most 64 attributes.");
-    }
+    wide_ = number_of_attributes_ > 64;
 
     schema_ = RelationalSchema::CreateFrom(*input_table_);
 
@@ -105,7 +102,7 @@ void Aid::CreateNegativeCover() {
             HandleTuple(tuple_num, index);
         }
 
-        size_t curr_neg_cover_size = neg_cover_.size();
+        size_t curr_neg_cover_size = NegativeCoverSize();
         double curr_ratio;
         if (prev_neg_cover_size == 0) {
             curr_ratio = (curr_neg_cover_size == 0) ? 0.0 : 1.0;
@@ -132,7 +129,11 @@ void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
             size_t another_index_in_cluster =
                     GenerateSecondClusterIndex(index_in_cluster, iteration_num);
             size_t another_tuple_num = cluster[another_index_in_cluster];
-            neg_cover_.insert(BuildAgreeSet(tuple_num, another_tuple_num));
+            if (wide_) {
+                neg_cover_wide_.insert(BuildAgreeSetWide(tuple_num, another_tuple_num));
+            } else {
+                neg_cover_.insert(BuildAgreeSet(tuple_num, another_tuple_num));
+            }
         }
     }
 }
@@ -147,6 +148,24 @@ uint64_t Aid::BuildAgreeSet(size_t t1, size_t t2) {
     }
 
     return equal_attr;
+}
+
+boost::dynamic_bitset<> Aid::BuildAgreeSetWide(size_t t1, size_t t2) const {
+    uint32_t const* row1 = tuples_.data() + t1 * number_of_attributes_;
+    uint32_t const* row2 = tuples_.data() + t2 * number_of_attributes_;
+    boost::dynamic_bitset<> equal_attr(number_of_attributes_);
+
+    for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
+        if (row1[attr_num] == row2[attr_num]) {
+            equal_attr.set(attr_num);
+        }
+    }
+
+    return equal_attr;
+}
+
+size_t Aid::NegativeCoverSize() const {
+    return wide_ ? neg_cover_wide_.size() : neg_cover_.size();
 }
 
 void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
@@ -196,9 +215,14 @@ void Aid::InvertNegativeCover() {
     HandleConstantColumns(attributes);
 
     std::vector<boost::dynamic_bitset<>> neg_cover_vector;
-    neg_cover_vector.reserve(neg_cover_.size());
-    for (uint64_t mask : neg_cover_) {
-        neg_cover_vector.emplace_back(number_of_attributes_, mask);
+    neg_cover_vector.reserve(NegativeCoverSize());
+    if (wide_) {
+        neg_cover_vector.insert(neg_cover_vector.end(), neg_cover_wide_.begin(),
+                                neg_cover_wide_.end());
+    } else {
+        for (uint64_t mask : neg_cover_) {
+            neg_cover_vector.emplace_back(number_of_attributes_, mask);
+        }
     }
     auto comp_by_card = [](boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<> const& rhs) {
         return lhs.count() > rhs.count();
