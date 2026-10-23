@@ -15,6 +15,7 @@
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/indices/type.h"
+#include "core/config/names.h"
 #include "core/model/types/type.h"
 
 namespace algos::pac_verifier {
@@ -95,6 +96,12 @@ private:
 
     void ResetState() override {
         pac_ = std::nullopt;
+    }
+
+    void MakeExecuteOptsAvailable() override {
+        using namespace config::names;
+
+        MakeOptionsAvailable({kMinEpsilon, kDiagonalThreshold});
     }
 
 protected:
