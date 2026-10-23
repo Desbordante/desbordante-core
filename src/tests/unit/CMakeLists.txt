@@ -457,6 +457,20 @@ desbordante_add_test(
     Boost::headers
 )
 
+# --- HUE ---
+desbordante_add_test(
+    hue.huespan
+    SRCS
+    test_huespan.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::hue::huespan
+    ${DESBORDANTE_PREFIX}::algos
+    ${DESBORDANTE_PREFIX}::testlib::common
+    spdlog::spdlog_header_only
+    gmock
+    Boost::headers
+)
+
 # --- IND ---
 desbordante_add_test(
     ind.algos
