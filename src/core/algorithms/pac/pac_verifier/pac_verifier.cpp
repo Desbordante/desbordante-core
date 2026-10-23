@@ -2,103 +2,18 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <string_view>
 #include <vector>
 
-#include "core/config/descriptions.h"
-#include "core/config/exceptions.h"
 #include "core/config/names.h"
-#include "core/config/option_using.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/util/logger.h"
 
 namespace algos::pac_verifier {
-void PACVerifier::RegisterCommonOptions(bool has_min_delta_option, bool has_max_delta_option) {
-    DESBORDANTE_OPTION_USING;
-
-    auto min_eps_not_negative = [](double x) {
-        if (x < 0) {
-            throw config::ConfigurationError("Min epsilon cannot be negative");
-        }
-    };
-
-    auto min_eps_le_max_eps = [this](double max_epsilon) {
-        if (max_epsilon > 0 && max_epsilon < min_epsilon_) {
-            throw config::ConfigurationError(
-                    "Min epsilon must be less than or equal to max epsilon");
-        }
-    };
-
-    auto delta_bounds = [](double x) {
-        if (x > 1 || x < 0) {
-            throw config::ConfigurationError("Min delta and max delta must be in [0, 1]");
-        }
-    };
-
-    auto min_delta_calc_default = [this]() {
-        if (min_epsilon_ > 0 || max_epsilon_ >= 0) {
-            return 0.0;
-        }
-        return kDefaultMinDelta;
-    };
-
-    auto max_delta_calc_default = [this]() {
-        if (min_epsilon_ > 0 || max_epsilon_ >= 0) {
-            return 1.0;
-        }
-        return kDefaultMaxDelta;
-    };
-
-    auto delta_steps_calc_default = [this]() {
-        return std::round((max_delta_ - min_delta_) * 1000);
-    };
-
-    std::vector<std::string_view> options_dependant_on_eps;
-    if (has_min_delta_option) {
-        options_dependant_on_eps.push_back(kMinDelta);
-    }
-    if (has_max_delta_option) {
-        options_dependant_on_eps.push_back(kMaxDelta);
-    }
-    if (options_dependant_on_eps.empty()) {
-        options_dependant_on_eps.push_back(kDeltaSteps);
-    }
-
-    RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, 0.0)
-                           .SetValueCheck(min_eps_not_negative)
-                           .SetConditionalOpts({{nullptr, {kMaxEpsilon}}}));
-    RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, -1.0)
-                           .SetValueCheck(min_eps_le_max_eps)
-                           .SetConditionalOpts({{nullptr, std::move(options_dependant_on_eps)}}));
-
-    if (has_min_delta_option) {
-        auto min_delta_option =
-                Option<double>(&min_delta_, kMinDelta, kDMinDelta, min_delta_calc_default)
-                        .SetValueCheck(delta_bounds);
-        if (!has_max_delta_option) {
-            min_delta_option.SetConditionalOpts({{nullptr, {kDeltaSteps}}});
-        }
-        RegisterOption(std::move(min_delta_option));
-    }
-
-    if (has_max_delta_option) {
-        RegisterOption(Option<double>(&max_delta_, kMaxDelta, kDMaxDelta, max_delta_calc_default)
-                               .SetValueCheck(delta_bounds)
-                               .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
-    }
-
-    RegisterOption(Option<unsigned long>(&delta_steps_, kDeltaSteps, kDDeltaSteps,
-                                         delta_steps_calc_default));
-    RegisterOption(Option(&diagonal_threshold_, kDiagonalThreshold, kDDiagonalThreshold,
-                          kDefaultDiagonalThreshold));
-}
-
 void PACVerifier::LogCommonOptions() const {
     LOG_DEBUG("Common PAC verifier options: epsilon: [{}, {}], delta: [{}, {}], delta steps: {}",
               min_epsilon_, max_epsilon_, min_delta_, max_delta_, delta_steps_);
@@ -171,12 +86,6 @@ void PACVerifier::LoadDataInternal() {
     }
 
     PreparePACTypeData();
-}
-
-void PACVerifier::MakeExecuteOptsAvailable() {
-    using namespace config::names;
-
-    MakeOptionsAvailable({kMinEpsilon, kDiagonalThreshold});
 }
 
 std::ranges::subrange<std::vector<PACVerifier::EpsilonDelta>::const_iterator>

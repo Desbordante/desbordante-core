@@ -29,19 +29,19 @@ std::vector<PACVerifier::EpsilonDelta> PairWisePACVerifier::CalculateEmpiricalPr
     assert(std::abs(GetDelta(sorted_pairs.size()) - 1) < kDistThreshold);
 
     // Use ceil to ensure that min_pairs is always enough to satisfy min_delta
-    std::size_t min_pairs_num = std::ceil(GetNumPairs(MinDelta()));
+    std::size_t min_pairs_num = std::ceil(GetNumPairs(min_delta_));
     assert(min_pairs_num <= sorted_pairs.size());
-    std::size_t max_pairs_num = std::floor(GetNumPairs(MaxDelta()));
+    std::size_t max_pairs_num = std::floor(GetNumPairs(max_delta_));
     assert(max_pairs_num <= sorted_pairs.size());
     LOG_TRACE("Min and max pairs: [{}, {}] (sorted pairs size: {})", min_pairs_num, max_pairs_num,
               sorted_pairs.size());
 
     std::size_t pairs_step;
-    if (DeltaSteps() <= 1) {
+    if (delta_steps_ <= 1) {
         pairs_step = max_pairs_num - min_pairs_num;
     } else {
         pairs_step =
-                std::round(static_cast<double>(max_pairs_num - min_pairs_num) / (DeltaSteps() - 1));
+                std::round(static_cast<double>(max_pairs_num - min_pairs_num) / (delta_steps_ - 1));
     }
     if (pairs_step == 0) {
         LOG_DEBUG("Pairs step is 0. Setting to 1");
@@ -52,10 +52,10 @@ std::vector<PACVerifier::EpsilonDelta> PairWisePACVerifier::CalculateEmpiricalPr
                                         [](TuplePair const& p) { return p.dist; });
     std::size_t curr_size = std::distance(sorted_pairs.begin(), end);
     auto no_pairs_delta = GetDelta(curr_size);
-    if (no_pairs_delta > MinDelta()) {
+    if (no_pairs_delta > min_delta_) {
         result.emplace_back(0, GetDelta(curr_size));
     }
-    LOG_DEBUG("Delta steps: {}, pairs step: {}, initial size: {} (delta: {})", DeltaSteps(),
+    LOG_DEBUG("Delta steps: {}, pairs step: {}, initial size: {} (delta: {})", delta_steps_,
               pairs_step, curr_size, no_pairs_delta);
 
     auto iteration = [&](std::size_t needed_pairs_num) {
@@ -92,7 +92,7 @@ std::vector<PACVerifier::EpsilonDelta> PairWisePACVerifier::CalculateEmpiricalPr
     }
     // Ensure that (??, max delta) is always in empirical_probabilities
     iteration(max_pairs_num);
-    if (MaxDelta() > 1 - kDistThreshold) {
+    if (max_delta_ > 1 - kDistThreshold) {
         result.emplace_back(sorted_pairs.back().dist, 1);
     }
 
