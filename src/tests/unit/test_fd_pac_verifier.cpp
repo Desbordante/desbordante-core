@@ -46,8 +46,8 @@ struct FDPACVerifyingParams {
                          std::optional<double> min_epsilon = std::nullopt,
                          std::optional<double> max_epsilon = std::nullopt,
                          std::optional<double> min_delta = std::nullopt,
-                         config::CustomMetricsType lhs_metrics = {},
-                         config::CustomMetricsType rhs_metrics = {})
+                         config::CustomMetricsOptionType lhs_metrics = {},
+                         config::CustomMetricsOptionType rhs_metrics = {})
         : rhs_arity(rhs_indices.size()),
           params({
                   {kCsvConfig, csv_config},

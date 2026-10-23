@@ -18,7 +18,7 @@ namespace {
 using GetDouble = std::function<double()>;
 
 constexpr static double kDefaultMinEpsilon = 0.0;
-constexpr static double kDefaultMaxEpsilon = 1.0;
+constexpr static double kDefaultMaxEpsilon = -1.0;
 constexpr static double kDefaultMinDelta = 0.9;
 constexpr static double kDefaultMaxDelta = 0.2;
 // Diagonal threshold is the maximum slope coefficient of a segment on the ECDF, that is still
