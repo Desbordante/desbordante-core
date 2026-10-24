@@ -198,11 +198,10 @@ std::vector<DataFrame::ValueIndices> DataFrame::ExtractRangesFromColumn(
 
 std::optional<size_t> DataFrame::FindRangeIndexByItem(
         size_t item, std::vector<DataFrame::ValueIndices> const& ranges) {
-    auto iter = std::upper_bound(
-            ranges.cbegin(), ranges.cend(), item,
-            [](size_t value, DataFrame::ValueIndices const& range) {
-                return value < range.second.first;
-            });
+    auto iter = std::upper_bound(ranges.cbegin(), ranges.cend(), item,
+                                 [](size_t value, DataFrame::ValueIndices const& range) {
+                                     return value < range.second.first;
+                                 });
 
     if (iter != ranges.begin()) {
         auto prev_it = std::prev(iter);
