@@ -122,10 +122,10 @@ int ComplexSequence::GetMaximalUtility(std::vector<std::vector<int>> const& epis
 
         auto& pairs = sequence_[timepoint].GetEventsUtilityPairs();
 
-        for (size_t i = state_machines.size() - 1; i >= 0; --i) {
+        for (int i = static_cast<int>(state_machines.size()) - 1; i >= 0; --i) {
             if (state_machines[i].Scan(pairs)) {
                 state_machines[i].Transit();
-                if (i == state_machines.size() - 1) {
+                if (i == static_cast<int>(state_machines.size()) - 1) {
                     state_machines.emplace_back(episode, first_eventset_utility);
                 }
                 if (state_machines[i].IsEnd()) {
