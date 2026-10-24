@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <iostream>
+#include <regex>
+#include <string>
 #include <unordered_map>
 
 #include <boost/program_options.hpp>
@@ -26,16 +28,6 @@ int main(int argc, char* argv[]) {
 
     ::util::logging::Initialize();
 
-    BenchmarkRunner bm_runner;
-    BenchmarkComparer bm_comparer;
-    for (auto test_register_func :
-         {ADCBenchmark, DDBenchmark, INDBenchmark, FDBenchmark, MDBenchmark, NARBenchmark}) {
-        test_register_func(bm_runner, bm_comparer);
-    }
-    bm_runner.ExecuteAll();
-
-    auto results = bm_runner.BenchmarkResults();
-
     BenchmarkCLI benchmark_cli;
     try {
         benchmark_cli.ParseOptions(argc, argv);
@@ -43,11 +35,43 @@ int main(int argc, char* argv[]) {
         std::cout << "Error: " << e.what() << '\n';
         return EXIT_FAILURE;
     }
+
     auto const& var_map = benchmark_cli.GetVariablesMap();
     if (var_map.contains(kHelpLongOption)) {
         benchmark_cli.PrintHelp();
         return EXIT_SUCCESS;
     }
+
+    BenchmarkRunner bm_runner;
+    BenchmarkComparer bm_comparer;
+    for (auto test_register_func :
+         {ADCBenchmark, DDBenchmark, INDBenchmark, FDBenchmark, MDBenchmark, NARBenchmark}) {
+        test_register_func(bm_runner, bm_comparer);
+    }
+
+    if (var_map.contains(kListLongOption)) {
+        for (auto bench : bm_runner.BenchmarkNames()) {
+            std::cout << bench << std::endl;
+        }
+        return EXIT_SUCCESS;
+    }
+
+    if (var_map.contains(kNameLongOption)) {
+        try {
+            std::regex pattern(var_map[kNameLongOption].as<std::string>());
+            auto func = [&pattern](std::string const& name) -> bool {
+                return std::regex_search(name, pattern);
+            };
+            bm_runner.Execute(func);
+        } catch (std::regex_error const& e) {
+            std::cerr << "Invalid regex: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
+    } else {
+        bm_runner.ExecuteAll();
+    }
+
+    auto results = bm_runner.BenchmarkResults();
 
     // Succeed if there's nothing to compare
     auto success = true;
