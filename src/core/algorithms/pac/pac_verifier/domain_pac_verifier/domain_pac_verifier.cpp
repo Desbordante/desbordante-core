@@ -11,8 +11,15 @@
 
 #include "core/algorithms/pac/domain_pac.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
+#include "core/algorithms/pac/pac_verifier/options.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
+#include "core/config/descriptions.h"
+#include "core/config/indices/option.h"
+#include "core/config/names.h"
+#include "core/config/option.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/util/bitset_utils.h"
 #include "core/util/logger.h"
 
@@ -46,19 +53,19 @@ void DomainPACVerifier::PreparePACTypeData() {
 std::vector<PACVerifier::EpsilonDelta> DomainPACVerifier::FindEpsilons() const {
     auto total_tuples_num = original_value_tuples_->size();
     // Tuples number needed to satisfy min_delta
-    std::size_t min_tuples_num = std::ceil(MinDelta() * total_tuples_num);
+    std::size_t min_tuples_num = std::ceil(min_delta_ * total_tuples_num);
     std::size_t tuples_step;
-    if (DeltaSteps() <= 1) {
+    if (delta_steps_ <= 1) {
         tuples_step = total_tuples_num - min_tuples_num;
     } else {
-        tuples_step = static_cast<double>(total_tuples_num - min_tuples_num) / (DeltaSteps() - 1);
+        tuples_step = static_cast<double>(total_tuples_num - min_tuples_num) / (delta_steps_ - 1);
     }
     if (tuples_step == 0) {
         // min_tuples ~ total_tuples => make a few iterations
         tuples_step = 1;
     }
     LOG_TRACE("Min tuples num: {}, total tuples num: {}, tuples step: {}, delta steps: {}",
-              min_tuples_num, total_tuples_num, tuples_step, DeltaSteps());
+              min_tuples_num, total_tuples_num, tuples_step, delta_steps_);
 
     auto end = domain_end_;
     auto domain_size = std::distance(dists_from_domain_.begin(), end);
@@ -66,7 +73,7 @@ std::vector<PACVerifier::EpsilonDelta> DomainPACVerifier::FindEpsilons() const {
     std::size_t curr_size = domain_size;
 
     auto domain_only_delta = static_cast<double>(domain_size) / total_tuples_num;
-    if (domain_only_delta > MinDelta() - kDistThreshold) {
+    if (domain_only_delta > min_delta_ - kDistThreshold) {
         result.emplace_back(0, domain_only_delta);
     }
 
@@ -152,6 +159,32 @@ PACVerifier::EpsilonDelta DomainPACVerifier::GetEpsilonDeltaForEpsilon(double ep
     auto delta = static_cast<double>(std::distance(dists_from_domain_.begin(), it)) /
                  original_value_tuples_->size();
     return {eps, delta};
+}
+
+DomainPACVerifier::DomainPACVerifier() {
+    DESBORDANTE_OPTION_USING;
+
+    auto get_min_epsilon = [this]() { return min_epsilon_; };
+    auto get_max_epsilon = [this]() { return max_epsilon_; };
+    auto get_min_delta = [this]() { return min_delta_; };
+    auto get_max_delta = [this]() { return max_delta_; };
+
+    RegisterOption(kMinEpsilonOption(&min_epsilon_).SetConditionalOpts({{nullptr, {kMaxEpsilon}}}));
+    RegisterOption(MaxEpsilonOption(get_min_epsilon)(&max_epsilon_)
+                           .SetConditionalOpts({{nullptr, {kMinDelta}}}));
+    RegisterOption(MinDeltaOption(get_min_epsilon, get_max_epsilon)(&min_delta_)
+                           .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
+    RegisterOption(DeltaStepsOption(get_min_delta, get_max_delta)(&delta_steps_));
+    RegisterOption(kDiagonalThresholdOption(&diagonal_threshold_));
+
+    RegisterOption(
+            config::kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices}}}));
+
+    RegisterOption(config::IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
+            &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
+    RegisterOption(Option(&domain_, kDomain, kDDomain));
+
+    MakeOptionsAvailable({config::kTableOpt.GetName(), kDomain});
 }
 
 DomainPACHighlight DomainPACVerifier::GetHighlights(double eps_1, double eps_2) const {
