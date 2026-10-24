@@ -6,7 +6,7 @@ namespace algos::huespan {
 class FiniteStateMachine {
 private:
     std::vector<std::vector<int>> fsm_;
-    int pos_ = 0;
+    size_t pos_ = 0;
     int utility_ = 0;
 
 public:

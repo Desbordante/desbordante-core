@@ -117,7 +117,7 @@ void Huespan::MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
     auto const& last_eventset = alpha_episode.back();
     int last_event = last_eventset.back();
 
-    for (int i = 0; i < occurences.start_timepoints.size(); ++i) {
+    for (size_t i = 0; i < occurences.start_timepoints.size(); ++i) {
         int start_timepoint = occurences.start_timepoints[i];
         int end_timepoint = occurences.end_timepoints[i];
         int alpha_prev_utility = occurences.prev_utilities[i];
@@ -144,7 +144,7 @@ void Huespan::MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
             }
             if (pruned) continue;
 
-            for (int i = 0; i < alpha_episode.size() - 1 && !pruned; ++i) {
+            for (size_t i = 0; i < alpha_episode.size() - 1 && !pruned; ++i) {
                 for (int event : alpha_episode[i]) {
                     auto it = cooccurence_matrix_serial_.find(event);
                     if (it == cooccurence_matrix_serial_.end()) continue;
@@ -189,7 +189,7 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
     std::unordered_set<int> pruning_set;
     auto const& last_eventset = alpha_episode.back();
     int previous_start_timepoint = -1;
-    for (int i = 0; i < occurences.start_timepoints.size(); ++i) {
+    for (size_t i = 0; i < occurences.start_timepoints.size(); ++i) {
         int start_timepoint = occurences.start_timepoints[i];
         if (start_timepoint == previous_start_timepoint) continue;
 
@@ -197,7 +197,7 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
         int end_timepoint = occurences.end_timepoints[i];
         int alpha_utility = occurences.utilities[i];
 
-        int j = i + 1;
+        size_t j = i + 1;
         for (; j < occurences.end_timepoints.size(); ++j) {
             if (occurences.start_timepoints[j] != start_timepoint) break;
         }
@@ -235,7 +235,7 @@ void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
                 }
                 if (pruned) continue;
 
-                for (int i = 0; i < alpha_episode.size() - 1 && !pruned; ++i) {
+                for (size_t i = 0; i < alpha_episode.size() - 1 && !pruned; ++i) {
                     for (int event : alpha_episode[i]) {
                         auto it = cooccurence_matrix_serial_.find(event);
                         if (it == cooccurence_matrix_serial_.end()) continue;

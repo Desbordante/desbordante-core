@@ -1,6 +1,7 @@
 #include "complex_utility_sequence.h"
 
 #include <algorithm>
+#include <cstddef>
 
 #include "core/algorithms/hue/huespan/minimal_occurences.h"
 #include "finite_state_machine.h"
@@ -83,7 +84,7 @@ int ComplexSequence::GetRemainingUtility(int timepoint, int event) const {
 std::vector<std::pair<int, int>> ComplexSequence::GetExtentionEvents(int timepoint,
                                                                      int last_event) const {
     auto& pairs = sequence_.at(timepoint).GetEventsUtilityPairs();
-    for (int i = 1; i < pairs.size(); ++i) {
+    for (size_t i = 1; i < pairs.size(); ++i) {
         if (pairs[i - 1].first == last_event) {
             return std::vector<std::pair<int, int>>(pairs.begin() + i, pairs.end());
         }
@@ -94,10 +95,10 @@ std::vector<std::pair<int, int>> ComplexSequence::GetExtentionEvents(int timepoi
 int ComplexSequence::GetEventsUtilityByTimepoint(std::vector<int> const& eventset,
                                                  int timepoint) const {
     int utility = 0;
-    int index = 0;
+    size_t index = 0;
     auto const& pairs = sequence_.at(timepoint).GetEventsUtilityPairs();
 
-    for (int i = 0; i < pairs.size(); ++i) {
+    for (size_t i = 0; i < pairs.size(); ++i) {
         if (index == eventset.size()) break;
 
         if (pairs[i].first == eventset[index]) {
@@ -121,7 +122,7 @@ int ComplexSequence::GetMaximalUtility(std::vector<std::vector<int>> const& epis
 
         auto& pairs = sequence_[timepoint].GetEventsUtilityPairs();
 
-        for (int i = state_machines.size() - 1; i >= 0; --i) {
+        for (size_t i = state_machines.size() - 1; i >= 0; --i) {
             if (state_machines[i].Scan(pairs)) {
                 state_machines[i].Transit();
                 if (i == state_machines.size() - 1) {
