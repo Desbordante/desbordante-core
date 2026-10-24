@@ -1,7 +1,11 @@
 #include "core/algorithms/od/fastod/storage/data_frame.h"
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include "core/algorithms/od/fastod/util/type_util.h"
 #include "core/parser/csv_parser/csv_parser.h"
@@ -194,12 +198,19 @@ std::vector<DataFrame::ValueIndices> DataFrame::ExtractRangesFromColumn(
 
 std::optional<size_t> DataFrame::FindRangeIndexByItem(
         size_t item, std::vector<DataFrame::ValueIndices> const& ranges) {
-    auto iter = std::find_if(ranges.cbegin(), ranges.cend(), [item](auto const& p) {
-        Range const& range = p.second;
-        return item >= range.first && item <= range.second;
-    });
+    auto iter = std::upper_bound(ranges.cbegin(), ranges.cend(), item,
+                                 [](size_t value, DataFrame::ValueIndices const& range) {
+                                     return value < range.second.first;
+                                 });
 
-    return (iter != ranges.cend()) ? std::optional<size_t>{iter - ranges.cbegin()} : std::nullopt;
+    if (iter != ranges.begin()) {
+        auto prev_it = std::prev(iter);
+        if (item >= prev_it->second.first && item <= prev_it->second.second) {
+            return std::optional<size_t>{prev_it - ranges.cbegin()};
+        }
+    }
+
+    return std::nullopt;
 }
 
 }  // namespace algos::fastod
