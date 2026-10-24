@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "core/algorithms/pac/model/tuple_type.h"
+#include "core/algorithms/pac/pac_verifier/options.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 #include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
@@ -52,8 +53,7 @@ void UCCPACVerifier::PreparePairs() {
         for (std::size_t j = i + 1; j < total_tuples; ++j) {
             auto const& first = (*tuples_)[i];
             auto const& second = (*tuples_)[j];
-            sorted_pairs_->emplace_back(i, j,
-                                        metric_->Dist(tuple_type_->GetTypes(), first, second));
+            sorted_pairs_->emplace_back(i, j, (*metric_)(first, second));
         }
     }
     std::ranges::sort(*sorted_pairs_, {}, [](TuplePair const& p) { return p.dist; });
@@ -64,6 +64,8 @@ void UCCPACVerifier::PreparePACTypeData() {
     auto const& col_data = TypedRelation().GetColumnData();
     std::ranges::transform(column_indices_, types.begin(),
                            [&col_data](std::size_t const idx) { return &col_data[idx].GetType(); });
+
+    metric_ = metric_opt_->SetTypes(types);
 
     tuple_type_ = std::make_shared<pac::model::TupleType>(std::move(types));
 
@@ -111,13 +113,24 @@ UCCPACVerifier::UCCPACVerifier() {
     DESBORDANTE_OPTION_USING;
     using namespace config;
 
-    RegisterCommonOptions(false, true);
+    auto get_min_epsilon = [this]() { return min_epsilon_; };
+    auto get_max_epsilon = [this]() { return max_epsilon_; };
+    auto get_min_delta = [this]() { return min_delta_; };
+    auto get_max_delta = [this]() { return max_delta_; };
+
+    RegisterOption(kMinEpsilonOption(&min_epsilon_).SetConditionalOpts({{nullptr, {kMaxEpsilon}}}));
+    RegisterOption(MaxEpsilonOption(get_min_epsilon)(&max_epsilon_)
+                           .SetConditionalOpts({{nullptr, {kMinDelta}}}));
+    RegisterOption(MaxDeltaOption(get_min_epsilon, get_max_epsilon)(&max_delta_)
+                           .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
+    RegisterOption(DeltaStepsOption(get_min_delta, get_max_delta)(&delta_steps_));
+    RegisterOption(kDiagonalThresholdOption(&diagonal_threshold_));
 
     RegisterOption(kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices}}}));
 
     RegisterOption(IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
             &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
-    RegisterOption(VectorMetricOption(&metric_));
+    RegisterOption(VectorMetricOption(&metric_opt_));
 
     MakeOptionsAvailable({kTableOpt.GetName(), kCustomMetric});
 }

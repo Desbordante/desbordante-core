@@ -12,6 +12,8 @@
 #include "core/algorithms/pac/pac_verifier/ucc_pac_verifier/ucc_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/tuple_pair.h"
 #include "core/algorithms/pac/ucc_pac.h"
+#include "core/config/custom_metric/custom_metrics/type.h"
+#include "core/config/custom_metric/custom_vector_metric/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
 #include "core/util/custom_metric/custom_vector_metric.h"
@@ -38,7 +40,8 @@ private:
     using Pairs = std::vector<TuplePair>;
 
     config::IndicesType column_indices_;
-    std::shared_ptr<util::ICustomVectorMetric> metric_;
+    config::CustomVectorMetricOptionType metric_opt_;
+    config::CustomVectorMetricType metric_;
 
     std::shared_ptr<pac::model::TupleType> tuple_type_;
     std::shared_ptr<std::vector<pac::model::Tuple>> tuples_;
@@ -64,6 +67,12 @@ private:
     }
 
     void RefineDelta(PairsIt&) const override;
+
+    void MakeExecuteOptsAvailable() override {
+        using namespace config::names;
+
+        MakeOptionsAvailable({kMinEpsilon, kDiagonalThreshold});
+    }
 
 public:
     UCCPACVerifier();
