@@ -212,6 +212,15 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    huespan
+    SRCS
+    huespan/bind_huespan.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::hue::huespan
+    Boost::headers
+)
+
+desbordante_add_bind(
     ind
     SRCS
     ind/bind_ind.cpp
