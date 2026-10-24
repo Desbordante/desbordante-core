@@ -74,7 +74,7 @@ Option<unsigned long>::DefaultFunc CalculateDefaultDeltaSteps(GetDouble&& get_mi
                                                               GetDouble&& get_max_delta) {
     return [get_min_delta = std::move(get_min_delta),
             get_max_delta = std::move(get_max_delta)]() mutable {
-        return std::round((get_min_delta() - get_max_delta()) * 1000);
+        return std::round((get_max_delta() - get_min_delta()) * 1000);
     };
 }
 }  // namespace
