@@ -81,7 +81,7 @@ public:
     }
 
     /// @brief Execute benchmarks which satisfy a condition
-    void Execute(std::function<bool(const std::string&)> cond) {
+    void Execute(std::function<bool(std::string const&)> cond) {
         for (auto& [name, benchmark_body] : benchmarks_) {
             if (!cond(name)) continue;
             std::cout << "** " << name << "... **\n";
