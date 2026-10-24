@@ -109,18 +109,20 @@ void FDPACVerifier::PreparePACTypeData() {
     lhs_types_ = make_types(lhs_indices_);
     rhs_types_ = make_types(rhs_indices_);
 
-    auto set_types = [](config::CustomMetricsType& metrics,
-                        config::CustomMetricsOptionType const& metrics_opt,
-                        std::vector<model::Type const*> const& types) {
+    auto set_types = [&col_data](config::CustomMetricsType& metrics,
+                                 config::CustomMetricsOptionType const& metrics_opt,
+                                 std::vector<model::Type const*> const& types,
+                                 config::IndicesType const& indices) {
         assert(metrics_opt.size() == types.size());
 
         metrics.reserve(metrics_opt.size());
         for (std::size_t i = 0; i < metrics_opt.size(); ++i) {
-            metrics.push_back(metrics_opt[i]->SetType(types[i]));
+            auto const& col_name = col_data[indices[i]].GetColumn()->GetName();
+            metrics.push_back(metrics_opt[i]->SetType(types[i], col_name));
         }
     };
-    set_types(lhs_metrics_, lhs_metrics_opt_, *lhs_types_);
-    set_types(rhs_metrics_, rhs_metrics_opt_, *rhs_types_);
+    set_types(lhs_metrics_, lhs_metrics_opt_, *lhs_types_, lhs_indices_);
+    set_types(rhs_metrics_, rhs_metrics_opt_, *rhs_types_, rhs_indices_);
 
     PreparePairs();
 }
