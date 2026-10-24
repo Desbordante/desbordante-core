@@ -181,8 +181,8 @@ TEST(UCCPACVerifierTests, DefaultMetricFails) {
             {kCsvConfig, kMixedWithNulls},
             {kColumnIndices, config::IndicesType{0}},
     };
-    auto verifier = algos::CreateAndLoadAlgorithm<algos::pac_verifier::UCCPACVerifier>(params);
-    EXPECT_THROW(verifier->Execute(), config::ConfigurationError);
+    EXPECT_THROW(algos::CreateAndLoadAlgorithm<algos::pac_verifier::UCCPACVerifier>(params),
+                 config::ConfigurationError);
 }
 
 using IndexPairs = std::vector<std::pair<std::size_t, std::size_t>>;

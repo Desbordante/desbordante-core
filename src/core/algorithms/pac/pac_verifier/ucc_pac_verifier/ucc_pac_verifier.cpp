@@ -7,6 +7,7 @@
 #include <iterator>
 #include <memory>
 #include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -65,7 +66,12 @@ void UCCPACVerifier::PreparePACTypeData() {
     std::ranges::transform(column_indices_, types.begin(),
                            [&col_data](std::size_t const idx) { return &col_data[idx].GetType(); });
 
-    metric_ = metric_opt_->SetTypes(types);
+    std::vector<std::string> column_names;
+    column_names.reserve(column_indices_.size());
+    std::ranges::transform(
+            column_indices_, std::back_inserter(column_names),
+            [&col_data](std::size_t idx) { return col_data[idx].GetColumn()->GetName(); });
+    metric_ = metric_opt_->SetTypes(types, column_names);
 
     tuple_type_ = std::make_shared<pac::model::TupleType>(std::move(types));
 
@@ -120,7 +126,7 @@ UCCPACVerifier::UCCPACVerifier() {
 
     RegisterOption(kMinEpsilonOption(&min_epsilon_).SetConditionalOpts({{nullptr, {kMaxEpsilon}}}));
     RegisterOption(MaxEpsilonOption(get_min_epsilon)(&max_epsilon_)
-                           .SetConditionalOpts({{nullptr, {kMinDelta}}}));
+                           .SetConditionalOpts({{nullptr, {kMaxDelta}}}));
     RegisterOption(MaxDeltaOption(get_min_epsilon, get_max_epsilon)(&max_delta_)
                            .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
     RegisterOption(DeltaStepsOption(get_min_delta, get_max_delta)(&delta_steps_));
