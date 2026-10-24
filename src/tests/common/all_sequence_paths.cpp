@@ -11,5 +11,5 @@ std::filesystem::path const kMaxFemBaselinePath = kSequenceDataDir / "maxfem_bas
 std::filesystem::path const kMaxFemWindowPath = kSequenceDataDir / "maxfem_window.txt";
 std::filesystem::path const kMaxFemParallelPath = kSequenceDataDir / "maxfem_parallel.txt";
 std::filesystem::path const kMaxFemPruningPath = kSequenceDataDir / "maxfem_pruning.txt";
-
+std::filesystem::path const kHuespanBaselinePath = kSequenceDataDir / "huespan_baseline.txt";
 }  // namespace tests
