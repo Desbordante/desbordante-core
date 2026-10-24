@@ -7,7 +7,7 @@
 #include "complex_utility_sequence.h"
 #include "core/algorithms/algorithm.h"
 #include "high_utility_episode.h"
-#include "minimal_occurences.h"
+#include "minimal_occurrences.h"
 
 namespace algos::huespan {
 class Huespan : public Algorithm {
@@ -26,23 +26,23 @@ private:
     std::unordered_map<int, std::unordered_map<int, int>> cooccurence_matrix_simult_;
     std::unordered_map<int, std::unordered_map<int, int>> cooccurence_matrix_serial_;
 
-    std::unordered_map<int, EventMinimalOccurences> single_candidates_mos_;
+    std::unordered_map<int, EventMinimalOccurrences> single_candidates_mos_;
 
     std::vector<HighUtilityEpisode> high_utility_episodes_;
 
     void BuildCoocurenceMatrix();
 
     std::pair<int, int> CalculateMOsUtilityAndUpperBound(
-            int beta, EpisodeMinimalOccurences const& occurences);
+            int beta, EpisodeMinimalOccurrences const& occurrences);
 
     void MineHUE(std::vector<std::vector<int>> const& alpha_episode,
-                 EpisodeMinimalOccurences const& occurences);
+                 EpisodeMinimalOccurrences const& occurrences);
 
     void MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
-                       EpisodeMinimalOccurences const& occurences);
+                       EpisodeMinimalOccurrences const& occurrences);
 
     void MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
-                       EpisodeMinimalOccurences const& occurences);
+                       EpisodeMinimalOccurrences const& occurrences);
 
     void LoadDataInternal() override;
     void ResetState() override;

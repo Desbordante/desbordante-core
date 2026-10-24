@@ -1,8 +1,8 @@
 #include "python_bindings/huespan/bind_huespan.h"
 
-#include <string>
-
 #include <pybind11/pybind11.h>
+
+#include <string>
 
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
@@ -23,8 +23,9 @@ void BindHueSpan(pybind11::module_& main_module) {
             .def_property_readonly("events", &HighUtilityEpisode::GetEvents)
             .def("__len__", &HighUtilityEpisode::GetSize)
             .def("__repr__", [](HighUtilityEpisode const& episode) {
-                std::string result = "HighUtilityEpisode(utility=" +
-                                     std::to_string(episode.GetUtility()) + ", events=";
+                std::string result =
+                        "HighUtilityEpisode(utility=" + std::to_string(episode.GetUtility()) +
+                        ", events=";
                 bool first_event_set = true;
                 for (auto const& event_set : episode.GetEvents()) {
                     if (!first_event_set) {

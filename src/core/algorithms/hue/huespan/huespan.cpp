@@ -53,24 +53,24 @@ void Huespan::RegisterOptions() {
 }
 
 std::pair<int, int> Huespan::CalculateMOsUtilityAndUpperBound(
-        int beta, EpisodeMinimalOccurences const& occurences) {
-    int total_utilty = 0;
+        int beta, EpisodeMinimalOccurrences const& occurrences) {
+    int total_utility = 0;
     int upper_bound = 0;
     int previous_start_timepoint = -1;
-    for (size_t pos = 0; pos < occurences.start_timepoints.size(); ++pos) {
-        int start_timepoint = occurences.start_timepoints[pos];
+    for (size_t pos = 0; pos < occurrences.start_timepoints.size(); ++pos) {
+        int start_timepoint = occurrences.start_timepoints[pos];
         if (start_timepoint == previous_start_timepoint) continue;
 
         previous_start_timepoint = start_timepoint;
-        total_utilty += occurences.utilities[pos];
-        int end_timepoint = occurences.end_timepoints[pos];
+        total_utility += occurrences.utilities[pos];
+        int end_timepoint = occurrences.end_timepoints[pos];
 
-        upper_bound += occurences.utilities[pos] +
+        upper_bound += occurrences.utilities[pos] +
                        pruned_sequence_.GetRemainingUtility(end_timepoint, beta) +
                        pruned_sequence_.GetUtilityOfDuration(end_timepoint + 1,
                                                              start_timepoint + max_duration_ - 1);
     }
-    return {total_utilty, upper_bound};
+    return {total_utility, upper_bound};
 }
 
 void Huespan::BuildCoocurenceMatrix() {
@@ -105,29 +105,29 @@ void Huespan::BuildCoocurenceMatrix() {
 }
 
 void Huespan::MineHUE(std::vector<std::vector<int>> const& alpha_episode,
-                      EpisodeMinimalOccurences const& occurences) {
-    MineSimultHUE(alpha_episode, occurences);
-    MineSerialHUE(alpha_episode, occurences);
+                      EpisodeMinimalOccurrences const& occurrences) {
+    MineSimultHUE(alpha_episode, occurrences);
+    MineSerialHUE(alpha_episode, occurrences);
 }
 
 void Huespan::MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
-                            EpisodeMinimalOccurences const& occurences) {
-    std::unordered_map<int, EpisodeMinimalOccurences> beta_info;
+                            EpisodeMinimalOccurrences const& occurrences) {
+    std::unordered_map<int, EpisodeMinimalOccurrences> beta_info;
     std::unordered_set<int> pruning_set;
     auto const& last_eventset = alpha_episode.back();
     int last_event = last_eventset.back();
 
-    for (size_t i = 0; i < occurences.start_timepoints.size(); ++i) {
-        int start_timepoint = occurences.start_timepoints[i];
-        int end_timepoint = occurences.end_timepoints[i];
-        int alpha_prev_utility = occurences.prev_utilities[i];
-        int alpha_utility = occurences.utilities[i];
+    for (size_t i = 0; i < occurrences.start_timepoints.size(); ++i) {
+        int start_timepoint = occurrences.start_timepoints[i];
+        int end_timepoint = occurrences.end_timepoints[i];
+        int alpha_prev_utility = occurrences.prev_utilities[i];
+        int alpha_utility = occurrences.utilities[i];
 
-        auto extension_pairs = pruned_sequence_.GetExtentionEvents(end_timepoint, last_event);
+        auto extension_pairs = pruned_sequence_.GetExtensionEvents(end_timepoint, last_event);
 
-        for (auto const& extention_pair : extension_pairs) {
-            int beta = extention_pair.first;
-            int beta_utility = alpha_utility + extention_pair.second;
+        for (auto const& extension_pair : extension_pairs) {
+            int beta = extension_pair.first;
+            int beta_utility = alpha_utility + extension_pair.second;
 
             if (pruning_set.count(beta)) continue;
 
@@ -184,33 +184,33 @@ void Huespan::MineSimultHUE(std::vector<std::vector<int>> const& alpha_episode,
 }
 
 void Huespan::MineSerialHUE(std::vector<std::vector<int>> const& alpha_episode,
-                            EpisodeMinimalOccurences const& occurences) {
-    std::unordered_map<int, EpisodeMinimalOccurences> beta_info;
+                            EpisodeMinimalOccurrences const& occurrences) {
+    std::unordered_map<int, EpisodeMinimalOccurrences> beta_info;
     std::unordered_set<int> pruning_set;
     auto const& last_eventset = alpha_episode.back();
     int previous_start_timepoint = -1;
-    for (size_t i = 0; i < occurences.start_timepoints.size(); ++i) {
-        int start_timepoint = occurences.start_timepoints[i];
+    for (size_t i = 0; i < occurrences.start_timepoints.size(); ++i) {
+        int start_timepoint = occurrences.start_timepoints[i];
         if (start_timepoint == previous_start_timepoint) continue;
 
         previous_start_timepoint = start_timepoint;
-        int end_timepoint = occurences.end_timepoints[i];
-        int alpha_utility = occurences.utilities[i];
+        int end_timepoint = occurrences.end_timepoints[i];
+        int alpha_utility = occurrences.utilities[i];
 
         size_t j = i + 1;
-        for (; j < occurences.end_timepoints.size(); ++j) {
-            if (occurences.start_timepoints[j] != start_timepoint) break;
+        for (; j < occurrences.end_timepoints.size(); ++j) {
+            if (occurrences.start_timepoints[j] != start_timepoint) break;
         }
 
         int next_mo_end_timepoint = pruned_sequence_.GetLastTimepoint();
-        if (j < occurences.end_timepoints.size()) {
-            next_mo_end_timepoint = occurences.end_timepoints[j];
+        if (j < occurrences.end_timepoints.size()) {
+            next_mo_end_timepoint = occurrences.end_timepoints[j];
         }
-        int extention_bound = std::min(next_mo_end_timepoint,
+        int extension_bound = std::min(next_mo_end_timepoint,
                                        start_timepoint + static_cast<int>(max_duration_) - 1);
 
         int max_alpha_utility = alpha_utility;
-        for (int timepoint = end_timepoint + 1; timepoint <= extention_bound; ++timepoint) {
+        for (int timepoint = end_timepoint + 1; timepoint <= extension_bound; ++timepoint) {
             for (auto const& pair : pruned_sequence_.GetEventsByTimepoint(timepoint)) {
                 int beta = pair.first;
 
@@ -287,20 +287,21 @@ void Huespan::ExecuteInternal() {
 
     for (auto& [candidate, moutility] : candidates) {
         std::vector<std::vector<int>> alpha_episode = {{candidate}};
-        EpisodeMinimalOccurences occurences;
-        occurences.start_timepoints = moutility.GetOccurences();
-        occurences.end_timepoints = occurences.start_timepoints;
-        occurences.prev_utilities.assign(occurences.start_timepoints.size(), 0);
-        occurences.utilities = moutility.GetUtilities();
+        EpisodeMinimalOccurrences occurrences;
+        occurrences.start_timepoints = moutility.GetOccurrences();
+        occurrences.end_timepoints = occurrences.start_timepoints;
+        occurrences.prev_utilities.assign(occurrences.start_timepoints.size(), 0);
+        occurrences.utilities = moutility.GetUtilities();
 
-        auto [total_utility, upper_bound] = CalculateMOsUtilityAndUpperBound(candidate, occurences);
+        auto [total_utility, upper_bound] =
+                CalculateMOsUtilityAndUpperBound(candidate, occurrences);
 
         if (upper_bound >= min_utility_absolute_) {
             if (total_utility >= min_utility_absolute_) {
                 HighUtilityEpisode hue(alpha_episode, total_utility);
                 high_utility_episodes_.push_back(hue);
             }
-            MineHUE(alpha_episode, occurences);
+            MineHUE(alpha_episode, occurrences);
         }
     }
     LOG_DEBUG("High utility episodes found: {}", high_utility_episodes_.size());
@@ -315,19 +316,19 @@ void Huespan::LoadDataInternal() {
     int current_timepoint = 1;
 
     while (getline(file, single_episode)) {
-        std::vector<std::string> single_episode_splitted;
-        boost::split(single_episode_splitted, single_episode, boost::is_any_of(":"),
+        std::vector<std::string> single_episode_split;
+        boost::split(single_episode_split, single_episode, boost::is_any_of(":"),
                      boost::token_compress_off);
-        if (single_episode_splitted.size() != 3) {
+        if (single_episode_split.size() != 3) {
             throw std::runtime_error("Line " + std::to_string(current_timepoint) +
                                      ": expected 3 ':'-separated fields, got " +
-                                     std::to_string(single_episode_splitted.size()));
+                                     std::to_string(single_episode_split.size()));
         }
         std::vector<std::string> events;
         std::vector<std::string> utilities;
-        boost::split(events, single_episode_splitted[0], boost::is_any_of(" "));
-        boost::split(utilities, single_episode_splitted[2], boost::is_any_of(" "));
-        int total_utility = std::stoi(single_episode_splitted[1]);
+        boost::split(events, single_episode_split[0], boost::is_any_of(" "));
+        boost::split(utilities, single_episode_split[2], boost::is_any_of(" "));
+        int total_utility = std::stoi(single_episode_split[1]);
         if (events.size() != utilities.size()) {
             throw std::runtime_error("Line " + std::to_string(current_timepoint) + ": " +
                                      std::to_string(events.size()) + " events but " +

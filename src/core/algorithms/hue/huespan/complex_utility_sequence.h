@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "minimal_occurences.h"
+#include "minimal_occurrences.h"
 
 namespace algos::huespan {
 
@@ -65,13 +65,13 @@ public:
     }
 
     void PruneSingleEvents(int max_duration, double min_utility_absolute,
-                           std::unordered_map<int, EventMinimalOccurences>& events_mos);
+                           std::unordered_map<int, EventMinimalOccurrences>& events_mos);
     int GetUtilityOfDuration(int start_timepoint, int end_timepoint);
     int GetRemainingUtility(int timepoint, int event) const;
 
     int GetEventsUtilityByTimepoint(std::vector<int> const& eventset, int timepoint) const;
     int GetMaximalUtility(std::vector<std::vector<int>> const& episode, int start_timepoint,
                           int end_timepoint);
-    std::vector<std::pair<int, int>> GetExtentionEvents(int timepoint, int last_event) const;
+    std::vector<std::pair<int, int>> GetExtensionEvents(int timepoint, int last_event) const;
 };
 }  // namespace algos::huespan

@@ -3,13 +3,13 @@
 #include <algorithm>
 #include <cstddef>
 
-#include "core/algorithms/hue/huespan/minimal_occurences.h"
 #include "finite_state_machine.h"
+#include "minimal_occurrences.h"
 
 namespace algos::huespan {
 void ComplexSequence::PruneSingleEvents(
         int max_duration, double min_utility_absolute,
-        std::unordered_map<int, EventMinimalOccurences>& events_mos) {
+        std::unordered_map<int, EventMinimalOccurrences>& events_mos) {
     std::unordered_map<int, int> events_awu;
     for (auto& [timepoint, events_utility_pairs] : sequence_) {
         int awu = GetUtilityOfDuration(timepoint - max_duration + 1, timepoint + max_duration - 1);
@@ -81,7 +81,7 @@ int ComplexSequence::GetRemainingUtility(int timepoint, int event) const {
     return utility;
 }
 
-std::vector<std::pair<int, int>> ComplexSequence::GetExtentionEvents(int timepoint,
+std::vector<std::pair<int, int>> ComplexSequence::GetExtensionEvents(int timepoint,
                                                                      int last_event) const {
     auto& pairs = sequence_.at(timepoint).GetEventsUtilityPairs();
     for (size_t i = 1; i < pairs.size(); ++i) {
