@@ -55,8 +55,17 @@ TEST_F(HuespanAlgorithm, MultipleExecutions) {
     auto ep3 = algos::huespan::HighUtilityEpisode({{4, 2}, {2, 3}, {1, 3}}, 17);
     auto ep4 = algos::huespan::HighUtilityEpisode({{4}, {2, 3}, {1, 3}}, 15);
 
-    auto hues = ExecuteHuespan(kHuespanBaselinePath, 0.4, 5);
-    hues = ExecuteHuespan(kHuespanBaselinePath, 0.7, 3);
+    algos::StdParamsMap param_map = {{config::names::kUtilitySequence, kHuespanBaselinePath}};
+    auto algo = algos::CreateAndLoadAlgorithm<algos::huespan::Huespan>(param_map);
+    algo->SetOption(config::names::kMinUtilityRatio, 0.4);
+    algo->SetOption(config::names::kMaxDuration, size_t(5));
+    algo->Execute();
+    auto hues = algo->GetHighUtilityEpisodes();
+
+    algo->SetOption(config::names::kMinUtilityRatio, 0.7);
+    algo->SetOption(config::names::kMaxDuration, size_t(3));
+    algo->Execute();
+    hues = algo->GetHighUtilityEpisodes();
 
     EXPECT_THAT(hues, UnorderedElementsAre(ep1, ep2, ep3, ep4));
 };
