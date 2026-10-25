@@ -1,0 +1,63 @@
+# Exported from IWYU internal mappings at 2026-03-11T12:20:16Z
+# Fixed: changed "public" to "private" for C headers (they are implementation details for C++ wrappers)
+# Also added C symbol mappings to force C++ headers usage
+[
+  { "include": ["<assert.h>", "private", "<cassert>", "public"] },
+  { "include": ["<complex.h>", "private", "<ccomplex>", "public"] },
+  { "include": ["<ctype.h>", "private", "<cctype>", "public"] },
+  { "include": ["<errno.h>", "private", "<cerrno>", "public"] },
+  { "include": ["<fenv.h>", "private", "<cfenv>", "public"] },
+  { "include": ["<float.h>", "private", "<cfloat>", "public"] },
+  { "include": ["<inttypes.h>", "private", "<cinttypes>", "public"] },
+  { "include": ["<iso646.h>", "private", "<ciso646>", "public"] },
+  { "include": ["<limits.h>", "private", "<climits>", "public"] },
+  { "include": ["<locale.h>", "private", "<clocale>", "public"] },
+  { "include": ["<math.h>", "private", "<cmath>", "public"] },
+  { "include": ["<setjmp.h>", "private", "<csetjmp>", "public"] },
+  { "include": ["<signal.h>", "private", "<csignal>", "public"] },
+  { "include": ["<stdalign.h>", "private", "<cstdalign>", "public"] },
+  { "include": ["<stdarg.h>", "private", "<cstdarg>", "public"] },
+  { "include": ["<stdbool.h>", "private", "<cstdbool>", "public"] },
+  { "include": ["<stddef.h>", "private", "<cstddef>", "public"] },
+  { "include": ["<stdint.h>", "private", "<cstdint>", "public"] },
+  { "include": ["<stdio.h>", "private", "<cstdio>", "public"] },
+  { "include": ["<stdlib.h>", "private", "<cstdlib>", "public"] },
+  { "include": ["<string.h>", "private", "<cstring>", "public"] },
+  { "include": ["<tgmath.h>", "private", "<ctgmath>", "public"] },
+  { "include": ["<time.h>", "private", "<ctime>", "public"] },
+  { "include": ["<uchar.h>", "private", "<cuchar>", "public"] },
+  { "include": ["<wchar.h>", "private", "<cwchar>", "public"] },
+  { "include": ["<wctype.h>", "private", "<cwctype>", "public"] },
+
+  # --- C symbols -> C++ headers ---
+  # size_t, ptrdiff_t, nullptr_t from <cstddef> instead of <stddef.h>
+  { "symbol": ["size_t", "private", "<cstddef>", "public"] },
+  { "symbol": ["ptrdiff_t", "private", "<cstddef>", "public"] },
+  { "symbol": ["nullptr_t", "private", "<cstddef>", "public"] },
+  # NULL from <cstdlib>
+  { "symbol": ["NULL", "private", "<cstdlib>", "public"] },
+  # memset, memcpy, memmove, memcmp from <cstring> instead of <string.h>
+  { "symbol": ["memset", "private", "<cstring>", "public"] },
+  { "symbol": ["memcpy", "private", "<cstring>", "public"] },
+  { "symbol": ["memmove", "private", "<cstring>", "public"] },
+  { "symbol": ["memcmp", "private", "<cstring>", "public"] },
+  # strlen, strcpy, strcat from <cstring>
+  { "symbol": ["strlen", "private", "<cstring>", "public"] },
+  { "symbol": ["strcpy", "private", "<cstring>", "public"] },
+  { "symbol": ["strcat", "private", "<cstring>", "public"] },
+  # printf, fprintf, sprintf from <cstdio> instead of <stdio.h>
+  { "symbol": ["printf", "private", "<cstdio>", "public"] },
+  { "symbol": ["fprintf", "private", "<cstdio>", "public"] },
+  { "symbol": ["sprintf", "private", "<cstdio>", "public"] },
+  # malloc, free, exit from <cstdlib> instead of <stdlib.h>
+  { "symbol": ["malloc", "private", "<cstdlib>", "public"] },
+  { "symbol": ["free", "private", "<cstdlib>", "public"] },
+  { "symbol": ["exit", "private", "<cstdlib>", "public"] },
+  # abs, labs, llabs from <cstdlib>
+  { "symbol": ["abs", "private", "<cstdlib>", "public"] },
+  { "symbol": ["labs", "private", "<cstdlib>", "public"] },
+  # isalnum, isalpha, isdigit from <cctype> instead of <ctype.h>
+  { "symbol": ["isalnum", "private", "<cctype>", "public"] },
+  { "symbol": ["isalpha", "private", "<cctype>", "public"] },
+  { "symbol": ["isdigit", "private", "<cctype>", "public"] }
+]
