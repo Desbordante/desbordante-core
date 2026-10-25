@@ -1,5 +1,6 @@
 """Explain and validate a Pattern FD on the licenses dataset."""
 
+import sys
 from pathlib import Path
 
 import desbordante
@@ -92,6 +93,7 @@ def print_results(title, table, verifier, lhs_indices, rhs_indices):
     print(f"  Violating rows: {verifier.get_num_error_rows()}")
     print(f"  Clusters with violations: {verifier.get_num_error_clusters()}")
 
+    use_color = sys.stdout.isatty()
     for number, highlight in enumerate(verifier.get_clusters(), start=1):
         violating_rows = set(highlight.get_violating_rows)
         print(f"  Cluster {number}:")
@@ -99,7 +101,10 @@ def print_results(title, table, verifier, lhs_indices, rhs_indices):
             lhs_values = table.iloc[row, lhs_indices].tolist()
             rhs_values = table.iloc[row, rhs_indices].tolist()
             label = "  <-- violation" if row in violating_rows else ""
-            print(f"    row {row}: {lhs_values} -> {rhs_values}{label}")
+            line = f"    row {row}: {lhs_values} -> {rhs_values}{label}"
+            if row in violating_rows and use_color:
+                line = f"\033[1;41m{line}\033[0m"
+            print(line)
     print()
 
 
