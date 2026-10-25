@@ -8,7 +8,7 @@
 namespace benchmark {
 
 inline void ODBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkComparer& comparer) {
-    runner.RegisterSimpleBenchmark<algos::Fastod>(tests::kOdTestNormAbalone);
+    runner.RegisterSimpleBenchmark<algos::Fastod>(tests::kEpicMeds);
 }
 
 }  // namespace benchmark
