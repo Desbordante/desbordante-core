@@ -25,6 +25,12 @@ def explain(*paragraphs):
     print("\n\n".join(paragraphs), end="\n\n")
 
 
+def terminal_style(text, code):
+    if not sys.stdout.isatty():
+        return str(text)
+    return f"\033[{code}m{text}\033[0m"
+
+
 def print_introduction():
     explain(
         "Pattern FD validation in Desbordante. This example is based on "
@@ -85,25 +91,25 @@ def violating_row_indices(verifier):
 def print_results(title, table, verifier, lhs_indices, rhs_indices):
     lhs_names = [table.columns[index] for index in lhs_indices]
     rhs_names = [table.columns[index] for index in rhs_indices]
-    print(f"{title}: {lhs_names} -> {rhs_names}")
-    print(f"  Pattern FD holds: {verifier.pattern_fd_holds()}")
+    print(terminal_style(f"{title}: {lhs_names} -> {rhs_names}", "1;49"))
+    holds = verifier.pattern_fd_holds()
+    print(f"  Pattern FD holds: {terminal_style(holds, '1;32' if holds else '1;31')}")
     print(f"  Observed coverage: {verifier.get_real_pattern_fd_coverage()}")
     print(f"  Observed minimum pattern inclusion: {verifier.get_real_min_pattern_inclusion()}")
     print(f"  Observed maximum RHS deviation: {verifier.get_real_max_rhs_deviation():.2f}")
     print(f"  Violating rows: {verifier.get_num_error_rows()}")
     print(f"  Clusters with violations: {verifier.get_num_error_clusters()}")
 
-    use_color = sys.stdout.isatty()
     for number, highlight in enumerate(verifier.get_clusters(), start=1):
         violating_rows = set(highlight.get_violating_rows)
-        print(f"  Cluster {number}:")
+        print(terminal_style(f"  Cluster {number}:", "1;34"))
         for row in sorted(highlight.cluster):
             lhs_values = table.iloc[row, lhs_indices].tolist()
             rhs_values = table.iloc[row, rhs_indices].tolist()
             label = "  <-- violation" if row in violating_rows else ""
             line = f"    row {row}: {lhs_values} -> {rhs_values}{label}"
-            if row in violating_rows and use_color:
-                line = f"\033[1;41m{line}\033[0m"
+            if row in violating_rows:
+                line = terminal_style(line, "1;41")
             print(line)
     print()
 
@@ -162,10 +168,13 @@ def run_example():
 
     explain(
         "We require at least four LHS matches for each tableau row "
-        "(min_pattern_inclusion=4) and ten distinct LHS-matching rows overall "
-        "(min_pattern_fd_coverage=10). For each tableau row, RHS deviation is "
+        f"{terminal_style('(min_pattern_inclusion=4)', '3')} and ten distinct "
+        "LHS-matching rows overall "
+        f"{terminal_style('(min_pattern_fd_coverage=10)', '3')}. For each "
+        "tableau row, RHS deviation is "
         "its violating rows divided by its LHS-matching rows. The reported "
-        "max_rhs_deviation is the largest such fraction; the allowed limit is 0.2. "
+        f"{terminal_style('max_rhs_deviation', '3')} is the largest such fraction; "
+        f"the allowed limit is {terminal_style('0.2', '3')}. "
         "Desbordante reports the observed values alongside the user-supplied "
         "limits; it does not change those limits."
     )
