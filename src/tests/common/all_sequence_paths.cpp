@@ -12,4 +12,8 @@ std::filesystem::path const kMaxFemWindowPath = kSequenceDataDir / "maxfem_windo
 std::filesystem::path const kMaxFemParallelPath = kSequenceDataDir / "maxfem_parallel.txt";
 std::filesystem::path const kMaxFemPruningPath = kSequenceDataDir / "maxfem_pruning.txt";
 std::filesystem::path const kHuespanBaselinePath = kSequenceDataDir / "huespan_baseline.txt";
+std::filesystem::path const kHuespanInvalidSequencePath =
+        kSequenceDataDir / "huespan_invalid_sequence.txt";
+std::filesystem::path const kHuespanInvalidUtilitiesPath =
+        kSequenceDataDir / "huespan_invalid_utilities.txt";
 }  // namespace tests

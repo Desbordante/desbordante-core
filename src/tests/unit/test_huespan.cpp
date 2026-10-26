@@ -1,9 +1,12 @@
+#include <stdexcept>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/hue/huespan/high_utility_episode.h"
 #include "core/algorithms/hue/huespan/huespan.h"
+#include "core/config/exceptions.h"
 #include "core/config/names.h"
 #include "gmock/gmock.h"
 #include "tests/common/all_sequence_paths.h"
@@ -68,6 +71,22 @@ TEST_F(HuespanAlgorithm, MultipleExecutions) {
     hues = algo->GetHighUtilityEpisodes();
 
     EXPECT_THAT(hues, UnorderedElementsAre(ep1, ep2, ep3, ep4));
+};
+
+TEST_F(HuespanAlgorithm, InvalidSequence) {
+    EXPECT_THROW(ExecuteHuespan(kHuespanInvalidSequencePath, 0.5, 3), std::runtime_error);
+};
+
+TEST_F(HuespanAlgorithm, InvalidUtilities) {
+    EXPECT_THROW(ExecuteHuespan(kHuespanInvalidUtilitiesPath, 0.5, 3), std::runtime_error);
+};
+
+TEST_F(HuespanAlgorithm, InvalidMinUtilityParameter) {
+    EXPECT_THROW(ExecuteHuespan(kHuespanBaselinePath, 10, 3), config::ConfigurationError);
+};
+
+TEST_F(HuespanAlgorithm, InvalidMaxDurationParameter) {
+    EXPECT_THROW(ExecuteHuespan(kHuespanBaselinePath, 0.5, 0), config::ConfigurationError);
 };
 
 }  // namespace tests

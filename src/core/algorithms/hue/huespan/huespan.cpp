@@ -317,8 +317,7 @@ void Huespan::LoadDataInternal() {
 
     while (getline(file, single_episode)) {
         std::vector<std::string> single_episode_split;
-        boost::split(single_episode_split, single_episode, boost::is_any_of(":"),
-                     boost::token_compress_off);
+        boost::split(single_episode_split, single_episode, boost::is_any_of(":"));
         if (single_episode_split.size() != 3) {
             throw std::runtime_error("Line " + std::to_string(current_timepoint) +
                                      ": expected 3 ':'-separated fields, got " +
