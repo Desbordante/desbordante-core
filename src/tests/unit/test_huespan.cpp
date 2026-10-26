@@ -52,6 +52,29 @@ TEST_F(HuespanAlgorithm, BasicSecond) {
     EXPECT_THAT(hues, UnorderedElementsAre(ep1, ep2, ep3, ep4, ep5, ep6, ep7));
 };
 
+TEST_F(HuespanAlgorithm, BigDataset) {
+    auto ep1 = algos::huespan::HighUtilityEpisode({{456, 66, 304, 882, 445, 753, 724, 508}}, 7383);
+    auto ep2 =
+            algos::huespan::HighUtilityEpisode({{456, 66, 62, 304, 882, 445, 753, 724, 508}}, 8147);
+    auto ep3 = algos::huespan::HighUtilityEpisode({{456, 66, 62, 304, 882, 445, 753, 508}}, 7265);
+    auto ep4 = algos::huespan::HighUtilityEpisode({{456, 66, 62, 304, 882, 445, 724, 508}}, 7769);
+    auto ep5 = algos::huespan::HighUtilityEpisode({{456, 66, 62, 304, 445, 753, 724, 508}}, 7400);
+    auto ep6 = algos::huespan::HighUtilityEpisode({{456, 66, 62, 882, 445, 753, 724, 508}}, 7769);
+    auto ep7 = algos::huespan::HighUtilityEpisode({{456, 66, 62, 882, 445, 724, 508}}, 7391);
+    auto ep8 = algos::huespan::HighUtilityEpisode({{272}}, 7820);
+    auto ep9 = algos::huespan::HighUtilityEpisode({{306}}, 7920);
+    auto ep10 = algos::huespan::HighUtilityEpisode({{330}}, 7960);
+    auto ep11 = algos::huespan::HighUtilityEpisode({{508}}, 7580);
+    auto ep12 = algos::huespan::HighUtilityEpisode({{789}}, 7964);
+    auto ep13 = algos::huespan::HighUtilityEpisode({{907}}, 7182);
+    auto ep14 = algos::huespan::HighUtilityEpisode({{1254}}, 8074);
+    auto ep15 = algos::huespan::HighUtilityEpisode({{1426}}, 11968);
+
+    auto hues = ExecuteHuespan(kHuespanFoodmartPath, 0.0025, 1);
+    EXPECT_THAT(hues, UnorderedElementsAre(ep1, ep2, ep3, ep4, ep5, ep6, ep7, ep8, ep9, ep10, ep11,
+                                           ep12, ep13, ep14, ep15));
+};
+
 TEST_F(HuespanAlgorithm, MultipleExecutions) {
     auto ep1 = algos::huespan::HighUtilityEpisode({{2, 3}, {1, 3}, {4}}, 15);
     auto ep2 = algos::huespan::HighUtilityEpisode({{2}, {2, 3}, {1, 3}}, 15);
