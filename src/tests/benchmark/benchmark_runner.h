@@ -3,6 +3,8 @@
 #include <chrono>
 #include <functional>
 #include <iostream>
+#include <ranges>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -21,6 +23,17 @@ class BenchmarkRunner {
 private:
     std::unordered_map<std::string, BenchmarkBody> benchmarks_;
     std::unordered_map<std::string, long long> bm_results_;
+
+    void ExecuteBenchmark(std::string const& name, BenchmarkBody const& benchmark_body) {
+        std::cout << "** " << name << "... **\n";
+        auto start = std::chrono::steady_clock::now();
+        benchmark_body();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                               std::chrono::steady_clock::now() - start)
+                               .count();
+        std::cout << "** " << name << ": " << elapsed / 1000 << "s **\n";
+        bm_results_.emplace(name, elapsed);
+    }
 
     /// @brief Demangle name and take only class name (without namespaces).
     std::string GetAlgoName(std::string const& mangled_name) {
@@ -74,22 +87,29 @@ public:
     }
 
     /// @brief Run all registered benchmarks
-    void ExecuteAll() {
-        for (auto& [name, benchmark_body] : benchmarks_) {
-            std::cout << "** " << name << "... **\n";
-            auto start = std::chrono::steady_clock::now();
-            benchmark_body();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                   std::chrono::steady_clock::now() - start)
-                                   .count();
-            std::cout << "** " << name << ": " << elapsed / 1000 << "s **\n";
-            bm_results_.emplace(name, elapsed);
+    void Execute() {
+        for (auto const& [name, benchmark_body] : benchmarks_) {
+            ExecuteBenchmark(name, benchmark_body);
+        }
+    }
+
+    /// @brief Run benchmarks whose names contain a match for the regex
+    void Execute(std::regex const& pattern) {
+        for (auto const& [name, benchmark_body] : benchmarks_) {
+            if (std::regex_search(name, pattern)) {
+                ExecuteBenchmark(name, benchmark_body);
+            }
         }
     }
 
     /// @brief Get results of all benchmarks that've been already executed
     std::unordered_map<std::string, long long> const& BenchmarkResults() const {
         return bm_results_;
+    }
+
+    /// @brief Get a list of all benchmarks registered
+    auto BenchmarkNames() const {
+        return std::ranges::views::keys(benchmarks_);
     }
 };
 }  // namespace benchmark

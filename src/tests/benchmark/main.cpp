@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <iostream>
+#include <regex>
+#include <string>
 #include <unordered_map>
 
 #include <boost/program_options.hpp>
@@ -47,7 +49,24 @@ int main(int argc, char* argv[]) {
         test_register_func(bm_runner, bm_comparer);
     }
 
-    bm_runner.ExecuteAll();
+    if (var_map.contains(kListLongOption)) {
+        for (auto bench : bm_runner.BenchmarkNames()) {
+            std::cout << bench << std::endl;
+        }
+        return EXIT_SUCCESS;
+    }
+
+    if (var_map.contains(kNameLongOption)) {
+        try {
+            std::regex pattern(var_map[kNameLongOption].as<std::string>());
+            bm_runner.Execute(pattern);
+        } catch (std::regex_error const& e) {
+            std::cerr << "Invalid regex: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
+    } else {
+        bm_runner.Execute();
+    }
 
     auto results = bm_runner.BenchmarkResults();
 
