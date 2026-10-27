@@ -122,15 +122,15 @@ void ConstantExpansion::Expand(Pattern&& parent_pattern, Frontier& frontier,
         auto accumulated_support =
                 CalculateAccumulatedSupport(valid_constants, cluster_representatives, cover);
 
-        FilterValidConstants(entries_buffer, replaced_index, valid_constants, pruning_strategy,
-                             const_entry_creator);
+        FilterForSupport(valid_constants, pruning_strategy, accumulated_support,
+                         SupportMode::kDirect);
 
         if (!valid_constants.any()) {
             continue;
         }
 
-        FilterForSupport(valid_constants, pruning_strategy, accumulated_support,
-                         SupportMode::kDirect);
+        FilterValidConstants(entries_buffer, replaced_index, valid_constants, pruning_strategy,
+                             const_entry_creator);
 
         if (!valid_constants.any()) {
             continue;
