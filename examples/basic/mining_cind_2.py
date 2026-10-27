@@ -3,6 +3,7 @@ import pandas as pd
 from tabulate import tabulate
 import textwrap
 import pprint
+import re
 
 YELLOW = "\033[1;33m"
 CYAN = "\033[1;36m"
@@ -67,7 +68,6 @@ def print_condition(cond, num, indent):
 
 
 def fmt_ind(ind_string):
-    import re
     m = re.match(
         r"\(([^,]+),\s*\[([^\]]*)\]\)\s*->\s*\(([^,]+),\s*\[([^\]]*)\]\)",
         ind_string,

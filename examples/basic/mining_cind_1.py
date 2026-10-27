@@ -2,6 +2,7 @@ import desbordante
 import pandas as pd
 from tabulate import tabulate
 import textwrap
+import re
 
 YELLOW = "\033[1;33m"
 CYAN = "\033[1;36m"
@@ -45,7 +46,6 @@ def fmt_attrs(attrs):
 
 
 def fmt_ind(ind_string):
-    import re
     m = re.match(
         r"\(([^,]+),\s*\[([^\]]*)\]\)\s*->\s*\(([^,]+),\s*\[([^\]]*)\]\)",
         ind_string,

@@ -8,21 +8,22 @@
 #include <unordered_set>
 #include <utility>
 
-#include <boost/container_hash/hash.hpp>
-
 #include "core/algorithms/cind/utils.h"
 
 namespace algos::cind {
 
 namespace {
-struct PairIntHash {
-    std::size_t operator()(std::pair<int, int> const& p) const noexcept {
-        std::size_t seed = 0;
-        boost::hash_combine(seed, p.first);
-        boost::hash_combine(seed, p.second);
-        return seed;
-    }
+struct CoverEntry {
+    std::vector<std::string> values;
+    std::vector<std::unordered_set<std::string>> rhs_seen;
+    std::size_t support{0};
+
+    CoverEntry(std::size_t total_attrs, std::size_t rhs_cond_size)
+        : values(total_attrs, kAnyValue), rhs_seen(rhs_cond_size) {}
 };
+
+using CoverKey = std::pair<std::size_t, int>;
+using Cover = std::unordered_map<CoverKey, CoverEntry, utils::PairHash>;
 }  // namespace
 
 CureCind::CureCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
@@ -98,7 +99,7 @@ std::vector<CureCind::PatternPair> CureCind::DiscoverPatterns(CureAttributes con
         for (std::size_t ri = 0; ri < attrs.rhs_conditional.size(); ++ri) {
             model::EncodedColumnData const* rhs_attr = attrs.rhs_conditional[ri];
 
-            std::unordered_map<std::pair<int, int>, std::size_t, PairIntHash> pair_counts;
+            std::unordered_map<std::pair<int, int>, std::size_t, utils::PairHash> pair_counts;
 
             for (std::size_t lhs_row = 0; lhs_row < lhs_rows; ++lhs_row) {
                 std::vector<std::size_t> const* rhs_rows_for_lhs = matching_rhs_rows[lhs_row];
@@ -138,17 +139,7 @@ std::vector<Condition> CureCind::MinimalCover(std::vector<PatternPair> const& pa
         total_joined += p.support;
     }
 
-    struct CoverEntry {
-        std::vector<std::string> values;
-        std::vector<std::unordered_set<std::string>> rhs_seen;
-        std::size_t support{0};
-
-        CoverEntry(std::size_t total_attrs, std::size_t rhs_cond_size)
-            : values(total_attrs, kAnyValue), rhs_seen(rhs_cond_size) {}
-    };
-
-    using CoverKey = std::pair<std::size_t, int>;
-    std::unordered_map<CoverKey, CoverEntry, PairIntHash> cover;
+    Cover cover;
 
     for (PatternPair const& p : patterns) {
         auto [it, inserted] = cover.try_emplace(CoverKey{p.lhs_attr_idx, p.lhs_value}, total_attrs,

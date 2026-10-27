@@ -4920,25 +4920,25 @@ Performance considerations:
 '''
 
 snapshots['test_example[basic/verifying_cind.py-None-verifying_cind_output] verifying_cind_output'] = '''================================================================================
-[1;36mVerifying Conditional Inclusion Dependencies (CINDs)[0m
+\x1b[1;36mVerifying Conditional Inclusion Dependencies (CINDs)\x1b[0m
 ================================================================================
 In this example we consider a Conditional Inclusion Dependency, check whether it
 holds on a small dataset, measure how close to holding it is, and inspect the
 rows that violate it. Definitions follow [1, 2];
 
-[1;33m>>> Definition 1 (IND) [1].[0m
+\x1b[1;33m>>> Definition 1 (IND) [1].\x1b[0m
 An Inclusion Dependency R1[X] subseteq R2[Y] holds when every combination of
 values in the columns X of R1 also appears in columns Y of R2. R1 with its
 columns X is called the left-hand side (LHS, the dependent table); R2 with its
 columns Y is called the right-hand side (RHS, the referenced table).
 
-[1;33m>>> Definition 2 (CIND) [1, 2].[0m
+\x1b[1;33m>>> Definition 2 (CIND) [1, 2].\x1b[0m
 A Conditional Inclusion Dependency extends an IND by restricting the rule to R1
 rows that match a pattern on the remaining columns of R1 (the conditional
 attributes). Pattern entries are either concrete values or a wildcard ("_" or
 "-") meaning any value. An all-wildcard pattern reduces a CIND to a plain IND.
 
-[1;36mDatasets[0m
+\x1b[1;36mDatasets\x1b[0m
 --------------------------------------------------------------------------------
 Two toy tables, en and de, with the same people taken from the English and
 German editions of Wikipedia. Columns: pid, cent (century), birthplace,
@@ -4975,11 +4975,11 @@ condition over the four remaining columns of en. The condition is passed as
 cind_condition_values - a list of length four, aligned with the en column order.
 
 ================================================================================
-[1;36mScenario 1. Empty condition: CIND reduces to IND[0m
+\x1b[1;36mScenario 1. Empty condition: CIND reduces to IND\x1b[0m
 ================================================================================
 Without a pattern every pid from en table is required to appear in de.
 
-  [1;41m does not hold [0m  validity = 0.500   completeness = 1.000
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.500   completeness = 1.000
 
 The two metrics answer two different questions:
   * validity     = |matching LHS rows included in RHS| / |matching LHS rows|
@@ -4993,13 +4993,13 @@ lists the offenders (rows that match the condition but whose key is missing from
 the RHS).
 
   2 violating cluster(s):
-  [1;46m #1 [0m  basket_rows = [3]  violating_rows = [3]
+  \x1b[1;46m #1 \x1b[0m  basket_rows = [3]  violating_rows = [3]
       row 3: Sante Gaiardoni
-  [1;46m #2 [0m  basket_rows = [2]  violating_rows = [2]
+  \x1b[1;46m #2 \x1b[0m  basket_rows = [2]  violating_rows = [2]
       row 2: Buddy Roosevelt
 
 ================================================================================
-[1;36mScenario 2. basket_rows vs violating_rows[0m
+\x1b[1;36mScenario 2. basket_rows vs violating_rows\x1b[0m
 ================================================================================
 In Scenario 1 the included attribute of the left table (en.pid) contained no
 duplicates, so basket_rows and violating_rows were identical. They diverge when
@@ -5018,9 +5018,9 @@ en (extended):
 +----+-----------------+--------+--------------+--------------+----------+
 
   CIND: en[pid] subseteq de[pid] | (desc = 'Actor')
-  [1;41m does not hold [0m  validity = 0.500   completeness = 0.500
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.500   completeness = 0.500
   1 violating cluster(s):
-  [1;46m #1 [0m  basket_rows = [2, 4]  violating_rows = [4]
+  \x1b[1;46m #1 \x1b[0m  basket_rows = [2, 4]  violating_rows = [4]
       row 4: Buddy Roosevelt
 
 The Buddy basket now has two rows. Only the new one (row 4) matches
@@ -5041,26 +5041,26 @@ Buddy is the false positive (matched the condition but missing in de); Mel is
 the recall miss (in de but not picked up by desc='Actor', they are an athlete).
 
 ================================================================================
-[1;36mScenario 3. A condition the data already satisfies[0m
+\x1b[1;36mScenario 3. A condition the data already satisfies\x1b[0m
 ================================================================================
 Let's add the condition desc = 'Actor' and put wildcards in the other positions.
 
   CIND: en[pid] subseteq de[pid] | (desc = 'Actor')
-  [1;42m holds [0m  validity = 1.000   completeness = 0.500
+  \x1b[1;42m holds \x1b[0m  validity = 1.000   completeness = 0.500
 
 Only Cecil Kellaway passes the filter, and they are in de, so the CIND holds
 exactly.
 
 ================================================================================
-[1;36mScenario 4. Partial validity, then a data fix[0m
+\x1b[1;36mScenario 4. Partial validity, then a data fix\x1b[0m
 ================================================================================
 Conditioning on cent = 18 selects three en table rows, but only two of their
 pids are in de.
 
   CIND: en[pid] subseteq de[pid] | (cent = '18')
-  [1;41m does not hold [0m  validity = 0.667   completeness = 1.000
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.667   completeness = 1.000
   1 violating cluster(s):
-  [1;46m #1 [0m  basket_rows = [2]  violating_rows = [2]
+  \x1b[1;46m #1 \x1b[0m  basket_rows = [2]  violating_rows = [2]
       row 2: Buddy Roosevelt
 
 The cluster points at Buddy Roosevelt: present in en, absent from de.
@@ -5071,9 +5071,9 @@ Now, a harder case: desc = 'Olympic' selects Sante Gaiardoni, who is not in de
 at all.
 
   CIND: en[pid] subseteq de[pid] | (desc = 'Olympic')
-  [1;41m does not hold [0m  validity = 0.000   completeness = 0.000
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.000   completeness = 0.000
   1 violating cluster(s):
-  [1;46m #1 [0m  basket_rows = [3]  violating_rows = [3]
+  \x1b[1;46m #1 \x1b[0m  basket_rows = [3]  violating_rows = [3]
       row 3: Sante Gaiardoni
 
 Let's treat it as a gap in de and fix data by adding the missing entry.
@@ -5096,22 +5096,65 @@ de (patched):
 +----+-----------------+--------+-----------------+--------------+----------------+
 
   CIND: en[pid] subseteq de[pid] | (desc = 'Olympic')
-  [1;42m holds [0m  validity = 1.000   completeness = 0.333
+  \x1b[1;42m holds \x1b[0m  validity = 1.000   completeness = 0.333
 
 The CIND now holds. A typical workflow is: verify, read the violating clusters,
 adjust data or condition, verify again.
 
 ================================================================================
-[1;36mScenario 5. Wrong number of condition values[0m
+\x1b[1;36mScenario 5. Wrong number of condition values\x1b[0m
 ================================================================================
-cind_condition_values must have one entry per conditional attribute (four, for
-this dataset). A wrong length raises an exception at execute() time as shown
-below.
+cind_condition_values must have one entry per conditional attribute of the LHS
+table (four, for this dataset), optionally followed by one entry per conditional
+attribute of the RHS table (eight in total), which is how Cure describes its
+conditions. A wrong length raises an exception at execute() time as shown below.
 
-  caught: cind_condition_values size must equal number of conditional attributes
+  caught: A CIND condition must have one value per conditional attribute of the LHS table (4) or of both tables (8), got 2
 
 ================================================================================
-[1;36mSee also[0m
+\x1b[1;36mScenario 6. Verifying a mined CIND directly\x1b[0m
+================================================================================
+A CIND object returned by a mining algorithm can be handed to the verifier as is
+through the cind option: the IND and all the conditions are taken from the
+object, so lhs_indices, rhs_indices and cind_condition_values are not needed.
+The tables must be loaded in the same order as for mining. Here we mine CINDs
+with CINDERELLA and verify those built on the pid columns.
+
+  en[pid] subseteq de[pid]: 3 mined condition(s)
+    ("18", "-", "-", "-", validity = 0.666667, completeness = 1)
+    ("-", "-", "USA", "-", validity = 1, completeness = 1)
+    ("18", "-", "USA", "-", validity = 1, completeness = 1)
+  \x1b[1;42m holds \x1b[0m  validity = 0.667   completeness = 1.000
+
+  de[pid] subseteq en[pid]: 1 mined condition(s)
+    ("18", "-", "-", "-", validity = 0.666667, completeness = 1)
+  \x1b[1;42m holds \x1b[0m  validity = 0.667   completeness = 1.000
+
+Verifying the whole object checks the union of its conditions. To look at a
+single condition, build a CIND holding just that condition: the verifier then
+reproduces the validity and completeness reported by the miner.
+
+  en[pid] subseteq de[pid] | ("18", "-", "-", "-", validity = 0.666667, completeness = 1)
+  mined:    validity = 0.667   completeness = 1.000
+  verified: validity = 0.667   completeness = 1.000
+
+Conditions mined by Cure (see mining_cind_2.py) also constrain the conditional
+attributes of the RHS table, listing several accepted values separated by ', '.
+The verifier understands this form as well: an LHS row is included only if some
+RHS row with the same key carries one of the listed values. This is stricter
+than checking the LHS part alone, so a Cure CIND may fail verification even
+though every condition was mined with enough support.
+
+  en[pid] subseteq de[pid]: 4 mined condition(s), e.g.
+    ("-", "-", "-", "Actor", "18", "Kap, Sud", "USA, LA, Cal", "Schauspieler", validity = 0.244898, completeness = 0.244898)
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.333   completeness = 0.500
+
+  de[pid] subseteq en[pid]: 7 mined condition(s), e.g.
+    ("-", "-", "-", "Schauspieler", "18", "SA", "USA", "Actor", validity = 0.244898, completeness = 0.244898)
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.333   completeness = 0.500
+
+================================================================================
+\x1b[1;36mSee also\x1b[0m
 ================================================================================
 Related primitives in Desbordante:
   * CIND mining           -  examples/basic/mining_cind_1.py

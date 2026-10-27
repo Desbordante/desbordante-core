@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -16,6 +17,7 @@
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
+#include "core/algorithms/cind/cind.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
@@ -268,6 +270,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
         kNormalConvPair<algos::cfd::RawCFD>,
+        kNormalConvPair<std::optional<algos::cind::CIND>>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
         {typeid(config::CustomMetricType), CustomMetricToAny},
         {typeid(config::CustomMetricsType), CustomMetricsToAny},

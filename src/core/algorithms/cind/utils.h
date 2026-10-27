@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
@@ -12,6 +13,13 @@ namespace algos::cind::utils {
 struct VecIntHash {
     std::size_t operator()(std::vector<int> const& vec) const noexcept {
         return boost::hash_value(vec);
+    }
+};
+
+struct PairHash {
+    template <typename First, typename Second>
+    std::size_t operator()(std::pair<First, Second> const& pair) const noexcept {
+        return boost::hash_value(pair);
     }
 };
 

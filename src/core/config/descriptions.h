@@ -237,8 +237,14 @@ extern std::string_view const kDAlgoType;
 constexpr auto kDCindMinSupport =
         "Minimum support threshold (number of joined tuples) for the Cure algorithm";
 constexpr auto kDCindCondValues =
-        "Condition values aligned with conditional attributes order. "
-        "Use '-' or '_' as wildcard. If empty => all wildcards.";
+        "Condition values aligned with conditional attributes order: either one value per "
+        "conditional attribute of the LHS table, or additionally one per conditional attribute "
+        "of the RHS table (as in conditions mined by Cure, where several accepted RHS values are "
+        "separated by ', '). Use '-' or '_' as wildcard. If empty => all wildcards.";
+constexpr auto kDCind =
+        "CIND to verify, as returned by a CIND mining algorithm. The IND and the conditions are "
+        "taken from it, so lhs_indices, rhs_indices and cind_condition_values are not used. "
+        "Tables must be loaded in the same order as for mining.";
 // SD verifier
 constexpr auto kDSdG1 = "Lower bound of the sequential interval (inclusive).";
 constexpr auto kDSdG2 = "Upper bound of the sequential interval (inclusive). Set -1 for Infinity.";
