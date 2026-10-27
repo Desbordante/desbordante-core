@@ -1,14 +1,17 @@
 #include <algorithm>
 #include <memory>
+#include <tuple>
 
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
 #include "core/algorithms/fd/fd_verifier/fd_verifier.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
 #include "core/model/types/builtin.h"
+#include "core/util/enum_to_str.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/common/csv_config_util.h"
 
@@ -49,6 +52,77 @@ void TestSorting(std::unique_ptr<FDVerifier> verifier) {
 
 namespace tests {
 namespace onam = config::names;
+
+class FDVerifierMetricAgreement
+    : public ::testing::TestWithParam<std::tuple<algos::AfdErrorMeasure, config::IndicesType>> {};
+
+TEST_P(FDVerifierMetricAgreement, MatchesCalculatorAndPreservesHighlights) {
+    using algos::afd_metric_calculator::AFDMetric;
+    using algos::afd_metric_calculator::AFDMetricCalculator;
+    auto const& [measure, rhs] = GetParam();
+    SCOPED_TRACE(util::EnumToStr(measure));
+    auto metric = util::EnumFromStr<AFDMetric>(util::EnumToStr(measure));
+    ASSERT_TRUE(metric.has_value());
+    algos::StdParamsMap params{{onam::kCsvConfig, kTestFD},
+                               {onam::kLhsIndices, config::IndicesType{4}},
+                               {onam::kRhsIndices, rhs},
+                               {onam::kAfdErrorMeasure, measure}};
+    auto verifier = algos::CreateAndLoadAlgorithm<FDVerifier>(params);
+    verifier->Execute();
+    params.erase(onam::kAfdErrorMeasure);
+    params.emplace(onam::kMetric, *metric);
+    auto calculator = algos::CreateAndLoadAlgorithm<AFDMetricCalculator>(params);
+    calculator->Execute();
+    EXPECT_NEAR(verifier->GetError(), 1.L - calculator->GetResult(), 1e-12L);
+    EXPECT_FALSE(verifier->FDHolds());
+    EXPECT_EQ(verifier->GetNumErrorRows(), rhs.size() == 1 ? 2 : 10);
+    ASSERT_EQ(verifier->GetHighlights().size(), rhs.size() == 1 ? 1 : 4);
+
+    // Execute again with an exact composite LHS and a different measure.
+    verifier->SetOption(onam::kLhsIndices, config::IndicesType{3, 4});
+    verifier->SetOption(onam::kRhsIndices, config::IndicesType{3});
+    verifier->SetOption(onam::kAfdErrorMeasure, algos::AfdErrorMeasure::kFi);
+    verifier->Execute();
+    EXPECT_TRUE(verifier->FDHolds());
+    EXPECT_EQ(verifier->GetError(), 0.L);
+    EXPECT_TRUE(verifier->GetHighlights().empty());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        FDVerifierMetrics, FDVerifierMetricAgreement,
+        ::testing::Combine(::testing::ValuesIn(magic_enum::enum_values<algos::AfdErrorMeasure>()),
+                           ::testing::Values(config::IndicesType{3}, config::IndicesType{2, 3})));
+
+struct ExactDependencyParams {
+    char const* file;
+    model::ColumnIndex lhs;
+    model::ColumnIndex rhs;
+};
+
+class FDVerifierExactMetrics
+    : public ::testing::TestWithParam<std::tuple<algos::AfdErrorMeasure, ExactDependencyParams>> {};
+
+TEST_P(FDVerifierExactMetrics, ExactAndOneRowDependenciesHaveZeroError) {
+    auto const& [measure, dependency] = GetParam();
+    SCOPED_TRACE(util::EnumToStr(measure));
+    algos::StdParamsMap params{
+            {onam::kCsvConfig, CSVConfig{kTestDataDir / dependency.file, ',', true}},
+            {onam::kLhsIndices, config::IndicesType{dependency.lhs}},
+            {onam::kRhsIndices, config::IndicesType{dependency.rhs}},
+            {onam::kAfdErrorMeasure, measure}};
+    auto verifier = algos::CreateAndLoadAlgorithm<FDVerifier>(params);
+    verifier->Execute();
+    EXPECT_TRUE(verifier->FDHolds());
+    EXPECT_EQ(verifier->GetError(), 0.L);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        FDVerifierMetrics, FDVerifierExactMetrics,
+        ::testing::Combine(::testing::ValuesIn(magic_enum::enum_values<algos::AfdErrorMeasure>()),
+                           ::testing::Values(ExactDependencyParams{"RfiPlus.csv", 4, 5},
+                                             ExactDependencyParams{"RfiPlus.csv", 6, 1},
+                                             ExactDependencyParams{"RfiPlus.csv", 0, 7},
+                                             ExactDependencyParams{"RfiPlusOneRow.csv", 0, 1})));
 
 struct FDVerifyingParams {
     algos::StdParamsMap params;

@@ -24,8 +24,9 @@ void BindFdVerification(pybind11::module_& main_module) {
             .def_property_readonly("most_frequent_rhs_value_proportion",
                                    &Highlight::GetMostFrequentRhsValueProportion);
     BindPrimitiveNoBase<FDVerifier>(fd_verification_module, "FDVerifier")
-            .def("fd_holds", &FDVerifier::FDHolds)
-            .def("get_error", &FDVerifier::GetError)
+            .def("fd_holds", &FDVerifier::FDHolds, "Whether the FD holds exactly.")
+            .def("get_error", &FDVerifier::GetError,
+                 "Error for the selected afd_error_measure (default: g1).")
             .def("get_num_error_clusters", &FDVerifier::GetNumErrorClusters)
             .def("get_num_error_rows", &FDVerifier::GetNumErrorRows)
             .def("get_highlights", &FDVerifier::GetHighlights);

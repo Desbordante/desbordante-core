@@ -7,6 +7,7 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd_verifier/stats_calculator.h"
+#include "core/algorithms/fd/tane/enums.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -22,12 +23,15 @@ private:
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
     config::EqNullsType is_null_equal_null_;
+    AfdErrorMeasure afd_error_measure_ = AfdErrorMeasure::kG1;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::unique_ptr<StatsCalculator> stats_calculator_;
 
     void VerifyFD() const;
+    long double CalculateError(model::PLI const* lhs, model::PLI const* rhs,
+                               model::PLI const* joint) const;
     void RegisterOptions();
 
     void ResetState() final {
@@ -60,7 +64,7 @@ public:
         return stats_calculator_->GetNumErrorRows();
     }
 
-    /* Returns the error threshold at which AFD holds */
+    /* Returns the selected afd_error_measure error (g1 by default). */
     long double GetError() const {
         assert(stats_calculator_);
         return stats_calculator_->GetError();

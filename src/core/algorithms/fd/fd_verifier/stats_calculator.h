@@ -33,9 +33,6 @@ private:
     static size_t CalculateNumDistinctRhsValues(
             std::unordered_map<ClusterIndex, unsigned> const& frequencies, size_t cluster_size);
 
-    static size_t CalculateNumTuplesConflictingOnRhsInCluster(
-            std::unordered_map<ClusterIndex, unsigned> const& frequencies, size_t cluster_size);
-
     static size_t CalculateNumMostFrequentRhsValue(
             std::unordered_map<ClusterIndex, unsigned> const& frequencies);
 
@@ -44,7 +41,8 @@ private:
 public:
     using HighlightCompareFunction = std::function<bool(Highlight const& h1, Highlight const& h2)>;
 
-    void CalculateStatistics(model::PLI const* lhs_pli, model::PLI const* rhs_pli);
+    void CalculateStatistics(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                             long double error);
 
     void PrintStatistics() const;
 

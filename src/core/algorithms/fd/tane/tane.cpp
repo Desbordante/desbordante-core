@@ -31,9 +31,23 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
             }
             return 1.0 - static_cast<config::ErrorType>(max) / x_pli->GetRelationSize();
         }
+        case AfdErrorMeasure::kG3Prime: {
+            model::PositionListIndex const* rhs_pli = rhs->GetPositionListIndex();
+            std::size_t const num_rows = rhs_pli->GetRelationSize();
+            if (rhs_pli->IsConstant() || num_rows == 1) return 0.L;
+
+            std::size_t max = 1;
+            for (model::PLI::Cluster const& cluster : rhs_pli->GetIndex()) {
+                max = std::max(max, cluster.size());
+            }
+            return static_cast<config::ErrorType>(num_rows - max) / (num_rows - 1);
+        }
         case AfdErrorMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1(
                     rhs, relation_.get()->GetNumTuplePairs());
+        case AfdErrorMeasure::kG1Prime:
+            return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1Prime(rhs,
+                                                                                       *relation_);
         /*
          * dom_{empty_set}(R) needs some care in its definition. If that care is taken, we get
          * |dom_{empty_set}(R)| = 1.
@@ -51,6 +65,12 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
         case AfdErrorMeasure::kPdep:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(
                                rhs->GetPositionListIndex());
+        case AfdErrorMeasure::kG1S: {
+            config::ErrorType const entropy = rhs->GetPositionListIndex()->GetEntropy();
+            if (entropy < 0.0) return 0.0;
+            if (entropy > 1.0) return 1.0;
+            return entropy;
+        }
         /*
          * The probability that a tuple participates in a violating pair is 0 if there is an FD,
          * otherwise it is 1 for an empty LHS and non-constant RHS.
@@ -73,6 +93,9 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
          * as well in that case.
          */
         case AfdErrorMeasure::kMuPlus:
+        case AfdErrorMeasure::kRfiPlus:
+        case AfdErrorMeasure::kRfiPrimePlus:
+        case AfdErrorMeasure::kSfi:
             return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
     }
     assert(false);
@@ -105,6 +128,24 @@ config::ErrorType Tane::CalculateFdError(model::PLI const* lhs_pli, model::PLI c
         case AfdErrorMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateG1Error(
                     lhs_pli, joint_pli, relation_.get()->GetNumTuplePairs());
+        case AfdErrorMeasure::kG1Prime:
+            return afd_metric_calculator::AFDMetricCalculator::CalculateG1PrimeError(
+                    lhs_pli, joint_pli, *relation_);
+        case AfdErrorMeasure::kG3Prime:
+            return afd_metric_calculator::AFDMetricCalculator::CalculateG3PrimeError(
+                    lhs_pli, rhs_pli, relation_->GetNumRows());
+        case AfdErrorMeasure::kG1S:
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG1SMeasure(
+                               lhs_pli, rhs_pli, relation_.get()->GetNumRows());
+        case AfdErrorMeasure::kRfiPlus:
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateRfiPlusMeasure(lhs_pli,
+                                                                                           rhs_pli);
+        case AfdErrorMeasure::kRfiPrimePlus:
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateRfiPrimePlusMeasure(
+                               lhs_pli, rhs_pli);
+        case AfdErrorMeasure::kSfi:
+            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateSfiMeasure(lhs_pli,
+                                                                                       rhs_pli);
     }
     assert(false);
     __builtin_unreachable();
