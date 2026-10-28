@@ -17,5 +17,6 @@ target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
     PRIVATE ${DESBORDANTE_PREFIX}::algos ${DESBORDANTE_PREFIX}::model::table
-            ${DESBORDANTE_PREFIX}::util spdlog::spdlog_header_only Boost::headers
+            ${DESBORDANTE_PREFIX}::util ${DESBORDANTE_PREFIX}::parser::csv
+            spdlog::spdlog_header_only Boost::headers
 )
