@@ -2301,25 +2301,25 @@ This iterative process helps discover:
 '''
 
 snapshots['test_example[basic/mining_cind_1.py-None-mining_cind_1_output] mining_cind_1_output'] = '''================================================================================
-\x1b[1;36mDiscovering Conditional Inclusion Dependencies (CINDs)\x1b[0m
+[1;36mDiscovering Conditional Inclusion Dependencies (CINDs)[0m
 ================================================================================
 In this example we discover Conditional Inclusion Dependencies on a small
 dataset, set thresholds that filter the search, and inspect the patterns the
 algorithm finds. Definitions follow [1, 2]; full citations are at the bottom.
 
-\x1b[1;33m>>> Definition 1 (IND) [1].\x1b[0m
+[1;33m>>> Definition 1 (IND) [1].[0m
 An Inclusion Dependency R1[X] subseteq R2[Y] holds when every combination of
 values in the columns X of R1 also appears in columns Y of R2. R1 with its
 columns X is called the left-hand side (LHS, the dependent table); R2 with its
 columns Y is called the right-hand side (RHS, the referenced table).
 
-\x1b[1;33m>>> Definition 2 (CIND) [1, 2].\x1b[0m
+[1;33m>>> Definition 2 (CIND) [1, 2].[0m
 A Conditional Inclusion Dependency extends an IND by restricting the rule to R1
 rows that match a pattern on the remaining columns of R1 (the conditional
 attributes). Pattern entries are either concrete values or a wildcard ("_" or
 "-") meaning any value.
 
-\x1b[1;33m>>> Mining pipeline.\x1b[0m
+[1;33m>>> Mining pipeline.[0m
 Mining works in two stages. Spider first searches for Approximate Inclusion
 Dependencies (AINDs) - inclusions that hold up to a small fraction of
 mismatches, controlled by the error threshold. AIND mining as a standalone
@@ -2328,7 +2328,7 @@ condition miner narrows it down to concrete patterns. This example uses the
 algorithms from [2]: CINDERELLA (breadth-first) and PLI-CIND (depth-first); both
 produce the same CINDs but trade off speed against memory.
 
-\x1b[1;36mDatasets\x1b[0m
+[1;36mDatasets[0m
 --------------------------------------------------------------------------------
 Two toy tables, en and de, with the same people taken from the English and
 German editions of Wikipedia. Columns: pid, cent (century), birthplace,
@@ -2360,7 +2360,7 @@ de:
 |  9 | Isobel Elsom   |     18 | Cambridge       | Cal          | Schauspielerin |
 +----+----------------+--------+-----------------+--------------+----------------+
 
-\x1b[1;36mMetrics\x1b[0m
+[1;36mMetrics[0m
 --------------------------------------------------------------------------------
 Each candidate pattern is scored by two metrics:
   * validity     = |matching LHS rows included in RHS| / |matching LHS rows|
@@ -2381,7 +2381,7 @@ into the formulas above:
 The mining algorithm keeps only patterns that meet user-supplied lower bounds on
 both metrics.
 
-\x1b[1;36mcondition_type: row vs group\x1b[0m
+[1;36mcondition_type: row vs group[0m
 --------------------------------------------------------------------------------
 The condition_type parameter chooses the unit of counting. In "group" mode all
 LHS rows that share the same inclusion key are counted together as one,
@@ -2391,7 +2391,7 @@ own. On unique-key tables the two modes coincide; where the same key recurs,
 
 This parameter directly affects validity and completeness calculation.
 
-\x1b[1;36mAlgorithm parameters\x1b[0m
+[1;36mAlgorithm parameters[0m
 --------------------------------------------------------------------------------
   * error          AIND error threshold; the IND finder accepts INDs
                    whose error is at most this value.
@@ -2406,7 +2406,7 @@ This parameter directly affects validity and completeness calculation.
                    "cinderella" (breadth-first, faster but heavier).
 
 ================================================================================
-\x1b[1;36mScenario 1. Mine CINDs with relaxed thresholds\x1b[0m
+[1;36mScenario 1. Mine CINDs with relaxed thresholds[0m
 ================================================================================
 The thresholds below are deliberately loose so the algorithm returns many
 candidates: error=0.5, validity=0.75, completeness=0.25. Scenario 3 uses
@@ -2439,7 +2439,7 @@ order); '-' means a wildcard. validity and completeness are measured for that
 specific pattern.
 
 ================================================================================
-\x1b[1;36mScenario 2. Inspecting CIND and Condition objects\x1b[0m
+[1;36mScenario 2. Inspecting CIND and Condition objects[0m
 ================================================================================
 Each item returned by get_cinds() is a CIND object, which carries its
 conditional attributes and a list of Condition objects. A Condition stores the
@@ -2458,7 +2458,7 @@ CIND and Condition both implement __str__, __eq__ and __hash__, so they are
 usable as dictionary keys and inside sets.
 
 ================================================================================
-\x1b[1;36mScenario 3. Tighter thresholds and a different condition type\x1b[0m
+[1;36mScenario 3. Tighter thresholds and a different condition type[0m
 ================================================================================
 Tighter thresholds: error=0.3, validity=0.95, completeness=0.5,
 condition_type="group". The result is fewer but more reliable CINDs; some come
@@ -2479,11 +2479,11 @@ opposite directions and Cecil sits on the failing side of just one of them.
 
   Comparing condition data = ('-', '18', '-') (i.e. cent='18'):
 
-  \x1b[1;33m>>> CIND #3: en.[birthplace] subseteq en.[deathplace]\x1b[0m
+  [1;33m>>> CIND #3: en.[birthplace] subseteq en.[deathplace][0m
   conditional attributes: en.[pid, cent, desc]
     [fail]  validity=0.667  completeness=0.667  (thresholds: validity>=0.95, completeness>=0.5)
 
-  \x1b[1;33m>>> CIND #4: en.[deathplace] subseteq en.[birthplace]\x1b[0m
+  [1;33m>>> CIND #4: en.[deathplace] subseteq en.[birthplace][0m
   conditional attributes: en.[pid, cent, desc]
     [PASS]  validity=1.000  completeness=0.667  (thresholds: validity>=0.95, completeness>=0.5)
 
@@ -2496,14 +2496,14 @@ Why the same `cent='18'` behaves differently:
     Buddy       18    CO          CO
     Sante       19    -           -
 
-  \x1b[1;33mCIND #3: en.[birthplace] subseteq en.[deathplace]\x1b[0m
+  [1;33mCIND #3: en.[birthplace] subseteq en.[deathplace][0m
     inclusion key = birthplace; en.deathplace set = {USA, CO, -}
     cent=18 selects rows with these birthplaces: SA, USA, CO  (3)
     among those, birthplace SA is NOT in the deathplace set -> Cecil
     breaks inclusion. Only USA and CO satisfy it.
     -> validity = 2/3 = 0.667, fails validity>=0.95
 
-  \x1b[1;33mCIND #4: en.[deathplace] subseteq en.[birthplace]\x1b[0m
+  [1;33mCIND #4: en.[deathplace] subseteq en.[birthplace][0m
     inclusion key = deathplace; en.birthplace set = {SA, USA, CO, -}
     cent=18 selects rows with these deathplaces: USA, CO  (2 unique,
     since Cecil and Mel share deathplace=USA)
@@ -2519,9 +2519,10 @@ data, then tighten thresholds and switch row/group to focus on the patterns that
 matter.
 
 ================================================================================
-\x1b[1;36mSee also\x1b[0m
+[1;36mSee also[0m
 ================================================================================
 Related primitives in Desbordante:
+  * CIND mining (Cure)    -  examples/basic/mining_cind_2.py
   * CIND verification     -  examples/basic/verifying_cind.py
   * IND mining            -  examples/basic/mining_ind.py
   * AIND mining           -  examples/basic/mining_aind.py
@@ -2537,6 +2538,210 @@ References:
   [3] O. Cure. Improving the Data Quality of Drug Databases using
       Conditional Dependencies and Ontologies. ACM JDIQ 4(1):20, 2012.
       -- CIND violation detection in a data-cleaning setting.
+
+'''
+
+snapshots['test_example[basic/mining_cind_2.py-None-mining_cind_2_output] mining_cind_2_output'] = '''================================================================================
+[1;36mDiscovering CINDs with the Cure algorithm[0m
+================================================================================
+In this example we discover Conditional Inclusion Dependencies with the Cure
+algorithm [3], an alternative to the CINDERELLA / PLI-CIND miners shown in
+mining_cind_1.py. Cure is controlled by a single support threshold and produces
+compact patterns with disjunctive RHS values.
+
+[1;33m>>> Definition (CIND) [1, 2].[0m
+A Conditional Inclusion Dependency restricts an IND R1[X] subseteq R2[Y] to R1
+rows that match a pattern on the remaining columns of R1 (the conditional
+attributes). Pattern entries are concrete values or a wildcard ("_" or "-")
+meaning any value. See mining_cind_1.py for the full definition and the
+validity/completeness metrics used by other miners.
+
+[1;33m>>> Cure pipeline [3].[0m
+Mining works in two stages. Spider first searches for Approximate Inclusion
+Dependencies (AINDs) - inclusions that hold up to a small fraction of
+mismatches, controlled by the error threshold. Then, for each AIND, Cure runs in
+two phases:
+
+  1. Discovery: for every pair of (LHS conditional attribute, RHS
+     conditional attribute), hash-join the rows on the inclusion key
+     and count co-occurrences of (LHS value, RHS value) pairs. Keep
+     pairs whose count is at least the support threshold.
+
+  2. Minimal cover: merge patterns sharing the same (LHS attribute,
+     LHS value) into one tableau row. When several RHS values appear
+     for the same LHS key, they are folded into a comma-separated
+     disjunction in the corresponding RHS slot.
+
+Validity and completeness for the resulting patterns are derived from the per-
+pattern support and the total number of joined tuples; they are informational
+only - Cure does not filter by them.
+
+[1;36mDatasets[0m
+--------------------------------------------------------------------------------
+Two toy tables, en and de, with the same people taken from the English and
+German editions of Wikipedia. Columns: pid, cent (century), birthplace,
+deathplace, desc (description, profession).
+
+en:
++----+-----------------+--------+--------------+--------------+----------+
+|    | pid             |   cent | birthplace   | deathplace   | desc     |
+|----+-----------------+--------+--------------+--------------+----------|
+|  0 | Cecil Kellaway  |     18 | SA           | USA          | Actor    |
+|  1 | Mel Sheppard    |     18 | USA          | USA          | Athlette |
+|  2 | Buddy Roosevelt |     18 | CO           | CO           | Stunt    |
+|  3 | Sante Gaiardoni |     19 | -            | -            | Olympic  |
++----+-----------------+--------+--------------+--------------+----------+
+
+de:
++----+----------------+--------+-----------------+--------------+----------------+
+|    | pid            |   cent | birthplace      | deathplace   | desc           |
+|----+----------------+--------+-----------------+--------------+----------------|
+|  0 | Cecil Kellaway |     18 | Kap             | LA           | Schauspieler   |
+|  1 | Cecil Kellaway |     18 | Kap             | Cal          | Schauspieler   |
+|  2 | Cecil Kellaway |     18 | Kap             | USA          | Schauspieler   |
+|  3 | Cecil Kellaway |     18 | Sud             | LA           | Schauspieler   |
+|  4 | Cecil Kellaway |     18 | Sud             | Cal          | Schauspieler   |
+|  5 | Cecil Kellaway |     18 | Sud             | USA          | Schauspieler   |
+|  6 | Sam Sheppard   |     19 | -               | -            | Mediziner      |
+|  7 | Mel Sheppard   |     18 | Almonesson Lake | Queens       | Leichtathlet   |
+|  8 | Isobel Elsom   |     18 | Cambridge       | LA           | Schauspielerin |
+|  9 | Isobel Elsom   |     18 | Cambridge       | Cal          | Schauspielerin |
++----+----------------+--------+-----------------+--------------+----------------+
+
+[1;36mAlgorithm parameters[0m
+--------------------------------------------------------------------------------
+  * error    AIND error threshold; the IND finder accepts INDs
+             whose error is at most this value.
+
+  * support  minimum number of joined (LHS, RHS) tuple pairs that
+             must back a (LHS value, RHS value) pattern for it to
+             be kept. Larger support -> fewer, more reliable
+             patterns; smaller support -> wider exploration.
+
+================================================================================
+[1;36mScenario 1. Mine CINDs with relaxed support[0m
+================================================================================
+Start with support=1 so any pattern observed at least once is kept. This is the
+broadest setting and shows what kinds of patterns Cure produces on this dataset.
+
+  found 8 CIND(s):
+    #1   de.[pid] subseteq en.[pid]                        10 cond.
+    #2   de.[cent] subseteq en.[cent]                      18 cond.
+    #3   en.[pid] subseteq de.[pid]                         6 cond.
+    #4   en.[cent] subseteq de.[cent]                      15 cond.
+    #5   en.[birthplace] subseteq de.[deathplace]           8 cond.
+    #6   en.[birthplace] subseteq en.[deathplace]           8 cond.
+    #7   en.[deathplace] subseteq de.[deathplace]          11 cond.
+    #8   en.[deathplace] subseteq en.[birthplace]          10 cond.
+
+Each line shows the underlying inclusion dependency the CIND refines (LHS table
+and columns subseteq RHS table and columns) and the number of concrete patterns
+Cure found over the remaining LHS columns - the conditional attributes.
+
+First few conditions of CIND #1 (de.[pid] subseteq en.[pid]):
+  conditional attributes (in column order): de.cent, de.birthplace,
+                                            de.deathplace, de.desc, en.cent,
+                                            en.birthplace, en.deathplace,
+                                            en.desc
+
+  1. data = ('-', '-', '-', 'Leichtathlet', '18', 'USA', 'USA', 'Athlette')
+            validity = 0.036, completeness = 0.036
+  2. data = ('-', '-', '-', 'Schauspieler', '18', 'SA', 'USA', 'Actor')
+            validity = 0.214, completeness = 0.214
+  3. data = ('-', '-', 'Cal', '-', '18', 'SA', 'USA', 'Actor')
+            validity = 0.071, completeness = 0.071
+  ... (7 more)
+
+Each Condition lists concrete values for the conditional attributes (in column
+order); '-' means a wildcard. A comma-separated value ("a, b") is a disjunction
+produced by the minimal-cover phase: the same LHS key matched several RHS
+values, all of which satisfy the pattern.
+
+================================================================================
+[1;36mScenario 2. Tighter support[0m
+================================================================================
+Raising support keeps only patterns backed by more joined tuples. Higher
+thresholds produce fewer but more reliable conditions.
+
+  support=1:  8 CIND(s), 86 condition(s)
+  support=2:  8 CIND(s), 51 condition(s)
+  support=3:  8 CIND(s), 32 condition(s)
+  support=5:  8 CIND(s), 23 condition(s)
+  support=8:  8 CIND(s), 3 condition(s)
+
+In practice the workflow is iterative: start with a small support to see what
+patterns exist, then raise it to focus on the patterns that are well-supported
+by the data.
+
+================================================================================
+[1;36mScenario 3. Cure vs CINDERELLA[0m
+================================================================================
+On the same AINDs the two miners use different scoring and produce different
+sets of conditions. CINDERELLA filters multi-attribute patterns by validity and
+completeness; Cure mines pairwise patterns with a support threshold and merges
+them into a minimal cover.
+
+  CINDERELLA (validity>=0.75, completeness>=0.25): 8 CIND(s), 232 condition(s)
+  Cure       (support>=2):                          8 CIND(s), 51 condition(s)
+
+Below is a side-by-side look at one CIND - the conditional patterns the two
+miners produce for the same underlying IND.
+
+  CINDERELLA (validity>=0.75, completeness>=0.25):
+    IND: de.[cent] subseteq en.[cent]
+    conditional attributes: de.[pid, birthplace, deathplace, desc]
+      1. data = ('-', '-', 'LA', '-')
+                validity = 1.000, completeness = 0.300
+      2. data = ('-', '-', '-', 'Schauspieler')
+                validity = 1.000, completeness = 0.600
+      3. data = ('Cecil Kellaway', '-', '-', '-')
+                validity = 1.000, completeness = 0.600
+      ... (10 more)
+
+  Cure (support>=2):
+    IND: de.[cent] subseteq en.[cent]
+    conditional attributes: de.pid, de.birthplace, de.deathplace, de.desc,
+                            en.pid, en.birthplace, en.deathplace, en.desc
+      1. data = ('-', '-', '-', 'Schauspieler',
+                 'Cecil Kellaway, Mel Sheppard, Buddy Roosevelt', 'USA, SA, CO',
+                 'USA, CO', 'Actor, Athlette, Stunt')
+                validity = 0.184, completeness = 0.184
+      2. data = ('-', '-', '-', 'Schauspielerin',
+                 'Cecil Kellaway, Mel Sheppard, Buddy Roosevelt', 'USA, SA, CO',
+                 'USA, CO', 'Actor, Athlette, Stunt')
+                validity = 0.061, completeness = 0.061
+      3. data = ('-', '-', 'Cal', '-',
+                 'Cecil Kellaway, Mel Sheppard, Buddy Roosevelt', 'USA, SA, CO',
+                 'USA, CO', 'Actor, Athlette, Stunt')
+                validity = 0.092, completeness = 0.092
+      ... (11 more)
+
+Two structural differences are visible. First, CINDERELLA's conditional
+attributes are taken only from the LHS table, while Cure also includes the RHS
+table's columns - patterns can constrain values on both sides of the inclusion.
+Second, Cure can collapse several RHS values for the same LHS key into one
+comma-separated slot (e.g. "a, b"), while CINDERELLA emits one explicit pattern
+per distinct value combination.
+
+================================================================================
+[1;36mSee also[0m
+================================================================================
+Related primitives in Desbordante:
+  * CIND mining (CINDERELLA, PLI-CIND) -  examples/basic/mining_cind_1.py
+  * CIND verification                  -  examples/basic/verifying_cind.py
+  * IND mining                         -  examples/basic/mining_ind.py
+  * AIND mining                        -  examples/basic/mining_aind.py
+  * IND/AIND verification              -  examples/basic/verifying_ind_aind.py
+
+References:
+  [1] L. Bravo, W. Fan, S. Ma. Extending Dependencies with Conditions.
+      VLDB 2007, pp. 243-254.  -- introduces CINDs.
+  [2] J. Bauckmann, Z. Abedjan, U. Leser, H. Muller, F. Naumann.
+      Discovering Conditional Inclusion Dependencies. CIKM 2012,
+      pp. 2094-2098.  -- CINDERELLA and PLI-CIND.
+  [3] O. Cure. Improving the Data Quality of Drug Databases using
+      Conditional Dependencies and Ontologies. ACM JDIQ 4(1):20, 2012.
+      -- the Cure algorithm used in this example.
 
 '''
 
@@ -4899,17 +5104,61 @@ adjust data or condition, verify again.
 ================================================================================
 \x1b[1;36mScenario 5. Wrong number of condition values\x1b[0m
 ================================================================================
-cind_condition_values must have one entry per conditional attribute (four, for
-this dataset). A wrong length raises an exception at execute() time as shown
-below.
+cind_condition_values must have one entry per conditional attribute of the LHS
+table (four, for this dataset), optionally followed by one entry per conditional
+attribute of the RHS table (eight in total), which is how Cure describes its
+conditions. A wrong length raises an exception at execute() time as shown below.
 
-  caught: cind_condition_values size must equal number of conditional attributes
+  caught: A CIND condition must have one value per conditional attribute of the LHS table (4) or of both tables (8), got 2
+
+================================================================================
+\x1b[1;36mScenario 6. Verifying a mined CIND directly\x1b[0m
+================================================================================
+A CIND object returned by a mining algorithm can be handed to the verifier as is
+through the cind option: the IND and all the conditions are taken from the
+object, so lhs_indices, rhs_indices and cind_condition_values are not needed.
+The tables must be loaded in the same order as for mining. Here we mine CINDs
+with CINDERELLA and verify those built on the pid columns.
+
+  en[pid] subseteq de[pid]: 3 mined condition(s)
+    ("18", "-", "-", "-", validity = 0.666667, completeness = 1)
+    ("-", "-", "USA", "-", validity = 1, completeness = 1)
+    ("18", "-", "USA", "-", validity = 1, completeness = 1)
+  \x1b[1;42m holds \x1b[0m  validity = 0.667   completeness = 1.000
+
+  de[pid] subseteq en[pid]: 1 mined condition(s)
+    ("18", "-", "-", "-", validity = 0.666667, completeness = 1)
+  \x1b[1;42m holds \x1b[0m  validity = 0.667   completeness = 1.000
+
+Verifying the whole object checks the union of its conditions. To look at a
+single condition, build a CIND holding just that condition: the verifier then
+reproduces the validity and completeness reported by the miner.
+
+  en[pid] subseteq de[pid] | ("18", "-", "-", "-", validity = 0.666667, completeness = 1)
+  mined:    validity = 0.667   completeness = 1.000
+  verified: validity = 0.667   completeness = 1.000
+
+Conditions mined by Cure (see mining_cind_2.py) also constrain the conditional
+attributes of the RHS table, listing several accepted values separated by ', '.
+The verifier understands this form as well: an LHS row is included only if some
+RHS row with the same key carries one of the listed values. This is stricter
+than checking the LHS part alone, so a Cure CIND may fail verification even
+though every condition was mined with enough support.
+
+  en[pid] subseteq de[pid]: 4 mined condition(s), e.g.
+    ("-", "-", "-", "Actor", "18", "Kap, Sud", "USA, LA, Cal", "Schauspieler", validity = 0.244898, completeness = 0.244898)
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.333   completeness = 0.500
+
+  de[pid] subseteq en[pid]: 7 mined condition(s), e.g.
+    ("-", "-", "-", "Schauspieler", "18", "SA", "USA", "Actor", validity = 0.244898, completeness = 0.244898)
+  \x1b[1;41m does not hold \x1b[0m  validity = 0.333   completeness = 0.500
 
 ================================================================================
 \x1b[1;36mSee also\x1b[0m
 ================================================================================
 Related primitives in Desbordante:
   * CIND mining           -  examples/basic/mining_cind_1.py
+  * CIND mining (Cure)    -  examples/basic/mining_cind_2.py
   * IND mining            -  examples/basic/mining_ind.py
   * AIND mining           -  examples/basic/mining_aind.py
   * IND/AIND verification -  examples/basic/verifying_ind_aind.py

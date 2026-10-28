@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "condition_miners/cinderella.h"
+#include "condition_miners/cure_cind.h"
 #include "condition_miners/pli_cind.h"
 #include "core/algorithms/cind/types.h"
 #include "core/config/conditions/algo_type/option.h"
@@ -12,7 +13,10 @@
 #include "core/config/conditions/validity/option.h"
 #include "core/config/equal_nulls/option.h"
 #include "core/config/error/option.h"
+#include "core/config/exceptions.h"
 #include "core/config/mem_limit/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
 #include "core/config/tabular_data/input_tables/option.h"
 #include "core/config/thread_number/option.h"
 
@@ -45,6 +49,8 @@ void CindAlgorithm::LoadDataInternal() {
 void CindAlgorithm::CreateCindMinerAlgo() {
     if (algo_type_ == AlgoType::kCinderella) {
         cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
+    } else if (algo_type_ == AlgoType::kCureCind) {
+        cind_miner_ = std::make_unique<CureCind>(spider_algo_->input_tables_);
     } else {
         cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
     }
@@ -55,11 +61,30 @@ void CindAlgorithm::RegisterCindMinerOptions() {
     RegisterOption(config::kValidityOpt(&cind_miner_->min_validity_));
     RegisterOption(config::kCompletenessOpt(&cind_miner_->min_completeness_));
     RegisterOption(config::kConditionTypeOpt(&cind_miner_->condition_type_));
+
+    if (algo_type_ == AlgoType::kCureCind) {
+        auto* cure = static_cast<CureCind*>(cind_miner_.get());
+
+        auto check_support = [](unsigned int support) {
+            if (support < 1) {
+                throw config::ConfigurationError("Support must be >= 1.");
+            }
+        };
+
+        RegisterOption(config::Option{&cure->min_support_, config::names::kCindMinSupport,
+                                      config::descriptions::kDCindMinSupport, 2u}
+                               .SetValueCheck(check_support));
+    }
 }
 
 void CindAlgorithm::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::kValidityOpt.GetName(), config::kCompletenessOpt.GetName(),
-                          config::kConditionTypeOpt.GetName()});
+    std::vector<std::string_view> opts{config::kValidityOpt.GetName(),
+                                       config::kCompletenessOpt.GetName(),
+                                       config::kConditionTypeOpt.GetName()};
+    if (algo_type_ == AlgoType::kCureCind) {
+        opts.push_back(config::names::kCindMinSupport);
+    }
+    MakeOptionsAvailable(opts);
 }
 
 bool CindAlgorithm::SetExternalOption(std::string_view option_name, boost::any const& value) {

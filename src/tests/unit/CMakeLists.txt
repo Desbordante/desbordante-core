@@ -87,6 +87,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::table
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::cind::verifier
+    ${DESBORDANTE_PREFIX}::cind
     ${DESBORDANTE_PREFIX}::ind::verifier
     ${DESBORDANTE_PREFIX}::ind
 )
