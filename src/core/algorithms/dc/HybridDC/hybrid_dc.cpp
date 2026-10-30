@@ -111,7 +111,7 @@ void HybridDC::CheckTypes() {
     }
 }
 
-unsigned long long HybridDC::ExecuteInternal() {
+void HybridDC::ExecuteInternal() {
     LOG_DEBUG("Start");
 
     SetLimits();
@@ -190,7 +190,6 @@ unsigned long long HybridDC::ExecuteInternal() {
     fprintf(stderr, "[HybridDC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
     fprintf(stderr, "[HybridDC] Total computing time: %lldms\n",
             static_cast<long long>(evi_ms + inv_ms));
-    return evi_ms + inv_ms;
 }
 
 }  // namespace algos::dc

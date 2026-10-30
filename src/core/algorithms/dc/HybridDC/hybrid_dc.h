@@ -52,7 +52,7 @@ private:
         dcs_.clear();
     }
 
-    unsigned long long ExecuteInternal() final;
+    void ExecuteInternal() final;
 
     void RegisterOptions();
 
