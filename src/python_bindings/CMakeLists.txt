@@ -79,6 +79,18 @@ desbordante_add_bind(
 )
 
 desbordante_add_bind(
+    cdd
+    SRCS
+    cdd/bind_cdd.cpp
+    cdd/bind_cdd_verification.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cdd
+    ${DESBORDANTE_PREFIX}::cdd::verifier
+    magic_enum::magic_enum
+    Boost::headers
+)
+
+desbordante_add_bind(
     cfd
     SRCS
     cfd/bind_cfd.cpp

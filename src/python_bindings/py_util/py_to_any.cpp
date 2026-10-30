@@ -14,6 +14,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
+#include "core/algorithms/cdd/cdd.h"
 #include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/cind/types.h"
@@ -244,6 +245,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<config::AfdErrorMeasureType>,
         kEnumConvPair<algos::afd_metric_calculator::AFDMetric>,
         kEnumConvPair<model::InputFormatType>,
+        kNormalConvPair<model::CDD>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::od::Ordering>,
