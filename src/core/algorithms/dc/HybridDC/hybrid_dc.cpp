@@ -157,8 +157,8 @@ void HybridDC::ExecuteInternal() {
         if (f) {
             for (auto const& ev : evidence_set_builder.evidence_set) {
                 bool first = true;
-                for (size_t i = ev.evidence._Find_first(); i < ev.evidence.size();
-                     i = ev.evidence._Find_next(i)) {
+                for (size_t i = model::FindFirst(ev.evidence); i < ev.evidence.size();
+                     i = model::FindNext(ev.evidence, i)) {
                     if (!first) fprintf(f, " ");
                     fprintf(f, "%zu", i);
                     first = false;

@@ -37,11 +37,11 @@ static constexpr size_t kNpos = 128;
 // changing it shifts which DCs get pruned and how large pos_cover grows.
 // Don't replace with integer compare.
 static bool BsLess(DBitset const& a, DBitset const& b) noexcept {
-    size_t ai = a._Find_first(), bi = b._Find_first();
+    size_t ai = model::FindFirst(a), bi = model::FindFirst(b);
     while (ai < kNpos && bi < kNpos) {
         if (ai != bi) return ai < bi;
-        ai = a._Find_next(ai);
-        bi = b._Find_next(bi);
+        ai = model::FindNext(a, ai);
+        bi = model::FindNext(b, bi);
     }
     return ai >= kNpos && bi < kNpos;  // a exhausted first, so a is "less"
 }
@@ -94,7 +94,7 @@ class HEIBitSetTrie {
     }
 
     void DoInsert(uint32_t node_idx, DBitset const& bs, size_t from) {
-        size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
+        size_t bit = (from == 0) ? model::FindFirst(bs) : model::FindNext(bs, from - 1);
         if (bit >= kNpos) {
             nodes_[node_idx].has_stored = true;
             stored_values_[node_idx] = bs;
@@ -105,7 +105,7 @@ class HEIBitSetTrie {
     }
 
     bool DoRemove(uint32_t node_idx, DBitset const& bs, size_t from) {
-        size_t bit = (from == 0) ? bs._Find_first() : bs._Find_next(from - 1);
+        size_t bit = (from == 0) ? model::FindFirst(bs) : model::FindNext(bs, from - 1);
         if (bit >= kNpos) {
             nodes_[node_idx].has_stored = false;
             return nodes_[node_idx].children.empty();
@@ -170,7 +170,7 @@ class HEIBitSetTrie {
         Node const& node = nodes_[node_idx];
         if (node.has_stored) return true;
 
-        size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
+        size_t qbit = (from == 0) ? model::FindFirst(query) : model::FindNext(query, from - 1);
         size_t ci = 0, n = node.children.size();
         auto const* children = node.children.data();
 
@@ -178,10 +178,10 @@ class HEIBitSetTrie {
             size_t cbit = children[ci].first;
             if (qbit == cbit) {
                 if (DoContainsSubset(children[ci].second, query, qbit + 1)) return true;
-                qbit = query._Find_next(qbit);
+                qbit = model::FindNext(query, qbit);
                 ++ci;
             } else if (qbit < cbit) {
-                qbit = query._Find_next(cbit - 1);
+                qbit = model::FindNext(query, cbit - 1);
             } else {
                 ++ci;
             }
@@ -196,7 +196,7 @@ class HEIBitSetTrie {
             nodes_[node_idx].has_stored = false;
         }
 
-        size_t qbit = (from == 0) ? query._Find_first() : query._Find_next(from - 1);
+        size_t qbit = (from == 0) ? model::FindFirst(query) : model::FindNext(query, from - 1);
         size_t ci = 0;
 
         while (qbit < kNpos && ci < nodes_[node_idx].children.size()) {
@@ -209,9 +209,9 @@ class HEIBitSetTrie {
                 } else {
                     ++ci;
                 }
-                qbit = query._Find_next(qbit);
+                qbit = model::FindNext(query, qbit);
             } else if (qbit < cbit) {
-                qbit = query._Find_next(cbit - 1);
+                qbit = model::FindNext(query, cbit - 1);
             } else {
                 ++ci;
             }
@@ -247,7 +247,7 @@ public:
     bool ContainsSuperset(DBitset const& query) const {
         std::array<uint8_t, kNpos> q_bits;
         size_t q_count = 0;
-        for (size_t b = query._Find_first(); b < kNpos; b = query._Find_next(b)) {
+        for (size_t b = model::FindFirst(query); b < kNpos; b = model::FindNext(query, b)) {
             q_bits[q_count++] = static_cast<uint8_t>(b);
         }
         return DoContainsSuperset(kRoot, q_bits, 0, q_count);
@@ -279,7 +279,7 @@ class HEIInverter {
 
     static DBitset ToDBitset(PredicateBitset const& pb, size_t n) {
         DBitset db;
-        for (size_t i = pb._Find_first(); i < pb.size() && i < n; i = pb._Find_next(i)) {
+        for (size_t i = model::FindFirst(pb); i < pb.size() && i < n; i = model::FindNext(pb, i)) {
             db.set(i);
         }
         return db;
@@ -288,7 +288,7 @@ class HEIInverter {
     // Convert to boost::dynamic_bitset for DenialConstraint construction.
     static boost::dynamic_bitset<> ToBoostBitset(DBitset const& bs) {
         boost::dynamic_bitset<> bdb(bs.size());
-        for (size_t i = bs._Find_first(); i < kNpos; i = bs._Find_next(i)) bdb.set(i);
+        for (size_t i = model::FindFirst(bs); i < kNpos; i = model::FindNext(bs, i)) bdb.set(i);
         return bdb;
     }
 
@@ -318,8 +318,8 @@ class HEIInverter {
             for (DBitset const& group : groups) {
                 if ((removed_dc & group).none()) {
                     DBitset candidates = group & ~invalid_ev;
-                    for (size_t i = candidates._Find_first(); i < kNpos;
-                         i = candidates._Find_next(i)) {
+                    for (size_t i = model::FindFirst(candidates); i < kNpos;
+                         i = model::FindNext(candidates, i)) {
                         DBitset candidate_dc = removed_dc;
                         candidate_dc.set(i);
                         if (!pos_cover.ContainsSubset(candidate_dc)) {
@@ -379,8 +379,8 @@ public:
         size_t n_evs = all_evs.size();
         std::vector<std::vector<size_t>> pred2evi(n_predicates_);
         for (size_t eid = 0; eid < n_evs; ++eid) {
-            for (size_t pid = all_evs[eid]._Find_first(); pid < kNpos;
-                 pid = all_evs[eid]._Find_next(pid)) {
+            for (size_t pid = model::FindFirst(all_evs[eid]); pid < kNpos;
+                 pid = model::FindNext(all_evs[eid], pid)) {
                 pred2evi[pid].push_back(eid);
             }
         }
@@ -390,7 +390,8 @@ public:
         for (size_t pid = 0; pid < n_predicates_; ++pid) {
             if (seen[pid]) continue;
             DBitset grp = ToDBitset(mutex_map_[pid], n_predicates_);
-            for (size_t p = grp._Find_first(); p < kNpos; p = grp._Find_next(p)) seen[p] = true;
+            for (size_t p = model::FindFirst(grp); p < kNpos; p = model::FindNext(grp, p))
+                seen[p] = true;
             unique_groups.push_back(std::move(grp));
         }
 
@@ -451,7 +452,7 @@ public:
             for (DBitset const& grp : unique_groups) {
                 if ((grp & pid_group).any()) continue;
                 // Inner EI uses only single-column groups (matches Java behavior).
-                size_t first = grp._Find_first();
+                size_t first = model::FindFirst(grp);
                 if (first < kNpos && pred_objects[first]->IsCrossColumn()) continue;
                 DBitset inner_grp = grp & ~preds_to_remove;
                 if (inner_grp.any()) inner_groups.push_back(std::move(inner_grp));

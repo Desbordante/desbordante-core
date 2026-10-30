@@ -161,7 +161,6 @@ void FastADC::ExecuteInternal() {
             static_cast<long long>(evi_ms + inv_ms));
 
     PrintResults();
-
 }
 
 // TODO: mb make this a list?
