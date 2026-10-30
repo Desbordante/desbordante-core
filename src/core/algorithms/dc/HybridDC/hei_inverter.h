@@ -450,9 +450,6 @@ public:
             inner_groups.reserve(unique_groups.size());
             for (DBitset const& grp : unique_groups) {
                 if ((grp & pid_group).any()) continue;
-                // Inner EI uses only single-column groups (matches Java behavior).
-                size_t first = model::FindFirst(grp);
-                if (first < kNpos && pred_objects[first]->IsCrossColumn()) continue;
                 DBitset inner_grp = grp & ~preds_to_remove;
                 if (inner_grp.any()) inner_groups.push_back(std::move(inner_grp));
             }

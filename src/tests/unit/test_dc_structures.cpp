@@ -1,6 +1,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <set>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -596,7 +597,8 @@ TEST(HybridDCTest, TestDC2Exact) {
     algo.SetOption(kThreads, 4U);
     algo.Execute();
 
-    EXPECT_EQ(algo.GetDCs().size(), 603u);
+    // Include minimal DCs whose remaining predicates span cross-column groups.
+    EXPECT_EQ(algo.GetDCs().size(), 1796u);
     std::cout << "HybridDC(HEI-P) found " << algo.GetDCs().size() << " denial constraints\n";
 }
 
@@ -739,6 +741,67 @@ TEST_F(FastADC, RejectsInvalidInversionThresholds) {
     EXPECT_THROW((ApproxEvidenceInverter(*predicate_builder_, 0.0, std::move(evidence),
                                          table_->GetSharedPtrSchema())),
                  std::overflow_error);
+}
+
+TEST(HybridDCTest, CrossColumnResultsMatchExhaustiveSearch) {
+    CSVConfig const csv{"input_data/hybrid_dc_cross_columns.csv", ',', true};
+    CSVParser parser(csv);
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true, true);
+    auto& columns = table->GetColumnData();
+    PredicateProvider provider;
+    auto indices = std::make_shared<PredicateIndexProvider>();
+    PredicateBuilder builder(&provider, indices, true);
+    builder.BuildPredicateSpace(columns);
+    auto const& predicates = builder.GetPredicates();
+    ASSERT_EQ(predicates.size(), 18U);
+    auto canonical = [](auto const& selected) {
+        std::vector<std::string> strings;
+        for (auto p : selected) strings.push_back(p->ToString());
+        std::sort(strings.begin(), strings.end());
+        return strings;
+    };
+    std::set<std::vector<std::string>> expected;
+    // Each of the three operand groups contributes no predicate or one of six operators.
+    for (unsigned a = 0; a <= 6; ++a) {
+        for (unsigned b = 0; b <= 6; ++b) {
+            for (unsigned c = 0; c <= 6; ++c) {
+                std::vector<PredicatePtr> selected;
+                if (a) selected.push_back(predicates[a - 1]);
+                if (b) selected.push_back(predicates[6 + b - 1]);
+                if (c) selected.push_back(predicates[12 + c - 1]);
+                auto valid = [&](PredicatePtr omitted) {
+                    for (size_t t = 0; t < table->GetNumRows(); ++t) {
+                        for (size_t u = 0; u < table->GetNumRows(); ++u) {
+                            if (t == u) continue;
+                            if (std::all_of(selected.begin(), selected.end(), [&](auto p) {
+                                    return p == omitted || p->Satisfies(columns, t, u);
+                                }))
+                                return false;
+                        }
+                    }
+                    return true;
+                };
+                if (valid(nullptr) && std::none_of(selected.begin(), selected.end(), valid)) {
+                    expected.insert(canonical(selected));
+                }
+            }
+        }
+    }
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(),
+                   config::InputTable{std::make_shared<CSVParser>(csv)});
+    algo.LoadData();
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.0);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+    std::set<std::vector<std::string>> actual;
+    for (auto const& dc : algo.GetDCs()) actual.insert(canonical(dc.GetPredicateSet()));
+    EXPECT_EQ(actual, expected);
 }
 
 }  // namespace tests
