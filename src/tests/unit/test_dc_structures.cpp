@@ -1,9 +1,12 @@
+#include <limits>
 #include <memory>
 #include <optional>
+#include <set>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "core/algorithms/dc/FastADC/fastadc.h"
 #include "core/algorithms/dc/FastADC/misc/misc.h"
 #include "core/algorithms/dc/FastADC/model/denial_constraint.h"
 #include "core/algorithms/dc/FastADC/model/operator.h"
@@ -14,6 +17,10 @@
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_organizer.h"
+#include "core/algorithms/dc/HybridDC/hei_inverter.h"
+#include "core/algorithms/dc/HybridDC/hybrid_dc.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_table/option.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/create_type.h"
 #include "core/model/types/int_type.h"
@@ -572,6 +579,229 @@ TEST_F(FastADC, DenialConstraints) {
         std::string dc = std::next(ordered_result.begin(), i)->ToString();
         EXPECT_EQ(dc, kExpectedDenialConstraints[i]) << "Unexpected denial constraint: " << dc;
     }
+}
+
+TEST(HybridDCTest, TestDC2Exact) {
+    auto table_stream = std::make_shared<CSVParser>(kTestDC2);
+
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.0);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+
+    // Include minimal DCs whose remaining predicates span cross-column groups.
+    EXPECT_EQ(algo.GetDCs().size(), 1796u);
+    std::cout << "HybridDC(HEI-P) found " << algo.GetDCs().size() << " denial constraints\n";
+}
+
+TEST(HybridDCTest, TestDC2Approx) {
+    auto table_stream = std::make_shared<CSVParser>(kTestDC2);
+
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(), config::InputTable{table_stream});
+    algo.LoadData();
+
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.01);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+
+    EXPECT_EQ(algo.GetDCs().size(), 345u);
+    std::cout << "HybridDC(AEI, threshold=0.01) found " << algo.GetDCs().size()
+              << " denial constraints\n";
+}
+
+TEST(HEIBitSetTrieTest, MatchesSetOperationsAcrossWordBoundaries) {
+    algos::dc::HEIBitSetTrie trie;
+    std::vector<PredicateBitset> stored;
+    auto bitset = [](unsigned mask) {
+        PredicateBitset bits;
+        constexpr std::array<size_t, 8> positions{0, 1, 62, 63, 64, 65, 126, 127};
+        for (size_t i = 0; i < positions.size(); ++i) {
+            if (mask & (1U << i)) bits.set(positions[i]);
+        }
+        return bits;
+    };
+    auto check = [&]() {
+        for (unsigned mask = 0; mask < 256; ++mask) {
+            auto query = bitset(mask);
+            bool subset = false, superset = false;
+            for (auto const& value : stored) {
+                subset |= (value & query) == value;
+                superset |= (value & query) == query;
+            }
+            EXPECT_EQ(trie.ContainsSubset(query), subset) << mask;
+            EXPECT_EQ(trie.ContainsSuperset(query), superset) << mask;
+        }
+    };
+    check();
+    for (unsigned mask = 1; mask < 256; mask += 3) {
+        auto value = bitset(mask);
+        trie.Insert(value);
+        stored.push_back(value);
+    }
+    check();
+    for (unsigned mask : {85U, 170U, 255U}) {
+        auto query = bitset(mask);
+        auto removed = trie.GetAndRemoveSubsets(query);
+        size_t expected = 0;
+        std::erase_if(stored, [&](auto const& value) {
+            if ((value & query) != value) return false;
+            EXPECT_EQ(std::count(removed.begin(), removed.end(), value), 1);
+            ++expected;
+            return true;
+        });
+        EXPECT_EQ(removed.size(), expected);
+        check();
+    }
+    trie.Insert({});
+    stored.emplace_back();
+    check();
+    trie.Remove({});
+    stored.clear();
+    check();
+}
+
+TEST(HybridDCTest, ResultsAreValidMinimalAndRepeatable) {
+    CSVParser parser(kTestDC2);
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true, true);
+    auto& columns = table->GetColumnData();
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(),
+                   config::InputTable{std::make_shared<CSVParser>(kTestDC2)});
+    algo.LoadData();
+    std::vector<std::string> expected;
+    for (unsigned threads : {1U, 4U, 1U}) {
+        using namespace config::names;
+        algo.SetOption(kShardLength, threads == 4 ? 2U : 0U);
+        algo.SetOption(kAllowCrossColumns);
+        algo.SetOption(kMinimumSharedValue);
+        algo.SetOption(kComparableThreshold);
+        algo.SetOption(kEvidenceThreshold, 0.0);
+        algo.SetOption(kThreads, threads);
+        algo.Execute();
+        std::vector<std::string> actual;
+        for (auto const& dc : algo.GetDCs()) {
+            std::vector<PredicatePtr> predicates;
+            for (auto predicate : dc.GetPredicateSet()) predicates.push_back(predicate);
+            auto violations = [&](PredicatePtr omitted) {
+                size_t count = 0;
+                for (size_t t = 0; t < table->GetNumRows(); ++t) {
+                    for (size_t u = 0; u < table->GetNumRows(); ++u) {
+                        if (t == u) continue;
+                        bool holds = true;
+                        for (auto predicate : predicates) {
+                            if (predicate != omitted && !predicate->Satisfies(columns, t, u)) {
+                                holds = false;
+                                break;
+                            }
+                        }
+                        count += holds;
+                    }
+                }
+                return count;
+            };
+            EXPECT_EQ(violations(nullptr), 0U) << dc.ToString();
+            for (auto predicate : predicates) {
+                EXPECT_GT(violations(predicate), 0U) << dc.ToString();
+            }
+            actual.push_back(dc.ToString());
+        }
+        std::sort(actual.begin(), actual.end());
+        ASSERT_FALSE(actual.empty());
+        if (expected.empty()) expected = actual;
+        EXPECT_EQ(actual, expected);
+    }
+}
+
+TEST_F(FastADC, RejectsInvalidInversionThresholds) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
+    for (double threshold :
+         {-0.1, 1.1, std::numeric_limits<double>::infinity(),
+          -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()}) {
+        EXPECT_THROW((ApproxEvidenceInverter(*predicate_builder_, threshold, EvidenceSet{},
+                                             table_->GetSharedPtrSchema())),
+                     std::invalid_argument);
+    }
+    EvidenceSet evidence;
+    evidence.EmplaceBack(PredicateBitset{}, std::numeric_limits<int64_t>::max());
+    EXPECT_THROW((ApproxEvidenceInverter(*predicate_builder_, 0.0, std::move(evidence),
+                                         table_->GetSharedPtrSchema())),
+                 std::overflow_error);
+}
+
+TEST(HybridDCTest, CrossColumnResultsMatchExhaustiveSearch) {
+    CSVConfig const csv{"input_data/hybrid_dc_cross_columns.csv", ',', true};
+    CSVParser parser(csv);
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true, true);
+    auto& columns = table->GetColumnData();
+    PredicateProvider provider;
+    auto indices = std::make_shared<PredicateIndexProvider>();
+    PredicateBuilder builder(&provider, indices, true);
+    builder.BuildPredicateSpace(columns);
+    auto const& predicates = builder.GetPredicates();
+    ASSERT_EQ(predicates.size(), 18U);
+    auto canonical = [](auto const& selected) {
+        std::vector<std::string> strings;
+        for (auto p : selected) strings.push_back(p->ToString());
+        std::sort(strings.begin(), strings.end());
+        return strings;
+    };
+    std::set<std::vector<std::string>> expected;
+    // Each of the three operand groups contributes no predicate or one of six operators.
+    for (unsigned a = 0; a <= 6; ++a) {
+        for (unsigned b = 0; b <= 6; ++b) {
+            for (unsigned c = 0; c <= 6; ++c) {
+                std::vector<PredicatePtr> selected;
+                if (a) selected.push_back(predicates[a - 1]);
+                if (b) selected.push_back(predicates[6 + b - 1]);
+                if (c) selected.push_back(predicates[12 + c - 1]);
+                auto valid = [&](PredicatePtr omitted) {
+                    for (size_t t = 0; t < table->GetNumRows(); ++t) {
+                        for (size_t u = 0; u < table->GetNumRows(); ++u) {
+                            if (t == u) continue;
+                            if (std::all_of(selected.begin(), selected.end(), [&](auto p) {
+                                    return p == omitted || p->Satisfies(columns, t, u);
+                                }))
+                                return false;
+                        }
+                    }
+                    return true;
+                };
+                if (valid(nullptr) && std::none_of(selected.begin(), selected.end(), valid)) {
+                    expected.insert(canonical(selected));
+                }
+            }
+        }
+    }
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(),
+                   config::InputTable{std::make_shared<CSVParser>(csv)});
+    algo.LoadData();
+    using namespace config::names;
+    algo.SetOption(kShardLength, 0U);
+    algo.SetOption(kAllowCrossColumns);
+    algo.SetOption(kMinimumSharedValue);
+    algo.SetOption(kComparableThreshold);
+    algo.SetOption(kEvidenceThreshold, 0.0);
+    algo.SetOption(kThreads, 4U);
+    algo.Execute();
+    std::set<std::vector<std::string>> actual;
+    for (auto const& dc : algo.GetDCs()) actual.insert(canonical(dc.GetPredicateSet()));
+    EXPECT_EQ(actual, expected);
 }
 
 }  // namespace tests

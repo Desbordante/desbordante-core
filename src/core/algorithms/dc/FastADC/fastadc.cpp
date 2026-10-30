@@ -1,5 +1,7 @@
 #include "core/algorithms/dc/FastADC/fastadc.h"
 
+#include <chrono>
+#include <cstdio>
 #include <stdexcept>
 #include <vector>
 
@@ -123,6 +125,8 @@ void FastADC::ExecuteInternal() {
                                        minimum_shared_value_, comparable_threshold_);
     predicate_builder.BuildPredicateSpace(typed_relation_->GetColumnData());
 
+    auto const evi_start = std::chrono::system_clock::now();
+
     PliShardBuilder pli_shard_builder(&int_prov_, &double_prov_, &string_prov_, shard_length_);
     pli_shard_builder.BuildPliShards(typed_relation_->GetColumnData());
 
@@ -136,13 +140,25 @@ void FastADC::ExecuteInternal() {
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
-    LOG_DEBUG("Built evidence set");
+    auto const evi_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::system_clock::now() - evi_start)
+                                .count();
+    fprintf(stderr, "[FastADC] Evidence time: %lldms\n", static_cast<long long>(evi_ms));
+
+    auto const inv_start = std::chrono::system_clock::now();
 
     ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
                                      std::move(evidence_set_builder.evidence_set),
                                      typed_relation_->GetSharedPtrSchema());
 
     dcs_ = dcbuilder.BuildDenialConstraints();
+
+    auto const inv_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::system_clock::now() - inv_start)
+                                .count();
+    fprintf(stderr, "[FastADC] Inversion time: %lldms\n", static_cast<long long>(inv_ms));
+    fprintf(stderr, "[FastADC] Total computing time: %lldms\n",
+            static_cast<long long>(evi_ms + inv_ms));
 
     PrintResults();
 }
