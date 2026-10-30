@@ -15,6 +15,7 @@
 #include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_builder.h"
 #include "core/algorithms/dc/FastADC/util/predicate_organizer.h"
+#include "core/algorithms/dc/HybridDC/hei_inverter.h"
 #include "core/algorithms/dc/HybridDC/hybrid_dc.h"
 #include "core/config/names.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -617,6 +618,109 @@ TEST(HybridDCTest, TestDC2Approx) {
     EXPECT_EQ(algo.GetDCs().size(), 345u);
     std::cout << "HybridDC(AEI, threshold=0.01) found " << algo.GetDCs().size()
               << " denial constraints\n";
+}
+
+TEST(HEIBitSetTrieTest, MatchesSetOperationsAcrossWordBoundaries) {
+    algos::dc::HEIBitSetTrie trie;
+    std::vector<PredicateBitset> stored;
+    auto bitset = [](unsigned mask) {
+        PredicateBitset bits;
+        constexpr std::array<size_t, 8> positions{0, 1, 62, 63, 64, 65, 126, 127};
+        for (size_t i = 0; i < positions.size(); ++i) {
+            if (mask & (1U << i)) bits.set(positions[i]);
+        }
+        return bits;
+    };
+    auto check = [&]() {
+        for (unsigned mask = 0; mask < 256; ++mask) {
+            auto query = bitset(mask);
+            bool subset = false, superset = false;
+            for (auto const& value : stored) {
+                subset |= (value & query) == value;
+                superset |= (value & query) == query;
+            }
+            EXPECT_EQ(trie.ContainsSubset(query), subset) << mask;
+            EXPECT_EQ(trie.ContainsSuperset(query), superset) << mask;
+        }
+    };
+    check();
+    for (unsigned mask = 1; mask < 256; mask += 3) {
+        auto value = bitset(mask);
+        trie.Insert(value);
+        stored.push_back(value);
+    }
+    check();
+    for (unsigned mask : {85U, 170U, 255U}) {
+        auto query = bitset(mask);
+        auto removed = trie.GetAndRemoveSubsets(query);
+        size_t expected = 0;
+        std::erase_if(stored, [&](auto const& value) {
+            if ((value & query) != value) return false;
+            EXPECT_EQ(std::count(removed.begin(), removed.end(), value), 1);
+            ++expected;
+            return true;
+        });
+        EXPECT_EQ(removed.size(), expected);
+        check();
+    }
+    trie.Insert({});
+    stored.emplace_back();
+    check();
+    trie.Remove({});
+    stored.clear();
+    check();
+}
+
+TEST(HybridDCTest, ResultsAreValidMinimalAndRepeatable) {
+    CSVParser parser(kTestDC2);
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true, true);
+    auto& columns = table->GetColumnData();
+    algos::dc::HybridDC algo;
+    algo.SetOption(config::kTableOpt.GetName(),
+                   config::InputTable{std::make_shared<CSVParser>(kTestDC2)});
+    algo.LoadData();
+    std::vector<std::string> expected;
+    for (unsigned threads : {1U, 4U, 1U}) {
+        using namespace config::names;
+        algo.SetOption(kShardLength, threads == 4 ? 2U : 0U);
+        algo.SetOption(kAllowCrossColumns);
+        algo.SetOption(kMinimumSharedValue);
+        algo.SetOption(kComparableThreshold);
+        algo.SetOption(kEvidenceThreshold, 0.0);
+        algo.SetOption(kThreads, threads);
+        algo.Execute();
+        std::vector<std::string> actual;
+        for (auto const& dc : algo.GetDCs()) {
+            std::vector<PredicatePtr> predicates;
+            for (auto predicate : dc.GetPredicateSet()) predicates.push_back(predicate);
+            auto violations = [&](PredicatePtr omitted) {
+                size_t count = 0;
+                for (size_t t = 0; t < table->GetNumRows(); ++t) {
+                    for (size_t u = 0; u < table->GetNumRows(); ++u) {
+                        if (t == u) continue;
+                        bool holds = true;
+                        for (auto predicate : predicates) {
+                            if (predicate != omitted && !predicate->Satisfies(columns, t, u)) {
+                                holds = false;
+                                break;
+                            }
+                        }
+                        count += holds;
+                    }
+                }
+                return count;
+            };
+            EXPECT_EQ(violations(nullptr), 0U) << dc.ToString();
+            for (auto predicate : predicates) {
+                EXPECT_GT(violations(predicate), 0U) << dc.ToString();
+            }
+            actual.push_back(dc.ToString());
+        }
+        std::sort(actual.begin(), actual.end());
+        ASSERT_FALSE(actual.empty());
+        if (expected.empty()) expected = actual;
+        EXPECT_EQ(actual, expected);
+    }
 }
 
 }  // namespace tests
