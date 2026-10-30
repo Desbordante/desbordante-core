@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <stack>
+#include <stdexcept>
 #include <vector>
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
@@ -38,7 +40,7 @@ public:
                            std::shared_ptr<RelationalSchema const> schema)
         : n_predicates_(pbuilder.PredicateCount()),
           evi_count_(evidence_set.GetTotalCount()),
-          target_(static_cast<int64_t>(std::ceil((1 - threshold) * evi_count_))),
+          target_(CalculateTarget(threshold, evi_count_)),
           organizer_(n_predicates_, std::move(evidence_set), std::move(pbuilder.TakeMutexMap())),
           approx_covers_(n_predicates_),
           predicate_provider_(pbuilder.predicate_provider),
@@ -83,6 +85,17 @@ public:
     }
 
 private:
+    static int64_t CalculateTarget(double threshold, size_t evidence_count) {
+        if (!(threshold >= 0.0 && threshold <= 1.0)) {
+            throw std::invalid_argument("evidence_threshold must be between 0 and 1");
+        }
+        double target = std::ceil((1 - threshold) * evidence_count);
+        if (target >= static_cast<double>(std::numeric_limits<int64_t>::max())) {
+            throw std::overflow_error("Evidence count exceeds the supported inversion range");
+        }
+        return static_cast<int64_t>(target);
+    }
+
     size_t n_predicates_;
     size_t evi_count_;
     int64_t target_;

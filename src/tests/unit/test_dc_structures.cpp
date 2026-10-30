@@ -1,3 +1,4 @@
+#include <limits>
 #include <memory>
 #include <optional>
 
@@ -721,6 +722,23 @@ TEST(HybridDCTest, ResultsAreValidMinimalAndRepeatable) {
         if (expected.empty()) expected = actual;
         EXPECT_EQ(actual, expected);
     }
+}
+
+TEST_F(FastADC, RejectsInvalidInversionThresholds) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
+    for (double threshold :
+         {-0.1, 1.1, std::numeric_limits<double>::infinity(),
+          -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()}) {
+        EXPECT_THROW((ApproxEvidenceInverter(*predicate_builder_, threshold, EvidenceSet{},
+                                             table_->GetSharedPtrSchema())),
+                     std::invalid_argument);
+    }
+    EvidenceSet evidence;
+    evidence.EmplaceBack(PredicateBitset{}, std::numeric_limits<int64_t>::max());
+    EXPECT_THROW((ApproxEvidenceInverter(*predicate_builder_, 0.0, std::move(evidence),
+                                         table_->GetSharedPtrSchema())),
+                 std::overflow_error);
 }
 
 }  // namespace tests
