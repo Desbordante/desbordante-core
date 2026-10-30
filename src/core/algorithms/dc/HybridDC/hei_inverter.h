@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -9,7 +8,6 @@
 #include <memory>
 #include <mutex>
 #include <numeric>
-#include <thread>
 #include <vector>
 
 #include <boost/container/small_vector.hpp>
@@ -19,6 +17,7 @@
 #include "core/algorithms/dc/FastADC/model/predicate.h"
 #include "core/algorithms/dc/FastADC/providers/index_provider.h"
 #include "core/model/table/relational_schema.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::dc {
 
@@ -275,7 +274,7 @@ class HEIInverter {
     std::vector<PredicateBitset> const& mutex_map_;
     std::shared_ptr<PredicateIndexProvider> pred_index_provider_;
     std::shared_ptr<RelationalSchema const> schema_;
-    unsigned threads_;
+    util::WorkerThreadPool* thread_pool_;
 
     static DBitset ToDBitset(PredicateBitset const& pb, size_t n) {
         DBitset db;
@@ -356,12 +355,12 @@ class HEIInverter {
 public:
     HEIInverter(size_t n_predicates, std::vector<PredicateBitset> const& mutex_map,
                 std::shared_ptr<PredicateIndexProvider> pred_index_provider,
-                std::shared_ptr<RelationalSchema const> schema, unsigned threads)
+                std::shared_ptr<RelationalSchema const> schema, util::WorkerThreadPool* thread_pool)
         : n_predicates_(n_predicates),
           mutex_map_(mutex_map),
           pred_index_provider_(std::move(pred_index_provider)),
           schema_(std::move(schema)),
-          threads_(threads) {}
+          thread_pool_(thread_pool) {}
 
     std::vector<DenialConstraint> Run(EvidenceSet const& evidence_set) {
         FILE* log = nullptr;
@@ -472,22 +471,10 @@ public:
             }
         };
 
-        if (log || threads_ <= 1) {
+        if (log || !thread_pool_) {
             for (size_t i = 0; i < n_predicates_; ++i) process_one(i);
         } else {
-            std::atomic<size_t> next_idx{0};
-            std::vector<std::thread> worker_threads;
-            worker_threads.reserve(threads_);
-            for (unsigned t = 0; t < threads_; ++t) {
-                worker_threads.emplace_back([&]() {
-                    while (true) {
-                        size_t i = next_idx.fetch_add(1, std::memory_order_relaxed);
-                        if (i >= n_predicates_) break;
-                        process_one(i);
-                    }
-                });
-            }
-            for (auto& th : worker_threads) th.join();
+            thread_pool_->ExecIndex(process_one, n_predicates_);
         }
 
         // Dedup, then sort by cardinality. Process one cardinality level at a time:
@@ -519,20 +506,12 @@ public:
             is_minimal.assign(batch, 0);
 
             // Threshold as parallelism overhead dominates for very small batches.
-            if (threads_ > 1 && batch >= 64 && !log) {
-                std::atomic<size_t> next{idx};
-                std::vector<std::thread> workers;
-                workers.reserve(threads_);
-                for (unsigned t = 0; t < threads_; ++t) {
-                    workers.emplace_back([&]() {
-                        while (true) {
-                            size_t i = next.fetch_add(1, std::memory_order_relaxed);
-                            if (i >= end) break;
-                            is_minimal[i - idx] = !nt.ContainsSubset(all_covers_raw[i]);
-                        }
-                    });
-                }
-                for (auto& w : workers) w.join();
+            if (thread_pool_ && batch >= 64 && !log) {
+                thread_pool_->ExecIndex(
+                        [&](size_t offset) {
+                            is_minimal[offset] = !nt.ContainsSubset(all_covers_raw[idx + offset]);
+                        },
+                        batch);
             } else {
                 for (size_t i = idx; i < end; ++i) {
                     is_minimal[i - idx] = !nt.ContainsSubset(all_covers_raw[i]);

@@ -175,7 +175,7 @@ void HybridDC::ExecuteInternal() {
         size_t n_predicates = predicate_builder.PredicateCount();
         auto mutex_map = predicate_builder.TakeMutexMap();
         HEIInverter hei_inverter(n_predicates, mutex_map, pred_index_provider_,
-                                 typed_relation_->GetSharedPtrSchema(), threads_);
+                                 typed_relation_->GetSharedPtrSchema(), thread_pool);
         dcs_ = hei_inverter.Run(evidence_set_builder.evidence_set);
     } else {
         ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
