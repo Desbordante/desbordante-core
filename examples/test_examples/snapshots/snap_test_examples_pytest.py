@@ -3395,6 +3395,28 @@ It is recommended to look at the first example for a deeper understanding of gra
 \x1b[93mClose the image window to finish.\x1b[0m
 '''
 
+snapshots['test_example[basic/mining_hybrid_dc.py-None-mining_hybrid_dc_output] mining_hybrid_dc_output'] = '''Denial constraints with at most 0% violating row pairs:
+¬{ t.Salary == s.Salary ∧ t.FedTaxRate == s.FedTaxRate }
+¬{ t.State == s.State ∧ t.FedTaxRate == s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary < s.Salary ∧ t.FedTaxRate > s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary < s.Salary ∧ t.FedTaxRate >= s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary <= s.Salary ∧ t.FedTaxRate > s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary <= s.Salary ∧ t.FedTaxRate >= s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary == s.Salary }
+¬{ t.State == s.State ∧ t.Salary > s.Salary ∧ t.FedTaxRate < s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary > s.Salary ∧ t.FedTaxRate <= s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary >= s.Salary ∧ t.FedTaxRate < s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary >= s.Salary ∧ t.FedTaxRate <= s.FedTaxRate }
+
+Denial constraints with at most 10% violating row pairs:
+¬{ t.Salary == s.Salary }
+¬{ t.Salary >= s.Salary ∧ t.FedTaxRate == s.FedTaxRate }
+¬{ t.State != s.State ∧ t.Salary > s.Salary ∧ t.FedTaxRate > s.FedTaxRate }
+¬{ t.State == s.State ∧ t.FedTaxRate == s.FedTaxRate }
+¬{ t.State == s.State ∧ t.Salary >= s.Salary ∧ t.FedTaxRate <= s.FedTaxRate }
+
+'''
+
 snapshots['test_example[basic/mining_ind.py-None-mining_ind_output] mining_ind_output'] = '''Found inclusion dependencies (-> means "is included in"):
 
 (course.csv, [Department name]) -> (department.csv, [Department name])
