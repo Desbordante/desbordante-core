@@ -1,11 +1,12 @@
 """Typo mining example using Desbordante algorithms."""
 
 from functools import reduce
-from itertools import groupby, islice
+from itertools import islice
 import operator
 
 from colorama import Style, Fore
 from jellyfish import levenshtein_distance
+from collections import Counter
 import desbordante
 import pandas
 
@@ -58,36 +59,42 @@ def configure_dataframe_print():
     pandas.set_option('display.max_colwidth', None)
 
 
-def get_squashed_sorted_clusters(dataset: pandas.DataFrame, lhs_indices, rhs_index):
-    def get_lhs(row_count_pair):
-        row, _ = row_count_pair
-        return row[:-1]
-
-    def get_rhs(row):
-        return row[-1]
-
+def get_squashed_sorted_filtered_clusters(dataset: pandas.DataFrame, lhs_indices, rhs_index):
     def count_key(rhs_count_pair):
         rhs, count = rhs_count_pair
         # Sort descending on count, ascending on rhs value
         return -count, rhs
 
-    fd_columns = [dataset.columns[col_num] for col_num in lhs_indices]
-    fd_columns.append(dataset.columns[rhs_index])
-    value_counts = dataset.value_counts(fd_columns, dropna=False)
-    # Rows with the same LHS now end up next to each other and can be
-    # grouped together with groupby. But inside each group rows may not
-    # be sorted by the number of their occurrences.
-    value_counts.sort_index(inplace=True)
-    lhs_groups = ((lhs, row_count_pairs) for lhs, row_count_iter in
-                  groupby(value_counts.items(), key=get_lhs) if
-                  # Exclude instances where FD is not violated.
-                  len(row_count_pairs := tuple(row_count_iter)) > 1)
-    # The final step is transforming lhs groups in the form of
-    # (lhs, (((*lhs, rhs_value), count), ...)) to the form
-    # (lhs, ((rhs_value, count), ...)) and sorting them by the number
-    # of occurrences in the table.
-    return [(lhs, sorted(((get_rhs(row), count) for row, count in row_count_pairs), key=count_key))
-            for lhs, row_count_pairs in lhs_groups]
+    fd_verifier = desbordante.fd_verification.algorithms.FDVerifier()
+    fd_verifier.load_data(table=dataset)
+    fd_verifier.execute(lhs_indices=lhs_indices, rhs_indices=[rhs_index])
+
+    if fd_verifier.fd_holds():
+        return []
+
+    highlights = fd_verifier.get_highlights()
+
+    squashed_clusters = []
+    for current_highlight in highlights:
+        if current_highlight.most_frequent_rhs_value_proportion <= 1.0 - RATIO:
+            continue
+
+        cluster_row_indices = current_highlight.cluster
+
+        rhs_values = [str(dataset.iat[row_index, rhs_index]) for row_index in cluster_row_indices]
+        rhs_counts = Counter(rhs_values)
+
+        sorted_rhs_counts = sorted(rhs_counts.items(), key=count_key)
+
+        lhs_values = tuple(dataset.iloc[cluster_row_indices[0], lhs_indices])
+        metric = number_metric if pandas.api.types.is_numeric_dtype(dataset.iloc[:, rhs_index]) \
+            else string_metric
+        filtered_cluster = filter_radius(lhs_values, sorted_rhs_counts, metric)
+
+        if filtered_cluster:
+            squashed_clusters.append(filtered_cluster)
+
+    return squashed_clusters
 
 
 def number_metric(a, b):
@@ -98,37 +105,17 @@ def string_metric(a, b):
     return levenshtein_distance(str(a), str(b))
 
 
-def filter_radius(squashed_sorted_clusters, metric) -> list:
+def filter_radius(lhs_values, sorted_rhs_counts, metric):
     def is_value_close(value_count_pair):
         value, _ = value_count_pair
         return metric(most_common_value, value) < RADIUS
 
-    filtered = []
-    for lhs, value_data in squashed_sorted_clusters:
-        most_common_value, _ = value_data[0]
-        close_value_pairs = list(filter(is_value_close, islice(value_data, 1, None)))
-        if close_value_pairs:
-            filtered.append((lhs, [value_data[0]] + close_value_pairs))
-    return filtered
-
-
-def filter_ratio(squashed_sorted_clusters):
-    def few_deviations(squashed_sorted_cluster):
-        _, value_info = squashed_sorted_cluster
-        _, most_common_count = value_info[0]
-        total_values = sum(number for _, number in value_info)
-        deviating_values = total_values - most_common_count
-        return deviating_values / total_values < RATIO
-
-    return list(filter(few_deviations, squashed_sorted_clusters))
-
-
-def filter_squashed_sorted_clusters(squashed_sorted_clusters):
-    try:
-        squashed_sorted_clusters = filter_radius(squashed_sorted_clusters, number_metric)
-    except TypeError:
-        squashed_sorted_clusters = filter_radius(squashed_sorted_clusters, string_metric)
-    return filter_ratio(squashed_sorted_clusters)
+    most_common_value, _ = sorted_rhs_counts[0]
+    close_value_pairs = list(filter(is_value_close, islice(sorted_rhs_counts, 1, None)))
+    if close_value_pairs:
+        return (lhs_values, [sorted_rhs_counts[0]] + close_value_pairs)
+    
+    return tuple()
 
 
 def get_result_set(df, algo_type, algo_config):
@@ -164,7 +151,7 @@ def get_typo_candidates_df(df, display_df):
     typo_candidate_rows = []
     typo_candidate_row_indices = []
 
-    for index, row in display_df.iterrows():
+    for _, row in display_df.iterrows():
         mask = reduce(operator.and_, map(get_mask, islice(row.items(), 1, None)))
         found_rows = df[mask]
         typo_candidate_rows.append(found_rows.values[0])
@@ -178,7 +165,7 @@ def main():
     print(CONFIG_STRING)
     print()
 
-    df = pandas.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, na_filter=False, dtype='string')
+    df = pandas.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, na_filter=False)
     print('Dataset sample:')
     print(df)
     print()
@@ -193,9 +180,9 @@ def main():
     print()
 
     print(f'Selecting FD with index {FD_INDEX}:')
-    lhs_indices, rhs_index = almost_holding_fds[FD_INDEX].to_index_tuple()
-    squashed_sorted_clusters = filter_squashed_sorted_clusters(
-        get_squashed_sorted_clusters(df, lhs_indices, rhs_index))
+    lhs_indices = almost_holding_fds[FD_INDEX].lhs_indices
+    rhs_index = almost_holding_fds[FD_INDEX].rhs_index
+    squashed_sorted_clusters = get_squashed_sorted_filtered_clusters(df, lhs_indices, rhs_index)
 
     if not squashed_sorted_clusters:
         print('Nothing found. Try another FD or relax restrictions (radius, ratio, error).')
