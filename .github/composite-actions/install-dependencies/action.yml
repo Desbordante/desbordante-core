@@ -74,7 +74,7 @@ runs:
       run: |
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
-        sudo ./llvm.sh 20 all
+        sudo ./llvm.sh 23 all
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
     - name: Install GCC toolset (on macOS)
