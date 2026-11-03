@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include "core/model/table/idataset_stream.h"
 
 namespace model {

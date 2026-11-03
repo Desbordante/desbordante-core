@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <bit>
 #include <sstream>
 
 #include "core/model/table/column_combination.h"
