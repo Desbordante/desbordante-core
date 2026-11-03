@@ -1,7 +1,8 @@
+import textwrap
+
 import desbordante
 import pandas as pd
 from tabulate import tabulate
-import textwrap
 
 GREEN_CODE = "\033[1;42m"
 RED_CODE = "\033[1;41m"
@@ -16,7 +17,7 @@ def prints(str):
 
 def print_table(table, title):
     print(title)
-    print(tabulate(table, headers='keys', tablefmt='psql'), end='\n\n')
+    print(tabulate(table, headers="keys", tablefmt="psql"), end="\n\n")
 
 
 def print_clusters(verifier, table, indices):
@@ -63,9 +64,9 @@ prints("3. Verify the AINDs to identify clusters of data that violate the depend
 prints("4. Display detailed information about the dependencies.")
 print()
 
-TABLE_NAMES = ['orders', 'customers', 'products']
+TABLE_NAMES = ["orders", "customers", "products"]
 # We will use those configs for dependency mining
-TABLE_CONFIGS = [(get_table_path(name), ',', True) for name in TABLE_NAMES]
+TABLE_CONFIGS = [(get_table_path(name), ",", True) for name in TABLE_NAMES]
 # Pandas dataframe will be used to show clusters.
 TABLE_DFS = [pd.read_csv(get_table_path(name), header=[0]) for name in TABLE_NAMES]
 # It is important to note that searching for exact dependencies takes significantly
@@ -107,7 +108,7 @@ print("Let's see detailed information about AINDs:")
 # For each AIND with an error, verify and print clusters
 # with potential typos:
 for typo_aind in typo_ainds:
-    print('AIND:', typo_aind)
+    print("AIND:", typo_aind)
     verify_aind(typo_aind.get_lhs(), typo_aind.get_rhs())
 
 prints("""Based on the analysis of the AINDs and their errors, we

@@ -4,13 +4,13 @@ import pandas as pd
 LHS = 8
 RHS = 9
 
-PATH = 'examples/datasets/LineItem.csv'
-SEP = '|'
+PATH = "examples/datasets/LineItem.csv"
+SEP = "|"
 
-BOLD = '\033[1m'
-YELLOW = '\033[93m'
-GREEN = '\033[92m'
-DEFAULT = '\033[0m'
+BOLD = "\033[1m"
+YELLOW = "\033[93m"
+GREEN = "\033[92m"
+DEFAULT = "\033[0m"
 
 print(f"""{BOLD}{YELLOW}Preliminaries{DEFAULT}
 Functional dependencies (FDs) are a classic concept in databases.
@@ -87,8 +87,8 @@ plausible database table tracking the statuses of various shipments.
 Here is a sample of the records:""")
 print()
 
-DEMONSTRATION_COLUMNS = ['ORDERKEY', 'RETURNFLAG', 'LINESTATUS', 'SHIPDATE',
-                         'RECEIPTDATE', 'SHIPMODE']
+DEMONSTRATION_COLUMNS = ["ORDERKEY", "RETURNFLAG", "LINESTATUS", "SHIPDATE",
+                         "RECEIPTDATE", "SHIPMODE"]
 DEMONSTRATION_ROW_INDICES = [0, 1, 2, 3, 10, 100, 101, 102, 500, 533, 534, 535]
 df = pd.read_csv(PATH, header=0, sep=SEP)
 print(df[DEMONSTRATION_COLUMNS].iloc[DEMONSTRATION_ROW_INDICES].to_string(
@@ -98,7 +98,7 @@ print("""SHIPDATE here represents the date shipping started, with RECEIPTDATE \
 being
 the date an item was or is projected to be received.\n""")
 
-print(f'{GREEN}RETURNFLAG and LINESTATUS values{DEFAULT}')
+print(f"{GREEN}RETURNFLAG and LINESTATUS values{DEFAULT}")
 print("""Let's take a closer look at two other columns: RETURNFLAG and \
 LINESTATUS. We
 will inspect their value distributions.""")
@@ -132,14 +132,14 @@ calc = desb.afd_metric_calculation.algorithms.AFDMetricCalculator()
 calc.load_data(table=(PATH, SEP, True))
 measure_values = {}
 
-for measure in ['rho', 'pdep', 'tau', 'mu_plus', 'fi', 'g1', 'g2', 'g3']:
+for measure in ["rho", "pdep", "tau", "mu_plus", "fi", "g1", "g2", "g3"]:
     calc.execute(lhs_indices=[LHS], rhs_indices=[RHS], metric=measure)
     value = calc.get_result()
-    print(f'{GREEN}{measure}{DEFAULT} = {value:.6f}')
+    print(f"{GREEN}{measure}{DEFAULT} = {value:.6f}")
     measure_values[measure] = value
 print()
 
-print('Notice that none of them return 1, but many are quite close, >0.95.')
+print("Notice that none of them return 1, but many are quite close, >0.95.")
 print()
 
 print("""We see the value for g2 being much lower than the others, with rho's \

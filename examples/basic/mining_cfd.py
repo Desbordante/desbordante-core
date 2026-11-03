@@ -1,23 +1,23 @@
+
 import desbordante
 import pandas as pd
-import time
 
 MINIMUM_SUPPORT = 7      # Minimum number of tuples that must satisfy the LHS pattern
 MINIMUM_CONFIDENCE = 0.75 # Minimum ratio of tuples satisfying both LHS and RHS patterns
 MAXIMUM_LHS_COUNT = 2    # Maximum number of attributes in the LHS
 
-TABLE_PATH = 'examples/datasets/cfd_datasets/employees.csv'
+TABLE_PATH = "examples/datasets/cfd_datasets/employees.csv"
 
 class Colors:
-    GREEN_BG = '\033[1;42m'
-    GREEN_FG = '\033[1;32m'
-    RED_BG = '\033[1;41m'
-    RED_FG = '\033[1;31m'
-    BLUE_FG = '\033[1;34m'
-    YELLOW_BG = '\033[1;43m'
-    DEFAULT_BG = '\033[1;49m'
-    DEFAULT_FG = '\033[1;37m'
-    RESET = '\033[0m'
+    GREEN_BG = "\033[1;42m"
+    GREEN_FG = "\033[1;32m"
+    RED_BG = "\033[1;41m"
+    RED_FG = "\033[1;31m"
+    BLUE_FG = "\033[1;34m"
+    YELLOW_BG = "\033[1;43m"
+    DEFAULT_BG = "\033[1;49m"
+    DEFAULT_FG = "\033[1;37m"
+    RESET = "\033[0m"
 
 
 def explain_cfd_concept():
@@ -84,15 +84,15 @@ def demonstrate_algorithm_parameters():
     print(f"{Colors.BLUE_FG}=== Algorithm Parameters Explanation ==={Colors.RESET}\n")
 
     print("CFD mining parameters:")
-    print(f"* cfd_minsup (minimum support):")
+    print("* cfd_minsup (minimum support):")
     print("  - Range: 1 to number of rows in dataset")
     print()
 
-    print(f"* cfd_minconf (minimum confidence):")
+    print("* cfd_minconf (minimum confidence):")
     print("  - Range: 0.0 to 1.0")
     print()
 
-    print(f"* cfd_max_lhs (maximum LHS size):")
+    print("* cfd_max_lhs (maximum LHS size):")
     print("  - Maximum number of attributes in left-hand side")
     print("  - Range: 1 to number of columns")
     print()
@@ -148,7 +148,7 @@ def advanced_cfd_analysis(df):
     print("Now let's discover all conditional functional dependencies in our dataset...")
     print()
 
-    print(f"Running CFD mining with the following parameters:")
+    print("Running CFD mining with the following parameters:")
     print(f"* Minimum Support (cfd_minsup): {MINIMUM_SUPPORT}")
     print(f"* Minimum Confidence (cfd_minconf): {MINIMUM_CONFIDENCE}")
     print(f"* Maximum LHS Count (cfd_max_lhs): {MAXIMUM_LHS_COUNT}")
@@ -236,7 +236,6 @@ def advanced_cfd_analysis(df):
 
 def print_cfd_metrics(df, cfd, verifier):
     """Print CFD verification metrics and violations."""
-
     verifier.execute(cfd_rule=cfd, cfd_minconf=0)
 
     holds = verifier.cfd_holds()
@@ -306,7 +305,7 @@ def demonstrate_experimentation_workflow():
 
 
 def main():
-    """Main function demonstrating all CFD capabilities."""
+    """Demonstrate all CFD capabilities."""
     print(f"{Colors.BLUE_FG}CFD Mining Example - Desbordante {Colors.RESET}\n")
 
     explain_cfd_concept()
@@ -326,5 +325,5 @@ def main():
     print(f"{Colors.GREEN_FG}See verifying_cfd.py for CFD validation examples.{Colors.RESET}")
     print()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

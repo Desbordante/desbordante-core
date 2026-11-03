@@ -1,31 +1,31 @@
-'''Example 3: 2D ball'''
+"""Example 3: 2D ball."""
 
-from tabulate import tabulate
 from csv import reader
 from math import inf
 
 import desbordante
+from tabulate import tabulate
 
-RED = '\033[31m'
-GREEN = '\033[32m'
-BLUE = '\033[34m'
-CYAN = '\033[36m'
-BOLD = '\033[1;37m'
-ENDC = '\033[0m'
+RED = "\033[31m"
+GREEN = "\033[32m"
+BLUE = "\033[34m"
+CYAN = "\033[36m"
+BOLD = "\033[1;37m"
+ENDC = "\033[0m"
 
-ENGINE_TEMPS = 'examples/datasets/verifying_pac/engine_temps_bad.csv'
+ENGINE_TEMPS = "examples/datasets/verifying_pac/engine_temps_bad.csv"
 
 
 def csv_to_str(filename: str) -> str:
-    with open(filename, newline='') as table:
-        rows = list(reader(table, delimiter=','))
+    with open(filename, newline="") as table:
+        rows = list(reader(table, delimiter=","))
     headers = rows[0]
     rows = rows[1:]
     return tabulate(rows, headers=headers)
 
 
 print(
-    f'''This example demonstrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+    f"""This example demonstrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
 It is the third example of "Basic Domain PAC verification" series (see the {CYAN}examples/basic/verifying_pac/{ENDC} directory).
 If you haven't read first and second parts yet, it is recommended to start there.
 
@@ -37,10 +37,10 @@ the Parallelepiped domain.
 
 The sensor readings are the same as before:
 {BOLD}{csv_to_str(ENGINE_TEMPS)}{ENDC}
-''')
+""")  # noqa: E501
 
 print(
-    f'''The parallelepiped {BLUE}[{{85, 1500}}, {{95, 3500}}]{ENDC} is a rectangle in the (temperature, RPM) space:
+    f"""The parallelepiped {BLUE}[{{85, 1500}}, {{95, 3500}}]{ENDC} is a rectangle in the (temperature, RPM) space:
     (95, 1500)      (95, 3500)
             +--------+
             |        |
@@ -73,40 +73,40 @@ scale dimensions differently -- effectively turning a circle into an ellipse.
 
 To balance temperature and RPM scales, we use leveling_coefficients={BLUE}[1, 0.005]{ENDC}.
 This treats a 200 RPM difference as roughly equivalent to a 1°C difference.
-''')
+""")
 
 # Formally, it's a disk: D = {x : dist(x, center) ≤ r}, but name "ball" is more clear
 ellipse = desbordante.pac.domains.Ball(["90", "2500"], 5, [1, 0.005])
 
-print(f'We now run the Domain PAC verifier with domain={BLUE}{ellipse}{ENDC}.')
+print(f"We now run the Domain PAC verifier with domain={BLUE}{ellipse}{ENDC}.")
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
-algo.load_data(table=(ENGINE_TEMPS, ',', True),
+algo.load_data(table=(ENGINE_TEMPS, ",", True),
                domain=ellipse,
                column_indices=[0, 1])
 algo.execute()
 pac = algo.get_pac()
-print(f'''Algorithm result:
+print(f"""Algorithm result:
     {GREEN}{pac}{ENDC}
 Outliers between {BLUE}+{pac.epsilon:.1f}{ENDC} and {BLUE}+∞{ENDC}: {BOLD}{algo.get_highlights(pac.epsilon, inf)}{ENDC}.
-''')
+""")
 
-parallelepiped = desbordante.pac.domains.Parallelepiped(['85', '1500'],
-                                                        ['95', '3500'],
+parallelepiped = desbordante.pac.domains.Parallelepiped(["85", "1500"],
+                                                        ["95", "3500"],
                                                         [1, 0.005])
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
-algo.load_data(table=(ENGINE_TEMPS, ',', True),
+algo.load_data(table=(ENGINE_TEMPS, ",", True),
                domain=parallelepiped,
                column_indices=[0, 1])
 algo.execute()
 pac = algo.get_pac()
 
-print(f'''For comparison, the Parallelepiped domain previously produced:
+print(f"""For comparison, the Parallelepiped domain previously produced:
     {RED}{pac}{ENDC}
 Outliers between {BLUE}+{pac.epsilon:.1f}{ENDC} and {BLUE}+∞{ENDC}: {BOLD}{algo.get_highlights(pac.epsilon, inf)}{ENDC}.
-''')
+""")
 print(
-    f'''Although the numerical values differ slightly, the Ball domain better reflects the actual operating
+    f"""Although the numerical values differ slightly, the Ball domain better reflects the actual operating
 conditions, because it models gradual risk changes instead of sharp rectangular boundaries.
 
 It is recommended to continue with the fourth example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
-which demonstrates another practical usage of the Ball domain.''')
+which demonstrates another practical usage of the Ball domain.""")  # noqa: E501

@@ -1,20 +1,20 @@
 from collections import defaultdict, deque
 
 import desbordante
-import pandas
+import pandas as pd
 
 # Algorithm that finds approximate FDs and its config
 ALGORITHM_TYPE = desbordante.afd.algorithms.Pyro
 ERROR = 0.001
-CONFIG = {'error': ERROR, 'max_lhs': 1}
+CONFIG = {"error": ERROR, "max_lhs": 1}
 
 # Parameters for pandas.read_csv(...).
-DATASET_PATH = 'examples/datasets/duplicates.csv'
+DATASET_PATH = "examples/datasets/duplicates.csv"
 HEADER = 0
-SEPARATOR = ','
+SEPARATOR = ","
 
 # File where the deduplicated dataset will be written.
-OUTPUT_FILE = 'output.csv'
+OUTPUT_FILE = "output.csv"
 
 # Initial window size in sorted neighborhood method.
 INITIAL_WINDOW_SIZE = 4
@@ -55,17 +55,17 @@ def count_matches(row1, row2, rhs: list[int]):
 
 
 def configure_dataframe_print():
-    pandas.set_option('display.max_columns', None)
-    pandas.set_option('display.width', None)
-    pandas.set_option('display.max_colwidth', None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", None)
+    pd.set_option("display.max_colwidth", None)
 
 
-def print_fd_info(df: pandas.DataFrame, fds: list[tuple[int, int]]):
+def print_fd_info(df: pd.DataFrame, fds: list[tuple[int, int]]):
     fd_dict = defaultdict(list)
     for lhs, rhs in fds:
         fd_dict[lhs].append(df.columns[rhs])
-    print('AFD info:')
-    print('\n'.join(f'{lhs}: {df.columns[lhs]} -> ( {" ".join(fd_dict[lhs])} )'
+    print("AFD info:")
+    print("\n".join(f'{lhs}: {df.columns[lhs]} -> ( {" ".join(fd_dict[lhs])} )'
                     for lhs in get_lhs_from_sorted_fds(fds)))
 
 
@@ -81,12 +81,12 @@ def drop_handler(df, new_rows, remaining_rows, used_rows):
 
 
 def choose_index(col_name, distinct_values):
-    print(f'Column: {col_name}. Which value to use?')
-    print('\n'.join(f'{i}: {value}' for i, value in enumerate(distinct_values)))
-    return int(input('index: '))
+    print(f"Column: {col_name}. Which value to use?")
+    print("\n".join(f"{i}: {value}" for i, value in enumerate(distinct_values)))
+    return int(input("index: "))
 
 
-def merge_handler(df: pandas.DataFrame, new_rows, remaining_rows, used_rows):
+def merge_handler(df: pd.DataFrame, new_rows, remaining_rows, used_rows):
     if not used_rows:
         return
     new_row = []
@@ -101,23 +101,23 @@ def merge_handler(df: pandas.DataFrame, new_rows, remaining_rows, used_rows):
 
 
 def unknown_handler(df, new_rows, remaining_rows, used_rows):
-    print('Unknown command.')
+    print("Unknown command.")
 
 
-def ask_rows(df: pandas.DataFrame, window: deque[tuple[int, object]]) -> list:
+def ask_rows(df: pd.DataFrame, window: deque[tuple[int, object]]) -> list:
     commands = {
-        'keepall': keepall_handler,
-        'drop': drop_handler,
-        'merge': merge_handler,
+        "keepall": keepall_handler,
+        "drop": drop_handler,
+        "merge": merge_handler,
     }
 
     remaining_rows = {row_info[0] for row_info in window}
     new_rows = []
     while remaining_rows:
         print(df.iloc[sorted(remaining_rows)].to_string())
-        command_args = input('Command: ').split()
+        command_args = input("Command: ").split()
         if not command_args:
-            print('Please input a command!')
+            print("Please input a command!")
             continue
         command, *used_rows = command_args
         used_rows = {col_num for col in used_rows if (col_num := int(col)) in remaining_rows}
@@ -130,7 +130,7 @@ def is_similar(row_info, window, chosen_cols, matches_required):
                for prev_row_info in window)
 
 
-def get_deduped_rows(df: pandas.DataFrame, chosen_cols: list[int], matches_required: int,
+def get_deduped_rows(df: pd.DataFrame, chosen_cols: list[int], matches_required: int,
                      fds: list[tuple[int, int]]):
     df.sort_values([df.columns[rhs_col] for _, rhs_col in fds if rhs_col in chosen_cols],
                    inplace=True)
@@ -161,34 +161,34 @@ def main():
     print(CONFIG_STRING)
     print()
 
-    df = pandas.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER,
-                         dtype='string', index_col=False, na_filter=False)
-    print('Dataset sample:')
+    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER,
+                         dtype="string", index_col=False, na_filter=False)
+    print("Dataset sample:")
     print(df)
-    print(f'Original records: {len(df)}')
+    print(f"Original records: {len(df)}")
     print()
 
     fds = get_1lhs_fds(df, ALGORITHM_TYPE, CONFIG)
     print_fd_info(df, fds)
-    lhs_column = int(input('LHS column index: '))
+    lhs_column = int(input("LHS column index: "))
     fds = list(filter(lambda fd: fd[0] == lhs_column, fds))
     if not fds:
-        print('No FDs with this LHS!')
+        print("No FDs with this LHS!")
         return
-    print('RHS columns:')
-    print('\n'.join(f'{rhs}: {df.columns[rhs]}' for _, rhs in fds))
-    chosen_cols = sorted(set(map(int, input('RHS columns to use (indices): ').split())))
-    matches_required = int(input('Equal columns to consider duplicates: '))
+    print("RHS columns:")
+    print("\n".join(f"{rhs}: {df.columns[rhs]}" for _, rhs in fds))
+    chosen_cols = sorted(set(map(int, input("RHS columns to use (indices): ").split())))
+    matches_required = int(input("Equal columns to consider duplicates: "))
 
     new_rows = get_deduped_rows(df, chosen_cols, matches_required, fds)
     print()
 
-    print(f'Resulting records: {len(new_rows)}. Duplicates found: {len(df) - len(new_rows)}')
-    new_df = pandas.DataFrame(new_rows, columns=df.columns)
+    print(f"Resulting records: {len(new_rows)}. Duplicates found: {len(df) - len(new_rows)}")
+    new_df = pd.DataFrame(new_rows, columns=df.columns)
 
     print(new_df)
     new_df.to_csv(OUTPUT_FILE, index=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

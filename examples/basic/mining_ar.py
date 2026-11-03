@@ -1,68 +1,68 @@
 import desbordante
-import pandas
+import pandas as pd
 from tabulate import tabulate
 
-TABLE_TABULAR = 'examples/datasets/rules_book_rows.csv'
-TABLE_SINGULAR = 'examples/datasets/rules_book.csv'
+TABLE_TABULAR = "examples/datasets/rules_book_rows.csv"
+TABLE_SINGULAR = "examples/datasets/rules_book.csv"
 COLOR_CODES = {
-    'bold_red': '\u001b[1;31m',
-    'bold_green': '\033[1;32m',
-    'bold_yellow': '\033[1;33m',
-    'bold_blue': '\033[1;34m',
-    'green': '\033[32m',
-    'yellow': '\033[33m',
-    'default': '\033[0m',
-    'blue_bg': '\033[1;46m',
-    'default_bg': '\033[1;49m'
+    "bold_red": "\u001b[1;31m",
+    "bold_green": "\033[1;32m",
+    "bold_yellow": "\033[1;33m",
+    "bold_blue": "\033[1;34m",
+    "green": "\033[32m",
+    "yellow": "\033[33m",
+    "default": "\033[0m",
+    "blue_bg": "\033[1;46m",
+    "default_bg": "\033[1;49m"
 }
 
 def print_table(table, title = None):
     if title is not None:
         print(title)
 
-    print(tabulate(table, tablefmt='pipe', stralign='center'))
+    print(tabulate(table, tablefmt="pipe", stralign="center"))
 
 
 def print_ars(ars):
-    print('Total count of ARs:', len(ars))
-    print('The first 10 ARs:')
+    print("Total count of ARs:", len(ars))
+    print("The first 10 ARs:")
     for ar in ars[:10]:
-        print('conf: ', end='')
+        print("conf: ", end="")
 
         if ar.confidence > 0.9:
-            print(COLOR_CODES['bold_green'], end='')
+            print(COLOR_CODES["bold_green"], end="")
         elif ar.confidence > 0.3:
-            print(COLOR_CODES['bold_yellow'], end='')
+            print(COLOR_CODES["bold_yellow"], end="")
         else:
-            print(COLOR_CODES['bold_red'], end='')
+            print(COLOR_CODES["bold_red"], end="")
 
-        print('{:1.2f}'.format(ar.confidence), 
-              COLOR_CODES['default'], end='\t')
-        print('sup: ', end='')
+        print(f"{ar.confidence:1.2f}",
+              COLOR_CODES["default"], end="\t")
+        print("sup: ", end="")
 
         if ar.support > 0.9:
-            print(COLOR_CODES['bold_green'], end='')
+            print(COLOR_CODES["bold_green"], end="")
         elif ar.support > 0.3:
-            print(COLOR_CODES['bold_yellow'], end='')
+            print(COLOR_CODES["bold_yellow"], end="")
         else:
-            print(COLOR_CODES['bold_red'], end='')
+            print(COLOR_CODES["bold_red"], end="")
 
-        print('{:1.2f}'.format(ar.support),
-              COLOR_CODES['default'], end='\t')
-        print(ar.left, '->', ar.right, )
+        print(f"{ar.support:1.2f}",
+              COLOR_CODES["default"], end="\t")
+        print(ar.left, "->", ar.right, )
 
 
 def print_itemnames(itemnames):
     print(f'{COLOR_CODES["blue_bg"]}Total number of items:'
           f'{COLOR_CODES["default_bg"]} {len(itemnames)}')
-    print(*itemnames, sep='\n')
+    print(*itemnames, sep="\n")
 
 
 def scenario_tabular():
     algo = desbordante.ar.algorithms.Default()
-    algo.load_data(table=(TABLE_TABULAR, ',', False), input_format='tabular')
+    algo.load_data(table=(TABLE_TABULAR, ",", False), input_format="tabular")
     algo.execute(minconf=1)
-    table = pandas.read_csv(TABLE_TABULAR, header=None)
+    table = pd.read_csv(TABLE_TABULAR, header=None)
 
     print("As the first example, let's look at the dataset containing receipts "
           'from some supermarket using input_format="tabular". In this '
@@ -71,8 +71,8 @@ def scenario_tabular():
           'some rows may be shorter than others.\n')
     print_table(table)
     print("\nLet's see the first 10 association rules (ARs) that are present "
-          'in the dataset with minconf=1. As no minsup is specified, '
-          'the default value of minsup=0 is used.\n')
+          "in the dataset with minconf=1. As no minsup is specified, "
+          "the default value of minsup=0 is used.\n")
 
     print_ars(algo.get_ars())
     print("\n['Butter'] -> ['Bread'] with confidence 1 means that whenever butter "
@@ -128,9 +128,9 @@ def scenario_tabular():
 
 def scenario_singular():
     algo = desbordante.ar.algorithms.Default()
-    algo.load_data(table=(TABLE_SINGULAR, ',', False), input_format='singular')
+    algo.load_data(table=(TABLE_SINGULAR, ",", False), input_format="singular")
     algo.execute()
-    table = pandas.read_csv(TABLE_SINGULAR, header=None, index_col=0)
+    table = pd.read_csv(TABLE_SINGULAR, header=None, index_col=0)
 
     print("\nFor the second example, let's take a dataset "
           'with the same receipts from the same supermarket, '
@@ -138,19 +138,19 @@ def scenario_singular():
           'two-column format, where the first column is the order of the items, '
           'and the second column is the item that belongs to that order.\n')
     print_table(table)
-    print('\nThis format is just a different table representation. Desbordante '
-          'is perfectly capable of rules discovery in such tables, and the '
-          'discovered objects are represented by the same '
-          'type of objects as in the previous examples ' 
-          '(i.e., they have the same methods and fields).\n\n')
-    print('Next, we will show you how to list all '
-          'of the unique items in the dataset.\n')
+    print("\nThis format is just a different table representation. Desbordante "
+          "is perfectly capable of rules discovery in such tables, and the "
+          "discovered objects are represented by the same "
+          "type of objects as in the previous examples "
+          "(i.e., they have the same methods and fields).\n\n")
+    print("Next, we will show you how to list all "
+          "of the unique items in the dataset.\n")
     print(f'In order to do this, you can use {COLOR_CODES["bold_blue"]}'
           f'get_itemnames{COLOR_CODES["default"]} method:\n')
     print_itemnames(algo.get_itemnames())
-    print('\nNow you have all of the items used in this dataset.\n')
+    print("\nNow you have all of the items used in this dataset.\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     scenario_tabular()
     scenario_singular()
