@@ -2,6 +2,7 @@
 
 #include "clang/AST/Decl.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/Basic/SourceLocation.h"
 
 namespace clang::tidy::misc {
 using namespace ast_matchers;
@@ -39,6 +40,11 @@ void MakeAutoCheck::check(ast_matchers::MatchFinder::MatchResult const& Result) 
     auto const* var = Result.Nodes.getNodeAs<VarDecl>("errordecl");
     if (var == nullptr) return;
 
-    diag(var->getLocation(), "variable '%0' should be declared as auto") << var->getName();
+    diag(var->getLocation(), "variable '%0' should be declared as auto")
+            << var->getName()
+            << FixItHint::CreateReplacement(
+                       CharSourceRange::getTokenRange(
+                               var->getTypeSourceInfo()->getTypeLoc().getSourceRange()),
+                       "auto");
 }
 };  // namespace clang::tidy::misc
