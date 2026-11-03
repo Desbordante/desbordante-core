@@ -13,7 +13,8 @@ Possible options:
   -h,         --help                  Display help
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
-  -b          --benchmark             Build benchmarks
+  -b,         --benchmark             Build benchmarks
+  -t,         --tidyexts              Build tidyexts
   -j[N],      --parallel[N]           The maximum number of concurrent processes for building
   -d,         --debug                 Set debug build type
   -s[S],      --sanitizer[=S]         Build with sanitizer S (has effect only for debug build).
@@ -43,6 +44,10 @@ for i in "$@"; do
             # Build benchmarks
         -b | --benchmark)
             BENCHMARK=true
+            ;;
+        # Build tidyexts
+        -t | --tidyexts)
+            TIDYEXTS=true
             ;;
         # The maximum number of concurrent processes for building
         -j* | --parallel*)
@@ -140,6 +145,10 @@ fi
 
 if [[ -n $LOG_LEVEL ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_LOG_LEVEL=${LOG_LEVEL}"
+fi
+
+if [[ $TIDYEXTS == true ]]; then
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BUILD_TIDYEXTS=ON"
 fi
 
 rm -f build/CMakeCache.txt
