@@ -18,9 +18,9 @@ def get_afds():
 
 
 def get_pfds():
-    algo = desbordante.pfd.algorithms.PFDTane()
+    algo = desbordante.afd.algorithms.Tane()
     algo.load_data(table=(TABLE, ',', True))
-    algo.execute(error=ERROR, pfd_error_measure=ERROR_MEASURE)
+    algo.execute(error=ERROR, afd_error_measure=ERROR_MEASURE)
     return algo.get_fds()
 
 
