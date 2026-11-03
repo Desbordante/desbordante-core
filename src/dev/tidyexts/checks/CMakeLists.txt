@@ -1,0 +1,1 @@
+target_sources(Desbordante.tidyexts PRIVATE makeauto.cpp)

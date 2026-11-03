@@ -55,6 +55,7 @@ endif()
 option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
 option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
+option(DESBORDANTE_BUILD_TIDYEXTS "Build clang-tidy extensions with project-specific passes built on AST matching" OFF)
 # This option only takes effect if DESBORDANTE_BUILD_TESTS or DESBORDANTE_BUILD_BENCHMARKS is ON
 option(DESBORDANTE_FETCH_DATASETS "Fetch datasets for tests or benchmarks" ON)
 option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
@@ -220,6 +221,11 @@ endif()
 # --- Dependencies installation ---
 
 include(desbordante_deps)
+
+# --- AST match SOs for clang-tidy ---
+if(DESBORDANTE_BUILD_TIDYEXTS)
+    add_subdirectory("src/dev/tidyexts")
+endif()
 
 # --- Core Project Structure and Module Setup ---
 
