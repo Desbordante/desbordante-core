@@ -2,10 +2,12 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
+#include "core/algorithms/cind/cind.h"
 #include "core/algorithms/cind/types.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_tables_type.h"
@@ -26,6 +28,8 @@ public:
 private:
     config::InputTables input_tables_;
     std::unique_ptr<model::EncodedTables> encoded_tables_;
+
+    std::optional<CIND> cind_;
 
     struct RawIND {
         config::IndicesType lhs;
@@ -50,6 +54,9 @@ private:
 
     void RegisterOptions();
     void ResetState() final;
+
+    void CheckCind(CIND const& cind) const;
+    std::vector<std::vector<std::string>> GetConditions() const;
 
     void LoadDataInternal() final;
     void ExecuteInternal() final;
