@@ -1,31 +1,31 @@
-'''Example 1 (advanced): Custom domain'''
+"""Example 1 (advanced): Custom domain."""
 
-from tabulate import tabulate
 from csv import reader
 from math import sqrt
 
 import desbordante
+from tabulate import tabulate
 
-RED = '\033[31m'
-GREEN = '\033[32m'
-BLUE = '\033[34m'
-CYAN = '\033[36m'
-BOLD = '\033[1;37m'
-ENDC = '\033[0m'
+RED = "\033[31m"
+GREEN = "\033[32m"
+BLUE = "\033[34m"
+CYAN = "\033[36m"
+BOLD = "\033[1;37m"
+ENDC = "\033[0m"
 
-USER_PREFERENCES = 'examples/datasets/verifying_pac/user_preferences.csv'
+USER_PREFERENCES = "examples/datasets/verifying_pac/user_preferences.csv"
 
 
 def csv_to_str(filename: str) -> str:
-    with open(filename, newline='') as table:
-        rows = list(reader(table, delimiter=','))
+    with open(filename, newline="") as table:
+        rows = list(reader(table, delimiter=","))
     headers = rows[0]
     rows = rows[1:]
     return tabulate(rows, headers=headers)
 
 
 print(
-    f'''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+    f"""This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
 A Domain PAC on a column set X and domain D, with given ε and δ means that {BOLD}Pr(x ∈ D±ε) ≥ δ{ENDC}.
 For more information, see "Checks and Balances: Monitoring Data Quality Problems in Network
 Traffic Databases" by Flip Korn et al (Proceedings of the 29th VLDB Conference, Berlin, 2003).
@@ -63,7 +63,7 @@ We use cosine distance, which measures the angle between two vectors rather then
 length. This is useful because we care about interest proportions, not total magnitude.
     {BOLD}dist(x, y) = 1 - cos(angle between x and y) = 1 - (x, y)/(|x| * |y|){ENDC},
 where (x, y) is a dot product between x and y.
-''')
+""")
 
 
 def cosine_dist(x: list[float], y: list[float]) -> float:
@@ -79,14 +79,14 @@ def cosine_dist(x: list[float], y: list[float]) -> float:
     return 1 - dot_product / (x_length * y_length)
 
 
-print(f'''A custom domain is defined by two parameters:
+print(f"""A custom domain is defined by two parameters:
     1. Distance function -- takes a value tuple and returns the distance to the domain.
     2. Domain name (optional) -- used for readable output.
 In this example:
     * distance function: {BLUE}dist(x, (0.9, 0.4, 0.05)){ENDC};
     * domain name: {BLUE}"(0.9, 0.4, 0.05)"{ENDC}.
 This effectively defines the domain as "users close to the ideal profile".
-''')
+""")
 
 PERFECT_USER = [0.9, 0.4, 0.05]
 
@@ -98,22 +98,22 @@ def dist_from_domain(x: list[float]) -> float:
 domain = desbordante.pac.domains.CustomDomain(dist_from_domain,
                                               "(0.9, 0.4, 0.05)")
 
-print(f'We run the Domain PAC verifier with domain={BLUE}{domain}{ENDC}.')
+print(f"We run the Domain PAC verifier with domain={BLUE}{domain}{ENDC}.")
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
-algo.load_data(table=(USER_PREFERENCES, ',', True),
+algo.load_data(table=(USER_PREFERENCES, ",", True),
                domain=domain,
                column_indices=[0, 1, 2])
 algo.execute()
 pac_1 = algo.get_pac()
-print(f'''Algorithm result:
+print(f"""Algorithm result:
     {GREEN}{pac_1}{ENDC}
 
-Now we lower the required probability threshold: min_delta={BLUE}0.6{ENDC}.''')
+Now we lower the required probability threshold: min_delta={BLUE}0.6{ENDC}.""")
 
 algo.execute(min_delta=0.6)
 pac_2 = algo.get_pac()
 
-print(f'''Algorithm result:
+print(f"""Algorithm result:
     {GREEN}{pac_2}{ENDC}
 
 Interpretation:
@@ -124,5 +124,5 @@ You can check outliers to identify which users are closer to or farther from the
 For an introduction to outliers, see {CYAN}examples/basic/verifying_pac/verifying_domain_pac1.py{ENDC}.
 
 You now know how to use Domain PACs with built-in domains as well as custom ones.
-Try applying them to your own data and see what insights you can uncover.'''
+Try applying them to your own data and see what insights you can uncover."""  # noqa: E501
       )

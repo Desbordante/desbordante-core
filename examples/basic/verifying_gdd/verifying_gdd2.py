@@ -1,13 +1,12 @@
-from pathlib import Path
 import tempfile
-
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
+from pathlib import Path
 
 import desbordante
-from desbordante.gdd import AttrAttr, CmpOp as Op
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+from desbordante.gdd import AttrAttr, GddFromDotString
+from desbordante.gdd import CmpOp as Op
 from desbordante.gdd import DistanceMetric as M
-from desbordante.gdd import GddFromDotString
 
 
 class bcolors:

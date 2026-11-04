@@ -6,8 +6,8 @@ from itertools import chain
 
 import desbordante as desb
 
-OptionContainer = namedtuple("OptionContainer", ['path', 'load_options', 'execute_options'])
-FailureCaseContainer = namedtuple("FailureCaseContainer", ['path', 'options'])
+OptionContainer = namedtuple("OptionContainer", ["path", "load_options", "execute_options"])
+FailureCaseContainer = namedtuple("FailureCaseContainer", ["path", "options"])
 
 TABLE_ONLY_CONTAINER = OptionContainer(
     "WDC_satellites.csv", {}, {}
@@ -161,7 +161,7 @@ METRIC_VERIFIER_FAILURE_CASES = [
             "rhs_indices": [1, 2],
         }
     ),
-    
+
     FailureCaseContainer(
         "TestLong.csv",
         {
@@ -209,7 +209,7 @@ class TestPythonBindings(unittest.TestCase):
     ):
         testing_algo = algo()
         self._configure_and_verify_no_extras(
-                testing_algo,  {'table': (path, separator, has_header)} | options.load_options)
+                testing_algo,  {"table": (path, separator, has_header)} | options.load_options)
         testing_algo.load_data()
 
         self._configure_and_verify_no_extras(testing_algo, options.execute_options)
@@ -232,7 +232,7 @@ class TestPythonBindings(unittest.TestCase):
             with self.subTest(msg=f"metric_verifier_load: {load}"):
                 with self.assertRaises(desb.ConfigurationError):
                     check_metric_verifier_failure(load.path, load.options)
-                
+
 
 
 class TestMaxFEM(unittest.TestCase):

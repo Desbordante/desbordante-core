@@ -1,9 +1,9 @@
-"""Example 2: 2D parallelepiped, leveling coefficients"""
+"""Example 2: 2D parallelepiped, leveling coefficients."""
 
-from tabulate import tabulate
 from csv import reader
 
 import desbordante
+from tabulate import tabulate
 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -54,7 +54,7 @@ of two segments:
   * temperature: [85, 95];
   * RPM: [1500, 3500].
 This forms a two-dimensional parallelepiped domain: {BLUE}[85, 95] x [1500, 3500]{ENDC}.
-"""
+"""  # noqa: E501
 )
 # Arguments of generic version are A = (a1, a2, ..., an) and B = (b1, b2, ..., bn).
 # Domain is [A, B] = [a1, b1] x [a2, b2] x ... x [an, bn].
@@ -73,12 +73,13 @@ algo.execute(max_epsilon=10)
 pac = algo.get_pac()
 print(f"Algorithm result: {RED}{pac}{ENDC}.")
 print(
-    f"A result with δ = {BLUE}{pac.delta}{ENDC} is unexpected. To understand what is happening, we examine the outliers."
+    f"A result with δ = {BLUE}{pac.delta}{ENDC} is unexpected. "
+    f"To understand what is happening, we examine the outliers."
 )
 
 print(
     f"""Outliers between {BLUE}+{0:.1f}{ENDC} and {BLUE}+{pac.epsilon:.1f}{ENDC} are: {BOLD}{algo.get_highlights(0, pac.epsilon)}{ENDC}.
-"""
+"""  # noqa: E501
 )
 print(
     f"""There are very few outliers, which suggests that the parameters may not be chosen correctly.
@@ -125,4 +126,4 @@ Outliers between {BLUE}+0{ENDC} and {BLUE}+5{ENDC}: {BOLD}{algo.get_highlights(0
 You can observe that the outliers reflect the normalized distance.
 
 It is recommended to continue with the third example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
-which introduces another basic domain type: Ball.""")
+which introduces another basic domain type: Ball.""")  # noqa: E501

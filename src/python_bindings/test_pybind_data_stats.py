@@ -1,8 +1,9 @@
 import unittest
+
 import desbordante as db
 
 DATASET_PATH = "TestDataStats.csv"
-SEPARATOR = ','
+SEPARATOR = ","
 HAS_HEADER = False
 
 
@@ -243,7 +244,7 @@ class TestDataStats(unittest.TestCase):
 
     def test_top_k_chars(self) -> None:
         res = self.data_stats.get_top_k_chars(10, 2)
-        expected = ['d', 'a']
+        expected = ["d", "a"]
         self.assertEqual(expected, res)
 
     def test_top_k_words(self) -> None:
@@ -255,49 +256,49 @@ class TestDataStats(unittest.TestCase):
         res = self.data_stats.get_words(6)
         expected = {"abc", "abd", "abe", "eeee", "ggg", "gre", "grg"}
         self.assertEqual(expected, res)
-    
+
     def test_whitespace_only_count(self) -> None:
         res = self.data_stats.get_whitespace_only_count(11)
         expected = 0
         self.assertEqual(expected, res)
-        
+
         res = self.data_stats.get_whitespace_only_count(10)
         expected = 0
         self.assertEqual(expected, res)
-    
+
     def test_leading_whitespace_count(self) -> None:
         res = self.data_stats.get_leading_whitespace_count(11)
         expected = 3
         self.assertEqual(expected, res)
-    
+
     def test_trailing_whitespace_count(self) -> None:
         res = self.data_stats.get_trailing_whitespace_count(11)
         expected = 4
         self.assertEqual(expected, res)
-    
+
     def test_special_chars_count(self) -> None:
         res = self.data_stats.get_special_chars_count(11)
         expected = 3
         self.assertEqual(expected, res)
-        
+
         res = self.data_stats.get_special_chars_count(10)
         expected = 1
         self.assertEqual(expected, res)
-    
+
     def test_first_char_frequency(self) -> None:
         res = self.data_stats.get_first_char_frequency(11)
         expected = " :3"
         self.assertEqual(expected, res)
-        
+
         res = self.data_stats.get_first_char_frequency(10)
         expected = "a:3"
         self.assertEqual(expected, res)
-    
+
     def test_last_char_frequency(self) -> None:
         res = self.data_stats.get_last_char_frequency(11)
         expected = " :4"
         self.assertEqual(expected, res)
-        
+
         res = self.data_stats.get_last_char_frequency(10)
         expected = "d:2"
         self.assertEqual(expected, res)
@@ -394,7 +395,7 @@ class TestDataStats(unittest.TestCase):
 
             except Exception as e:
                 self.fail(f"Failed for column {i}: {e}")
-        
+
     def test_get_min_white_spaces(self):
         res = self.data_stats.get_min_white_spaces(11)
         expected = 0
@@ -409,12 +410,12 @@ class TestDataStats(unittest.TestCase):
         res = self.data_stats.get_zero_percent(7)
         expected = 3.0 / 8.0
         self.assertAlmostEqual(expected, res)
-        
+
 class TestDataStatsBool(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.data_stats = db.statistics.algorithms.DataStats()
-        cls.data_stats.load_data(table=("TestBool.csv", ',', False))
+        cls.data_stats.load_data(table=("TestBool.csv", ",", False))
         cls.data_stats.execute()
 
     def test_get_true_count(self):
@@ -426,6 +427,6 @@ class TestDataStatsBool(unittest.TestCase):
         res = self.data_stats.get_false_count(0)
         expected = 2
         self.assertEqual(expected, res)
-        
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,26 +1,24 @@
-import sys
 import os
-import pandas as pd
 
 import desbordante
-
+import pandas as pd
 
 TABLE_PATH = (
-    'examples/datasets/sd_verification_datasets/network_logs.csv'
+    "examples/datasets/sd_verification_datasets/network_logs.csv"
 )
 TABLE_PATH_FIXED = (
-    'examples/datasets/sd_verification_datasets/network_logs_fixed.csv'
+    "examples/datasets/sd_verification_datasets/network_logs_fixed.csv"
 )
 
 COLOR_CODES = {
-    'bold_red': '\u001b[1;31m',
-    'bold_green': '\033[1;32m',
-    'default': '\033[0m',
-    'default_bg': '\033[1;49m',
-    'red_bg': '\033[1;41m',
-    'green_bg': '\033[1;42m',
-    'blue': '\033[1;34m',
-    'yellow_bg': '\033[1;43m'
+    "bold_red": "\u001b[1;31m",
+    "bold_green": "\033[1;32m",
+    "default": "\033[0m",
+    "default_bg": "\033[1;49m",
+    "red_bg": "\033[1;41m",
+    "green_bg": "\033[1;42m",
+    "blue": "\033[1;34m",
+    "yellow_bg": "\033[1;43m"
 }
 
 
@@ -77,22 +75,21 @@ def auto_fix_dataset(table, violations):
         if isinstance(v, desbordante.sd_verification.SDInsertion):
             num_ins = v.min_insertions
             time_step = (v.val_right - v.val_left) / (num_ins + 1)
-            poll_left = table.loc[v.left_row_idx, 'PollNum']
-            poll_right = table.loc[v.right_row_idx, 'PollNum']
+            poll_left = table.loc[v.left_row_idx, "PollNum"]
 
             for k in range(1, num_ins + 1):
                 new_rows.append({
-                    'PollNum': poll_left,
-                    'Time': int(v.val_left + time_step * k)
+                    "PollNum": poll_left,
+                    "Time": int(v.val_left + time_step * k)
                 })
 
     if new_rows:
         df_new = pd.DataFrame(new_rows)
-        df_new['_is_fixed'] = True
-        table_fixed['_is_fixed'] = False
+        df_new["_is_fixed"] = True
+        table_fixed["_is_fixed"] = False
         table_fixed = pd.concat([table_fixed, df_new], ignore_index=True)
 
-    return table_fixed.sort_values('Time').reset_index(drop=True)
+    return table_fixed.sort_values("Time").reset_index(drop=True)
 
 
 def scenario_network_monitoring():
@@ -124,8 +121,8 @@ def scenario_network_monitoring():
     table_fixed = auto_fix_dataset(table, algo.get_violations())
     cols = table_fixed.columns.tolist()
     clean_fixed = (
-        table_fixed.drop(columns=['_is_fixed'])
-        if '_is_fixed' in cols
+        table_fixed.drop(columns=["_is_fixed"])
+        if "_is_fixed" in cols
         else table_fixed
     )
     print("\nWe can see that the rule is violated in several places.\n"
@@ -149,7 +146,7 @@ def scenario_network_monitoring():
           "to shift and rewrite all subsequent 'PollNum' values in the\n"
           "entire table.")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("This example demonstrates how to validate Sequential Dependencies\n"
           "(SDs) using the Desbordante library. Algorithm is based on the\n"
           "article by Lukasz Golab, Howard Karloff, Flip Korn, Avishek Saha,\n"

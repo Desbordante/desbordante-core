@@ -150,3 +150,53 @@ extend-glob = [
 rela = "rela"
 [tool.typos.type.gdd.extend-words]
 rela = "rela"
+
+[tool.ruff]
+# line-length: 120 instead of default 88
+# Reason: Examples often have long f-strings with column names, URLs, table data
+# that are more readable on one line than split across multiple lines.
+# Also allows for better formatted output in demonstration scripts.
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "Q",   # quotes
+    "T",   # print statements
+    "D",   # docstrings
+    "S",   # bandit security
+    "I",   # sort imports properly
+    "UP",  # modernize Python syntax (safe for 3.10+)
+    "ISC", # good use of string concatenation
+    "ICN", # use common import conventions
+]
+# Ignore rules that are too strict for examples/notebooks:
+# - D100: missing docstring in public module (examples are scripts, not libraries)
+# - D101: missing docstring in public class (simple example classes)
+# - D102: missing docstring in public method (example methods prioritize clarity)
+# - D103: missing docstring in public function (simple helper functions)
+# - D104: missing docstring in public package (package initializers may be empty)
+# - D107: missing docstring in __init__ (simple init methods)
+# - D203: one blank line required before class docstring
+#         (conflicts with D211: no blank line required before class)
+# - D212, D213: alternative positions for multiline docstring summaries
+#         (both are allowed in existing code)
+# - D413: missing blank line after last section (formatting preference)
+ignore = [
+    "D100", "D101", "D102", "D103", "D104", "D107", "D203", "D212", "D213", "D413",
+]
+
+exclude = [
+    ".git",
+    "build/",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Example scripts and notebooks use print to demonstrate output.
+"examples/**/*.py" = ["T201"]
+"examples/**/*.ipynb" = ["T201"]
+# Generated snapshots preserve exact captured output and snapshottest formatting.
+"examples/test_examples/snapshots/*.py" = ["E501", "W291", "Q000", "Q001", "UP009", "UP010", "I001"]

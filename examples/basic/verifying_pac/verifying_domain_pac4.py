@@ -1,30 +1,30 @@
-'''Example 4: string values'''
+"""Example 4: string values."""
 
-from tabulate import tabulate
 from csv import reader
 
 import desbordante
+from tabulate import tabulate
 
-RED = '\033[31m'
-GREEN = '\033[32m'
-BLUE = '\033[34m'
-CYAN = '\033[36m'
-BOLD = '\033[1;37m'
-ENDC = '\033[0m'
+RED = "\033[31m"
+GREEN = "\033[32m"
+BLUE = "\033[34m"
+CYAN = "\033[36m"
+BOLD = "\033[1;37m"
+ENDC = "\033[0m"
 
-LEVENSHTEIN_TYPOS = 'examples/datasets/verifying_pac/levenshtein_typos.csv'
+LEVENSHTEIN_TYPOS = "examples/datasets/verifying_pac/levenshtein_typos.csv"
 
 
 def csv_to_str(filename: str) -> str:
-    with open(filename, newline='') as table:
-        rows = list(reader(table, delimiter=','))
+    with open(filename, newline="") as table:
+        rows = list(reader(table, delimiter=","))
     headers = rows[0]
     rows = rows[1:]
     return tabulate(rows, headers=headers)
 
 
 print(
-    f'''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+    f"""This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
 It is the final example in the "Basic Domain PAC verification" series (see the {CYAN}examples/basic/verifying_pac/{ENDC} directory).
 If you haven't read the first three parts yet, it is recommended to start there.
 
@@ -40,30 +40,30 @@ character insertions, deletions, or substitutions are required to transform one 
 In Desbordante, Levenshtein distance is the default metric for strings, so no additional
 configuration is needed. Based on the previous examples, the most suitable domain here is the Ball
 domain, because we are measuring distance from a single center value.
-''')
+""")  # noqa: E501
 
 ball = desbordante.pac.domains.Ball(["Desbordante"], 0)
 
 print(
-    f'We run the Domain PAC verifier with the following parameter: domain={BLUE}{ball}{ENDC}.'
+    f"We run the Domain PAC verifier with the following parameter: domain={BLUE}{ball}{ENDC}."
 )
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
-algo.load_data(table=(LEVENSHTEIN_TYPOS, ',', True),
+algo.load_data(table=(LEVENSHTEIN_TYPOS, ",", True),
                domain=ball,
                column_indices=[0])
 algo.execute()
 pac = algo.get_pac()
-print(f'Result: {GREEN}{pac}{ENDC}.')
+print(f"Result: {GREEN}{pac}{ENDC}.")
 
 print(
-    f'''This means that {GREEN}{pac.delta * 100}%{ENDC} of our users make no more than {GREEN}{pac.epsilon}{ENDC} typos in the word
+    f"""This means that {GREEN}{pac.delta * 100}%{ENDC} of our users make no more than {GREEN}{pac.epsilon}{ENDC} typos in the word
 "Desbordante", which satisfies our requirement.
 
 If you would like to see which specific words contain a given number of typos, you can inspect the
 outliers (see previous examples).
-''')
+""")  # noqa: E501
 
 print(
-    f'''Now that you have completed all basic examples, you can continue with the advanced example:
+    f"""Now that you have completed all basic examples, you can continue with the advanced example:
 {CYAN}examples/advanced/verifying_pac/verifying_domain_pac_custom_domain.py{ENDC}.
-This example demonstrates how to define and use a Custom domain.''')
+This example demonstrates how to define and use a Custom domain.""")

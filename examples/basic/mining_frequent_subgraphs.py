@@ -1,6 +1,6 @@
 try:
-    import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    import matplotlib.pyplot as plt
     import networkx as nx
     HAS_VISUALIZATION = True
 except ImportError:
@@ -10,15 +10,15 @@ import desbordante
 
 
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 def colored(text, color):
@@ -30,7 +30,7 @@ def print_section(title, content):
     print(content)
 
 
-GRAPH_DATABASE_FILE = 'examples/datasets/fsm/gspan_test_simple.txt'
+GRAPH_DATABASE_FILE = "examples/datasets/fsm/gspan_test_simple.txt"
 
 MINSUP = 0.9
 
@@ -40,7 +40,8 @@ INTRO_TEXT = (
     "This algorithm is defined in the following paper:\n"
     "Xifeng Yan and Jiawei Han. gSpan: Graph-Based Substructure Pattern Mining.\n"
     "IEEE International Conference on Data Mining, ICDM'02. 721-724. 10.1109/ICDM.2002.1184038.\n\n"
-    "Suppose you have a large collection of graphs — molecules, social networks, or program flow graphs — and you want\n"
+    "Suppose you have a large collection of graphs — molecules, "
+    "social networks, or program flow graphs — and you want\n"
     "to find common substructures that appear frequently across this collection. This is exactly what Frequent\n"
     "Subgraph Mining (FSM) does.\n\n"
     "Unlike verification primitives that check if a specific rule holds (like Functional Dependencies), FSM is a\n"
@@ -80,19 +81,19 @@ ANALYSIS_TEXT = (
 
 def _draw_cell(ax, G, node_color, face_color, border_color, fontsize=11):
     pos = nx.spring_layout(G, seed=42)
-    node_labels = nx.get_node_attributes(G, 'label')
-    edge_labels = nx.get_edge_attributes(G, 'label')
+    node_labels = nx.get_node_attributes(G, "label")
+    edge_labels = nx.get_edge_attributes(G, "label")
     nx.draw(G, pos, ax=ax, with_labels=True, labels=node_labels,
-            node_color=node_color, node_size=800, font_weight='bold')
+            node_color=node_color, node_size=800, font_weight="bold")
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, ax=ax)
     ax.patch.set_visible(True)
     ax.patch.set_facecolor(face_color)
     ax.add_patch(mpatches.FancyBboxPatch(
-        (0, 0), 1, 1, boxstyle='square,pad=0', transform=ax.transAxes,
+        (0, 0), 1, 1, boxstyle="square,pad=0", transform=ax.transAxes,
         fill=False, edgecolor=border_color, linewidth=2.5, clip_on=False))
     ax.text(0.5, -0.05, G.name, transform=ax.transAxes,
-            ha='center', va='top', fontsize=fontsize,
-            fontweight='bold', color=border_color)
+            ha="center", va="top", fontsize=fontsize,
+            fontweight="bold", color=border_color)
 
 
 def visualize_demo_graphs():
@@ -104,57 +105,67 @@ def visualize_demo_graphs():
 
     # Input graphs
     G0 = nx.Graph()
-    G0.add_node(0, label='10'); G0.add_node(1, label='11')
-    G0.add_node(2, label='10'); G0.add_node(3, label='11')
-    G0.add_edge(0, 1, label='20'); G0.add_edge(1, 2, label='23'); G0.add_edge(1, 3, label='22')
+    G0.add_node(0, label="10")
+    G0.add_node(1, label="11")
+    G0.add_node(2, label="10")
+    G0.add_node(3, label="11")
+    G0.add_edge(0, 1, label="20")
+    G0.add_edge(1, 2, label="23")
+    G0.add_edge(1, 3, label="22")
     G0.name = "Input Graph #0"
 
     G1 = nx.Graph()
-    G1.add_node(4, label='10'); G1.add_node(5, label='11')
-    G1.add_edge(4, 5, label='20')
+    G1.add_node(4, label="10")
+    G1.add_node(5, label="11")
+    G1.add_edge(4, 5, label="20")
     G1.name = "Input Graph #1"
 
     G2 = nx.Graph()
-    G2.add_node(6, label='10'); G2.add_node(7, label='10')
-    G2.add_node(8, label='11'); G2.add_node(9, label='11')
-    G2.add_edge(6, 7, label='21'); G2.add_edge(7, 8, label='23')
-    G2.add_edge(7, 9, label='20'); G2.add_edge(8, 9, label='22')
+    G2.add_node(6, label="10")
+    G2.add_node(7, label="10")
+    G2.add_node(8, label="11")
+    G2.add_node(9, label="11")
+    G2.add_edge(6, 7, label="21")
+    G2.add_edge(7, 8, label="23")
+    G2.add_edge(7, 9, label="20")
+    G2.add_edge(8, 9, label="22")
     G2.name = "Input Graph #2"
 
     # Frequent patterns at minsup=0.9
     R1 = nx.Graph()
-    R1.add_node(0, label='10')
+    R1.add_node(0, label="10")
     R1.name = "Pattern #1"
 
     R2 = nx.Graph()
-    R2.add_node(0, label='11')
+    R2.add_node(0, label="11")
     R2.name = "Pattern #2"
 
     R3 = nx.Graph()
-    R3.add_node(0, label='10'); R3.add_node(1, label='11')
-    R3.add_edge(0, 1, label='20')
+    R3.add_node(0, label="10")
+    R3.add_node(1, label="11")
+    R3.add_edge(0, 1, label="20")
     R3.name = "Pattern #3"
 
     # 6 tiles: top row = input graphs, bottom row = patterns
     fig, axes = plt.subplots(2, 3, figsize=(14, 9))
-    fig.patch.set_facecolor('#f0f0f0')
+    fig.patch.set_facecolor("#f0f0f0")
     plt.subplots_adjust(top=0.90, bottom=0.10, hspace=0.60, wspace=0.30, left=0.04, right=0.96)
 
-    fig.text(0.5, 0.95, 'Input Graph Database', ha='center', va='top',
-             fontsize=13, fontweight='bold', color='steelblue')
+    fig.text(0.5, 0.95, "Input Graph Database", ha="center", va="top",
+             fontsize=13, fontweight="bold", color="steelblue")
 
     fig.add_artist(plt.Line2D([0.03, 0.97], [0.50, 0.50],
-                              transform=fig.transFigure, color='#888888',
-                              linewidth=1.5, linestyle='--'))
+                              transform=fig.transFigure, color="#888888",
+                              linewidth=1.5, linestyle="--"))
 
-    fig.text(0.5, 0.49, f'Frequent Patterns   (minsup = {MINSUP})', ha='center', va='top',
-             fontsize=13, fontweight='bold', color='seagreen')
+    fig.text(0.5, 0.49, f"Frequent Patterns   (minsup = {MINSUP})", ha="center", va="top",
+             fontsize=13, fontweight="bold", color="seagreen")
 
     for i, G in enumerate([G0, G1, G2]):
-        _draw_cell(axes[0, i], G, 'lightsteelblue', 'aliceblue', 'steelblue')
+        _draw_cell(axes[0, i], G, "lightsteelblue", "aliceblue", "steelblue")
 
     for i, G in enumerate([R1, R2, R3]):
-        _draw_cell(axes[1, i], G, 'lightgreen', 'honeydew', 'seagreen')
+        _draw_cell(axes[1, i], G, "lightgreen", "honeydew", "seagreen")
 
     print(colored("Opening visualization window...", bcolors.OKCYAN))
     plt.show()
@@ -210,8 +221,8 @@ def print_subgraph_components(subgraph, index):
         print(colored("  (single-vertex pattern, no edges)", bcolors.WARNING))
 
 
-def visualize_subgraph_results(results, title, node_color='lightsalmon',
-                               face_color='seashell', border_color='sienna'):
+def visualize_subgraph_results(results, title, node_color="lightsalmon",
+                               face_color="seashell", border_color="sienna"):
     if not HAS_VISUALIZATION:
         return
 
@@ -223,8 +234,8 @@ def visualize_subgraph_results(results, title, node_color='lightsalmon',
     rows = (len(graphs) + cols - 1) // cols
 
     fig, axes_arr = plt.subplots(rows, cols, figsize=(4.5 * cols, 4.5 * rows + 0.5), squeeze=False)
-    fig.suptitle(title, fontsize=13, fontweight='bold')
-    fig.patch.set_facecolor('#f5f5f5')
+    fig.suptitle(title, fontsize=13, fontweight="bold")
+    fig.patch.set_facecolor("#f5f5f5")
     plt.subplots_adjust(hspace=0.60, wspace=0.30, bottom=0.08, top=0.92)
 
     for i, G in enumerate(graphs):

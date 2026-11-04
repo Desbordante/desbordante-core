@@ -1,6 +1,6 @@
 import desbordante
 
-print('''
+print("""
 =======================================================
 This example demonstrates how Desbordante can perform
 approximate functional dependency (FD) discovery
@@ -23,13 +23,13 @@ to the following publications:
 =======================================================\n
 We will now demonstrate how to invoke EulerFD and
 AID-FD in Desbordante.
-''')
+""")
 
-TABLE = 'examples/datasets/medical.csv'
+TABLE = "examples/datasets/medical.csv"
 
 print("EulerFD: ")
 alg = desbordante.fd.algorithms.EulerFD()
-alg.load_data(table=(TABLE, ',', True))
+alg.load_data(table=(TABLE, ",", True))
 alg.execute()
 
 result_euler = alg.get_fds()
@@ -37,11 +37,11 @@ result_euler = alg.get_fds()
 for fd in result_euler:
     print(fd)
 
-print('-------------------------------')
+print("-------------------------------")
 
 print("AID-FD: ")
 alg = desbordante.fd.algorithms.Aid()
-alg.load_data(table=(TABLE, ',', True))
+alg.load_data(table=(TABLE, ",", True))
 alg.execute()
 
 result_aid = alg.get_fds()

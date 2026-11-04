@@ -1,7 +1,8 @@
+import textwrap
+
 import desbordante
 import pandas as pd
 from tabulate import tabulate
-import textwrap
 
 YELLOW = "\033[1;33m"
 CYAN = "\033[1;36m"
@@ -90,7 +91,7 @@ prints(
     "A Conditional Inclusion Dependency extends an IND by restricting the "
     "rule to R1 rows that match a pattern on the remaining columns of R1 "
     "(the conditional attributes). Pattern entries are either concrete "
-    "values or a wildcard (\"_\" or \"-\") meaning any value."
+    'values or a wildcard ("_" or "-") meaning any value.'
 )
 print()
 
@@ -158,12 +159,12 @@ print(f"{CYAN}condition_type: row vs group{RESET}")
 print("-" * 80)
 
 prints(
-    "The condition_type parameter chooses the unit of counting. In \"group\" "
+    'The condition_type parameter chooses the unit of counting. In "group" '
     "mode all LHS rows that share the same inclusion key are counted "
-    "together as one, regardless of how many rows there are. In \"row\" "
+    'together as one, regardless of how many rows there are. In "row" '
     "mode every LHS row counts on its own. On unique-key tables the two "
-    "modes coincide; where the same key recurs, \"group\" stays robust and "
-    "\"row\" tends to inflate totals through duplicates."
+    'modes coincide; where the same key recurs, "group" stays robust and '
+    '"row" tends to inflate totals through duplicates.'
 )
 print()
 prints(
@@ -182,10 +183,10 @@ print("  * validity       lower bound on the validity score (see Metrics).")
 print()
 print("  * completeness   lower bound on the completeness score (see Metrics).")
 print()
-print("  * condition_type \"row\" or \"group\" (see the section above).")
+print('  * condition_type "row" or "group" (see the section above).')
 print()
-print("  * algo_type      \"pli_cind\" (default, depth-first, low memory) or")
-print("                   \"cinderella\" (breadth-first, faster but heavier).")
+print('  * algo_type      "pli_cind" (default, depth-first, low memory) or')
+print('                   "cinderella" (breadth-first, faster but heavier).')
 print()
 
 
@@ -275,7 +276,7 @@ banner("Scenario 3. Tighter thresholds and a different condition type")
 
 printlns(
     "Tighter thresholds: error=0.3, validity=0.95, completeness=0.5, "
-    "condition_type=\"group\". The result is fewer but more reliable CINDs; "
+    'condition_type="group". The result is fewer but more reliable CINDs; '
     "some come back with 0 conditions because the underlying AIND exists "
     "but no concrete pattern passed validity >= 0.95 and completeness >= 0.5."
 )
@@ -302,7 +303,7 @@ printlns(
 algo3, cinds_all = mine(error=0.3, validity=0.0, completeness=0.0,
                         condition_type="group")
 all_by_ind = {c.get_ind_string(): c for c in cinds_all}
-target_data = ('-', '18', '-')
+target_data = ("-", "18", "-")
 
 
 def find_cent18(cind):
@@ -346,18 +347,18 @@ print("    Buddy       18    CO          CO")
 print("    Sante       19    -           -")
 print()
 print(f"  {YELLOW}CIND #3: en.[birthplace] subseteq en.[deathplace]{RESET}")
-print(f"    inclusion key = birthplace; en.deathplace set = {{USA, CO, -}}")
-print(f"    cent=18 selects rows with these birthplaces: SA, USA, CO  (3)")
-print(f"    among those, birthplace SA is NOT in the deathplace set -> Cecil")
-print(f"    breaks inclusion. Only USA and CO satisfy it.")
-print(f"    -> validity = 2/3 = 0.667, fails validity>=0.95")
+print("    inclusion key = birthplace; en.deathplace set = {USA, CO, -}")
+print("    cent=18 selects rows with these birthplaces: SA, USA, CO  (3)")
+print("    among those, birthplace SA is NOT in the deathplace set -> Cecil")
+print("    breaks inclusion. Only USA and CO satisfy it.")
+print("    -> validity = 2/3 = 0.667, fails validity>=0.95")
 print()
 print(f"  {YELLOW}CIND #4: en.[deathplace] subseteq en.[birthplace]{RESET}")
-print(f"    inclusion key = deathplace; en.birthplace set = {{SA, USA, CO, -}}")
-print(f"    cent=18 selects rows with these deathplaces: USA, CO  (2 unique,")
-print(f"    since Cecil and Mel share deathplace=USA)")
-print(f"    both deathplace values are in the birthplace set.")
-print(f"    -> validity = 2/2 = 1.000, passes validity>=0.95")
+print("    inclusion key = deathplace; en.birthplace set = {SA, USA, CO, -}")
+print("    cent=18 selects rows with these deathplaces: USA, CO  (2 unique,")
+print("    since Cecil and Mel share deathplace=USA)")
+print("    both deathplace values are in the birthplace set.")
+print("    -> validity = 2/2 = 1.000, passes validity>=0.95")
 print()
 printlns(
     "So the same row Cecil that broke CIND #3 (his birthplace SA is not a "

@@ -1,22 +1,24 @@
 import os
-from pathlib import Path
 import re
 import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 import snapshottest
 
-EXAMPLES_DIR = Path('examples')
-INPUTS_DIR = EXAMPLES_DIR / 'test_examples' / 'inputs'
-TEST_EXAMPLES_SUBDIR = EXAMPLES_DIR / 'test_examples'
+EXAMPLES_DIR = Path("examples")
+INPUTS_DIR = EXAMPLES_DIR / "test_examples" / "inputs"
+TEST_EXAMPLES_SUBDIR = EXAMPLES_DIR / "test_examples"
 EXCLUDED_FILES = {
-    'basic/mining_sfd.py',
+    "basic/mining_sfd.py",
 }
 
 def generate_test_cases():
     """Dynamically discovers and generates test cases for Python example scripts."""
     test_cases = []
 
-    for script_path in EXAMPLES_DIR.rglob('*.py'):
+    for script_path in EXAMPLES_DIR.rglob("*.py"):
         if script_path.is_relative_to(TEST_EXAMPLES_SUBDIR):
             continue
         relative_path_str = script_path.relative_to(EXAMPLES_DIR).as_posix()
@@ -32,18 +34,19 @@ def generate_test_cases():
 
 TEST_CASES = generate_test_cases()
 
-@pytest.mark.parametrize('script, input_file, output', TEST_CASES)
+@pytest.mark.parametrize("script, input_file, output", TEST_CASES)
 def test_example(snapshot, script, input_file, output):
-    cmd = ['python3', f'examples/{script}']
+    cmd = [sys.executable, f"examples/{script}"]
     stdin = None
     if input_file:
-        with open(f'examples/test_examples/inputs/{input_file}') as f:
+        with open(f"examples/test_examples/inputs/{input_file}") as f:
             stdin = f.read()
     env = os.environ.copy()
     # To skip plt.show()
     env["MPLBACKEND"] = "Agg"
 
-    result = subprocess.run(
+    # The test intentionally executes examples discovered in the repository.
+    result = subprocess.run(  # noqa: S603
         cmd,
         input=stdin,
         text=True,
@@ -59,15 +62,15 @@ def test_example(snapshot, script, input_file, output):
         raise AssertionError(error_msg)
 
     result_output = result.stdout
-    if script == 'basic/mining_afd.py':
+    if script == "basic/mining_afd.py":
         result_output = re.sub(
-            r'(\|.+(?:Pyro|Tane).+\|.+\|.+)\d+\.\d{3} s',
-            r'\1<runtime>',
+            r"(\|.+(?:Pyro|Tane).+\|.+\|.+)\d+\.\d{3} s",
+            r"\1<runtime>",
             result_output,
         )
         result_output = re.sub(
-            r'was \d+\.\d{2} times faster',
-            'was <speedup> times faster',
+            r"was \d+\.\d{2} times faster",
+            "was <speedup> times faster",
             result_output,
         )
 

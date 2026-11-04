@@ -1,22 +1,22 @@
-from typing import Dict, List, Tuple
 from collections import defaultdict
-import matplotlib.pyplot as plt
+
 import desbordante as db
+import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 
 
 class DataCleaner:
-    def __init__(self, violations: List[Tuple[int, int]]) -> None:
-        self.graph: Dict[int, List[int]] = defaultdict(list)
+    def __init__(self, violations: list[tuple[int, int]]) -> None:
+        self.graph: dict[int, list[int]] = defaultdict(list)
         for v1, v2 in violations:
             if v1 != v2:
                 self.graph[v1].append(v2)
                 self.graph[v2].append(v1)
             else:
                 self.graph[v1] = [v1]
-        self.nodes: List[int] = list(self.graph.keys())
-        self.removed_nodes: List[int] = []
+        self.nodes: list[int] = list(self.graph.keys())
+        self.removed_nodes: list[int] = []
 
     def __remove_highest_degree_node(self) -> None:
         # TODO: Consider using max heap to speed up things
@@ -68,13 +68,13 @@ def main():
     "∀s, t ∈ R, s ≠ t: ¬(p_1 ∧ . . . ∧ p_m)\n\n"
     "DCs involve comparisons between pairs of rows within a dataset.\n"
     "A typical DC example, derived from a Functional Dependency such as A -> B,\n"
-    "is expressed as: \"∀s, t ∈ R, s ≠ t, ¬(t.A == s.A ∧ t.B ≠ s.B).\"\n"
+    'is expressed as: "∀s, t ∈ R, s ≠ t, ¬(t.A == s.A ∧ t.B ≠ s.B)."\n'
     "This denotes that for any pair of rows in the relation, it should not be the case\n"
     "that while the values in column A are equal, the values in column B are unequal.\n\n"
     "Consider the following dataset:\n")
 
-    TABLE_1 = 'examples/datasets/taxes_3.csv'
-    SEPARATOR = ','
+    TABLE_1 = "examples/datasets/taxes_3.csv"
+    SEPARATOR = ","
     HAS_HEADER = True
     DC = "!(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate)"
     DO_COLLECT_VIOLATIONS = True
@@ -97,7 +97,7 @@ def main():
 
     dc_holds = verifier.dc_holds()
 
-    print("DC " + DC + " holds: " + str(dc_holds), end='\n\n')
+    print("DC " + DC + " holds: " + str(dc_holds), end="\n\n")
 
     violations = verifier.get_violations()
     viol_str = ", ".join(map(str, violations))
@@ -127,7 +127,7 @@ def main():
 
     # Start cleaning algorithm
     cleaner = DataCleaner(violations)
-    
+
     cleaner.draw("Graph before", False)
     cleaner.clean()
     cleaner.draw("Graph after")
@@ -142,8 +142,8 @@ def main():
     "9   Wisconsin   3000        0.9  -->  Wisconsin   3000        0.09\n"
     "13      Texas   5000       0.05  -->      Texas   5000         0.5\n\n")
 
-    TABLE_2 = 'examples/datasets/taxes_4.csv'
-    SEPARATOR = ','
+    TABLE_2 = "examples/datasets/taxes_4.csv"
+    SEPARATOR = ","
     HAS_HEADER = True
 
     verifier = db.dc_verification.algorithms.Default()
@@ -156,7 +156,7 @@ def main():
     print_table(TABLE_2)
 
     print("Now we can check if the constraint holds by running the algorithm again.\n\n"
-    f"DC " + DC + " holds: " + str(dc_holds), end='\n\n'
+    "DC " + DC + " holds: " + str(dc_holds), end="\n\n"
     "After fixing the typos in the initial dataset, the constraint holds.\n")
 
 

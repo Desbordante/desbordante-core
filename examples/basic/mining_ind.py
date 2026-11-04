@@ -1,13 +1,15 @@
-import desbordante
 import csv
 
+import desbordante
+
+
 def row_to_padded_string(row, widths):
-    return ''.join(field.ljust(width) for width, field in zip(widths, row))
+    return "".join(field.ljust(width) for width, field in zip(widths, row))
 
 def print_table(filename: str):
-    with open(filename, newline='') as table:
-        rows = list(csv.reader(table, delimiter=','))
-    
+    with open(filename, newline="") as table:
+        rows = list(csv.reader(table, delimiter=","))
+
     column_widths = []
     for col_num in range(len(rows[0])):
         max_len = max(len(row[col_num]) for row in rows)
@@ -15,11 +17,11 @@ def print_table(filename: str):
 
     header, *data_rows = rows
     print(row_to_padded_string(header, column_widths))
-    print('-' * sum(column_widths))
-    print('\n'.join(row_to_padded_string(row, column_widths) for row in data_rows))
+    print("-" * sum(column_widths))
+    print("\n".join(row_to_padded_string(row, column_widths) for row in data_rows))
 
-TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
-          ['course', 'department', 'instructor', 'student', 'teaches']]
+TABLES = [(f"examples/datasets/ind_datasets/{table_name}.csv", ",", True) for table_name in
+          ["course", "department", "instructor", "student", "teaches"]]
 
 algo = desbordante.ind.algorithms.Default()
 algo.load_data(tables=TABLES)
@@ -30,12 +32,12 @@ for ind in inds:
     print(ind)
 
 print()
-print('Tables for first IND:')
-print('course.csv:\n')
-print_table('examples/datasets/ind_datasets/course.csv')
+print("Tables for first IND:")
+print("course.csv:\n")
+print_table("examples/datasets/ind_datasets/course.csv")
 
 print()
-print('department.csv:\n')
-print_table('examples/datasets/ind_datasets/department.csv')
+print("department.csv:\n")
+print_table("examples/datasets/ind_datasets/department.csv")
 
-print('See also examples/datasets/mining_ind_dataframes.py for usage with pandas DataFrames')
+print("See also examples/datasets/mining_ind_dataframes.py for usage with pandas DataFrames")

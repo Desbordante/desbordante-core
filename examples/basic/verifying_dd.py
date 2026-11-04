@@ -14,7 +14,7 @@ COLOR_CODES = {
 
 def print_intro(table: str) -> None:
     print(
-        f'''This is an example of validating differential dependencies.
+        f"""This is an example of validating differential dependencies.
 
 Differential dependencies were introduced by Song, Shaoxu,
 and Chen, Lei in their 2011 article, "Differential
@@ -61,23 +61,23 @@ strings.
 
 Finally, an additional example of differential dependency
 mining, using the Split algorithm, is also available in
-the Desbordante project.\n''')
+the Desbordante project.\n""")
     data = pd.read_csv(table)
     print(f"{data}\n")
 
 
 def print_first_dd_verified(algorithm):
     print(
-        f'''To better understand the differential dependency concept,
+        f"""To better understand the differential dependency concept,
 let's examine a practical example.
 
 Consider the following DD:
 
 {COLOR_CODES["yellow"]}{dd1.__str__()}{COLOR_CODES["nocolor"]}
-''')
+""")
     print_holds(algorithm.dd_holds())
     print(
-        '''This dependency requires that for any two records
+        """This dependency requires that for any two records
 with the same product_name, the difference in
 their stock_quantity must not exceed 20, and
 the difference in price_per_unit must not
@@ -86,56 +86,56 @@ exceed 60.
 In other words, for the same product sold
 across different stores, stock levels cannot
 vary by more than 20 units, and the price
-cannot vary by more than 60 units.''')
+cannot vary by more than 60 units.""")
 
 
 def print_second_dd_verified(algorithm):
     print(
-        f'''Now, let`s check the DD:
+        f"""Now, let`s check the DD:
 
 {COLOR_CODES["yellow"]}{dd2.__str__()}{COLOR_CODES["nocolor"]}
 
 This means that for a single product, the
 difference in stock quantity between any
 two stores cannot exceed 25 units.
-''')
+""")
     print_holds(algorithm.dd_holds())
 
 
 def print_third_dd_verified(algorithm):
-    print('''Our previous dependency failed because it
+    print("""Our previous dependency failed because it
 didn't account for key operational factors.
 For instance, stock levels are influenced
 by product demand and store size, not just
 the store location.
 
 To address this, we refine the dependency
-by adding a constraint on the product_category.''')
+by adding a constraint on the product_category.""")
     print(f'Next DD, which we are going to check: \n\n{COLOR_CODES["yellow"]}{dd3.__str__()}{COLOR_CODES["nocolor"]}\n')
     print_holds(algorithm.dd_holds())
     print(
-        '''This differential dependency states:
+        """This differential dependency states:
 
 For tuples with the same store_name and category,
 the stock_quantity must not differ by more than
-25 units.''')
+25 units.""")
 
 
 def print_about_second_dd(algorithm):
-    print('''Desbordante can automatically detect pairs of
+    print("""Desbordante can automatically detect pairs of
 violating tuples. Let’s do it.
-''')
+""")
     print(
-        f'''Desbordante returned {algo.get_num_error_pairs()} pairs of records that
-violate the stock_quantity threshold.\n''')
-    print('''The error threshold of a differential
+        f"""Desbordante returned {algo.get_num_error_pairs()} pairs of records that
+violate the stock_quantity threshold.\n""")
+    print("""The error threshold of a differential
 dependency is the ratio of record pairs
 that satisfy the left-hand side (LHS) but
 violate the right-hand side (RHS), to the
 total number of record pairs that satisfy
 the LHS.
-''')
-    print(f'In our example error threshold is: {COLOR_CODES["red"]}{algo.get_error()}{COLOR_CODES["nocolor"]}\n\nNow, let us look at the pairs of violating tuples:\n')
+""")
+    print(f'In our example error threshold is: {COLOR_CODES["red"]}{algo.get_error()}{COLOR_CODES["nocolor"]}\n\nNow, let us look at the pairs of violating tuples:\n')  # noqa: E501
     highlights = algo.get_highlights()
     table_copy = table.copy()
     for highlight in highlights:
@@ -149,7 +149,7 @@ the LHS.
                 if i == 4:
                     print(f'{COLOR_CODES["red"]}{table_copy[first_error_row_index][i]}{COLOR_CODES["nocolor"]}', end="")
                 else:
-                    print(f'{COLOR_CODES["red"]}{table_copy[first_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")
+                    print(f'{COLOR_CODES["red"]}{table_copy[first_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")  # noqa: E501
             else:
                 if i == 4:
                     print(table_copy[first_error_row_index][i], end="")
@@ -162,41 +162,41 @@ the LHS.
                 print(f'{COLOR_CODES["green"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")
             elif i == highlight.attribute_index:
                 if i == 4:
-                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]}', end="")
+                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]}', end="")  # noqa: E501
                 else:
-                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")
+                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")  # noqa: E501
             else:
                 if i == 4:
                     print(table_copy[second_error_row_index][i], end="")
                 else:
                     print(table_copy[second_error_row_index][i] + " ", end="")
-        print('\n')
-    print('''Clearly, this DD has no practical
+        print("\n")
+    print("""Clearly, this DD has no practical
 significance, however, it remains useful for
-demonstration purposes.''')
+demonstration purposes.""")
 
 
 def print_about_fourth_dd():
     data = pd.read_csv(GRADES_TABLE)
-    print('''Validation of Differential Dependencies can
+    print("""Validation of Differential Dependencies can
 also be utilized for mitigating data inaccuracies.
 
 Consider the grades_dd.py table.
-''')
+""")
     print(data)
-    print(f'''
+    print(f"""
 We will check the DD:
 
-{COLOR_CODES["yellow"]}{dd4.__str__()}{COLOR_CODES["nocolor"]}''')
+{COLOR_CODES["yellow"]}{dd4.__str__()}{COLOR_CODES["nocolor"]}""")
     algorithm = desbordante.dd_verification.algorithms.DDVerifier()
-    activity = (GRADES_TABLE, ',', True)
+    activity = (GRADES_TABLE, ",", True)
     algorithm.load_data(table=activity)
     algorithm.execute(dd=dd4)
     print()
     print_holds(algorithm.dd_holds())
     highlights = algorithm.get_highlights()
     table_copy: list[list[str]]
-    with open(GRADES_TABLE, newline='') as act_table:
+    with open(GRADES_TABLE, newline="") as act_table:
         act = list(csv.reader(act_table))
         table_copy = act.copy()
     for highlight in highlights:
@@ -210,7 +210,7 @@ We will check the DD:
                 if i == 4:
                     print(f'{COLOR_CODES["red"]}{table_copy[first_error_row_index][i]}{COLOR_CODES["nocolor"]}', end="")
                 else:
-                    print(f'{COLOR_CODES["red"]}{table_copy[first_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")
+                    print(f'{COLOR_CODES["red"]}{table_copy[first_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")  # noqa: E501
             else:
                 if i == 4:
                     print(table_copy[first_error_row_index][i], end="")
@@ -223,31 +223,31 @@ We will check the DD:
                 print(f'{COLOR_CODES["green"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")
             elif i == highlight.attribute_index:
                 if i == 4:
-                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]}', end="")
+                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]}', end="")  # noqa: E501
                 else:
-                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")
+                    print(f'{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]} ', end="")  # noqa: E501
             else:
                 if i == 4:
                     print(table_copy[second_error_row_index][i], end="")
                 else:
                     print(table_copy[second_error_row_index][i] + " ", end="")
-        print('\n')
+        print("\n")
     print(f'Error threshold: {COLOR_CODES["red"]}{algorithm.get_error()}{COLOR_CODES["nocolor"]}\n')
-    print('''We have two pairs of rows that do not conform to
+    print("""We have two pairs of rows that do not conform to
 the constraints imposed by the DD. Let's rectify
 this data error by changing "Akice" to "Alice"
 in the first row of the "student_name" column
 and then re-evaluate the DD's over this table.
-''')
+""")
     data = pd.read_csv(GRADES_TABLE2)
     print(data)
     algorithm2 = desbordante.dd_verification.algorithms.DDVerifier()
-    algorithm2.load_data(table =(GRADES_TABLE2, ',', True))
+    algorithm2.load_data(table =(GRADES_TABLE2, ",", True))
     algorithm2.execute(dd=dd4)
     print()
     if not algorithm2.dd_holds():
-        print(f'''After correcting the error, the error threshold
-dropped to {COLOR_CODES["red"]}{algorithm2.get_error()}{COLOR_CODES["nocolor"]}''')
+        print(f"""After correcting the error, the error threshold
+dropped to {COLOR_CODES["red"]}{algorithm2.get_error()}{COLOR_CODES["nocolor"]}""")
     print("""
 A potential error may also exist in the left-hand
 side of the DD. For instance, in rows 3, 4 and 5
@@ -258,15 +258,15 @@ correct this error and observe the subsequent changes.
     data = pd.read_csv(GRADES_TABLE3)
     print(data)
     algorithm3 = desbordante.dd_verification.algorithms.DDVerifier()
-    algorithm3.load_data(table=(GRADES_TABLE3, ',', True))
+    algorithm3.load_data(table=(GRADES_TABLE3, ",", True))
     algorithm3.execute(dd=dd4)
     print()
     if algorithm3.dd_holds():
-        print(f'''After correcting the error, the error threshold
-dropped to {COLOR_CODES["green"]}{algorithm3.get_error()}{COLOR_CODES["nocolor"]} and the {COLOR_CODES["green"]}DD holds.{COLOR_CODES["nocolor"]}''')
+        print(f"""After correcting the error, the error threshold
+dropped to {COLOR_CODES["green"]}{algorithm3.get_error()}{COLOR_CODES["nocolor"]} and the {COLOR_CODES["green"]}DD holds.{COLOR_CODES["nocolor"]}""")  # noqa: E501
 def print_about_fifth_dd():
     data = pd.read_csv(SALARIES_TABLE)
-    print(f'''Also, our validator supports user-defined metrics.
+    print(f"""Also, our validator supports user-defined metrics.
 We will check the differential dependency
 
 {COLOR_CODES["yellow"]}{dd5.__str__()}{COLOR_CODES["nocolor"]}
@@ -275,28 +275,28 @@ in the salaries_dd.csv table.
 
 {data}
 
-We will pass to the validator a function to calculate the normalized 
-distance, which is defined as (distance between pair of fields) / (maximum 
+We will pass to the validator a function to calculate the normalized\x20
+distance, which is defined as (distance between pair of fields) / (maximum\x20
 distance among all field pairs).
-''')
+""")
     algo = desbordante.dd_verification.algorithms.DDVerifier()
-    algo.load_data(table=(SALARIES_TABLE, ',', True))
+    algo.load_data(table=(SALARIES_TABLE, ",", True))
     def normalized_distance_salary(first: int, second: int) -> float:
         result =  abs(first - second)/5
         return result
     def normalized_distance_experience(first: int, second: int) -> float:
         result =  abs(first - second)/7
         return result
-    metrics =  {"salary_level": desbordante.dd_verification.make_metric_ptr((normalized_distance_salary,"int")), "experience_years": desbordante.dd_verification.make_metric_ptr((normalized_distance_experience, "int"))}
+    metrics =  {"salary_level": desbordante.dd_verification.make_metric_ptr((normalized_distance_salary,"int")), "experience_years": desbordante.dd_verification.make_metric_ptr((normalized_distance_experience, "int"))}  # noqa: E501
     algo.load_data(metrics_map=metrics)
     algo.execute(dd=dd5, metrics_map=metrics)
     print_holds(algo.dd_holds())
-    print('''Thus, across various departments, employee
+    print("""Thus, across various departments, employee
 compensation is logically tied to professional experience.
 Specifically, when considering tuple pairs where employees
 share the same value in the "department" column and have
 close values in the "salary_level" column, their values in
-the "experience_years" column should also demonstrate proximity.''')
+the "experience_years" column should also demonstrate proximity.""")
 
 
 def print_holds(result: bool) -> None:
@@ -306,12 +306,12 @@ def print_holds(result: bool) -> None:
         print(f'This {COLOR_CODES["red"]}DD doesn`t hold.{COLOR_CODES["nocolor"]}\n')
 
 
-TABLE = 'examples/datasets/stores_dd.csv'  
-FLIGHT_TABLE = 'examples/datasets/flights_dd_verifier_example.csv'
-GRADES_TABLE = 'examples/datasets/grades_dd.csv'
-GRADES_TABLE2 = 'examples/datasets/grades_dd2.csv'
-GRADES_TABLE3 = 'examples/datasets/grades_dd3.csv'
-SALARIES_TABLE = 'examples/datasets/salaries_dd.csv'
+TABLE = "examples/datasets/stores_dd.csv"
+FLIGHT_TABLE = "examples/datasets/flights_dd_verifier_example.csv"
+GRADES_TABLE = "examples/datasets/grades_dd.csv"
+GRADES_TABLE2 = "examples/datasets/grades_dd2.csv"
+GRADES_TABLE3 = "examples/datasets/grades_dd3.csv"
+SALARIES_TABLE = "examples/datasets/salaries_dd.csv"
 lhs1 = [desbordante.dd_verification.DF("product_name", 0, 0)]
 rhs1 = [desbordante.dd_verification.DF("stock_quantity", 0, 20),
         desbordante.dd_verification.DF("price_per_unit", 0, 60)]
@@ -324,7 +324,7 @@ lhs3 = [desbordante.dd_verification.DF("store_name", 0, 0),
 rhs3 = [desbordante.dd_verification.DF("stock_quantity", 0, 25)]
 dd3 = desbordante.dd.DD(lhs3, rhs3)
 algo = desbordante.dd_verification.algorithms.DDVerifier()
-algo.load_data(table=(TABLE, ',', True))
+algo.load_data(table=(TABLE, ",", True))
 algo.execute(dd=dd1)
 lhs4 = [desbordante.dd_verification.DF("student_id", 0, 0)]
 rhs4 = [desbordante.dd_verification.DF("student_name", 0, 0)]
@@ -332,7 +332,7 @@ dd4 = desbordante.dd.DD(lhs4, rhs4)
 lhs5 = [desbordante.dd_verification.DF("department", 0, 0), desbordante.dd_verification.DF("salary_level", 0, 0.3)]
 rhs5 = [desbordante.dd_verification.DF("experience_years", 0, 0.5)]
 dd5 = desbordante.dd.DD(lhs5, rhs5)
-with open(TABLE, newline='') as csvtable:
+with open(TABLE, newline="") as csvtable:
     table = list(csv.reader(csvtable))
 print_intro(TABLE)
 print("-" * 100)
