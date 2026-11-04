@@ -5,6 +5,8 @@ include(desbordante_helpers)
 
 list(APPEND DESBORDANTE_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # ---- CMake Policies ----
 if(POLICY CMP0167)
     # To search for the upstream BoostConfig.cmake. Added in version 3.30.
