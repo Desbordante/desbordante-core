@@ -6,37 +6,15 @@
 
 #include "core/algorithms/gdd/gdd_graph_description.h"
 #include "core/util/levenshtein_distance.h"
-#include "gdd_validator/gdd_validator.h"
+#include "graph_matcher/wcoj_graph_matcher.h"
 
 namespace model {
 
 namespace gdd::detail {
 
-bool IsSubgraph(gdd::graph_t const& query, gdd::graph_t const& graph) {
-    bool result = false;
-
-    auto vcmp = [&query, &graph](gdd::vertex_t const& query_v, gdd::vertex_t const& graph_v) {
-        return ::algos::GddValidator::LabelsMatch(query[query_v].label, graph[graph_v].label) &&
-               query[query_v].attributes == graph[graph_v].attributes;
-    };
-
-    auto ecmp = [&query, &graph](gdd::edge_t const& query_e, gdd::edge_t const& graph_e) {
-        return ::algos::GddValidator::LabelsMatch(query[query_e].label, graph[graph_e].label);
-    };
-
-    auto callback = [&result](auto, auto) {
-        result = true;
-        return false;
-    };
-
-    using PropertyMapT = boost::property_map<gdd::graph_t, boost::vertex_index_t>::type;
-    PropertyMapT const query_index_map = boost::get(boost::vertex_index, query);
-    PropertyMapT const graph_index_map = boost::get(boost::vertex_index, graph);
-    std::vector<gdd::vertex_t> const query_vertex_order = boost::vertex_order_by_mult(query);
-
-    boost::vf2_subgraph_iso(query, graph, callback, query_index_map, graph_index_map,
-                            query_vertex_order, ecmp, vcmp);
-    return result;
+bool IsSubgraph(GraphTypes::Graph const& query, GraphTypes::Graph const& graph) {
+    algos::WcojGraphMatcher matcher(graph, [](auto) { return false; });
+    return !matcher.Run(query, algos::MatchSemantics::kIsomorphism);
 }
 
 }  // namespace gdd::detail
@@ -45,7 +23,7 @@ namespace {
 
 bool CompareDistance(double dist, gdd::detail::CmpOp op, double threshold) {
     constexpr double eps = std::numeric_limits<double>::epsilon();
-    using ::model::gdd::detail::CmpOp;
+    using gdd::detail::CmpOp;
 
     switch (op) {
         case CmpOp::kLe:
@@ -110,15 +88,14 @@ std::size_t Gdd::ExtractVertexIdFromConst(gdd::detail::ConstValue const& cv) {
     throw std::logic_error("Invalid vertex id (unsuitable type)");
 }
 
-std::optional<gdd::vertex_t> Gdd::FindPatternVertexById(std::size_t id) const {
+std::optional<Gdd::Vertex> Gdd::FindPatternVertexById(std::size_t id) const {
     auto const& verts = boost::make_iterator_range(boost::vertices(pattern_));
-    auto const it = std::ranges::find_if(
-            verts, [this, id](gdd::vertex_t v) { return pattern_[v].id == id; });
+    auto const it =
+            std::ranges::find_if(verts, [this, id](Vertex v) { return pattern_[v].id == id; });
     return it == verts.end() ? std::nullopt : std::optional{*it};
 }
 
-std::optional<gdd::vertex_t> Gdd::ResolveGraphVertex(gdd::detail::MappingT const& pg_map,
-                                                     std::size_t pv_id) const {
+std::optional<Gdd::Vertex> Gdd::ResolveGraphVertex(Mapping const& pg_map, std::size_t pv_id) const {
     if (auto const pv = FindPatternVertexById(pv_id); pv) {
         auto const gv_it = pg_map.find(*pv);
         if (gv_it == pg_map.end()) {
@@ -146,14 +123,12 @@ std::optional<std::pair<std::size_t, std::string_view>> Gdd::TokenAsRelation(
                                                     std::get<RelTag>(field).name};
 }
 
-std::unordered_set<gdd::vertex_t> Gdd::CollectRelationTargets(gdd::graph_t const& g,
-                                                              gdd::vertex_t gv,
-                                                              std::string_view rel_label) {
-    std::unordered_set<gdd::vertex_t> targets;
+std::unordered_set<Gdd::Vertex> Gdd::CollectRelationTargets(Graph const& g, Vertex gv,
+                                                            std::string_view rel_label) {
+    std::unordered_set<Vertex> targets;
 
     for (auto [edge_it, eend] = boost::out_edges(gv, g); edge_it != eend; ++edge_it) {
-        if (std::string const& lab = g[*edge_it].label;
-            ::algos::GddValidator::LabelsMatch(lab, rel_label)) {
+        if (std::string const& lab = g[*edge_it].label; gdd::LabelsMatch(lab, rel_label)) {
             targets.insert(boost::target(*edge_it, g));
         }
     }
@@ -161,8 +136,7 @@ std::unordered_set<gdd::vertex_t> Gdd::CollectRelationTargets(gdd::graph_t const
 }
 
 std::optional<gdd::detail::ConstValue> Gdd::ResolveScalar(
-        gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
-        gdd::detail::DistanceOperand const& op) const {
+        Graph const& g, Mapping const& pg_map, gdd::detail::DistanceOperand const& op) const {
     using namespace gdd::detail;
 
     if (std::holds_alternative<ConstValue>(op)) {
@@ -194,7 +168,7 @@ std::optional<gdd::detail::ConstValue> Gdd::ResolveScalar(
     return it->second;
 }
 
-bool Gdd::SatisfiesRelationConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+bool Gdd::SatisfiesRelationConstraint(Graph const& g, Mapping const& pg_map,
                                       std::pair<std::size_t, std::string_view> const& lhs_rel,
                                       gdd::detail::DistanceOperand const& rhs) const {
     using namespace gdd::detail;
@@ -205,13 +179,13 @@ bool Gdd::SatisfiesRelationConstraint(gdd::graph_t const& g, gdd::detail::Mappin
         return false;
     }
 
-    std::unordered_set<gdd::vertex_t> const lhs_targets =
+    std::unordered_set<Vertex> const lhs_targets =
             CollectRelationTargets(g, *gv_lhs_opt, lhs_relname);
 
     // 1. exists edge with label lhs_relname that ends at node rhs
     if (std::holds_alternative<ConstValue>(rhs)) {
         ConstValue const& cv = std::get<ConstValue>(rhs);
-        return std::ranges::any_of(lhs_targets, [&g, &cv](gdd::vertex_t target) {
+        return std::ranges::any_of(lhs_targets, [&g, &cv](Vertex target) {
             return g[target].id == ExtractVertexIdFromConst(cv);
         });
     }
@@ -219,7 +193,7 @@ bool Gdd::SatisfiesRelationConstraint(gdd::graph_t const& g, gdd::detail::Mappin
     // 2. both nodes have edge with same label that ends at the same node
     if (auto const rhs_rel = TokenAsRelation(rhs)) {
         auto const& [rhs_pid, rhs_relname] = *rhs_rel;
-        if (!::algos::GddValidator::LabelsMatch(lhs_relname, rhs_relname)) {
+        if (!gdd::LabelsMatch(lhs_relname, rhs_relname)) {
             return false;
         }
 
@@ -227,17 +201,17 @@ bool Gdd::SatisfiesRelationConstraint(gdd::graph_t const& g, gdd::detail::Mappin
         if (!gv_rhs_opt) {
             return false;
         }
-        std::unordered_set<gdd::vertex_t> const rhs_targets =
+        std::unordered_set<Vertex> const rhs_targets =
                 CollectRelationTargets(g, *gv_rhs_opt, rhs_relname);
 
-        return std::ranges::any_of(
-                lhs_targets, [&rhs_targets](gdd::vertex_t v) { return rhs_targets.contains(v); });
+        return std::ranges::any_of(lhs_targets,
+                                   [&rhs_targets](Vertex v) { return rhs_targets.contains(v); });
     }
 
     return false;
 }
 
-bool Gdd::SatisfiesAttributeConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+bool Gdd::SatisfiesAttributeConstraint(Graph const& g, Mapping const& pg_map,
                                        gdd::detail::DistanceConstraint const& constraint) const {
     auto const lhs_scalar = ResolveScalar(g, pg_map, constraint.lhs);
     auto const rhs_scalar = ResolveScalar(g, pg_map, constraint.rhs);
@@ -250,7 +224,7 @@ bool Gdd::SatisfiesAttributeConstraint(gdd::graph_t const& g, gdd::detail::Mappi
     return CompareDistance(dist, constraint.op, constraint.threshold);
 }
 
-bool Gdd::SatisfiesConstraint(gdd::graph_t const& g, gdd::detail::MappingT const& pg_map,
+bool Gdd::SatisfiesConstraint(Graph const& g, Mapping const& pg_map,
                               gdd::detail::DistanceConstraint const& constraint) const {
     if (auto const lhs_rel = TokenAsRelation(constraint.lhs)) {
         return SatisfiesRelationConstraint(g, pg_map, *lhs_rel, constraint.rhs);
@@ -258,8 +232,9 @@ bool Gdd::SatisfiesConstraint(gdd::graph_t const& g, gdd::detail::MappingT const
     return SatisfiesAttributeConstraint(g, pg_map, constraint);
 }
 
-GddCounterexample BuildCounterexample(gdd::graph_t const& pattern, gdd::graph_t const& graph,
-                                      gdd::detail::MappingT const& mapping) {
+GddCounterexample BuildCounterexample(gdd::GraphTypes::Graph const& pattern,
+                                      gdd::GraphTypes::Graph const& graph,
+                                      gdd::GraphTypes::Mapping const& mapping) {
     GddCounterexample ce{};
     ce.match.reserve(mapping.size());
 

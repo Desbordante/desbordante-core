@@ -5,7 +5,7 @@
 
 #include <boost/graph/adjacency_list.hpp>
 
-namespace model {
+namespace model::gfd {
 
 struct Vertex {
     int node_id;
@@ -20,4 +20,4 @@ using graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirecte
 using vertex_t = boost::graph_traits<graph_t>::vertex_descriptor;
 using edge_t = boost::graph_traits<graph_t>::edge_descriptor;
 
-}  // namespace model
+}  // namespace model::gfd

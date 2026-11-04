@@ -9,12 +9,12 @@ namespace algos {
 
 class NaiveGfdValidator : public GfdHandler {
 public:
-    std::vector<model::Gfd> GenerateSatisfiedGfds(model::graph_t const& graph,
+    std::vector<model::Gfd> GenerateSatisfiedGfds(model::gfd::graph_t const& graph,
                                                   std::vector<model::Gfd> const& gfds);
 
     NaiveGfdValidator() : GfdHandler() {};
 
-    NaiveGfdValidator(model::graph_t graph_, std::vector<model::Gfd> gfds_)
+    NaiveGfdValidator(model::gfd::graph_t graph_, std::vector<model::Gfd> gfds_)
         : GfdHandler(graph_, gfds_) {}
 };
 

@@ -12,15 +12,15 @@ namespace {
 
 class CheckCallback {
 private:
-    model::graph_t const& query_;
-    model::graph_t const& graph_;
+    model::gfd::graph_t const& query_;
+    model::gfd::graph_t const& graph_;
     std::vector<model::Gfd::Literal> const premises_;
     std::vector<model::Gfd::Literal> const conclusion_;
     bool& res_;
     int& amount_;
 
 public:
-    CheckCallback(model::graph_t const& query_, model::graph_t const& graph_,
+    CheckCallback(model::gfd::graph_t const& query_, model::gfd::graph_t const& graph_,
                   std::vector<model::Gfd::Literal> const& premises_,
                   std::vector<model::Gfd::Literal> const& conclusion_, bool& res_, int& amount_)
         : query_(query_),
@@ -42,8 +42,8 @@ public:
                 if (fst_token.first == -1) {
                     fst = fst_token.second;
                 } else {
-                    model::vertex_t v;
-                    model::vertex_t u = boost::vertex(fst_token.first, query_);
+                    model::gfd::vertex_t v;
+                    model::gfd::vertex_t u = boost::vertex(fst_token.first, query_);
                     v = boost::get(f, u);
                     auto attrs = graph_[v].attributes;
                     if (attrs.find(fst_token.second) == attrs.end()) {
@@ -54,8 +54,8 @@ public:
                 if (snd_token.first == -1) {
                     snd = snd_token.second;
                 } else {
-                    model::vertex_t v;
-                    model::vertex_t u = boost::vertex(fst_token.first, query_);
+                    model::gfd::vertex_t v;
+                    model::gfd::vertex_t u = boost::vertex(fst_token.first, query_);
                     v = boost::get(f, u);
                     auto attrs = graph_[v].attributes;
                     if (attrs.find(snd_token.second) == attrs.end()) {
@@ -81,23 +81,23 @@ public:
     }
 };
 
-bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
-    model::graph_t pattern = gfd.GetPattern();
+bool Validate(model::gfd::graph_t const& graph, model::Gfd const& gfd) {
+    model::gfd::graph_t pattern = gfd.GetPattern();
 
     struct VCompare {
-        model::graph_t const& pattern;
-        model::graph_t const& graph;
+        model::gfd::graph_t const& pattern;
+        model::gfd::graph_t const& graph;
 
-        bool operator()(model::vertex_t fr, model::vertex_t to) const {
+        bool operator()(model::gfd::vertex_t fr, model::gfd::vertex_t to) const {
             return pattern[fr].attributes.at("label") == graph[to].attributes.at("label");
         }
     } vcompare{pattern, graph};
 
     struct ECompare {
-        model::graph_t const& pattern;
-        model::graph_t const& graph;
+        model::gfd::graph_t const& pattern;
+        model::gfd::graph_t const& graph;
 
-        bool operator()(model::edge_t fr, model::edge_t to) const {
+        bool operator()(model::gfd::edge_t fr, model::gfd::edge_t to) const {
             return pattern[fr].label == graph[to].label;
         }
     } ecompare{pattern, graph};
@@ -122,7 +122,7 @@ bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
 namespace algos {
 
 std::vector<model::Gfd> NaiveGfdValidator::GenerateSatisfiedGfds(
-        model::graph_t const& graph, std::vector<model::Gfd> const& gfds) {
+        model::gfd::graph_t const& graph, std::vector<model::Gfd> const& gfds) {
     for (auto& gfd : gfds) {
         if (Validate(graph, gfd)) {
             result_.push_back(gfd);
