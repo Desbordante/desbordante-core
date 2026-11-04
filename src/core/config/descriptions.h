@@ -241,4 +241,20 @@ constexpr auto kDCindCondValues =
 constexpr auto kDSdG1 = "Lower bound of the sequential interval (inclusive).";
 constexpr auto kDSdG2 = "Upper bound of the sequential interval (inclusive). Set -1 for Infinity.";
 constexpr auto kDSdIndices = "Subset of row indices to validate the SD on.";
+// SD miner
+constexpr auto kDSdMinimumConfidence =
+        "Minimum confidence of each tableau pattern. Approximate generation relaxes this "
+        "threshold by the factor (1 - delta) / (1 + delta).";
+constexpr auto kDSdMinimumSupport =
+        "Minimum global support required for the assembled tableau as a fraction of eligible "
+        "rows. Rows missing either selected column are not eligible.";
+constexpr auto kDSdDelta =
+        "Approximation parameter in (0, 1). Smaller values tighten the confidence guarantee "
+        "but usually require more work. Only affects approximate interval generation.";
+constexpr auto kDSdIntervalStrategy =
+        "Candidate generation strategy: exact preserves minimum_confidence; approximate uses "
+        "a geometric interval family with a relaxed threshold. Speedup is not guaranteed.";
+constexpr auto kDSdAssemblyStrategy =
+        "Tableau assembly strategy: exact finds a minimum-size tableau among the candidates; "
+        "greedy uses less memory but may select up to nine times as many tableau patterns.";
 }  // namespace config::descriptions

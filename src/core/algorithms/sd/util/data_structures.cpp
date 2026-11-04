@@ -1,8 +1,10 @@
 #include "data_structures.h"
 
-namespace algos::sd_verifier::ds {
+#include <algorithm>
 
-void SegmentTree::Update(size_t pos, double value, size_t rank, long source_idx, long t_val,
+namespace algos::sd::util {
+
+void SegmentTree::Update(size_t pos, long double value, size_t rank, long source_idx, long t_val,
                          long j_val) {
     pos += n_;
     tree_[pos] = {value, rank, source_idx, t_val, j_val};
@@ -23,21 +25,25 @@ std::optional<RmqNode> SegmentTree::Query(size_t l, size_t r) const {
             if (!res.has_value() || tree_[r] < res.value()) res = tree_[r];
         }
     }
+    if (!res.has_value() || res->source_idx == -1) {
+        return std::nullopt;
+    }
     return res;
 }
 
-void Fenwick::Update(size_t pos, long value, long source_idx, long t_val, long j_val) {
+void Fenwick::Update(size_t pos, long double value, long source_idx, long t_val, long j_val) {
+    CostNode const candidate{value, source_idx, t_val, j_val};
     for (++pos; pos <= n_; pos += pos & -pos) {
-        if (value < tree_[pos].cost) {
-            tree_[pos] = {value, source_idx, t_val, j_val};
+        if (candidate < tree_[pos]) {
+            tree_[pos] = candidate;
         }
     }
 }
 
 std::optional<CostNode> Fenwick::Query(size_t pos) const {
-    CostNode res = {std::numeric_limits<long>::max() / 2, -1, 0, 0};
+    CostNode res = {std::numeric_limits<long double>::infinity(), -1, 0, 0};
     for (++pos; pos > 0; pos -= pos & -pos) {
-        if (tree_[pos].cost < res.cost) {
+        if (tree_[pos] < res) {
             res = tree_[pos];
         }
     }
@@ -47,4 +53,4 @@ std::optional<CostNode> Fenwick::Query(size_t pos) const {
     return res;
 }
 
-}  // namespace algos::sd_verifier::ds
+}  // namespace algos::sd::util

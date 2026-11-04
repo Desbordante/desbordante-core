@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
-#include "core/algorithms/sd/sd_verifier/util/data_structures.h"
+#include "core/algorithms/sd/util/edit_distance_calculator.h"
 #include "core/config/indices/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 
@@ -70,24 +70,12 @@ private:
     std::vector<SDViolation> violations_;
 
     void RegisterOptions();
-    long CalculateDCost(double distance) const;
     long CalculateOps(std::vector<double> const& values,
                       std::vector<size_t> const& original_indices);
-    void InitExactGap(size_t n, std::vector<double> const& values, std::vector<int>& class_id,
-                      std::vector<std::vector<double>>& class_vals,
-                      std::vector<ds::Fenwick>& fenwicks) const;
-    void InitIntervalGap(std::vector<double> const& values, std::vector<double>& unique_vals,
-                         std::unique_ptr<ds::SegmentTree>& tree,
-                         std::vector<ds::CostNode>& best_prefix_costs) const;
-    void UpdateMin2Interval(double current_val, size_t i, size_t l_rank, size_t r_rank,
-                            std::vector<double> const& unique_vals, ds::SegmentTree const& tree,
-                            long& min2_cost, long& min2_j) const;
-    void ProcessIntervalBands(double current_val, size_t i, std::vector<double> const& unique_vals,
-                              ds::SegmentTree const& tree, long& min2_cost, long& min2_j) const;
     void ReconstructPath(std::vector<double> const& values,
                          std::vector<size_t> const& original_indices,
-                         std::vector<bool> const& ops_from_t, std::vector<long> const& t_prev,
-                         bool is_exact_gap);
+                         algos::sd::util::EditDistanceTrace const& trace,
+                         algos::sd::util::EditDistanceCalculator const& calculator);
 
     void ResetState() override {
         confidence_ = 0.0;

@@ -164,4 +164,10 @@ constexpr auto kCindCondValues = "cind_condition_values";
 constexpr auto kSdG1 = "g1";
 constexpr auto kSdG2 = "g2";
 constexpr auto kSdIndices = "indices";
+// SD miner
+constexpr auto kSdMinimumConfidence = "minimum_confidence";
+constexpr auto kSdMinimumSupport = "minimum_support";
+constexpr auto kSdDelta = "delta";
+constexpr auto kSdIntervalStrategy = "interval_strategy";
+constexpr auto kSdAssemblyStrategy = "assembly_strategy";
 }  // namespace config::names

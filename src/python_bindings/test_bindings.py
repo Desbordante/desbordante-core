@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from collections import namedtuple
 from itertools import chain
+from pathlib import Path
 
 import desbordante as desb
 
@@ -203,6 +204,95 @@ class TestPythonBindings(unittest.TestCase):
                 testing_algo._set_option(option_name, params.pop(option_name, None))
 
         self.assertEqual(params, {})
+
+    def test_sd_miner_strategy_options_use_strings(self):
+        miner = desb.sd.algorithms.SDMiner()
+
+        self.assertEqual((str,), miner._get_option_type("interval_strategy"))
+        self.assertEqual((str,), miner._get_option_type("assembly_strategy"))
+        self.assertFalse(hasattr(desb.sd, "IntervalStrategy"))
+        self.assertFalse(hasattr(desb.sd, "AssemblyStrategy"))
+
+        miner.load_data(table=("TestLong.csv", ",", True))
+        miner._set_option("interval_strategy", "approximate")
+        miner._set_option("assembly_strategy", "greedy")
+        options = miner.get_opts()
+        self.assertEqual("approximate", options["interval_strategy"])
+        self.assertEqual("greedy", options["assembly_strategy"])
+
+    def test_sd_miner_sorted_row_indices_map_patterns_to_verifier_input(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_path = Path(temp_dir) / "sd_miner_row_mapping.csv"
+            csv_path.write_text("X,Y\n2,101\n1,100\n1,0\n", encoding="utf-8")
+
+            miner = desb.sd.algorithms.SDMiner()
+            miner.load_data(table=(str(csv_path), ",", True))
+            miner.execute(
+                lhs_indices=[0],
+                rhs_indices=[1],
+                g1=1.0,
+                g2=1.0,
+                minimum_confidence=1.0,
+                minimum_support=2.0 / 3.0,
+                interval_strategy="exact",
+                assembly_strategy="exact",
+            )
+
+            sorted_row_indices = miner.get_sorted_row_indices()
+            self.assertEqual([2, 1, 0], sorted_row_indices)
+            tableau = miner.get_tableau()
+            self.assertEqual(1, len(tableau))
+            pattern = tableau[0]
+            verifier_indices = sorted_row_indices[
+                pattern.left_position:pattern.right_position + 1
+            ]
+            self.assertEqual([1, 0], verifier_indices)
+
+            verifier = desb.sd_verification.algorithms.SDVerifier()
+            verifier.load_data(table=(str(csv_path), ",", True))
+            verifier.execute(
+                lhs_indices=[0],
+                rhs_indices=[1],
+                indices=verifier_indices,
+                g1=1.0,
+                g2=1.0,
+            )
+            self.assertAlmostEqual(pattern.confidence, verifier.get_confidence())
+
+    def test_sd_miner_repeated_execution_matches_fresh_instance(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_path = Path(temp_dir) / "sd_miner_repeated.csv"
+            csv_path.write_text("X,Y\n2,3\n1,0\n1,1\n3,4\n4,20\n", encoding="utf-8")
+            table = (str(csv_path), ",", True)
+            miner = desb.sd.algorithms.SDMiner()
+            miner.load_data(table=table)
+
+            def result(algo):
+                return (
+                    [(p.left, p.right, p.confidence) for p in algo.get_candidates()],
+                    [(p.left_position, p.right_position, p.left_x, p.right_x,
+                      p.support, p.confidence) for p in algo.get_tableau()],
+                    algo.get_global_support(),
+                    algo.get_sorted_row_indices(),
+                )
+
+            for interval, assembly, confidence, support, g1, g2 in [
+                ("exact", "exact", 0.5, 1.0, 1.0, 2.0),
+                ("exact", "exact", 1.0, 1.0, 9.0, 11.0),
+                ("approximate", "greedy", 0.75, 0.0, 0.0, 1.0),
+                ("approximate", "exact", 0.75, 1.0, 1.0, -1.0),
+                ("exact", "greedy", 1.0, 1.0, 1.0, 2.0),
+            ]:
+                with self.subTest(interval=interval, assembly=assembly, support=support):
+                    options = dict(lhs_indices=[0], rhs_indices=[1], g1=g1, g2=g2,
+                                   minimum_confidence=confidence, minimum_support=support,
+                                   interval_strategy=interval, assembly_strategy=assembly,
+                                   delta=0.1)
+                    miner.execute(**options)
+                    fresh = desb.sd.algorithms.SDMiner()
+                    fresh.load_data(table=table)
+                    fresh.execute(**options)
+                    self.assertEqual(result(miner), result(fresh))
 
     def _test_correct_option_setting(
         self, algo, path, separator, has_header, options: dict
