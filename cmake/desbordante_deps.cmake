@@ -20,7 +20,7 @@ include(cmake/CPM.cmake)
 CPMAddPackage(
     NAME spdlog
     GITHUB_REPOSITORY gabime/spdlog
-    GIT_TAG v1.15.2
+    GIT_TAG v1.17.0
     OPTIONS "SPDLOG_BUILD_EXAMPLE OFF" "SPDLOG_BUILD_TESTS OFF" "SPDLOG_INSTALL OFF"
             "SPDLOG_HEADER_ONLY ON"
     SYSTEM YES
