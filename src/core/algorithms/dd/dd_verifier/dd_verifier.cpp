@@ -10,7 +10,6 @@
 #include "core/config/names.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
-#include "core/model/table/vertical.h"
 #include "core/util/logger.h"
 
 namespace algos::dd {
@@ -27,6 +26,8 @@ void DDVerifier::RegisterOptions() {
     RegisterOption(Option{&dd_, kDDString, kDDDString, default_dd});
     RegisterOption(Option<std::unordered_map<std::string, std::shared_ptr<Metric>>>{
             &metrics_, kDDudm, kDDDudm, default_metrics});
+    RegisterOption(Option{&ids_, "ids", "Rows, on which we validate dependency",
+                          std::vector<std::size_t>()});  // TODO: make normal description
 }
 
 double DDVerifier::GetError() const {
@@ -84,7 +85,12 @@ std::vector<std::pair<std::size_t, std::size_t>> DDVerifier::GetRowsWhereLhsHold
             bool all_lhs_hold = true;
             auto curr_constraint = dd_.left.cbegin();
             for (auto const& column_index : lhs_column_indices_) {
-                double const diff = CalculateDistance(column_index, {i, j});
+                double diff;
+                if (ids_.empty()) {
+                    diff = CalculateDistance(column_index, {i, j});
+                } else {
+                    diff = CalculateDistance(column_index, {ids_[i], ids_[j]});
+                }
                 if (!curr_constraint->constraint.Contains(diff)) {
                     all_lhs_hold = false;
                     break;
@@ -93,7 +99,11 @@ std::vector<std::pair<std::size_t, std::size_t>> DDVerifier::GetRowsWhereLhsHold
             }
 
             if (all_lhs_hold) {
-                result.emplace_back(i, j);
+                if (ids_.empty()) {
+                    result.emplace_back(i, j);
+                } else {
+                    result.emplace_back(ids_[i], ids_[j]);
+                }
             }
         }
     }
@@ -171,7 +181,10 @@ void DDVerifier::VerifyDD() {
         }
     }
     CheckCorrectnessDd();
-    num_rows_ = typed_relation_->GetNumRows();
+    if (ids_.empty())
+        num_rows_ = typed_relation_->GetNumRows();
+    else
+        num_rows_ = ids_.size();
     num_columns_ = typed_relation_->GetNumColumns();
 
     std::vector<std::pair<std::size_t, std::size_t>> const lhs = GetRowsWhereLhsHolds();

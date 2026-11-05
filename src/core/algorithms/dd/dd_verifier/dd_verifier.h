@@ -17,17 +17,6 @@ using DDs = model::DDString;
 
 class DDVerifier : public Algorithm {
 private:
-    DDs dd_;
-    config::InputTable input_table_;
-    std::size_t num_rows_{};
-    std::size_t num_columns_{};
-    std::size_t num_error_rhs_{};
-    std::vector<model::ColumnIndex> lhs_column_indices_;
-    std::vector<model::ColumnIndex> rhs_column_indices_;
-    double error_ = 0.;
-    std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    std::vector<Highlight> highlights_;
-    std::unordered_map<std::string, std::shared_ptr<Metric>> metrics_;
     void RegisterOptions();
 
     void VisualizeHighlights() const;
@@ -36,26 +25,40 @@ private:
 
     std::vector<std::pair<std::size_t, std::size_t>> GetRowsWhereLhsHolds() const;
 
-    double CalculateDistance(model::ColumnIndex column_index,
-                             std::pair<std::size_t, std::size_t> const& tuple_pair) const;
-
-    void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs);
-
-    void VerifyDD();
+    virtual void CheckDFOnRhs(std::vector<std::pair<std::size_t, std::size_t>> const& lhs);
 
     bool IsColumnMetrizable(model::ColumnIndex const column_index) const;
 
     void CheckCorrectnessDd() const;
 
-    void ResetState() final {
+    void ResetState() override {
         error_ = 0.;
         num_error_rhs_ = 0;
         highlights_.clear();
         lhs_column_indices_.clear();
         rhs_column_indices_.clear();
+        ids_.clear();
     }
 
 protected:
+    DDs dd_;
+    config::InputTable input_table_;
+    std::vector<std::size_t> ids_;
+    std::size_t num_rows_{};
+    std::size_t num_columns_{};
+    std::unordered_map<std::string, std::shared_ptr<Metric>> metrics_;
+    std::vector<model::ColumnIndex> lhs_column_indices_;
+    std::vector<model::ColumnIndex> rhs_column_indices_;
+    double error_ = 0.;
+    std::vector<Highlight> highlights_;
+    std::size_t num_error_rhs_{};
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
+
+    double CalculateDistance(model::ColumnIndex column_index,
+                             std::pair<std::size_t, std::size_t> const& tuple_pair) const;
+
+    void VerifyDD();
+
     void LoadDataInternal() override;
 
     void MakeExecuteOptsAvailable() override;
@@ -69,7 +72,7 @@ public:
 
     std::size_t GetNumErrorRhs() const;
 
-    bool DDHolds() const;
+    virtual bool DDHolds() const;
 
     std::vector<Highlight> const& GetHighlights() const;
 };

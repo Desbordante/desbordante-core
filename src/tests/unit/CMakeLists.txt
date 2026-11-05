@@ -50,6 +50,19 @@ desbordante_add_test(
     Boost::headers
 )
 
+# --- CDD ---
+desbordante_add_test(
+    cdd.verifier
+    SRCS
+    test_cdd_verifier.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::cdd::verifier
+    ${DESBORDANTE_PREFIX}::testlib::common
+    spdlog::spdlog_header_only
+    magic_enum::magic_enum
+    Boost::headers
+)
+
 # --- CFD ---
 desbordante_add_test(
     cfd.fdfirst

@@ -4375,6 +4375,276 @@ UCC holds, showing stats for AUCC is useless
 --------------------------------------------------------------------------------
 '''
 
+snapshots['test_example[basic/verifying_cdd.py-None-verifying_cdd_output] verifying_cdd_output'] = '''This is an example of validating Conditional Differential Dependencies (CDDs).
+In Desbordante, there are also examples of validating and mining 
+Differential Dependencies (DD). Before viewing these examples, we 
+recommend that you take a look at the existing ones.
+
+CDDs were introduced by Selasi Kwashie, Jixue Liu, Jiuyong Li, Feiyue in 
+their 2015 article, "Conditional Differential Dependencies (CDDs)", 
+published in Advances in Databases and Information Systems. ADBIS 2015. 
+Lecture Notes in Computer Science, vol 9282.
+
+A CDD extends the concept of DD by adding conditions that restrict the 
+scope in which the dependency applies.
+
+A CDD consists of:
+1. A standard DD (LHS -> RHS).
+2. LHS Conditions: These act as a filter for the entire table. Only rows 
+satisfying these conditions are considered for the DD check.
+3. RHS Conditions: For a CDD to hold, tuple pairs satisfying the LHS DD 
+must also satisfy these conditions, in addition to satisfying the RHS 
+conditions of the DD.
+
+It is important that a CDD without defined conditions becomes equivalent 
+to the corresponding DD.
+
+Supported condition predicates:
+EQ (=)       - equality
+NEQ (!=)     - inequality  
+LT (<)       - less than
+LE (<=)      - less than or equal
+GT (>)       - greater than
+GE (>=)      - greater than or equal
+IN_SET (∈)   - value in a set (e.g., category ∈ {Smartphones, Laptops})
+IN_INTERVAL (∈) - value in an interval (e.g., price ∈ [100, 500])
+ANY (_)      - wildcard, matches any value
+
+Conditions can be specified on any table attributes, including those not 
+participating in the DD.
+
+To explain the CDD concept and illustrate the validation of this primitive,
+we will examine the stores_dd.csv dataset.
+
+    store_name        product_name     category  stock_quantity  price_per_unit
+0   BestBuy NY     Apple iPhone 15  Smartphones              50             999
+1   BestBuy LA     Apple iPhone 15  Smartphones              30            1029
+2   Walmart TX     Apple iPhone 15  Smartphones              40             989
+3   BestBuy NY  Samsung Galaxy S23  Smartphones              25             899
+4   BestBuy LA  Samsung Galaxy S23  Smartphones              20             920
+5   Walmart TX  Samsung Galaxy S23  Smartphones              35             880
+6   BestBuy NY     Sony WH-1000XM5   Headphones              15             399
+7   BestBuy LA     Sony WH-1000XM5   Headphones              18             410
+8   Walmart TX     Sony WH-1000XM5   Headphones              10             395
+9   BestBuy NY   Apple MacBook Air      Laptops              10            1299
+10  BestBuy LA   Apple MacBook Air      Laptops               8            1349
+11  Walmart TX   Apple MacBook Air      Laptops              12            1289
+
+
+----------------------------------------------------------------------------------------------------
+Example #1
+----------------------------------------------------------------------------------------------------
+As previously noted, when conditions are not specified for a CDD, it is 
+equivalent to the corresponding DD.
+
+Consider the following CDD:
+
+\x1b[1;33mproduct_name [0.0, 0.0] -> stock_quantity [0.0, 20.0] ; price_per_unit [0.0, 60.0], LHS conditions: (), RHS conditions: ()\x1b[0m
+
+Let`s verify this.
+This \x1b[1;32mCDD holds.\x1b[0m
+
+As explained in the DD verification example, this dependency defines constraints
+on the distance between pairs of attribute values. In other words, this dependency 
+demonstrates that for any identical product across all stores, the variance in 
+stock_quantity does not exceed 20 units, and the price difference does not exceed 
+60 units.
+
+----------------------------------------------------------------------------------------------------
+Example #2
+----------------------------------------------------------------------------------------------------
+In practice, verifying a dependency to hold over the entire table may be too strong 
+condition: it often holds only on some subsets of rows rather than on all of them. 
+For example, it can be observed that, the price difference for Smartphones is less 
+than 60.
+
+Consider the following CDD:
+
+\x1b[1;33mproduct_name [0, 0] -> price_per_unit [0, 40], LHS conditions: (category = Smartphones), RHS conditions: ()\x1b[0m
+
+Interpretation: For identical smartphones across different stores, the price difference does not exceed 40 units.
+
+Rows satisfying the LHS condition (category = Smartphones):
+store_name       product_name    category  stock_quantity  price_per_unit
+BestBuy NY    Apple iPhone 15 Smartphones              50             999
+BestBuy LA    Apple iPhone 15 Smartphones              30            1029
+Walmart TX    Apple iPhone 15 Smartphones              40             989
+BestBuy NY Samsung Galaxy S23 Smartphones              25             899
+BestBuy LA Samsung Galaxy S23 Smartphones              20             920
+Walmart TX Samsung Galaxy S23 Smartphones              35             880
+
+Let`s verify this.
+This \x1b[1;32mCDD holds.\x1b[0m
+
+This validates our hypothesis.
+At the same time, without setting additional conditions, the CDD fails to hold.
+
+The verifier supports finding exceptions for dependencies that don't hold.
+For DD, exceptions are row pairs where the distance between considered 
+attributes satisfies LHS but violates RHS DD. For CDDs, exceptions are rows
+that belong to pairs satisfying LHS DD, but for which the RHS Condition is not satisfied.
+
+\x1b[1;33mproduct_name [0, 0] -> price_per_unit [0, 40], LHS conditions: (), RHS conditions: ()\x1b[0m
+
+Let`s verify this.
+This \x1b[1;31mCDD doesn`t hold.\x1b[0m
+
+- \x1b[1;31mDD violations found: 2 pairs.\x1b[0m
+10) BestBuy NY Apple MacBook Air Laptops 10 \x1b[1;31m1299\x1b[0m
+11) BestBuy LA Apple MacBook Air Laptops 8 \x1b[1;31m1349\x1b[0m
+
+11) BestBuy LA Apple MacBook Air Laptops 8 \x1b[1;31m1349\x1b[0m
+12) Walmart TX Apple MacBook Air Laptops 12 \x1b[1;31m1289\x1b[0m
+
+----------------------------------------------------------------------------------------------------
+Example #3
+----------------------------------------------------------------------------------------------------
+Unlike LHS conditions, which prune the tuples under consideration, RHS conditions
+act as an additional constraint that matching pairs must satisfy. In order for a 
+CDD to hold, every pair satisfying the LHS DD must additionally satisfy the RHS 
+conditions of the CDD.
+
+Consider the CDD:
+
+\x1b[1;33mproduct_name [0, 0] -> stock_quantity [0, 1000], LHS conditions: (), RHS conditions: (store_name = Walmart TX)\x1b[0m
+
+Let`s verify this.
+This \x1b[1;31mCDD doesn`t hold.\x1b[0m
+
+While the DD defined by this CDD holds, some of the rows that satisfy the distance 
+constraints of the RHS DD violate the RHS conditions of the CDD.
+
+\x1b[1;31mRHS condition violations found: 8 rows.\x1b[0m
+
+1) \x1b[1;31mBestBuy NY\x1b[0m Apple iPhone 15 Smartphones 50 999
+2) \x1b[1;31mBestBuy LA\x1b[0m Apple iPhone 15 Smartphones 30 1029
+4) \x1b[1;31mBestBuy NY\x1b[0m Samsung Galaxy S23 Smartphones 25 899
+5) \x1b[1;31mBestBuy LA\x1b[0m Samsung Galaxy S23 Smartphones 20 920
+7) \x1b[1;31mBestBuy NY\x1b[0m Sony WH-1000XM5 Headphones 15 399
+8) \x1b[1;31mBestBuy LA\x1b[0m Sony WH-1000XM5 Headphones 18 410
+10) \x1b[1;31mBestBuy NY\x1b[0m Apple MacBook Air Laptops 10 1299
+11) \x1b[1;31mBestBuy LA\x1b[0m Apple MacBook Air Laptops 8 1349
+
+
+----------------------------------------------------------------------------------------------------
+Example #4
+----------------------------------------------------------------------------------------------------
+CDDs allow to detect logical errors within specific segments of data.
+
+Consider the logistics_cdd.csv table:
+
+   package_id origin_hub dest_hub delivery_type  weight_kg  transit_hours
+0         101    Chicago  Atlanta       Express        3.0             14
+1         102    Chicago  Atlanta       Express        3.5             15
+2         103    Chicago  Atlanta       Express        4.0             38
+3         104    Chicago  Atlanta      Standard        3.2             40
+4         105    Chicago  Atlanta      Standard        3.8             42
+5         106     Dallas  Atlanta       Express        3.0             16
+6         107     Dallas  Atlanta       Express        3.2             17
+
+Under company business policies, express shipments with identical origin and destination hubs
+and comparable weights (within 1.5 kg) are expected to have a transit_hours difference of no 
+more than 4 hours.
+
+We evaluate this expected behavior with the following CDD:
+
+
+\x1b[1;33morigin_hub [0, 0] ; dest_hub [0, 0] ; weight_kg [0, 1.5] -> transit_hours [0, 4], LHS conditions: (delivery_type = Express), RHS conditions: ()\x1b[0m
+
+Let`s verify this.
+This \x1b[1;31mCDD doesn`t hold.\x1b[0m
+
+- \x1b[1;31mDD violations found: 2 pairs.\x1b[0m
+1) 101 Chicago Atlanta Express 3.0 \x1b[1;31m14\x1b[0m
+3) 103 Chicago Atlanta Express 4.0 \x1b[1;31m38\x1b[0m
+
+2) 102 Chicago Atlanta Express 3.5 \x1b[1;31m15\x1b[0m
+3) 103 Chicago Atlanta Express 4.0 \x1b[1;31m38\x1b[0m
+
+It can be seen that 103 package violates express shipment business policies. Consequently, it 
+is logical to assume that an inaccuracy occurred and the package was intended to have the 
+Standard delivery type. We now correct this error.
+
+   package_id origin_hub dest_hub delivery_type  weight_kg  transit_hours
+0         101    Chicago  Atlanta       Express        3.0             14
+1         102    Chicago  Atlanta       Express        3.5             15
+2         103    Chicago  Atlanta      Standard        4.0             38
+3         104    Chicago  Atlanta      Standard        3.2             40
+4         105    Chicago  Atlanta      Standard        3.8             42
+5         106     Dallas  Atlanta       Express        3.0             16
+6         107     Dallas  Atlanta       Express        3.2             17
+
+Let`s verify this.
+This \x1b[1;32mCDD holds.\x1b[0m
+
+
+----------------------------------------------------------------------------------------------------
+Example #5
+----------------------------------------------------------------------------------------------------
+LHS conditions answer the question "which rows does the rule apply to?", while RHS conditions
+answer "what must additionally hold for the rows that match the rule?". This is useful when
+values are consistent with each other, but violate an absolute business constraint:
+a plain DD cannot detect this.
+
+Let's return to the stores_dd.csv table.
+
+Suppose the manufacturer enforces a minimum advertised price (MAP) policy: smartphones must
+not be sold below 900 in any store, and prices of the same smartphone across stores must stay
+close to each other (difference <= 40).
+
+First, let's check only the consistency of prices inside the Smartphones segment:
+
+\x1b[1;33mproduct_name [0, 0] -> price_per_unit [0, 40], LHS conditions: (category = Smartphones), RHS conditions: ()\x1b[0m
+
+Let`s verify this.
+This \x1b[1;32mCDD holds.\x1b[0m
+
+Prices of identical smartphones are consistent across stores, so the DD part does not find
+anything suspicious. Now add the MAP policy as an RHS condition:
+
+\x1b[1;33mproduct_name [0, 0] -> price_per_unit [0, 40], LHS conditions: (category = Smartphones), RHS conditions: (price_per_unit >= 900)\x1b[0m
+
+Let`s verify this.
+This \x1b[1;31mCDD doesn`t hold.\x1b[0m
+
+While the DD defined by this CDD holds, some of the rows that satisfy the distance
+constraints of the RHS DD violate the RHS conditions of the CDD.
+
+\x1b[1;31mRHS condition violations found: 2 rows.\x1b[0m
+
+4) \x1b[1;31mBestBuy NY\x1b[0m Samsung Galaxy S23 Smartphones 25 899
+6) \x1b[1;31mWalmart TX\x1b[0m Samsung Galaxy S23 Smartphones 35 880
+
+
+Both violations concern Samsung Galaxy S23: the prices are close to the other stores, but below
+the MAP threshold. We correct the prices.
+
+    store_name        product_name     category  stock_quantity  price_per_unit
+0   BestBuy NY     Apple iPhone 15  Smartphones              50             999
+1   BestBuy LA     Apple iPhone 15  Smartphones              30            1029
+2   Walmart TX     Apple iPhone 15  Smartphones              40             989
+3   BestBuy NY  Samsung Galaxy S23  Smartphones              25             900
+4   BestBuy LA  Samsung Galaxy S23  Smartphones              20             920
+5   Walmart TX  Samsung Galaxy S23  Smartphones              35             900
+6   BestBuy NY     Sony WH-1000XM5   Headphones              15             399
+7   BestBuy LA     Sony WH-1000XM5   Headphones              18             410
+8   Walmart TX     Sony WH-1000XM5   Headphones              10             395
+9   BestBuy NY   Apple MacBook Air      Laptops              10            1299
+10  BestBuy LA   Apple MacBook Air      Laptops               8            1349
+11  Walmart TX   Apple MacBook Air      Laptops              12            1289
+
+Let`s verify this.
+This \x1b[1;32mCDD holds.\x1b[0m
+
+
+Related examples (similar primitives):
+examples/basic/verifying_dd.py   - Differential Dependencies verification
+examples/basic/verifying_cfd.py  - Conditional Functional Dependencies verification
+examples/basic/mining_dd.py      - Differential Dependencies mining
+examples/basic/mining_cfd.py     - Conditional Functional Dependencies mining
+
+'''
+
 snapshots['test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output'] = '''\x1b[1;34mCFD Validation Example - Desbordante\x1b[0m
 
 \x1b[1;34m=== Understanding Conditional Functional Dependencies ===\x1b[0m
@@ -5368,6 +5638,405 @@ each offering a different perspective on dependency strength.
 
 A dedicated walkthrough of all available metrics can be found at:
 \x1b[1;42mexamples/basic/verifying_fd_afd_metric.py\x1b[1;49m
+'''
+
+snapshots['test_example[basic/verifying_gdd/verifying_gdd1.py-None-verifying_gdd1_output] verifying_gdd1_output'] = '''This example demonstrates Graph Differential Dependency
+(GDD) validation.
+
+The pattern is defined in the paper
+
+"Zhang, Y., Kwashie, S., Bewong, M., Hu, J., Mahboubi, A.,
+Guo, X., & Feng, Z. Discovering graph differential dependencies.
+Australasian Database Conference (ADC), 2023."
+
+\x1b[95mBasic definition\x1b[0m
+
+A Graph Differential Dependency has the form
+
+    (Q[z], ΦL(X) -> ΦR(Y))
+
+Here Q[z] is a graph pattern, while ΦL(X) and ΦR(Y) are sets of
+distance constraints over the variables of that pattern.
+
+Semantically, a GDD states the following: for every homomorphic match
+of the pattern in the graph, if all constraints from the left-hand
+side hold, then all constraints from the right-hand side must also
+hold.
+
+In simpler terms, a GDD is a formal implication checked on all
+homomorphic matches of the pattern.
+
+The difference between a homomorphic match and an isomorphic match
+will be shown in the next example.
+
+\x1b[95mParameters\x1b[0m
+
+The validator receives two inputs:
+1. the input graph written in DOT;
+2. the list of GDDs to validate.
+
+Each GDD consists of three parts:
+1. a pattern written in DOT;
+2. the left-hand side constraints;
+3. the right-hand side constraints.
+
+In this example we use only attribute-to-constant constraints.
+Currently the Python API also provides relation-based helpers.
+
+\x1b[95mProperty graph definition\x1b[0m
+
+A property graph is a tuple
+
+    G = (V, E, λ, ρ)
+
+where:
+- V is the set of vertices;
+- E is the set of directed edges;
+- λ assigns labels to vertices and edges;
+- ρ stores attribute-value pairs of vertices.
+
+In this example, Person and City are vertex labels.
+Attributes such as "name" and "age" are stored in ρ,
+and "lives_in" is an edge label.
+
+\x1b[95mGraph pattern definition\x1b[0m
+
+A graph pattern Q[z] is a directed graph whose vertices and edges
+also have labels. The list z contains all pattern vertices, that is,
+all pattern variables.
+
+Intuitively, the pattern describes the shape of subgraphs on which
+the dependency is checked.
+
+In this example the pattern is
+
+    Person -[lives_in]-> City
+
+\x1b[95mHomomorphic match definition\x1b[0m
+
+A match of a graph pattern in a graph is a homomorphism h from the
+pattern to the graph such that:
+1. each pattern vertex is mapped to a graph vertex with a matching
+   label;
+2. each pattern edge is mapped to a graph edge with a matching label.
+
+Important: this is a homomorphic match, not necessarily an isomorphic
+one. Distinct pattern vertices may be mapped to the same graph vertex.
+This difference matters in general and will be discussed in the next
+example.
+
+\x1b[95mGDD syntax and semantics\x1b[0m
+
+A Graph Differential Dependency has the form
+
+    (Q[z], ΦL(X) -> ΦR(Y))
+
+where:
+- Q[z] is a graph pattern;
+- ΦL(X) is the left-hand side;
+- ΦR(Y) is the right-hand side;
+- both ΦL(X) and ΦR(Y) are sets of distance constraints.
+
+Let H(Q[z], G) be the set of all matches of Q[z] in graph G.
+Then G satisfies the GDD iff for every match h in H(Q[z], G),
+
+    h |= ΦL(X)  =>  h |= ΦR(Y)
+
+So the left-hand side acts as a precondition, and the right-hand
+side must hold whenever that precondition is satisfied.
+
+\x1b[95mSix forms of distance constraints\x1b[0m
+
+In the paper, distance constraints come in six forms.
+
+1. Attribute-to-constant:
+   δ_A(x.A, c) <= t
+
+2. Attribute-to-attribute:
+   δ_{A1,A2}(x.A1, x'.A2) <= t
+
+3. eid-to-constant:
+   δ_{eid}(x.eid, ce) = 0
+
+4. eid-to-eid:
+   δ_{eid}(x.eid, x'.eid) = 0
+
+5. Relation-to-constant:
+   δ_≡(x.rela, cr) = 0
+
+6. Relation-to-relation:
+   δ_≡(x.rela, x'.rela) = 0
+
+We usually do not use eid constraints, because the identifier of
+the real-world entity is often unknown in the data. It may be
+implemented later.
+
+\x1b[95mHow these constraints are represented in Python\x1b[0m
+
+The current Python bindings conveniently expose these helpers:
+
+1. AttrConst(pid, attr, const, metric, op, threshold)
+   attribute-to-constant
+
+2. AttrAttr(pid1, attr1, pid2, attr2, metric, op, threshold)
+   attribute-to-attribute
+
+3. RelConst(pid, relation, const)
+   relation-to-constant
+
+4. RelRel(pid1, relation1, pid2, relation2)
+   relation-to-relation
+
+For attribute constraints:
+- pid is the pattern vertex id;
+- attr is the attribute name;
+- const is the compared constant, if any;
+- metric is the distance metric;
+- op is the comparison operator;
+- threshold bounds the distance.
+
+Desbordante version of GDD validation implements:
+- EDIT_DISTANCE metric for strings;
+- ABS_DIFF metric for numbers;
+- LE, LT, GE, GT, EQ, NE as the comparison operator.
+
+Note that the original paper describes two comparison operators:
+LE and EQ.
+
+\x1b[95mDataset\x1b[0m
+
+The displayed figure shows a small property graph (on the left).
+
+It contains Person vertices with attributes such as "name" and "age",
+and City vertices with a "name" attribute. The edge "lives_in"
+connects a person to the city where that person lives.
+
+So, informally, the picture describes several people with attributes
+and the cities in which they live. This is the graph on which we will
+validate our dependencies.
+
+\x1b[95mShowcase 1\x1b[0m
+
+Showcase 1. String equality via EDIT_DISTANCE.
+
+We validate the following rule inside the pattern (shown on the right)
+
+    Person -[lives_in]-> City
+
+The concrete dependency says:
+
+    if 0.name = "Misha", then 1.name = "Amsterdam"
+
+Since EDIT_DISTANCE with threshold 0.0 means exact string equality,
+this is simply the implication
+
+    "Misha" -> "Amsterdam"
+
+This dependency is expected not to hold, because not every matched
+person with name "Misha" lives in Amsterdam. One of the two Mishas
+lives in Riga.
+
+\x1b[95mDesbordante > \x1b[0mGDD does not hold.
+
+\x1b[95mShowcase 2\x1b[0m
+
+Showcase 2. Arithmetic distance via ABS_DIFF.
+
+Now we validate another rule on the same pattern (shown on the right
+as well):
+
+    if 0.age < 30, then 1.name = "Amsterdam"
+
+With the current API, ABS_DIFF expresses absolute distance to a
+constant. Therefore, assuming non-negative ages, we encode
+
+    0.age < 30
+
+as
+
+    |0.age - 0| < 30
+
+This is a convenient showcase for ABS_DIFF in this dataset.
+This dependency is expected to hold because, in this graph, every
+matched person younger than 30 lives in Amsterdam. Misha and Bob
+are 25, while the other Misha is 31 and lives in Riga.
+
+\x1b[95mDesbordante > \x1b[0mGDD holds.
+
+\x1b[95mWhat we learned\x1b[0m
+
+In this example we learned how to describe a graph pattern,
+attach distance constraints to its vertices, and validate several GDDs
+in a single validator run on one graph.
+
+We also saw two kinds of constraints in practice:
+exact string equality through EDIT_DISTANCE, and numeric comparison
+through ABS_DIFF.
+
+For a more realistic scenario based on fact checking, read the example
+
+    verifying_gdd2.py
+
+\x1b[93mClose the image window to finish.\x1b[0m
+'''
+
+snapshots['test_example[basic/verifying_gdd/verifying_gdd2.py-None-verifying_gdd2_output] verifying_gdd2_output'] = '''This example demonstrates GDD validation for fact checking.
+
+The pattern is defined in the paper
+
+"Zhang, Y., Kwashie, S., Bewong, M., Hu, J., Mahboubi, A.,
+Guo, X., & Feng, Z. Discovering graph differential dependencies.
+Australasian Database Conference (ADC), 2023."
+
+\x1b[95mGraph\x1b[0m
+
+The figure contains a small fact-checking example.
+
+On the left is the data graph. It stores cities and countries, together
+with two kinds of facts: a city may be a capital of a country, and a
+city may be located in a country.
+
+Here we validate that a country's capital is located on that country's
+territory. In graph terms, for one City vertex, the country reached via
+`capital_of` must coincide with the country reached via `located_in`.
+
+On the right is the graph pattern used by the dependency. Starting from
+one City vertex, it follows both outgoing edges and binds the two
+reached Country variables separately.
+
+
+\x1b[95mHomomorphic matching\x1b[0m
+
+This example is intentionally built around a self-join pattern.
+
+The pattern has one City variable and two Country variables.
+
+It is important to distinguish graph isomorphism from graph homomorphism.
+
+Informally, an isomorphism is a vertex bijection which is both edge-preserving
+and label-preserving mapping. In particular, different pattern vertices must be
+mapped to different graph vertices due to it's injectiveness.
+
+A homomorphism is weaker: it must preserve the labeled edges of the
+pattern, but it does not have to be injective. So two different pattern
+vertices may be mapped to the same graph vertex, as long as all pattern
+edges are still respected in the data graph.
+
+Under the GDD definition from the paper, a match of the pattern is a
+homomorphism, not an isomorphism. Therefore, variables 1 and 2 are not
+required to map to different graph vertices.
+
+So the two Country variables may refer to the same country node.
+Here this is not a corner case but exactly the desired behavior: if
+`capital_of` and `located_in` agree, both variables should be allowed
+to map to the same Country.
+
+
+\x1b[95mPython API used in this example\x1b[0m
+
+This example constructs the dependency with GddFromDotString,
+that is, directly from a DOT string embedded in Python.
+
+This is convenient for compact and self-contained examples. If the
+pattern is already stored in the repository as a DOT file, the same
+idea can be expressed with GddFromDotFile, as in the earlier
+file-based validation example.
+
+Now that the validator can also return counterexamples, we will use
+that functionality on a second dataset where the fact-check fails.
+
+
+\x1b[95mShowcase 1. Consistent dataset\x1b[0m
+
+Showcase 1. Fact checking on a consistent dataset.
+
+We validate the following rule on the pattern:
+
+    if a city has both edges from the pattern,
+    then the countries reached by `capital_of`
+    and `located_in` must have the same name
+
+This is exactly a fact-check that a country's capital is located on the
+territory of that same country.
+
+Formally, the right-hand side is
+
+    1.name = 2.name
+
+implemented as EDIT_DISTANCE == 0.0 between the two country names.
+
+The left-hand side is empty. So the dependency is checked on every
+homomorphic match of the pattern. This is a useful fact-checking
+shape: two different graph paths that start from the same city must
+agree on the country they reach.
+
+In the current graph, Paris reaches France through both edges, and
+Berlin reaches Germany through both edges. Lyon has no `capital_of`
+edge, so it does not instantiate the pattern and does not participate
+in the check. Therefore this dependency is expected to hold.
+
+
+\x1b[95mDesbordante > \x1b[0mGDD holds.
+
+\x1b[93mClose the image window to continue.\x1b[0m
+
+\x1b[95mShowcase 2. Inconsistent dataset\x1b[0m
+
+Showcase 2. Fact checking on an inconsistent dataset.
+
+Now we keep the same schema, the same pattern, and the same GDD, but
+we slightly modify the graph.
+
+Paris is still recorded as the capital of France, but its `located_in`
+edge now points to Germany.
+
+So the dependency is expected not to hold. In this situation, the most
+natural interpretation is that the data are inconsistent: two facts in
+the graph disagree about the same city.
+
+Since the validator can now return counterexamples, we will inspect
+one violating match and see exactly how the pattern was mapped.
+
+
+\x1b[95mDesbordante > \x1b[0mGDD does not hold.
+
+This is likely a data inconsistency: one city is connected to
+different countries through `capital_of` and `located_in`.
+
+\x1b[95mReturned counterexample\x1b[0m
+
+A counterexample is a homomorphic match of the pattern for which
+the implication fails.
+
+Here the left-hand side is empty, so every match satisfies it. Thus a
+counterexample is simply a match for which the right-hand side
+
+    1.name = 2.name
+
+does not hold.
+
+Below we print how each pattern vertex was mapped to the graph.
+
+
+Counterexample match:
+  0 City -> 1 City {'name': 'Paris'}
+  1 Country -> 101 Country {'name': 'France'}
+  2 Country -> 102 Country {'name': 'Germany'}
+
+\x1b[95mWhat we learned\x1b[0m
+
+In this example we used GDD validation as a consistency check
+between two different paths in a graph.
+
+Concretely, we checked that if a city is recorded as the capital of a
+country, then that city is also recorded as being located in the same
+country.
+
+We also saw how a returned counterexample can be interpreted as a
+concrete witness of a likely inconsistency in the data.
+
+
+\x1b[93mClose the image window to finish.\x1b[0m
 '''
 
 snapshots['test_example[basic/verifying_gdd/verifying_gdd1.py-None-verifying_gdd1_output] verifying_gdd1_output'] = '''This example demonstrates Graph Differential Dependency
