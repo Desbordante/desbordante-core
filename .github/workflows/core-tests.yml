@@ -39,7 +39,7 @@ concurrency:
   
 jobs:
   run_tests:
-    name: Run core-tests on ${{ matrix.system.os }} with ${{ matrix.system.toolset }}, ${{matrix.cfg.BUILD_TYPE}} ${{ matrix.cfg.SANITIZER }}
+    name: Run core-tests on ${{ matrix.system.os }} with ${{ matrix.system.toolset }}, ${{ matrix.cfg.PRESET }}
     continue-on-error: true
     strategy:
       matrix:
@@ -70,10 +70,10 @@ jobs:
             env: CXX=clang++
 
         cfg:
-          - { BUILD_TYPE: Release }
-          - { BUILD_TYPE: Debug, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
-          - { BUILD_TYPE: Debug, SANITIZER : ADDRESS, CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
-          - { BUILD_TYPE: Debug, SANITIZER : UB, CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
+          - { PRESET: release }
+          - { PRESET: debug, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
+          - { PRESET: asan, CMAKE_OPTS : '-DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
+          - { PRESET: ubsan, CMAKE_OPTS : '-DCMAKE_CXX_FLAGS_DEBUG="-O1" -DDESBORDANTE_CI_REDUCED_DEBUG_INFO=ON' }
 
     runs-on: ${{ matrix.system.os }}
     steps:
@@ -88,20 +88,15 @@ jobs:
         run: |
           export ${{ matrix.system.env }}
 
-          if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
-            ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }} \
-              --cmake-opt='${{ matrix.cfg.CMAKE_OPTS }}'
-          else
-            ./build.sh
-          fi
+          cmake --preset ${{ matrix.cfg.PRESET }} ${{ matrix.cfg.CMAKE_OPTS }}
+          cmake --build --preset ${{ matrix.cfg.PRESET }}
       - name: Test
-        working-directory: ${{github.workspace}}/build
         shell: bash
         run: |
           export ${{ matrix.system.runtime-env }}
 
           if [[ "${{ inputs.parallel-tests }}" != "false" ]]; then
-            export CTEST_ARGS="-j ${nproc}"
+            export CTEST_ARGS="-j $(nproc)"
           fi
 
-          ctest --exclude-regex ".*HeavyDatasets.*" --output-on-failure $CTEST_ARGS
+          ctest --preset ${{ matrix.cfg.PRESET }} $CTEST_ARGS
