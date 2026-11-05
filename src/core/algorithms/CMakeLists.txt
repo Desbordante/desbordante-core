@@ -6,6 +6,7 @@ set(SUBDIRS
     dc
     dd
     fd
+    hue
     fem
     fsm
     gdd
