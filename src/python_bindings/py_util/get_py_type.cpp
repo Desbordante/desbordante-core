@@ -16,6 +16,7 @@
 #include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
@@ -109,6 +110,7 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<algos::od::Ordering, &PyUnicode_Type>,
             kPyTypePair<algos::des::DifferentialStrategy, &PyUnicode_Type>,
             kPyTypePair<std::vector<unsigned int>, &PyList_Type, &PyLong_Type>,
+            kPyTypePair<algos::pattern_fd::PatternsTable, &PyList_Type, &PyDict_Type>,
             {typeid(algos::hymd::HyMD::ColumnMatches),
              []() {
                  return MakeTypeTuple(

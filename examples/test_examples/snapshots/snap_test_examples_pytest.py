@@ -6992,6 +6992,108 @@ Now that you have completed all basic examples, you can continue with the advanc
 This example demonstrates how to define and use a Custom domain.
 '''
 
+snapshots['test_example[basic/verifying_pattern_fd.py-None-verifying_pattern_fd_output] verifying_pattern_fd_output'] = '''Pattern FD validation in Desbordante. This example is based on 'Pattern Functional Dependencies for Data Cleaning' by Abdulhakim Qahtan, Nan Tang, Mourad Ouzzani, Yang Cao, and Michael Stonebraker, Proceedings of the VLDB Endowment (PVLDB), 13(5), 2020. https://www.vldb.org/pvldb/vol13/p684-qahtan.pdf
+
+Imagine that license numbers issued in a city should have a particular prefix followed by three digits. If one number is missing a letter, we can flag that row without knowing the correct number in advance. This is validation: we supply the dependency and its patterns for Desbordante to check.
+
+Formally, a Pattern FD is written (X -> Y, T): X and Y are sets of columns, and T is a pattern tableau. Each row of T assigns patterns to columns in X and Y. Both sides may contain several columns; lhs_indices and rhs_indices are lists of their zero-based column indices. For example, lhs_indices=[2, 3] uses City and Zip, while rhs_indices=[0, 4] checks Licensee Name and Licensee Number. Here we specify a pattern for every listed column. The running example uses one column on each side to keep the output readable.
+
+The paper draws a bar over a constrained part: matching rows must agree on that part. In Desbordante's Regex(pattern), write <...> instead. For example, Regex(r'<\\D{3}>\\D{2}') accepts five digits and compares the first three. The bar and angle brackets are notation for comparison, not characters in the data. Regex(r'BBWLHR\\D{3}') checks only the value's structure: the literal prefix BBWLHR followed by three digits. Here \\D means a digit in Desbordante's pattern language, unlike Python's regex escape \\D.
+
+Token(text, position) specifies a token-position pair: the given text must appear at a zero-based position. Depending on the column's mode, position counts tokens or characters; in this example the whole city name starts at position 0. The paper's bottom symbol (⊥) is Wildcard() in Python. It can be placed in a tableau row as {ZIP: Wildcard()}. It accepts any value; when values are compared within a group, their complete values are used. Regex also supports \\A (any character), \\U (uppercase), \\L (lowercase), and \\S (a non-word symbol), as well as repetitions such as {N}, * and +. Use raw Python strings for patterns containing backslashes.
+
+Options available to this verifier:
+  load_data(table=...): the input table, here a pandas DataFrame
+  load_data(is_null_equal_null=...): whether nulls compare equal (default: True)
+  execute(lhs_indices=...): zero-based indices of the LHS columns
+  execute(rhs_indices=...): zero-based indices of the RHS columns
+  execute(patterns=...): the pattern tableau, a list of column-to-pattern maps
+  execute(min_pattern_fd_coverage=...): minimum distinct rows matching a tableau LHS
+  execute(min_pattern_inclusion=...): minimum LHS matches for every tableau row
+  execute(max_rhs_deviation=...): maximum allowed RHS violation fraction
+
+The licenses dataset contains the following rows. Row numbers on the left are zero-based and will also appear in the validation results:
+
+                          Licensee Name                   Street          City    Zip Licensee Number
+0                   DEL FRISCO'S GRILLE  11800 GRAND PARK AVENUE     ROCKVILLE  20852       BBWLHR856
+1   PALADAR LATIN KITCHEN & RUM BAR - G   203 CROWNE PARK AVENUE  GAITHERSBURG  20878       BBWLHR855
+2                   29 CONVENIENCE MART    10755 COLESVILLE ROAD    GERMANTOWN  20901        BWLCC021
+3                          ASIA NINE II      254 CROWN PARK ROAD  GAITHERSBURG  20878       BBWLHR861
+4                      BLO BLOW DRY BAR  317 ELLINGTON BOULEVARD  GAITHERSBURG  20878       BBWLHR866
+5                       MAKI MAKI SUSHI       8023 WISCONSIN AVE    GERMANTOWN  20814        CBWLC002
+6                CAMBRIA HOTEL & SUITES     1 HELEN HENEGHAN WAY     ROCKVILLE  20850     BBWLHM20442
+7                           CARLUCCIO'S       11826 TRADE STREET    GERMANTOWN  20852       CBWLCC021
+8       BRETTON WOODS RECREATION CENTER         15700 RIVER ROAD    GERMANTOWN  20874       CBWLCC006
+9                         TEDS BULLETIN  220 ELLINGTON BOULEVARD  GAITHERSBURG  20878       BBWLHR185
+10              POOLESVILLE GOLF COURSE  16601 WEST WILLARD ROAD    GERMANTOWN  20837       CBWLCC007
+11                  OLD TOWN POUR HOUSE  212 ELLINGTON BOULEVARD  GAITHERSBURG  20878       BBWLHR187
+
+Our proposed dependency is City -> Licensee Number. The pattern tableau has two rows: for GAITHERSBURG, a license number must start with BBWLHR; for GERMANTOWN, it must start with CBWLCC. Both prefixes are followed by exactly three digits. The Python names Token and Regex correspond to the two kinds of patterns in this tableau. Other cities, such as ROCKVILLE, are outside these tableau rows.
+
+  City = Token('GAITHERSBURG', 0) -> Licensee Number = Regex('BBWLHR\\\\D{3}')
+  City = Token('GERMANTOWN', 0) -> Licensee Number = Regex('CBWLCC\\\\D{3}')
+
+We require at least four LHS matches for each tableau row (min_pattern_inclusion=4) and ten distinct LHS-matching rows overall (min_pattern_fd_coverage=10). For each tableau row, RHS deviation is its violating rows divided by its LHS-matching rows. The reported max_rhs_deviation is the largest such fraction; the allowed limit is 0.2. Desbordante reports the observed values alongside the user-supplied limits; it does not change those limits.
+
+Results on the original data: ['City'] -> ['Licensee Number']
+  Pattern FD holds: False
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.40
+  Violating rows: 2
+  Clusters with violations: 1
+  Cluster 1:
+    row 2: ['GERMANTOWN'] -> ['BWLCC021']  <-- violation
+    row 5: ['GERMANTOWN'] -> ['CBWLC002']  <-- violation
+    row 7: ['GERMANTOWN'] -> ['CBWLCC021']
+    row 8: ['GERMANTOWN'] -> ['CBWLCC006']
+    row 10: ['GERMANTOWN'] -> ['CBWLCC007']
+
+In the original data, both city patterns cover five rows. Two GERMANTOWN license numbers lack a letter in the expected CBWLCC prefix, so that tableau row has deviation 2/5 = 0.4. This exceeds the allowed 0.2.
+
+To illustrate the result, change the two highlighted values in a copy of the table so they match the expected pattern, then run the same validation again. These are illustrative values, not verified license numbers. The CSV file is unchanged.
+
+  row 2: BWLCC021 -> CBWLCC021
+  row 5: CBWLC002 -> CBWLCC002
+
+Results after changing the highlighted values: ['City'] -> ['Licensee Number']
+  Pattern FD holds: True
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.00
+  Violating rows: 0
+  Clusters with violations: 0
+
+Previously highlighted rows no longer highlighted: [2, 5]
+
+The same data can also be checked with a different threshold. If we allow max_rhs_deviation=0.4 on the original table, pattern_fd_holds() becomes true, but the two highlighted rows remain. Changing a threshold changes the acceptance decision, not the data.
+
+Results on original data with a relaxed limit: ['City'] -> ['Licensee Number']
+  Pattern FD holds: True
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.40
+  Violating rows: 2
+  Clusters with violations: 1
+  Cluster 1:
+    row 2: ['GERMANTOWN'] -> ['BWLCC021']  <-- violation
+    row 5: ['GERMANTOWN'] -> ['CBWLC002']  <-- violation
+    row 7: ['GERMANTOWN'] -> ['CBWLCC021']
+    row 8: ['GERMANTOWN'] -> ['CBWLCC006']
+    row 10: ['GERMANTOWN'] -> ['CBWLCC007']
+
+Finally, use two LHS columns: City and Zip. A row must satisfy both the city token and the five-digit Zip pattern to be included. Since Regex(r'\\D{5}') has no <...> part, the complete Zip values are used when grouping LHS rows. This example has two LHS columns, and the API allows more; rhs_indices can likewise list multiple RHS columns, with their patterns included in each tableau row.
+
+Results with two LHS columns: ['City', 'Zip'] -> ['Licensee Number']
+  Pattern FD holds: True
+  Observed coverage: 10
+  Observed minimum pattern inclusion: 5
+  Observed maximum RHS deviation: 0.00
+  Violating rows: 0
+  Clusters with violations: 0
+
+'''
+
 snapshots['test_example[basic/verifying_pfd.py-None-verifying_pfd_output] verifying_pfd_output'] = '''Dataset: examples/datasets/glitchy_sensor_2.csv
     Id DeviceId  Data
 0    1      D-1  1001
