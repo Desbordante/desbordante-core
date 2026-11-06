@@ -15,7 +15,9 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/pac/domain_pac.h"
+#include "core/algorithms/pac/fd_pac.h"
 #include "core/config/column_index/type.h"
+#include "core/config/indices/type.h"
 #include "python_bindings/pac/bind_domains.h"
 
 namespace py = pybind11;
@@ -34,6 +36,30 @@ py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
     for (std::size_t i = 0; i < column_indices.size(); ++i) {
         result[i + 1] = column_indices[i];
     }
+    return result;
+}
+
+/// @brief Convert FD PAC to a Python tuple, which elements are (concatenated):
+///   1. Lhs column indices
+///   2. Rhs column indices
+/// Lhs deltas, epsilons and delta are not included in tuple, because there's no proper way to hash
+/// doubles
+py::tuple FDPACToTuple(model::FDPAC const& fd_pac) {
+    auto const lhs_col_indices = fd_pac.GetLhsColumnIndices();
+    auto const rhs_col_indices = fd_pac.GetRhsColumnIndices();
+
+    auto add_to_tuple = [](py::tuple& tp, auto const& vec, std::size_t& shift) {
+        for (std::size_t i = 0; i < vec.size(); ++i) {
+            tp[shift + i] = vec[i];
+        }
+        shift += vec.size();
+    };
+
+    py::tuple result(lhs_col_indices.size() + rhs_col_indices.size());
+    std::size_t shift = 0;
+    add_to_tuple(result, lhs_col_indices, shift);
+    add_to_tuple(result, rhs_col_indices, shift);
+
     return result;
 }
 }  // namespace
@@ -74,6 +100,42 @@ void BindPAC(py::module& main_module) {
                         auto delta = t[4].cast<double>();
                         return DomainPAC(epsilon, delta, domain_name, std::move(column_indices),
                                          std::move(column_names));
+                    }));
+
+    py::class_<FDPAC>(pac_module, "FDPAC")
+            .def_property_readonly("epsilons", &FDPAC::GetEpsilons)
+            .def_property_readonly("delta", &FDPAC::GetDelta)
+            .def_property_readonly("lhs_deltas", &FDPAC::GetLhsDeltas)
+            .def_property_readonly("lhs_indices", &FDPAC::GetLhsColumnIndices)
+            .def_property_readonly("lhs_column_names", &FDPAC::GetLhsColumnNames)
+            .def_property_readonly("rhs_indices", &FDPAC::GetRhsColumnIndices)
+            .def_property_readonly("rhs_column_names", &FDPAC::GetRhsColumnNames)
+            .def("to_short_string", &FDPAC::ToShortString)
+            .def("to_long_string", &FDPAC::ToLongString)
+            .def("__str__", &FDPAC::ToLongString)
+            .def(py::self == py::self)
+            .def("__hash__", [](FDPAC const& fd_pac) { return py::hash(FDPACToTuple(fd_pac)); })
+            .def(py::pickle(
+                    [](FDPAC const& fd_pac) {
+                        return py::make_tuple(
+                                fd_pac.GetLhsColumnIndices(), fd_pac.GetLhsColumnNames(),
+                                fd_pac.GetRhsColumnIndices(), fd_pac.GetRhsColumnNames(),
+                                fd_pac.GetLhsDeltas(), fd_pac.GetEpsilons(), fd_pac.GetDelta());
+                    },
+                    [](py::tuple t) {
+                        if (t.size() != 7) {
+                            throw std::runtime_error("Invalid state for FD PAC pickle");
+                        }
+                        auto lhs_indices = t[0].cast<config::IndicesType>();
+                        auto lhs_column_names = t[1].cast<std::vector<std::string>>();
+                        auto rhs_indices = t[2].cast<config::IndicesType>();
+                        auto rhs_column_names = t[3].cast<std::vector<std::string>>();
+                        auto lhs_deltas = t[4].cast<std::vector<double>>();
+                        auto epsilons = t[5].cast<std::vector<double>>();
+                        auto delta = t[6].cast<double>();
+                        return FDPAC(std::move(lhs_indices), std::move(lhs_column_names),
+                                     std::move(rhs_indices), std::move(rhs_column_names),
+                                     std::move(lhs_deltas), std::move(epsilons), delta);
                     }));
 
     BindDomains(pac_module);

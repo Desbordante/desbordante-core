@@ -12,12 +12,8 @@
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/pac_verifier.h"
-#include "core/config/descriptions.h"
-#include "core/config/indices/option.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
-#include "core/config/option_using.h"
-#include "core/config/tabular_data/input_table/option.h"
 
 namespace algos::pac_verifier {
 /// @brief Domain Probabilistic Approximate Constraint verifier.
@@ -54,19 +50,14 @@ private:
         pac_ = std::nullopt;
     }
 
-public:
-    DomainPACVerifier() : PACVerifier() {
-        DESBORDANTE_OPTION_USING;
+    void MakeExecuteOptsAvailable() override {
+        using namespace config::names;
 
-        RegisterOption(
-                config::kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices}}}));
-
-        RegisterOption(config::IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
-                &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
-        RegisterOption(Option(&domain_, kDomain, kDDomain));
-
-        MakeOptionsAvailable({config::kTableOpt.GetName(), kDomain});
+        MakeOptionsAvailable({kMinEpsilon, kDiagonalThreshold});
     }
+
+public:
+    DomainPACVerifier();
 
     model::DomainPAC const& GetPAC() const {
         if (!pac_) {
