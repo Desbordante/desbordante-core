@@ -51,10 +51,11 @@ private:
 
     // Input
     config::InputTable input_table_;
-    config::CustomMetricsType metrics_;
+    config::CustomMetricsOptionType metrics_;
 
     // Internal state
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
+    config::CustomMetricsType typed_metrics_;
     std::size_t num_attributes_ = 0;
     std::size_t num_rows_ = 0;
     std::size_t total_pairs_ = 0;
@@ -87,6 +88,7 @@ private:
     void ResetState() final;
 
     // helper methods
+    void BuildTypedMetrics();
     void BuildMatchBitsets();
     std::size_t ComputeSupport(uint32_t attributes_mask);
     // Computes conf and supp for a single individual

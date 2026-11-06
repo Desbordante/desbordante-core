@@ -215,7 +215,7 @@ boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
                                    return nullptr;
                                }
                                try {
-                                   return handle.cast<config::CustomMetricType>();
+                                   return handle.cast<config::CustomMetricOptionType>();
                                } catch (py::cast_error const&) {
                                }
                                return std::make_shared<python_bindings::PyCustomMetric>(
@@ -276,6 +276,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
         {typeid(config::CustomMetricType), CustomMetricToAny},
         {typeid(config::CustomMetricsType), CustomMetricsToAny},
+        {typeid(config::CustomMetricOptionType), CustomMetricToAny},
+        {typeid(config::CustomMetricsOptionType), CustomMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
         kNormalConvPair<std::vector<double>>,
 };

@@ -20,20 +20,6 @@ namespace python_bindings {
 
 namespace {
 
-RFD MakeRfd(std::vector<std::size_t> lhs_indices, std::size_t rhs_index, double support,
-            double confidence) {
-    if (lhs_indices.empty()) throw config::ConfigurationError("LHS must not be empty");
-    if (std::find(lhs_indices.begin(), lhs_indices.end(), rhs_index) != lhs_indices.end()) {
-        throw config::ConfigurationError("RHS attribute cannot be in LHS");
-    }
-    RFD rfd;
-    rfd.lhs_indices = std::move(lhs_indices);
-    rfd.rhs_index = rhs_index;
-    rfd.support = support;
-    rfd.confidence = confidence;
-    return rfd;
-}
-
 std::vector<std::string> LhsNames(RFD const& rfd) {
     std::vector<std::string> names;
     names.reserve(rfd.lhs_indices.size());
@@ -73,15 +59,17 @@ void BindGaRfd(py::module_& main_module) {
 
     py::class_<RFD>(rfd_module, "RFD")
             .def(py::init<>())
-            .def(py::init(&MakeRfd), py::arg("lhs_indices"), py::arg("rhs_index"),
-                 py::arg("support") = 0.0, py::arg("confidence") = 0.0)
+            .def(py::init<std::vector<std::size_t>, std::size_t, double, double>(),
+                 py::arg("lhs_indices"), py::arg("rhs_index"), py::arg("support") = 0.0,
+                 py::arg("confidence") = 0.0)
             .def_property_readonly("lhs_indices", [](RFD const& r) { return r.lhs_indices; })
             .def_property_readonly("rhs_index", [](RFD const& r) { return r.rhs_index; })
             .def_property_readonly("lhs", &LhsNames)
             .def_property_readonly("rhs", &RhsName)
             .def_property_readonly("support", [](RFD const& r) { return r.support; })
             .def_property_readonly("confidence", [](RFD const& r) { return r.confidence; })
-            .def("__str__", [](RFD const& r) { return r.input_table ? r.ToString() : ToStringNoTable(r); })
+            .def("__str__",
+                 [](RFD const& r) { return r.input_table ? r.ToString() : ToStringNoTable(r); })
             .def("__repr__",
                  [](RFD const& r) {
                      std::string repr = "lhs_indices=[";
@@ -111,9 +99,9 @@ void BindGaRfd(py::module_& main_module) {
                         if (state.size() != 4) {
                             throw std::runtime_error("Invalid state for RFD pickle");
                         }
-                        return MakeRfd(state[0].cast<std::vector<std::size_t>>(),
-                                       state[1].cast<std::size_t>(), state[2].cast<double>(),
-                                       state[3].cast<double>());
+                        return RFD(state[0].cast<std::vector<std::size_t>>(),
+                                   state[1].cast<std::size_t>(), state[2].cast<double>(),
+                                   state[3].cast<double>());
                     }));
 
     BindPrimitiveNoBase<GaRfd>(rfd_module, "GaRfd").def("get_rfds", &GaRfd::GetRfds);
