@@ -31,6 +31,7 @@
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
+#include "core/config/custom_random_seed/type.h"
 #include "core/config/enum_members_string.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -44,9 +45,6 @@
 #include "python_bindings/py_util/create_dataframe_reader.h"
 #include "python_bindings/py_util/iterable_sequence_stream.h"
 #include "python_bindings/py_util/py_custom_metrics.h"
-
-#include "core/algorithms/rfd/similarity_metric.h"
-#include "python_bindings/rfd/py_similarity_metric.h"
 
 namespace {
 
@@ -216,6 +214,10 @@ boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
                                if (handle.is_none()) {
                                    return nullptr;
                                }
+                               try {
+                                   return handle.cast<config::CustomMetricType>();
+                               } catch (py::cast_error const&) {
+                               }
                                return std::make_shared<python_bindings::PyCustomMetric>(
                                        py::reinterpret_borrow<py::object>(handle));
                            });
@@ -275,11 +277,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         {typeid(config::CustomMetricType), CustomMetricToAny},
         {typeid(config::CustomMetricsType), CustomMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
-        {typeid(std::shared_ptr<algos::rfd::SimilarityMetric>), [](std::string_view, py::handle obj) {
-            return std::shared_ptr<algos::rfd::SimilarityMetric>(
-                new python_bindings::PySimilarityMetric(py::reinterpret_borrow<py::object>(obj)));
-        }},
-    };
+        kNormalConvPair<std::vector<double>>,
+};
 
 }  // namespace
 
