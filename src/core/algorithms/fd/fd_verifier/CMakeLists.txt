@@ -4,7 +4,8 @@ target_sources(${NAME} PRIVATE fd_verifier.cpp stats_calculator.cpp)
 target_link_libraries(
     ${NAME}
     PUBLIC ${DESBORDANTE_PREFIX}::config
-    PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::model::table Boost::headers
+    PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::model::table
+            ${DESBORDANTE_PREFIX}::afd::metric_calc Boost::headers
 )
 
 set(NAME fd.verifier.dynamic)

@@ -13,6 +13,12 @@ enum class DESBORDANTE_EXPORT AfdErrorMeasure : char {
     kRho,
     kFi,
     kG2,
-    kG3
+    kG3,
+    kG1S,
+    kRfiPlus,
+    kRfiPrimePlus,
+    kSfi,
+    kG1Prime,
+    kG3Prime
 };
 }  // namespace algos

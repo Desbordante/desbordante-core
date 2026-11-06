@@ -1,42 +1,36 @@
-#include <utility>
+#include <cmath>
 
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
-#include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
-#include "core/config/indices/type.h"
 #include "core/config/names.h"
 #include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 using namespace config::names;
 using namespace algos::afd_metric_calculator;
 
 struct AFDMetricCalculatorParams {
-    algos::StdParamsMap params;
-    long double const expected = 0.L;
-
-    AFDMetricCalculatorParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                              AFDMetric metric, long double expected,
-                              CSVConfig const& csv_config = kTestFD)
-        : params({{kCsvConfig, csv_config},
-                  {kLhsIndices, std::move(lhs_indices)},
-                  {kRhsIndices, std::move(rhs_indices)},
-                  {kEqualNulls, true},
-                  {kMetric, metric}}),
-          expected(expected) {}
+    config::IndicesType lhs;
+    config::IndicesType rhs;
+    AFDMetric metric;
+    long double expected;
 };
 
 class TestAFDMetrics : public ::testing::TestWithParam<AFDMetricCalculatorParams> {};
 
 TEST_P(TestAFDMetrics, DefaultTest) {
     auto const& p = GetParam();
-    auto mp = algos::StdParamsMap(p.params);
-    auto calculator =
-            algos::CreateAndLoadAlgorithm<algos::afd_metric_calculator::AFDMetricCalculator>(mp);
+    algos::StdParamsMap params{{kCsvConfig, kTestFD},
+                               {kLhsIndices, p.lhs},
+                               {kRhsIndices, p.rhs},
+                               {kEqualNulls, true},
+                               {kMetric, p.metric}};
+    auto calculator = algos::CreateAndLoadAlgorithm<AFDMetricCalculator>(params);
     calculator->Execute();
-    EXPECT_DOUBLE_EQ(calculator->GetResult(), p.expected);
+    EXPECT_NEAR(calculator->GetResult(), p.expected, 1e-12L);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -47,6 +41,8 @@ INSTANTIATE_TEST_SUITE_P(
                                                     1 - std::log(4) / std::log(746496)),
                           AFDMetricCalculatorParams({4}, {3}, AFDMetric::kMuPlus, 498.L / 630),
                           AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG3, 11.L / 12),
+                          AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG1Prime, 62.L / 63),
+                          AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG3Prime, 6.L / 7),
                           AFDMetricCalculatorParams({4}, {3}, AFDMetric::kG1, 65.L / 66),
                           AFDMetricCalculatorParams({4}, {3}, AFDMetric::kRho, 0.8333333333333334),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kTau, 54.L / 114),
@@ -55,6 +51,8 @@ INSTANTIATE_TEST_SUITE_P(
                                                     std::log(432) / std::log(13824)),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kMuPlus, 252.L / 912),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG3, 7.L / 12),
+                          AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG1Prime, 50.L / 63),
+                          AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG3Prime, 3.L / 8),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kG1, 53.L / 66),
                           AFDMetricCalculatorParams({3}, {4}, AFDMetric::kRho,
                                                     0.6666666666666666)));

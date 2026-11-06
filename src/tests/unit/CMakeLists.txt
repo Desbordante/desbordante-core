@@ -293,6 +293,7 @@ desbordante_add_test(
     fd.tane
     SRCS
     test_tane_afd_measures.cpp
+    test_tane_afd_regressions.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd
     ${DESBORDANTE_PREFIX}::afd
@@ -394,7 +395,25 @@ desbordante_add_test(
     afd.metric_calc
     SRCS
     test_afd_metric_calculator.cpp
+    test_afd_metric_calculator_regressions.cpp
+    test_afd_metric_calculator_validation.cpp
     LIBS
+    ${DESBORDANTE_PREFIX}::afd::metric_calc
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    spdlog::spdlog_header_only
+    Boost::headers
+)
+
+desbordante_add_test(
+    afd.metric_tane
+    SRCS
+    test_afd_metric_tane.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
+    ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::afd::metric_calc
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::model::table
