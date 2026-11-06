@@ -31,6 +31,7 @@
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
+#include "core/config/custom_random_seed/type.h"
 #include "core/config/enum_members_string.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -213,6 +214,10 @@ boost::any CustomMetricsToAny(std::string_view option_name, py::handle obj) {
                                if (handle.is_none()) {
                                    return nullptr;
                                }
+                               try {
+                                   return handle.cast<config::CustomMetricOptionType>();
+                               } catch (py::cast_error const&) {
+                               }
                                return std::make_shared<python_bindings::PyCustomMetric>(
                                        py::reinterpret_borrow<py::object>(handle));
                            });
@@ -269,9 +274,10 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
         kNormalConvPair<algos::cfd::RawCFD>,
         kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
-        {typeid(config::CustomMetricType), CustomMetricToAny},
-        {typeid(config::CustomMetricsType), CustomMetricsToAny},
+        {typeid(config::CustomMetricOptionType), CustomMetricToAny},
+        {typeid(config::CustomMetricsOptionType), CustomMetricsToAny},
         {typeid(config::CustomVectorMetricType), CustomVectorMetricToAny},
+        kNormalConvPair<std::vector<double>>,
 };
 
 }  // namespace

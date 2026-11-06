@@ -19,6 +19,7 @@ set(SUBDIRS
     od/order
     od/set_based_verifier
     pac
+    rfd
     statistics
     ucc
     sd
