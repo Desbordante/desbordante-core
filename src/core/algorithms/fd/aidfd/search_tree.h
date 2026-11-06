@@ -49,6 +49,8 @@ private:
     void CollectSubsets(Bitset const& set, std::shared_ptr<Node> const& current_node,
                         BitsetConsumer const& collect, bool& go_further) const;
 
+    bool HasSuperset(Bitset const& set, std::shared_ptr<Node> const& current_node) const;
+
     void ForEach(std::shared_ptr<Node> const& current_node, BitsetConsumer const& collect) const;
 
     std::shared_ptr<Node> FindNode(Bitset const& set);
@@ -76,4 +78,5 @@ public:
     void ForEach(BitsetConsumer const& collect) const;
     void ForEachSubset(Bitset const& set, BitsetConsumer const& collect) const;
     [[nodiscard]] bool ContainsAnySubsetOf(Bitset const& set) const;
+    [[nodiscard]] bool ContainsAnySupersetOf(Bitset const& set) const;
 };
