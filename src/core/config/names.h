@@ -84,6 +84,13 @@ constexpr auto kMinimumSharedValue = "minimum_shared_value";
 constexpr auto kShardLength = "shard_length";
 // FastOD
 constexpr auto kTimeLimitSeconds = "time_limit";
+// GA-RFD
+constexpr auto kRfdMinSimilarity = "min_similarity";
+constexpr auto kRfdMinimumConfidence = "minconf";
+constexpr auto kRfdCrossoverProbability = "crossover_probability";
+constexpr auto kRfdMutationProbability = "mutation_probability";
+constexpr auto kRfdMaxGenerations = "max_generations";
+constexpr auto kCacheMaxSize = "cache_size";
 // GFD
 constexpr auto kGfdData = "gfd";
 constexpr auto kGraphData = "graph";
@@ -164,13 +171,4 @@ constexpr auto kCindCondValues = "cind_condition_values";
 constexpr auto kSdG1 = "g1";
 constexpr auto kSdG2 = "g2";
 constexpr auto kSdIndices = "indices";
-// GA-RFD
-constexpr auto kMetrics = "metrics";
-constexpr auto kSimilarityThresholds = "similarity_thresholds";
-constexpr auto kMinConfidence = "min_confidence";
-constexpr auto kMaxGenerations = "max_generations";
-constexpr auto kCrossoverProb = "crossover_prob";
-constexpr auto kMutationProb = "mutation_prob";
-constexpr auto kMaxLhsArity = "max_lhs_arity";
-constexpr auto kOutputFile = "output_file";
 }  // namespace config::names
