@@ -157,7 +157,9 @@ pyro_alg.load_data(table=(TABLE, ',', True))
 pyro_alg.execute(error=ERROR)
 result_pyro = pyro_alg.get_fds()
 
-print_mining_results('Pyro', [('g1', result_pyro)], ERROR)
+print_mining_results(
+    'Pyro', [('g1', result_pyro)], ERROR, show_dependency_errors=True
+)
 
 print(f'''
 {Format.BOLD}{Format.YELLOW}Pyro Results{Format.END}
@@ -187,8 +189,8 @@ to the threshold value, we must provide the error_measure parameter,
 which determines the AFD measure used: ‘g1’, ‘pdep’, ‘tau’, ‘mu_plus’,
 or ‘rho’.
 
-Unlike Pyro, Tane also reports the error value of each discovered
-AFD. This value is shown next to the corresponding dependency below.
+Like Pyro, Tane reports the error value of each discovered AFD. This
+value is shown next to the corresponding dependency below.
 ''')
 
 tane_alg = desbordante.afd.algorithms.Tane()

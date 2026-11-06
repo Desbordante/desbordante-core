@@ -211,7 +211,6 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::fd::fdep
     ${DESBORDANTE_PREFIX}::fd::fun
     ${DESBORDANTE_PREFIX}::fd::hy
-    ${DESBORDANTE_PREFIX}::fd::pyro
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::fd
@@ -413,6 +412,7 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::testlib::common
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::fd::tane
+    ${DESBORDANTE_PREFIX}::fd::pyro
     ${DESBORDANTE_PREFIX}::afd
     spdlog::spdlog_header_only
     gmock

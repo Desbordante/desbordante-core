@@ -20,7 +20,6 @@
 #include "core/algorithms/fd/fdep/fdep.h"
 #include "core/algorithms/fd/fun/fun.h"
 #include "core/algorithms/fd/hyfd/hyfd.h"
-#include "core/algorithms/fd/pyro/pyro.h"
 #include "core/config/indices/type.h"
 #include "core/util/bitset_utils.h"
 #include "python_bindings/py_util/bind_primitive.h"
@@ -81,11 +80,9 @@ void BindFd(py::module_& main_module) {
                         return FD(lhs, rhs, std::move(schema));
                     }));
 
-    static constexpr auto kPyroName = "Pyro";
-    auto fd_algos_module =
-            BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep, FdMine, FUN,
-                          Pyro>(fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
-                                {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep",
-                                 "FdMine", "FUN", kPyroName});
+    auto fd_algos_module = BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep,
+                                        FdMine, FUN>(
+            fd_module, &FDAlgorithm::SortedFdList, "FdAlgorithm", "get_fds",
+            {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine", "FUN"});
 }
 }  // namespace python_bindings

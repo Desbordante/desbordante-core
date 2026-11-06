@@ -3,14 +3,14 @@
 #include <list>
 #include <mutex>
 
-#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/algorithms/fd/pli_based_afd_algorithm.h"
 #include "core/algorithms/fd/pyrocommon/core/dependency_consumer.h"
 #include "core/algorithms/fd/pyrocommon/core/search_space.h"
 
 namespace algos {
 
-/* Class for mining FD with pyro algorithm */
-class Pyro : public DependencyConsumer, public PliBasedFDAlgorithm {
+/* Class for mining AFDs with the Pyro algorithm */
+class Pyro : public DependencyConsumer, public PliBasedAFDAlgorithm {
 private:
     std::list<std::unique_ptr<SearchSpace>> search_spaces_;
     std::mutex search_spaces_mutex_;
