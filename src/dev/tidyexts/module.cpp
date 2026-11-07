@@ -3,6 +3,7 @@
 
 #include "checks/makeauto.h"
 #include "checks/whilenotfor.h"
+#include "checks/explicitcapture.h"
 
 namespace clang::tidy::misc {
 class DesbordanteModule : public ClangTidyModule {
@@ -10,6 +11,7 @@ public:
     void addCheckFactories(ClangTidyCheckFactories& factories) override {
         factories.registerCheck<MakeAutoCheck>("desbordante.MakeAuto");
         factories.registerCheck<WhileNotForCheck>("desbordante.WhileNotFor");
+        factories.registerCheck<ExplicitLambdaCapturesCheck>("desbordante.ExplicitLambdaCaptures");
     }
 };
 
