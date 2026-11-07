@@ -40,7 +40,6 @@ constexpr auto kCfdMinimumSupport = "cfd_minsup";
 constexpr auto kCFDRule = "cfd_rule";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
 // CORDS
-constexpr auto kDelta = "delta";
 constexpr auto kFixedSample = "fixed_sample";
 constexpr auto kMaxAmountOfCategories = "max_amount_of_categories";
 constexpr auto kMaxDiffValsProportion = "max_different_values_proportion";
@@ -50,6 +49,8 @@ constexpr auto kMinSFDStrengthMeasure = "min_sfd_strength";
 constexpr auto kMinSkewThreshold = "min_skew_threshold";
 constexpr auto kMinStructuralZeroesAmount = "min_structural_zeroes_amount";
 constexpr auto kOnlySFD = "only_sfd";
+// CORDS, PAC
+constexpr auto kDelta = "delta";
 // DC verifier
 constexpr auto kDenialConstraint = "denial_constraint";
 // DD verifier
@@ -122,9 +123,11 @@ constexpr auto kColumnIndices = "column_indices";
 constexpr auto kDeltaSteps = "delta_steps";
 constexpr auto kDiagonalThreshold = "diagonal_threshold";
 constexpr auto kDomain = "domain";
+constexpr auto kEpsilon = "epsilon";
 constexpr auto kMinDelta = "min_delta";
 constexpr auto kMaxEpsilon = "max_epsilon";
 constexpr auto kMinEpsilon = "min_epsilon";
+constexpr auto kPacValidationMode = "mode";
 // Pyro
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider

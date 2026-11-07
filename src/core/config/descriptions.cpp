@@ -10,6 +10,7 @@
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/enum_members_string.h"
 
 namespace {
@@ -77,4 +78,6 @@ std::string_view const kDODLeftOrdering =
 std::string_view const kDConditionType =
         c<S("CIND condition types to use\n"), m<algos::cind::CondType>>;
 std::string_view const kDAlgoType = c<S("CIND algorithm types to use\n"), m<algos::cind::AlgoType>>;
+std::string_view const kDPACValidationMode =
+        c<S("PAC validation mode\n"), m<algos::pac_verifier::PACValidationMode>>;
 }  // namespace config::descriptions
