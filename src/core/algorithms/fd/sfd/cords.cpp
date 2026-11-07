@@ -62,7 +62,7 @@ void Cords::RegisterOptions() {
                           kDMaxFalsePositiveProbability}
                            .SetValueCheck(check_max_false_positive));
 
-    RegisterOption(Option{&delta_, kDelta, kDDelta}.SetValueCheck(check_delta));
+    RegisterOption(Option{&delta_, kDelta, kDCordsDelta}.SetValueCheck(check_delta));
     RegisterOption(
             Option{&max_amount_of_categories_, kMaxAmountOfCategories, kDMaxAmountOfCategories}
                     .SetValueCheck(check_positive));

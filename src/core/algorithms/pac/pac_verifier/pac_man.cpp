@@ -12,7 +12,7 @@
 #include "core/util/logger.h"
 
 namespace algos::pac_verifier {
-std::optional<EpsilonDelta> PACMan::TryValidatePAC(
+void PACMan::CheckEpsDeltaConditions(
         std::vector<EpsilonDelta> const& empirical_probabilities) const {
     // It's convenient to call delta validation like min_eps = max_eps = 0, delta = delta,
     // so these checks should be first
@@ -21,10 +21,9 @@ std::optional<EpsilonDelta> PACMan::TryValidatePAC(
         auto first_delta_it =
                 std::ranges::lower_bound(empirical_probabilities, min_delta_, {}, GetDelta);
         if (first_delta_it->epsilon > max_epsilon_) {
-            LOG_DEBUG(
-                    "Max eps and min delta cannot be both satisfied. Taking first pair with min "
-                    "delta.");
-            return *first_delta_it;
+            throw std::runtime_error(
+                    "Min_delta and max_epsilon cannot be satisfied simultaneously. Consider using "
+                    "mode=find_delta to find delta by epsilon");
         }
     }
     if (min_epsilon_ > 0 && max_delta_ < 1) {
@@ -32,18 +31,11 @@ std::optional<EpsilonDelta> PACMan::TryValidatePAC(
                 std::ranges::upper_bound(empirical_probabilities, max_delta_, {}, GetDelta);
         auto last_delta_it = std::prev(after_last_delta_it);
         if (last_delta_it->epsilon < min_epsilon_) {
-            LOG_DEBUG(
-                    "Min eps and max delta cannot be both satisfied. Taking last pair with max "
-                    "delta.");
-            return *last_delta_it;
+            throw std::runtime_error(
+                    "Max_delta and min_epsilon cannot be satisfied simultaneously. Consider using "
+                    "mode=find_delta to find delta by epsilon");
         }
     }
-
-    if (max_epsilon_ >= 0 && min_epsilon_ > 0 && max_epsilon_ - min_epsilon_ < kDistThreshold) {
-        LOG_DEBUG("Got min_epsilon == max_epsilon, entering epsilon validation mode");
-        return get_epsilon_delta_for_epsilon_(min_epsilon_);
-    }
-    return std::nullopt;
 }
 
 std::optional<EpsilonDelta> PACMan::CheckPairsBetweenMinMaxEpsilon(
@@ -131,12 +123,8 @@ EpsilonDelta PACMan::FindEpsilonDelta(std::vector<EpsilonDelta>&& empirical_prob
     assert(empirical_probabilities.front().delta > min_delta_ - kDistThreshold);
     assert(empirical_probabilities.back().delta < max_delta_ + kDistThreshold);
 
-    auto maybe_eps_delta = TryValidatePAC(empirical_probabilities);
-    if (maybe_eps_delta) {
-        LOG_TRACE("Got epsilon-delta from TryValidatePAC");
-        return *maybe_eps_delta;
-    }
-    maybe_eps_delta = CheckPairsBetweenMinMaxEpsilon(empirical_probabilities);
+    CheckEpsDeltaConditions(empirical_probabilities);
+    auto maybe_eps_delta = CheckPairsBetweenMinMaxEpsilon(empirical_probabilities);
     if (maybe_eps_delta) {
         LOG_TRACE("Got epsilon-delta from CheckPairsBetweenMinMaxEpsilon");
         return *maybe_eps_delta;

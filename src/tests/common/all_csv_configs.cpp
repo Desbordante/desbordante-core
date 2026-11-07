@@ -28,6 +28,7 @@ CSVConfig const kCIPublicHighway700 = CreateCsvConfig("CIPublicHighway700.csv", 
 CSVConfig const kCustomMetricBalls = CreateCsvConfig("custom_metric_balls.csv", ',', true);
 CSVConfig const kEpicMeds = CreateCsvConfig("EpicMeds.csv", '|', true);
 CSVConfig const kEpicVitals = CreateCsvConfig("EpicVitals.csv", '|', true);
+CSVConfig const kEngineTempsBad = CreateCsvConfig("engine_temps_bad.csv", ',', true);
 CSVConfig const kFdReduced30 = CreateCsvConfig("fd-reduced-30.csv", ',', true);
 CSVConfig const kFlight1k = CreateCsvConfig("flight_1k.csv", ';', true);
 CSVConfig const kIndTest3aryInds = CreateCsvConfig("ind_data/Test-3ary-inds.csv", ',', false);
