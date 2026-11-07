@@ -17,6 +17,7 @@ extern CSVConfig const kCIPublicHighway700;
 extern CSVConfig const kCustomMetricBalls;
 extern CSVConfig const kEpicMeds;
 extern CSVConfig const kEpicVitals;
+extern CSVConfig const kEngineTempsBad;
 extern CSVConfig const kFdReduced30;
 extern CSVConfig const kFlight1k;
 extern CSVConfig const kIndTest3aryInds;

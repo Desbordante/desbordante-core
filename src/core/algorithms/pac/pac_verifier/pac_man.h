@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "core/algorithms/pac/pac_verifier/util/pac_verifier_utils.h"
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 
 namespace algos::pac_verifier {
 /// @brief PAC-Man algorithm. Uses elbow method to find an optimal PAC on a ECDF
@@ -25,10 +26,8 @@ private:
     std::ranges::subrange<std::vector<EpsilonDelta>::const_iterator> BuildECDF(
             std::vector<EpsilonDelta>& empirical_probabilities) const;
 
-    /// @brief Check if user requested "validation" (finding one parameter by given value of another
-    /// one) and "validate" if needed
-    std::optional<EpsilonDelta> TryValidatePAC(
-            std::vector<EpsilonDelta> const& empirical_probabilities) const;
+    /// @brief Check if min/max epsilon and min/max delta conditions can be satisfied simultaneously
+    void CheckEpsDeltaConditions(std::vector<EpsilonDelta> const& empirical_probabilities) const;
 
     /// @brief Check if there are pairs between min epsilon and max epsilon, and select proper (eps,
     /// delta) if needed

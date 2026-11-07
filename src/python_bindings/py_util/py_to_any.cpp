@@ -28,6 +28,7 @@
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
@@ -250,6 +251,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::cind::CondType>,
         kEnumConvPair<algos::cind::AlgoType>,
         kEnumConvPair<algos::des::DifferentialStrategy>,
+        kEnumConvPair<algos::pac_verifier::PACValidationMode>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(std::shared_ptr<model::ISequenceStream>), SequenceStreamToAny},

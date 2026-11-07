@@ -67,6 +67,10 @@ private:
     void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
 
+    EpsilonDelta FindPAC();
+    EpsilonDelta FindEpsilon();
+    EpsilonDelta FindDelta();
+
 public:
     DomainPACVerifier();
 
