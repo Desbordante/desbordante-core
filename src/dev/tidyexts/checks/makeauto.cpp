@@ -40,7 +40,7 @@ void MakeAutoCheck::check(ast_matchers::MatchFinder::MatchResult const& Result) 
     auto const* var = Result.Nodes.getNodeAs<VarDecl>("errordecl");
     if (var == nullptr) return;
 
-    diag(var->getLocation(), "variable '%0' should be declared as auto")
+    diag(var->getLocation(), "Variable '%0' should be declared as auto")
             << var->getName()
             << FixItHint::CreateReplacement(
                        CharSourceRange::getTokenRange(

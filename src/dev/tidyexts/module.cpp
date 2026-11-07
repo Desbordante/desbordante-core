@@ -8,8 +8,8 @@ namespace clang::tidy::misc {
 class DesbordanteModule : public ClangTidyModule {
 public:
     void addCheckFactories(ClangTidyCheckFactories& factories) override {
-        factories.registerCheck<MakeAutoCheck>("desbordante.make-auto");
-        factories.registerCheck<WhileNotForCheck>("desbordante.while-not-for");
+        factories.registerCheck<MakeAutoCheck>("desbordante.MakeAuto");
+        factories.registerCheck<WhileNotForCheck>("desbordante.WhileNotFor");
     }
 };
 
