@@ -1,1 +1,1 @@
-target_sources(Desbordante.tidyexts PRIVATE makeauto.cpp whilenotfor.cpp)
+target_sources(${NAME} PRIVATE makeauto.cpp whilenotfor.cpp)

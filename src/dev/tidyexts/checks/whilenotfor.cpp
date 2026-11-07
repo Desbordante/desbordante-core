@@ -41,7 +41,7 @@ void WhileNotForCheck::check(const ast_matchers::MatchFinder::MatchResult &Resul
                     .str() +
             ")";
 
-    diag(for_loop->getForLoc(), "this loop can be replaced with while")
+    diag(for_loop->getForLoc(), "This loop can be replaced with while")
         << FixItHint::CreateReplacement(
             header_range,
             replacement
