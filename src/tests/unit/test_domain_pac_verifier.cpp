@@ -15,11 +15,13 @@
 #include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/indices/type.h"
 #include "core/config/names.h"
 #include "core/model/types/builtin.h"
 #include "core/model/types/mixed_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "gtest/gtest.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace {
@@ -35,6 +37,16 @@ using namespace pac::model;
 
 // Threshold for algo results (epsilon and delta)
 constexpr static auto kThreshold = 1e-3;
+
+void RunDomainPACVerifierTest(algos::StdParamsMap params, double exp_epsilon, double exp_delta,
+                              algos::StdParamsMap const& extra_params = {}) {
+    params.insert(extra_params.begin(), extra_params.end());
+    auto algo = algos::CreateAndLoadAlgorithm<algos::pac_verifier::DomainPACVerifier>(params);
+    algo->Execute();
+    auto pac = algo->GetPAC();
+    EXPECT_NEAR(pac.GetEpsilon(), exp_epsilon, kThreshold);
+    EXPECT_NEAR(pac.GetDelta(), exp_delta, kThreshold);
+}
 
 struct DomainPACVerifyingParams {
     algos::StdParamsMap params;
@@ -62,14 +74,7 @@ class TestDomainPACVerifier : public ::testing::TestWithParam<DomainPACVerifying
 
 TEST_P(TestDomainPACVerifier, DefaultTest) {
     auto const& p = GetParam();
-    auto params_map = p.params;
-    auto verifier =
-            algos::CreateAndLoadAlgorithm<algos::pac_verifier::DomainPACVerifier>(params_map);
-    verifier->Execute();
-
-    auto const& pac = verifier->GetPAC();
-    EXPECT_NEAR(pac.GetEpsilon(), p.exp_epsilon, kThreshold);
-    EXPECT_NEAR(pac.GetDelta(), p.exp_delta, kThreshold);
+    RunDomainPACVerifierTest(p.params, p.exp_epsilon, p.exp_delta);
 }
 
 /// @brief Is single-column mixed-typed value a null
@@ -183,8 +188,6 @@ INSTANTIATE_TEST_SUITE_P(
                                          std::make_shared<Parallelepiped>("0", "5"), 1, 0.9, 0, 1),
                 // "Normal" case: min_delta <= real delta
                 CustomMetricBallsIntervalsParams(0, -1, 6.217, 0.999, 0.95),
-                // Min_delta is greater than delta for max_eps => should return (??, min_delta)
-                CustomMetricBallsIntervalsParams(0, 1, 2.60487, 0.9, 0.9),
                 // "Totally constrained" refinement -- all bounds are explicit
                 CustomMetricBallsIntervalsParams(0, 1, 0.631, 0.625, 0.6),
                 // "Half-lines" on epsilon
@@ -196,15 +199,9 @@ INSTANTIATE_TEST_SUITE_P(
                 CustomMetricBallsIntervalsParams(2, -1, 6.217, 0.999, 0.95),
                 //   d. Max epsilon and min delta
                 CustomMetricBallsIntervalsParams(0, 1.3, 1.074, 0.705, 0.68),
-                // -- Validation --
-                // #20
-                // Epsilon validation
-                CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
-                // Delta validation
-                CustomMetricBallsIntervalsParams(0, 0, 2.605, 0.9, 0.9),
                 // -- No pairs between min_eps and max_eps --
                 // Each test has it's "validation" counterpart
-                // #22
+                // #19
                 // No pairs between min_eps and max_eps, should take a pair before min_eps and
                 // promote the epsilon
                 SimpleTyposParallelepipedIntervalsParams(0, 3, 3, 4, 3, 0.9),
@@ -224,7 +221,55 @@ INSTANTIATE_TEST_SUITE_P(
                 SimpleTyposParallelepipedIntervalsParams(7, 7, 0, 2, 0, 0),
         }));
 
+struct DomainPACVerifierModesParams {
+    algos::StdParamsMap params;
+    double epsilon;
+    double delta;
+
+    DomainPACVerifierModesParams(CSVConfig const& csv_config, config::IndicesType&& col_indices,
+                                 std::shared_ptr<pac::model::IDomain>&& domain, double epsilon,
+                                 double delta)
+        : params({{kCsvConfig, csv_config},
+                  {kColumnIndices, std::move(col_indices)},
+                  {kDomain, std::move(domain)}}),
+          epsilon(epsilon),
+          delta(delta) {}
+};
+
+class TestDomainPACVerifierModes : public ::testing::TestWithParam<DomainPACVerifierModesParams> {};
+
+TEST_P(TestDomainPACVerifierModes, ValidationModes) {
+    using enum algos::pac_verifier::PACValidationMode;
+
+    auto const& p = GetParam();
+
+    // Explicit find-epsilon
+    RunDomainPACVerifierTest(p.params, p.epsilon, p.delta,
+                             {{kPacValidationMode, kFindEpsilon}, {kDelta, p.delta}});
+    // Implicit find-epsilon
+    RunDomainPACVerifierTest(p.params, p.epsilon, p.delta,
+                             {{kMinEpsilon, 0.0}, {kMaxEpsilon, 0.0}, {kMinDelta, p.delta}});
+    // Explicit find-delta
+    RunDomainPACVerifierTest(p.params, p.epsilon, p.delta,
+                             {{kPacValidationMode, kFindDelta}, {kEpsilon, p.epsilon}});
+    // Implicit find-delta
+    RunDomainPACVerifierTest(p.params, p.epsilon, p.delta,
+                             {{kMinEpsilon, p.epsilon}, {kMaxEpsilon, p.epsilon}});
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        DomainPACVerifierModesTests, TestDomainPACVerifierModes,
+        ::testing::ValuesIn({
+                DomainPACVerifierModesParams(kCustomMetricBalls, {0, 1},
+                                             std::make_shared<Ball>(Strings{"0", "0"}, 5), 1.499,
+                                             0.774),
+                DomainPACVerifierModesParams(kCustomMetricBalls, {0, 1},
+                                             std::make_shared<Ball>(Strings{"0", "0"}, 5), 2.605,
+                                             0.9),
+        }));
+
 using Epsilons = std::pair<double, double>;
+
 using HighlightValues = std::vector<std::string>;
 
 struct DomainPACHighlightParams {
