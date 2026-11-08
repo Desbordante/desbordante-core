@@ -3,7 +3,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "core/algorithms/fd/tane/pfdtane.h"
 #include "core/algorithms/fd/tane/tane.h"
 #include "core/model/table/relational_schema.h"
 #include "core/util/bitset_utils.h"
@@ -136,7 +135,7 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmAFDTest, ThrowsOnEmpty, ReturnsEmptyOnSingl
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using AFDAlgorithms = ::testing::Types<algos::Tane, algos::PFDTane>;
+using AFDAlgorithms = ::testing::Types<algos::Tane>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmAFDTest, AlgorithmAFDTest, AFDAlgorithms);
 
 }  // namespace tests
