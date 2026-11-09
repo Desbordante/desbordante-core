@@ -8,6 +8,8 @@ CYAN = "\033[1;36m"
 YELLOW = "\033[1;33m"
 RESET = "\033[0m"
 
+verifier_CFD = desbordante.cfd.algorithms.CFD
+
 TABLE_PATH = "examples/datasets/ticket_routing.csv"
 PREFERRED_RULES = [
     (["Contract", "Region"], "Queue"),
@@ -53,17 +55,30 @@ def average_support_per_cfd(cfds):
     return sum(cfd.support for cfd in cfds) / len(cfds)
 
 
-def verify_cfd_rule(df, lhs, rhs, min_conf=1.0):
+def verify_cfd_rule(df, cfd, min_conf=1.0):
     verifier = desbordante.cfd_verification.algorithms.Default()
     verifier.load_data(table=df)
-    verifier.execute(cfd_rule_left=lhs, cfd_rule_right=rhs, cfd_minconf=min_conf)
+    verifier.execute(cfd_rule=cfd, cfd_minconf=min_conf)
     return verifier
 
+def make_verifier_cfd(df, lhs_rule, rhs_rule):
+    lhs = [
+        (int(df.columns.get_loc(attr)), value)
+        for attr, value in lhs_rule
+    ]
+
+    rhs_attr, rhs_value = rhs_rule
+    rhs = (int(df.columns.get_loc(rhs_attr)), rhs_value)
+
+    return verifier_CFD(lhs=lhs, rhs=rhs)
 
 def collect_violating_rows(verifier):
+    highlights = verifier.get_highlights()
     violating_rows = set()
-    for highlight in verifier.get_highlights():
-        violating_rows.update(highlight.get_violating_rows)
+
+    for highlight in highlights:
+        violating_rows.update(highlight.violating_rows)
+
     return violating_rows
 
 
@@ -333,7 +348,8 @@ def run_usecase(df, cfds_2):
     verification_summary = []
     violating_rows = set()
     for lhs_rule, rhs_rule in VALIDATION_RULES:
-        verifier = verify_cfd_rule(df, lhs_rule, rhs_rule, min_conf=1.0)
+        cfd = make_verifier_cfd(df, lhs_rule, rhs_rule)
+        verifier = verify_cfd_rule(df, cfd, min_conf=1.0)
         rows = collect_violating_rows(verifier)
         violating_rows.update(rows)
         verification_summary.append(

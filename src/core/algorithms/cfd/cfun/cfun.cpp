@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <chrono>
 #include <numeric>
-#include <ranges>
 
 #include "core/algorithms/cfd/cfun/attribute_utils.h"
 #include "core/config/names_and_descriptions.h"
@@ -12,7 +11,6 @@
 #include "core/util/logger.h"
 
 namespace algos::cfd::cfun {
-
 CFUN::CFUN() : Algorithm() {
     using namespace config::names;
     RegisterOptions();
@@ -22,7 +20,14 @@ CFUN::CFUN() : Algorithm() {
 void CFUN::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&min_support_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u});
+
+    auto check_supp = [](unsigned int value) {
+        if (value == 0) {
+            throw config::ConfigurationError("Minimum support must be greater than 0.");
+        }
+    };
+    RegisterOption(Option{&min_support_, kCfdMinimumSupport, kDCfdMinimumSupport, 1u}.SetValueCheck(
+            std::move(check_supp)));
 }
 
 void CFUN::MakeExecuteOptsAvailable() {
@@ -32,7 +37,7 @@ void CFUN::MakeExecuteOptsAvailable() {
 
 void CFUN::LoadDataInternal() {
     cfd_relation_ = CFDRelationData::CreateFrom(*input_table_);
-    if (cfd_relation_->GetColumnData().empty()) {
+    if (cfd_relation_->GetColumnData().empty() || cfd_relation_->GetNumRows() == 0) {
         throw std::runtime_error("Got an empty dataset: CFD mining is meaningless.");
     }
 }
@@ -40,6 +45,9 @@ void CFUN::LoadDataInternal() {
 void CFUN::ExecuteInternal() {
     LOG_INFO("Starting CFUN with min_support = {}", min_support_);
     auto start_time = std::chrono::system_clock::now();
+
+    intersect_buffers_ = IntersectBuffers(cfd_relation_->GetNumRows());
+    probing_buffer_ = ProbingBuffer(cfd_relation_->GetNumRows());
 
     auto last = BuildZeroLevel();
     auto current = BuildFirstLevel();
@@ -112,17 +120,16 @@ std::vector<Quadruple::Partition> CFUN::CalculateMonoPartitions() const {
     return partitions;
 }
 
-std::vector<std::vector<unsigned int>> CFUN::GetMonoProbingTables(Level const& first_level) const {
+std::vector<std::vector<unsigned int>> CFUN::GetMonoProbingTables(Level const& first_level) {
     std::vector<std::vector<unsigned int>> mono_probing_tables;
-    mono_probing_tables.reserve(cfd_relation_->GetNumColumns());
+    mono_probing_tables.reserve(first_level.size());
 
-    auto build_mono_probing_table =
-            [num_rows = cfd_relation_->GetNumRows()](Quadruple const& candidate) {
-                return candidate.CalculateProbingTable(num_rows);
-            };
+    for (auto const& candidate : first_level) {
+        probing_buffer_.Reset();
+        probing_buffer_.CalculateProbingTable(candidate.GetClusters());
 
-    std::ranges::transform(first_level, std::back_inserter(mono_probing_tables),
-                           build_mono_probing_table);
+        mono_probing_tables.push_back(probing_buffer_.probing_table);
+    }
 
     return mono_probing_tables;
 }
@@ -193,16 +200,16 @@ CCFD CFUN::DisplayCFD(Quadruple const& X, unsigned int num_col,
                 std::move(schema));
 }
 
-void CFUN::ComputeQuasiClosures(Level& current, Level const& last) const {
+void CFUN::ComputeQuasiClosures(Level& current, Level const& last) {
     auto attr_to_candidate = AttributeIndex(last);
 
     for (auto& candidate : current) {
         auto subsets = attr_to_candidate.GetAllSubsets(candidate);
-        candidate.UpdateQuasiClosure(subsets, cfd_relation_->GetNumRows());
+        candidate.UpdateQuasiClosure(subsets, probing_buffer_);
     }
 }
 
-void CFUN::GenerateNextLevel(Level& last, Level& current) const {
+void CFUN::GenerateNextLevel(Level& last, Level& current) {
     std::swap(last, current);
     current.clear();
     if (last.empty()) {
@@ -224,8 +231,8 @@ void CFUN::GenerateNextLevel(Level& last, Level& current) const {
                 continue;
             }
 
-            auto candidate_ij =
-                    candidate_i.Intersect(candidate_j, cfd_relation_->GetNumRows(), min_support_);
+            auto candidate_ij = candidate_i.Intersect(candidate_j, min_support_, intersect_buffers_,
+                                                      probing_buffer_);
 
             if (candidate_ij.IsEmptySets()) {
                 continue;

@@ -71,6 +71,8 @@ void BindFdFirst(py::module_& cfd_module) {
             cfd_module, &CFDDiscovery::GetCfds, "CfdAlgorithm", "get_cfds", {"FDFirst"});
 
     py::class_<RawCFD::RawItem>(fd_first_module, "Item")
+            .def(py::init<int, std::optional<std::string>>(), py::arg("attribute"),
+                 py::arg("value").none(true))
             .def_property_readonly("attribute", &RawCFD::RawItem::GetAttribute)
             .def_property_readonly("value", &RawCFD::RawItem::GetValue)
             .def("__str__", &RawCFD::RawItem::ToString)
@@ -97,6 +99,9 @@ void BindFdFirst(py::module_& cfd_module) {
                     }));
 
     py::class_<RawCFD>(fd_first_module, "CFD")
+            .def(py::init<>())
+            .def(py::init<RawCFD::RawItems, RawCFD::RawItem>(), py::arg("lhs"), py::arg("rhs"))
+            .def(py::init(&CreateRawCFDFromTuples), py::arg("lhs"), py::arg("rhs"))
             .def("__str__", &RawCFD::ToString)
             .def_property_readonly("lhs", &RawCFD::GetLhs)
             .def_property_readonly("rhs", &RawCFD::GetRhs)
@@ -122,9 +127,27 @@ void BindCfun(pybind11::module_& cfd_module) {
                                .def("get_cfds", &CFUN::GetCFDList);
 
     py::class_<CCFD::Condition>(cfun_module, "Condition")
+            .def(py::init([](std::vector<std::string> pattern, size_t support) {
+                     return CCFD::Condition(std::move(pattern), support);
+                 }),
+                 py::arg("pattern"), py::arg("support"))
             .def_property_readonly("pattern", &CCFD::Condition::GetPattern)
             .def_property_readonly("support", &CCFD::Condition::GetSupport)
             .def(py::self == py::self)
+            .def("__repr__",
+                 [](CCFD::Condition const& condition) {
+                     std::string repr = "Condition(pattern=[";
+                     for (auto const& value : condition.GetPattern()) {
+                         if (repr.back() != '[') {
+                             repr += ", ";
+                         }
+                         repr += "'" + value + "'";
+                     }
+                     repr += "], support=";
+                     repr += std::to_string(condition.GetSupport());
+                     repr += ")";
+                     return repr;
+                 })
             .def("__hash__",
                  [](CCFD::Condition const& cond) {
                      return py::hash(py::make_tuple(
@@ -149,6 +172,7 @@ void BindCfun(pybind11::module_& cfd_module) {
 
     py::class_<CCFD>(cfun_module, "CCFD")
             .def("__str__", &CCFD::ToString)
+            .def("__repr__", &CCFD::ToString)
             .def_property_readonly("embedded_fd", &CCFD::GetEmbeddedFd)
             .def_property_readonly("tableau", &CCFD::GetTableau)
             .def_property_readonly("support", &CCFD::GetSupport)

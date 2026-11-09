@@ -1,31 +1,26 @@
 #include "core/algorithms/cfd/cfun/quadruple.h"
 
 #include <cstddef>
-#include <unordered_map>
-#include <unordered_set>
+#include <ranges>
 #include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+
+#include "core/algorithms/cfd/cfun/buffers.h"
 
 namespace algos::cfd::cfun {
 
-std::vector<unsigned int> Quadruple::CalculateProbingTable(size_t num_rows) const {
-    std::vector<unsigned int> probing_table(num_rows, 0);
-    unsigned int next_cluster_id = 1;
-    for (auto const& cluster : clusters_) {
-        for (auto tuple : cluster.indices) {
-            probing_table[tuple] = next_cluster_id;
-        }
-        ++next_cluster_id;
-    }
-    return probing_table;
-}
+Quadruple Quadruple::Intersect(Quadruple const& other, size_t min_support,
+                               IntersectBuffers& intersect_buffers,
+                               ProbingBuffer& probing_buffer) const {
+    intersect_buffers.Reset();
+    probing_buffer.Reset();
+    probing_buffer.CalculateProbingTable(other.clusters_);
 
-Quadruple Quadruple::Intersect(Quadruple const& other, size_t num_rows, size_t min_support) const {
-    auto probing = other.CalculateProbingTable(num_rows);
-
-    std::vector<unsigned int> assoc(num_rows + 1, 0);
-    std::vector<unsigned int> counts(num_rows + 1, 0);
-    std::vector<unsigned int> elem_result(num_rows + 1, 0);
-
+    auto& probing = probing_buffer.probing_table;
+    auto& assoc = intersect_buffers.assoc;
+    auto& counts = intersect_buffers.counts;
+    auto& elem_result = intersect_buffers.elem_result;
     unsigned int next_id = 1;
 
     for (auto const& cluster : clusters_) {
@@ -105,13 +100,16 @@ void Quadruple::UpdateClosure(std::vector<size_t> const& valid_cluster_ids,
     }
 }
 
-void Quadruple::UpdateQuasiClosure(std::vector<Quadruple const*> const& subsets, size_t num_rows) {
-    auto candidate_ec = CalculateProbingTable(num_rows);
+void Quadruple::UpdateQuasiClosure(std::vector<Quadruple const*> const& subsets,
+                                   ProbingBuffer& probing_buffer) {
+    probing_buffer.Reset();
+    probing_buffer.CalculateProbingTable(clusters_);
+    auto& probing = probing_buffer.probing_table;
 
     for (Quadruple const* subset : subsets) {
         for (auto const& subset_cluster : subset->clusters_) {
             for (auto tuple_id : subset_cluster.indices) {
-                unsigned int curr_ec = candidate_ec[tuple_id];
+                unsigned int curr_ec = probing[tuple_id];
                 if (curr_ec != 0) {
                     clusters_[curr_ec - 1].quasi_closure |= subset_cluster.closure;
                 }
