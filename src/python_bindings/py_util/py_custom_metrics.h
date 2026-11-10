@@ -9,6 +9,7 @@
 
 #include <pybind11/pytypes.h>
 
+#include "core/config/exceptions.h"
 #include "core/model/types/type.h"
 #include "core/util/custom_metric/custom_metric.h"
 #include "core/util/custom_metric/custom_vector_metric.h"
