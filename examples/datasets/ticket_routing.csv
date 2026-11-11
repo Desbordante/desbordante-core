@@ -1,0 +1,13 @@
+Segment,Contract,Region,SLA,Queue
+Retail,Monthly,EU,Standard,Queue-A
+Retail,Monthly,EU,Standard,Queue-A
+Retail,Monthly,US,Premium,Queue-B
+Retail,Monthly,US,Standard,Queue-B
+Enterprise,Annual,EU,Premium,Queue-A
+Enterprise,Annual,EU,Premium,Queue-A
+Enterprise,Annual,US,Premium,Queue-B
+Enterprise,Annual,US,Premium,Queue-B
+Retail,Annual,EU,Premium,Queu-A
+Retail,Annual,US,Standard,Queue-A
+Enterprise,Monthly,EU,Premium,Queue-A
+Enterprise,Monthly,US,Premium,Queue-B
