@@ -13,23 +13,21 @@ namespace pac::model {
 /// D = {x | d(x, @c center) <= @c radius}
 class Ball final : public MetricBasedDomain {
 private:
-    Tuple center_;
     std::vector<std::string> center_str_;
     double radius_;
-    std::vector<::model::Type::Destructor> destructors_;
+    TypedTuple center_;
 
     /// @brief Euclidean distance.
     /// d(X, Y) = sqrt(x[1] - y[1])^2 + ... + (x[n] - y[n])^2)
-    double EuclideanDist(Tuple const& x, Tuple const& y) const;
+    double EuclideanDist(Tuple const& x, TypedTuple const& y) const;
 
 protected:
     virtual double DistFromDomainInternal(Tuple const& value) const override {
         return std::max(0.0, EuclideanDist(value, center_) - radius_);
     }
 
-    virtual void ConvertValues() override {
+    void AfterSetTypes() override {
         center_ = AllocateValues(center_str_);
-        destructors_ = GetDestructors();
     }
 
 public:
@@ -39,7 +37,6 @@ public:
           center_str_(std::move(center_str)),
           radius_(radius) {}
 
-    virtual ~Ball();
     virtual std::string ToString() const override;
 };
 }  // namespace pac::model
