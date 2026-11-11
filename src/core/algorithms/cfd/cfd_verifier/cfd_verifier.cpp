@@ -1,6 +1,7 @@
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 
 #include "core/algorithms/cfd/model/cfd_relation_data.h"
@@ -20,12 +21,20 @@ void CFDVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     auto check_item = [this](cfd::RawCFD::RawItem const& item) {
+        int const attribute = item.GetAttribute();
+        if (attribute < 0 || static_cast<size_t>(attribute) >= relation_->GetNumColumns()) {
+            throw config::ConfigurationError("CFD attribute index " + std::to_string(attribute) +
+                                             " is out of range for a table with " +
+                                             std::to_string(relation_->GetNumColumns()) +
+                                             " columns.");
+        }
+
         if (item.GetValue().has_value() && item.GetValue().value() != "_") {
-            cfd::Item item_id = relation_->GetItem(item.GetAttribute(), item.GetValue().value());
+            cfd::Item item_id = relation_->GetItem(attribute, item.GetValue().value());
             if (item_id == -1) {
-                throw config::ConfigurationError(
-                        "Value '" + item.GetValue().value() + "' for attribute " +
-                        std::to_string(item.GetAttribute()) + " not found in dataset.");
+                throw config::ConfigurationError("Value '" + item.GetValue().value() +
+                                                 "' for attribute " + std::to_string(attribute) +
+                                                 " not found in dataset.");
             }
         }
     };

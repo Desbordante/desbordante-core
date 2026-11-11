@@ -6,6 +6,7 @@
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
+#include "core/config/exceptions.h"
 #include "core/config/names_and_descriptions.h"
 #include "tests/common/all_csv_configs.h"
 
@@ -29,6 +30,24 @@ struct CFDVerifierParams {
 };
 
 class CFDVerifierTest : public ::testing::TestWithParam<CFDVerifierParams> {};
+
+class CFDVerifierInvalidAttributeTest : public ::testing::TestWithParam<RawCFD> {};
+
+TEST_P(CFDVerifierInvalidAttributeTest, RejectsOutOfRangeAttribute) {
+    algos::cfd_verifier::CFDVerifier verifier;
+    algos::LoadAlgorithmData(verifier, {{config::names::kCsvConfig, kTennis}});
+    EXPECT_THROW(verifier.SetOption(config::names::kCFDRule, GetParam()),
+                 config::ConfigurationError);
+}
+
+INSTANTIATE_TEST_SUITE_P(InvalidAttributes, CFDVerifierInvalidAttributeTest,
+                         // Tennis has five columns, so valid indices are 0 through 4.
+                         ::testing::Values(RawCFD({RawItem{-1, "sunny"}}, RawItem{4, "yes"}),
+                                           RawCFD({RawItem{5, std::nullopt}}, RawItem{4, "yes"}),
+                                           RawCFD({RawItem{-1, "_"}}, RawItem{4, "yes"}),
+                                           RawCFD({}, RawItem{5, "yes"}),
+                                           RawCFD({}, RawItem{-1, std::nullopt}),
+                                           RawCFD({}, RawItem{5, "_"})));
 
 TEST_P(CFDVerifierTest, Test) {
     auto const& p = GetParam();
