@@ -1,5 +1,8 @@
 #include <cstddef>
+#include <list>
 #include <set>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -69,6 +72,34 @@ TEST_P(CFUNTest, Test) {
 
     CheckEqualityExceptedCFDs(p.excepted_cfds, algo->GetCFDList());
 }
+
+class CFUNEmptyInputTest : public ::testing::TestWithParam<CSVConfig> {};
+
+TEST_P(CFUNEmptyInputTest, RejectsEmptyInput) {
+    algos::StdParamsMap params{{config::names::kCsvConfig, GetParam()}};
+    EXPECT_THROW(algos::CreateAndLoadAlgorithm<algos::cfd::cfun::CFUN>(params), std::runtime_error);
+}
+
+INSTANTIATE_TEST_SUITE_P(CFUNEdgeCases, CFUNEmptyInputTest,
+                         ::testing::Values(kTestEmpty, kHeaderOnly));
+
+INSTANTIATE_TEST_SUITE_P(
+        CFUNEdgeCases, CFUNTest,
+        ::testing::Values(
+                CFUNParams(kSingleRow, 1, {{"[] -> A", {"| (x)"}}, {"[] -> B", {"| (y)"}}}),
+                CFUNParams(kSingleColumn, 3, {{"[] -> A", {"| (x)"}}}),
+                CFUNParams(kDuplicateRows, 3, {{"[] -> A", {"| (x)"}}, {"[] -> B", {"| (y)"}}}),
+                // Empty CSV fields are treated as an ordinary constant value.
+                CFUNParams(kAllNullColumn, 3, {{"[] -> A", {"| ()"}}}),
+                CFUNParams(kMaximumCardinality, 1,
+                           {{"[A] -> B", {".a.| (w)", ".b.| (x)", ".c.| (y)", ".d.| (z)"}},
+                            {"[A] -> C", {".a.| (p)", ".b.| (q)", ".c.| (r)", ".d.| (s)"}},
+                            {"[B] -> A", {".w.| (a)", ".x.| (b)", ".y.| (c)", ".z.| (d)"}},
+                            {"[B] -> C", {".w.| (p)", ".x.| (q)", ".y.| (r)", ".z.| (s)"}},
+                            {"[C] -> A", {".p.| (a)", ".q.| (b)", ".r.| (c)", ".s.| (d)"}},
+                            {"[C] -> B", {".p.| (w)", ".q.| (x)", ".r.| (y)", ".s.| (z)"}}}),
+                // All patterns have support 1, even though each CFD covers four rows.
+                CFUNParams(kMaximumCardinality, 2, {})));
 
 INSTANTIATE_TEST_SUITE_P(
         CFUNParamTest, CFUNTest,
