@@ -4,4 +4,5 @@
 
 namespace python_bindings {
 void BindFastADC(pybind11::module_& main_module);
+void BindHybridDC(pybind11::module_& main_module);
 }  // namespace python_bindings
