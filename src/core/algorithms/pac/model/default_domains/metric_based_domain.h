@@ -7,6 +7,7 @@
 
 #include "core/algorithms/pac/model/idomain.h"
 #include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/util/typed_value.h"
 #include "core/model/types/imetrizable_type.h"
 #include "core/model/types/type.h"
 
@@ -19,11 +20,9 @@ private:
     void ThrowIfEmpty() const;
     void ValidateTypes(std::vector<::model::Type const*> const&) override;
 
-    void AfterSetTypes() override {
-        ConvertValues();
-    }
-
 protected:
+    using TypedTuple = std::vector<pac::util::TypedValue>;
+
     std::vector<::model::IMetrizableType const*> metrizable_types_;
 
     /// @brief Distance between two std::byte pointers of type metrizable_types[type_num].
@@ -33,11 +32,7 @@ protected:
                              std::byte const* y) const;
 
     virtual double DistFromDomainInternal(Tuple const& value) const = 0;
-    std::vector<std::byte const*> AllocateValues(std::vector<std::string> const&) const;
-
-    // MetricBasedDomain's destructor is called before derived classes' destructors, so value
-    // destructors have to be stored in derived classes
-    std::vector<::model::Type::Destructor> GetDestructors() const;
+    TypedTuple AllocateValues(std::vector<std::string> const&) const;
 
     /// @brief Convert all needed values after types are set
     virtual void ConvertValues() {}

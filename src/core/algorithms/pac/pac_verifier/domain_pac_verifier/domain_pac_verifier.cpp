@@ -185,8 +185,8 @@ DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindEpsilon() {
         std::advance(it, 1);
     }
     auto actual_pairs = std::distance(dists_from_domain_.begin(), it);
-    auto redined_delta = static_cast<double>(actual_pairs) / dists_from_domain_.size();
-    return {epsilon, std::max(Delta(), redined_delta)};
+    auto refined_delta = static_cast<double>(actual_pairs) / dists_from_domain_.size();
+    return {epsilon, std::max(Delta(), refined_delta)};
 }
 
 DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindDelta() {
