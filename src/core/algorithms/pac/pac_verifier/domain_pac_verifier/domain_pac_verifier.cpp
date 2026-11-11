@@ -1,11 +1,13 @@
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -117,23 +119,23 @@ void DomainPACVerifier::ExecuteInternal() {
     oss << '}';
     LOG_INFO("Verifying Domain PAC on columns {} with domain {}", oss.str(), domain_->ToString());
 
-    domain_end_ = std::ranges::partition_point(
-            dists_from_domain_, [](auto const& p) { return std::abs(p.second) < kDistThreshold; });
-
-    LOG_TRACE("Distances from domain:");
-    for ([[maybe_unused]] auto const& [it, dist] : dists_from_domain_) {
-        LOG_TRACE("\t{}: {}", tuple_type_->ValueToString(*it), dist);
+    EpsilonDelta eps_delta;
+    switch (SelectMode()) {
+        case PACValidationMode::kFindPac:
+            eps_delta = FindPAC();
+            break;
+        case PACValidationMode::kFindEpsilon:
+            eps_delta = FindEpsilon();
+            break;
+        case PACValidationMode::kFindDelta:
+            eps_delta = FindDelta();
+            break;
     }
-    LOG_TRACE("Initial domain size: {}", std::distance(dists_from_domain_.cbegin(), domain_end_));
-
-    auto empirical_probabilities = FindEpsilons();
-    auto [eps, delta] = FindEpsilonDelta(std::move(empirical_probabilities));
 
     auto const schema = TypedRelation().GetSharedPtrSchema();
     pac_ = model::DomainPAC{
-            eps, delta, domain_->ToString(),
+            eps_delta.epsilon, eps_delta.delta, domain_->ToString(),
             schema->GetVertical(util::IndicesToBitset(column_indices_, schema->GetNumColumns()))};
-
     LOG_INFO("Result: {}", pac_->ToLongString());
 }
 
@@ -152,6 +154,46 @@ PACVerifier::EpsilonDelta DomainPACVerifier::GetEpsilonDeltaForEpsilon(double ep
     auto delta = static_cast<double>(std::distance(dists_from_domain_.begin(), it)) /
                  original_value_tuples_->size();
     return {eps, delta};
+}
+
+DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindPAC() {
+    domain_end_ = std::ranges::partition_point(
+            dists_from_domain_, [](auto const& p) { return std::abs(p.second) < kDistThreshold; });
+
+    LOG_TRACE("Distances from domain:");
+    for ([[maybe_unused]] auto const& [it, dist] : dists_from_domain_) {
+        LOG_TRACE("\t{}: {}", tuple_type_->ValueToString(*it), dist);
+    }
+    LOG_TRACE("Initial domain size: {}", std::distance(dists_from_domain_.cbegin(), domain_end_));
+
+    auto empirical_probabilities = FindEpsilons();
+    return FindEpsilonDelta(std::move(empirical_probabilities));
+}
+
+DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindEpsilon() {
+    LOG_DEBUG("Dists from domain size: {}, original value tuples size: {}",
+              dists_from_domain_.size(), original_value_tuples_->size());
+    std::size_t needed_pairs = std::ceil(dists_from_domain_.size() * Delta());
+    if (needed_pairs > 0) {
+        --needed_pairs;
+    }
+    auto epsilon = dists_from_domain_[needed_pairs].second;
+
+    // Refine delta
+    auto it = std::next(dists_from_domain_.begin(), needed_pairs);
+    while (it != dists_from_domain_.end() && std::next(it)->second - epsilon < kDistThreshold) {
+        std::advance(it, 1);
+    }
+    auto actual_pairs = std::distance(dists_from_domain_.begin(), it);
+    auto redined_delta = static_cast<double>(actual_pairs) / dists_from_domain_.size();
+    return {epsilon, std::max(Delta(), redined_delta)};
+}
+
+DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindDelta() {
+    if (!std::isfinite(Epsilon())) {
+        return {dists_from_domain_.back().second, 1};
+    }
+    return GetEpsilonDeltaForEpsilon(Epsilon());
 }
 
 DomainPACHighlight DomainPACVerifier::GetHighlights(double eps_1, double eps_2) const {

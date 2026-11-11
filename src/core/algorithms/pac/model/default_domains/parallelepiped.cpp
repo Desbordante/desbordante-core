@@ -23,42 +23,28 @@ double Parallelepiped::DistFromDomainInternal(Tuple const& value) const {
     double max_dist = 0;
     for (std::size_t i = 0; i < metrizable_types_.size(); ++i) {
         double one_dim_dist = 0;
-        if (tuple_type_->CompareComponents(i, value[i], first_[i]) ==
+        if (tuple_type_->CompareComponents(i, value[i], first_[i].Value()) ==
             ::model::CompareResult::kLess) {
-            one_dim_dist = ComponentDistance(i, value[i], first_[i]);
-        } else if (tuple_type_->CompareComponents(i, last_[i], value[i]) ==
+            one_dim_dist = ComponentDistance(i, value[i], first_[i].Value());
+        } else if (tuple_type_->CompareComponents(i, last_[i].Value(), value[i]) ==
                    ::model::CompareResult::kLess) {
-            one_dim_dist = ComponentDistance(i, value[i], last_[i]);
+            one_dim_dist = ComponentDistance(i, value[i], last_[i].Value());
         }
         max_dist = std::max(max_dist, one_dim_dist);
     }
     return max_dist;
 }
 
-void Parallelepiped::ConvertValues() {
+void Parallelepiped::AfterSetTypes() {
     first_ = AllocateValues(first_str_);
     last_ = AllocateValues(last_str_);
-    destructors_ = GetDestructors();
 
     // Check that first_ <= last_
     for (std::size_t i = 0; i < metrizable_types_.size(); ++i) {
-        if (tuple_type_->CompareComponents(i, first_[i], last_[i]) ==
+        if (tuple_type_->CompareComponents(i, first_[i].Value(), last_[i].Value()) ==
             ::model::CompareResult::kGreater) {
             throw config::ConfigurationError(
                     "Lower bound of Parallelepiped must be less or equal than the upper bound.");
-        }
-    }
-}
-
-Parallelepiped::~Parallelepiped() {
-    for (std::size_t i = 0; i < first_.size(); ++i) {
-        auto const& destroy = destructors_[i];
-        if (destroy) {
-            destroy(first_[i]);
-            destroy(last_[i]);
-        } else {
-            delete[] first_[i];
-            delete[] last_[i];
         }
     }
 }

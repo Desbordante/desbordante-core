@@ -8,9 +8,13 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <vector>
 
+#include <magic_enum/magic_enum.hpp>
+
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/descriptions.h"
 #include "core/config/exceptions.h"
 #include "core/config/names.h"
@@ -21,10 +25,11 @@
 namespace algos::pac_verifier {
 void PACVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
+    using enum PACValidationMode;
 
-    auto min_eps_not_negative = [](double x) {
+    auto eps_not_negative = [](double x) {
         if (x < 0) {
-            throw config::ConfigurationError("Min epsilon cannot be negative");
+            throw config::ConfigurationError("Epsilon cannot be negative");
         }
     };
 
@@ -35,9 +40,9 @@ void PACVerifier::RegisterOptions() {
         }
     };
 
-    auto min_delta_le1 = [](double x) {
-        if (x > 1) {
-            throw config::ConfigurationError("Min delta must be less or equal to 1");
+    auto delta_in_0_1 = [](double x) {
+        if (x < 0 || x > 1) {
+            throw config::ConfigurationError("Delta must be in [0, 1]");
         }
     };
 
@@ -50,47 +55,51 @@ void PACVerifier::RegisterOptions() {
 
     auto delta_steps_calc_default = [this]() { return std::round((1 - min_delta_) * 1000); };
 
+    auto is_eq = [](auto value) { return [value](auto x) { return x == value; }; };
+
+    RegisterOption(Option(&mode_, kPacValidationMode, kDPACValidationMode, kFindPac)
+                           .SetConditionalOpts({{is_eq(kFindPac), {kMinEpsilon}},
+                                                {is_eq(kFindEpsilon), {kDelta}},
+                                                {is_eq(kFindDelta), {kEpsilon}}}));
+
     RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, 0.0)
-                           .SetValueCheck(min_eps_not_negative)
+                           .SetValueCheck(eps_not_negative)
                            .SetConditionalOpts({{nullptr, {kMaxEpsilon}}}));
     RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, -1.0)
                            .SetValueCheck(min_eps_le_max_eps)
                            .SetConditionalOpts({{nullptr, {kMinDelta}}}));
     RegisterOption(Option<double>(&min_delta_, kMinDelta, kDMinDelta, min_delta_calc_default)
-                           .SetValueCheck(min_delta_le1)
+                           .SetValueCheck(delta_in_0_1)
                            .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
     RegisterOption(Option<unsigned long>(&delta_steps_, kDeltaSteps, kDDeltaSteps,
                                          delta_steps_calc_default));
+
+    RegisterOption(Option(&delta_, kDelta, kDPACDelta).SetValueCheck(delta_in_0_1));
+
+    RegisterOption(Option(&epsilon_, kEpsilon, kDEpsilon).SetValueCheck(eps_not_negative));
+
     RegisterOption(Option(&diagonal_threshold_, kDiagonalThreshold, kDDiagonalThreshold,
                           kDefaultDiagonalThreshold));
 }
 
 void PACVerifier::LogCommonOptions() const {
     LOG_DEBUG(
-            "Common PAC verifier options: min delta: {}, min eps: {}, max eps: {}, delta steps: {}",
-            min_delta_, min_epsilon_, max_epsilon_, delta_steps_);
+            "Common PAC verifier options: mode: {}, min delta: {}, min eps: {}, max eps: {}, delta "
+            "steps: {}",
+            magic_enum::enum_name(mode_), min_delta_, min_epsilon_, max_epsilon_, delta_steps_);
 }
 
-std::optional<PACVerifier::EpsilonDelta> PACVerifier::TryValidatePAC(
+void PACVerifier::CheckEpsDeltaConditions(
         std::vector<EpsilonDelta> const& empirical_probabilities) const {
-    // It's convenient to call delta validation like min_eps = max_eps = 0, delta = delta,
-    // so this check should be first
     if (max_epsilon_ >= 0) {
-        // Both epsilon and delta bounds are passed explicitly. It may be "delta validation"
         auto first_delta_it =
                 std::ranges::lower_bound(empirical_probabilities, min_delta_, {}, GetDelta);
         if (first_delta_it->epsilon > max_epsilon_) {
-            LOG_DEBUG(
-                    "Max eps and min delta cannot be both satisfied. Taking first pair with min "
-                    "delta.");
-            return *first_delta_it;
+            throw std::runtime_error(
+                    "Min_delta and max_epsilon cannot be satisfied simultaneously. Consider using "
+                    "mode=find_delta to find delta by epsilon");
         }
     }
-    if (max_epsilon_ >= 0 && min_epsilon_ > 0 && max_epsilon_ - min_epsilon_ < kDistThreshold) {
-        LOG_DEBUG("Got min_epsilon == max_epsilon, entering epsilon validation mode");
-        return GetEpsilonDeltaForEpsilon(min_epsilon_);
-    }
-    return std::nullopt;
 }
 
 std::optional<PACVerifier::EpsilonDelta> PACVerifier::CheckPairsBetweenMinMaxEpsilon(
@@ -118,6 +127,29 @@ std::optional<PACVerifier::EpsilonDelta> PACVerifier::CheckPairsBetweenMinMaxEps
     return std::nullopt;
 }
 
+PACValidationMode PACVerifier::SelectMode() {
+    using enum PACValidationMode;
+
+    switch (mode_) {
+        case kFindPac:
+            if (max_epsilon_ == 0 && min_delta_ > 0) {
+                delta_ = min_delta_;
+                return kFindEpsilon;
+            }
+            if (min_epsilon_ == max_epsilon_) {
+                epsilon_ = min_epsilon_;
+                return kFindDelta;
+            }
+            return kFindPac;
+        case kFindEpsilon:
+        case kFindDelta:
+            return mode_;
+        default:
+            throw config::ConfigurationError("Unknown validation mode: " +
+                                             std::to_string(static_cast<int>(mode_)));
+    }
+}
+
 void PACVerifier::LoadDataInternal() {
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, true);
     input_table_->Reset();
@@ -131,7 +163,7 @@ void PACVerifier::LoadDataInternal() {
 void PACVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({kMinEpsilon, kDiagonalThreshold});
+    MakeOptionsAvailable({kPacValidationMode, kDiagonalThreshold});
 }
 
 std::ranges::subrange<std::vector<PACVerifier::EpsilonDelta>::const_iterator>
@@ -192,12 +224,8 @@ PACVerifier::EpsilonDelta PACVerifier::FindEpsilonDelta(
         LOG_TRACE("\t{}, {}", eps, delta);
     }
 
-    auto maybe_eps_delta = TryValidatePAC(empirical_probabilities);
-    if (maybe_eps_delta) {
-        LOG_TRACE("Got epsilon-delta from TryValidatePAC");
-        return *maybe_eps_delta;
-    }
-    maybe_eps_delta = CheckPairsBetweenMinMaxEpsilon(empirical_probabilities);
+    CheckEpsDeltaConditions(empirical_probabilities);
+    auto maybe_eps_delta = CheckPairsBetweenMinMaxEpsilon(empirical_probabilities);
     if (maybe_eps_delta) {
         LOG_TRACE("Got epsilon-delta from CheckPairsBetweenMinMaxEpsilon");
         return *maybe_eps_delta;

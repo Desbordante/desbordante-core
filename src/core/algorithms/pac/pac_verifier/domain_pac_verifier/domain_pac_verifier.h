@@ -54,6 +54,10 @@ private:
         pac_ = std::nullopt;
     }
 
+    EpsilonDelta FindPAC();
+    EpsilonDelta FindEpsilon();
+    EpsilonDelta FindDelta();
+
 public:
     DomainPACVerifier() : PACVerifier() {
         DESBORDANTE_OPTION_USING;

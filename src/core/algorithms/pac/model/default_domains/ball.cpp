@@ -9,24 +9,13 @@
 #include "core/algorithms/pac/model/tuple_type.h"
 
 namespace pac::model {
-double Ball::EuclideanDist(Tuple const& x, Tuple const& y) const {
+double Ball::EuclideanDist(Tuple const& x, TypedTuple const& y) const {
     double dist = 0;
     for (std::size_t i = 0; i < metrizable_types_.size(); ++i) {
-        auto coord_dist = ComponentDistance(i, x[i], y[i]);
+        auto coord_dist = ComponentDistance(i, x[i], y[i].Value());
         dist += coord_dist * coord_dist;
     }
     return std::sqrt(dist);
-}
-
-Ball::~Ball() {
-    for (std::size_t i = 0; i < center_.size(); ++i) {
-        auto const& destroy = destructors_[i];
-        if (destroy) {
-            destroy(center_[i]);
-        } else {
-            delete[] center_[i];
-        }
-    }
 }
 
 std::string Ball::ToString() const {
