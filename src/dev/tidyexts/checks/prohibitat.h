@@ -20,7 +20,7 @@ public:
 private:
     enum class ContainerKind : int { kMapLike, kVectorLike };
 
-    std::string GenerateFixText(ContainerKind kind, std::string const& idx_var);
+    std::string GenerateFixText(ContainerKind kind, std::string const& idx_var, bool is_arrow);
     std::optional<ContainerKind> ResolveContainerKind(QualType const& type);
 };
 
