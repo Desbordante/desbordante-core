@@ -1,0 +1,1 @@
+target_sources(${NAME} PRIVATE bindsnakecase.cpp common.cpp)

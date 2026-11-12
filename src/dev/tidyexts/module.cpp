@@ -1,3 +1,4 @@
+#include "checks/pybind/bindsnakecase.h"
 #include "checks/explicitcapture.h"
 #include "checks/makeauto.h"
 #include "checks/prohibitat.h"
@@ -13,6 +14,7 @@ public:
         factories.registerCheck<WhileNotForCheck>("desbordante.WhileNotFor");
         factories.registerCheck<ExplicitLambdaCapturesCheck>("desbordante.ExplicitLambdaCaptures");
         factories.registerCheck<ProhibitAtCheck>("desbordante.ProhibitAt");
+        factories.registerCheck<BindSnakeCaseCheck>("desbordante.pybind.BindSnakeCase");
     }
 };
 
