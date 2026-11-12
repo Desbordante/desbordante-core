@@ -5,6 +5,8 @@ include(desbordante_helpers)
 
 list(APPEND DESBORDANTE_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # ---- CMake Policies ----
 if(POLICY CMP0167)
     # To search for the upstream BoostConfig.cmake. Added in version 3.30.
@@ -32,6 +34,9 @@ project(
     LANGUAGES CXX
     DESCRIPTION "Open-source data profiling tool"
 )
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 # ---- Build Environment Validation ----
 
@@ -55,6 +60,8 @@ endif()
 option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
 option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
+option(DESBORDANTE_BUILD_TIDYEXTS "Build clang-tidy extensions with project-specific passes built on AST matching" OFF)
+option(DESBORDANTE_CLANG_TIDY "Enable clang-tidy" OFF)
 # This option only takes effect if DESBORDANTE_BUILD_TESTS or DESBORDANTE_BUILD_BENCHMARKS is ON
 option(DESBORDANTE_FETCH_DATASETS "Fetch datasets for tests or benchmarks" ON)
 option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
@@ -220,6 +227,23 @@ endif()
 # --- Dependencies installation ---
 
 include(desbordante_deps)
+
+# --- AST match SOs for clang-tidy ---
+if(DESBORDANTE_BUILD_TIDYEXTS)
+    add_subdirectory("src/dev/tidyexts")
+endif()
+
+# --- Clang Tidy setup ---
+# We set it up here because setting it up outside of CMake
+# requires always passing --load for tidyexts
+if(DESBORDANTE_CLANG_TIDY)
+    set(DESBORDANTE_CLANG_TIDY_OPTIONS "clang-tidy;-config-file=${CMAKE_CURRENT_LIST_DIR}/.clang-tidy")
+    if(DESBORDANTE_BUILD_TIDYEXTS)
+        set(CMAKE_CXX_CLANG_TIDY "${DESBORDANTE_CLANG_TIDY_OPTIONS};-load=$<TARGET_FILE:Desbordante.tidyexts>")
+    else()
+        set(CMAKE_CXX_CLANG_TIDY "${DESBORDANTE_CLANG_TIDY_OPTIONS}")
+    endif()
+endif()
 
 # --- Core Project Structure and Module Setup ---
 
