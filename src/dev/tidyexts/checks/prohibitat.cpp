@@ -9,6 +9,7 @@
 #include <clang/Basic/SourceLocation.h>
 #include <clang/Lex/Lexer.h>
 #include <optional>
+#include <stdexcept>
 
 namespace clang::tidy::misc {
 using namespace ast_matchers;
@@ -27,8 +28,8 @@ void ProhibitAtCheck::check(MatchFinder::MatchResult const& Result) {
     auto const* idx_arg = Result.Nodes.getNodeAs<Expr>("idxarg");
     if (idx_arg == nullptr) return;
 
-    auto const qt = call->getImplicitObjectArgument()->getType();
-    auto const opt_type = ResolveContainerKind(qt);
+    auto const container_type = Result.Context->getRecordType(call->getMethodDecl()->getParent());
+    auto const opt_type = ResolveContainerKind(container_type);
     if (!opt_type.has_value()) return;
     auto const type = opt_type.value();
 
@@ -39,10 +40,9 @@ void ProhibitAtCheck::check(MatchFinder::MatchResult const& Result) {
                     CharSourceRange::getTokenRange(idx_arg->getBeginLoc(), idx_arg->getEndLoc()),
                     *sm, Result.Context->getLangOpts())
                     .str();
-    std::string fix = GenerateFixText(type, arg_expr);
-
     auto const* me = dyn_cast<MemberExpr>(call->getCallee()->IgnoreParenImpCasts());
     if (me == nullptr) return;
+    std::string fix = GenerateFixText(type, arg_expr, me->isArrow());
 
     diag(me->getOperatorLoc(), ".at() is prohibited for STL containers")
             << FixItHint::CreateReplacement(
@@ -65,12 +65,13 @@ std::optional<ProhibitAtCheck::ContainerKind> ProhibitAtCheck::ResolveContainerK
     return std::nullopt;
 }
 
-std::string ProhibitAtCheck::GenerateFixText(ContainerKind kind, std::string const& idx_var) {
+std::string ProhibitAtCheck::GenerateFixText(ContainerKind kind, std::string const& idx_var,
+                                           bool is_arrow) {
     switch (kind) {
         case ContainerKind::kVectorLike:
-            return "[" + idx_var + "]";
+            return is_arrow ? "->operator[](" + idx_var + ")" : "[" + idx_var + "]";
         case ContainerKind::kMapLike:
-            return ".find(" + idx_var + ")->second";
+            return (is_arrow ? "->find(" : ".find(") + idx_var + ")->second";
         default:
             throw std::runtime_error("unreachable");
     }
