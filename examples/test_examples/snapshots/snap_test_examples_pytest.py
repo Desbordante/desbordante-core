@@ -2147,12 +2147,17 @@ See mining_ar.py and mining_afd.py for the AR and AFD primitives referenced abov
 Support: The number of records satisfying the condition X (LHS part)
 Confidence: The fraction of records where Y occurs given X
 
+Below, we'll print the mined CFDs along with these metrics.
+
 A CFD is considered to HOLD (is discovered) when both its support and confidence are
 greater than or equal to the specified minimum thresholds. The confidence value also
 indicates how strictly the dependency is followed:
 * confidence = 1.0 means the CFD holds exactly, with no violating records;
 * confidence < 1.0 means there are violations - the lower the confidence, the more records
   break the dependency.
+
+The mining algorithm returns each CFD together with its support and confidence.
+You can access them through cfd.support and cfd.confidence.
 
 \x1b[1;34m=== Available CFD Algorithms ===\x1b[0m
 
@@ -2214,14 +2219,32 @@ Running CFD mining with the following parameters:
 
 Discovered 9 CFDs:
   1. {(1, _)} -> (3, _)
+     Support: 8
+     Confidence: 1.00
   2. {(3, _)} -> (1, _)
+     Support: 8
+     Confidence: 0.88
   3. {(3, _),(2, _)} -> (1, _)
+     Support: 8
+     Confidence: 1.00
   4. {(1, _)} -> (0, _)
+     Support: 8
+     Confidence: 0.75
   5. {(3, _),(0, _)} -> (1, _)
+     Support: 8
+     Confidence: 1.00
   6. {(0, _)} -> (2, _)
+     Support: 8
+     Confidence: 0.88
   7. {(2, _)} -> (0, _)
+     Support: 8
+     Confidence: 1.00
   8. {(3, _),(0, _)} -> (2, _)
+     Support: 8
+     Confidence: 0.88
   9. {(1, _),(0, _)} -> (2, _)
+     Support: 8
+     Confidence: 0.88
 
 Column mapping: {0: 'Department', 1: 'Position', 2: 'Location', 3: 'Salary'}
 
