@@ -34,20 +34,33 @@ public:
 private:
     RawItems lhs_;
     RawItem rhs_;
+    unsigned int support_ = 0;
+    double confidence_ = 0.0;
 
 public:
     explicit RawCFD(RawItems lhs, RawItem rhs) : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
     RawCFD() = default;
 
+    RawCFD(RawItems lhs, RawItem rhs, unsigned int support, double confidence)
+        : lhs_(std::move(lhs)), rhs_(std::move(rhs)), support_(support), confidence_(confidence) {}
+
     std::string ToString() const;
 
-    RawItems const& GetLhs() const {
+    RawItems const& GetLhs() const noexcept {
         return lhs_;
     }
 
-    RawItem const& GetRhs() const {
+    RawItem const& GetRhs() const noexcept {
         return rhs_;
+    }
+
+    unsigned int GetSupport() const noexcept {
+        return support_;
+    }
+
+    double GetConfidence() const noexcept {
+        return confidence_;
     }
 
     bool operator==(RawCFD const& other) const = default;

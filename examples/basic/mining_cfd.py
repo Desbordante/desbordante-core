@@ -70,12 +70,20 @@ def explain_cfd_concept():
     print("Support: The number of records satisfying the condition X (LHS part)")
     print("Confidence: The fraction of records where Y occurs given X")
     print()
+
+    print("Below, we'll print the mined CFDs along with these metrics.")
+    print()
+    
     print("A CFD is considered to HOLD (is discovered) when both its support and confidence are")
     print("greater than or equal to the specified minimum thresholds. The confidence value also")
     print("indicates how strictly the dependency is followed:")
     print("* confidence = 1.0 means the CFD holds exactly, with no violating records;")
     print("* confidence < 1.0 means there are violations - the lower the confidence, the more records")
     print("  break the dependency.")
+
+    print()
+    print("The mining algorithm returns each CFD together with its support and confidence.")
+    print("You can access them through cfd.support and cfd.confidence.")
     print()
 
 
@@ -167,6 +175,8 @@ def advanced_cfd_analysis(df):
     print(f"Discovered {len(cfds)} CFDs:")
     for i, cfd in enumerate(cfds, 1):
         print(f"  {i}. {cfd}")
+        print(f"     Support: {cfd.support}")
+        print(f"     Confidence: {cfd.confidence:.2f}")
     print()
 
     if not cfds:
