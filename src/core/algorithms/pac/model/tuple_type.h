@@ -44,7 +44,7 @@ public:
     }
 };
 
-/// @brief Converts vector of strings of the same format as ComparableTupleType::ValueToString()
+/// @brief Converts vector of strings to the same format as ComparableTupleType::ValueToString()
 /// does
 std::string StringValueToString(std::vector<std::string> const& strings);
 }  // namespace pac::model
