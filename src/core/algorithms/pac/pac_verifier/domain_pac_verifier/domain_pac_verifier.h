@@ -6,22 +6,21 @@
 #include <utility>
 #include <vector>
 
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/pac/domain_pac.h"
 #include "core/algorithms/pac/model/idomain.h"
 #include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
-#include "core/algorithms/pac/pac_verifier/pac_verifier.h"
-#include "core/config/descriptions.h"
-#include "core/config/indices/option.h"
+#include "core/algorithms/pac/pac_verifier/pac_man.h"
+#include "core/algorithms/pac/pac_verifier/util/pac_verifier_utils.h"
 #include "core/config/indices/type.h"
-#include "core/config/names.h"
-#include "core/config/option_using.h"
-#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::pac_verifier {
 /// @brief Domain Probabilistic Approximate Constraint verifier.
-class DomainPACVerifier final : public PACVerifier {
+class DomainPACVerifier final : public Algorithm {
 private:
     using Tuples = std::vector<pac::model::Tuple>;
     using TuplesIter = Tuples::const_iterator;
@@ -30,12 +29,23 @@ private:
     config::IndicesType column_indices_;
     std::shared_ptr<pac::model::IDomain> domain_;
 
+    config::InputTable input_table_;
+    double min_epsilon_;
+    double max_epsilon_;
+    double min_delta_;
+    double diagonal_threshold_;
+    unsigned long delta_steps_;
+
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
+
     std::shared_ptr<Tuples> original_value_tuples_;
     // Distances from domain to each value, sorted by distance
     std::vector<std::pair<TuplesIter, double>> dists_from_domain_;
     std::shared_ptr<pac::model::TupleType> tuple_type_;
     // Iterator to after-last value that falls into domain itself (with eps = 0)
     std::vector<std::pair<TuplesIter, double>>::const_iterator domain_end_;
+
+    std::unique_ptr<PACMan> pac_man_;
 
     std::optional<model::DomainPAC> pac_;
 
@@ -46,27 +56,23 @@ private:
     std::vector<EpsilonDelta> FindEpsilons() const;
 
     void MakeDomain();
-    virtual void PreparePACTypeData() override;
     void ExecuteInternal() override;
-    EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const override;
+    EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const;
 
     void ResetState() override {
         pac_ = std::nullopt;
+        pac_man_ = nullptr;
     }
+
+    void MakeExecuteOptsAvailable() override;
+    void LoadDataInternal() override;
+
+    EpsilonDelta FindPAC();
+    EpsilonDelta FindEpsilon();
+    EpsilonDelta FindDelta();
 
 public:
-    DomainPACVerifier() : PACVerifier() {
-        DESBORDANTE_OPTION_USING;
-
-        RegisterOption(
-                config::kTableOpt(&input_table_).SetConditionalOpts({{nullptr, {kColumnIndices}}}));
-
-        RegisterOption(config::IndicesOption{kColumnIndices, kDColumnIndices, nullptr}(
-                &column_indices_, [this]() { return input_table_->GetNumberOfColumns(); }));
-        RegisterOption(Option(&domain_, kDomain, kDDomain));
-
-        MakeOptionsAvailable({config::kTableOpt.GetName(), kDomain});
-    }
+    DomainPACVerifier();
 
     model::DomainPAC const& GetPAC() const {
         if (!pac_) {
