@@ -32,10 +32,15 @@ jobs:
           os: ubuntu-latest
           toolset: gcc
           boost-libraries: 'container,thread,graph,program_options'
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: performance-ubuntu-latest-gcc-benchmark
+
       - name: Build
         run: |
           export CXX=g++-14
-          cmake --preset benchmark
+          cmake --preset benchmark -DDESBORDANTE_USE_CCACHE=ON
           cmake --build --preset benchmark
 
       - name: Get previous results

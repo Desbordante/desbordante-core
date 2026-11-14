@@ -73,6 +73,11 @@ jobs:
         with:
           os: ${{ matrix.os }}
           toolset: ${{ matrix.toolset }}
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: bindings-${{ matrix.os }}-${{ matrix.toolset }}
+
       - name: Build pip package
         shell: bash
         run: |
@@ -80,7 +85,7 @@ jobs:
 
           python3 -m venv .venv
           source .venv/bin/activate
-          python3 -m pip install .
+          python3 -m pip install . -Ccmake.define.DESBORDANTE_USE_CCACHE=ON
       - name: Test pip package
         shell: bash
         run: |
