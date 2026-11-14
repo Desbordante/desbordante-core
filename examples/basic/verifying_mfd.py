@@ -1,6 +1,7 @@
+from operator import attrgetter
+
 import desbordante
 import pandas as pd
-from operator import attrgetter
 
 GREEN_CODE = "\033[1;42m"
 RED_CODE = "\033[1;41m"
@@ -23,7 +24,7 @@ def print_results(verifier, data, parameter):
             print(f"Max distance: {max_distance} > {parameter}")
         print()
 
-def check_mfd(lhs_indices, rhs_indices, metric, parameters,
+def check_mfd(lhs_indices, rhs_indices, metric, parameters,  # noqa: PLR0913
               table, mfd_text, metric_algorithm = None):
     data = pd.read_csv(table, header=[0])
     print(data)
@@ -43,18 +44,18 @@ def check_mfd(lhs_indices, rhs_indices, metric, parameters,
         print_results(algo, data, mfd_parameter)
 
 def mfd_coordinates():
-    METRIC = "euclidean"
-    METRIC_ALGORITHM = "calipers"
-    LHS_INDICES = [1]
-    RHS_INDICES = [2,3]
-    PARAMETERS = [1, 0.1, 0.01, 0.001, 0.0001]
-    TABLE="examples/datasets/addresses_coordinates.csv"
+    metric = "euclidean"
+    metric_algorithm = "calipers"
+    lhs_indices = [1]
+    rhs_indices = [2,3]
+    parameters = [1, 0.1, 0.01, 0.001, 0.0001]
+    table="examples/datasets/addresses_coordinates.csv"
 
     print("To do that, let's explore addresses_coordinates.csv and try "
           "verifying a metric functional dependency in it.\n")
 
-    check_mfd(LHS_INDICES, RHS_INDICES, METRIC, PARAMETERS, TABLE,
-              "[Address] -> [Latitude, Longitude]", METRIC_ALGORITHM)
+    check_mfd(lhs_indices, rhs_indices, metric, parameters, table,
+              "[Address] -> [Latitude, Longitude]", metric_algorithm)
 
     print("As we can notice from the results, decreasing δ "
           "tightens the constraint, and, as such, yields more "
@@ -79,11 +80,11 @@ def mfd_coordinates():
     print("-" * 80)
 
 def mfd_basic():
-    METRIC = "euclidean"
-    LHS_INDICES = [0]
-    RHS_INDICES = [2]
-    PARAMETERS = [5, 3]
-    TABLE="examples/datasets/theatres_mfd.csv"
+    metric = "euclidean"
+    lhs_indices = [0]
+    rhs_indices = [2]
+    parameters = [5, 3]
+    table="examples/datasets/theatres_mfd.csv"
 
     print(f"{BLUE_CODE}Metric Functional Dependency{DEFAULT_COLOR_CODE} "
           "(MFD) is a type of relaxed functional "
@@ -100,7 +101,7 @@ def mfd_basic():
     print("Let's start by investigating theatres_mfd.csv and "
           "trying to verify a metric functional dependency in it.\n")
 
-    check_mfd(LHS_INDICES, RHS_INDICES, METRIC, PARAMETERS, TABLE,
+    check_mfd(lhs_indices, rhs_indices, metric, parameters, table,
               "[Movie] -> [Duration]")
 
     print("We learnt that in this case, the specified MFD does not hold, and "
@@ -123,19 +124,19 @@ def mfd_basic():
     print("-" * 80)
 
 def mfd_strings():
-    METRIC = "cosine"
-    METRIC_ALGORITHM = "brute"
-    LHS_INDICES = [1]
-    RHS_INDICES = [2]
-    PARAMETERS = [0.75, 0.5, 0.25, 0.1, 0.01]
-    TABLE="examples/datasets/addresses_names.csv"
+    metric = "cosine"
+    metric_algorithm = "brute"
+    lhs_indices = [1]
+    rhs_indices = [2]
+    parameters = [0.75, 0.5, 0.25, 0.1, 0.01]
+    table="examples/datasets/addresses_names.csv"
     bigrams_table="examples/datasets/bigrams.csv"
 
     print("Let's showcase this by checking addresses_names.csv and "
           "trying to verify a metric functional dependency in it.\n")
 
-    check_mfd(LHS_INDICES, RHS_INDICES, METRIC, PARAMETERS, TABLE,
-              "[SSN] -> [Address]", METRIC_ALGORITHM)
+    check_mfd(lhs_indices, rhs_indices, metric, parameters, table,
+              "[SSN] -> [Address]", metric_algorithm)
 
     print("To get into the intricacies of how the distance has been "
           "calculated here, we need to first define what is known as an "

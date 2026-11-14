@@ -1,12 +1,12 @@
-import desbordante
-import pandas
-
 from os.path import join
+
+import desbordante
+import pandas as pd
 
 # Parameters for pandas.read_csv(...).
 HEADER = 0
-SEPARATOR = ','
-DATASET_FOLDER_PATH = 'examples/datasets'
+SEPARATOR = ","
+DATASET_FOLDER_PATH = "examples/datasets"
 DATASET1_PATH = join(DATASET_FOLDER_PATH, "cargo_data_1.csv")
 DATASET2_PATH = join(DATASET_FOLDER_PATH, "cargo_data_2.csv")
 DATASET3_PATH = join(DATASET_FOLDER_PATH, "cargo_data_3.csv")
@@ -18,11 +18,11 @@ EXACT_ALGORITHM_CONFIG = {}
 # Algorithm that finds approximate FDs and its config.
 APPROXIMATE_ALGORITHM_TYPE = desbordante.afd.algorithms.Pyro
 ERROR = 0.005
-APPROXIMATE_ALGORITHM_CONFIG = {'error': ERROR}
+APPROXIMATE_ALGORITHM_CONFIG = {"error": ERROR}
 
 METRIC_VERIFIER_CONFIG = {
-    'lhs_indices': [1], 'rhs_indices': [3], 'metric': 'euclidean',
-    'metric_algorithm': 'brute', 'parameter': 4
+    "lhs_indices": [1], "rhs_indices": [3], "metric": "euclidean",
+    "metric_algorithm": "brute", "parameter": 4
 }
 
 
@@ -41,15 +41,15 @@ def get_result_mv(df, mv_config):
 
 
 def print_fds(fds):
-    print('\n'.join(map(str, sorted(fds, key=lambda fd: fd.to_name_tuple()))))
+    print("\n".join(map(str, sorted(fds, key=lambda fd: fd.to_name_tuple()))))
 
 
 def main():
-    df1 = pandas.read_csv(DATASET1_PATH, sep=SEPARATOR, header=HEADER)
-    df2 = pandas.read_csv(DATASET2_PATH, sep=SEPARATOR, header=HEADER)
-    df3 = pandas.read_csv(DATASET3_PATH, sep=SEPARATOR, header=HEADER)
+    df1 = pd.read_csv(DATASET1_PATH, sep=SEPARATOR, header=HEADER)
+    df2 = pd.read_csv(DATASET2_PATH, sep=SEPARATOR, header=HEADER)
+    df3 = pd.read_csv(DATASET3_PATH, sep=SEPARATOR, header=HEADER)
     if not (df1.columns.tolist() == df2.columns.tolist() == df3.columns.tolist()):
-        print('Datasets must have the same schemas!')
+        print("Datasets must have the same schemas!")
         return
 
     print("FDs found for dataset 1:")

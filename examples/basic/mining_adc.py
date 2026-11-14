@@ -1,20 +1,22 @@
 import desbordante as db
 import pandas as pd
 
-RED = '\033[31m'
-YELLOW = '\033[33m'
-GREEN = '\033[32m'
-CYAN = '\033[1m\033[36m'
-ENDC = '\033[0m'
+RED = "\033[31m"
+YELLOW = "\033[33m"
+GREEN = "\033[32m"
+CYAN = "\033[1m\033[36m"
+ENDC = "\033[0m"
 
 TABLE_1 = "examples/datasets/taxes_1.csv"
 TABLE_2 = "examples/datasets/taxes_2.csv"
+
 
 def print_table(filename: str, title: str = "") -> None:
     if title:
         print(f"{title}")
     data = pd.read_csv(filename, header=0)
     print(data, end="\n\n")
+
 
 def main():
     print(f"""{YELLOW}Understanding Denial Constraints (DCs){ENDC}
@@ -59,7 +61,7 @@ We have two parameters in Desbordante's DC mining algorithm:
 
     # Exact DC mining on TABLE_1
     algo = db.dc.algorithms.Default()
-    algo.load_data(table=(TABLE_1, ',', True))
+    algo.load_data(table=(TABLE_1, ",", True))
     algo.execute(evidence_threshold=0, shard_length=0)
     dcs_table1_exact = algo.get_dcs()
 
@@ -81,7 +83,7 @@ This means we only require that at least half of all row pairs satisfy each DC (
 
     # Approximate DC mining on TABLE_1
     algo = db.dc.algorithms.Default()
-    algo.load_data(table=(TABLE_1, ',', True))
+    algo.load_data(table=(TABLE_1, ",", True))
     algo.execute(evidence_threshold=0.5, shard_length=0)
     dcs_table1_approx = algo.get_dcs()
 
@@ -137,7 +139,7 @@ Let's see how the exact DC mining changes due to this additional record.
 
     # Exact DC mining on TABLE_2
     algo = db.dc.algorithms.Default()
-    algo.load_data(table=(TABLE_2, ',', True))
+    algo.load_data(table=(TABLE_2, ",", True))
     algo.execute(evidence_threshold=0, shard_length=0)
     dcs_table2_exact = algo.get_dcs()
 
@@ -146,13 +148,15 @@ Let's see how the exact DC mining changes due to this additional record.
         print(f"  {CYAN}{dc}{ENDC}")
     print()
 
-    print(f"""We can see that the DC {CYAN}¬{{ t.State == s.State ∧ t.Salary >= s.Salary ∧ t.FedTaxRate <= s.FedTaxRate }}{ENDC}
-no longer appears because of the violation introduced by record index 9
-({GREEN}(Texas, 5000, 0.05){ENDC}).
+    print(
+        f"We can see that the DC {CYAN}¬{{ t.State == s.State ∧ t.Salary >= s.Salary ∧ "
+        f"t.FedTaxRate <= s.FedTaxRate }}{ENDC}\n"
+        "no longer appears because of the violation introduced by record index 9\n"
+        f"({GREEN}(Texas, 5000, 0.05){ENDC}).\n\n"
+        f"Those violations occur in pairs like {RED}(6, 9), (7, 9), (8, 9){ENDC},\n"
+        "where each number is a record index in the dataset."
+    )
 
-Those violations occur in pairs like {RED}(6, 9), (7, 9), (8, 9){ENDC},
-where each number is a record index in the dataset.""")
 
 if __name__ == "__main__":
     main()
-

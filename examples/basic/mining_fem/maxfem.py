@@ -1,5 +1,6 @@
-import desbordante
 import textwrap
+
+import desbordante
 
 YELLOW = "\033[1;33m"
 CYAN = "\033[1;36m"
@@ -26,8 +27,8 @@ def banner(title):
 def read_sequence_file(path):
     rows = []
     with open(path) as f:
-        for line in f:
-            line = line.strip()
+        for raw_line in f:
+            line = raw_line.strip()
             if not line:
                 continue
             events_part, _, ts_part = line.partition("|")

@@ -1,9 +1,9 @@
-"""Example 2: 2D parallelepiped, leveling coefficients"""
+"""Example 2: 2D parallelepiped, leveling coefficients."""
 
-from tabulate import tabulate
 from csv import reader
 
 import desbordante
+from tabulate import tabulate
 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -46,7 +46,8 @@ As in the first example, we use the Domain PAC verifier to check whether the eng
 )
 
 print(
-    f"""Firstly, we need to create domain. We have a Cartesian product of two segments: {BLUE}[85, 95] x [1500, 3500]{ENDC},
+    f"""Firstly, we need to create domain. We have a Cartesian product of two segments: """
+    f"""{BLUE}[85, 95] x [1500, 3500]{ENDC},
 so it would be natural to use parallelepiped.
 
 We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
@@ -73,11 +74,13 @@ algo.execute(max_epsilon=10)
 pac = algo.get_pac()
 print(f"Algorithm result: {RED}{pac}{ENDC}.")
 print(
-    f"A result with δ = {BLUE}{pac.delta}{ENDC} is unexpected. To understand what is happening, we examine the outliers."
+    f"A result with δ = {BLUE}{pac.delta}{ENDC} is unexpected. "
+    f"To understand what is happening, we examine the outliers."
 )
 
 print(
-    f"""Outliers between {BLUE}+{0:.1f}{ENDC} and {BLUE}+{pac.epsilon:.1f}{ENDC} are: {BOLD}{algo.get_highlights(0, pac.epsilon)}{ENDC}.
+    f"""Outliers between {BLUE}+{0:.1f}{ENDC} and {BLUE}+{pac.epsilon:.1f}{ENDC} are: """
+    f"""{BOLD}{algo.get_highlights(0, pac.epsilon)}{ENDC}.
 """
 )
 print(
@@ -124,5 +127,6 @@ To better understand the effect of leveling coefficients, let's inspect the outl
 Outliers between {BLUE}+0{ENDC} and {BLUE}+5{ENDC}: {BOLD}{algo.get_highlights(0, 5)}{ENDC}.
 You can observe that the outliers reflect the normalized distance.
 
-It is recommended to continue with the third example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
+It is recommended to continue with the third example """
+      f"""({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
 which introduces another basic domain type: Ball.""")

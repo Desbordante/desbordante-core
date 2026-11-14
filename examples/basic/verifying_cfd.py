@@ -1,20 +1,20 @@
 import desbordante
 import pandas as pd
 
-TABLE_PATH = 'examples/datasets/cfd_datasets/city.csv'
+TABLE_PATH = "examples/datasets/cfd_datasets/city.csv"
 
 MINIMUM_CONFIDENCE = 0.9  # Minimum confidence threshold for a CFD to hold
 
 class Colors:
-    GREEN_BG = '\033[1;42m'
-    GREEN_FG = '\033[1;32m'
-    RED_BG = '\033[1;41m'
-    RED_FG = '\033[1;31m'
-    BLUE_FG = '\033[1;34m'
-    YELLOW_BG = '\033[1;43m'
-    DEFAULT_BG = '\033[1;49m'
-    DEFAULT_FG = '\033[1;37m'
-    RESET = '\033[0m'
+    GREEN_BG = "\033[1;42m"
+    GREEN_FG = "\033[1;32m"
+    RED_BG = "\033[1;41m"
+    RED_FG = "\033[1;31m"
+    BLUE_FG = "\033[1;34m"
+    YELLOW_BG = "\033[1;43m"
+    DEFAULT_BG = "\033[1;49m"
+    DEFAULT_FG = "\033[1;37m"
+    RESET = "\033[0m"
 
 CFD = desbordante.cfd.CFD
 
@@ -81,13 +81,13 @@ def demonstrate_algorithm_parameters():
     print(f"{Colors.BLUE_FG}=== Algorithm Parameters Explanation ==={Colors.RESET}\n")
 
     print("CFD verification parameters:")
-    print(f"* cfd_rule: the CFD to verify")
+    print("* cfd_rule: the CFD to verify")
     print("  - CFD object with LHS and RHS")
     print("  - Required parameter")
     print("  - Example: CFD(lhs=[(0, 'Los Angeles'), (3, '_')], rhs=(4, 'high')), where 0,3,4 are attribute indices")
     print()
 
-    print(f"* cfd_minconf: minimum confidence threshold")
+    print("* cfd_minconf: minimum confidence threshold")
     print("  - Lower values: more tolerant of violations")
     print("  - Range: 0.0 to 1.0")
     print()
@@ -159,7 +159,7 @@ def create_and_explain_dataset():
 
 
 def print_table_with_highlight(table, indices_to_highlight):
-    """Print table with highlighted rows"""
+    """Print table with highlighted rows."""
     if table.empty:
         print(table.to_string())
     else:
@@ -176,7 +176,6 @@ def print_table_with_highlight(table, indices_to_highlight):
 
 def print_cfd_metrics(df, cfd, verifier):
     """Print CFD verification metrics and violations."""
-
     print(f"Verifying with minimum confidence (cfd_minconf): {MINIMUM_CONFIDENCE}")
     verifier.execute(cfd_rule=cfd, cfd_minconf=MINIMUM_CONFIDENCE)
 
@@ -225,7 +224,7 @@ def display_violations(df, verifier, cfd):
 
 
 def scenario_find_rhs_violations(df):
-    """Scenario: Finding violations in RHS (right-hand side)"""
+    """Scenario: Finding violations in RHS (right-hand side)."""
     print(f"{Colors.BLUE_FG}=== Scenario 1: Finding RHS Violations ==={Colors.RESET}")
     print("Let's verify our first hypothesis: Los Angeles properties should consistently have high building costs.")
     print()
@@ -282,7 +281,7 @@ def scenario_find_rhs_violations(df):
 
 
 def scenario_find_lhs_violations(df):
-    """Scenario: Finding violations by examining LHS conditions"""
+    """Scenario: Finding violations by examining LHS conditions."""
     print(f"{Colors.BLUE_FG}=== Scenario 2: Analyzing Different LHS Conditions ==={Colors.RESET}")
 
     print("In this scenario, we'll explore how different LHS (Left-Hand Side) conditions")
@@ -487,5 +486,5 @@ def main():
     print()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

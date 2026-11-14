@@ -1,22 +1,22 @@
-from typing import Dict, List, Tuple
 from collections import defaultdict
-import matplotlib.pyplot as plt
+
 import desbordante as db
+import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 
 
 class DataCleaner:
-    def __init__(self, violations: List[Tuple[int, int]]) -> None:
-        self.graph: Dict[int, List[int]] = defaultdict(list)
+    def __init__(self, violations: list[tuple[int, int]]) -> None:
+        self.graph: dict[int, list[int]] = defaultdict(list)
         for v1, v2 in violations:
             if v1 != v2:
                 self.graph[v1].append(v2)
                 self.graph[v2].append(v1)
             else:
                 self.graph[v1] = [v1]
-        self.nodes: List[int] = list(self.graph.keys())
-        self.removed_nodes: List[int] = []
+        self.nodes: list[int] = list(self.graph.keys())
+        self.removed_nodes: list[int] = []
 
     def __remove_highest_degree_node(self) -> None:
         # TODO: Consider using max heap to speed up things
@@ -37,14 +37,14 @@ class DataCleaner:
         while self.__has_edges():
             self.__remove_highest_degree_node()
 
-    def draw(self, title: str, is_blocked: bool = True) -> None:
+    def draw(self, title: str, *, is_blocked: bool = True) -> None:
         plt.figure()
         plt.title(title)
-        G = nx.Graph()
-        G.add_nodes_from(self.nodes)
+        graph = nx.Graph()
+        graph.add_nodes_from(self.nodes)
         for node, neighbours in self.graph.items():
-            [G.add_edge(node, neighbour) for neighbour in neighbours]
-        nx.draw(G, with_labels=True)
+            [graph.add_edge(node, neighbour) for neighbour in neighbours]
+        nx.draw(graph, with_labels=True)
         plt.show(block=is_blocked)
 
 def print_table(table: str) -> None:
@@ -68,22 +68,22 @@ def main():
     "∀s, t ∈ R, s ≠ t: ¬(p_1 ∧ . . . ∧ p_m)\n\n"
     "DCs involve comparisons between pairs of rows within a dataset.\n"
     "A typical DC example, derived from a Functional Dependency such as A -> B,\n"
-    "is expressed as: \"∀s, t ∈ R, s ≠ t, ¬(t.A == s.A ∧ t.B ≠ s.B).\"\n"
+    'is expressed as: "∀s, t ∈ R, s ≠ t, ¬(t.A == s.A ∧ t.B ≠ s.B)."\n'
     "This denotes that for any pair of rows in the relation, it should not be the case\n"
     "that while the values in column A are equal, the values in column B are unequal.\n\n"
     "Consider the following dataset:\n")
 
-    TABLE_1 = 'examples/datasets/taxes_3.csv'
-    SEPARATOR = ','
-    HAS_HEADER = True
-    DC = "!(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate)"
-    DO_COLLECT_VIOLATIONS = True
+    table_1 = "examples/datasets/taxes_3.csv"
+    separator = ","
+    has_header = True
+    dc = "!(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate)"
+    do_collect_violations = True
 
     # Load data
     verifier = db.dc_verification.algorithms.Default()
-    verifier.load_data(table=(TABLE_1, SEPARATOR, HAS_HEADER))
+    verifier.load_data(table=(table_1, separator, has_header))
 
-    print_table(TABLE_1)
+    print_table(table_1)
 
     print("And the following Denial Constraint:\n"
     "!(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate).\n"
@@ -93,11 +93,11 @@ def main():
     "Now, we run the algorithm in order to see if the constraint holds.\n")
 
     # Execute algorithm
-    verifier.execute(denial_constraint=DC, do_collect_violations=DO_COLLECT_VIOLATIONS)
+    verifier.execute(denial_constraint=dc, do_collect_violations=do_collect_violations)
 
     dc_holds = verifier.dc_holds()
 
-    print("DC " + DC + " holds: " + str(dc_holds), end='\n\n')
+    print("DC " + dc + " holds: " + str(dc_holds), end="\n\n")
 
     violations = verifier.get_violations()
     viol_str = ", ".join(map(str, violations))
@@ -127,8 +127,8 @@ def main():
 
     # Start cleaning algorithm
     cleaner = DataCleaner(violations)
-    
-    cleaner.draw("Graph before", False)
+
+    cleaner.draw("Graph before", is_blocked=False)
     cleaner.clean()
     cleaner.draw("Graph after")
 
@@ -142,21 +142,21 @@ def main():
     "9   Wisconsin   3000        0.9  -->  Wisconsin   3000        0.09\n"
     "13      Texas   5000       0.05  -->      Texas   5000         0.5\n\n")
 
-    TABLE_2 = 'examples/datasets/taxes_4.csv'
-    SEPARATOR = ','
-    HAS_HEADER = True
+    table_2 = "examples/datasets/taxes_4.csv"
+    separator = ","
+    has_header = True
 
     verifier = db.dc_verification.algorithms.Default()
-    verifier.load_data(table=(TABLE_2, SEPARATOR, HAS_HEADER))
+    verifier.load_data(table=(table_2, separator, has_header))
 
-    verifier.execute(denial_constraint=DC, do_collect_violations=DO_COLLECT_VIOLATIONS)
+    verifier.execute(denial_constraint=dc, do_collect_violations=do_collect_violations)
     dc_holds = verifier.dc_holds()
 
     print("The dataset after repairs:\n")
-    print_table(TABLE_2)
+    print_table(table_2)
 
     print("Now we can check if the constraint holds by running the algorithm again.\n\n"
-    f"DC " + DC + " holds: " + str(dc_holds), end='\n\n'
+    "DC " + dc + " holds: " + str(dc_holds), end="\n\n"
     "After fixing the typos in the initial dataset, the constraint holds.\n")
 
 
