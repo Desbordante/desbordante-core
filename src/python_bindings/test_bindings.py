@@ -20,6 +20,15 @@ class FailureCaseContainer(NamedTuple):
 
 CUSTOM_DOMAIN_BOUND = 7
 
+
+def distance_from_custom_domain(val):
+    return max(0, int(val[0]) - CUSTOM_DOMAIN_BOUND)
+
+
+CUSTOM_DOMAIN = desb.pac.domains.CustomDomain(
+    distance_from_custom_domain, f"[-\\infty, {CUSTOM_DOMAIN_BOUND}]"
+)
+
 TABLE_ONLY_CONTAINER = OptionContainer(
     "WDC_satellites.csv", {}, {}
 )
@@ -153,8 +162,7 @@ ALGO_CORRECT_OPTIONS_INFO = [
             "TestLong.csv",
             {
                 "column_indices": [1],
-                "domain": desb.pac.domains.CustomDomain(
-                    lambda val: int(val[0]) < CUSTOM_DOMAIN_BOUND, f"[-\\infty, {CUSTOM_DOMAIN_BOUND}]"),
+                "domain": CUSTOM_DOMAIN,
             },
             {
                 "max_epsilon": 7,
@@ -237,6 +245,19 @@ class TestPythonBindings(unittest.TestCase):
                     self._test_correct_option_setting(
                         algo, option.path, ",", has_header=True, options=option
                     )
+
+    def test_custom_domain_distance(self):
+        for value, distance in [(6, 0), (7, 0), (8, 1), (20, 13)]:
+            with self.subTest(value=value):
+                self.assertEqual(distance_from_custom_domain([value]), distance)
+
+        with tempfile.TemporaryDirectory() as directory:
+            table = pathlib.Path(directory) / "values.csv"
+            table.write_text("value\n6\n7\n20\n")
+            verifier = desb.pac_verification.algorithms.DomainPACVerifier()
+            verifier.load_data(table=(str(table), ",", True), domain=CUSTOM_DOMAIN, column_indices=[0])
+            verifier.execute(min_delta=1.0)
+            self.assertEqual(verifier.get_pac().epsilon, 13.0)
 
     def test_metric_verifier_failure_cases(self):
         for load in METRIC_VERIFIER_FAILURE_CASES:
