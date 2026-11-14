@@ -145,7 +145,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION
                     "Suppressing deprecated declaration warnings. "
                     "Consider using another version of Clang."
     )
-    list(APPEND DEBUG_BUILD_OPTS "-Wno-deprecated-declarations")
+    list(APPEND DEBUG_BUILD_OPTS "-Wno-error-deprecated-declarations")
 endif()
 
 if(ASAN)
