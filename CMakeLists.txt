@@ -61,6 +61,7 @@ option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
 option(DESBORDANTE_CI_REDUCED_DEBUG_INFO "Use reduced debug info intended for CI builds" OFF)
 option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
+option(DESBORDANTE_USE_CCACHE "Enable object file caching using ccache" OFF)
 
 set(DESBORDANTE_SANITIZER
     ""
@@ -215,6 +216,12 @@ endif()
 
 if(DESBORDANTE_BINDINGS)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
+if(DESBORDANTE_USE_CCACHE)
+    find_program(CCACHE_PATH ccache REQUIRED)
+    message(STATUS "Found ccache at ${CCACHE_PATH}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PATH}")
 endif()
 
 # --- Dependencies installation ---
