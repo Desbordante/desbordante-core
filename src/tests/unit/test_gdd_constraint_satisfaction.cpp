@@ -7,13 +7,12 @@
 
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/gdd/gdd_graph_description.h"
-#include "tests/unit/test_gdd_utils.h"
+#include "test_gdd_utils.h"
 
 // TODO: wildcard tests once they will be implemented in code.
 
 using model::Gdd;
-using model::gdd::graph_t;
-using model::gdd::vertex_t;
+using model::gdd::GraphTypes;
 
 using model::gdd::detail::CmpOp;
 using model::gdd::detail::ConstValue;
@@ -55,14 +54,14 @@ class GddSatisfiesAttrConstTest : public ::testing::TestWithParam<AttrConstCase>
 TEST_P(GddSatisfiesAttrConstTest, WorksAsExpected) {
     AttrConstCase const& tc = GetParam();
 
-    graph_t p = MakeSingleVertexPattern(1, "X");
+    GraphTypes::Graph p = MakeSingleVertexPattern(1, "X");
     DistanceConstraint const c = AttrConst(1, tc.attr_name, tc.rhs, tc.metric, tc.op, tc.threshold);
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
-    graph_t g;
+    GraphTypes::Graph g;
     auto const gv = AddVertex(g, tc.graph_vertex_id, tc.graph_vertex_label, tc.graph_vertex_attrs);
     auto const pv = FindVertexById(p, 1);
-    model::gdd::detail::MappingT const map{{pv, gv}};
+    GraphTypes::Mapping const map{{pv, gv}};
 
     if (tc.expect_throw) {
         EXPECT_THROW(gdd.Satisfies(g, map), std::logic_error);
@@ -278,18 +277,18 @@ class GddSatisfiesAttrAttrTest : public ::testing::TestWithParam<AttrAttrCase> {
 TEST_P(GddSatisfiesAttrAttrTest, WorksAsExpected) {
     AttrAttrCase const& tc = GetParam();
 
-    graph_t p = MakeTwoVertexPattern(1, 2, "A", "B");
+    GraphTypes::Graph p = MakeTwoVertexPattern(1, 2, "A", "B");
     DistanceConstraint const c =
             AttrAttr(1, tc.lhs_attr_name, 2, tc.rhs_attr_name, tc.metric, tc.op, tc.threshold);
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
-    graph_t g;
+    GraphTypes::Graph g;
     auto const g1 = AddVertex(g, tc.lhs_graph_id, tc.lhs_graph_label);
     auto const g2 = AddVertex(g, tc.rhs_graph_id, tc.rhs_graph_label);
     auto const p1 = FindVertexById(p, 1);
     auto const p2 = FindVertexById(p, 2);
 
-    model::gdd::detail::MappingT const map{{p1, g1}, {p2, g2}};
+    GraphTypes::Mapping const map{{p1, g1}, {p2, g2}};
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
 
@@ -336,17 +335,17 @@ class GddSatisfiesRelConstTest : public ::testing::TestWithParam<RelConstCase> {
 TEST_P(GddSatisfiesRelConstTest, WorksAsExpected) {
     RelConstCase const& tc = GetParam();
 
-    graph_t p = MakeSingleVertexPattern(1, "A");
+    GraphTypes::Graph p = MakeSingleVertexPattern(1, "A");
     DistanceConstraint const c = RelConst(1, "knows", 42LL);
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
-    graph_t g;
+    GraphTypes::Graph g;
     auto const a = AddVertex(g, 1, "A");
     auto const b = AddVertex(g, 42, "B");
     AddEdge(g, a, b, tc.actual_edge_label);
 
     auto const pv = FindVertexById(p, 1);
-    model::gdd::detail::MappingT const map{{pv, a}};
+    GraphTypes::Mapping const map{{pv, a}};
 
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
@@ -382,11 +381,11 @@ class GddSatisfiesRelRelTest : public ::testing::TestWithParam<RelRelCase> {};
 TEST_P(GddSatisfiesRelRelTest, WorksAsExpected) {
     RelRelCase const& tc = GetParam();
 
-    graph_t p = MakeTwoVertexPattern(1, 2, "A", "C");
+    GraphTypes::Graph p = MakeTwoVertexPattern(1, 2, "A", "C");
     DistanceConstraint const c = RelRel(1, tc.lhs_rel_name, 2, tc.rhs_rel_name);
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
-    graph_t g;
+    GraphTypes::Graph g;
     auto const a = AddVertex(g, 1, "A");
     auto const c_v = AddVertex(g, 2, "C");
 
@@ -403,7 +402,7 @@ TEST_P(GddSatisfiesRelRelTest, WorksAsExpected) {
 
     auto const p1 = FindVertexById(p, 1);
     auto const p2 = FindVertexById(p, 2);
-    model::gdd::detail::MappingT const map{{p1, a}, {p2, c_v}};
+    GraphTypes::Mapping const map{{p1, a}, {p2, c_v}};
 
     EXPECT_EQ(gdd.Satisfies(g, map), tc.expected);
 }
@@ -442,58 +441,58 @@ INSTANTIATE_TEST_SUITE_P(RelRelCases, GddSatisfiesRelRelTest,
                          });
 
 TEST(GddSatisfiesConstraint, EmptyLhsRhsSatisfies) {
-    graph_t p = MakeSingleVertexPattern(1, "X");
+    GraphTypes::Graph p = MakeSingleVertexPattern(1, "X");
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{});
 
-    graph_t g;
+    GraphTypes::Graph g;
     auto const gv = AddVertex(g, 10, "X");
     auto const pv = FindVertexById(p, 1);
 
-    model::gdd::detail::MappingT map;
+    GraphTypes::Mapping map;
     map.emplace(pv, gv);
 
     EXPECT_TRUE(gdd.Satisfies(g, map));
 }
 
 TEST(GddSatisfiesConstraint, LhsFalseThenSatisfies) {
-    graph_t p = MakeSingleVertexPattern(1, "X");
+    GraphTypes::Graph p = MakeSingleVertexPattern(1, "X");
     DistanceConstraint const l =
             AttrConst(1, "id", 10LL, DistanceMetric::kAbsDiff, CmpOp::kLe, 0.0);
     DistanceConstraint const r = RelRel(230498, "randomstr", 1234, "anotherrandomstr");
 
     Gdd const gdd(p, Gdd::Phi{l}, Gdd::Phi{r, r, r, r});
 
-    graph_t g;
+    GraphTypes::Graph g;
     AddVertex(g, 10, "X");
 
     EXPECT_TRUE(gdd.Satisfies(g, {}));
 }
 
 TEST(GddSatisfiesConstraint, MissingPatternVertexInMapMakesConstraintFail) {
-    graph_t p = MakeSingleVertexPattern(1, "X");
+    GraphTypes::Graph p = MakeSingleVertexPattern(1, "X");
     DistanceConstraint const c =
             AttrConst(1, "id", 10LL, DistanceMetric::kAbsDiff, CmpOp::kLe, 0.0);
 
     Gdd const gdd(p, Gdd::Phi{}, Gdd::Phi{c});
 
-    graph_t g;
+    GraphTypes::Graph g;
     AddVertex(g, 10, "X");
 
     EXPECT_FALSE(gdd.Satisfies(g, {}));
 }
 
 TEST(GddSatisfiesConstraint, RelConstNonInt64ConstValueTypesThrows) {
-    graph_t p = MakeSingleVertexPattern(1, "A");
+    GraphTypes::Graph p = MakeSingleVertexPattern(1, "A");
     DistanceConstraint const c = RelConst(1, "knows", std::string("42"));
     Gdd const gdd(p, Gdd::Phi{c}, Gdd::Phi{});
 
-    graph_t g;
+    GraphTypes::Graph g;
     auto const a = AddVertex(g, 1, "A");
     auto const b = AddVertex(g, 42, "B");
     AddEdge(g, a, b, "knows");
 
     auto const pv = FindVertexById(p, 1);
-    model::gdd::detail::MappingT const map{{pv, a}};
+    GraphTypes::Mapping const map{{pv, a}};
 
     EXPECT_THROW(gdd.Satisfies(g, map), std::logic_error);
 }

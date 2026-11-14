@@ -13,7 +13,7 @@ protected:
     std::filesystem::path graph_path_;
     std::vector<std::filesystem::path> gfd_paths_;
 
-    model::graph_t graph_;
+    model::gfd::graph_t graph_;
     std::vector<model::Gfd> gfds_;
     std::vector<model::Gfd> result_;
 
@@ -25,12 +25,12 @@ protected:
     void RegisterOptions();
 
 public:
-    virtual std::vector<model::Gfd> GenerateSatisfiedGfds(model::graph_t const& graph,
+    virtual std::vector<model::Gfd> GenerateSatisfiedGfds(model::gfd::graph_t const& graph,
                                                           std::vector<model::Gfd> const& gfds) = 0;
 
     GfdHandler();
 
-    GfdHandler(model::graph_t graph_, std::vector<model::Gfd> gfds_)
+    GfdHandler(model::gfd::graph_t graph_, std::vector<model::Gfd> gfds_)
         : Algorithm(), graph_(graph_), gfds_(gfds_) {
         ExecutePrepare();
     }

@@ -1,4 +1,4 @@
-#include "core/algorithms/gdd/gdd_validator/gdd_validator.h"
+#include "gdd_validator.h"
 
 #include <algorithm>
 #include <cassert>
@@ -33,7 +33,7 @@ void GddValidator::RegisterOptions() {
     MakeOptionsAvailable({kGraphData, kGddData});
 }
 
-GddValidator::GddValidator() : Algorithm() {
+GddValidator::GddValidator() {
     RegisterOptions();
 }
 
@@ -78,19 +78,22 @@ void GddValidator::ExecuteInternal() {
     }
 }
 
-GddValidator::DomainT GddValidator::BuildDomain(model::gdd::graph_t const& pattern,
-                                                model::gdd::graph_t const& graph) {
-    DomainT dom;
+bool GddValidator::GroupCheck::operator()(Mapping const& match) {
+    Graph const& pattern = group.front()->GetPattern();
 
-    for (auto [pv, pend] = boost::vertices(pattern); pv != pend; ++pv) {
-        for (auto [gv, gend] = boost::vertices(graph); gv != gend; ++gv) {
-            if (LabelsMatch(pattern[*pv].label, graph[*gv].label)) {
-                dom[*pv].emplace_back(*gv);
-            }
+    for (std::size_t gdd_index = 0; gdd_index < group.size(); ++gdd_index) {
+        if (output[gdd_index].ce.has_value()) {
+            continue;
+        }
+
+        ++output[gdd_index].match_count;
+        if (!group[gdd_index]->Satisfies(*graph, match)) {
+            output[gdd_index].ce = model::BuildCounterexample(pattern, *graph, match);
+            --remaining;
         }
     }
 
-    return dom;
+    return remaining != 0;
 }
 
 }  // namespace algos

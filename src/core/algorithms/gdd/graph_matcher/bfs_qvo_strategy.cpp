@@ -2,7 +2,7 @@
 
 namespace algos {
 
-std::size_t BfsQvoStrategy::GetDomainSize(VertexT pattern_vertex) const {
+std::size_t BfsQvoStrategy::GetDomainSize(Vertex pattern_vertex) const {
     auto const it = domain_.find(pattern_vertex);
     if (it == domain_.end()) {
         return 0;
@@ -10,11 +10,11 @@ std::size_t BfsQvoStrategy::GetDomainSize(VertexT pattern_vertex) const {
     return it->second.size();
 }
 
-std::size_t BfsQvoStrategy::GetPatternDegree(VertexT vertex) const {
+std::size_t BfsQvoStrategy::GetPatternDegree(Vertex vertex) const {
     return boost::out_degree(vertex, pattern_) + boost::in_degree(vertex, pattern_);
 }
 
-bool BfsQvoStrategy::IsBetterRoot(VertexT lhs, VertexT rhs) const {
+bool BfsQvoStrategy::IsBetterRoot(Vertex lhs, Vertex rhs) const {
     std::size_t const lhs_domain_size = GetDomainSize(lhs);
     std::size_t const rhs_domain_size = GetDomainSize(rhs);
 
@@ -32,9 +32,9 @@ bool BfsQvoStrategy::IsBetterRoot(VertexT lhs, VertexT rhs) const {
     return pattern_[lhs].id < pattern_[rhs].id;
 }
 
-BfsQvoStrategy::VertexT BfsQvoStrategy::ChooseNextRoot() const {
+BfsQvoStrategy::Vertex BfsQvoStrategy::ChooseNextRoot() const {
     bool found = false;
-    VertexT best{};
+    Vertex best{};
 
     for (auto const vertex : boost::make_iterator_range(boost::vertices(pattern_))) {
         if (visited_.contains(vertex)) {
@@ -51,13 +51,13 @@ BfsQvoStrategy::VertexT BfsQvoStrategy::ChooseNextRoot() const {
     return best;
 }
 
-void BfsQvoStrategy::EnqueueIfNeeded(VertexT vertex) {
+void BfsQvoStrategy::EnqueueIfNeeded(Vertex vertex) {
     if (!visited_.contains(vertex) && queued_.emplace(vertex).second) {
         queue_.push_back(vertex);
     }
 }
 
-void BfsQvoStrategy::EnqueueUndirectedNeighbors(VertexT vertex) {
+void BfsQvoStrategy::EnqueueUndirectedNeighbors(Vertex vertex) {
     for (auto const edge : boost::make_iterator_range(boost::out_edges(vertex, pattern_))) {
         EnqueueIfNeeded(boost::target(edge, pattern_));
     }
@@ -68,7 +68,7 @@ void BfsQvoStrategy::EnqueueUndirectedNeighbors(VertexT vertex) {
 }
 
 void BfsQvoStrategy::VisitNext() {
-    VertexT const current = queue_.front();
+    Vertex const current = queue_.front();
     queue_.pop_front();
     queued_.erase(current);
 
@@ -80,7 +80,7 @@ void BfsQvoStrategy::VisitNext() {
     EnqueueUndirectedNeighbors(current);
 }
 
-std::vector<BfsQvoStrategy::VertexT> BfsQvoStrategy::Order() {
+std::vector<BfsQvoStrategy::Vertex> BfsQvoStrategy::Order() {
     qvo_.clear();
     visited_.clear();
     queued_.clear();

@@ -9,11 +9,12 @@
 
 namespace parser::graph_parser::gdd {
 
+using model::gdd::GraphTypes;
+
 namespace {
 
-using AMap =
-        boost::property_map<model::gdd::graph_t, std::unordered_map<std::string, std::string>
-                                                         model::gdd::VertexProperties::*>::type;
+using AMap = boost::property_map<GraphTypes::Graph, std::unordered_map<std::string, std::string>
+                                                            model::gdd::VertexProperties::*>::type;
 
 struct NewAttr {
     using Ptr = boost::shared_ptr<boost::dynamic_property_map>;
@@ -32,11 +33,9 @@ public:
     explicit NewAttr(AMap a) : attrs(a) {}
 
     Ptr operator()(std::string const& name, boost::any const& descr, boost::any const&) const {
-        if (typeid(model::gdd::vertex_t) == descr.type()) {
-            return MakeDyn(boost::make_function_property_map<model::gdd::vertex_t>(
-                    [this, name](model::gdd::vertex_t v) -> std::string& {
-                        return attrs[v][name];
-                    }));
+        if (typeid(GraphTypes::Vertex) == descr.type()) {
+            return MakeDyn(boost::make_function_property_map<GraphTypes::Vertex>(
+                    [this, name](GraphTypes::Vertex v) -> std::string& { return attrs[v][name]; }));
         }
         return Ptr();
     }
@@ -44,10 +43,10 @@ public:
 
 }  // namespace
 
-model::gdd::graph_t ReadGraph(std::istream& stream) {
-    model::gdd::graph_t result;
+GraphTypes::Graph ReadGraph(std::istream& stream) {
+    GraphTypes::Graph result;
 
-    std::unordered_map<model::gdd::vertex_t, std::string> node_ids;
+    std::unordered_map<GraphTypes::Vertex, std::string> node_ids;
     auto const node_id_pm = boost::make_assoc_property_map(node_ids);
 
     NewAttr const newattr(boost::get(&model::gdd::VertexProperties::attributes, result));
@@ -82,7 +81,7 @@ model::gdd::graph_t ReadGraph(std::istream& stream) {
     return result;
 }
 
-model::gdd::graph_t ReadGraph(std::filesystem::path const& path) {
+GraphTypes::Graph ReadGraph(std::filesystem::path const& path) {
     std::ifstream f(path);
     return ReadGraph(f);
 }
