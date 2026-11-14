@@ -23,7 +23,7 @@ FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery() {
     RegisterOptions();
 }
 
-void FDFirstAlgorithm::RegisterCfd(Itemset const& lhs, Item rhs) {
+void FDFirstAlgorithm::RegisterCfd(Itemset const& lhs, Item rhs, unsigned int supp, double conf) {
     auto const get_raw_item = [this](Item const& item) -> RawCFD::RawItem {
         AttributeIndex attr_index = relation_->GetAttrIndex(item);
         return item < 0 ? RawCFD::RawItem{.attribute = attr_index, .value = std::nullopt}
@@ -37,7 +37,7 @@ void FDFirstAlgorithm::RegisterCfd(Itemset const& lhs, Item rhs) {
     std::transform(lhs.begin(), lhs.end(), std::back_inserter(raw_lhs), get_raw_item);
 
     RawCFD::RawItem raw_rhs = get_raw_item(rhs);
-    cfd_list_.emplace_back(std::move(raw_lhs), raw_rhs);
+    cfd_list_.emplace_back(std::move(raw_lhs), raw_rhs, supp, conf);
 }
 
 void FDFirstAlgorithm::RegisterOptions() {
@@ -156,10 +156,11 @@ void FDFirstAlgorithm::MineFD(MinerNode<PartitionTIdList> const& inode, Itemset 
     }
     if (lhs_gen) {
         // Here the confidence computing method from the paper is used
-        double e = stored_sub->second.PartitionError(inode.tids);
-        double conf = 1 - (e / stored_sub->second.Support());
+        double error = stored_sub->second.PartitionError(inode.tids);
+        auto support = stored_sub->second.Support();
+        double conf = 1 - (error / support);
         if (conf >= min_conf_) {
-            RegisterCfd(lhs, rhs);
+            RegisterCfd(lhs, rhs, support, conf);
         }
         if (conf >= 1) {
             rules_[rhs].push_back(lhs);
@@ -324,10 +325,11 @@ void FDFirstAlgorithm::AddCFDToCFDList(Itemset const& sub, int out,
         }
     }
     if (lhs_gen) {
-        unsigned e = PartitionUtil::GetPartitionError(inode.tids, partitions);
-        double conf = 1.0 - (static_cast<double>(e) / static_cast<double>(inode.node_supp));
+        unsigned error = PartitionUtil::GetPartitionError(inode.tids, partitions);
+        auto support = inode.node_supp;
+        double conf = 1.0 - (static_cast<double>(error) / static_cast<double>(support));
         if (conf >= min_conf_) {
-            RegisterCfd(sub, out);
+            RegisterCfd(sub, out, support, conf);
         }
         if (conf >= 1) {
             rules_[out].push_back(sub);

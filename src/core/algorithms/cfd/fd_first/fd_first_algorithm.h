@@ -32,7 +32,7 @@ private:
     std::set<Itemset> free_itemsets_;
     std::unordered_map<int, std::vector<Itemset>> rules_;
 
-    void RegisterCfd(Itemset const& lhs, Item rhs);
+    void RegisterCfd(Itemset const& lhs, Item rhs, unsigned int supp, double conf);
     void ResetStateCFD() final;
 
     void FdsFirstDFS();

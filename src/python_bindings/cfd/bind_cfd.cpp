@@ -89,19 +89,26 @@ void BindCfd(py::module_& main_module) {
             .def("__str__", &RawCFD::ToString)
             .def_property_readonly("lhs", &RawCFD::GetLhs)
             .def_property_readonly("rhs", &RawCFD::GetRhs)
+            .def_property_readonly("support", &RawCFD::GetSupport)
+            .def_property_readonly("confidence", &RawCFD::GetConfidence)
             .def(py::self == py::self)
             .def("__hash__", [](RawCFD const& cfd) { return py::hash(MakeCfdTuple(cfd)); })
             .def(py::pickle(
                     // __getstate__
-                    [](RawCFD const& cfd) { return py::make_tuple(cfd.GetLhs(), cfd.GetRhs()); },
+                    [](RawCFD const& cfd) {
+                        return py::make_tuple(cfd.GetLhs(), cfd.GetRhs(), cfd.GetSupport(),
+                                              cfd.GetConfidence());
+                    },
                     // __setstate__
                     [](py::tuple t) {
-                        if (t.size() != 2) {
+                        if (t.size() != 4) {
                             throw std::runtime_error("Invalid state for CFD pickle!");
                         }
                         auto lhs = t[0].cast<RawCFD::RawItems>();
                         auto rhs = t[1].cast<RawCFD::RawItem>();
-                        return RawCFD(std::move(lhs), std::move(rhs));
+                        auto support = t[2].cast<unsigned int>();
+                        auto confidence = t[3].cast<double>();
+                        return RawCFD(std::move(lhs), std::move(rhs), support, confidence);
                     }));
 
     BindPrimitive<FDFirstAlgorithm>(cfd_module, &CFDDiscovery::GetCfds, "CfdAlgorithm", "get_cfds",
