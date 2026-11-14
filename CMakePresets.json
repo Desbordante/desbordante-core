@@ -7,7 +7,8 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "DESBORDANTE_USE_CCACHE": "ON"
             }
         },
         {
@@ -23,7 +24,8 @@
             "displayName": "Release",
             "inherits": "common",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "DESBORDANTE_USE_CCACHE": "OFF"
             }
         },
         {
