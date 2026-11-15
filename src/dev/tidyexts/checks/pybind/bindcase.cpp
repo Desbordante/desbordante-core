@@ -1,4 +1,4 @@
-#include "bindsnakecase.h"
+#include "bindcase.h"
 
 #include <cctype>
 #include <clang/AST/ASTTypeTraits.h>
@@ -14,7 +14,7 @@
 namespace clang::tidy::misc {
 using namespace ast_matchers;
 
-void BindSnakeCaseCheck::registerMatchers(MatchFinder* Finder) {
+void BindCaseCheck::registerMatchers(MatchFinder* Finder) {
     auto binding_name = traverse(
             TK_AsIs, ignoringImplicit(anyOf(
                              stringLiteral().bind("binding_name"),
@@ -63,7 +63,7 @@ void BindSnakeCaseCheck::registerMatchers(MatchFinder* Finder) {
             this);
 }
 
-void BindSnakeCaseCheck::CheckChain(StringLiteral const* binding_name, bool should_be_caps,
+void BindCaseCheck::CheckChain(StringLiteral const* binding_name, bool should_be_caps,
                                     std::string const& message) {
     if (IsSnakeCase(binding_name->getString().str(), should_be_caps)) return;
     std::string snake = ToSnakeCase(binding_name->getString().str(), should_be_caps);
@@ -73,7 +73,7 @@ void BindSnakeCaseCheck::CheckChain(StringLiteral const* binding_name, bool shou
             '"' + snake + '"');
 }
 
-void BindSnakeCaseCheck::CheckConstructor(StringLiteral const* binding_name, bool pascal,
+void BindCaseCheck::CheckConstructor(StringLiteral const* binding_name, bool pascal,
                                           std::string const& message) {
     std::string name = binding_name->getString().str();
     if (pascal && IsPascalCase(name)) return;
@@ -85,7 +85,7 @@ void BindSnakeCaseCheck::CheckConstructor(StringLiteral const* binding_name, boo
             '"' + correct_case + '"');
 }
 
-void BindSnakeCaseCheck::check(MatchFinder::MatchResult const& Result) {
+void BindCaseCheck::check(MatchFinder::MatchResult const& Result) {
     auto const* binding_name = Result.Nodes.getNodeAs<StringLiteral>("binding_name");
     auto const* defcall = Result.Nodes.getNodeAs<CXXMemberCallExpr>("defcall");
     auto const* constdef = Result.Nodes.getNodeAs<CXXMemberCallExpr>("constdefcall");
@@ -109,7 +109,7 @@ void BindSnakeCaseCheck::check(MatchFinder::MatchResult const& Result) {
         CheckConstructor(binding_name, false, "Module names must be in snake_case");
 }
 
-bool BindSnakeCaseCheck::IsSnakeCase(std::string const& in, bool caps) {
+bool BindCaseCheck::IsSnakeCase(std::string const& in, bool caps) {
     auto checker = caps ? isLowercase : isUppercase;
     for (char ch : in) {
         // according to PEP8 function names with uppercase letters are strictly prohibited with no
@@ -119,7 +119,7 @@ bool BindSnakeCaseCheck::IsSnakeCase(std::string const& in, bool caps) {
     return true;
 }
 
-std::string BindSnakeCaseCheck::ToSnakeCase(std::string const& in, bool caps) {
+std::string BindCaseCheck::ToSnakeCase(std::string const& in, bool caps) {
     std::string out;
 
     auto checker = caps ? isLowercase : isUppercase;
@@ -136,7 +136,7 @@ std::string BindSnakeCaseCheck::ToSnakeCase(std::string const& in, bool caps) {
     return out;
 }
 
-std::string BindSnakeCaseCheck::ToPascalCase(std::string const& in) {
+std::string BindCaseCheck::ToPascalCase(std::string const& in) {
     std::string out;
     bool prev_underscore = false;
 
@@ -157,7 +157,7 @@ std::string BindSnakeCaseCheck::ToPascalCase(std::string const& in) {
     return out;
 }
 
-bool BindSnakeCaseCheck::IsPascalCase(std::string const& in) {
+bool BindCaseCheck::IsPascalCase(std::string const& in) {
     if (in.size() == 0) return true;
     if (!isUppercase(in[0])) return false;
 

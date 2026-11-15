@@ -6,10 +6,10 @@
 #include "clang-tidy/ClangTidyCheck.h"
 
 namespace clang::tidy::misc {
-// Forces the use of snake_case when writing binds for Python
-class BindSnakeCaseCheck : public ClangTidyCheck {
+// Forces the use of correct naming conventions in Python bindings
+class BindCaseCheck : public ClangTidyCheck {
 public:
-    BindSnakeCaseCheck(StringRef Name, ClangTidyContext* Context) : ClangTidyCheck(Name, Context) {}
+    BindCaseCheck(StringRef Name, ClangTidyContext* Context) : ClangTidyCheck(Name, Context) {}
 
     void registerMatchers(ast_matchers::MatchFinder* Finder) override;
 
