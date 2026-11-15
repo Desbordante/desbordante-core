@@ -15,7 +15,9 @@
             "displayName": "Debug",
             "inherits": "common",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "DESBORDANTE_CLANG_TIDY": "ON",
+                "DESBORDANTE_BUILD_TIDYEXTS": "ON"
             }
         },
         {
