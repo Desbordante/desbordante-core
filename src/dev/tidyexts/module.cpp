@@ -4,7 +4,6 @@
 #include "checks/prohibitat.h"
 #include "checks/whilenotfor.h"
 #include "clang-tidy/ClangTidyModule.h"
-#include "clang-tidy/ClangTidyModuleRegistry.h"
 
 namespace clang::tidy::misc {
 class DesbordanteModule : public ClangTidyModule {

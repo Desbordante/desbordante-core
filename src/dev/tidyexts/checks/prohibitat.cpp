@@ -28,7 +28,7 @@ void ProhibitAtCheck::check(MatchFinder::MatchResult const& Result) {
     auto const* idx_arg = Result.Nodes.getNodeAs<Expr>("idxarg");
     if (idx_arg == nullptr) return;
 
-    auto const container_type = Result.Context->getRecordType(call->getMethodDecl()->getParent());
+    auto const container_type = Result.Context->getCanonicalTagType(call->getMethodDecl()->getParent());
     auto const opt_type = ResolveContainerKind(container_type);
     if (!opt_type.has_value()) return;
     auto const type = opt_type.value();
