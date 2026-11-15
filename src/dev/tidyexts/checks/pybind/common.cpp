@@ -1,9 +1,10 @@
 #include "common.h"
+
 #include <clang/AST/DeclTemplate.h>
 #include <clang/AST/Type.h>
 
 namespace clang::tidy::misc {
-bool IsPybindClass(const QualType& qt) {
+bool IsPybindClass(QualType const& qt) {
     auto const* rd = qt->getAsCXXRecordDecl();
     auto const* spec = llvm::dyn_cast_or_null<clang::ClassTemplateSpecializationDecl>(rd);
 

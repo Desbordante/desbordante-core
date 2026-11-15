@@ -1,7 +1,7 @@
-#include "checks/pybind/bindsnakecase.h"
 #include "checks/explicitcapture.h"
 #include "checks/makeauto.h"
 #include "checks/prohibitat.h"
+#include "checks/pybind/bindsnakecase.h"
 #include "checks/whilenotfor.h"
 #include "clang-tidy/ClangTidyModule.h"
 

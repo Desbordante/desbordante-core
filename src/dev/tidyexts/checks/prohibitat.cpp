@@ -28,7 +28,8 @@ void ProhibitAtCheck::check(MatchFinder::MatchResult const& Result) {
     auto const* idx_arg = Result.Nodes.getNodeAs<Expr>("idxarg");
     if (idx_arg == nullptr) return;
 
-    auto const container_type = Result.Context->getCanonicalTagType(call->getMethodDecl()->getParent());
+    auto const container_type =
+            Result.Context->getCanonicalTagType(call->getMethodDecl()->getParent());
     auto const opt_type = ResolveContainerKind(container_type);
     if (!opt_type.has_value()) return;
     auto const type = opt_type.value();
@@ -66,7 +67,7 @@ std::optional<ProhibitAtCheck::ContainerKind> ProhibitAtCheck::ResolveContainerK
 }
 
 std::string ProhibitAtCheck::GenerateFixText(ContainerKind kind, std::string const& idx_var,
-                                           bool is_arrow) {
+                                             bool is_arrow) {
     switch (kind) {
         case ContainerKind::kVectorLike:
             return is_arrow ? "->operator[](" + idx_var + ")" : "[" + idx_var + "]";
