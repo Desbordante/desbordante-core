@@ -9,8 +9,6 @@
 #include <clang/Basic/Diagnostic.h>
 #include <clang/Basic/SourceLocation.h>
 
-#include "common.h"
-
 namespace clang::tidy::misc {
 using namespace ast_matchers;
 
@@ -64,7 +62,7 @@ void BindCaseCheck::registerMatchers(MatchFinder* Finder) {
 }
 
 void BindCaseCheck::CheckChain(StringLiteral const* binding_name, bool should_be_caps,
-                                    std::string const& message) {
+                               std::string const& message) {
     if (IsSnakeCase(binding_name->getString().str(), should_be_caps)) return;
     std::string snake = ToSnakeCase(binding_name->getString().str(), should_be_caps);
 
@@ -74,7 +72,7 @@ void BindCaseCheck::CheckChain(StringLiteral const* binding_name, bool should_be
 }
 
 void BindCaseCheck::CheckConstructor(StringLiteral const* binding_name, bool pascal,
-                                          std::string const& message) {
+                                     std::string const& message) {
     std::string name = binding_name->getString().str();
     if (pascal && IsPascalCase(name)) return;
     if (!pascal && IsSnakeCase(name, false)) return;
