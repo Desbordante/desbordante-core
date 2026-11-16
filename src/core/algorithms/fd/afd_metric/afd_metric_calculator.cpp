@@ -49,37 +49,42 @@ void AFDMetricCalculator::LoadDataInternal() {
 }
 
 void AFDMetricCalculator::ExecuteInternal() {
-    auto num_rows = relation_->GetNumRows();
     auto lhs_pli = relation_->CalculatePLI(lhs_indices_);
     auto rhs_pli = relation_->CalculatePLI(rhs_indices_);
 
-    switch (metric_) {
-        case AFDMetric::kG2:
-            result_ = 1 - CalculateG2Error(lhs_pli.get(), rhs_pli.get(), num_rows);
-            break;
-        case AFDMetric::kTau:
-            result_ = CalculateTau(lhs_pli.get(), rhs_pli.get());
-            break;
-        case AFDMetric::kMuPlus:
-            result_ = CalculateMuPlus(lhs_pli.get(), rhs_pli.get());
-            break;
-        case AFDMetric::kFi:
-            result_ = CalculateFI(lhs_pli.get(), rhs_pli.get(), num_rows);
-            break;
-        case AFDMetric::kG1:
-            result_ = 1 - CalculateG1Error(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get(),
-                                           relation_->GetNumTuplePairs());
-            break;
-        case AFDMetric::kG3:
-            result_ = CalculateG3(lhs_pli.get(), rhs_pli.get(), num_rows);
-            break;
-        case AFDMetric::kPdep:
-            result_ = CalculatePdepMeasure(lhs_pli.get(), rhs_pli.get());
-            break;
-        case AFDMetric::kRho:
-            result_ = CalculateRhoMeasure(lhs_pli.get(), lhs_pli->Intersect(rhs_pli.get()).get());
-            break;
+    result_ = 1.L - CalculateError(metric_, lhs_pli.get(), rhs_pli.get(), *relation_);
+}
+
+long double AFDMetricCalculator::CalculateError(AfdMeasure metric, model::PLI const* lhs_pli,
+                                                model::PLI const* rhs_pli,
+                                                ColumnLayoutRelationData const& relation,
+                                                model::PLI const* joint_pli) {
+    auto const num_rows = relation.GetNumRows();
+    std::unique_ptr<model::PLI> owned_joint_pli;
+    if (joint_pli == nullptr && (metric == AfdMeasure::kG1 || metric == AfdMeasure::kRho)) {
+        owned_joint_pli = lhs_pli->Intersect(rhs_pli);
+        joint_pli = owned_joint_pli.get();
     }
+
+    switch (metric) {
+        case AfdMeasure::kG2:
+            return CalculateG2Error(lhs_pli, rhs_pli, num_rows);
+        case AfdMeasure::kTau:
+            return 1.L - CalculateTau(lhs_pli, rhs_pli);
+        case AfdMeasure::kMuPlus:
+            return 1.L - CalculateMuPlus(lhs_pli, rhs_pli);
+        case AfdMeasure::kFi:
+            return 1.L - CalculateFI(lhs_pli, rhs_pli, num_rows);
+        case AfdMeasure::kG1:
+            return CalculateG1Error(lhs_pli, joint_pli, relation.GetNumTuplePairs());
+        case AfdMeasure::kG3:
+            return 1.L - CalculateG3(lhs_pli, rhs_pli, num_rows);
+        case AfdMeasure::kPdep:
+            return 1.L - CalculatePdepMeasure(lhs_pli, rhs_pli);
+        case AfdMeasure::kRho:
+            return 1.L - CalculateRhoMeasure(lhs_pli, joint_pli);
+    }
+    throw std::logic_error("Unknown AFD metric");
 }
 
 long double AFDMetricCalculator::CalculateG2Error(model::PLI const* lhs_pli,

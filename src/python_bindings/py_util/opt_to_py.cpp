@@ -71,7 +71,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::des::DifferentialStrategy>,
         kEnumConvPair<algos::od::Ordering>,
-        kEnumConvPair<algos::AfdErrorMeasure>};
+        kEnumConvPair<algos::AfdMeasure>};
 }  // namespace
 
 namespace python_bindings {

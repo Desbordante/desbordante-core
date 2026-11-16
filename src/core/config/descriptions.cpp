@@ -61,13 +61,13 @@ std::string_view const kDMetric = c<S("metric to use\n"), m<algos::metric::Metri
 std::string_view const kDMetricAlgorithm =
         c<S("MFD algorithm to use\n"), m<algos::metric::MetricAlgo>>;
 std::string_view const kDAFDMetric =
-        c<S("AFD metric to calculate\n"), m<algos::afd_metric_calculator::AFDMetric>>;
+        c<S("AFD metric to calculate\n"), m<algos::AfdMeasure>>;
 std::string_view const kDCfdSubstrategy =
         c<S("CFD lattice traversal strategy to use\n"), m<algos::cfd::Substrategy>>;
 std::string_view const kDPfdErrorMeasure =
         c<S("PFD error measure to use\n"), m<algos::PfdErrorMeasure>>;
 std::string_view const kDAfdErrorMeasure =
-        c<S("AFD error measure to use\n"), m<algos::AfdErrorMeasure>>;
+        c<S("AFD error measure to use\n"), m<algos::AfdMeasure>>;
 std::string_view const kDLevelDefinition =
         c<S("MD lattice level definition to use\n"), m<algos::hymd::LevelDefinition>>;
 std::string_view const kDDifferentialStrategy =

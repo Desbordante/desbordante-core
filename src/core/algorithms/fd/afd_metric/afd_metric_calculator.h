@@ -18,7 +18,7 @@ class AFDMetricCalculator : public Algorithm {
 private:
     config::InputTable input_table_;
 
-    AFDMetric metric_;
+    AfdMeasure metric_;
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
 
@@ -38,6 +38,14 @@ protected:
     void ExecuteInternal() override;
 
 public:
+    // Ordinary FD error is 1 - AFD measure. Reuses joint_pli when supplied; otherwise
+    // builds it only for measures that need it. Consumer-specific exact-FD and
+    // zero-ary conventions remain the caller's responsibility.
+    static long double CalculateError(AfdMeasure measure, model::PLI const* lhs_pli,
+                                      model::PLI const* rhs_pli,
+                                      ColumnLayoutRelationData const& relation,
+                                      model::PLI const* joint_pli = nullptr);
+
     static long double CalculatePdepSelf(model::PLI const* x_pli);
 
     // Computes Pdep(X, X∪A) directly from X clusters and A's probing table.

@@ -394,6 +394,7 @@ desbordante_add_test(
     afd.metric_calc
     SRCS
     test_afd_metric_calculator.cpp
+    test_afd_metric_calculator_validation.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::afd::metric_calc
     ${DESBORDANTE_PREFIX}::testlib::common
