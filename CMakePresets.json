@@ -5,19 +5,14 @@
             "name": "common",
             "hidden": true,
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-            }
+            "binaryDir": "${sourceDir}/build/${presetName}"
         },
         {
             "name": "debug",
             "displayName": "Debug",
             "inherits": "common",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "DESBORDANTE_CLANG_TIDY": "ON",
-                "DESBORDANTE_BUILD_TIDYEXTS": "ON"
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
@@ -53,6 +48,24 @@
                 "DESBORDANTE_BUILD_BENCHMARKS": "ON",
                 "DESBORDANTE_BUILD_TESTS": "OFF"
             }
+        },
+        {
+            "name": "tidyexts",
+            "inherits": "debug",
+            "cacheVariables": {
+                "DESBORDANTE_FETCH_DATASETS": "OFF",
+                "DESBORDANTE_BUILD_TIDYEXTS": "ON"
+            }
+        },
+        {
+            "name": "compilecommands",
+            "inherits": "debug",
+            "cacheVariables": {
+                "DESBORDANTE_BUILD_TIDYEXTS": "ON",
+                "DESBORDANTE_BINDINGS": "ON",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "DESBORDANTE_BUILD_BENCHMARKS": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -80,7 +93,13 @@
             "name": "benchmark",
             "configurePreset": "benchmark",
             "displayName": "Benchmarks build"
+        },
+        {
+            "name": "tidyexts",
+            "configurePreset": "tidyexts",
+            "targets": ["Desbordante.tidyexts"]
         }
+
     ],
     "testPresets": [
         {
@@ -129,6 +148,21 @@
             "displayName": "Test ASan build excluding heavy tests",
             "configurePreset": "asan",
             "inherits": "light"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "tidyexts",
+            "steps": [
+                { "name": "tidyexts", "type": "configure" },
+                { "name": "tidyexts", "type": "build" }
+            ]
+        },
+        {
+            "name": "compilecommands",
+            "steps": [
+                { "type": "configure", "name": "compilecommands" }
+            ]
         }
     ]
 }

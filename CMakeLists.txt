@@ -266,3 +266,7 @@ endif()
 if(DESBORDANTE_BINDINGS)
     add_subdirectory("src/python_bindings")
 endif()
+
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+    file(COPY "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" DESTINATION "${CMAKE_CURRENT_LIST_DIR}")
+endif()
