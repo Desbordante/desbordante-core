@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iterator>
+#include <limits>
 #include <numeric>
 #include <random>
 #include <ranges>
@@ -51,8 +52,8 @@ GaRfd::GaRfd() {
 
 void GaRfd::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kRfdMinSimilarity, kRfdMinimumConfidence, kPopulationSize,
-                          kRfdMaxGenerations, kRfdCrossoverProbability, kRfdMutationProbability,
+    MakeOptionsAvailable({kRfdMinSimilarity, kArMinimumConfidence, kPopulationSize,
+                          kRfdMaxGenerations, kCrossoverProbability, kRfdMutationProbability,
                           kSeed, kCustomMetrics, kCacheMaxSize});
 }
 
@@ -101,16 +102,16 @@ void GaRfd::RegisterOptions() {
             Option<std::vector<double>>::DefaultFunc(default_min_similarity)}
                            .SetNormalizeFunc(normalize_min_similarity)
                            .SetValueCheck(check_min_similarity));
-    RegisterOption(Option{&min_confidence_, kRfdMinimumConfidence, kDRfdMinimumConfidence, 1.0}
-                           .SetValueCheck(check_probability_range(kRfdMinimumConfidence)));
+    RegisterOption(Option{&min_confidence_, kArMinimumConfidence, kDRfdMinimumConfidence, 1.0}
+                           .SetValueCheck(check_probability_range(kArMinimumConfidence)));
     RegisterOption(Option{&max_population_size_, kPopulationSize, kDPopulationSize,
                           static_cast<std::size_t>(1024)}
                            .SetValueCheck(check_population_size));
     RegisterOption(Option{&max_generations_, kRfdMaxGenerations, kDRfdMaxGenerations,
                           static_cast<std::size_t>(32)});
-    RegisterOption(Option{&crossover_probability_, kRfdCrossoverProbability,
+    RegisterOption(Option{&crossover_probability_, kCrossoverProbability,
                           kDRfdCrossoverProbability, 1.0}
-                           .SetValueCheck(check_probability_range(kRfdCrossoverProbability)));
+                           .SetValueCheck(check_probability_range(kCrossoverProbability)));
     RegisterOption(
             Option{&mutation_probability_, kRfdMutationProbability, kDRfdMutationProbability, 1.0}
                     .SetValueCheck(check_probability_range(kRfdMutationProbability)));
@@ -129,11 +130,27 @@ void GaRfd::LoadDataInternal() {
     if (num_attributes_ < 2)
         throw config::ConfigurationError("GA-RFD requires at least 2 attributes");
     if (num_attributes_ > kMaxAttributes)
-        throw config::ConfigurationError("GA-RFD supports at most 31 attributes");
+        throw config::ConfigurationError("GA-RFD supports at most 32 attributes");
     if (num_rows_ < 2) throw config::ConfigurationError("GA-RFD requires at least 2 rows");
-    full_mask_ = (1u << num_attributes_) - 1;
+    full_mask_ = num_attributes_ == std::numeric_limits<AttributeMask>::digits
+                         ? std::numeric_limits<AttributeMask>::max()
+                         : (1u << num_attributes_) - 1;
 
     total_pairs_ = num_rows_ * (num_rows_ - 1) / 2;
+}
+
+void GaRfd::BuildTypedMetrics() {
+    auto const& column_data = typed_relation_->GetColumnData();
+    typed_metrics_.clear();
+    typed_metrics_.reserve(num_attributes_);
+    for (std::size_t attribute = 0; attribute < num_attributes_; ++attribute) {
+        auto const& column = column_data[attribute];
+        typed_metrics_.push_back(
+                metrics_[attribute]
+                        ? metrics_[attribute]->SetType(&column.GetType(),
+                                                       input_table_->GetColumnName(attribute))
+                        : nullptr);
+    }
 }
 
 void GaRfd::BuildMatchBitsets() {
@@ -150,8 +167,7 @@ void GaRfd::BuildMatchBitsets() {
         // Core uses distances internally; the user-facing threshold is a
         // similarity in [0, 1], so distance threshold is 1 - similarity
         double const min_sim = min_similarity_[attribute];
-        auto const& metric = *metrics_[attribute];
-        model::Type const& column_type = column.GetType();
+        auto const& typed_metric = *typed_metrics_[attribute];
 
         // NULLs and empty values never count as matching
         std::vector<bool> valid(num_rows_);
@@ -167,8 +183,7 @@ void GaRfd::BuildMatchBitsets() {
             for (std::size_t second_row = first_row + 1; second_row < num_rows_; ++second_row) {
                 bool match = false;
                 if (first_value != nullptr && valid[second_row]) {
-                    double const dist =
-                            metric.Dist(&column_type, first_value, column.GetValue(second_row));
+                    double const dist = typed_metric(first_value, column.GetValue(second_row));
                     match = (dist + min_sim <= 1.0);
                 }
 
@@ -508,6 +523,7 @@ std::vector<RFD> GaRfd::Finalize(
 }
 
 void GaRfd::ExecuteInternal() {
+    BuildTypedMetrics();
     LOG_INFO("Build match bitsets...");
     BuildMatchBitsets();
 

@@ -30,14 +30,15 @@ auto const kAbsDiff = AbsoluteDifferenceMetric();
 
 static algos::StdParamsMap MakeParams(CSVConfig const& csv_config, std::vector<double> min_sim,
                                       double min_confidence, std::size_t pop_size,
-                                      std::size_t max_gen, config::CustomMetricsType metrics = {}) {
+                                      std::size_t max_gen,
+                                      config::CustomMetricsOptionType metrics = {}) {
     config::InputTable table = std::make_shared<CSVParser>(csv_config);
     algos::StdParamsMap params{{kTable, table},
                                {kRfdMinSimilarity, min_sim},
-                               {kRfdMinimumConfidence, min_confidence},
+                               {kArMinimumConfidence, min_confidence},
                                {kPopulationSize, pop_size},
                                {kRfdMaxGenerations, max_gen},
-                               {kRfdCrossoverProbability, 0.85},
+                               {kCrossoverProbability, 0.85},
                                {kRfdMutationProbability, 0.3},
                                {kSeed, std::uint32_t{42}}};
     if (!metrics.empty()) {
@@ -48,13 +49,14 @@ static algos::StdParamsMap MakeParams(CSVConfig const& csv_config, std::vector<d
 
 static algos::StdParamsMap MakeParams(CSVConfig const& csv_config, double min_sim,
                                       double min_confidence, std::size_t pop_size,
-                                      std::size_t max_gen, config::CustomMetricsType metrics = {}) {
+                                      std::size_t max_gen,
+                                      config::CustomMetricsOptionType metrics = {}) {
     return MakeParams(csv_config, std::vector<double>{min_sim}, min_confidence, pop_size, max_gen,
                       metrics);
 }
 
-static config::CustomMetricsType EqualityMetrics(std::size_t n) {
-    return config::CustomMetricsType(n, kEq);
+static config::CustomMetricsOptionType EqualityMetrics(std::size_t n) {
+    return config::CustomMetricsOptionType(n, kEq);
 }
 
 static void ExpectValidRfds(std::vector<RFD> const& rfds, double min_confidence) {
@@ -86,7 +88,7 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
 
     config::InputTable table = std::make_shared<CSVParser>(kIris);
 
-    config::CustomMetricsType ga_metrics;
+    config::CustomMetricsOptionType ga_metrics;
     for (int i = 0; i < 4; ++i) ga_metrics.push_back(kAbsDiff);
     ga_metrics.push_back(kEq);
 
@@ -95,10 +97,10 @@ TEST(GARfd, AbsoluteDifferenceMetricYieldsRfdsOnIris) {
     algos::StdParamsMap params{{kTable, table},
                                {kCustomMetrics, ga_metrics},
                                {kRfdMinSimilarity, sim_vec},
-                               {kRfdMinimumConfidence, min_confidence},
+                               {kArMinimumConfidence, min_confidence},
                                {kPopulationSize, pop_size},
                                {kRfdMaxGenerations, generations},
-                               {kRfdCrossoverProbability, 0.85},
+                               {kCrossoverProbability, 0.85},
                                {kRfdMutationProbability, 0.3},
                                {kSeed, std::uint32_t{123}}};
 
@@ -133,7 +135,7 @@ TEST_P(GaRfdDatasetTest, DiscoversRFDs) {
     std::size_t ncols = tmp_parser->GetNumberOfColumns();
     std::vector<double> sim_vec(ncols, p.min_sim);
 
-    config::CustomMetricsType metrics(ncols, kEq);
+    config::CustomMetricsOptionType metrics(ncols, kEq);
     auto params =
             MakeParams(p.csv_config, sim_vec, p.min_confidence, p.pop_size, p.max_gen, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<GaRfd>(params);
@@ -183,7 +185,7 @@ TEST(GARfdNames, MinedRfdsCarryColumnNamesAndIndices) {
 }
 
 TEST(GARfdMetric, LevenshteinMetricOnIris) {
-    auto metrics = config::CustomMetricsType{kLev, kLev, kLev, kLev, kEq};
+    auto metrics = config::CustomMetricsOptionType{kLev, kLev, kLev, kLev, kEq};
     auto params = MakeParams(kIris, 0.8, 0.9, 30, 5, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<GaRfd>(params);
     algo->Execute();
@@ -260,7 +262,7 @@ TEST(GARfdEdge, MismatchedMetricsCountThrows) {
 }
 
 TEST(GARfdMetric, AbsoluteThresholdMetricWithTolerances) {
-    config::CustomMetricsType metrics{
+    config::CustomMetricsOptionType metrics{
             AbsoluteThresholdMetricFactory(0.5), AbsoluteThresholdMetricFactory(0.5),
             AbsoluteThresholdMetricFactory(0.5), AbsoluteThresholdMetricFactory(0.5), kEq};
     auto params = MakeParams(kIris, std::vector<double>(5, 1.0), 0.5, 20, 2, metrics);
@@ -274,7 +276,7 @@ TEST(GARfdMetric, AbsoluteThresholdMetricWithTolerances) {
 TEST(GARfdOperators, ZeroCrossoverAndMutation) {
     auto metrics = EqualityMetrics(5);
     auto params = MakeParams(kIris, 1.0, 0.8, 30, 3, metrics);
-    params[kRfdCrossoverProbability] = 0.0;
+    params[kCrossoverProbability] = 0.0;
     params[kRfdMutationProbability] = 0.0;
     auto algo = algos::CreateAndLoadAlgorithm<GaRfd>(params);
     algo->Execute();
@@ -338,13 +340,13 @@ static BruteForceInterpretation BruteForceEvaluate(
         std::vector<std::vector<std::string>> const& rows) {
     BruteForceInterpretation result;
     result.total_pairs = rows.size() * (rows.size() - 1) / 2;
-    std::size_t const kAttributes = rows.front().size();
-    for (std::size_t rhs = 0; rhs < kAttributes; ++rhs) {
-        for (AttributeMask lhs_mask = 1; lhs_mask < (1u << kAttributes); ++lhs_mask) {
+    std::size_t const k_attributes = rows.front().size();
+    for (std::size_t rhs = 0; rhs < k_attributes; ++rhs) {
+        for (AttributeMask lhs_mask = 1; lhs_mask < (1u << k_attributes); ++lhs_mask) {
             if ((lhs_mask & (1u << rhs)) != 0) continue;
             std::uint64_t const key = CandidateKey(lhs_mask, rhs);
             std::vector<std::size_t> lhs_indices;
-            for (std::size_t attr = 0; attr < kAttributes; ++attr) {
+            for (std::size_t attr = 0; attr < k_attributes; ++attr) {
                 if ((lhs_mask & (1u << attr)) != 0) lhs_indices.push_back(attr);
             }
             std::size_t const count_lhs = BruteForceSupport(rows, lhs_indices);
@@ -355,12 +357,21 @@ static BruteForceInterpretation BruteForceEvaluate(
     return result;
 }
 
-// GA-RFD supports at most 31 attributes (AttributeMask is 32-bit, 1 bit is
-// reserved for the rhs).
-TEST(GARfdEdge, MoreThan31AttributesThrows) {
+// GA-RFD supports at most 32 attributes: AttributeMask is 32-bit and the rhs
+// is stored as a separate index in Individual (no mask bit is reserved for it).
+TEST(GARfdEdge, MaxAttributesSupported) {
     std::size_t const ncols = NumberOfColumnsIn(kRfd32Attrs);
     ASSERT_EQ(ncols, std::size_t{32});
     auto params = MakeParams(kRfd32Attrs, std::vector<double>(ncols, 1.0), 0.5, 10, 1,
+                             EqualityMetrics(ncols));
+    EXPECT_NO_THROW(algos::CreateAndLoadAlgorithm<GaRfd>(params));
+}
+
+// 33 attributes exceed the uint32_t mask width and must be rejected at load time.
+TEST(GARfdEdge, MoreThan32AttributesThrows) {
+    std::size_t const ncols = NumberOfColumnsIn(kRfd33Attrs);
+    ASSERT_EQ(ncols, std::size_t{33});
+    auto params = MakeParams(kRfd33Attrs, std::vector<double>(ncols, 1.0), 0.5, 10, 1,
                              EqualityMetrics(ncols));
     EXPECT_THROW(algos::CreateAndLoadAlgorithm<GaRfd>(params), std::exception);
 }
@@ -388,14 +399,14 @@ TEST(GARfdNulls, NullsAndEmptiesNeverMatch) {
     auto rfds = algo->GetRfds();
     ASSERT_FALSE(rfds.empty());
     ExpectValidRfds(rfds, 0.0);
-    constexpr std::size_t kNullColumn = 0;
+    constexpr std::size_t k_null_column = 0;
     for (auto const& rfd : rfds) {
         bool const null_in_lhs = std::find(rfd.lhs_indices.begin(), rfd.lhs_indices.end(),
-                                           kNullColumn) != rfd.lhs_indices.end();
+                                           k_null_column) != rfd.lhs_indices.end();
         if (null_in_lhs) {
             EXPECT_DOUBLE_EQ(rfd.support, 0.0) << rfd.ToString();
             EXPECT_DOUBLE_EQ(rfd.confidence, 1.0) << rfd.ToString();
-        } else if (rfd.rhs_index == kNullColumn) {
+        } else if (rfd.rhs_index == k_null_column) {
             EXPECT_DOUBLE_EQ(rfd.confidence, 0.0) << rfd.ToString();
         }
     }
@@ -499,7 +510,7 @@ TEST(GARfdSupport, ReportedValuesMatchBruteForce) {
 // fixture uses values whose relative distances are dyadic and hit the exact
 // 0.5 boundary for min_similarity = 0.5
 TEST(GARfdConfidence, ExactMinConfidenceBorderNotLostToRounding) {
-    config::CustomMetricsType metrics{kAbsDiff, kAbsDiff};
+    config::CustomMetricsOptionType metrics{kAbsDiff, kAbsDiff};
     auto params = MakeParams(kRfdConfEdge, std::vector<double>{0.5, 0.5}, 0.8, 30, 10, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<GaRfd>(params);
     algo->Execute();
@@ -527,7 +538,7 @@ TEST(GARfdConfidence, ExactMinConfidenceBorderNotLostToRounding) {
 // arithmetic, while an explicit 1.0 - 0.9 threshold gives
 // 0.09999999999999998 and loses the pair
 TEST(GARfdMinSimilarity, ExactMinSimilarityBorderNotLostToRounding) {
-    config::CustomMetricsType metrics{kAbsDiff, kAbsDiff};
+    config::CustomMetricsOptionType metrics{kAbsDiff, kAbsDiff};
     auto params = MakeParams(kRfdSimEdge, std::vector<double>{0.9, 0.9}, 0.9, 30, 10, metrics);
     auto algo = algos::CreateAndLoadAlgorithm<GaRfd>(params);
     algo->Execute();

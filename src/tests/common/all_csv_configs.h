@@ -68,6 +68,7 @@ extern CSVConfig const kPlista1k;
 extern CSVConfig const kProbeTest1;
 extern CSVConfig const kProbeTest2;
 extern CSVConfig const kRfd32Attrs;
+extern CSVConfig const kRfd33Attrs;
 extern CSVConfig const kRfdBruteSmall;
 extern CSVConfig const kRfdConfEdge;
 extern CSVConfig const kRfdDuplicates;

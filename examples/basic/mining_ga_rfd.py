@@ -508,9 +508,12 @@ print_rfds_table(
     eq_rfds, COL_NAMES_STR, title="RFDs with exact equality on all columns"
 )
 printlns(
-    "  Without fuzzy matching, the only dependencies found involve cuisine "
-    + "and district because they contain exact duplicates. On the other hand, restaurant names, "
-    + "which are all unique due to typos, never appear in any found RFD."
+    "  Without fuzzy matching, the only non-vacuous rules (support > 0) involve "
+    + "cuisine and district because they contain exact duplicates. Restaurant names "
+    + "are all unique, so no pair of rows is similar on restaurant: rules that "
+    + "mention restaurant appear only with zero support and trivially maximal "
+    + "confidence 1.0 (an empty antecedent covers every pair vacuously), so they "
+    + "carry no information."
 )
 
 algo.execute(
@@ -534,11 +537,12 @@ print_rfds_table(
 )
 
 printlns(
-    "  Now 'restaurant' appears in the dependencies! For instance, "
-    + f"{GREEN}[restaurant] -> [cuisine]{RESET} tells us that restaurants with similar names "
-    + "tend to serve the same cuisine, even when the names contain small typos. "
-    + "This rule was invisible with exact equality. Jaccard on 2-grams "
-    + "successfully absorbs spelling variations and keeps the dependency alive."
+    "  Now the restaurant rules have real support! For instance, "
+    + f"{GREEN}[restaurant] -> [cuisine]{RESET} has support 0.127 and confidence 0.857: "
+    + "restaurants with similar names tend to serve the same cuisine, even when "
+    + "the names contain small typos. With exact equality this rule was an empty "
+    + "artifact (zero support); Jaccard on 2-grams absorbs spelling variations "
+    + "and gives the dependency real coverage."
 )
 printlns(
     f"  Support is low because very few restaurant-name pairs reach the "

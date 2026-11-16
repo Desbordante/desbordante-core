@@ -3789,9 +3789,11 @@ Jaccard used).
  5. [restaurant] -> [district]             (conf=1.000, supp=0.000)
  6. [restaurant, cuisine] -> [district]    (conf=1.000, supp=0.000)
 
-  Without fuzzy matching, the only dependencies found involve cuisine and
-district because they contain exact duplicates. On the other hand, restaurant
-names, which are all unique due to typos, never appear in any found RFD.
+  Without fuzzy matching, the only non-vacuous rules (support > 0) involve
+cuisine and district because they contain exact duplicates. Restaurant names are
+all unique, so no pair of rows is similar on restaurant: rules that mention
+restaurant appear only with zero support and trivially maximal confidence 1.0
+(an empty antecedent covers every pair vacuously), so they carry no information.
 
 Let's try again using fuzzy matching with Jaccard metric.
 
@@ -3806,11 +3808,12 @@ Let's try again using fuzzy matching with Jaccard metric.
  8. [cuisine, district] -> [restaurant]    (conf=0.750, supp=0.145)
  9. [district] -> [restaurant]             (conf=0.353, supp=0.309)
 
-  Now 'restaurant' appears in the dependencies! For instance,
-\x1b[1;32m[restaurant] -> [cuisine]\x1b[0m tells us that restaurants with similar
-names tend to serve the same cuisine, even when the names contain small typos.
-This rule was invisible with exact equality. Jaccard on 2-grams successfully
-absorbs spelling variations and keeps the dependency alive.
+  Now the restaurant rules have real support! For instance, \x1b[1;32m[restaurant]
+-> [cuisine]\x1b[0m has support 0.127 and confidence 0.857: restaurants with
+similar names tend to serve the same cuisine, even when the names contain small
+typos. With exact equality this rule was an empty artifact (zero support);
+Jaccard on 2-grams absorbs spelling variations and gives the dependency real
+coverage.
 
   Support is low because very few restaurant-name pairs reach the \x1b[1m0.3\x1b[0m
 Jaccard threshold, but confidence is well above random, indicating a real

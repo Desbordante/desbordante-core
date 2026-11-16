@@ -76,6 +76,7 @@ CSVConfig const kPlista1k = CreateCsvConfig("plista_1k.csv", ';', false);
 CSVConfig const kProbeTest1 = CreateCsvConfig("ProbeTest1.csv", ',', true);
 CSVConfig const kProbeTest2 = CreateCsvConfig("ProbeTest2.csv", ',', true);
 CSVConfig const kRfd32Attrs = CreateCsvConfig("rfd/rfd_32_attrs.csv", ',', true);
+CSVConfig const kRfd33Attrs = CreateCsvConfig("rfd/rfd_33_attrs.csv", ',', true);
 CSVConfig const kRfdBruteSmall = CreateCsvConfig("rfd/rfd_brute_small.csv", ',', true);
 CSVConfig const kRfdConfEdge = CreateCsvConfig("rfd/rfd_conf_edge.csv", ',', true);
 CSVConfig const kRfdDuplicates = CreateCsvConfig("rfd/rfd_duplicates.csv", ',', true);

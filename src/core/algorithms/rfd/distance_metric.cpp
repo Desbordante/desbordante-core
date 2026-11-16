@@ -34,32 +34,6 @@ std::optional<model::TypeId> ComparableTypeId(model::Type const* type, std::byte
     return left_id;
 }
 
-class EqualityMetricImpl : public util::ICustomMetric {
-public:
-    double Dist(model::Type const* type, std::byte const* first,
-                std::byte const* second) const override {
-        if (!ComparableTypeId(type, first, second)) return kDissimilarDist;
-        return type->Compare(first, second) == model::CompareResult::kEqual ? 0.0 : kDissimilarDist;
-    }
-};
-
-class LevenshteinMetricImpl : public util::ICustomMetric {
-public:
-    double Dist(model::Type const* type, std::byte const* first,
-                std::byte const* second) const override {
-        std::string left_str;
-        std::string right_str;
-        if (!ComparableTypeId(type, first, second)) return kDissimilarDist;
-        std::string const l = type->ValueToString(first);
-        std::string const r = type->ValueToString(second);
-
-        if (left_str.empty() && right_str.empty()) return 0.0;
-        std::size_t const max_len = std::max(left_str.size(), right_str.size());
-        return static_cast<double>(util::LevenshteinDistance(left_str, right_str)) /
-               static_cast<double>(max_len);
-    }
-};
-
 std::optional<std::pair<double, double>> NumericValues(model::Type const* type,
                                                        std::byte const* first,
                                                        std::byte const* second,
@@ -80,53 +54,54 @@ std::optional<std::pair<double, double>> NumericValues(model::Type const* type,
     return std::pair{as_double(first), as_double(second)};
 }
 
-class AbsoluteDifferenceMetricImpl : public util::ICustomMetric {
-public:
-    double Dist(model::Type const* type, std::byte const* first,
-                std::byte const* second) const override {
-        auto values = NumericValues(type, first, second, "abs_diff");
-        if (!values) return kDissimilarDist;
-
-        double const absolute_difference = std::abs(values->first - values->second);
-        double const max_absolute = std::max(std::abs(values->first), std::abs(values->second));
-        if (max_absolute == 0.0) return 0.0;
-        return absolute_difference / max_absolute;
-    }
-};
-
-class AbsoluteThresholdMetricImpl : public util::ICustomMetric {
-public:
-    explicit AbsoluteThresholdMetricImpl(double tolerance) : tolerance_(tolerance) {}
-
-    double Dist(model::Type const* type, std::byte const* first,
-                std::byte const* second) const override {
-        auto values = NumericValues(type, first, second, "abs_threshold");
-        if (!values) return kDissimilarDist;
-
-        double const absolute_difference = std::abs(values->first - values->second);
-        return (absolute_difference <= tolerance_) ? 0.0 : kDissimilarDist;
-    }
-
-private:
-    double tolerance_;
-};
-
 }  // namespace
 
 std::shared_ptr<util::ICustomMetric> EqualityMetric() {
-    return std::make_shared<EqualityMetricImpl>();
+    return std::make_shared<util::DynamicCustomMetric>(
+            [](model::Type const* type, std::byte const* first, std::byte const* second) {
+                if (!ComparableTypeId(type, first, second)) return kDissimilarDist;
+                return type->Compare(first, second) == model::CompareResult::kEqual
+                               ? 0.0
+                               : kDissimilarDist;
+            });
 }
 
 std::shared_ptr<util::ICustomMetric> LevenshteinMetric() {
-    return std::make_shared<LevenshteinMetricImpl>();
+    return std::make_shared<util::DynamicCustomMetric>(
+            [](model::Type const* type, std::byte const* first, std::byte const* second) {
+                if (!ComparableTypeId(type, first, second)) return kDissimilarDist;
+                std::string const l = type->ValueToString(first);
+                std::string const r = type->ValueToString(second);
+                std::size_t const max_len = std::max(l.size(), r.size());
+                if (max_len == 0) return 0.0;
+                return static_cast<double>(util::LevenshteinDistance(l, r)) /
+                       static_cast<double>(max_len);
+            });
 }
 
 std::shared_ptr<util::ICustomMetric> AbsoluteDifferenceMetric() {
-    return std::make_shared<AbsoluteDifferenceMetricImpl>();
+    return std::make_shared<util::DynamicCustomMetric>(
+            [](model::Type const* type, std::byte const* first, std::byte const* second) {
+                auto values = NumericValues(type, first, second, "abs_diff");
+                if (!values) return kDissimilarDist;
+
+                double const absolute_difference = std::abs(values->first - values->second);
+                double const max_absolute =
+                        std::max(std::abs(values->first), std::abs(values->second));
+                if (max_absolute == 0.0) return 0.0;
+                return absolute_difference / max_absolute;
+            });
 }
 
 std::shared_ptr<util::ICustomMetric> AbsoluteThresholdMetricFactory(double tolerance) {
-    return std::make_shared<AbsoluteThresholdMetricImpl>(tolerance);
+    return std::make_shared<util::DynamicCustomMetric>(
+            [tolerance](model::Type const* type, std::byte const* first, std::byte const* second) {
+                auto values = NumericValues(type, first, second, "abs_threshold");
+                if (!values) return kDissimilarDist;
+
+                double const absolute_difference = std::abs(values->first - values->second);
+                return (absolute_difference <= tolerance) ? 0.0 : kDissimilarDist;
+            });
 }
 
 }  // namespace algos::rfd

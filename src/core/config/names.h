@@ -86,8 +86,6 @@ constexpr auto kShardLength = "shard_length";
 constexpr auto kTimeLimitSeconds = "time_limit";
 // GA-RFD
 constexpr auto kRfdMinSimilarity = "min_similarity";
-constexpr auto kRfdMinimumConfidence = "minconf";
-constexpr auto kRfdCrossoverProbability = "crossover_probability";
 constexpr auto kRfdMutationProbability = "mutation_probability";
 constexpr auto kRfdMaxGenerations = "max_generations";
 constexpr auto kCacheMaxSize = "cache_size";

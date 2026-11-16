@@ -24,7 +24,7 @@
 
 namespace algos::rfd {
 
-static constexpr std::size_t kMaxAttributes = 31;
+static constexpr std::size_t kMaxAttributes = 32;
 
 using AttributeMask = std::uint32_t;
 using LHS_Mask = std::uint32_t;
@@ -33,7 +33,7 @@ using RHS_Index = std::uint8_t;
 class GaRfd final : public algos::Algorithm {
 private:
     struct Individual {
-        AttributeMask lhs_mask = 0;
+        LHS_Mask lhs_mask = 0;
         std::uint8_t rhs_index = 0;
         double support = 0.0;
         double confidence = 0.0;
@@ -51,10 +51,11 @@ private:
 
     // Input
     config::InputTable input_table_;
-    config::CustomMetricsType metrics_;
+    config::CustomMetricsOptionType metrics_;
 
     // Internal state
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
+    config::CustomMetricsType typed_metrics_;
     std::size_t num_attributes_ = 0;
     std::size_t num_rows_ = 0;
     std::size_t total_pairs_ = 0;
@@ -87,6 +88,7 @@ private:
     void ResetState() final;
 
     // helper methods
+    void BuildTypedMetrics();
     void BuildMatchBitsets();
     std::size_t ComputeSupport(uint32_t attributes_mask);
     // Computes conf and supp for a single individual
@@ -118,7 +120,7 @@ private:
 public:
     GaRfd();
 
-    [[nodiscard]] std::vector<RFD> GetRfds() const {
+    [[nodiscard]] std::vector<RFD> const& GetRfds() const {
         return discovered_;
     }
 };
