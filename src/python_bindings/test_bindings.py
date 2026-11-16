@@ -66,7 +66,8 @@ ALGO_CORRECT_OPTIONS_INFO = [
     ]),
     (desb.fd_verification.algorithms.FDVerifier, [
         get_common_option_container(
-            {"lhs_indices": [1, 2, 3], "rhs_indices": [1, 2, 3]}
+            {"lhs_indices": [1, 2, 3], "rhs_indices": [1, 2, 3],
+             "afd_error_measure": "g3_prime"}
         ),
     ]),
     (desb.ar.algorithms.Apriori, [
@@ -232,7 +233,18 @@ class TestPythonBindings(unittest.TestCase):
             with self.subTest(msg=f"metric_verifier_load: {load}"):
                 with self.assertRaises(desb.ConfigurationError):
                     check_metric_verifier_failure(load.path, load.options)
-                
+
+    def test_fd_verifier_error_measure_execution(self):
+        for options, expected_error in [
+            ({"afd_error_measure": "g3_prime"}, 1 / 7),
+            ({}, 1 / 66),  # Omitting the measure preserves the default G1 error.
+        ]:
+            with self.subTest(options=options):
+                verifier = desb.fd_verification.algorithms.FDVerifier()
+                verifier.load_data(table=("TestFD.csv", ",", True))
+                verifier.execute(lhs_indices=[4], rhs_indices=[3], **options)
+                self.assertFalse(verifier.fd_holds())
+                self.assertAlmostEqual(verifier.get_error(), expected_error, places=12)
 
 
 class TestMaxFEM(unittest.TestCase):

@@ -3,7 +3,9 @@
 #include <memory>
 #include <stdexcept>
 
+#include "core/algorithms/fd/afd_metric/afd_metric_calculator.h"
 #include "core/config/equal_nulls/option.h"
+#include "core/config/error_measure/option.h"
 #include "core/config/indices/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
@@ -25,12 +27,14 @@ void FDVerifier::RegisterOptions() {
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
+    RegisterOption(config::kAfdErrorMeasureOpt(&afd_error_measure_));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({config::kLhsIndicesOpt.GetName(), config::kRhsIndicesOpt.GetName()});
+    MakeOptionsAvailable({config::kLhsIndicesOpt.GetName(), config::kRhsIndicesOpt.GetName(),
+                          config::kAfdErrorMeasureOpt.GetName()});
 }
 
 void FDVerifier::LoadDataInternal() {
@@ -61,7 +65,15 @@ void FDVerifier::VerifyFD() const {
         return;
     }
 
-    stats_calculator_->CalculateStatistics(lhs_pli.get(), rhs_pli.get());
+    stats_calculator_->CalculateStatistics(
+            lhs_pli.get(), rhs_pli.get(),
+            CalculateError(lhs_pli.get(), rhs_pli.get(), intersection_pli.get()));
+}
+
+long double FDVerifier::CalculateError(model::PLI const* lhs, model::PLI const* rhs,
+                                       model::PLI const* joint) const {
+    using Calculator = afd_metric_calculator::AFDMetricCalculator;
+    return Calculator::CalculateError(afd_error_measure_, lhs, rhs, *relation_, joint);
 }
 
 void FDVerifier::SortHighlightsByProportionAscending() const {
