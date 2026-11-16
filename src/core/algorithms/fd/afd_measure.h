@@ -14,7 +14,13 @@ enum class DESBORDANTE_EXPORT AfdMeasure : char {
     kRho,
     kFi,
     kG2,
-    kG3
+    kG3,
+    kG1S,
+    kRfiPlus,
+    kRfiPrimePlus,
+    kSfi,
+    kG1Prime,
+    kG3Prime
 };
 
 // Compatibility name for C++ consumers of the error-measure option.
