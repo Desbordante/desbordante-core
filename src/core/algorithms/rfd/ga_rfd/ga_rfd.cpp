@@ -26,12 +26,6 @@
 
 namespace {
 
-[[nodiscard]] std::size_t PopcountAll(std::vector<uint64_t> const& words) noexcept {
-    std::size_t support = 0;
-    for (uint64_t word : words) support += std::popcount(word);
-    return support;
-}
-
 int FirstSetBitIndex(algos::rfd::AttributeMask value) noexcept {
     return value == 0 ? -1 : static_cast<int>(std::countr_zero(value));
 }
@@ -53,8 +47,8 @@ GaRfd::GaRfd() {
 void GaRfd::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({kRfdMinSimilarity, kArMinimumConfidence, kPopulationSize,
-                          kRfdMaxGenerations, kCrossoverProbability, kRfdMutationProbability,
-                          kSeed, kCustomMetrics, kCacheMaxSize});
+                          kRfdMaxGenerations, kCrossoverProbability, kRfdMutationProbability, kSeed,
+                          kCustomMetrics, kCacheMaxSize});
 }
 
 void GaRfd::RegisterOptions() {
@@ -109,9 +103,9 @@ void GaRfd::RegisterOptions() {
                            .SetValueCheck(check_population_size));
     RegisterOption(Option{&max_generations_, kRfdMaxGenerations, kDRfdMaxGenerations,
                           static_cast<std::size_t>(32)});
-    RegisterOption(Option{&crossover_probability_, kCrossoverProbability,
-                          kDRfdCrossoverProbability, 1.0}
-                           .SetValueCheck(check_probability_range(kCrossoverProbability)));
+    RegisterOption(
+            Option{&crossover_probability_, kCrossoverProbability, kDRfdCrossoverProbability, 1.0}
+                    .SetValueCheck(check_probability_range(kCrossoverProbability)));
     RegisterOption(
             Option{&mutation_probability_, kRfdMutationProbability, kDRfdMutationProbability, 1.0}
                     .SetValueCheck(check_probability_range(kRfdMutationProbability)));
@@ -156,14 +150,13 @@ void GaRfd::BuildTypedMetrics() {
 void GaRfd::BuildMatchBitsets() {
     support_cache_ = std::make_unique<util::LRUCache<AttributeMask, std::size_t>>(cache_max_size_);
 
-    std::size_t const num_words_per_attribute = (total_pairs_ + 63) / 64;
     similar_pair_bits_.clear();
     similar_pair_bits_.reserve(num_attributes_);
 
     auto const& column_data = typed_relation_->GetColumnData();
     for (std::size_t attribute = 0; attribute < num_attributes_; ++attribute) {
         auto const& column = column_data[attribute];
-        std::vector<uint64_t> bits(num_words_per_attribute, 0);
+        boost::dynamic_bitset<std::uint64_t> bits(total_pairs_);
         // Core uses distances internally; the user-facing threshold is a
         // similarity in [0, 1], so distance threshold is 1 - similarity
         double const min_sim = min_similarity_[attribute];
@@ -175,8 +168,7 @@ void GaRfd::BuildMatchBitsets() {
             valid[row] = !column.IsNullOrEmpty(row);
         }
 
-        uint64_t word_mask = 1;
-        std::size_t word_index = 0;
+        std::size_t pair_index = 0;
 
         for (std::size_t first_row = 0; first_row < num_rows_; ++first_row) {
             std::byte const* first_value = valid[first_row] ? column.GetValue(first_row) : nullptr;
@@ -188,13 +180,9 @@ void GaRfd::BuildMatchBitsets() {
                 }
 
                 if (match) {
-                    bits[word_index] |= word_mask;
+                    bits.set(pair_index);
                 }
-                word_mask <<= 1;
-                if (word_mask == 0) {
-                    word_mask = 1;
-                    ++word_index;
-                }
+                ++pair_index;
             }
         }
         similar_pair_bits_.push_back(std::move(bits));
@@ -218,7 +206,7 @@ std::size_t GaRfd::ComputeSupport(AttributeMask attributes_mask) {
         return 0;
     }
 
-    std::vector<uint64_t> const& first_bits = similar_pair_bits_[first_attribute];
+    boost::dynamic_bitset<std::uint64_t> const& first_bits = similar_pair_bits_[first_attribute];
 
     if (first_bits.empty()) [[unlikely]] {
         support_cache_->Put(attributes_mask, 0);
@@ -226,7 +214,7 @@ std::size_t GaRfd::ComputeSupport(AttributeMask attributes_mask) {
     }
 
     if ((attributes_mask & (attributes_mask - 1)) == 0u) {
-        std::size_t const support = PopcountAll(first_bits);
+        std::size_t const support = first_bits.count();
         support_cache_->Put(attributes_mask, support);
         LOG_DEBUG("Support for mask {:0{}b} = {}", attributes_mask, num_attributes_, support);
         return support;
@@ -237,20 +225,16 @@ std::size_t GaRfd::ComputeSupport(AttributeMask attributes_mask) {
     remaining_mask &= remaining_mask - 1;
     while (remaining_mask != 0) {
         int attribute = FirstSetBitIndex(remaining_mask);
-        std::vector<uint64_t> const& other_bits = similar_pair_bits_[attribute];
-        std::size_t running_support = 0;
-        for (std::size_t word = 0; word < compute_buffer_.size(); ++word) {
-            compute_buffer_[word] &= other_bits[word];
-            running_support += std::popcount(compute_buffer_[word]);
-        }
-        if (running_support == 0) [[unlikely]] {
+        boost::dynamic_bitset<std::uint64_t> const& other_bits = similar_pair_bits_[attribute];
+        compute_buffer_ &= other_bits;
+        if (compute_buffer_.none()) [[unlikely]] {
             support_cache_->Put(attributes_mask, 0);
             return 0;
         }
         remaining_mask &= remaining_mask - 1;
     }
 
-    std::size_t const support = PopcountAll(compute_buffer_);
+    std::size_t const support = compute_buffer_.count();
 
     support_cache_->Put(attributes_mask, support);
     LOG_DEBUG("Support for mask {:0{}b} = {}", attributes_mask, num_attributes_, support);

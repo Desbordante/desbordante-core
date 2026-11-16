@@ -15,6 +15,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/rfd/ga_rfd/util/lru_cache.h"
 #include "core/algorithms/rfd/rfd.h"
@@ -60,11 +62,11 @@ private:
     std::size_t num_rows_ = 0;
     std::size_t total_pairs_ = 0;
 
-    std::vector<uint64_t> compute_buffer_;
     AttributeMask full_mask_ = 0;
 
     // separate bin column on chunk of 64 bit
-    std::vector<std::vector<uint64_t>> similar_pair_bits_;
+    std::vector<boost::dynamic_bitset<std::uint64_t>> similar_pair_bits_;
+    boost::dynamic_bitset<std::uint64_t> compute_buffer_;
 
     std::size_t cache_max_size_ = 10000;
     std::unique_ptr<util::LRUCache<uint32_t, std::size_t>> support_cache_;
