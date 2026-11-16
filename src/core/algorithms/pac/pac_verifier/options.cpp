@@ -1,9 +1,14 @@
 #include "core/algorithms/pac/pac_verifier/options.h"
 
+#include <algorithm>
 #include <cmath>
 #include <functional>
+#include <iterator>
+#include <optional>
 #include <utility>
+#include <vector>
 
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/common_option.h"
 #include "core/config/descriptions.h"
 #include "core/config/exceptions.h"
@@ -15,6 +20,10 @@ using namespace config::names;
 using namespace config::descriptions;
 
 namespace {
+auto ModeSelector(algos::pac_verifier::PACValidationMode mode) {
+    return [mode](algos::pac_verifier::PACValidationMode value) { return value == mode; };
+}
+
 using GetDouble = std::function<double()>;
 
 constexpr static double kDefaultMinEpsilon = 0.0;
@@ -29,7 +38,7 @@ constexpr static double kDefaultDiagonalThreshold = 1e-5;
 
 void NotNegative(double value) {
     if (value < 0) {
-        throw ConfigurationError("Min epsilon cannot be negative");
+        throw ConfigurationError("Epsilon cannot be negative");
     }
 }
 
@@ -55,7 +64,7 @@ Option<double>::DefaultFunc CalculateDefaultMinDelta(GetDouble&& get_min_epsilon
 
 void DeltaBounds(double value) {
     if (value > 1 || value < 0) {
-        throw config::ConfigurationError("Min delta and max delta must be in [0, 1]");
+        throw config::ConfigurationError("Delta must be in [0, 1]");
     }
 }
 
@@ -80,6 +89,18 @@ Option<unsigned long>::DefaultFunc CalculateDefaultDeltaSteps(GetDouble&& get_mi
 }  // namespace
 
 namespace algos::pac_verifier {
+config::Option<PACValidationMode> PACValidationModeOption(
+        PACValidationMode* value_ptr,
+        std::unordered_map<PACValidationMode, std::vector<std::string_view>> conditional_options) {
+    Option<PACValidationMode>::OptCondVector cond_opts;
+    cond_opts.reserve(conditional_options.size());
+    std::ranges::transform(conditional_options, std::back_inserter(cond_opts), [](auto const& kv) {
+        return std::make_pair(ModeSelector(kv.first), kv.second);
+    });
+    return Option(value_ptr, kPacValidationMode, kDPACValidationMode, PACValidationMode::kFindPac)
+            .SetConditionalOpts(std::move(cond_opts));
+}
+
 CommonOption<double> const kMinEpsilonOption{kMinEpsilon, kDMinEpsilon, kDefaultMinEpsilon, nullptr,
                                              NotNegative};
 
@@ -108,6 +129,12 @@ config::CommonOption<unsigned long> DeltaStepsOption(GetDouble get_min_delta,
             kDeltaSteps, kDDeltaSteps,
             CalculateDefaultDeltaSteps(std::move(get_min_delta), std::move(get_max_delta))};
 }
+
+config::CommonOption<double> const kDeltaOption{kDelta, kDPACDelta, std::nullopt, nullptr,
+                                                DeltaBounds};
+
+config::CommonOption<double> const kEpsilonOption{kEpsilon, kDEpsilon, std::nullopt, nullptr,
+                                                  NotNegative};
 
 CommonOption<double> const kDiagonalThresholdOption{kDiagonalThreshold, kDDiagonalThreshold,
                                                     kDefaultDiagonalThreshold};

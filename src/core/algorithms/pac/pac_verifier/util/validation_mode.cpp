@@ -5,8 +5,7 @@
 
 #include "core/config/exceptions.h"
 
-using namespace algos::pac_verifier;
-
+namespace algos::pac_verifier {
 std::tuple<PACValidationMode, std::optional<double>, std::optional<double>> SelectPACValidationMode(
         PACValidationMode mode, double min_epsilon, double max_epsilon, double min_delta,
         double max_delta) {
@@ -31,3 +30,4 @@ std::tuple<PACValidationMode, std::optional<double>, std::optional<double>> Sele
                                              std::to_string(static_cast<int>(mode)));
     }
 }
+}  // namespace algos::pac_verifier

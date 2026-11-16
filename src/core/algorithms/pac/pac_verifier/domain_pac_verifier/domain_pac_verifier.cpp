@@ -98,13 +98,6 @@ std::vector<EpsilonDelta> DomainPACVerifier::FindEpsilons() const {
 }
 
 void DomainPACVerifier::ExecuteInternal() {
-    PACMan pac_man{min_epsilon_,
-                   max_epsilon_,
-                   min_delta_,
-                   1,
-                   diagonal_threshold_,
-                   [this](double epsilon) { return GetEpsilonDeltaForEpsilon(epsilon); }};
-
     LOG_DEBUG("Common PAC verifier options: delta: [{}, 1], eps: [{}, {}], delta steps: {}",
               min_delta_, min_epsilon_, max_epsilon_, delta_steps_);
 
@@ -140,9 +133,6 @@ void DomainPACVerifier::ExecuteInternal() {
             break;
     }
 
-    auto empirical_probabilities = FindEpsilons();
-    auto [eps, delta] = pac_man.FindEpsilonDelta(std::move(empirical_probabilities));
-
     auto const schema = typed_relation_->GetSharedPtrSchema();
     pac_ = model::DomainPAC{
             eps_delta.epsilon, eps_delta.delta, domain_->ToString(),
@@ -167,7 +157,14 @@ EpsilonDelta DomainPACVerifier::GetEpsilonDeltaForEpsilon(double epsilon) const 
     return {eps, delta};
 }
 
-DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindPAC() {
+EpsilonDelta DomainPACVerifier::FindPAC() {
+    PACMan pac_man{min_epsilon_,
+                   max_epsilon_,
+                   min_delta_,
+                   1,
+                   diagonal_threshold_,
+                   [this](double epsilon) { return GetEpsilonDeltaForEpsilon(epsilon); }};
+
     domain_end_ = std::ranges::partition_point(
             dists_from_domain_, [](auto const& p) { return std::abs(p.second) < kDistThreshold; });
 
@@ -178,13 +175,13 @@ DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindPAC() {
     LOG_TRACE("Initial domain size: {}", std::distance(dists_from_domain_.cbegin(), domain_end_));
 
     auto empirical_probabilities = FindEpsilons();
-    return pac_man_->FindEpsilonDelta(std::move(empirical_probabilities));
+    return pac_man.FindEpsilonDelta(std::move(empirical_probabilities));
 }
 
-DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindEpsilon() {
+EpsilonDelta DomainPACVerifier::FindEpsilon() {
     LOG_DEBUG("Dists from domain size: {}, original value tuples size: {}",
               dists_from_domain_.size(), original_value_tuples_->size());
-    std::size_t needed_pairs = std::ceil(dists_from_domain_.size() * Delta());
+    std::size_t needed_pairs = std::ceil(dists_from_domain_.size() * delta_);
     if (needed_pairs > 0) {
         --needed_pairs;
     }
@@ -196,15 +193,15 @@ DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindEpsilon() {
         std::advance(it, 1);
     }
     auto actual_pairs = std::distance(dists_from_domain_.begin(), it);
-    auto redined_delta = static_cast<double>(actual_pairs) / dists_from_domain_.size();
-    return {epsilon, std::max(Delta(), redined_delta)};
+    auto refined_delta = static_cast<double>(actual_pairs) / dists_from_domain_.size();
+    return {epsilon, std::max(delta_, refined_delta)};
 }
 
-DomainPACVerifier::EpsilonDelta DomainPACVerifier::FindDelta() {
-    if (!std::isfinite(Epsilon())) {
+EpsilonDelta DomainPACVerifier::FindDelta() {
+    if (!std::isfinite(epsilon_)) {
         return {dists_from_domain_.back().second, 1};
     }
-    return GetEpsilonDeltaForEpsilon(Epsilon());
+    return GetEpsilonDeltaForEpsilon(epsilon_);
 }
 
 DomainPACHighlight DomainPACVerifier::GetHighlights(double eps_1, double eps_2) const {
@@ -235,7 +232,7 @@ DomainPACHighlight DomainPACVerifier::GetHighlights(double eps_1, double eps_2) 
 void DomainPACVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({kMinEpsilon, kDiagonalThreshold});
+    MakeOptionsAvailable({kPacValidationMode, kDiagonalThreshold});
 }
 
 void DomainPACVerifier::LoadDataInternal() {
@@ -260,6 +257,7 @@ void DomainPACVerifier::LoadDataInternal() {
 
 DomainPACVerifier::DomainPACVerifier() {
     DESBORDANTE_OPTION_USING;
+    using enum PACValidationMode;
 
     auto domain_not_nullptr = [](std::shared_ptr<pac::model::IDomain> const& domain) {
         if (!domain) {
@@ -275,17 +273,28 @@ DomainPACVerifier::DomainPACVerifier() {
     RegisterOption(Option(&domain_, kDomain, kDDomain).SetValueCheck(domain_not_nullptr));
     MakeOptionsAvailable({config::kTableOpt.GetName(), kDomain});
 
+    // Common execute options
+    RegisterOption(PACValidationModeOption(
+            &mode_,
+            {{kFindPac, {kMinEpsilon}}, {kFindEpsilon, {kDelta}}, {kFindDelta, {kEpsilon}}}));
+    RegisterOption(kDiagonalThresholdOption(&diagonal_threshold_));
+
     auto get_min_epsilon = [this]() { return min_epsilon_; };
     auto get_max_epsilon = [this]() { return max_epsilon_; };
     auto get_min_delta = [this]() { return min_delta_; };
 
-    // Execute options
+    // Find PAC mode
     RegisterOption(kMinEpsilonOption(&min_epsilon_).SetConditionalOpts({{nullptr, {kMaxEpsilon}}}));
     RegisterOption(MaxEpsilonOption(get_min_epsilon)(&max_epsilon_)
                            .SetConditionalOpts({{nullptr, {kMinDelta}}}));
     RegisterOption(MinDeltaOption(get_min_epsilon, get_max_epsilon)(&min_delta_)
                            .SetConditionalOpts({{nullptr, {kDeltaSteps}}}));
     RegisterOption(DeltaStepsOption(get_min_delta, []() { return 1; })(&delta_steps_));
-    RegisterOption(kDiagonalThresholdOption(&diagonal_threshold_));
+
+    // Find epsilon mode
+    RegisterOption(kDeltaOption(&delta_));
+
+    // Find delta mode
+    RegisterOption(kEpsilonOption(&epsilon_));
 }
 }  // namespace algos::pac_verifier
