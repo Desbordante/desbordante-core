@@ -37,7 +37,6 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 # ---- Build Environment Validation ----
 
 # In-source build validation
@@ -60,7 +59,9 @@ endif()
 option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
 option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
-option(DESBORDANTE_BUILD_TIDYEXTS "Build clang-tidy extensions with project-specific passes built on AST matching" OFF)
+option(DESBORDANTE_BUILD_TIDYEXTS
+       "Build clang-tidy extensions with project-specific passes built on AST matching" OFF
+)
 option(DESBORDANTE_CLANG_TIDY "Enable clang-tidy" OFF)
 # This option only takes effect if DESBORDANTE_BUILD_TESTS or DESBORDANTE_BUILD_BENCHMARKS is ON
 option(DESBORDANTE_FETCH_DATASETS "Fetch datasets for tests or benchmarks" ON)
@@ -238,9 +239,13 @@ endif()
 # We set it up here because setting it up outside of CMake
 # requires always passing --load for tidyexts
 if(DESBORDANTE_CLANG_TIDY)
-    set(DESBORDANTE_CLANG_TIDY_OPTIONS "clang-tidy;-config-file=${CMAKE_CURRENT_LIST_DIR}/.clang-tidy")
+    set(DESBORDANTE_CLANG_TIDY_OPTIONS
+        "clang-tidy;-config-file=${CMAKE_CURRENT_LIST_DIR}/.clang-tidy"
+    )
     if(DESBORDANTE_BUILD_TIDYEXTS)
-        set(CMAKE_CXX_CLANG_TIDY "${DESBORDANTE_CLANG_TIDY_OPTIONS};-load=$<TARGET_FILE:Desbordante.tidyexts>")
+        set(CMAKE_CXX_CLANG_TIDY
+            "${DESBORDANTE_CLANG_TIDY_OPTIONS};-load=$<TARGET_FILE:Desbordante.tidyexts>"
+        )
     else()
         set(CMAKE_CXX_CLANG_TIDY "${DESBORDANTE_CLANG_TIDY_OPTIONS}")
     endif()
@@ -269,5 +274,7 @@ if(DESBORDANTE_BINDINGS)
 endif()
 
 if(DESBORDANTE_COPY_COMPILE_COMMANDS)
-    file(COPY "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" DESTINATION "${CMAKE_CURRENT_LIST_DIR}")
+    file(COPY "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json"
+         DESTINATION "${CMAKE_CURRENT_LIST_DIR}"
+    )
 endif()
