@@ -5,7 +5,10 @@
             "name": "common",
             "hidden": true,
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/${presetName}"
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
         },
         {
             "name": "debug",
@@ -64,7 +67,8 @@
                 "DESBORDANTE_BUILD_TIDYEXTS": "ON",
                 "DESBORDANTE_BINDINGS": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-                "DESBORDANTE_BUILD_BENCHMARKS": "ON"
+                "DESBORDANTE_BUILD_BENCHMARKS": "ON",
+                "DESBORDANTE_COPY_COMPILE_COMMANDS": "ON"
             }
         }
     ],

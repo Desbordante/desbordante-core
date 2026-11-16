@@ -68,6 +68,7 @@ option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
 option(DESBORDANTE_CI_REDUCED_DEBUG_INFO "Use reduced debug info intended for CI builds" OFF)
 option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
+option(DESBORDANTE_COPY_COMPILE_COMMANDS "Copy compile commands to root" OFF)
 
 set(DESBORDANTE_SANITIZER
     ""
@@ -267,6 +268,6 @@ if(DESBORDANTE_BINDINGS)
     add_subdirectory("src/python_bindings")
 endif()
 
-if(CMAKE_EXPORT_COMPILE_COMMANDS)
+if(DESBORDANTE_COPY_COMPILE_COMMANDS)
     file(COPY "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" DESTINATION "${CMAKE_CURRENT_LIST_DIR}")
 endif()
