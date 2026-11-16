@@ -4,7 +4,7 @@ SOURCE_FILES=$(git diff --cached --name-only --diff-filter=M -- "*.cpp" "*.h" "*
 
 if [[ -n "$SOURCE_FILES" ]]; then
     cmake --workflow --preset tidyexts
-    cmake --preset debug
+    cmake --preset compilecommands
 
     TIDYEXTS_PATH=$(find ./build/tidyexts -name "libDesbordante.tidyexts*")
 
@@ -13,7 +13,7 @@ if [[ -n "$SOURCE_FILES" ]]; then
 
     set -euo pipefail
     echo "Clang-tidy"
-    clang-tidy -p=./build/debug --config-file=.clang-tidy -load=${TIDYEXTS_PATH} $SOURCE_FILES
+    clang-tidy --config-file=.clang-tidy -load=${TIDYEXTS_PATH} $SOURCE_FILES
     echo "Clang-format"
     clang-format --dry-run -Werror --style=file:.clang-format -i $SOURCE_FILES
 fi
