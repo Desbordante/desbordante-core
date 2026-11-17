@@ -37,6 +37,8 @@ constexpr auto kDArMinimumSupport = "Ar minimum support value (between 0 and 1)"
 constexpr auto kDArLhsRule = "left part of association rule to verify";
 constexpr auto kDArRhsRule = "right part of association rule to verify";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
+// CDD
+constexpr auto kDCdd = "Conditional differential dependency that needs to be verified";
 // CFD
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";

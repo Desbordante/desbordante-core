@@ -33,6 +33,8 @@ constexpr auto kArMinimumSupport = "minsup";
 constexpr auto kTIdColumnIndex = "tid_column_index";
 constexpr auto kArLhsRule = "lhs_rule";
 constexpr auto kArRhsRule = "rhs_rule";
+// CDD
+constexpr auto kCdd = "cdd";
 // CFD
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
 constexpr auto kCfdMinimumConfidence = "cfd_minconf";

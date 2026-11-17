@@ -34,7 +34,9 @@ TEST_CASES = generate_test_cases()
 
 @pytest.mark.parametrize('script, input_file, output', TEST_CASES)
 def test_example(snapshot, script, input_file, output):
-    cmd = ['python3', f'examples/{script}']
+    # Use the current python executable (which should be the venv python when run from venv)
+    import sys
+    cmd = [sys.executable, f'examples/{script}']
     stdin = None
     if input_file:
         with open(f'examples/test_examples/inputs/{input_file}') as f:
@@ -42,6 +44,8 @@ def test_example(snapshot, script, input_file, output):
     env = os.environ.copy()
     # To skip plt.show()
     env["MPLBACKEND"] = "Agg"
+    # Ensure the built module is findable
+    env["PYTHONPATH"] = os.path.join(os.getcwd(), 'build', 'src', 'python_bindings')
 
     result = subprocess.run(
         cmd,

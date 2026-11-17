@@ -1,6 +1,7 @@
 set(SUBDIRS
     algebraic_constraints
     ar
+    cdd
     cfd
     cind
     dc

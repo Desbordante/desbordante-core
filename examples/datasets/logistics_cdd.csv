@@ -1,0 +1,8 @@
+package_id,origin_hub,dest_hub,delivery_type,weight_kg,transit_hours
+101,Chicago,Atlanta,Express,3.0,14
+102,Chicago,Atlanta,Express,3.5,15
+103,Chicago,Atlanta,Express,4.0,38
+104,Chicago,Atlanta,Standard,3.2,40
+105,Chicago,Atlanta,Standard,3.8,42
+106,Dallas,Atlanta,Express,3.0,16
+107,Dallas,Atlanta,Express,3.2,17
