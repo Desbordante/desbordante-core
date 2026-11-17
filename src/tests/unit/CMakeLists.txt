@@ -698,6 +698,18 @@ desbordante_add_test(
 
 # --- SD ---
 desbordante_add_test(
+    sd.miner
+    SRCS
+    test_sd_miner.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::sd::miner
+    ${DESBORDANTE_PREFIX}::sd::verifier
+    Boost::headers
+    magic_enum::magic_enum
+    spdlog::spdlog_header_only
+)
+
+desbordante_add_test(
     sd.verifier
     SRCS
     test_sd_verifier.cpp
