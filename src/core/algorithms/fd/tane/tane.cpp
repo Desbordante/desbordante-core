@@ -22,7 +22,7 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
     // makes sense on our own. If the RHS is constant, there is an FD, so it only makes sense for
     // error to be 0.
     switch (afd_error_measure_) {
-        case AfdErrorMeasure::kG3: {
+        case AfdMeasure::kG3: {
             std::size_t max = 1;
             model::PositionListIndex const* x_pli = rhs->GetPositionListIndex();
             for (model::PLI::Cluster const& x_cluster : x_pli->GetIndex()) {
@@ -31,14 +31,28 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
             }
             return 1.0 - static_cast<config::ErrorType>(max) / x_pli->GetRelationSize();
         }
-        case AfdErrorMeasure::kG1:
+        case AfdMeasure::kG3Prime: {
+            model::PositionListIndex const* rhs_pli = rhs->GetPositionListIndex();
+            std::size_t const num_rows = rhs_pli->GetRelationSize();
+            if (rhs_pli->IsConstant() || num_rows == 1) return 0.L;
+
+            std::size_t max = 1;
+            for (model::PLI::Cluster const& cluster : rhs_pli->GetIndex()) {
+                max = std::max(max, cluster.size());
+            }
+            return static_cast<config::ErrorType>(num_rows - max) / (num_rows - 1);
+        }
+        case AfdMeasure::kG1:
             return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1(
                     rhs, relation_.get()->GetNumTuplePairs());
+        case AfdMeasure::kG1Prime:
+            return afd_metric_calculator::AFDMetricCalculator::CalculateZeroAryG1Prime(rhs,
+                                                                                       *relation_);
         /*
          * dom_{empty_set}(R) needs some care in its definition. If that care is taken, we get
          * |dom_{empty_set}(R)| = 1.
          */
-        case AfdErrorMeasure::kRho:
+        case AfdMeasure::kRho:
             return static_cast<config::ErrorType>(rhs->GetPositionListIndex()->GetNumCluster() -
                                                   1) /
                    rhs->GetPositionListIndex()->GetNumCluster();
@@ -48,31 +62,40 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
          * of a tuple on empty X as the empty set, then we get pdep({}, Y) = p(R1.Y = R.Y2), which
          * is exactly the self-dependency measure pdep(Y).
          */
-        case AfdErrorMeasure::kPdep:
+        case AfdMeasure::kPdep:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepSelf(
                                rhs->GetPositionListIndex());
+        case AfdMeasure::kG1S: {
+            config::ErrorType const entropy = rhs->GetPositionListIndex()->GetEntropy();
+            if (entropy < 0.0) return 0.0;
+            if (entropy > 1.0) return 1.0;
+            return entropy;
+        }
         /*
          * The probability that a tuple participates in a violating pair is 0 if there is an FD,
          * otherwise it is 1 for an empty LHS and non-constant RHS.
          */
-        case AfdErrorMeasure::kG2:
+        case AfdMeasure::kG2:
         /*
          * For an empty LHS, the mutual information is 0, but if the entropy of RHS is also 0 (i.e.
          * it is constant), the measure is technically undefined.
          */
-        case AfdErrorMeasure::kFi:
+        case AfdMeasure::kFi:
         /*
          * When using pdep({}, Y) = pdep(Y), tau has 0 in the numerator. If pdep(Y) = 0, it has 0 in
          * the denominator too, so it is technically undefined.
          */
-        case AfdErrorMeasure::kTau:
+        case AfdMeasure::kTau:
         /*
          * Since Y is taken to be constant in the definition, pdep({} -> Y, R) is just pdep(Y). The
          * expected value of a constant is that constant, so we get a 0 in the numerator. The
          * denominator is again 0 when the RHS is constant, so this measure is technically undefined
          * as well in that case.
          */
-        case AfdErrorMeasure::kMuPlus:
+        case AfdMeasure::kMuPlus:
+        case AfdMeasure::kRfiPlus:
+        case AfdMeasure::kRfiPrimePlus:
+        case AfdMeasure::kSfi:
             return rhs->GetPositionListIndex()->IsConstant() ? 0.0 : 1.0;
     }
     assert(false);
@@ -81,33 +104,8 @@ config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
 
 config::ErrorType Tane::CalculateFdError(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                          model::PLI const* joint_pli) {
-    switch (afd_error_measure_) {
-        case AfdErrorMeasure::kPdep:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(lhs_pli,
-                                                                                        rhs_pli);
-        case AfdErrorMeasure::kTau:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs_pli, rhs_pli);
-        case AfdErrorMeasure::kMuPlus:
-            return 1 -
-                   afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs_pli, rhs_pli);
-        case AfdErrorMeasure::kRho:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateRhoMeasure(lhs_pli,
-                                                                                       joint_pli);
-        case AfdErrorMeasure::kFi:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateFI(
-                               lhs_pli, rhs_pli, relation_.get()->GetNumRows());
-        case AfdErrorMeasure::kG2:
-            return afd_metric_calculator::AFDMetricCalculator::CalculateG2Error(
-                    lhs_pli, rhs_pli, relation_.get()->GetNumRows());
-        case AfdErrorMeasure::kG3:
-            return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateG3(
-                               lhs_pli, rhs_pli, relation_.get()->GetNumRows());
-        case AfdErrorMeasure::kG1:
-            return afd_metric_calculator::AFDMetricCalculator::CalculateG1Error(
-                    lhs_pli, joint_pli, relation_.get()->GetNumTuplePairs());
-    }
-    assert(false);
-    __builtin_unreachable();
+    return afd_metric_calculator::AFDMetricCalculator::CalculateError(
+            afd_error_measure_, lhs_pli, rhs_pli, *relation_, joint_pli);
 }
 
 }  // namespace algos

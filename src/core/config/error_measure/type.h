@@ -4,5 +4,5 @@
 
 namespace config {
 using PfdErrorMeasureType = algos::PfdErrorMeasure;
-using AfdErrorMeasureType = algos::AfdErrorMeasure;
+using AfdErrorMeasureType = algos::AfdMeasure;
 }  // namespace config

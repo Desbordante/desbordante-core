@@ -50,6 +50,60 @@ void TestSorting(std::unique_ptr<FDVerifier> verifier) {
 namespace tests {
 namespace onam = config::names;
 
+TEST(FDVerifierExecution, ExactReexecutionClearsPreviousViolations) {
+    algos::StdParamsMap params{{onam::kCsvConfig, kTestFD},
+                               {onam::kLhsIndices, config::IndicesType{4}},
+                               {onam::kRhsIndices, config::IndicesType{3}},
+                               {onam::kAfdErrorMeasure, algos::AfdErrorMeasure::kG3Prime}};
+    auto verifier = algos::CreateAndLoadAlgorithm<FDVerifier>(params);
+    verifier->Execute();
+    ASSERT_FALSE(verifier->FDHolds());
+    ASSERT_NEAR(verifier->GetError(), 1.L / 7.L, 1e-12L);
+    ASSERT_EQ(verifier->GetNumErrorRows(), 2);
+    ASSERT_EQ(verifier->GetHighlights().size(), 1);
+
+    // Check an exact dependency on the same object. Previous violations must be cleared.
+    verifier->SetOption(onam::kLhsIndices, config::IndicesType{3, 4});
+    verifier->SetOption(onam::kRhsIndices, config::IndicesType{3});
+    verifier->SetOption(onam::kAfdErrorMeasure, algos::AfdErrorMeasure::kG3Prime);
+    verifier->Execute();
+    EXPECT_TRUE(verifier->FDHolds());
+    EXPECT_EQ(verifier->GetError(), 0.L);
+    EXPECT_EQ(verifier->GetNumErrorRows(), 0);
+    EXPECT_EQ(verifier->GetNumErrorClusters(), 0);
+    EXPECT_TRUE(verifier->GetHighlights().empty());
+}
+
+struct ExactDependencyParams {
+    char const* name;
+    char const* file;
+    model::ColumnIndex lhs;
+    model::ColumnIndex rhs;
+};
+
+class FDVerifierExactDependencies : public ::testing::TestWithParam<ExactDependencyParams> {};
+
+TEST_P(FDVerifierExactDependencies, ReturnsZeroError) {
+    auto const& dependency = GetParam();
+    algos::StdParamsMap params{
+            {onam::kCsvConfig, CSVConfig{kTestDataDir / dependency.file, ',', true}},
+            {onam::kLhsIndices, config::IndicesType{dependency.lhs}},
+            {onam::kRhsIndices, config::IndicesType{dependency.rhs}},
+            {onam::kAfdErrorMeasure, algos::AfdErrorMeasure::kFi}};
+    auto verifier = algos::CreateAndLoadAlgorithm<FDVerifier>(params);
+    verifier->Execute();
+    EXPECT_TRUE(verifier->FDHolds());
+    EXPECT_EQ(verifier->GetError(), 0.L);
+}
+
+INSTANTIATE_TEST_SUITE_P(FDVerifierExactness, FDVerifierExactDependencies,
+                         ::testing::Values(ExactDependencyParams{"RepeatedLhs", "TestFD.csv", 5, 1},
+                                           ExactDependencyParams{"UniqueLhs", "SimpleTypes.csv", 3,
+                                                                 4},
+                                           ExactDependencyParams{"ConstantRhs", "TestFD.csv", 4, 0},
+                                           ExactDependencyParams{"OneRow", "OneRow.csv", 0, 1}),
+                         [](auto const& info) { return info.param.name; });
+
 struct FDVerifyingParams {
     algos::StdParamsMap params;
     long double const error = 0.;

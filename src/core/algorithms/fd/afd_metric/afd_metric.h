@@ -1,17 +1,9 @@
 #pragma once
 
-#include "core/util/export.h"
+#include "core/algorithms/fd/afd_measure.h"
 
 namespace algos::afd_metric_calculator {
 
-enum class DESBORDANTE_EXPORT AFDMetric : char {
-    kG2 = 0,
-    kTau,
-    kMuPlus,
-    kFi,
-    kG1,
-    kG3,
-    kPdep,
-    kRho
-};
+// Compatibility name for C++ consumers of the metric calculator.
+using AFDMetric = AfdMeasure;
 }  // namespace algos::afd_metric_calculator

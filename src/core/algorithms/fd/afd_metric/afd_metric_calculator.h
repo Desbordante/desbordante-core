@@ -18,7 +18,7 @@ class AFDMetricCalculator : public Algorithm {
 private:
     config::InputTable input_table_;
 
-    AFDMetric metric_;
+    AfdMeasure metric_;
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
 
@@ -38,6 +38,14 @@ protected:
     void ExecuteInternal() override;
 
 public:
+    // Ordinary FD error is 1 - AFD measure. Reuses joint_pli when supplied; otherwise
+    // builds it only for measures that need it. Consumer-specific exact-FD and
+    // zero-ary conventions remain the caller's responsibility.
+    static long double CalculateError(AfdMeasure measure, model::PLI const* lhs_pli,
+                                      model::PLI const* rhs_pli,
+                                      ColumnLayoutRelationData const& relation,
+                                      model::PLI const* joint_pli = nullptr);
+
     static long double CalculatePdepSelf(model::PLI const* x_pli);
 
     // Computes Pdep(X, X∪A) directly from X clusters and A's probing table.
@@ -49,6 +57,9 @@ public:
     static long double CalculateG3(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                    std::size_t num_rows);
 
+    static long double CalculateG3PrimeError(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                             std::size_t num_rows);
+
     static long double CalculateTau(model::PLI const* lhs_pli, model::PLI const* rhs_pli);
 
     static long double CalculateMuPlus(model::PLI const* lhs_pli, model::PLI const* rhs_pli);
@@ -56,12 +67,40 @@ public:
     static long double CalculateFI(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                    size_t num_rows);
 
+    static long double CalculateG1SMeasure(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
+                                           std::size_t num_rows);
+
+    static long double CalculateRfiPlusMeasure(model::PLI const* lhs_pli,
+                                               model::PLI const* rhs_pli);
+
+    static long double CalculateRfiPrimePlusMeasure(model::PLI const* lhs_pli,
+                                                    model::PLI const* rhs_pli);
+
+    // Uses alpha = 0.5, the best-performing setting evaluated in the source paper.
+    static long double CalculateSfiMeasure(model::PLI const* lhs_pli, model::PLI const* rhs_pli);
+
     static config::ErrorType CalculateZeroAryG1(ColumnData const* rhs,
                                                 unsigned long long num_tuple_pairs);
 
     static config::ErrorType CalculateG1Error(model::PLI const* lhs_pli,
                                               model::PLI const* joint_pli,
                                               unsigned long long num_tuple_pairs);
+
+    static config::ErrorType CalculateG1PrimeError(model::PLI const* lhs_pli,
+                                                   model::PLI const* joint_pli,
+                                                   unsigned long long normalization);
+
+    // Rebuilds the full-tuple PLI on demand; no normalization is cached.
+    static config::ErrorType CalculateG1PrimeError(model::PLI const* lhs_pli,
+                                                   model::PLI const* joint_pli,
+                                                   ColumnLayoutRelationData const& relation);
+
+    static config::ErrorType CalculateZeroAryG1Prime(ColumnData const* rhs,
+                                                     ColumnLayoutRelationData const& relation);
+
+    static config::ErrorType CalculateZeroAryG1Prime(ColumnData const* rhs,
+                                                     unsigned long long num_tuple_pairs,
+                                                     unsigned long long normalization);
 
     static config::ErrorType CalculateRhoMeasure(model::PLI const* x_pli, model::PLI const* xa_pli);
 
