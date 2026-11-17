@@ -1,5 +1,6 @@
 add_subdirectory(cfd_verifier)
 add_subdirectory(fd_first)
+add_subdirectory(cfd_miner)
 
 set(NAME cfd.model)
 desbordante_add_lib(NAME OBJECT)
