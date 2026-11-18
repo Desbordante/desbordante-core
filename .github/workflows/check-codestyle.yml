@@ -62,7 +62,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: apt update && apt install ninja
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
       - uses: ZedThree/clang-tidy-review@v0.23.1
         id: review
         with:
