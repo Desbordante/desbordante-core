@@ -23,7 +23,8 @@
             "displayName": "Release",
             "inherits": "common",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "DESBORDANTE_USE_CCACHE": "OFF"
             }
         },
         {

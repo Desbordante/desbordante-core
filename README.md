@@ -255,6 +255,7 @@ Prior to cloning the repository and attempting to build the project, ensure that
 - GNU GCC, version 14+, LLVM Clang, version 16+, or Apple Clang, version 16+
 - CMake, version 3.25+
 - Boost library built with compiler you're going to use (GCC or Clang), version 1.85-1.86, 1.88+
+- ccache unless you disable it explicitly by setting `DESBORDANTE_USE_CCACHE=OFF` 
 
 Instructions below are given for GCC (on Linux) and Apple Clang (on macOS).
 Instructions for other supported compilers can be found in [Desbordante wiki](https://github.com/Desbordante/desbordante-core/wiki/Building).
@@ -381,6 +382,10 @@ log.setLevel(logging.INFO) # Or logging.DEBUG, logging.TRACE, etc.
 ```
 
 ## Troubleshooting
+
+### Weird compilation errors
+We enable ccache by default. If you run into issues, try to clean the cache using `ccache -C` or
+`cacche -c`. You can also disable by passing `-D DESBORDANTE_USE_CCACHE=OFF` to `cmake`.
 
 ### No type hints in IDE
 If type hints don't work for you in Visual Studio Code, for example, then install stubs using the command:

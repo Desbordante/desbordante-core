@@ -83,13 +83,18 @@ jobs:
         with:
           os: ${{ matrix.system.os }}
           toolset: ${{ matrix.system.toolset }}
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ matrix.system.os }}-${{ matrix.system.toolset }}-${{ matrix.cfg.PRESET }}
+
       - name: Build
         shell: bash
         run: |
           export ${{ matrix.system.env }}
 
           cmake --version
-          cmake --preset ${{ matrix.cfg.PRESET }} ${{ matrix.cfg.CMAKE_OPTS }}
+          cmake --preset ${{ matrix.cfg.PRESET }} ${{ matrix.cfg.CMAKE_OPTS }} -DDESBORDANTE_USE_CCACHE=ON
           cmake --build --preset ${{ matrix.cfg.PRESET }}
       - name: Test
         shell: bash
