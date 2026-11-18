@@ -26,6 +26,7 @@
 #include "python_bindings/gfd/bind_gfd.h"
 #include "python_bindings/gfd/bind_gfd_verification.h"
 #include "python_bindings/gspan/bind_gspan.h"
+#include "python_bindings/huespan/bind_huespan.h"
 #include "python_bindings/ind/bind_ind.h"
 #include "python_bindings/ind/bind_ind_verification.h"
 #include "python_bindings/md/bind_md.h"
@@ -88,6 +89,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindFastADC,
                            BindGfd,
                            BindGSpan,
+                           BindHueSpan,
                            BindCFDVerification,
                            BindDDVerification,
                            BindAODVerification,
