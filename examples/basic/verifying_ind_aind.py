@@ -1,7 +1,8 @@
+import textwrap
+
 import desbordante
 import pandas as pd
 from tabulate import tabulate
-import textwrap
 
 GREEN_CODE = "\033[1;42m"
 RED_CODE = "\033[1;41m"
@@ -9,7 +10,7 @@ BLUE_CODE = "\033[1;46m"
 DEFAULT_COLOR_CODE = "\033[1;49m"
 RESET_CODE = "\033[0m"
 
-print('''==============================================
+print("""==============================================
 In Desbordante, we consider an approximate inclusion dependency (AIND)
 as any inclusion dependency (IND) that utilizes an error metric to measure
 violations. This metric calculates the proportion of distinct values in the
@@ -36,11 +37,11 @@ For more information, consider:
 1) Unary and n-ary inclusion dependency discovery in relational databases by
    Fabien De Marchi, Stéphane Lopes, and Jean-Marc Petit.
 
-==============================================''')
+==============================================""")
 
 
-def prints(str):
-    print(textwrap.fill(str, 80))
+def prints(text):
+    print(textwrap.fill(text, 80))
 
 
 def print_results_for_ind(verifier):
@@ -53,7 +54,7 @@ def print_results_for_ind(verifier):
 
 def print_table(table, title):
     print(title)
-    print(tabulate(table, headers='keys', tablefmt='psql'), end='\n\n')
+    print(tabulate(table, headers="keys", tablefmt="psql"), end="\n\n")
 
 
 def get_table_df(dataset):
@@ -89,7 +90,7 @@ def aind_verify(lhs, rhs):
 
 
 def print_clusters(verifier, lhs):
-    (table_name, table, indices) = lhs
+    (_table_name, table, indices) = lhs
 
     print(f"Number of clusters violating IND: {verifier.get_violating_clusters_count()}")
     for i, cluster in enumerate(verifier.get_violating_clusters(), start=1):
@@ -108,8 +109,8 @@ and 'products'.""")
     prints("Let's start by verifying exact IND holding between those tables.")
     print()
 
-    algo = aind_verify(('orders', get_table_df('orders'), [2]),
-                       ('products', get_table_df('products'), [1]))
+    algo = aind_verify(("orders", get_table_df("orders"), [2]),
+                       ("products", get_table_df("products"), [1]))
 
     print_results_for_ind(algo)
     print()
@@ -120,6 +121,8 @@ without any typos or missing data.""")
 
 
 def approximate_scenario():
+    incorrect_customer_id = 201
+    correct_customer_id = 101
     print("Now, let's consider the approximate IND verification scenario (AIND).")
     print()
     prints("""Unlike exact INDs, approximate INDs allow for a certain level of error.
@@ -127,11 +130,11 @@ This error indicates how accurately the dependency holds between the datasets.
 In this scenario, we will use the 'orders' and 'customers' datasets.""")
     print()
 
-    verify = lambda lhs_df, rhs_df: aind_verify(('orders', lhs_df, [1]),
-                                                ('customers', rhs_df, [0]))
+    def verify(lhs_df, rhs_df):
+        return aind_verify(("orders", lhs_df, [1]), ("customers", rhs_df, [0]))
 
-    lhs_df = get_table_df('orders')
-    rhs_df = get_table_df('customers')
+    lhs_df = get_table_df("orders")
+    rhs_df = get_table_df("customers")
 
     algo = verify(lhs_df, rhs_df)
 
@@ -141,11 +144,15 @@ In this scenario, we will use the 'orders' and 'customers' datasets.""")
 Let's examine the violating clusters in more detail to understand the errors.""")
     print()
 
-    print_clusters(algo, ('orders', lhs_df, [1]))
+    print_clusters(algo, ("orders", lhs_df, [1]))
     prints("Based on our analysis, this AIND does not hold due to the following reasons:")
-    prints("""1. The `orders.customer_id` value '201' does not match any entry in the `customers.id` column.
-This suggests a possible typo where '201' might have been entered instead of '101',
-indicating that the customer who bought the 'Mouse' should be Alice.""")
+    prints(
+        f"1. The `orders.customer_id` value '{incorrect_customer_id}' "
+        "does not match any entry in the `customers.id` column.\n"
+        f"This suggests a possible typo where '{incorrect_customer_id}' might have been entered "
+        f"instead of '{correct_customer_id}',\n"
+        "indicating that the customer who bought the 'Mouse' should be Alice."
+    )
     prints("""2. The `orders.customer_id` value '108' also violates the AIND.
 This appears to be a case where the 'customers' table might be incomplete,
 and some customer entries are missing.""")
@@ -157,10 +164,13 @@ can help improve the accuracy of this dependency.""")
     print("Let's fix the issues.")
     print()
     prints("Step 1: Fix data issue in the 'orders' dataset.")
-    prints("Update the value in the `orders.customer_id` column where it is '201' to '101'.")
+    prints(
+        f"Update the value in the `orders.customer_id` column where it is '{incorrect_customer_id}' "
+        f"to '{correct_customer_id}'."
+    )
     print()
 
-    lhs_df.loc[lhs_df['customer_id'] == 201, 'customer_id'] = 101
+    lhs_df.loc[lhs_df["customer_id"] == incorrect_customer_id, "customer_id"] = correct_customer_id
     algo = verify(lhs_df, rhs_df)
 
     print_results_for_ind(algo)
@@ -173,7 +183,7 @@ let's address the missing customer entry.""")
     prints("Adding a new customer with id '108', name 'Frank', and country 'Italy'.")
     print()
 
-    new_entry = {'id': 108, 'name': 'Frank', 'country': 'Italy'}
+    new_entry = {"id": 108, "name": "Frank", "country": "Italy"}
     rhs_df = pd.concat([rhs_df, pd.DataFrame([new_entry])], ignore_index=True)
     algo = verify(lhs_df, rhs_df)
 

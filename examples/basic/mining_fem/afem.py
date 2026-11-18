@@ -1,5 +1,6 @@
-import desbordante
 import textwrap
+
+import desbordante
 
 YELLOW = "\033[1;33m"
 CYAN = "\033[1;36m"
@@ -24,13 +25,14 @@ def banner(title):
 
 
 def read_sequence_file(path):
-    """Parses the "events|timestamp" text format used by Desbordante sequence
-    datasets. Only used here to pretty-print the dataset; the algorithm reads
-    the file itself via load_data."""
+    """Parse the "events|timestamp" text format used by Desbordante sequence datasets.
+
+    Only used here to pretty-print the dataset; the algorithm reads the file itself via load_data.
+    """
     rows = []
     with open(path) as f:
-        for line in f:
-            line = line.strip()
+        for raw_line in f:
+            line = raw_line.strip()
             if not line:
                 continue
             events_part, _, ts_part = line.partition("|")

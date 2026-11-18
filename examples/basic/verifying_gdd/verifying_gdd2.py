@@ -1,16 +1,15 @@
-from pathlib import Path
 import tempfile
-
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
+from pathlib import Path
 
 import desbordante
-from desbordante.gdd import AttrAttr, CmpOp as Op
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+from desbordante.gdd import AttrAttr, GddFromDotString
+from desbordante.gdd import CmpOp as Op
 from desbordante.gdd import DistanceMetric as M
-from desbordante.gdd import GddFromDotString
 
 
-class bcolors:
+class BColors:
     HEADER = "\033[95m"
     WARNING = "\033[93m"
     ENDC = "\033[0m"
@@ -250,7 +249,7 @@ def print_counterexample(counterexample) -> None:
 
 
 def print_block(title: str, text: str) -> None:
-    print(f"{bcolors.HEADER}{title}{bcolors.ENDC}\n")
+    print(f"{BColors.HEADER}{title}{BColors.ENDC}\n")
     print(text)
     print()
 
@@ -277,13 +276,13 @@ def main() -> None:
 
     valid_gdds, _ = validate_gdds(GRAPH_DOT, [GDD_COUNTRY_AGREEMENT])
 
-    print(f"{bcolors.HEADER}Desbordante > {bcolors.ENDC}", end="")
+    print(f"{BColors.HEADER}Desbordante > {BColors.ENDC}", end="")
     if GDD_COUNTRY_AGREEMENT in valid_gdds:
         print("GDD holds.\n")
     else:
         print("GDD does not hold.\n")
 
-    print(f"{bcolors.WARNING}Close the image window to continue.{bcolors.ENDC}\n")
+    print(f"{BColors.WARNING}Close the image window to continue.{BColors.ENDC}\n")
     show_example(IMAGE1_PATH)
 
     print_block(
@@ -296,7 +295,7 @@ def main() -> None:
         [GDD_COUNTRY_AGREEMENT],
     )
 
-    print(f"{bcolors.HEADER}Desbordante > {bcolors.ENDC}", end="")
+    print(f"{BColors.HEADER}Desbordante > {BColors.ENDC}", end="")
     if GDD_COUNTRY_AGREEMENT in valid_gdds:
         print("GDD holds.\n")
     else:
@@ -322,7 +321,7 @@ def main() -> None:
         OUTRO_INFO,
     )
 
-    print(f"{bcolors.WARNING}Close the image window to finish.{bcolors.ENDC}")
+    print(f"{BColors.WARNING}Close the image window to finish.{BColors.ENDC}")
     show_example(IMAGE2_PATH)
 
 

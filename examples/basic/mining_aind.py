@@ -2,7 +2,7 @@ import desbordante
 import pandas as pd
 from tabulate import tabulate
 
-print('''==============================================
+print("""==============================================
 In Desbordante, we consider an approximate inclusion dependency (AIND)
 as any inclusion dependency (IND) that utilizes an error metric to measure
 violations. This metric calculates the proportion of distinct values in the
@@ -29,23 +29,23 @@ originally designed for approximate functional dependencies (FDs).
 For more information, consider:
 1) Unary and n-ary inclusion dependency discovery in relational databases by
    Fabien De Marchi, Stéphane Lopes, and Jean-Marc Petit.
-==============================================''')
+==============================================""")
 
 
 def print_table(table, title):
     print(title)
-    print(tabulate(table, headers='keys', tablefmt='psql'), end='\n\n')
+    print(tabulate(table, headers="keys", tablefmt="psql"), end="\n\n")
 
 
 def get_table_path(dataset):
     return f"examples/datasets/ind_datasets/{dataset}.csv"
 
 
-TABLE_NAMES = ['employee', 'project_assignments']
-TABLES = [(get_table_path(name), ',', True) for name in TABLE_NAMES]
+TABLE_NAMES = ["employee", "project_assignments"]
+TABLES = [(get_table_path(name), ",", True) for name in TABLE_NAMES]
 
 print()
-print('Now, we are going to demonstrate how to discover AINDs.')
+print("Now, we are going to demonstrate how to discover AINDs.")
 print()
 
 print("""The datasets under consideration for this example are
@@ -70,10 +70,10 @@ for ind in algo.get_inds():
     print("IND:", ind)
 
 print()
-print('''We found only a single AIND, this dependency contains typos in the
-"Employee Name" column of the second dataset.''')
+print("""We found only a single AIND, this dependency contains typos in the
+"Employee Name" column of the second dataset.""")
 print()
-print('''For automatically detecting violating clusters, you can create a
+print("""For automatically detecting violating clusters, you can create a
 pipeline using the AIND verifier in combination with a mining algorithm.
 
-For an additional example, refer to the examples/advanced/aind_typos.py''')
+For an additional example, refer to the examples/advanced/aind_typos.py""")

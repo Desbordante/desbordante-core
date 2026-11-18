@@ -1,20 +1,20 @@
 import desbordante
-import pandas
-from colorama import Fore, Style, Back
+import pandas as pd
+from colorama import Back, Fore, Style
 
-TABLE = 'examples/datasets/dog_breeds.csv'
+TABLE = "examples/datasets/dog_breeds.csv"
 
 DOWN_ARROW = "      |\n      |\n      V"
 
 def print_rule_part(rule_part, columns):
     for column_index, value in rule_part.items():
-        print(f'{columns[column_index]}{value}')
+        print(f"{columns[column_index]}{value}")
 
 
 def print_10_nars(nars, df_columns):
     for i, nar in enumerate(nars[:10], start=1):
         print(f"NAR {i}:{Style.BRIGHT}")
-        print_rule_part(nar.ante, df_columns)   
+        print_rule_part(nar.ante, df_columns)
         print(DOWN_ARROW)
         print_rule_part(nar.cons, df_columns)
         print(f"   support = {nar.support}")
@@ -22,9 +22,9 @@ def print_10_nars(nars, df_columns):
         print(f"{Style.RESET_ALL}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     algo = desbordante.nar.algorithms.DES()
-    algo.load_data(table=(TABLE, ',', True))
+    algo.load_data(table=(TABLE, ",", True))
     print("Numerical Association Rules (NAR) are an extension of traditional "
           "Association Rules (AR), which help to discover patterns in data. Unlike ARs, "
           "which work with binary attributes (e.g., whether an item was purchased "
@@ -54,7 +54,7 @@ if __name__ == '__main__':
           "algorithm.\n")
     print("As a demonstration of working with some of DES' parameters, let's inspect "
           "a dataset containing information about 159 dog breeds.\n")
-    df = pandas.read_csv(TABLE)
+    df = pd.read_csv(TABLE)
 
     print("Fragment of the dog_breeds.csv table:")
     print(df)
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     confidence_percent = round(example_nar.confidence * 100)
     support_percent = round(example_nar.support * 100)
     print_10_nars([example_nar], df.columns)
-    
+
     print(f"\nThe above NAR is one of the {discovered_nar_count} rules discovered"
           f" with these settings. The NAR states that about {confidence_percent}%"
           " of all dog breeds of type 'Hound' have an intelligence rating between"
@@ -87,28 +87,28 @@ if __name__ == '__main__':
           "that, in general, hounds are intelligent dogs and are mostly friendly. Let's see "
           "if that is true.\n")
 
-    hound_rows = df[df['Type'] == 'Hound']
-    
+    hound_rows = df[df["Type"] == "Hound"]
+
     violating_row_indices = []
     min_intelligence = example_nar.cons[9].lower_bound
     max_intelligence = example_nar.cons[9].upper_bound
     min_friendliness = example_nar.cons[3].lower_bound
     max_friendliness = example_nar.cons[3].upper_bound
     for i, (_, row) in enumerate(hound_rows.iterrows()):
-        intelligence = row['Intelligence']
-        friendliness = row['Friendliness']
+        intelligence = row["Intelligence"]
+        friendliness = row["Friendliness"]
         if (intelligence < min_intelligence or intelligence > max_intelligence or
             friendliness < min_friendliness or friendliness > max_friendliness):
             violating_row_indices.append(i)
-        
-    header, *hound_row_strings = hound_rows[['Name', 'Type', 'Intelligence', 'Friendliness']].to_string().splitlines()
+
+    header, *hound_row_strings = hound_rows[["Name", "Type", "Intelligence", "Friendliness"]].to_string().splitlines()
     print(header)
     for i, hound_row_string in enumerate(hound_row_strings):
         if i in violating_row_indices:
             print(f"{Back.RED}{hound_row_string}{Back.RESET}")
         else:
             print(hound_row_string)
-    
+
     print("\nAs observed, only 1 row with 'Type' equal to 'Hound' falls outside "
           "either the intelligence or friendliness bounds. This record accounts for "
           f"the (27-1)/27 ~= {confidence_percent}% confidence level of this rule.\n")

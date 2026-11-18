@@ -1,15 +1,17 @@
-from os import path
 import desbordante as db
 import pandas as pd
 
-print("""This is a basic example explaining how to use Denial Constraint (DC) verification for checking hypotheses on data.
-A more advanced example of using Denial Constraints is located in examples/expert/data_cleaning_dc.py.
+print(
+    "This is a basic example explaining how to use Denial Constraint (DC) verification "
+    "for checking hypotheses on data.\n"
+    "A more advanced example of using Denial Constraints is located in "
+    "examples/expert/data_cleaning_dc.py.\n\n"
+    "DC verification is performed by the Rapidash algorithm:\n"
+    "Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia\n"
+    "Floratou. 2023. Rapidash: Efficient Constraint Discovery via Rapid Verification.\n"
+    "URL: https://arxiv.org/abs/2309.12436\n"
+)
 
-DC verification is performed by the Rapidash algorithm:
-Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia
-Floratou. 2023. Rapidash: Efficient Constraint Discovery via Rapid Verification.
-URL: https://arxiv.org/abs/2309.12436
-""")
 
 def print_table(table: str) -> None:
     data = pd.read_csv(table, header=None)
@@ -17,7 +19,8 @@ def print_table(table: str) -> None:
     headers = data.iloc[0]
     data = data[1:]
     data.columns = headers
-    print(data, end='\n\n')
+    print(data, end="\n\n")
+
 
 # The given denial constraint tells us that if two people live in the
 # same state, the one earning a lower salary must have a lower tax rate
@@ -54,7 +57,7 @@ Then we run the algorithm in order to see if the constraint holds.
 
 # Creating a verifier and loading data
 verifier = db.dc_verification.algorithms.Default()
-verifier.load_data(table=(TABLE_1, ',', True))
+verifier.load_data(table=(TABLE_1, ",", True))
 
 # Algorithm execution
 verifier.execute(denial_constraint=DC, do_collect_violations=DO_COLLECT_VIOLATIONS)
@@ -71,7 +74,7 @@ a little more interesting. Consider the previous table but with an additional re
 print_table(TABLE_2)
 
 verifier = db.dc_verification.algorithms.Default()
-verifier.load_data(table=(TABLE_2, ',', True))
+verifier.load_data(table=(TABLE_2, ",", True))
 verifier.execute(denial_constraint=DC, do_collect_violations=DO_COLLECT_VIOLATIONS)
 
 result: bool = verifier.dc_holds()
@@ -86,7 +89,7 @@ print(f"""Now we can see that the same DC we examined on the previous dataset do
 The issue is that for the last record (Texas, 5000, 0.05), there are people in Texas with a lower salary
 but a higher tax rate.
 
-Such pairs of records that contradict a DC are called violations. We can retrieve these 
+Such pairs of records that contradict a DC are called violations. We can retrieve these\x20
 violations from the algorithm object. In this case, the following pairs are the violations:
 {viol_str}, where each number is an index of a record in the table.
 """)

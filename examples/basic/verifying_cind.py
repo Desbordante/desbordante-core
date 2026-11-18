@@ -1,7 +1,8 @@
+import textwrap
+
 import desbordante
 import pandas as pd
 from tabulate import tabulate
-import textwrap
 
 GREEN = "\033[1;42m"
 RED = "\033[1;41m"
@@ -86,7 +87,7 @@ prints(
     "A Conditional Inclusion Dependency extends an IND by restricting the "
     "rule to R1 rows that match a pattern on the remaining columns of R1 "
     "(the conditional attributes). Pattern entries are either concrete "
-    "values or a wildcard (\"_\" or \"-\") meaning any value. An "
+    'values or a wildcard ("_" or "-") meaning any value. An '
     "all-wildcard pattern reduces a CIND to a plain IND."
 )
 print()
@@ -258,7 +259,7 @@ try:
     bad.load_data(tables=[en, de])
     bad.execute(lhs_indices=[0], rhs_indices=[0],
                 cind_condition_values=["18", "_"])
-except Exception as e:
+except RuntimeError as e:
     print(f"  caught: {e}")
 print()
 

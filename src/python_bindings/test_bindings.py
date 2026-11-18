@@ -1,13 +1,33 @@
 import pathlib
 import tempfile
 import unittest
-from collections import namedtuple
 from itertools import chain
+from typing import ClassVar, NamedTuple
 
 import desbordante as desb
 
-OptionContainer = namedtuple("OptionContainer", ['path', 'load_options', 'execute_options'])
-FailureCaseContainer = namedtuple("FailureCaseContainer", ['path', 'options'])
+
+class OptionContainer(NamedTuple):
+    path: str
+    load_options: dict[str, object]
+    execute_options: dict[str, object]
+
+
+class FailureCaseContainer(NamedTuple):
+    path: str
+    options: dict[str, object]
+
+
+CUSTOM_DOMAIN_BOUND = 7
+
+
+def distance_from_custom_domain(val):
+    return max(0, int(val[0]) - CUSTOM_DOMAIN_BOUND)
+
+
+CUSTOM_DOMAIN = desb.pac.domains.CustomDomain(
+    distance_from_custom_domain, f"[-\\infty, {CUSTOM_DOMAIN_BOUND}]"
+)
 
 TABLE_ONLY_CONTAINER = OptionContainer(
     "WDC_satellites.csv", {}, {}
@@ -142,8 +162,7 @@ ALGO_CORRECT_OPTIONS_INFO = [
             "TestLong.csv",
             {
                 "column_indices": [1],
-                "domain": desb.pac.domains.CustomDomain(
-                    lambda val: int(val[0]) < 7, "[-\\infty, 7]"),
+                "domain": CUSTOM_DOMAIN,
             },
             {
                 "max_epsilon": 7,
@@ -161,7 +180,7 @@ METRIC_VERIFIER_FAILURE_CASES = [
             "rhs_indices": [1, 2],
         }
     ),
-    
+
     FailureCaseContainer(
         "TestLong.csv",
         {
@@ -209,7 +228,7 @@ class TestPythonBindings(unittest.TestCase):
     ):
         testing_algo = algo()
         self._configure_and_verify_no_extras(
-                testing_algo,  {'table': (path, separator, has_header)} | options.load_options)
+                testing_algo,  {"table": (path, separator, has_header)} | options.load_options)
         testing_algo.load_data()
 
         self._configure_and_verify_no_extras(testing_algo, options.execute_options)
@@ -224,25 +243,39 @@ class TestPythonBindings(unittest.TestCase):
             for option in option_containers:
                 with self.subTest(msg=f"testing setting correct options for {algo.__name__}"):
                     self._test_correct_option_setting(
-                        algo, option.path, ",", True, option
+                        algo, option.path, ",", has_header=True, options=option
                     )
+
+    def test_custom_domain_distance(self):
+        for value, distance in [(6, 0), (7, 0), (8, 1), (20, 13)]:
+            with self.subTest(value=value):
+                self.assertEqual(distance_from_custom_domain([value]), distance)
+
+        with tempfile.TemporaryDirectory() as directory:
+            table = pathlib.Path(directory) / "values.csv"
+            table.write_text("value\n6\n7\n20\n")
+            verifier = desb.pac_verification.algorithms.DomainPACVerifier()
+            verifier.load_data(table=(str(table), ",", True), domain=CUSTOM_DOMAIN, column_indices=[0])
+            verifier.execute(min_delta=1.0)
+            self.assertEqual(verifier.get_pac().epsilon, 13.0)
 
     def test_metric_verifier_failure_cases(self):
         for load in METRIC_VERIFIER_FAILURE_CASES:
-            with self.subTest(msg=f"metric_verifier_load: {load}"):
-                with self.assertRaises(desb.ConfigurationError):
-                    check_metric_verifier_failure(load.path, load.options)
-                
+            with (
+                self.subTest(msg=f"metric_verifier_load: {load}"),
+                self.assertRaises(desb.ConfigurationError),
+            ):
+                check_metric_verifier_failure(load.path, load.options)
 
 
 class TestMaxFEM(unittest.TestCase):
     # Sequence: event 1 three times, event 2 twice (infrequent at minsup=3),
     # window_size=1 prevents composite episodes.
     # Expected: one maximal episode [[1]] with support 3.
-    _SEQUENCE = [[1], [2], [1], [2], [1]]
+    _SEQUENCE: ClassVar = [[1], [2], [1], [2], [1]]
     _MINSUP = 3
     _WINDOW_SIZE = 1
-    _EXPECTED = [([[1]], 3)]
+    _EXPECTED: ClassVar = [([[1]], 3)]
 
     def _run(self, sequence_arg):
         alg = desb.fem.MaxFEM()

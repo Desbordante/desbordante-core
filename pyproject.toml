@@ -148,3 +148,88 @@ extend-glob = [
 rela = "rela"
 [tool.typos.type.gdd.extend-words]
 rela = "rela"
+
+[tool.ruff]
+# line-length: 120 instead of default 88
+# Reason: Examples often have long f-strings with column names, URLs, table data
+# that are more readable on one line than split across multiple lines
+# Also allows for better formatted output in demonstration scripts
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN001", # Missing argument annotation: argument types are optional
+    "ANN003", # Missing **kwargs annotation: argument types are optional
+    "ANN201", # Missing public-function return annotation: return types are optional
+    "ANN202", # Missing private-function return annotation: return types are optional
+    "COM812", # Missing trailing comma: let the Ruff formatter manage trailing commas in notebooks
+    "COM819", # Prohibited trailing comma: allow commas that preserve multiline formatter layout
+    "D203",   # Blank line before class docstring: prefer no blank line (D211)
+    "D213",   # Multiline summary on the second line: prefer the first line (D212)
+    "FBT001", # Boolean-typed positional argument: helpers may accept Boolean flags positionally
+    "FIX002", # TODO comment: allow TODOs as reminders of unfinished work
+    "NPY002", # Legacy NumPy random API: preserve seeded example datasets and their demonstrated results
+    "PLR0915", # Too many statements: keep sequential explanations and print calls together in example functions
+    "PTH110", # os.path.exists(): os.path and pathlib are both acceptable for filesystem paths
+    "PTH118", # os.path.join(): os.path and pathlib are both acceptable for filesystem paths
+    "PTH123", # Builtin open(): both open(path) and Path.open() are acceptable
+    "TD002",  # Missing TODO author: TODO comments do not require individual ownership
+    "TD003",  # Missing TODO issue link: TODO comments do not require a tracking issue
+]
+
+exclude = [
+    ".git",
+    "build/",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Example scripts explain their usage through output; docstrings are not required on every definition
+"examples/**/*.py" = [
+    "D100", # Missing public-module docstring
+    "D101", # Missing public-class docstring
+    "D102", # Missing public-method docstring
+    "D103", # Missing public-function docstring
+    "D104", # Missing public-package docstring
+    "D107", # Missing __init__ docstring
+    "INP001", # Missing __init__.py: examples are standalone scripts, not importable packages
+    "RUF001", # Ambiguous Unicode in strings: explanatory output uses mathematical symbols and punctuation
+    "T201", # print(): console output is the purpose of these examples
+]
+"examples/**/*.ipynb" = [
+    "D103", # Missing function docstring: Markdown cells explain notebook helpers
+    "RUF001", # Ambiguous Unicode in strings: explanatory output uses mathematical symbols and punctuation
+    "T201", # print(): notebook output demonstrates algorithm results
+]
+# Pytest uses assert statements for regression checks
+"examples/test_examples/test_examples_pytest.py" = ["S101"]
+# These files intentionally use unittest-style assertions and internal binding options
+"src/python_bindings/test_bindings.py" = [
+    "D100", # Missing module docstring: test names and cases document the checks
+    "D101", # Missing class docstring: test classes group related checks
+    "D102", # Missing method docstring: test method names describe the checks
+    "D103", # Missing function docstring: helpers support the test cases in this module
+    "INP001", # Missing __init__.py: tests are discovered without making this directory a Python package
+    "PT009", # unittest assertion: preserve the TestCase assertion style
+    "PT027", # unittest assertRaises: preserve the TestCase exception-checking style
+    "SLF001", # Private-member access: these tests exercise internal binding option setters
+]
+"src/python_bindings/test_pybind_data_stats.py" = [
+    "D100", # Missing module docstring: test names and cases document the checks
+    "D101", # Missing class docstring: test classes group related checks
+    "D102", # Missing method docstring: test method names describe the checks
+    "D103", # Missing function docstring: helpers support the test cases in this module
+    "INP001", # Missing __init__.py: tests are discovered without making this directory a Python package
+    "PT009", # unittest assertion: preserve the TestCase assertion style
+]
+# Generated snapshots preserve exact captured output and snapshottest formatting
+"examples/test_examples/snapshots/*.py" = [
+    "E501", # Long lines: preserve captured output without wrapping
+    "W291", # Trailing whitespace: preserve captured output exactly
+    "Q000", # Inline-string quotes: snapshottest chooses the generated quote style
+    "Q001", # Multiline-string quotes: snapshottest chooses the generated quote style
+    "UP009", # UTF-8 encoding declaration: written by snapshottest
+    "UP010", # Unnecessary __future__ import for Python 3.10+: written by snapshottest
+    "I001", # Import sorting: preserve the generator's import layout
+]
