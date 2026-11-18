@@ -13,7 +13,7 @@ if [[ -n "$SOURCE_FILES" ]]; then
 
     set -euo pipefail
     echo "Clang-tidy"
-    clang-tidy --config-file=.clang-tidy -load=${TIDYEXTS_PATH} $SOURCE_FILES
+    clang-tidy --warnings-as-errors='*' --config-file=.clang-tidy -load=${TIDYEXTS_PATH} $SOURCE_FILES
     echo "Clang-format"
     clang-format --dry-run -Werror --style=file:.clang-format -i $SOURCE_FILES
 fi

@@ -125,7 +125,7 @@ std::string BindCaseCheck::ToSnakeCase(std::string const& in, bool caps) {
 
     for (std::string::size_type i = 0; i < in.length(); i++) {
         if (checker(in[i])) {
-            if (i != 0) out.push_back('_');
+            if (i != 0 && !caps) out.push_back('_');
             out.push_back(transformer(in[i]));
         } else
             out.push_back(in[i]);
