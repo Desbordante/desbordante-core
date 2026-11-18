@@ -2,6 +2,7 @@
 #include "checks/makeauto.h"
 #include "checks/prohibitat.h"
 #include "checks/pybind/bindcase.h"
+#include "checks/pybind/pythonrepr.h"
 #include "checks/whilenotfor.h"
 #include "clang-tidy/ClangTidyModule.h"
 
@@ -14,6 +15,7 @@ public:
         factories.registerCheck<ExplicitLambdaCapturesCheck>("desbordante.ExplicitLambdaCaptures");
         factories.registerCheck<ProhibitAtCheck>("desbordante.ProhibitAt");
         factories.registerCheck<BindCaseCheck>("desbordante.pybind.BindCase");
+        factories.registerCheck<PythonReprCheck>("desbordante.pybind.Repr");
     }
 };
 
