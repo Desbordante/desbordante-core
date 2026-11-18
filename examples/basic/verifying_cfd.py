@@ -16,7 +16,7 @@ class Colors:
     DEFAULT_FG = '\033[1;37m'
     RESET = '\033[0m'
 
-CFD = desbordante.cfd.CFD
+CFD = desbordante.cfd.algorithms.CFD
 
 def explain_cfd_concept():
     """Explain what CFDs are with a real-world example."""
