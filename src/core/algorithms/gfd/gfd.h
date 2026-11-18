@@ -21,7 +21,7 @@ public:
     using Literal = std::pair<Token, Token>;
 
 private:
-    graph_t pattern_;
+    gfd::graph_t pattern_;
     std::vector<Literal> premises_;
     std::vector<Literal> conclusion_;
 
@@ -34,7 +34,7 @@ public:
           premises_(std::forward<T2>(premises)),
           conclusion_(std::forward<T2>(conclusion)) {}
 
-    graph_t const& GetPattern() const noexcept {
+    gfd::graph_t const& GetPattern() const noexcept {
         return pattern_;
     }
 
@@ -46,7 +46,7 @@ public:
         return conclusion_;
     }
 
-    void SetPattern(graph_t const& pattern) {
+    void SetPattern(gfd::graph_t const& pattern) {
         pattern_ = pattern;
     }
 

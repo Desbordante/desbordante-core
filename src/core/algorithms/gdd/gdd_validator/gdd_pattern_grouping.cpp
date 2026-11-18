@@ -4,21 +4,22 @@ namespace algos {
 
 namespace {
 
-bool SamePattern(model::gdd::graph_t const& a, model::gdd::graph_t const& b) {
+using model::gdd::GraphTypes;
+
+bool SamePattern(GraphTypes::Graph const& a, GraphTypes::Graph const& b) {
     if (boost::num_vertices(a) != boost::num_vertices(b) ||
         boost::num_edges(a) != boost::num_edges(b)) {
         return false;
     }
 
-    using model::gdd::vertex_t;
-    for (vertex_t const v : boost::make_iterator_range(boost::vertices(a))) {
+    for (GraphTypes::Vertex const v : boost::make_iterator_range(boost::vertices(a))) {
         if (a[v].id != b[v].id || a[v].label != b[v].label) {
             return false;
         }
     }
 
-    auto edges = [](model::gdd::graph_t const& g) {
-        std::vector<std::tuple<vertex_t, vertex_t, std::string_view>> result;
+    auto edges = [](GraphTypes::Graph const& g) {
+        std::vector<std::tuple<GraphTypes::Vertex, GraphTypes::Vertex, std::string_view>> result;
         result.reserve(boost::num_edges(g));
         for (auto const e : boost::make_iterator_range(boost::edges(g))) {
             result.emplace_back(boost::source(e, g), boost::target(e, g), g[e].label);

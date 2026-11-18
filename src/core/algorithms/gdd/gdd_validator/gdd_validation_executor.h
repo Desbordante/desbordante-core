@@ -10,8 +10,7 @@ namespace algos {
 
 struct GddValidator::ValidationExecutor {
     virtual void Execute(GddValidator& validator, PatternGrouping const& grouping,
-                         std::size_t first_group, std::size_t last_group,
-                         model::gdd::graph_t const& graph,
+                         std::size_t first_group, std::size_t last_group, Graph const& graph,
                          std::span<GddHoldsResult> output) const = 0;
 
     virtual ~ValidationExecutor() = default;
@@ -19,8 +18,7 @@ struct GddValidator::ValidationExecutor {
 
 struct GddValidator::SequentialValidationExecutor : ValidationExecutor {
     virtual void Execute(GddValidator& validator, PatternGrouping const& grouping,
-                         std::size_t first_group, std::size_t last_group,
-                         model::gdd::graph_t const& graph,
+                         std::size_t first_group, std::size_t last_group, Graph const& graph,
                          std::span<GddHoldsResult> output) const final;
 };
 
@@ -37,8 +35,7 @@ public:
     }
 
     virtual void Execute(GddValidator& validator, PatternGrouping const& grouping,
-                         std::size_t first_group, std::size_t last_group,
-                         model::gdd::graph_t const& graph,
+                         std::size_t first_group, std::size_t last_group, Graph const& graph,
                          std::span<GddHoldsResult> output) const final;
 };
 

@@ -7,19 +7,19 @@ namespace algos {
 
 namespace egfd_validator {
 
-using CPI = std::map<std::pair<model::vertex_t, model::vertex_t>,
-                     std::map<model::vertex_t, std::set<model::vertex_t>>>;
+using CPI = std::map<std::pair<model::gfd::vertex_t, model::gfd::vertex_t>,
+                     std::map<model::gfd::vertex_t, std::set<model::gfd::vertex_t>>>;
 
 }  // namespace egfd_validator
 
 class EGfdValidator : public GfdHandler {
 public:
-    std::vector<model::Gfd> GenerateSatisfiedGfds(model::graph_t const& graph,
+    std::vector<model::Gfd> GenerateSatisfiedGfds(model::gfd::graph_t const& graph,
                                                   std::vector<model::Gfd> const& gfds);
 
     EGfdValidator() : GfdHandler() {};
 
-    EGfdValidator(model::graph_t graph_, std::vector<model::Gfd> gfds_)
+    EGfdValidator(model::gfd::graph_t graph_, std::vector<model::Gfd> gfds_)
         : GfdHandler(graph_, gfds_) {}
 };
 

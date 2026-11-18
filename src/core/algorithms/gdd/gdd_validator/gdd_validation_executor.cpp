@@ -7,8 +7,7 @@ namespace algos {
 void GddValidator::SequentialValidationExecutor::Execute(GddValidator& validator,
                                                          PatternGrouping const& grouping,
                                                          std::size_t first_group,
-                                                         std::size_t last_group,
-                                                         model::gdd::graph_t const& graph,
+                                                         std::size_t last_group, Graph const& graph,
                                                          std::span<GddHoldsResult> output) const {
     assert(last_group <= grouping.GroupCount());
     assert(grouping.gdds.size() == output.size());
@@ -25,8 +24,7 @@ void GddValidator::SequentialValidationExecutor::Execute(GddValidator& validator
 void GddValidator::ParallelValidationExecutor::Execute(GddValidator& validator,
                                                        PatternGrouping const& grouping,
                                                        std::size_t first_group,
-                                                       std::size_t last_group,
-                                                       model::gdd::graph_t const& graph,
+                                                       std::size_t last_group, Graph const& graph,
                                                        std::span<GddHoldsResult> output) const {
     assert(last_group <= grouping.GroupCount());
     assert(last_group - first_group >= threads_);

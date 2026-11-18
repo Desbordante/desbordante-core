@@ -25,7 +25,7 @@ namespace algos {
 namespace {
 
 // A mapping from a query to a subgraph of a larger graph
-using Embedding = std::unordered_map<model::vertex_t, model::vertex_t>;
+using Embedding = std::unordered_map<model::gfd::vertex_t, model::gfd::vertex_t>;
 // A set of mappings
 using Embeddings = std::vector<Embedding>;
 
@@ -47,7 +47,7 @@ using Info = std::unordered_map<std::string, std::set<std::string>>;
 // A data structure that has as its key a pattern vertex
 // and as its value a set of graph vertices
 // to which the vertex can be mapped
-using VertexImage = std::unordered_map<model::vertex_t, std::set<model::vertex_t>>;
+using VertexImage = std::unordered_map<model::gfd::vertex_t, std::set<model::gfd::vertex_t>>;
 
 // A data structure that returns by literal a set of
 // indices of the embeddings on which the literal is satisfied
@@ -100,18 +100,19 @@ std::size_t GetMinSize(VertexImage const& vertex_map, std::size_t fallback_size)
 }
 
 template <typename MapType, typename EmbeddingType>
-void PopulateVertexMap(MapType& vertex_map, model::graph_t const& pattern,
+void PopulateVertexMap(MapType& vertex_map, model::gfd::graph_t const& pattern,
                        EmbeddingType const& embedding) {
-    BGL_FORALL_VERTICES_T(v, pattern, model::graph_t) {
-        auto [it, emplaced] = vertex_map.try_emplace(v, std::set<model::vertex_t>{embedding.at(v)});
+    BGL_FORALL_VERTICES_T(v, pattern, model::gfd::graph_t) {
+        auto [it, emplaced] =
+                vertex_map.try_emplace(v, std::set<model::gfd::vertex_t>{embedding.at(v)});
         if (!emplaced) {
             it->second.insert(embedding.at(v));
         }
     }
 }
 
-std::size_t Support(model::graph_t const& graph, Embeddings const& embeddings,
-                    model::graph_t const& pattern) {
+std::size_t Support(model::gfd::graph_t const& graph, Embeddings const& embeddings,
+                    model::gfd::graph_t const& pattern) {
     VertexImage vertex_map;
     for (Embedding const& embedding : embeddings) {
         PopulateVertexMap(vertex_map, pattern, embedding);
@@ -130,8 +131,8 @@ bool IsForbidden(Rules const& forbidden_rules, std::vector<model::Gfd::Literal> 
     return std::ranges::any_of(forbidden_rules, is_forbidden);
 }
 
-void ChangeLiterals(std::vector<model::Gfd::Literal>& literals, model::graph_t const& pattern,
-                    model::graph_t const& existed, Embedding const& iso) {
+void ChangeLiterals(std::vector<model::Gfd::Literal>& literals, model::gfd::graph_t const& pattern,
+                    model::gfd::graph_t const& existed, Embedding const& iso) {
     for (auto& [fstToken, sndToken] : literals) {
         if (fstToken.first != -1) {
             auto vertex = boost::vertex(fstToken.first, pattern);
@@ -144,9 +145,9 @@ void ChangeLiterals(std::vector<model::Gfd::Literal>& literals, model::graph_t c
     }
 }
 
-void UpdateRules(std::size_t index, model::graph_t const& existed, Embedding const& iso,
-                 model::graph_t const& new_pattern, std::vector<Rules>& new_forbidden_rules_set,
-                 Rules const& forbidden_rules) {
+void UpdateRules(std::size_t index, model::gfd::graph_t const& existed, Embedding const& iso,
+                 model::gfd::graph_t const& new_pattern,
+                 std::vector<Rules>& new_forbidden_rules_set, Rules const& forbidden_rules) {
     Rules new_forbidden_rules(forbidden_rules);
     Rules& rules = new_forbidden_rules_set.at(index);
     for (auto& forbidden_rule : new_forbidden_rules) {
@@ -166,30 +167,32 @@ void UpdateRules(std::size_t index, model::graph_t const& existed, Embedding con
     }
 }
 
-void UpdateExisted(bool& isoExists, model::graph_t const& new_pattern,
-                   std::vector<model::graph_t> const& new_patterns,
+void UpdateExisted(bool& isoExists, model::gfd::graph_t const& new_pattern,
+                   std::vector<model::gfd::graph_t> const& new_patterns,
                    std::vector<Rules>& new_forbidden_rules_set, Rules const& forbidden_rules) {
     std::size_t index = 0;
     for (auto const& existed : new_patterns) {
-        auto vcompare = [&new_pattern, &existed](model::vertex_t const& fr,
-                                                 model::vertex_t const& to) {
+        auto vcompare = [&new_pattern, &existed](model::gfd::vertex_t const& fr,
+                                                 model::gfd::vertex_t const& to) {
             return new_pattern[fr].attributes.at("label") == existed[to].attributes.at("label");
         };
-        auto ecompare = [&new_pattern, &existed](model::edge_t const& fr, model::edge_t const& to) {
+        auto ecompare = [&new_pattern, &existed](model::gfd::edge_t const& fr,
+                                                 model::gfd::edge_t const& to) {
             return new_pattern[fr].label == existed[to].label;
         };
         Embedding iso;
         auto callback = [&new_pattern, &iso, &isoExists](auto f, auto) {
-            BGL_FORALL_VERTICES_T(u, new_pattern, model::graph_t) {
+            BGL_FORALL_VERTICES_T(u, new_pattern, model::gfd::graph_t) {
                 iso.emplace(u, boost::get(f, u));
             }
             isoExists = true;
             return false;
         };
-        using property_map_type = boost::property_map<model::graph_t, boost::vertex_index_t>::type;
+        using property_map_type =
+                boost::property_map<model::gfd::graph_t, boost::vertex_index_t>::type;
         property_map_type new_index_map = boost::get(boost::vertex_index, new_pattern);
         property_map_type existed_index_map = boost::get(boost::vertex_index, existed);
-        std::vector<model::vertex_t> new_vertex_order = vertex_order_by_mult(new_pattern);
+        std::vector<model::gfd::vertex_t> new_vertex_order = vertex_order_by_mult(new_pattern);
         boost::vf2_subgraph_iso(new_pattern, existed, callback, new_index_map, existed_index_map,
                                 new_vertex_order, ecompare, vcompare);
         if (!isoExists) {
@@ -202,12 +205,12 @@ void UpdateExisted(bool& isoExists, model::graph_t const& new_pattern,
 }
 
 template <typename ModifyPattern, typename EmbeddingTransform>
-void TryAddPattern(model::graph_t const& base_pattern, Embeddings const& embeddings,
-                   Rules const& forbidden_rules, std::vector<model::graph_t>& new_patterns,
+void TryAddPattern(model::gfd::graph_t const& base_pattern, Embeddings const& embeddings,
+                   Rules const& forbidden_rules, std::vector<model::gfd::graph_t>& new_patterns,
                    std::vector<Embeddings>& new_embeddings_set,
                    std::vector<Rules>& new_forbidden_rules_set, ModifyPattern&& modify_pattern,
                    EmbeddingTransform&& embedding_transform) {
-    model::graph_t new_pattern;
+    model::gfd::graph_t new_pattern;
     boost::copy_graph(base_pattern, new_pattern);
 
     modify_pattern(new_pattern);
@@ -230,9 +233,9 @@ void TryAddPattern(model::graph_t const& base_pattern, Embeddings const& embeddi
     }
 }
 
-void AddEdge(std::set<std::string> const& edge_labels, model::graph_t const& graph,
-             model::graph_t const& pattern, Embeddings const& embeddings,
-             Rules const& forbidden_rules, std::vector<model::graph_t>& new_patterns,
+void AddEdge(std::set<std::string> const& edge_labels, model::gfd::graph_t const& graph,
+             model::gfd::graph_t const& pattern, Embeddings const& embeddings,
+             Rules const& forbidden_rules, std::vector<model::gfd::graph_t>& new_patterns,
              std::vector<Embeddings>& new_embeddings_set,
              std::vector<Rules>& new_forbidden_rules_set) {
     std::size_t num_vertices = boost::num_vertices(pattern);
@@ -248,10 +251,10 @@ void AddEdge(std::set<std::string> const& edge_labels, model::graph_t const& gra
         std::vector<std::size_t> element = {j, j};
         pairs.push_back(std::move(element));
     }
-    model::vertex_t origin, finish;
+    model::gfd::vertex_t origin, finish;
     auto exists_edge = [&pattern](auto const& pair) {
-        model::vertex_t u = boost::vertex(pair[0], pattern);
-        model::vertex_t v = boost::vertex(pair[1], pattern);
+        model::gfd::vertex_t u = boost::vertex(pair[0], pattern);
+        model::gfd::vertex_t v = boost::vertex(pair[1], pattern);
         return !boost::edge(u, v, pattern).second;
     };
     auto it = std::ranges::find_if(pairs, exists_edge);
@@ -266,7 +269,7 @@ void AddEdge(std::set<std::string> const& edge_labels, model::graph_t const& gra
     };
 
     for (auto& label : edge_labels) {
-        auto modify_pattern = [&origin, &finish, &label](model::graph_t& new_pattern) {
+        auto modify_pattern = [&origin, &finish, &label](model::gfd::graph_t& new_pattern) {
             boost::add_edge(origin, finish, {std::move(label)}, new_pattern);
         };
         TryAddPattern(pattern, embeddings, forbidden_rules, new_patterns, new_embeddings_set,
@@ -275,27 +278,28 @@ void AddEdge(std::set<std::string> const& edge_labels, model::graph_t const& gra
 }
 
 void AddVertex(std::set<std::string> const& vertex_labels, std::set<std::string> const& edge_labels,
-               model::graph_t const& graph, model::graph_t const& pattern,
+               model::gfd::graph_t const& graph, model::gfd::graph_t const& pattern,
                Embeddings const& embeddings, Rules const& forbidden_rules,
-               std::vector<model::graph_t>& new_patterns,
+               std::vector<model::gfd::graph_t>& new_patterns,
                std::vector<Embeddings>& new_embeddings_set,
                std::vector<Rules>& new_forbidden_rules_set) {
     std::size_t num_pat_vertices = boost::num_vertices(pattern);
     for (auto const& edge_label : edge_labels) {
         for (auto const& vertex_label : vertex_labels) {
             for (std::size_t j = 0; j < num_pat_vertices; ++j) {
-                model::vertex_t u = boost::vertex(j, pattern);
-                model::vertex_t curr_vertex;
+                model::gfd::vertex_t u = boost::vertex(j, pattern);
+                model::gfd::vertex_t curr_vertex;
 
                 auto embedding_transform = [&u, &graph, &pattern, &vertex_label, &edge_label,
                                             &curr_vertex](Embedding const& embedding) {
                     Embeddings res;
-                    model::vertex_t v = embedding.at(u);
-                    boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it,
+                    model::gfd::vertex_t v = embedding.at(u);
+                    boost::graph_traits<model::gfd::graph_t>::adjacency_iterator adjacency_it,
                             adjacency_end;
                     boost::tie(adjacency_it, adjacency_end) = boost::adjacent_vertices(v, graph);
                     for (; adjacency_it != adjacency_end; ++adjacency_it) {
-                        boost::graph_traits<model::graph_t>::adjacency_iterator pat_adjacency_it,
+                        boost::graph_traits<model::gfd::graph_t>::adjacency_iterator
+                                pat_adjacency_it,
                                 pat_adjacency_end;
                         boost::tie(pat_adjacency_it, pat_adjacency_end) =
                                 boost::adjacent_vertices(u, pattern);
@@ -318,11 +322,11 @@ void AddVertex(std::set<std::string> const& vertex_labels, std::set<std::string>
                 };
 
                 auto modify_pattern = [&u, &num_pat_vertices, &vertex_label, &edge_label,
-                                       &curr_vertex](model::graph_t& new_pattern) {
+                                       &curr_vertex](model::gfd::graph_t& new_pattern) {
                     std::unordered_map<std::string, std::string> attributes = {
                             {"label", vertex_label}};
-                    model::Vertex new_v =
-                            model::Vertex{static_cast<int>(num_pat_vertices), attributes};
+                    model::gfd::Vertex new_v =
+                            model::gfd::Vertex{static_cast<int>(num_pat_vertices), attributes};
                     curr_vertex = boost::add_vertex(new_v, new_pattern);
                     boost::add_edge(u, curr_vertex, {edge_label}, new_pattern);
                 };
@@ -407,13 +411,13 @@ void GfdMiner::ExecuteInternal() {
 }
 
 bool GfdMiner::CheckToken(model::Gfd::Token const& token, std::string& tok,
-                          model::graph_t const& pattern, Embedding const& embedding) {
+                          model::gfd::graph_t const& pattern, Embedding const& embedding) {
     if (token.first == -1) {
         tok = token.second;
         return true;
     } else {
-        model::vertex_t u = boost::vertex(token.first, pattern);
-        model::vertex_t v = embedding.at(u);
+        model::gfd::vertex_t u = boost::vertex(token.first, pattern);
+        model::gfd::vertex_t v = embedding.at(u);
         std::unordered_map<std::string, std::string> const& attrs = graph_[v].attributes;
         auto it = attrs.find(token.second);
         if (it != attrs.end()) {
@@ -424,7 +428,7 @@ bool GfdMiner::CheckToken(model::Gfd::Token const& token, std::string& tok,
     }
 }
 
-void GfdMiner::AddCompacted(std::vector<SingleRule>& rules, model::graph_t& pattern,
+void GfdMiner::AddCompacted(std::vector<SingleRule>& rules, model::gfd::graph_t& pattern,
                             Rules& forbidden_rules) {
     if (rules.empty()) return;
     std::ranges::sort(rules);
@@ -445,7 +449,7 @@ void GfdMiner::AddCompacted(std::vector<SingleRule>& rules, model::graph_t& patt
 }
 
 bool GfdMiner::CheckFrequency(std::set<std::size_t> const& indices, Embeddings const& embeddings,
-                              model::graph_t const& pattern) {
+                              model::gfd::graph_t const& pattern) {
     VertexImage vertex_map;
     for (std::size_t index : indices) {
         PopulateVertexMap(vertex_map, pattern, embeddings[index]);
@@ -455,7 +459,7 @@ bool GfdMiner::CheckFrequency(std::set<std::size_t> const& indices, Embeddings c
 }
 
 bool GfdMiner::Validate(std::vector<model::Gfd::Literal> const& lhs, model::Gfd::Literal const& rhs,
-                        model::graph_t& pattern, Embeddings const& embeddings,
+                        model::gfd::graph_t& pattern, Embeddings const& embeddings,
                         SatisfiedEmbeddings const& satisfied_embeddings) {
     std::set<std::size_t> lhs_embeddings;
     if (lhs.empty()) {
@@ -491,7 +495,7 @@ bool GfdMiner::CheckFrequency(std::vector<model::Gfd::Literal> const& subset,
 }
 
 std::vector<SingleRule> GfdMiner::GenerateRules(std::vector<model::Gfd::Literal> const& literals,
-                                                model::graph_t& pattern,
+                                                model::gfd::graph_t& pattern,
                                                 Embeddings const& embeddings,
                                                 Rules const& forbidden_rules,
                                                 SatisfiedEmbeddings const& satisfied_embeddings) {
@@ -550,7 +554,7 @@ std::vector<SingleRule> GfdMiner::GenerateRules(std::vector<model::Gfd::Literal>
 }
 
 bool GfdMiner::LiteralSatisfied(model::Gfd::Literal const& l, Embedding const& embedding,
-                                model::graph_t const& pattern) {
+                                model::gfd::graph_t const& pattern) {
     auto const& [fst_token, snd_token] = l;
     std::string fst, snd;
     bool first_res = CheckToken(fst_token, fst, pattern, embedding);
@@ -559,7 +563,7 @@ bool GfdMiner::LiteralSatisfied(model::Gfd::Literal const& l, Embedding const& e
 }
 
 std::vector<model::Gfd::Literal> GfdMiner::GenerateLiterals(
-        model::graph_t const& pattern, std::unordered_map<std::string, Info> const& attrs_info,
+        model::gfd::graph_t const& pattern, std::unordered_map<std::string, Info> const& attrs_info,
         Embeddings const& embeddings, SatisfiedEmbeddings& satisfied_embeddings_set) {
     std::vector<std::size_t> indices(boost::num_vertices(pattern));
     std::iota(indices.begin(), indices.end(), 0);
@@ -630,7 +634,7 @@ std::vector<model::Gfd::Literal> GfdMiner::GenerateLiterals(
     return result;
 }
 
-void GfdMiner::HorizontalSpawn(std::vector<model::graph_t> const& patterns,
+void GfdMiner::HorizontalSpawn(std::vector<model::gfd::graph_t> const& patterns,
                                std::vector<Embeddings> const& embeddings_set,
                                std::vector<Rules>& forbidden_rules_set,
                                std::unordered_map<std::string, Info> const& attrs_info) {
@@ -650,7 +654,7 @@ void GfdMiner::HorizontalSpawn(std::vector<model::graph_t> const& patterns,
     }
 }
 
-void GfdMiner::FilterSupp(std::vector<model::graph_t>& patterns,
+void GfdMiner::FilterSupp(std::vector<model::gfd::graph_t>& patterns,
                           std::vector<Embeddings>& embeddings_set) {
     std::vector<std::size_t> del_indices = {};
     for (std::size_t i = 0; i < patterns.size(); ++i) {
@@ -669,12 +673,12 @@ void GfdMiner::FilterSupp(std::vector<model::graph_t>& patterns,
 }
 
 void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::string>& edge_labels,
-                          std::vector<model::graph_t>& patterns,
+                          std::vector<model::gfd::graph_t>& patterns,
                           std::vector<Embeddings>& embeddings_set,
                           std::vector<Rules>& forbidden_rules_set,
                           std::unordered_map<std::string, Info>& attrs_info) {
     std::unordered_map<std::string, std::size_t> label_to_index;
-    BGL_FORALL_VERTICES_T(v, graph_, model::graph_t) {
+    BGL_FORALL_VERTICES_T(v, graph_, model::gfd::graph_t) {
         std::unordered_map<std::string, std::string> graph_attributes = graph_[v].attributes;
         std::string const& label = graph_attributes.at("label");
         vertex_labels.insert(label);
@@ -687,10 +691,10 @@ void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::st
             Embedding embedding{{boost::vertex(0, patterns.at(index)), v}};
             embeddings_set.at(index).push_back(std::move(embedding));
         } else {
-            model::graph_t pattern = {};
+            model::gfd::graph_t pattern = {};
             std::unordered_map<std::string, std::string> attributes = {{"label", label}};
 
-            boost::add_vertex(model::Vertex{0, attributes}, pattern);
+            boost::add_vertex(model::gfd::Vertex{0, attributes}, pattern);
             patterns.push_back(pattern);
 
             Embedding embedding{{boost::vertex(0, pattern), v}};
@@ -715,7 +719,7 @@ void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::st
         }
     }
 
-    BGL_FORALL_EDGES_T(e, graph_, model::graph_t) {
+    BGL_FORALL_EDGES_T(e, graph_, model::gfd::graph_t) {
         edge_labels.insert(graph_[e].label);
     }
 }
@@ -726,7 +730,7 @@ void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::st
 void GfdMiner::MineGfds() {
     std::set<std::string> vertex_labels;
     std::set<std::string> edge_labels;
-    std::vector<model::graph_t> patterns;
+    std::vector<model::gfd::graph_t> patterns;
     std::vector<Embeddings> embeddings_set;
     std::vector<Rules> forbidden_rules_set;
     std::unordered_map<std::string, Info> attrs_info;
@@ -738,12 +742,12 @@ void GfdMiner::MineGfds() {
     while (!patterns.empty()) {
         HorizontalSpawn(patterns, embeddings_set, forbidden_rules_set, attrs_info);
 
-        std::vector<model::graph_t> new_patterns;
+        std::vector<model::gfd::graph_t> new_patterns;
         std::vector<Embeddings> new_embeddings_set;
         std::vector<Rules> new_forbidden_rules_set;
 
         for (std::size_t i = 0; i < patterns.size(); ++i) {
-            model::graph_t pattern = patterns.at(i);
+            model::gfd::graph_t pattern = patterns.at(i);
             Embeddings embeddings = embeddings_set.at(i);
             Rules forbidden_rules = forbidden_rules_set.at(i);
 

@@ -335,9 +335,11 @@ desbordante_add_test(
     SRCS
     test_gdd_validator.cpp
     test_gdd_constraint_satisfaction.cpp
+    test_gdd_graph_matcher.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::gdd
     ${DESBORDANTE_PREFIX}::gdd::validator
+    ${DESBORDANTE_PREFIX}::gdd::graph_matcher
     spdlog::spdlog_header_only
     gmock
     Boost::headers

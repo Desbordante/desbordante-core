@@ -152,7 +152,7 @@ void BindGddVerification(pybind11::module_& main_module) {
     using model::Gdd;
     using model::GddCounterexample;
     using model::GddCounterexampleVertex;
-    using model::gdd::graph_t;
+    using model::gdd::GraphTypes;
     using model::gdd::detail::AttrTag;
     using model::gdd::detail::CmpOp;
     using model::gdd::detail::ConstValue;
@@ -486,7 +486,7 @@ void BindGddVerification(pybind11::module_& main_module) {
             .def(py::init([](std::string const& pattern_dot, std::vector<DistanceConstraint> lhs,
                              std::vector<DistanceConstraint> rhs) {
                      std::stringstream ss(pattern_dot);
-                     graph_t pattern = parser::graph_parser::gdd::ReadGraph(ss);
+                     GraphTypes::Graph pattern = parser::graph_parser::gdd::ReadGraph(ss);
                      return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
                  }),
                  "pattern_dot"_a, "lhs"_a, "rhs"_a)
@@ -506,7 +506,7 @@ void BindGddVerification(pybind11::module_& main_module) {
             [](std::string const& pattern_dot, std::vector<DistanceConstraint> lhs,
                std::vector<DistanceConstraint> rhs) {
                 std::stringstream ss(pattern_dot);
-                graph_t pattern = parser::graph_parser::gdd::ReadGraph(ss);
+                GraphTypes::Graph pattern = parser::graph_parser::gdd::ReadGraph(ss);
                 return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
             },
             "pattern_dot"_a, "lhs"_a, "rhs"_a);
@@ -515,7 +515,7 @@ void BindGddVerification(pybind11::module_& main_module) {
             "GddFromDotFile",
             [](std::filesystem::path const& pattern_dot_file, std::vector<DistanceConstraint> lhs,
                std::vector<DistanceConstraint> rhs) {
-                graph_t pattern = parser::graph_parser::gdd::ReadGraph(pattern_dot_file);
+                GraphTypes::Graph pattern = parser::graph_parser::gdd::ReadGraph(pattern_dot_file);
                 return Gdd(std::move(pattern), std::move(lhs), std::move(rhs));
             },
             "pattern_dot_file"_a, "lhs"_a, "rhs"_a);
