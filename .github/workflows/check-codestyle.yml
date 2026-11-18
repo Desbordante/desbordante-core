@@ -70,7 +70,7 @@ jobs:
         with:
           # Using Clang for compile commands generation to avoid parsing issues
           # https://clangd.llvm.org/design/compile-commands#subtle-parsing-problems
-          apt_packages: python3-dev,libboost1.88-all-dev,clang
+          apt_packages: python3-dev,libboost1.88-all-dev,clang,llvm-dev,libclang-dev
           cmake_command: cmake --preset compilecommands -DCMAKE_CXX_COMPILER=clang++ -G "Unix Makefiles"
           build_dir: .
           config_file: '.clang-tidy'
