@@ -67,8 +67,7 @@
                 "DESBORDANTE_BUILD_TIDYEXTS": "ON",
                 "DESBORDANTE_BINDINGS": "ON",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-                "DESBORDANTE_BUILD_BENCHMARKS": "ON",
-                "DESBORDANTE_COPY_COMPILE_COMMANDS": "ON"
+                "DESBORDANTE_BUILD_BENCHMARKS": "ON"
             }
         }
     ],

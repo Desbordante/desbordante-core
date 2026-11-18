@@ -72,7 +72,7 @@ jobs:
           # https://clangd.llvm.org/design/compile-commands#subtle-parsing-problems
           apt_packages: python3-dev,libboost1.88-all-dev,clang,llvm-dev,libclang-dev
           cmake_command: cmake --preset compilecommands -DCMAKE_CXX_COMPILER=clang++ -G "Unix Makefiles"
-          build_dir: .
+          build_dir: build/compilecommands
           config_file: '.clang-tidy'
           include: "*.c,*.cc,*.cpp,*.cxx"
           split_workflow: true
