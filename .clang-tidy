@@ -1,4 +1,4 @@
-Checks: '-readability-identifier-length,-misc-no-recursion,readability-identifier-naming'
+Checks: '-readability-identifier-length,-misc-no-recursion,readability-identifier-naming,desbordante.*,modernize-avoid-c-style-cast,cert-dcl50-cpp'
 CheckOptions:
   - { key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic, value: '1' }
   - { key: readability-identifier-naming.NamespaceCase, value: lower_case }

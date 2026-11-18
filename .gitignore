@@ -19,3 +19,5 @@ datasets/*.zip
 
 .env
 __pycache__
+
+/compile_commands.json
