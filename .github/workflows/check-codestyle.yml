@@ -71,7 +71,7 @@ jobs:
           # Using Clang for compile commands generation to avoid parsing issues
           # https://clangd.llvm.org/design/compile-commands#subtle-parsing-problems
           apt_packages: python3-dev,libboost1.88-all-dev,clang
-          cmake_command: cmake --preset compilecommands
+          cmake_command: cmake --preset compilecommands -DCMAKE_CXX_COMPILER=clang++ -G "Unix Makefiles"
           build_dir: .
           config_file: '.clang-tidy'
           include: "*.c,*.cc,*.cpp,*.cxx"
