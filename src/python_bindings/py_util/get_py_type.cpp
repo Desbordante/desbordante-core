@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <typeinfo>
+#include <unicodeobject.h>
 #include <unordered_map>
 #include <vector>
 
@@ -24,6 +25,7 @@
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
@@ -108,6 +110,7 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<algos::hymd::LevelDefinition, &PyUnicode_Type>,
             kPyTypePair<algos::od::Ordering, &PyUnicode_Type>,
             kPyTypePair<algos::des::DifferentialStrategy, &PyUnicode_Type>,
+            kPyTypePair<algos::pac_verifier::PACValidationMode, &PyUnicode_Type>,
             kPyTypePair<std::vector<unsigned int>, &PyList_Type, &PyLong_Type>,
             {typeid(algos::hymd::HyMD::ColumnMatches),
              []() {
