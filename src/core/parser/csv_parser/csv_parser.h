@@ -1,12 +1,8 @@
-//
-// Created by Ilya Vologin
-// https://github.com/cupertank
-//
-
 #pragma once
 
 #include <filesystem>
-#include <fstream>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,58 +12,46 @@ struct CSVConfig {
     std::filesystem::path path;
     char separator;
     bool has_header;
+
+    static CSVConfig GetDefaultFor(std::filesystem::path const& path) {
+        CSVConfig cfg = {
+                .path = path,
+                .separator = ',',
+                .has_header = true,
+        };
+
+        return cfg;
+    }
 };
 
 class CSVParser : public model::IDatasetStream {
 private:
-    std::ifstream source_;
+    class Reader;
+
+    std::filesystem::path path_;
     char separator_;
-    char escape_symbol_ = '\\';
-    char quote_ = '\"';
     bool has_header_;
-    bool has_next_;
-    std::string next_line_;
-    int number_of_columns_;
+    std::unique_ptr<Reader> reader_;
+    mutable std::optional<std::vector<std::string>> next_row_;
     std::vector<std::string> column_names_;
     std::string relation_name_;
-    void GetNext();
-    void PeekNext();
-    void GetLine(unsigned long long const line_index);
-    std::vector<std::string> ParseString(std::string const& s) const;
-    void GetNextIfHas();
-    void SkipLine();
 
-    inline static std::string& Rtrim(std::string& s);
+    void InitializeReader();
 
 public:
-    CSVParser() = default;
+    CSVParser() = delete;
     explicit CSVParser(std::filesystem::path const& path);
     CSVParser(std::filesystem::path const& path, char separator, bool has_header);
     explicit CSVParser(CSVConfig const& csv_config);
+    CSVParser(CSVParser&&) noexcept;
+    CSVParser& operator=(CSVParser&&) noexcept;
+    ~CSVParser() override;
 
     std::vector<std::string> GetNextRow() override;
-    std::string GetUnparsedLine(unsigned long long const line_index);
-    std::vector<std::string> ParseLine(unsigned long long const line_index);
-
-    bool HasNextRow() const override {
-        return has_next_;
-    }
-
-    char GetSeparator() const {
-        return separator_;
-    }
-
-    size_t GetNumberOfColumns() const override {
-        return number_of_columns_;
-    }
-
-    std::string GetColumnName(size_t index) const override {
-        return column_names_[index];
-    }
-
-    std::string GetRelationName() const override {
-        return relation_name_;
-    }
-
+    bool HasNextRow() const override;
+    char GetSeparator() const;
+    size_t GetNumberOfColumns() const override;
+    std::string GetColumnName(size_t index) const override;
+    std::string GetRelationName() const override;
     void Reset() override;
 };

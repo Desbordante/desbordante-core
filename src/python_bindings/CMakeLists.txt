@@ -49,6 +49,7 @@ target_sources(
 target_link_libraries(
     ${NAME} PRIVATE spdlog::spdlog_header_only Boost::headers pybind11::pybind11
                     ${DESBORDANTE_PREFIX}::config::enum_members_string
+                    ${DESBORDANTE_PREFIX}::parser::csv
 )
 
 desbordante_add_bind(
