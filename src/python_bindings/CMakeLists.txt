@@ -142,7 +142,6 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::fd::fdep
     ${DESBORDANTE_PREFIX}::fd::mine
     ${DESBORDANTE_PREFIX}::fd::fun
-    ${DESBORDANTE_PREFIX}::fd::pyro
     ${DESBORDANTE_PREFIX}::bindlib::util
     magic_enum::magic_enum
     spdlog::spdlog_header_only
@@ -156,6 +155,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
+    ${DESBORDANTE_PREFIX}::fd::pyro
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers

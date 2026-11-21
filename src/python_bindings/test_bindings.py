@@ -232,6 +232,24 @@ class TestPythonBindings(unittest.TestCase):
             with self.subTest(msg=f"metric_verifier_load: {load}"):
                 with self.assertRaises(desb.ConfigurationError):
                     check_metric_verifier_failure(load.path, load.options)
+
+    def test_pyro_returns_afds(self):
+        self.assertIs(desb.fd.algorithms.Pyro, desb.afd.algorithms.Pyro)
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv") as table:
+            table.write("A,B\nx,1\nx,1\nx,2\ny,3\n")
+            table.flush()
+
+            algorithm = desb.afd.algorithms.Pyro()
+            algorithm.load_data(table=(table.name, ",", True))
+            algorithm.execute(error=0.34, seed=0)
+
+        afd = next(
+            fd for fd in algorithm.get_fds()
+            if fd.lhs_indices == [0] and fd.rhs_index == 1
+        )
+        self.assertIsInstance(afd, desb.afd.AFD)
+        self.assertAlmostEqual(afd.get_threshold(), 10923 / 32768)
                 
 
 

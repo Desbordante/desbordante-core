@@ -97,10 +97,11 @@ TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
     ASSERT_TRUE(FdMineCheckFdListEquality(true_fd_collection, algorithm->FdList()));
 }
 
-std::string GetJsonFDs(std::list<FD>& fd_collection) {
+template <typename FdCollection>
+std::string GetJsonFDs(FdCollection const& fd_collection) {
     std::string result = "{\"fds\": [";
     std::list<std::string> discovered_fd_strings;
-    for (auto& fd : fd_collection) {
+    for (auto const& fd : fd_collection) {
         discovered_fd_strings.push_back(fd.ToJSONString());
     }
     discovered_fd_strings.sort();
@@ -159,7 +160,7 @@ TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             std::list<FD> fds = algorithm->FdList();
             pyro.Execute();
 
-            for (auto& fd : pyro.FdList()) {
+            for (auto const& fd : pyro.AfdList()) {
                 if (fd.GetLhs().GetArity() == 0) {
                     std::list<FD>::iterator it = fds.begin();
                     while (it != fds.end()) {
@@ -175,7 +176,7 @@ TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
 
             MinimizeFDs(fds);
             std::string algorithm_results = GetJsonFDs(fds);
-            std::string results_pyro = pyro.FDAlgorithm::GetJsonFDs();
+            std::string results_pyro = GetJsonFDs(pyro.AfdList());
 
             EXPECT_EQ(results_pyro, algorithm_results)
                     << "The new algorithm and Pyro yield different results at "

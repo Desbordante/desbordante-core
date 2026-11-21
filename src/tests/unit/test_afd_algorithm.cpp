@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "core/algorithms/fd/pyro/pyro.h"
 #include "core/algorithms/fd/tane/pfdtane.h"
 #include "core/algorithms/fd/tane/tane.h"
 #include "core/model/table/relational_schema.h"
@@ -131,12 +132,33 @@ TYPED_TEST_P(AlgorithmAFDTest, MaxLHSOptionWork) {
     MaxLhsTestFun(kCIPublicHighway700, algo_large->AfdList(), max_lhs);
 }
 
+TYPED_TEST_P(AlgorithmAFDTest, ReportsCalculatedError) {
+    using namespace config::names;
+
+    algos::StdParamsMap params{{kCsvConfig, kTestFD},
+                               {kError, config::ErrorType{0.34}},
+                               {kSeed, 0}};
+    auto algorithm = algos::CreateAndLoadAlgorithm<TypeParam>(params);
+    algorithm->Execute();
+
+    auto const& afds = algorithm->AfdList();
+    auto afd = std::find_if(afds.begin(), afds.end(), [](AFD const& candidate) {
+        auto const& lhs = candidate.GetLhs();
+        return lhs.GetArity() == 1 && lhs.GetColumnIndicesRef().test(1) &&
+               candidate.GetRhs().GetIndex() == 2;
+    });
+
+    ASSERT_NE(afd, afds.end());
+    EXPECT_GT(afd->GetThreshold(), 0.0);
+    EXPECT_LE(afd->GetThreshold(), 0.34);
+}
+
 REGISTER_TYPED_TEST_SUITE_P(AlgorithmAFDTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNonKey,
                             WorksOnLongDataset, WorksOnWideDataset, LightDatasetsConsistentHash,
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
-                            MaxLHSOptionWork);
+                            MaxLHSOptionWork, ReportsCalculatedError);
 
-using AFDAlgorithms = ::testing::Types<algos::Tane, algos::PFDTane>;
+using AFDAlgorithms = ::testing::Types<algos::Tane, algos::PFDTane, algos::Pyro>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmAFDTest, AlgorithmAFDTest, AFDAlgorithms);
 
 }  // namespace tests

@@ -1688,12 +1688,12 @@ dependencies that deviate only slightly from exact FDs.
 
 \x1b[1m\x1b[93mFound AFDs by \x1b[96mPyro\x1b[0m:
   \x1b[1mMeasure:\x1b[0m \x1b[92mg1\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 6 AFDs
-    \x1b[92m[Price] -> Id\x1b[0m
-    \x1b[92m[Price] -> ProductName\x1b[0m
-    \x1b[92m[ProductName] -> Id\x1b[0m
-    \x1b[92m[ProductName] -> Price\x1b[0m
-    \x1b[92m[Id] -> ProductName\x1b[0m
-    \x1b[92m[Id] -> Price\x1b[0m
+    \x1b[92m[Price] -> Id\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.2121\x1b[0m
+    \x1b[92m[Price] -> ProductName\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.1061\x1b[0m
+    \x1b[92m[ProductName] -> Id\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.1818\x1b[0m
+    \x1b[92m[ProductName] -> Price\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0758\x1b[0m
+    \x1b[92m[Id] -> ProductName\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0000\x1b[0m
+    \x1b[92m[Id] -> Price\x1b[0m | \x1b[1mError:\x1b[0m \x1b[93m0.0000\x1b[0m
 
 \x1b[1m\x1b[93mPyro Results\x1b[0m
 As we can see, the algorithm found six AFDs. Based on the results, we
@@ -1722,8 +1722,8 @@ to the threshold value, we must provide the error_measure parameter,
 which determines the AFD measure used: ‘g1’, ‘pdep’, ‘tau’, ‘mu_plus’,
 or ‘rho’.
 
-Unlike Pyro, Tane also reports the error value of each discovered
-AFD. This value is shown next to the corresponding dependency below.
+Like Pyro, Tane reports the error value of each discovered AFD. This
+value is shown next to the corresponding dependency below.
 
 \x1b[1m\x1b[93mFound AFDs by \x1b[96mTane\x1b[0m:
   \x1b[1mMeasure:\x1b[0m \x1b[92mg1\x1b[0m | \x1b[1mThreshold:\x1b[0m 0.3 | \x1b[1mFound:\x1b[0m 6 AFDs
