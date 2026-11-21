@@ -20,6 +20,7 @@ CSVConfig const kAdult9attr = CreateCsvConfig("adult9attr.csv", ';', false);
 CSVConfig const kAnimalsBeverages = CreateCsvConfig("animals_beverages.csv", ',', true);
 CSVConfig const kBernoulliRelation = CreateCsvConfig("BernoulliRelation.csv", ',', true);
 CSVConfig const kBreastCancer = CreateCsvConfig("breast_cancer.csv", ',', true);
+CSVConfig const kBridges = CreateCsvConfig("bridges.csv", ',', false);
 CSVConfig const kCIPublicHighway = CreateCsvConfig("CIPublicHighway.csv", ',', true);
 CSVConfig const kCIPublicHighway10k = CreateCsvConfig("CIPublicHighway10k.csv", ',', true);
 CSVConfig const kCIPublicHighway20attr55k =

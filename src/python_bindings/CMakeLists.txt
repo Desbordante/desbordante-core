@@ -86,6 +86,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cfd::fdfirst
     ${DESBORDANTE_PREFIX}::cfd::verifier
+    ${DESBORDANTE_PREFIX}::cfd::cfdfinder
     Boost::headers
 )
 
