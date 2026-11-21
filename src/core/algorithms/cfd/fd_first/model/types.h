@@ -11,9 +11,6 @@
 
 namespace algos::cfd {
 
-// The set of tids of tuples (indexes of rows in a table) that support a concrete item.
-using SimpleTIdList = std::vector<Item>;
-
 using PartitionList = std::vector<std::pair<Itemset, std::vector<unsigned>>>;
 using RhsesPair2DList = std::vector<std::vector<std::pair<int, int>>>;
 using RhsesPairList = std::vector<std::pair<int, int>>;

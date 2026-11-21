@@ -7,9 +7,9 @@
 #include "core/algorithms/cfd/cfd_discovery.h"
 #include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cfd/fd_first/miner_node.h"
-#include "core/algorithms/cfd/fd_first/model/partition_tidlist.h"
 #include "core/algorithms/cfd/fd_first/model/types.h"
 #include "core/algorithms/cfd/fd_first/util/prefix_tree.h"
+#include "core/algorithms/cfd/model/partition_tidlist.h"
 
 // see algorithms/cfd/fd_first/LICENSE
 
