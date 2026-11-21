@@ -18,6 +18,7 @@
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
@@ -71,7 +72,9 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::des::DifferentialStrategy>,
         kEnumConvPair<algos::od::Ordering>,
-        kEnumConvPair<algos::AfdErrorMeasure>};
+        kEnumConvPair<algos::AfdErrorMeasure>,
+        kEnumConvPair<algos::pac_verifier::PACValidationMode>,
+};
 }  // namespace
 
 namespace python_bindings {

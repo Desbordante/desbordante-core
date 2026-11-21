@@ -13,16 +13,15 @@ namespace pac::model {
 /// [@c first[1], @c last[1]] x ... x [@c first[n], @c last[n]]
 class Parallelepiped final : public MetricBasedDomain {
 private:
-    Tuple first_;
+    TypedTuple first_;
     std::vector<std::string> first_str_;
-    Tuple last_;
+    TypedTuple last_;
     std::vector<std::string> last_str_;
-    std::vector<::model::Type::Destructor> destructors_;
 
 protected:
     /// @brief Compare with Chebyshev distance
     virtual double DistFromDomainInternal(Tuple const& value) const override;
-    virtual void ConvertValues() override;
+    void AfterSetTypes() override;
 
 public:
     Parallelepiped(std::vector<std::string>&& first_str, std::vector<std::string>&& last_str,
@@ -41,7 +40,6 @@ public:
     Parallelepiped(std::string&& single_first_str, std::string&& single_last_str)
         : first_str_{single_first_str}, last_str_{single_last_str} {}
 
-    virtual ~Parallelepiped();
     virtual std::string ToString() const override;
 };
 }  // namespace pac::model

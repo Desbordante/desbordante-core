@@ -50,23 +50,6 @@ void BindDomainPACVerification(py::module_& pac_verification_module) {
             BindPrimitiveNoBase<DomainPACVerifier>(pac_verification_module, "DomainPACVerifier")
                     .def("get_pac", &DomainPACVerifier::GetPAC)
                     .def("get_highlights", &DomainPACVerifier::GetHighlights, "eps_1"_a = -1,
-                         "eps_2"_a = -1)
-                    .def(
-                            "find_epsilon",
-                            [](DomainPACVerifier& verifier, double delta) {
-                                algos::ConfigureFromMap(
-                                        verifier,
-                                        {{kMinEpsilon, .0}, {kMaxEpsilon, .0}, {kMinDelta, delta}});
-                                verifier.Execute();
-                            },
-                            "Verify PAC with given delta", "delta"_a)
-                    .def(
-                            "find_delta",
-                            [](DomainPACVerifier& verifier, double epsilon) {
-                                algos::ConfigureFromMap(
-                                        verifier, {{kMinEpsilon, epsilon}, {kMaxEpsilon, epsilon}});
-                                verifier.Execute();
-                            },
-                            "Verify PAC with given epsilon", "epsilon"_a);
+                         "eps_2"_a = -1);
 }
 }  // namespace python_bindings

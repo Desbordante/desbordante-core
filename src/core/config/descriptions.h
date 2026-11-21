@@ -46,7 +46,7 @@ constexpr auto kDCfdMinimumSupport =
 constexpr auto kDCFDRule = "CFD rule";
 extern std::string_view const kDCfdSubstrategy;
 // CORDS
-constexpr auto kDDelta =
+constexpr auto kDCordsDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "
         "greater than minimum_cardinality_.";
 constexpr auto kDFixedSample =
@@ -182,15 +182,22 @@ constexpr auto kDDiagonalThreshold =
         "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
         "containing N rows is not considered a change (default is 1e-5).";
 constexpr auto kDDomain = "Ordered domain for Domain PAC.";
+constexpr auto kDEpsilon = "The exact value of epsilon to find the corresponding delta";
 constexpr auto kDMaxEpsilon =
         "Maximal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is +infinity).";
 constexpr auto kDMinEpsilon =
         "Minimal value of epsilon, which shows how much values deviate from exact dependency "
         "(default is 0).";
+constexpr auto kDMaxDelta =
+        "Maximal value of delta, which is a probability at which values satisfy the dependency "
+        "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";
+
 constexpr auto kDMinDelta =
         "Minimal value of delta, which is a probability at which values satisfy the dependency "
         "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";
+constexpr auto kDPACDelta = "The exact value of delta to find the corresponding epsilon";
+extern std::string_view const kDPACValidationMode;
 // Pyro
 constexpr auto kDCustomRandom =
         "seed for the custom random generator. Used for consistency of results across platforms.";

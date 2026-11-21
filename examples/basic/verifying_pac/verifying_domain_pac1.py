@@ -107,13 +107,12 @@ print(
     f"""This result is not directly informative for our goal. Since both ε and δ exceed the required values,
 we cannot determine whether the constraint holds for ε={BLUE}5{ENDC} and δ={BLUE}0.9{ENDC}.
 
-The algorithm provides two special functions: {BOLD}find_epsilon{ENDC} and {BOLD}find_delta{ENDC}, which give the exact ε for given δ
-and vice versa. Let's call {BOLD}find_delta{ENDC} with epsilon={BLUE}5{ENDC}.
+The algorithm provides two special modes: {BOLD}find_epsilon{ENDC} and {BOLD}find_delta{ENDC}, which give the exact ε for given δ
+and vice versa. Let's set mode={BOLD}find_delta{ENDC} and epsilon={BLUE}5{ENDC}.
 """
 )
 
-# Calling `find_delta(epsilon=3)` is equivalent to `execute(min_epsilon=3, max_epsilon=3, min_delta=0)`
-algo.find_delta(epsilon=5)
+algo.execute(mode="find_delta", epsilon=5)
 pac = algo.get_pac()
 
 print(f"Algorithm result: {RED}{pac}{ENDC}.\n")
@@ -122,13 +121,11 @@ print(
 )
 print(
     f"""
-Also, let's check which ε is needed to satisfy δ={BLUE}0.9{ENDC} by calling {BOLD}find_epsilon{ENDC} with delta={BLUE}0.9{ENDC}.
+Also, let's check which ε is needed to satisfy δ={BLUE}0.9{ENDC} by setting mode={BOLD}find_epsilon{ENDC} and delta={BLUE}0.9{ENDC}.
 """
 )
 
-# Calling `find_epsilon(delta=0.9)` is equivalent to `execute(min_epsilon=0, max_epsilon=0, min_delta=0.9)`
-# Whenever max_epsilon is not enough to satisfy min_delta, algorithm verifies PAC with δ=min_delta
-algo.find_epsilon(delta=0.9)
+algo.execute(mode="find_epsilon", delta=0.9)
 
 pac = algo.get_pac()
 print(f"Algorithm result: {RED}{pac}{ENDC}.\n")

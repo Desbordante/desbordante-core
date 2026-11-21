@@ -1,0 +1,162 @@
+#include "core/algorithms/pac/pac_verifier/pac_man.h"
+
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <iterator>
+#include <optional>
+#include <ranges>
+#include <vector>
+
+#include "core/algorithms/pac/pac_verifier/util/pac_verifier_utils.h"
+#include "core/util/logger.h"
+
+namespace algos::pac_verifier {
+void PACMan::CheckEpsDeltaConditions(
+        std::vector<EpsilonDelta> const& empirical_probabilities) const {
+    // It's convenient to call delta validation like min_eps = max_eps = 0, delta = delta,
+    // so these checks should be first
+    if (max_epsilon_ >= 0 && min_delta_ > 0) {
+        // Both epsilon and delta bounds are passed explicitly. It may be "delta validation"
+        auto first_delta_it =
+                std::ranges::lower_bound(empirical_probabilities, min_delta_, {}, GetDelta);
+        if (first_delta_it->epsilon > max_epsilon_) {
+            throw std::runtime_error(
+                    "Min_delta and max_epsilon cannot be satisfied simultaneously. Consider using "
+                    "mode=find_delta to find delta by epsilon");
+        }
+    }
+    if (min_epsilon_ > 0 && max_delta_ < 1) {
+        auto after_last_delta_it =
+                std::ranges::upper_bound(empirical_probabilities, max_delta_, {}, GetDelta);
+        auto last_delta_it = std::prev(after_last_delta_it);
+        if (last_delta_it->epsilon < min_epsilon_) {
+            throw std::runtime_error(
+                    "Max_delta and min_epsilon cannot be satisfied simultaneously. Consider using "
+                    "mode=find_delta to find delta by epsilon");
+        }
+    }
+}
+
+std::optional<EpsilonDelta> PACMan::CheckPairsBetweenMinMaxEpsilon(
+        std::vector<EpsilonDelta> const& empirical_probabilities) const {
+    if (max_epsilon_ >= 0 && min_epsilon_ > 0) {
+        auto after_min_epsilon =
+                std::ranges::upper_bound(empirical_probabilities, min_epsilon_, {}, GetEpsilon);
+        if (after_min_epsilon->epsilon > max_epsilon_) {
+            LOG_INFO("No pairs between min eps and max eps. Taking a pair after max eps");
+            auto eps_delta_pair = get_epsilon_delta_for_epsilon_(min_epsilon_);
+            // Either `get_epsilon_delta_for_epsilon_` will produce a valid pair with eps <=
+            // max_eps, or it will take the least epsilon possible
+            return EpsilonDelta{std::max(min_epsilon_, eps_delta_pair.epsilon),
+                                eps_delta_pair.delta};
+        }
+    }
+    if (min_epsilon_ > 0) {
+        auto eps_delta_pair = get_epsilon_delta_for_epsilon_(min_epsilon_);
+        if (eps_delta_pair.epsilon > empirical_probabilities.back().epsilon - kDistThreshold) {
+            LOG_INFO("No pairs after min eps. Taking last pair");
+            // Let `get_epsilon_delta_for_epsilon_` select delta here
+            return eps_delta_pair;
+        }
+    }
+    return std::nullopt;
+}
+
+std::ranges::subrange<std::vector<EpsilonDelta>::const_iterator> PACMan::BuildECDF(
+        std::vector<EpsilonDelta>& empirical_probabilities) const {
+    auto begin = empirical_probabilities.begin();
+    auto end = empirical_probabilities.end();
+
+    if (min_epsilon_ > 0) {
+        // Take all values that have eps > min_eps, and add (min_eps, delta_{j - 1}) to beginning
+        // (where j is the index of the first "good" element)
+        begin = std::ranges::upper_bound(begin, end, min_epsilon_, {}, GetEpsilon);
+        auto eps_delta_pair = get_epsilon_delta_for_epsilon_(min_epsilon_);
+        // We've already checked that there are pairs between min_epsilon and max_epsilon
+        if (max_epsilon_ >= 0) {
+            assert(eps_delta_pair.epsilon <= max_epsilon_);
+        }
+        if (eps_delta_pair.delta > min_delta_ - kDistThreshold || begin == end) {
+            LOG_DEBUG("Adding ({}, {}) to the beginning", eps_delta_pair.epsilon,
+                      eps_delta_pair.delta);
+            std::advance(begin, -1);
+            auto epsilon = std::max(min_epsilon_, eps_delta_pair.epsilon);
+            *begin = {epsilon, eps_delta_pair.delta};
+        }
+
+        // If begin != empirical_probs.begin, a new pair is added.
+        // If begin == empirical_probs.begin, then begin != empirical_probs.end (because
+        // empirical_probs is not empty here)
+        assert(begin != end);
+    }
+    if (max_epsilon_ >= 0) {
+        // We've already checked that there are pairs between min_eps and max_eps
+        assert(begin->epsilon <= max_epsilon_);
+
+        // Take all values that have eps < max_eps
+        // New pair is not added, because it would be stripped out anyway
+        end = std::ranges::upper_bound(begin, end, max_epsilon_, {}, GetEpsilon);
+        // Since `begin->epsilon <= max_epsilon`, upper_bound cannot give `begin`
+        assert(begin != end);
+    }
+
+    // Due to the delta refinement, there may be several epsilons with near deltas
+    auto extra_pairs = std::ranges::unique(
+            begin, end,
+            [threshold{diagonal_threshold_}](double a, double b) { return b - a < threshold; },
+            GetDelta);
+    return std::ranges::subrange(begin, extra_pairs.begin());
+}
+
+EpsilonDelta PACMan::FindEpsilonDelta(std::vector<EpsilonDelta>&& empirical_probabilities) const {
+    LOG_TRACE("Empirical probabilities:");
+    for ([[maybe_unused]] auto const& [eps, delta] : empirical_probabilities) {
+        LOG_TRACE("\t{}, {}", eps, delta);
+    }
+
+    assert(!empirical_probabilities.empty());
+    if (empirical_probabilities.size() == 1) {
+        LOG_DEBUG("Empirical probabilities contains a single pair");
+        return empirical_probabilities.front();
+    }
+    assert(empirical_probabilities.front().delta > min_delta_ - kDistThreshold);
+    assert(empirical_probabilities.back().delta < max_delta_ + kDistThreshold);
+
+    CheckEpsDeltaConditions(empirical_probabilities);
+    auto maybe_eps_delta = CheckPairsBetweenMinMaxEpsilon(empirical_probabilities);
+    if (maybe_eps_delta) {
+        LOG_TRACE("Got epsilon-delta from CheckPairsBetweenMinMaxEpsilon");
+        return *maybe_eps_delta;
+    }
+
+    auto stripped_emp_prob = BuildECDF(empirical_probabilities);
+
+    LOG_DEBUG("Stripped empirical probabilities:");
+    for ([[maybe_unused]] auto const& [eps, delta] : stripped_emp_prob) {
+        LOG_DEBUG("\t{}, {}", eps, delta);
+    }
+
+    assert(!stripped_emp_prob.empty());
+    if (stripped_emp_prob.size() == 1) {
+        return stripped_emp_prob.front();
+    }
+
+    double max_eps_diff = -1;
+    std::size_t best_eps_idx = 0;
+    for (std::size_t i = 0; i < stripped_emp_prob.size() - 1; ++i) {
+        auto eps_diff = stripped_emp_prob[i + 1].epsilon - stripped_emp_prob[i].epsilon;
+        // Take the least eps_i such that (eps_{i + 1} - eps_i) is maximal
+        if (eps_diff > max_eps_diff - kDistThreshold) {
+            max_eps_diff = eps_diff;
+            best_eps_idx = i;
+        }
+    }
+
+    if (max_eps_diff < 0) {
+        return stripped_emp_prob.back();
+    }
+
+    return stripped_emp_prob[best_eps_idx];
+}
+}  // namespace algos::pac_verifier

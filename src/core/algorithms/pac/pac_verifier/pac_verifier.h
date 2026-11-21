@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "core/algorithms/algorithm.h"
+#include "core/algorithms/pac/pac_verifier/util/validation_mode.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 
@@ -25,11 +26,20 @@ private:
     // 1e-5 is one extra value on a table containing 10^5 rows
     constexpr static double kDefaultDiagonalThreshold = 1e-5;
 
+    PACValidationMode mode_;
+
+    // Find PAC mode
     double min_epsilon_;
     double max_epsilon_;
     double min_delta_;
-    double diagonal_threshold_;
     unsigned long delta_steps_;
+
+    // Find epsilon mode
+    double delta_;
+    // Find delta mode
+    double epsilon_;
+
+    double diagonal_threshold_;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
@@ -39,10 +49,8 @@ private:
     std::ranges::subrange<std::vector<EpsilonDelta>::const_iterator> BuildECDF(
             std::vector<EpsilonDelta>& empirical_probabilities) const;
 
-    /// @brief Check if user requested "validation" (finding one parameter by given value of another
-    /// one) and "validate" if needed
-    std::optional<EpsilonDelta> TryValidatePAC(
-            std::vector<EpsilonDelta> const& empirical_probabilities) const;
+    /// @brief Check if min/max epsilon and min/max delta conditions can be satisfied simultaneously
+    void CheckEpsDeltaConditions(std::vector<EpsilonDelta> const& empirical_probabilities) const;
 
     /// @brief Check if there are pairs between min epsilon and max epsilon, and select proper (eps,
     /// delta) if needed
@@ -74,9 +82,22 @@ protected:
         return delta_steps_;
     }
 
+    double Delta() const {
+        return delta_;
+    }
+
+    double Epsilon() const {
+        return epsilon_;
+    }
+
     model::ColumnLayoutTypedRelationData const& TypedRelation() const {
         return *typed_relation_;
     }
+
+    // Get explicitly passed find-epsilon and find-delta modes, or select mode automatically
+    // based on other parameters in find-pac mode
+    // Also sets delta_ and epsilon_
+    PACValidationMode SelectMode();
 
     virtual void LoadDataInternal() override;
     virtual void MakeExecuteOptsAvailable() override;
