@@ -237,6 +237,21 @@ desbordante_add_test(
     Boost::headers
 )
 desbordante_add_test(
+    fd.aid
+    SRCS
+    test_aidfd.cpp
+    LIBS
+    ${DESBORDANTE_PREFIX}::testlib::common
+    ${DESBORDANTE_PREFIX}::fd
+    ${DESBORDANTE_PREFIX}::afd
+    ${DESBORDANTE_PREFIX}::fd::aid
+    ${DESBORDANTE_PREFIX}::model::table
+    ${DESBORDANTE_PREFIX}::model::types
+    spdlog::spdlog_header_only
+    gmock
+    Boost::headers
+)
+desbordante_add_test(
     fd.mine
     SRCS
     test_fd_mine.cpp
