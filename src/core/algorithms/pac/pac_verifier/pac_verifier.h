@@ -18,22 +18,7 @@ protected:
     };
 
 private:
-    constexpr static double kDefaultMinDelta = 0.9;
-    // Diagonal threshold is the maximum slope coefficient of a segment on the ECDF, that is still
-    // considered horizontal during verifying PAC via elbow method
-    // See https://colab.research.google.com/drive/1t2i-BgzRaL3VSzL0Q0izR1RbgE1i0Ohu?usp=sharing
-    // 1e-5 is one extra value on a table containing 10^5 rows
-    constexpr static double kDefaultDiagonalThreshold = 1e-5;
-
-    double min_epsilon_;
-    double max_epsilon_;
-    double min_delta_;
-    double diagonal_threshold_;
-    unsigned long delta_steps_;
-
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-
-    void RegisterOptions();
 
     /// @brief Remove extra pairs from empirical_probabilities
     std::ranges::subrange<std::vector<EpsilonDelta>::const_iterator> BuildECDF(
@@ -59,27 +44,22 @@ private:
     }
 
 protected:
-    // Input table must be registered in concrete classes to allow setting conditional options on it
-    // Therefore, we need a protected data member here
-    config::InputTable input_table_;
-
     // Threshold for floating-point comparison of distances
     constexpr static double kDistThreshold = 1e-12;
 
-    double MinDelta() const {
-        return min_delta_;
-    }
-
-    std::size_t DeltaSteps() const {
-        return delta_steps_;
-    }
+    config::InputTable input_table_;
+    double min_epsilon_;
+    double max_epsilon_;
+    double min_delta_ = 0;
+    double max_delta_ = 1;
+    double diagonal_threshold_;
+    unsigned long delta_steps_;
 
     model::ColumnLayoutTypedRelationData const& TypedRelation() const {
         return *typed_relation_;
     }
 
     virtual void LoadDataInternal() override;
-    virtual void MakeExecuteOptsAvailable() override;
 
     /// @brief Prepare data for validating concrete PAC type.
     /// Called after processing options.
@@ -96,12 +76,5 @@ protected:
     /// Must return the minimal possible epsilon when the requested @c epsilon is too small to get
     /// epsilon-delta for it
     virtual EpsilonDelta GetEpsilonDeltaForEpsilon(double epsilon) const = 0;
-
-public:
-    PACVerifier() : Algorithm() {
-        RegisterOptions();
-    }
-
-    virtual ~PACVerifier() = default;
 };
 }  // namespace algos::pac_verifier
