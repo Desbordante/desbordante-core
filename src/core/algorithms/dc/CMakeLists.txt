@@ -1,4 +1,5 @@
 add_subdirectory(FastADC)
+add_subdirectory(HybridDC)
 add_subdirectory(verifier)
 
 set(NAME dc.model)
