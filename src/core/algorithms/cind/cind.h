@@ -7,7 +7,7 @@
 
 namespace algos::cind {
 struct CIND {
-    model::IND const& ind;
+    model::IND ind;
     std::vector<Condition> conditions;
     std::vector<std::string> conditional_attributes;
 
@@ -34,12 +34,14 @@ struct CIND {
     }
 
     bool operator==(const CIND& that) const {
-        return this->conditions == that.conditions && &this->ind == &that.ind;
+        return this->conditions == that.conditions && this->ind.GetLhs() == that.ind.GetLhs() &&
+               this->ind.GetRhs() == that.ind.GetRhs();
     }
 
     size_t Hash() const {
         static auto const kCondHasher = std::hash<Condition>{};
-        size_t result = boost::hash_value(&ind);
+        size_t result = ind.GetLhs().GetHash();
+        boost::hash_combine(result, ind.GetRhs().GetHash());
         for (auto const& cond : conditions) {
             boost::hash_combine(result, kCondHasher(cond));
         }

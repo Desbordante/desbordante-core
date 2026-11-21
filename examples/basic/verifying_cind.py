@@ -248,8 +248,10 @@ printlns(
 banner("Scenario 5. Wrong number of condition values")
 
 printlns(
-    "cind_condition_values must have one entry per conditional attribute "
-    "(four, for this dataset). A wrong length raises an exception at "
+    "cind_condition_values must have one entry per conditional attribute of "
+    "the LHS table (four, for this dataset), optionally followed by one entry "
+    "per conditional attribute of the RHS table (eight in total), which is how "
+    "Cure describes its conditions. A wrong length raises an exception at "
     "execute() time as shown below."
 )
 
@@ -263,10 +265,102 @@ except Exception as e:
 print()
 
 
+banner("Scenario 6. Verifying a mined CIND directly")
+
+printlns(
+    "A CIND object returned by a mining algorithm can be handed to the "
+    "verifier as is through the cind option: the IND and all the conditions "
+    "are taken from the object, so lhs_indices, rhs_indices and "
+    "cind_condition_values are not needed. The tables must be loaded in the "
+    "same order as for mining. Here we mine CINDs with CINDERELLA and verify "
+    "those built on the pid columns."
+)
+
+TABLE_NAMES = ["en", "de"]
+COLUMNS = [list(en.columns), list(de.columns)]
+
+
+def fmt_side(cc):
+    cols = ", ".join(COLUMNS[cc.table_index][i] for i in cc.column_indices)
+    return f"{TABLE_NAMES[cc.table_index]}[{cols}]"
+
+
+def fmt_cind(cind):
+    ind = cind.get_ind()
+    return f"{fmt_side(ind.get_lhs())} subseteq {fmt_side(ind.get_rhs())}"
+
+
+def on_pid(cind):
+    ind = cind.get_ind()
+    return (list(ind.get_lhs().column_indices) == [0]
+            and list(ind.get_rhs().column_indices) == [0])
+
+
+def verify_mined(cind):
+    algo = desbordante.cind_verification.algorithms.Default()
+    algo.load_data(tables=[en, de])
+    algo.execute(cind=cind, condition_type="group", validity=0.5, completeness=0.5)
+    return algo
+
+
+miner = desbordante.cind.algorithms.Default()
+miner.load_data(tables=[en, de], algo_type="cinderella")
+miner.execute(error=0.5, validity=0.5, completeness=1.0, condition_type="group")
+mined = [cind for cind in miner.get_cinds() if on_pid(cind)]
+
+for cind in mined:
+    print(f"  {fmt_cind(cind)}: {cind.conditions_number()} mined condition(s)")
+    for cond in cind.get_conditions():
+        print(f"    {cond}")
+    print_result(verify_mined(cind))
+    print()
+
+printlns(
+    "Verifying the whole object checks the union of its conditions. To look at "
+    "a single condition, build a CIND holding just that condition: the "
+    "verifier then reproduces the validity and completeness reported by the "
+    "miner."
+)
+
+cind = mined[0]
+cond = cind.get_conditions()[0]
+single = desbordante.cind.CIND(ind=cind.get_ind(),
+                               conditional_attributes=cind.get_condition_attributes(),
+                               conditions=[cond])
+algo = verify_mined(single)
+print(f"  {fmt_cind(cind)} | {cond}")
+print(f"  mined:    validity = {cond.validity():.3f}   "
+      f"completeness = {cond.completeness():.3f}")
+print(f"  verified: validity = {algo.get_real_validity():.3f}   "
+      f"completeness = {algo.get_real_completeness():.3f}")
+print()
+
+printlns(
+    "Conditions mined by Cure (see mining_cind_2.py) also constrain the "
+    "conditional attributes of the RHS table, listing several accepted values "
+    "separated by ', '. The verifier understands this form as well: an LHS row "
+    "is included only if some RHS row with the same key carries one of the "
+    "listed values. This is stricter than checking the LHS part alone, so a "
+    "Cure CIND may fail verification even though every condition was mined "
+    "with enough support."
+)
+
+miner = desbordante.cind.algorithms.Default()
+miner.load_data(tables=[en, de], algo_type="cure_cind")
+miner.execute(error=0.5, support=2)
+
+for cind in filter(on_pid, miner.get_cinds()):
+    print(f"  {fmt_cind(cind)}: {cind.conditions_number()} mined condition(s), e.g.")
+    print(f"    {cind.get_conditions()[0]}")
+    print_result(verify_mined(cind))
+    print()
+
+
 banner("See also")
 
 print("Related primitives in Desbordante:")
 print("  * CIND mining           -  examples/basic/mining_cind_1.py")
+print("  * CIND mining (Cure)    -  examples/basic/mining_cind_2.py")
 print("  * IND mining            -  examples/basic/mining_ind.py")
 print("  * AIND mining           -  examples/basic/mining_aind.py")
 print("  * IND/AIND verification -  examples/basic/verifying_ind_aind.py")

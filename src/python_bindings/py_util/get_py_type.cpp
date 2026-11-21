@@ -3,6 +3,7 @@
 #include <Python.h>
 
 #include <functional>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <typeinfo>
@@ -15,6 +16,7 @@
 
 #include "core/algorithms/cfd/fd_first/enums.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
+#include "core/algorithms/cind/cind.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -150,6 +152,8 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<config::CustomVectorMetricOptionType, &PyFunction_Type>,
             {typeid(algos::cfd::RawCFD),
              [] { return MakeTypeTuple(py::type::of<algos::cfd::RawCFD>()); }},
+            {typeid(std::optional<algos::cind::CIND>),
+             [] { return MakeTypeTuple(py::type::of<algos::cind::CIND>()); }},
     };
 
     auto const it = type_map.find(type_index);
