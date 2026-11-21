@@ -1,3 +1,4 @@
+add_subdirectory(fastdd)
 add_subdirectory(split)
 add_subdirectory(dd_verifier)
 
